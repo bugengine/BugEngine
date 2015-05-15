@@ -220,13 +220,14 @@ struct PyTypeObject
 {
     struct PyNumberMethods
     {
+        binaryfunc nb_add;
+        binaryfunc nb_subtract;
+        binaryfunc nb_multiply;
     };
 
     struct Py2NumberMethods
     {
-        binaryfunc nb_add;
-        binaryfunc nb_subtract;
-        binaryfunc nb_multiply;
+        PyNumberMethods nb_common;
         binaryfunc nb_divide;
         binaryfunc nb_remainder;
         binaryfunc nb_divmod;
@@ -271,9 +272,7 @@ struct PyTypeObject
 
     struct Py3NumberMethods
     {
-        binaryfunc nb_add;
-        binaryfunc nb_subtract;
-        binaryfunc nb_multiply;
+        PyNumberMethods nb_common;
         binaryfunc nb_remainder;
         binaryfunc nb_divmod;
         ternaryfunc nb_power;

@@ -10,9 +10,7 @@ namespace BugEngine { namespace Python
 
 static PyTypeObject::Py2NumberMethods s_py2ArrayNumber =
 {
-    0,
-    0,
-    0,
+    { 0, 0, 0 },
     0,
     0,
     0,
@@ -53,9 +51,7 @@ static PyTypeObject::Py2NumberMethods s_py2ArrayNumber =
 
 static PyTypeObject::Py3NumberMethods s_py3ArrayNumber =
 {
-    0,
-    0,
-    0,
+    { 0, 0, 0 },
     0,
     0,
     0,
@@ -226,9 +222,9 @@ int PyBugArray::nonZero(PyObject *self)
 void PyBugArray::registerType(PyObject* module)
 {
     if (s_library->getVersion() >= 30)
-        s_pyType.tp_as_number = reinterpret_cast<PyTypeObject::PyNumberMethods*>(&s_py3ArrayNumber);
+        s_pyType.tp_as_number = &s_py3ArrayNumber.nb_common;
     else
-        s_pyType.tp_as_number = reinterpret_cast<PyTypeObject::PyNumberMethods*>(&s_py2ArrayNumber);
+        s_pyType.tp_as_number = &s_py2ArrayNumber.nb_common;
     int result = s_library->m_PyType_Ready(&s_pyType);
     be_assert(result >= 0, "unable to register type");
     Py_INCREF(&s_pyType);

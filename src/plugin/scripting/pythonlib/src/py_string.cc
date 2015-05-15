@@ -11,9 +11,7 @@ namespace BugEngine { namespace Python
 template< typename T >
 PyTypeObject::Py2NumberMethods PyBugString<T>::s_py2StringNumber =
 {
-    0,
-    0,
-    0,
+    { 0, 0, 0 },
     0,
     0,
     0,
@@ -55,9 +53,7 @@ PyTypeObject::Py2NumberMethods PyBugString<T>::s_py2StringNumber =
 template< typename T >
 PyTypeObject::Py3NumberMethods PyBugString<T>::s_py3StringNumber =
 {
-    0,
-    0,
-    0,
+    { 0, 0, 0 },
     0,
     0,
     0,
@@ -269,9 +265,9 @@ template< typename T >
 void PyBugString<T>::registerType(PyObject* module)
 {
     if (s_library->getVersion() >= 30)
-        s_pyType.tp_as_number = reinterpret_cast<PyTypeObject::PyNumberMethods*>(&s_py3StringNumber);
+        s_pyType.tp_as_number = &s_py3StringNumber.nb_common;
     else
-        s_pyType.tp_as_number = reinterpret_cast<PyTypeObject::PyNumberMethods*>(&s_py2StringNumber);
+        s_pyType.tp_as_number = &s_py2StringNumber.nb_common;
     s_pyType.tp_alloc = s_library->m_PyType_GenericAlloc;
     int result = s_library->m_PyType_Ready(&s_pyType);
     be_assert(result >= 0, "unable to register type");
