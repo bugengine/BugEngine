@@ -1,4 +1,4 @@
-class CppObject:
+class CppObject(object):
     def __init__(self):
         self.tags = []
 
