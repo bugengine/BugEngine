@@ -12,6 +12,7 @@ static bool s_systemInfo_acquired = (GetSystemInfo(&s_systemInfo), true);
 
 u32 SystemAllocator::platformPageSize()
 {
+    be_forceuse(s_systemInfo_acquired);
     return s_systemInfo.dwPageSize;
 }
 
