@@ -11,14 +11,12 @@ namespace BugEngine
 CPUKernelTask::CPUKernelTask(weak<KernelObject> object)
     :   object(object)
     ,   params()
-    ,   splitCount(i_u32::Zero)
 {
 }
 
 CPUKernelTask::Range CPUKernelTask::prepare()
 {
-    splitCount = i_u32::Zero;
-    return Range(splitCount);
+    return Range(1);
 }
 
 void CPUKernelTask::operator()(const Range& range) const
@@ -50,11 +48,13 @@ private:
 KernelObject::KernelObject(const inamespace& name)
     :   m_kernel(name, "kernel")
     ,   m_entryPoint(m_kernel.getSymbol<KernelMain>("_kmain"))
-    ,   m_task(scoped< Task::Task<CPUKernelTask> >::create(Arena::task(), istring(name.str().name), Colors::make(231, 231, 231, 0), CPUKernelTask(this), Scheduler::Immediate))
+    ,   m_task(scoped< Task::Task<CPUKernelTask> >::create(Arena::task(), istring(name.str().name),
+                                                           Colors::make(231, 231, 231, 0),
+                                                           CPUKernelTask(this)))
     ,   m_callback(scoped<Callback>::create(Arena::task()))
     ,   m_callbackConnection(m_task, m_callback)
 {
-    be_debug("kernel entry point: %p"|m_entryPoint);
+    be_debug("kernel entry point: %p" | m_entryPoint);
 }
 
 KernelObject::~KernelObject()

@@ -10,20 +10,17 @@ namespace BugEngine { namespace Task
 {
 
 ITaskItem::ITaskItem(weak<const ITask> owner)
-:   m_owner(owner)
-,   m_splitCount(0)
+    :   m_owner(owner)
 {
 }
 
-ITaskItem::ITaskItem(ITaskItem& cpy)
-:   m_owner(cpy.m_owner)
-,   m_splitCount(++cpy.m_splitCount)
+ITaskItem::ITaskItem(const ITaskItem& cpy)
+    :   m_owner(cpy.m_owner)
 {
 }
 
 ITaskItem::~ITaskItem()
 {
-    
 }
 
 }}

@@ -48,11 +48,17 @@ bool range_sequence<T>::atomic() const
 }
 
 template< typename T >
-range_sequence<T> range_sequence<T>::split()
+u32 range_sequence<T>::partCount(u32 /*workerCount*/) const
 {
-    T oldbegin = m_begin;
-    m_begin = m_begin + (m_end-m_begin)/2;
-    return range_sequence<T>(oldbegin, m_begin);
+    return (m_end - m_begin + m_grain - 1) / m_grain;
+}
+
+template< typename T >
+range_sequence<T> range_sequence<T>::part(u32 index, u32 total) const
+{
+    T begin = m_begin + index * m_grain;
+    T end = (index == total-1) ? m_end : begin + m_grain;
+    return range_sequence<T>(begin, end);
 }
 
 }}

@@ -23,10 +23,9 @@ private:
     istring const   m_name;
 protected:
     IMemoryProvider(const istring& name);
-    virtual Kernel::KernelParameter getKernelParameterFromBank(weak<const Kernel::IMemoryBank> bank) const = 0;
+    virtual KernelParameter getKernelParameterFromBank(weak<const IMemoryBank> bank) const = 0;
 public:
     istring name() const { return m_name; }
-
 };
 
 }}

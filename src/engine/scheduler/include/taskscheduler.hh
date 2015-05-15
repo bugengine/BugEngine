@@ -30,6 +30,7 @@ class TaskScheduler : public minitl::pointer
 private:
     class Worker;
     friend class Worker;
+    friend class ITaskItem;
 private:
     minitl::vector<Worker*> m_workers;
     Semaphore               m_synchro;
@@ -38,22 +39,26 @@ private:
 private: //friend Worker
     minitl::istack<ITaskItem>   m_tasks[Scheduler::PriorityCount];
     minitl::istack<ITaskItem>   m_mainThreadTasks[Scheduler::PriorityCount];
-private:
-    void queue(ITaskItem* task, int affinity);
+private: //friend class ITaskItem, Worker
     ITaskItem* pop(Scheduler::Affinity affinity);
-    void split(ITaskItem* t, size_t count);
 public:
     TaskScheduler(weak<Scheduler> scheduler);
     ~TaskScheduler();
 
     void queue(ITaskItem* task);
+    void queue(ITaskItem* task, int priority);
 
     void mainThreadJoin();
     void notifyEnd();
 
-	bool taskDone();
-	bool hasTasks();
-	bool isRunning();
+    bool taskDone();
+    bool hasTasks();
+    bool isRunning();
+
+    u32 workerCount() const
+    {
+        return m_workers.size();
+    }
 };
 
 }}

@@ -30,7 +30,9 @@ CPUKernelScheduler::~CPUKernelScheduler()
     m_resourceManager->detach<Kernel::KernelDescription>(weak<const Resource::ILoader>(m_loader));
 }
 
-void CPUKernelScheduler::run(weak<const Task::ITask> task, weak<const Kernel::KernelDescription> kernel, const minitl::array<Kernel::KernelParameter>& parameters)
+void CPUKernelScheduler::run(weak<const Task::ITask> task,
+                             weak<const Kernel::KernelDescription> kernel,
+                             const minitl::array<Kernel::KernelParameter>& parameters)
 {
     weak<KernelObject> object = kernel->getResource(m_loader).getRefHandle<KernelObject>();
     be_assert(object, "kernel is not loaded");

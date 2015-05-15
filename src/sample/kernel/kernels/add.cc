@@ -4,26 +4,25 @@
 #include    <components.script.hh>
 #include    <cstdio>
 
-void kmain(u32 index, const u32 total,
+void kmain(const u32 /*index*/, const u32 /*total*/,
            in<BugEngine::A> input,
            inout<BugEngine::B> output,
            inout<BugEngine::C> output2,
            inout<BugEngine::D> output3,
            inout<BugEngine::E> output4)
 {
-    u32 first = index * input.size() / total;
-    u32 last = (index+1) * input.size() / total;
-    input += first;
-    while(first < last)
+    while(input)
     {
-        output->value += 2 * input->value;
-        output2->value += 3 * input->value;
-        output3->value += 4 * input->value;
-        output4->value += 5 * input->value;
+        printf("%d / %d / %d / %d / %d",
+               input->value,
+               output->value,
+               output2->value,
+               output3->value,
+               output4->value);
         ++input;
         ++output;
         ++output2;
         ++output3;
-        ++first;
+        ++output4;
     }
 }

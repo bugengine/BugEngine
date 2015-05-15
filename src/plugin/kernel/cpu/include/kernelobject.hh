@@ -19,22 +19,34 @@ struct CPUKernelTask
     weak<KernelObject>      object;
     weak<const Task::ITask> sourceTask;
     Kernel::KernelParameter params[16];
-    i_u32                   splitCount;
 
     struct Range
     {
-        u32     index;
-        i_u32&  total;
-        Range(i_u32& taskCount)
-        :   index(taskCount)
-        ,   total(taskCount)
+        u32 index;
+        u32 total;
+        Range(u32 total)
+            :   index(total)
+            ,   total(total)
         {
-            taskCount++;
         }
-        bool atomic() const { return false; }
-        Range split()
+        Range(u32 index, u32 total)
+            :   index(index)
+            ,   total(total)
         {
-            return Range(total);
+            be_assert(index = total, "index should not be equal tot total");
+        }
+        bool atomic() const
+        {
+            return index != total;
+        }
+        u32 partCount(u32 workerCount) const
+        {
+            be_forceuse(workerCount);
+            return total;
+        }
+        Range part(u32 index, u32 total) const
+        {
+            return Range(index, total);
         }
     };
 

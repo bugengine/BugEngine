@@ -19,16 +19,27 @@ class be_api(SCHEDULER) ITaskItem : public minitl::istack<ITaskItem>::node
     friend class TaskScheduler;
 protected:
     weak<const ITask>   m_owner;
-    u32                 m_splitCount;
+protected:
+    template< typename T >
+    void* allocate(weak<Scheduler> scheduler)
+    {
+        return scheduler->allocateTask<T>();
+    }
+    template< typename T >
+    void release(weak<Scheduler> scheduler)
+    {
+        return scheduler->releaseTask<T>(minitl::be_checked_cast<T>(this));
+    }
+    void schedule(weak<Scheduler> scheduler, ITaskItem* newItem)
+    {
+        return scheduler->queueTask(newItem, Scheduler::Immediate);
+    }
 public:
-    virtual void            run(weak<Scheduler> sc) = 0;
-    virtual ITaskItem*      split(weak<Scheduler> sc) = 0;
-    virtual bool            atomic() const = 0;
+    virtual void    run(weak<Scheduler> sc) = 0;
 public:
-    explicit ITaskItem(weak<const ITask> owner);
-    ITaskItem(ITaskItem& cpy);
+    ITaskItem(weak<const ITask> owner);
+    ITaskItem(const ITaskItem& cpy);
     virtual ~ITaskItem();
-    inline u32 splitCount() const {return m_splitCount; }
 };
 
 template< typename Range, typename Body >
@@ -39,11 +50,13 @@ private:
     const Body& m_body;
 public:
     TaskItem(weak< const Task<Body> > owner, const Range& r, const Body& b);
-    TaskItem(TaskItem& split);
 
-    virtual void            run(weak<Scheduler> sc) override;
-    virtual ITaskItem*      split(weak<Scheduler> sc) override;
-    virtual bool            atomic() const override;
+    virtual void    run(weak<Scheduler> sc) override;
+private:
+    TaskItem(const TaskItem& split, u32 index, u32 total);
+private:
+    TaskItem(const TaskItem& other);
+    TaskItem& operator=(const TaskItem& other);
 };
 
 }}
