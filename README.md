@@ -65,10 +65,13 @@ to print a list of options.
 
 
 when you have decided which compiler to use, you can build & "install" by running
+```sh
 > python waf install:platform-architecture-compiler-version:variant
+```
 To list all supported combinations, run
+```sh
 > python waf install
-
+```
 
 
 ### Bulding with IDEs
