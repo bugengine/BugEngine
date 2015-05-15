@@ -56,5 +56,5 @@ env:
    VERSION=4.2.1-sjlj
    VARIANT=final
    MASTER=
-script: CC= CXX= ./waf configure --platforms=$OS_NAME --compilers=$COMPILER install:$OS_NAME-$ARCH-$COMPILER-$VERSION:$VARIANT
+script: CC= CXX= ./waf configure --platforms=$OS_NAME --compilers=$COMPILER $MASTER install:$OS_NAME-$ARCH-$COMPILER-$VERSION:$VARIANT
 
