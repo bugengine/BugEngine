@@ -1,10 +1,9 @@
-======================
-= Building BugEngine =
-======================
+Building BugEngine
+==================
 
 
 Supported platforms
-----------------------
+-------------------
 
 The following platforms are currently tested and known to build & work:
 
@@ -35,8 +34,7 @@ Solaris:
 
 
 
-Building
------------
+## Building
 
 You need one of the supported compilers installed and working
 You need python installed (tested with python 2.6 and above)
@@ -46,22 +44,25 @@ waf is the build system that is used for building.
 waf can also be used to generate projects for MSVC 2003 and above, including express versions, XCode, NetBeans
 
 
-Configuring
-..............
+### Configuring
 
 In the root folder of the project, run
+```sh
 > python waf configure
+```
 it will detect all the supported toolchains that it can find:
 * GCC, sunCC and clang should be in the path (except for MacOSX, where they are shipped with Xcode).
 * on Windows, MSVC, intel compilers and Platform SDK are detected automatically.
 
 Run
+```sh
 > python waf --help
+```
 to print a list of options.
 
 
-Building from the command line
-.................................
+### Building from the command line
+
 
 when you have decided which compiler to use, you can build & "install" by running
 > python waf install:platform-architecture-compiler-version:variant
@@ -70,19 +71,24 @@ To list all supported combinations, run
 
 
 
-Bulding with IDEs
-....................
+### Bulding with IDEs
 
 The other way of building is to create projects for the supported IDEs and build from the IDE.
 The supported IDEs Visual Studio 2003 to 2013 in their complete or express editions, XCode, NetBeans, Eclipse and QtCreator.
 To generate the project files, configure the project and run
+```sh
 > python waf [IDE] [IDEs...]
+```
 run
+```sh
 > python waf --help
+```
 to print a list of all supported toolchains and IDE.
 
 For instance,
+```sh
 > python waf vs2005e vs2010
+```
 will create a set of projects and a solution for Visual Studio 2005 express, and another set of projects and solutions for Visual Studio 2010.
 You don't need to have these installed to generate the projects, you just need them to actually open the projects.
 
