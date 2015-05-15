@@ -274,9 +274,9 @@ template< typename T >
 void PyBugNumber<T>::registerType(PyObject* module)
 {
     if (s_library->getVersion() >= 30)
-        s_pyType.tp_as_number = (PyTypeObject::PyNumberMethods*)&s_py3NumberNumber;
+        s_pyType.tp_as_number = reinterpret_cast<PyTypeObject::PyNumberMethods*>(&s_py3NumberNumber);
     else
-        s_pyType.tp_as_number = (PyTypeObject::PyNumberMethods*)&s_py2NumberNumber;
+        s_pyType.tp_as_number = reinterpret_cast<PyTypeObject::PyNumberMethods*>(&s_py2NumberNumber);
     s_pyType.tp_alloc = s_library->m_PyType_GenericAlloc;
     int result = s_library->m_PyType_Ready(&s_pyType);
     be_assert(result >= 0, "unable to register type");

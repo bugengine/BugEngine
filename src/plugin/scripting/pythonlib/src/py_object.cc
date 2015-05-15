@@ -355,9 +355,9 @@ int PyBugObject::nonZero(PyObject *self)
 void PyBugObject::registerType(PyObject* module)
 {
     if (s_library->getVersion() >= 30)
-        s_pyType.tp_as_number = (PyTypeObject::PyNumberMethods*)&s_py3ObjectNumber;
+        s_pyType.tp_as_number = reinterpret_cast<PyTypeObject::PyNumberMethods*>(&s_py3ObjectNumber);
     else
-        s_pyType.tp_as_number = (PyTypeObject::PyNumberMethods*)&s_py2ObjectNumber;
+        s_pyType.tp_as_number = reinterpret_cast<PyTypeObject::PyNumberMethods*>(&s_py2ObjectNumber);
     int result = s_library->m_PyType_Ready(&s_pyType);
     be_assert(result >= 0, "unable to register type");
     Py_INCREF(&s_pyType);
