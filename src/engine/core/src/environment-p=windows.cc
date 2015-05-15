@@ -46,7 +46,13 @@ extern "C" IMAGE_DOS_HEADER __ImageBase;
 void Environment::init()
 {
     char dllPath[MAX_PATH] = {0};
-    GetModuleFileNameA(reinterpret_cast<HINSTANCE>(&__ImageBase), dllPath, sizeof(dllPath));
+    union
+    {
+        IMAGE_DOS_HEADER*   imageBase;
+        HINSTANCE           value;
+    } convertToHinstance;
+    convertToHinstance.imageBase = &__ImageBase;
+    GetModuleFileNameA(convertToHinstance.value, dllPath, sizeof(dllPath));
     const char* progName = dllPath;
     init(1, &progName);
 }
