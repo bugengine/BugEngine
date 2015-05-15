@@ -3,6 +3,7 @@
 
 #include    <pythonlib/stdafx.h>
 
+#include    <plugin/plugin.hh>
 #include    <rtti/engine/namespace.hh>
 
 BE_PLUGIN_NAMESPACE_REGISTER();
