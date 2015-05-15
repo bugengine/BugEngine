@@ -7,28 +7,29 @@ Supported platforms
 
 The following platforms are currently tested and known to build & work:
 
-Win32 (Windows 7 and Windows 8): You will need a properly configured compiler
+#### Win32 (Windows 7 and Windows 8):
+You will need a properly configured compiler
 * Visual Studio: from 2003 to 2013
 * gcc: MingW32
 * clang: a properly cofigured CLang with MingW (3.2 and 3.4 tested)
 * Intel compiler: version 12 and 13 should work.
 
-Linux:
+#### Linux:
 * gcc
 * suncc
 * clang
 * intel compilers
 
-MacOS X:
+#### MacOS X:
 * gcc (and llvm-gcc)
 * clang
 * intel compilers
 
-FreeBSD:
+#### FreeBSD:
 * gcc
 * clang
 
-Solaris:
+#### Solaris:
 * gcc
 * suncc
 
