@@ -1,5 +1,8 @@
 os:
  - linux
 language: cpp
-script: ./waf configure install:all
+compiler:
+ - clang
+ - gcc
+script: ./waf configure --platforms=$TRAVIS_OS_NAME --compilers=$CC install:all
 
