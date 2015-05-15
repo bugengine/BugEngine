@@ -15,6 +15,7 @@ Window::CursesWindow::ScreenPipe::ScreenPipe()
     HANDLE pipeRead, pipeWrite;
     BOOL result = CreatePipe(&pipeRead, &pipeWrite, NULL, 0);
     be_assert(result != FALSE, "CreatePipe failed with error %d" | GetLastError());
+    be_forceuse(result);
     int descRead = _open_osfhandle((intptr_t)pipeRead, _O_RDONLY);
     m_screenStdOut = _fdopen(descRead, "r");
     int descWrite = _open_osfhandle((intptr_t)pipeWrite, _O_WRONLY);
