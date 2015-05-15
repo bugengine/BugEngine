@@ -322,10 +322,10 @@ def thirdparty(bld, name, path, env, libs=[], lib_paths=[], frameworks=[], inclu
     arch_specific = archs + ['%s.%s'%(p,a) for p in platforms for a in archs]
     source_node = bld.path.make_node('%s' % path.replace('.', '/'))
 
-    lib_paths += [i.path_from(bld.bldnode) for i in [source_node.make_node('lib')] + [source_node.make_node('lib.%s'%platform) for platform in platform_specific + arch_specific] if os.path.isdir(i.abspath())]
+    lib_paths = lib_paths + [i.path_from(bld.bldnode) for i in [source_node.make_node('lib')] + [source_node.make_node('lib.%s'%platform) for platform in platform_specific + arch_specific] if os.path.isdir(i.abspath())]
     bin_paths = [i for i in [source_node.make_node('bin.%s'%arch) for arch in arch_specific] if os.path.isdir(i.abspath())]
     data_paths = [i for i in [source_node.make_node('data.%s'%arch) for arch in arch_specific] if os.path.isdir(i.abspath())]
-    includes += [i for i in [source_node.make_node('api')] + [source_node.make_node('api.%s'%platform) for platform in platform_specific + arch_specific] if os.path.isdir(i.abspath())]
+    includes = includes + [i for i in [source_node.make_node('api')] + [source_node.make_node('api.%s'%platform) for platform in platform_specific + arch_specific] if os.path.isdir(i.abspath())]
 
     target_prefix = (env.ENV_PREFIX + '/') if env.ENV_PREFIX else ''
     target_name = target_prefix + name
