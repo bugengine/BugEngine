@@ -8,7 +8,6 @@
 #include    <world/entitystorage.script.hh>
 #include    <rtti/engine/propertyinfo.script.hh>
 #include    <rtti/typeinfo.hh>
-#include    <world/helper/outputstream.hh>
 #include    <world/helper/componentlist.hh>
 
 namespace BugEngine { namespace World
@@ -45,14 +44,21 @@ public:
     {
         be_forceuse(isConst);
         const EntityStorageFactory* factory = static_cast<const EntityStorageFactory*>(from);
-        return RTTI::Value(RTTI::Value::ByRef(Helper::ProductGetter<T, typename COMPONENT_LIST::Type, (StorageSize)COMPONENT_LIST::Storage, typename COMPONENT_LIST::Tail>::getProduct(factory->m_list)));
+        return RTTI::Value(RTTI::Value::ByRef(Helper::ProductGetter<
+                                                T,
+                                                typename COMPONENT_LIST::Type,
+                                                (StorageSize)COMPONENT_LIST::Storage,
+                                                typename COMPONENT_LIST::Tail>::getProduct(factory->m_list)));
     }
     template< typename T >
     static RTTI::Value getPartition(void* from, bool isConst)
     {
         be_forceuse(isConst);
         const EntityStorageFactory* factory = static_cast<const EntityStorageFactory*>(from);
-        return RTTI::Value(RTTI::Value::ByRef(Helper::PartitionGetter<T, typename PARTITION_LIST::Type, typename PARTITION_LIST::Tail>::getPartition(factory->m_partitions)));
+        return RTTI::Value(RTTI::Value::ByRef(Helper::PartitionGetter<
+                                                T,
+                                                typename PARTITION_LIST::Type,
+                                                typename PARTITION_LIST::Tail>::getPartition(factory->m_partitions)));
     }
     static raw<const RTTI::Property> s_properties;
 };
@@ -74,7 +80,11 @@ namespace BugEngine
 template< typename COMPONENT_LIST, typename PARTITION_LIST >
 struct be_typeid< World::EntityStorageFactory<COMPONENT_LIST, PARTITION_LIST> >
 {
-    static inline RTTI::Type  type()  { return RTTI::Type::makeType(preklass(), RTTI::Type::Value, RTTI::Type::Mutable, RTTI::Type::Mutable); }
+    static inline RTTI::Type  type()
+    {
+        return RTTI::Type::makeType(preklass(), RTTI::Type::Value,
+                                    RTTI::Type::Mutable, RTTI::Type::Mutable);
+    }
     static inline raw<RTTI::Class> preklass()
     {
         static RTTI::Class s_class =

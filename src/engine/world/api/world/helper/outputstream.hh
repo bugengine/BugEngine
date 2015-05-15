@@ -16,8 +16,8 @@ struct OutputStream
     scoped< Kernel::Stream<T> > stream;
     const Kernel::Product<T>    product;
     OutputStream(weak<Task::ITask> producer)
-    :   stream(scoped< Kernel::Stream<T> >::create(Arena::task()))
-    ,   product(stream, producer)
+        :   stream(scoped< Kernel::Stream<T> >::create(Arena::task()))
+        ,   product(stream, producer)
     {
     }
 private:

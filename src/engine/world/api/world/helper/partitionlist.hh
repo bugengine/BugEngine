@@ -7,7 +7,6 @@
 #include    <world/stdafx.h>
 #include    <rtti/engine/propertyinfo.script.hh>
 #include    <rtti/value.hh>
-#include    <world/helper/outputstream.hh>
 #include    <world/helper/partition.hh>
 
 

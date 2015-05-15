@@ -43,6 +43,11 @@ Scheduler::~Scheduler()
     m_running = false;
 }
 
+void Scheduler::queueTask(Task::ITaskItem* task, Priority priority)
+{
+    m_taskScheduler->queue(task, priority);
+}
+
 void Scheduler::queueTask(Task::ITaskItem* task)
 {
     m_taskScheduler->queue(task);
@@ -97,6 +102,11 @@ void Scheduler::removeKernelScheduler(weak<Kernel::IKernelScheduler> scheduler)
         }
     }
     be_notreached();
+}
+
+u32 Scheduler::workerCount() const
+{
+    return m_taskScheduler->workerCount();
 }
 
 }

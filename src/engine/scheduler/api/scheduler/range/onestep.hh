@@ -15,9 +15,10 @@ public:
     range_onestep();
     ~range_onestep();
 
-    inline size_t               size() const;
-    inline range_onestep        split();
-    inline bool                 atomic() const;
+    inline size_t           size() const;
+    inline u32              partCount(u32 workerCount) const;
+    inline range_onestep    part(u32 index, u32 total) const;
+    inline bool             atomic() const;
 };
 
 }}

@@ -34,7 +34,7 @@ class be_api(SCHEDULER) Scheduler : public minitl::pointer
 {
     BE_NOCOPY(Scheduler);
     template< typename BODY > friend class Task::Task;
-    template< typename RANGE, typename BODY > friend class Task::TaskItem;
+    friend class Task::ITaskItem;
     friend class Task::TaskGroup;
     friend class Task::KernelTask;
     friend class Task::TaskScheduler;
@@ -70,6 +70,7 @@ private:
 private:
     void notifyEnd();
 private:
+    void queueTask(Task::ITaskItem* task, Priority priority);
     void queueTask(Task::ITaskItem* task);
     void queueKernel(weak<const Task::KernelTask> task, const minitl::array< weak<const Kernel::IStream> >& parameters);
     void* allocate(size_t size);
@@ -83,6 +84,7 @@ public:
     void mainThreadJoin();
     void addKernelScheduler(weak<Kernel::IKernelScheduler> scheduler);
     void removeKernelScheduler(weak<Kernel::IKernelScheduler> scheduler);
+    u32 workerCount() const;
 };
 
 template< typename T >

@@ -23,7 +23,8 @@ public:
     inline T&                   begin();
     inline T&                   end();
     inline size_t               size() const;
-    inline range_sequence<T>    split();
+    inline u32                  partCount(u32 workerCount) const;
+    inline range_sequence<T>    part(u32 index, u32 total) const;
     inline bool                 atomic() const;
 };
 

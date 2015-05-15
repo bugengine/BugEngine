@@ -25,6 +25,7 @@ public:
     {
     }
     operator void*() const { return (void*)(m_end - m_current); }
+    bool operator !() const { return m_current == m_end; }
     in& operator++() { m_current++; return *this; }
     in& operator--() { m_current--; return *this; }
     in  operator++(int) { in result = *this; m_current++; return result; }
@@ -52,6 +53,7 @@ public:
     {
     }
     operator void*() const { return (void*)(m_end - m_current); }
+    bool operator !() const { return m_current == m_end; }
     inout& operator++() { m_current++; return *this; }
     inout& operator--() { m_current--; return *this; }
     inout  operator++(int) { inout result = *this; m_current++; return result; }
