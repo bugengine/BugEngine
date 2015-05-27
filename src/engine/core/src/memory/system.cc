@@ -9,19 +9,11 @@ namespace BugEngine
 
 SystemAllocator::SystemAllocator(BlockSize size, u32 initialCount)
     :   m_head(0)
-    ,   m_capacity(i_u32::create(initialCount))
+    ,   m_capacity(i_u32::Zero)
     ,   m_used(i_u32::Zero)
     ,   m_blockSize(size)
 {
-    Block* head = 0;
-    for (u32 i = 0; i < initialCount; ++i)
-    {
-        Block* block = (Block*)platformReserve(blockSize());
-        platformCommit((byte*)block, 0, blockSize());
-        block->next = head;
-        head = block;
-    }
-    m_head.setConditional(head, m_head.getTicket());
+    grow(initialCount);
 }
 
 SystemAllocator::~SystemAllocator()
@@ -32,7 +24,10 @@ SystemAllocator::~SystemAllocator()
     {
         byte* buffer = reinterpret_cast<byte*>(head);
         head = head->next;
-        platformFree(buffer, blockSize());
+        if ((uintptr_t)buffer % platformPageSize() == 0)
+        {
+            platformFree(buffer, blockSize());
+        }
     }
 }
 
@@ -50,17 +45,7 @@ void* SystemAllocator::allocate()
             ScopedMutexLock lock(m_allocLock);
             if (!m_head)
             {
-                u32 extra = m_capacity;
-                m_capacity += extra;
-                Block* head = 0;
-                for (u32 i = 0; i < extra; ++i)
-                {
-                    Block* block = (Block*)platformReserve(blockSize());
-                    platformCommit((byte*)block, 0, blockSize());
-                    block->next = head;
-                    head = block;
-                }
-                m_head.setConditional(head, m_head.getTicket());
+                grow(m_capacity);
             }
             ticket = m_head.getTicket();
             result = m_head;
@@ -85,6 +70,41 @@ void  SystemAllocator::free(void* memory)
 u32 SystemAllocator::blockSize() const
 {
     return 1 << (((u32)m_blockSize * 2) + 12);
+}
+
+void SystemAllocator::grow(u32 extraCapacity)
+{
+    Block* head = 0;
+    const u32 pageSize = platformPageSize();
+    if (blockSize() > pageSize)
+    {
+        for (u32 i = 0; i < extraCapacity; ++i)
+        {
+            Block* block = (Block*)platformReserve(blockSize());
+            platformCommit((byte*)block, 0, blockSize());
+            block->next = head;
+            head = block;
+        }
+    }
+    else
+    {
+        be_assert(pageSize % blockSize() == 0, "Page size should be a multiple of block size");
+        u32 blocksPerPage = pageSize / blockSize();
+        u32 pageCount = extraCapacity / blocksPerPage;
+        for (u32 i = 0; i < pageCount; ++i)
+        {
+            Block* block = (Block*)platformReserve(pageCount);
+            platformCommit((byte*)block, 0, pageSize);
+            for (u32 j = 0; j < blocksPerPage; ++j)
+            {
+                block->next = head;
+                head = block;
+                block = (Block*)((u8*)block + blockSize());
+            }
+        }
+    }
+    m_head.setConditional(head, m_head.getTicket());
+    m_capacity += extraCapacity;
 }
 
 }
