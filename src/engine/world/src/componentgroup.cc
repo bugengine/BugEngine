@@ -96,12 +96,14 @@ struct ComponentGroup::EntityOperationRemoveIterator
 
     EntityOperationRemove* operator->() const
     {
-        return reinterpret_cast<EntityOperationRemove*>(page->m_data + offset);
+        byte* data = page->m_data + offset;
+        return reinterpret_cast<EntityOperationRemove*>(data);
     }
 
     EntityOperationRemove& operator*() const
     {
-        return *reinterpret_cast<EntityOperationRemove*>(page->m_data + offset);
+        byte* data = page->m_data + offset;
+        return *reinterpret_cast<EntityOperationRemove*>(data);
     }
 
     EntityOperationRemoveIterator& operator++()
