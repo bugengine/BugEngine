@@ -322,9 +322,8 @@ class TaskBase(evil):
 			return None
 
 		total = master.total
-		n = len(str(total))
-		fs = '[%%%dd/%%%dd] %%s%%s%%s' % (n, n)
-		return fs % (cur(), total, col1, s, col2)
+		fs = '[%3d%%] %s%s%s'
+		return fs % (cur()*100/total, col1, s, col2)
 
 	def attr(self, att, default=None):
 		"""
