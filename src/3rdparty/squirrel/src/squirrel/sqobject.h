@@ -5,7 +5,7 @@
 #include "squtils.h"
 
 #ifdef _SQ64
-#define UINT_MINUS_ONE (0xFFFFFFFFFFFFFFFF)
+#define UINT_MINUS_ONE (0xFFFFFFFFFFFFFFFFULL)
 #else
 #define UINT_MINUS_ONE (0xFFFFFFFF)
 #endif
