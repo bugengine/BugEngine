@@ -310,14 +310,9 @@ class QtPlatform(QtObject):
             assert(env)
             sysroot = env.SYSROOT[0] if env.SYSROOT else ''
             self.PE_Profile_AutoDetected = False
-            if 'android' in env.VALID_PLATFORMS:
-                device = 'Android Device'
-                device_type = 'Android.Device.Type'
-            else:
-                device = 'Desktop Device'
-                device_type = 'Desktop'
+            device = 'Desktop Device'
+            device_type = 'Desktop'
             self.PE_Profile_Data = [
-                    ('Android.GdbServer.Information', ''),
                     ('Debugger.Information', debugger),
                     ('PE.Profile.Device', device),
                     ('PE.Profile.DeviceType', device_type),
