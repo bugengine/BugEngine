@@ -2,7 +2,7 @@
    see LICENSE for detail */
 
 #include    <scheduler/stdafx.h>
-#include    <scheduler/kernel/product.hh>
+#include    <scheduler/kernel/product.factory.hh>
 
 namespace BugEngine { namespace Kernel
 {

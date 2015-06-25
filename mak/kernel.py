@@ -49,7 +49,7 @@ template = """
 %(pch)s
 #include    <scheduler/kernel/kernel.script.hh>
 #include    <scheduler/task/itask.hh>
-#include    <scheduler/kernel/product.hh>
+#include    <scheduler/kernel/product.factory.hh>
 #include    <scheduler/task/kerneltask.hh>
 #include    <kernel/colors.hh>
 %(includes)s
