@@ -695,7 +695,7 @@ class QtCreator(Build.BuildContext):
                                     ('ProjectExplorer.BuildConfiguration.BuildStepList.0', [
                                         ('ProjectExplorer.BuildStepList.Step.0', [
                                             ('ProjectExplorer.BuildStep.Enabled', True),
-                                            ('ProjectExplorer.ProcessStep.Arguments', '%s install:%s:%s'%(sys.argv[0], env_name, variant)),
+                                            ('ProjectExplorer.ProcessStep.Arguments', '%s build:%s:%s'%(sys.argv[0], env_name, variant)),
                                             ('ProjectExplorer.ProcessStep.Command', sys.executable),
                                             ('ProjectExplorer.ProcessStep.WorkingDirectory', self.srcnode.abspath()),
                                             ('ProjectExplorer.ProjectConfiguration.DefaultDisplayName', 'Waf configuration'),

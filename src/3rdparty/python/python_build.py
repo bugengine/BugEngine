@@ -1,4 +1,4 @@
-from waflib import Options
+from waflib import Options, Utils
 from waflib.Configure import conf
 from waflib.TaskGen import feature, before_method, after_method
 import os
@@ -28,9 +28,12 @@ def python_module(bld, name, depends, path, platforms=[]):
 def install_python_module(self):
     if self.bld.is_install:
         if not self.env.ENV_PREFIX: #no multiarch
-            self.bld.install_files(os.path.join(self.bld.env.PREFIX, self.bld.optim, self.bld.env.DEPLOY_RUNBINDIR), [self.link_task.outputs[0]])
+            self.install_files(os.path.join(self.bld.env.PREFIX, self.bld.optim, self.bld.env.DEPLOY_RUNBINDIR),
+                               [self.link_task.outputs[0]],
+                               Utils.O755)
             if self.env.CC_NAME == 'msvc':
-                self.bld.install_files(os.path.join(self.bld.env.PREFIX, self.bld.optim, self.bld.env.DEPLOY_RUNBINDIR), [self.link_task.outputs[1]])
+                self.install_files(os.path.join(self.bld.env.PREFIX, self.bld.optim, self.bld.env.DEPLOY_RUNBINDIR),
+                                   [self.link_task.outputs[1]])
 
 
 def build(bld):

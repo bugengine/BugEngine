@@ -232,7 +232,7 @@ class VCproj:
                                 command = command % {'toolchain':toolchain, 'variant':variant}
                                 tool['BuildCommandLine'] = 'cd $(SolutionDir) && %s %s %s' % (sys.executable, sys.argv[0], command)
                             else:
-                                tool['BuildCommandLine'] = 'cd $(SolutionDir) && %s %s install:%s:%s --targets=%s' % (sys.executable, toolchain, variant, task_gen.target)
+                                tool['BuildCommandLine'] = 'cd $(SolutionDir) && %s %s build:%s:%s --targets=%s' % (sys.executable, toolchain, variant, task_gen.target)
                                 tool['CleanCommandLine'] = 'cd $(SolutionDir) && %s %s clean:%s:%s --targets=%s' % (sys.executable, sys.argv[0], toolchain, variant, task_gen.target)
                                 tool['ReBuildCommandLine'] = 'cd $(SolutionDir) && %s %s clean:%s:%s instal:%s:%s --targets=%s' % (sys.executable, sys.argv[0], toolchain, variant, toolchain, variant, task_gen.target)
                             if 'cxxprogram' in task_gen.features:
@@ -368,8 +368,8 @@ class VCxproj:
                     command = command % {'toolchain':toolchain, 'variant':variant}
                     self.vcxproj._add(properties, 'NMakeBuildCommandLine', 'cd $(SolutionDir) && %s %s %s' % (sys.executable, sys.argv[0], command))
                 else:
-                    self.vcxproj._add(properties, 'NMakeBuildCommandLine', 'cd $(SolutionDir) && %s %s install:%s:%s --targets=%s' % (sys.executable, sys.argv[0], toolchain, variant, task_gen.target))
-                    self.vcxproj._add(properties, 'NMakeReBuildCommandLine', 'cd $(SolutionDir) && %s %s clean:%s:%s install:%s:%s --targets=%s' % (sys.executable, sys.argv[0], toolchain, variant, toolchain, variant, task_gen.target))
+                    self.vcxproj._add(properties, 'NMakeBuildCommandLine', 'cd $(SolutionDir) && %s %s build:%s:%s --targets=%s' % (sys.executable, sys.argv[0], toolchain, variant, task_gen.target))
+                    self.vcxproj._add(properties, 'NMakeReBuildCommandLine', 'cd $(SolutionDir) && %s %s clean:%s:%s build:%s:%s --targets=%s' % (sys.executable, sys.argv[0], toolchain, variant, toolchain, variant, task_gen.target))
                     self.vcxproj._add(properties, 'NMakeCleanCommandLine', 'cd $(SolutionDir) && %s %s clean:%s:%s --targets=%s' % (sys.executable, sys.argv[0], toolchain, variant, task_gen.target))
                     if 'cxxprogram' in task_gen.features:
                         self.vcxproj._add(properties, 'NMakeOutput', '%s' % os.path.join('$(OutDir)', env.DEPLOY_BINDIR, sub_env.cxxprogram_PATTERN%task_gen.target))
@@ -467,7 +467,9 @@ class vs2003(Build.BuildContext):
 
         solution = Solution(self, appname, version_number, version_name, folders)
 
-        for target, command, do_build in [('build.reconfigure', 'reconfigure', False), ('build.%s'%version, version, False), ('build.all', 'install:%(toolchain)s:%(variant)s', True)]:
+        for target, command, do_build in [('build.reconfigure', 'reconfigure', False),
+                                          ('build.%s'%version, version, False),
+                                          ('build.all', 'build:%(toolchain)s:%(variant)s', True)]:
             task_gen = lambda: None
             task_gen.target = target
             task_gen.command = command

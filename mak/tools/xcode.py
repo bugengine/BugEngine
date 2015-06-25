@@ -549,7 +549,7 @@ class xcode(Build.BuildContext):
                                 'VALID_ARCHS': macarch(env.VALID_ARCHITECTURES[0]),
                                 'SDKROOT': env.XCODE_SDKROOT,
                                 'SUPPORTED_PLATFORMS': env.XCODE_SUPPORTEDPLATFORMS}))
-                build = PBXShellScriptBuildPhase('install:'+toolchain+':${CONFIG}')
+                build = PBXShellScriptBuildPhase('build:'+toolchain+':${CONFIG}')
                 target = PBXNativeTarget(
                                 toolchain,
                                 PBXFileReference(appname, appname+'.app', 'wrapper.application', 'BUILT_PRODUCTS_DIR'),
@@ -560,7 +560,7 @@ class xcode(Build.BuildContext):
                 p._output.children.append(target.productReference)
                 scheme = XCodeScheme(target._id, toolchain, appname+'.app', schemes.project_name, False)
             else:
-                target = PBXLegacyTarget('install:%s:$(CONFIG)'%toolchain, toolchain)
+                target = PBXLegacyTarget('build:%s:$(CONFIG)'%toolchain, toolchain)
                 p.targets.append(target)
                 scheme = XCodeScheme(target._id, toolchain, appname, schemes.project_name, False)
             scheme.write(schemes.make_node('%s.xcscheme'%toolchain))

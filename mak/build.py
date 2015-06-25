@@ -2,6 +2,7 @@ from waflib import Task, Options, Build, Task, Utils, Errors, TaskGen
 from waflib.Configure import conf
 from waflib.TaskGen import feature, taskgen_method, extension, before_method, after_method
 import os
+import shutil
 from waflib.Tools import ccroot, c, cxx
 
 
@@ -11,7 +12,10 @@ old_exec_command = Task.Task.exec_command
 
 def to_string(self):
     bld = self.generator.bld
-    tgt_str = ' '.join([a.path_from(bld.bldnode) for a in self.outputs][:1])
+    if self.outputs:
+        tgt_str = ' '.join([a.path_from(bld.bldnode) for a in self.outputs][:1])
+    else:
+        tgt_str = ' '.join([a.path_from(bld.srcnode) for a in self.inputs][:1])
     return '(%s) %s\n' % (self.__class__.__name__.replace('_task', ''), tgt_str)
 
 
@@ -53,6 +57,51 @@ def exec_command(self, cmd, **kw):
 Task.Task.__str__ = to_string
 Task.Task.log_display = log_display
 Task.Task.exec_command = exec_command
+
+
+class install_task(Task.Task):
+    color = 'CYAN'
+
+    def runnable_status(self):
+        ret = super(install_task, self).runnable_status()
+        if ret != Task.ASK_LATER:
+            for source, target, chmod in self.install_step:
+                d, _ = os.path.split(target)
+                if not d:
+                    raise Errors.WafError('Invalid installation given %r->%r' % (src, tgt))
+                Utils.check_dir(d)
+
+                try:
+                    st1 = os.stat(target)
+                    st2 = os.stat(source.abspath())
+                except OSError:
+                    ret = Task.RUN_ME
+                    break
+                else:
+                    # same size and identical timestamps -> make no copy
+                    if st1.st_mtime + 2 < st2.st_mtime or st1.st_size != st2.st_size:
+                        ret = Task.RUN_ME
+                        break
+        return ret
+
+    def run(self):
+        for source, target, chmod in self.install_step:
+            # following is for shared libs and stale inodes (-_-)
+            try:
+                os.remove(target)
+            except OSError:
+                pass
+
+            try:
+                shutil.copy2(source.abspath(), target)
+                os.chmod(target, chmod)
+            except IOError:
+                try:
+                    os.stat(source.abspath())
+                except (OSError, IOError):
+                    Logs.error('File %r does not exist' % source.abspath())
+                raise Errors.WafError('Could not install the file %r' % target)
+
 
 
 for command in ['build', 'clean', 'install']:
@@ -113,20 +162,21 @@ def module(bld, name, module_path, depends,
             build = True
 
     source_node = bld.path.make_node(module_path.replace('.', '/'))
+    install_tg = bld(target = name+'.deploy', features=[])
     for p,e in [
             ('data', 'DEPLOY_DATADIR'),
             ('bin', 'DEPLOY_RUNBINDIR')]:
         node = source_node.make_node(p)
         if os.path.isdir(node.abspath()):
-            deploy_directory(bld, bld.env, node, '', e)
+            install_tg.deploy_directory(bld.env, node, '', e)
         for tp in platforms:
             node = source_node.make_node(p+'.'+tp)
             if os.path.isdir(node.abspath()):
-                deploy_directory(bld, bld.env, node, '', e)
+                install_tg.deploy_directory(bld.env, node, '', e)
             for a in archs:
                 node = source_node.make_node(p+'.'+tp+'.'+a)
                 if os.path.isdir(node.abspath()):
-                    deploy_directory(bld, bld.env, node, '', e)
+                    install_tg.deploy_directory(bld.env, node, '', e)
 
     if 'plugin' in features:
         plugin_name = name.replace('.', '_')
@@ -293,16 +343,6 @@ def module(bld, name, module_path, depends,
     return (result, multiarch)
 
 
-def deploy_directory(bld, env, node, local_path, env_variable):
-    target_path = os.path.join(bld.env.PREFIX, bld.__class__.optim, env[env_variable], local_path)
-    for n in node.listdir():
-        sn = node.make_node(n)
-        if os.path.isdir(sn.abspath()):
-            deploy_directory(bld, env, sn, os.path.join(local_path, n), env_variable)
-        else:
-            bld.install_as(os.path.join(target_path, n), sn)
-
-
 @conf
 def external(bld, name):
     namespace = name.split('.')
@@ -334,14 +374,16 @@ def thirdparty(bld, name, path, env, libs=[], lib_paths=[], frameworks=[], inclu
     env['FRAMEWORK_%s' % target_name] = frameworks
     env['LIBPATH_%s' % target_name] = lib_paths
     env['LIB_%s' % target_name] = libs
+
+    install_tg = bld(target = name+'.deploy', features=[])
     for bin_path in bin_paths:
-        deploy_directory(bld, bld.env, bin_path, '', 'DEPLOY_RUNBINDIR')
+        install_tg.deploy_directory(env, bin_path, '', 'DEPLOY_RUNBINDIR')
     for data_path in data_paths:
-        deploy_directory(bld, bld.env, data_path, '', 'DEPLOY_DATADIR')
+        install_tg.deploy_directory(env, data_path, '', 'DEPLOY_DATADIR')
     if name not in bld.env.THIRDPARTIES_FIRST:
         bin_paths = [i for i in [source_node.make_node('bin')] + [source_node.make_node('bin.%s'%platform) for platform in platform_specific] if os.path.isdir(i.abspath())]
         for bin_path in bin_paths:
-            deploy_directory(bld, bld.env, bin_path, '', 'DEPLOY_RUNBINDIR')
+            install_tg.deploy_directory(env, bin_path, '', 'DEPLOY_RUNBINDIR')
         bld.env.append_unique('THIRDPARTIES_FIRST', name)
     if bld.env.PROJECTS:
         bld(target=name,
@@ -447,6 +489,30 @@ def build(bld):
     bld.multiarch_envs = [bld.all_envs[envname] for envname in bld.env.SUB_TOOLCHAINS] or [bld.env]
 
 
+@taskgen_method
+def deploy_directory(self, env, node, local_path, env_variable):
+    target_path = os.path.join(self.bld.env.PREFIX, self.bld.__class__.optim,
+                               env[env_variable], local_path)
+    for n in node.listdir():
+        sn = node.make_node(n)
+        if os.path.isdir(sn.abspath()):
+            self.deploy_directory(env, sn, os.path.join(local_path, n), env_variable)
+        else:
+            self.install_files(target_path, [sn])
+
+
+@taskgen_method
+def install_files(self, out_dir, file_list, chmod=Utils.O644):
+    try:
+        install_task = self.bug_install_task
+    except AttributeError:
+        install_task = self.bug_install_task = self.create_task('install', [], [])
+        install_task.install_step = []
+    install_task.inputs += file_list
+    for f in file_list:
+        install_task.install_step.append((f, os.path.join(out_dir, f.name), chmod))
+
+
 @feature('*')
 def check_use_taskgens(self):
     """
@@ -507,9 +573,12 @@ def rename_executable(self):
 def install_kernel(self):
     if self.bld.is_install:
         if not self.env.ENV_PREFIX and not self.bld.env.STATIC: #no multiarch, no static
-            self.bld.install_files(os.path.join(self.bld.env.PREFIX, self.bld.optim, self.bld.env.DEPLOY_KERNELDIR), [self.link_task.outputs[0]])
+            self.install_files(os.path.join(self.bld.env.PREFIX, self.bld.optim, self.bld.env.DEPLOY_KERNELDIR),
+                               [self.link_task.outputs[0]],
+                               Utils.O755)
             if self.env.CC_NAME == 'msvc':
-                self.bld.install_files(os.path.join(self.bld.env.PREFIX, self.bld.optim, self.bld.env.DEPLOY_KERNELDIR), [self.link_task.outputs[1]])
+                self.install_files(os.path.join(self.bld.env.PREFIX, self.bld.optim, self.bld.env.DEPLOY_KERNELDIR),
+                                   [self.link_task.outputs[1]])
 
 
 @feature('plugin')
@@ -518,9 +587,12 @@ def install_plugin(self):
     if self.bld.is_install:
         if ('cshlib' in self.features) or ('cxxshlib' in self.features):
             if not self.env.ENV_PREFIX: #no multiarch
-                self.bld.install_files(os.path.join(self.bld.env.PREFIX, self.bld.optim, self.bld.env.DEPLOY_PLUGINDIR), [self.link_task.outputs[0]])
+                self.install_files(os.path.join(self.bld.env.PREFIX, self.bld.optim, self.bld.env.DEPLOY_PLUGINDIR),
+                                   [self.link_task.outputs[0]],
+                                   Utils.O755)
                 if self.env.CC_NAME == 'msvc':
-                    self.bld.install_files(os.path.join(self.bld.env.PREFIX, self.bld.optim, self.bld.env.DEPLOY_PLUGINDIR), [self.link_task.outputs[1]])
+                    self.install_files(os.path.join(self.bld.env.PREFIX, self.bld.optim, self.bld.env.DEPLOY_PLUGINDIR),
+                                       [self.link_task.outputs[1]])
 
 
 @feature('shared_lib')
@@ -529,9 +601,12 @@ def install_shared_lib(self):
     if self.bld.is_install:
         if ('cshlib' in self.features) or ('cxxshlib' in self.features):
             if not self.env.ENV_PREFIX: #no multiarch
-                self.bld.install_files(os.path.join(self.bld.env.PREFIX, self.bld.optim, self.bld.env.DEPLOY_RUNBINDIR), [self.link_task.outputs[0]])
+                self.install_files(os.path.join(self.bld.env.PREFIX, self.bld.optim, self.bld.env.DEPLOY_RUNBINDIR),
+                                   [self.link_task.outputs[0]],
+                                   Utils.O755)
                 if self.env.CC_NAME == 'msvc':
-                    self.bld.install_files(os.path.join(self.bld.env.PREFIX, self.bld.optim, self.bld.env.DEPLOY_RUNBINDIR), [self.link_task.outputs[1]])
+                    self.install_files(os.path.join(self.bld.env.PREFIX, self.bld.optim, self.bld.env.DEPLOY_RUNBINDIR),
+                                       [self.link_task.outputs[1]])
 
 
 @feature('launcher')
@@ -539,9 +614,12 @@ def install_shared_lib(self):
 def install_program(self):
     if self.bld.is_install:
         if not self.env.ENV_PREFIX: #no multiarch
-            self.bld.install_files(os.path.join(self.bld.env.PREFIX, self.bld.optim, self.bld.env.DEPLOY_BINDIR), [self.link_task.outputs[0]], chmod=Utils.O755)
+            self.install_files(os.path.join(self.bld.env.PREFIX, self.bld.optim, self.bld.env.DEPLOY_BINDIR),
+                               [self.link_task.outputs[0]],
+                               chmod=Utils.O755)
             if self.env.CC_NAME == 'msvc':
-                self.bld.install_files(os.path.join(self.bld.env.PREFIX, self.bld.optim, self.bld.env.DEPLOY_BINDIR), [self.link_task.outputs[1]])
+                self.install_files(os.path.join(self.bld.env.PREFIX, self.bld.optim, self.bld.env.DEPLOY_BINDIR),
+                                   [self.link_task.outputs[1]])
 
 
 @feature('game')
