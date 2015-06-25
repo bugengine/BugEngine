@@ -300,7 +300,7 @@ class eclipse(Build.BuildContext):
                                                 XmlNode(toolChain, 'targetPlatform',
                                                                 {	'binaryParser': 'org.eclipse.cdt.core.ELF;org.eclipse.cdt.core.MachO64;org.eclipse.cdt.core.PE',
                                                                     'id': cdt_bld + '.prefbase.toolchain.%d'%count, 'name': ''}).close()
-                                                waf_build = '"%s" install:%s:%s'%(waf, toolchain, variant)
+                                                waf_build = '"%s" build:%s:%s'%(waf, toolchain, variant)
                                                 waf_clean = '"%s" clean:%s:%s'%(waf, toolchain, variant)
                                                 count = count+1
                                                 XmlNode(toolChain, 'builder',

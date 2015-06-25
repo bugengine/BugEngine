@@ -55,9 +55,9 @@ class Project (XmlFile):
 			search_paths = self.add(completion, 'SearchPaths')
 			custom_build = self.add(conf, 'CustomBuild', {'Enabled':'Yes'})
 			if task_gen.type == 'waf':
-				self.add(custom_build, 'BuildCommand', '%s %s install_%s' % (sys.executable, sys.argv[0], env_name))
-				self.add(custom_build, 'CleanCommand', '%s %s clean_%s' % (sys.executable, sys.argv[0], env_name))
-				self.add(custom_build, 'RebuildCommand', '%s %s clean_%s install_%s' % (sys.executable, sys.argv[0], env_name, env_name))
+				self.add(custom_build, 'BuildCommand', '%s %s build:%s' % (sys.executable, sys.argv[0], env_name))
+				self.add(custom_build, 'CleanCommand', '%s %s clean:%s' % (sys.executable, sys.argv[0], env_name))
+				self.add(custom_build, 'RebuildCommand', '%s %s clean:%s build:%s' % (sys.executable, sys.argv[0], env_name, env_name))
 
 
 	def add_files(self, container, source_tree, local_path):
