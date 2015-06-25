@@ -17,7 +17,7 @@ class KernelObject;
 struct CPUKernelTask
 {
     weak<KernelObject>      object;
-    weak<const Task::ITask> sourceTask;
+    weak<Task::ITask>       sourceTask;
     Kernel::KernelParameter params[16];
 
     struct Range

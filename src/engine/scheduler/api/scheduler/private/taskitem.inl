@@ -12,7 +12,7 @@ namespace BugEngine { namespace Task
 {
 
 template< typename Range, typename Body >
-TaskItem<Range, Body>::TaskItem(weak<const Task<Body> > owner, const Range& r, const Body& b)
+TaskItem<Range, Body>::TaskItem(weak< Task<Body> > owner, const Range& r, const Body& b)
     :   ITaskItem(owner)
     ,   m_range(r)
     ,   m_body(b)
@@ -31,7 +31,7 @@ TaskItem<Range, Body>::TaskItem(const TaskItem& split, u32 index, u32 total)
 template< typename Range, typename Body >
 void TaskItem<Range, Body>::run(weak<Scheduler> sc)
 {
-    weak< const Task<Body> > owner = be_checked_cast< const Task<Body> >(m_owner);
+    weak< Task<Body> > owner = be_checked_cast< Task<Body> >(m_owner);
     if (m_range.atomic())
     {
         m_body(m_range);

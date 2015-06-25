@@ -21,13 +21,13 @@ private:
     class Callback : public ICallback
     {
     private:
-        weak< TaskGroup > m_owner;
-        mutable i_u32     m_completed;
+        weak< TaskGroup >   m_owner;
+        i_u32               m_completed;
     public:
         Callback(weak< TaskGroup > owner);
         virtual ~Callback();
 
-        virtual void onCompleted(weak<Scheduler> scheduler, weak<const ITask> task) const override;
+        virtual void onCompleted(weak<Scheduler> scheduler, weak<ITask> task) override;
         virtual void onConnected(weak<ITask> to, CallbackStatus status) override;
         virtual bool onDisconnected(weak<ITask> to) override;
     };
