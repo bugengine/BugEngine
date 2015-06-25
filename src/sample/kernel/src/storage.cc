@@ -3,7 +3,7 @@
 
 #include    <stdafx.h>
 #include    <storage.script.hh>
-#include    <scheduler/kernel/stream.hh>
+#include    <scheduler/kernel/stream.factory.hh>
 
 namespace BugEngine
 {

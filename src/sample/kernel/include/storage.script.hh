@@ -6,8 +6,8 @@
 /**************************************************************************************************/
 #include    <stdafx.h>
 #include    <world/entitystorage.factory.hh>
-#include    <scheduler/kernel/stream.hh>
-#include    <scheduler/kernel/product.hh>
+#include    <scheduler/kernel/stream.factory.hh>
+#include    <scheduler/kernel/product.factory.hh>
 #include    <components.script.hh>
 
 namespace BugEngine
