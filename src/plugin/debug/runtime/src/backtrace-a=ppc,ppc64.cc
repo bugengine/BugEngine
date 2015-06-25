@@ -26,7 +26,7 @@ BE_NOINLINE size_t Callstack::backtrace(Address* buffer, size_t count, size_t sk
 {
     void** stackPointer;
 //    stackPointer = (void**)(&buffer)-2;
-#ifdef BE_COMPILER_GCC
+#if defined(BE_COMPILER_GCC) || defined(BE_COMPILER_CLANG)
 # ifdef __APPLE_CC__
     stackPointer = (void**)(&buffer)-2;
     __asm__ volatile ("mr %0,r1" : "=r" (stackPointer));
