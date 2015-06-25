@@ -24,7 +24,14 @@ SystemAllocator::~SystemAllocator()
     {
         byte* buffer = reinterpret_cast<byte*>(head);
         head = head->next;
-        if ((uintptr_t)buffer % platformPageSize() == 0)
+        if (blockSize() < platformPageSize())
+        {
+            if ((uintptr_t)buffer % platformPageSize() == 0)
+            {
+                platformFree(buffer, platformPageSize());
+            }
+        }
+        else
         {
             platformFree(buffer, blockSize());
         }
@@ -93,7 +100,7 @@ void SystemAllocator::grow(u32 extraCapacity)
         u32 pageCount = extraCapacity / blocksPerPage;
         for (u32 i = 0; i < pageCount; ++i)
         {
-            Block* block = (Block*)platformReserve(pageCount);
+            Block* block = (Block*)platformReserve(pageSize);
             platformCommit((byte*)block, 0, pageSize);
             for (u32 j = 0; j < blocksPerPage; ++j)
             {
