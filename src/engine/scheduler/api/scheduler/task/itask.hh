@@ -31,7 +31,7 @@ public:
 
         virtual ~ICallback();
 
-        virtual void onCompleted(weak<Scheduler> scheduler, weak<const ITask> task) const = 0;
+        virtual void onCompleted(weak<Scheduler> scheduler, weak<ITask> task) = 0;
         virtual void onConnected(weak<ITask> to, CallbackStatus) = 0;
         virtual bool onDisconnected(weak<ITask> from) = 0;
     };
@@ -43,12 +43,12 @@ private:
     private:
         weak<ITask> const               m_starts;
         minitl::vector< weak<ITask> >   m_startedBy;
-        mutable i_u32                   m_completed;
+        i_u32                           m_completed;
     public:
         ChainCallback(weak<ITask> task);
         virtual ~ChainCallback();
 
-        virtual void onCompleted(weak<Scheduler> scheduler, weak<const ITask> task) const override;
+        virtual void onCompleted(weak<Scheduler> scheduler, weak<ITask> task) override;
         virtual void onConnected(weak<ITask> to, CallbackStatus status) override;
         virtual bool onDisconnected(weak<ITask> from) override;
     private:
@@ -71,7 +71,7 @@ public:
     virtual ~ITask();
 
     virtual void schedule(weak<Scheduler> scheduler) = 0;
-    void completed(weak<Scheduler> scheduler) const;
+    void completed(weak<Scheduler> scheduler);
 
     weak<ICallback> startCallback();
 

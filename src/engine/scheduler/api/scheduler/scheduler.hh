@@ -72,7 +72,7 @@ private:
 private:
     void queueTask(Task::ITaskItem* task, Priority priority);
     void queueTask(Task::ITaskItem* task);
-    void queueKernel(weak<const Task::KernelTask> task, const minitl::array< weak<const Kernel::IStream> >& parameters);
+    void queueKernel(weak<Task::KernelTask> task, const minitl::array< weak<const Kernel::IStream> >& parameters);
     void* allocate(size_t size);
     void  release(void* t, size_t size);
     template< typename T > inline void* allocateTask();

@@ -68,7 +68,7 @@ TaskGroup::Callback::~Callback()
 {
 }
 
-void TaskGroup::Callback::onCompleted(weak<Scheduler> scheduler, weak<const ITask> /*task*/) const
+void TaskGroup::Callback::onCompleted(weak<Scheduler> scheduler, weak<ITask> /*task*/)
 {
     if (++m_completed == m_owner->m_endTaskCount)
     {

@@ -45,20 +45,14 @@ public:
     static StringCache* unique(const char *val);
     static StringCache* unique(const char *begin, const char *end);
 private:
-    mutable i_u32  m_refCount;
-    u32  m_length;
-#   ifdef  BE_DEBUG
-    const char *m_text;
-    size_t  m_gard;
-#   endif
+    mutable i_u32   m_refCount;
+    u32             m_length;
+    char            m_text[1];
 private:
     StringCache(u32 len)
         :   m_refCount(i_u32::Zero)
         ,   m_length(len)
-#   ifdef  BE_DEBUG
-        ,   m_text((const char *)(this+1))
-        ,   m_gard(0xDEADBEEF)
-#   endif
+        ,   m_text()
     {
     }
     StringCache();
@@ -66,7 +60,7 @@ public:
     void retain(void) const     { m_refCount++; }
     void release(void) const    { be_assert(m_refCount, "string's refcount already 0"); m_refCount--; }
     size_t size() const         { return m_length; }
-    const char *str() const     { return reinterpret_cast<const char *>(this+1); }
+    const char *str() const     { return m_text; }
 };
 
 StringCache::Buffer* StringCache::getBuffer()
@@ -89,7 +83,7 @@ StringCache::Buffer::~Buffer()
 
 StringCache* StringCache::Buffer::reserve(size_t size)
 {
-    size_t allsize = minitl::align(size+1+sizeof(StringCache), be_alignof(StringCache));
+    size_t allsize = minitl::align(size + sizeof(StringCache), be_alignof(StringCache));
     be_assert(allsize < s_capacity, "string size is bigger than pool size");
     if (m_used > s_capacity)
     {
@@ -140,12 +134,10 @@ StringCache* StringCache::unique(const char *val)
     {
         u32 len = be_checked_numcast<u32>(strlen(val));
         StringCache* cache = getBuffer()->reserve(len);
-        char *data = (char*)cache + sizeof(StringCache);
-
         (void)(new(cache) StringCache(len));
-        strcpy(data, val);
+        strcpy(cache->m_text, val);
 
-        minitl::tuple<StringIndex::iterator,bool> insertresult = g_strings.insert(data, cache);
+        minitl::tuple<StringIndex::iterator,bool> insertresult = g_strings.insert(cache->m_text, cache);
         be_forceuse(insertresult);
         return cache;
     }

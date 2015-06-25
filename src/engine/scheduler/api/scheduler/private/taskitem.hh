@@ -18,7 +18,7 @@ class be_api(SCHEDULER) ITaskItem : public minitl::istack<ITaskItem>::node
 {
     friend class TaskScheduler;
 protected:
-    weak<const ITask>   m_owner;
+    weak<ITask> m_owner;
 protected:
     template< typename T >
     void* allocate(weak<Scheduler> scheduler)
@@ -37,7 +37,7 @@ protected:
 public:
     virtual void    run(weak<Scheduler> sc) = 0;
 public:
-    ITaskItem(weak<const ITask> owner);
+    ITaskItem(weak<ITask> owner);
     ITaskItem(const ITaskItem& cpy);
     virtual ~ITaskItem();
 };
@@ -49,7 +49,7 @@ private:
     Range       m_range;
     const Body& m_body;
 public:
-    TaskItem(weak< const Task<Body> > owner, const Range& r, const Body& b);
+    TaskItem(weak< Task<Body> > owner, const Range& r, const Body& b);
 
     virtual void    run(weak<Scheduler> sc) override;
 private:

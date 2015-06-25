@@ -28,10 +28,10 @@ ITask::~ITask()
     }
 }
 
-void ITask::completed(weak<Scheduler> sc) const
+void ITask::completed(weak<Scheduler> sc)
 {
     ScopedCriticalSection scope(m_cs);
-    for (minitl::vector< weak<ICallback> >::const_iterator it = m_callbacks.begin(); it != m_callbacks.end(); ++it)
+    for (minitl::vector< weak<ICallback> >::iterator it = m_callbacks.begin(); it != m_callbacks.end(); ++it)
     {
         (*it)->onCompleted(sc, this);
     }
@@ -96,7 +96,7 @@ ITask::ChainCallback::~ChainCallback()
     }
 }
 
-void ITask::ChainCallback::onCompleted(weak<Scheduler> scheduler, weak<const ITask> /*task*/) const
+void ITask::ChainCallback::onCompleted(weak<Scheduler> scheduler, weak<ITask> /*task*/)
 {
     if (++m_completed == m_startedBy.size())
     {

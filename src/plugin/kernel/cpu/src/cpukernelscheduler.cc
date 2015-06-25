@@ -30,7 +30,7 @@ CPUKernelScheduler::~CPUKernelScheduler()
     m_resourceManager->detach<Kernel::KernelDescription>(weak<const Resource::ILoader>(m_loader));
 }
 
-void CPUKernelScheduler::run(weak<const Task::ITask> task,
+void CPUKernelScheduler::run(weak<Task::ITask> task,
                              weak<const Kernel::KernelDescription> kernel,
                              const minitl::array<Kernel::KernelParameter>& parameters)
 {

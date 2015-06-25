@@ -18,10 +18,10 @@ class Task : public ITask
     friend class TaskItem;
     BE_NOCOPY(Task);
 public:
-    Body            body;
+    Body    body;
 private:
-    mutable i_u32   m_taskCount;
-    mutable i_u32   m_taskCompleted;
+    i_u32   m_taskCount;
+    i_u32   m_taskCompleted;
 public:
     Task(istring name, color32 color, const Body& body,
          Scheduler::Priority priority = Scheduler::Default,

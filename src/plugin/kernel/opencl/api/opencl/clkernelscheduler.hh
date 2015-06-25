@@ -27,7 +27,8 @@ private:
 public:
     OpenCLKernelScheduler(const Plugin::Context& context, const cl_context_properties* properties = 0);
     ~OpenCLKernelScheduler();
-    virtual void run(weak<const Task::ITask> task, weak<const Kernel::KernelDescription> kernel, const minitl::array<Kernel::KernelParameter>& parameters) override;
+    virtual void run(weak<Task::ITask> task, weak<const Kernel::KernelDescription> kernel,
+                     const minitl::array<Kernel::KernelParameter>& parameters) override;
     virtual weak<Kernel::IMemoryProvider> memoryProvider() const override;
 };
 
