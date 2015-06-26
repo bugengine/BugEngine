@@ -7,14 +7,14 @@
 #include    <core/stdafx.h>
 
 
-template< typename T > struct thread;
+template< typename T > struct tls;
 
 namespace BugEngine
 {
 
 class be_api(CORE) ThreadLocal
 {
-    template< typename T > friend struct ::thread;
+    template< typename T > friend struct ::tls;
 private:
     static void* tlsAlloc();
     static void  tlsFree(void* key);
@@ -25,47 +25,47 @@ private:
 }
 
 template< typename T >
-struct thread
+struct tls
 {
 private:
     void*   m_tlsKey;
 
 public:
-    thread()
+    tls()
         :   m_tlsKey(BugEngine::ThreadLocal::tlsAlloc())
     {
     }
 
-    thread(const thread& other)
+    tls(const tls& other)
         :   m_tlsKey(BugEngine::ThreadLocal::tlsAlloc())
     {
         *this = other;
     }
 
-    ~thread()
+    ~tls()
     {
         BugEngine::ThreadLocal::tlsFree(m_tlsKey);
     }
 
-    thread& operator=(T* t)
+    tls& operator=(T* t)
     {
         BugEngine::ThreadLocal::tlsSet(m_tlsKey, reinterpret_cast<void*>(t));
         return *this;
     }
 
-    thread& operator=(weak<T> t)
+    tls& operator=(weak<T> t)
     {
         BugEngine::ThreadLocal::tlsSet(m_tlsKey, reinterpret_cast<void*>(t.operator->()));
         return *this;
     }
 
-    thread& operator=(ref<T> t)
+    tls& operator=(ref<T> t)
     {
         BugEngine::ThreadLocal::tlsSet(m_tlsKey, reinterpret_cast<void*>(t.operator->()));
         return *this;
     }
 
-    thread& operator=(scoped<T> t)
+    tls& operator=(scoped<T> t)
     {
         BugEngine::ThreadLocal::tlsSet(m_tlsKey, reinterpret_cast<void*>(t.operator->()));
         return *this;

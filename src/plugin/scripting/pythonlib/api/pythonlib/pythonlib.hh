@@ -147,7 +147,7 @@ public:
     PySys_SetObjectType                     m_PySys_SetObject;
 };
 
-extern thread<PythonLibrary> s_library;
+extern tls<PythonLibrary> s_library;
 
 be_api(PYTHONLIB) PyObject* init2_py_bugengine(bool registerLog);
 be_api(PYTHONLIB) PyObject* init3_py_bugengine(bool registerLog);
