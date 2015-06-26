@@ -8,7 +8,6 @@
 #include    <cstdlib>
 #include    <cstdio>
 #include    <dlfcn.h>
-#include    <linux/limits.h>
 
 
 namespace BugEngine
