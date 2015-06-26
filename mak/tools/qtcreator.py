@@ -769,7 +769,7 @@ class QtCreator(Build.BuildContext):
                                 ('PE.EnvironmentAspect.Changes', ()),
                                 ('ProjectExplorer.CustomExecutableRunConfiguration.Arguments', task_gen.target),
                                 ('ProjectExplorer.CustomExecutableRunConfiguration.Executable', to_var('OUT_NAME')),
-                                ('ProjectExplorer.CustomExecutableRunConfiguration.UseTerminal', True),
+                                ('ProjectExplorer.CustomExecutableRunConfiguration.UseTerminal', False),
                                 ('ProjectExplorer.CustomExecutableRunConfiguration.WorkingDirectory', to_var('OUT_DIR')),
                                 ('ProjectExplorer.ProjectConfiguration.DefaultDisplayName', 'Run %s' % task_gen.target),
                                 ('ProjectExplorer.ProjectConfiguration.DisplayName', ''),
