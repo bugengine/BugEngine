@@ -15,7 +15,7 @@
 namespace BugEngine { namespace Python
 {
 
-thread<PythonLibrary> s_library;
+tls<PythonLibrary> s_library;
 
 static PyMethodDef s_methods[] =
 {
