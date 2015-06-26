@@ -325,12 +325,10 @@ def process_use(self):
 			if y.tmp_use_objects:
 				self.add_objects_from_tgen(y)
 
-		if getattr(y, 'export_includes', None):
-			self.includes.extend(y.to_incnodes(y.export_includes))
-
-		if getattr(y, 'export_defines', None):
-			self.env.append_value('DEFINES', self.to_list(y.export_defines))
-
+		for var in self.get_uselib_vars():
+			value = getattr(y, 'export_%s'%var.lower(), None)
+			if value:
+				self.env.append_value(var, self.to_list(value))
 
 	# and finally, add the uselib variables (no recursion needed)
 	for x in names:

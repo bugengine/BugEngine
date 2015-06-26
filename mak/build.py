@@ -371,19 +371,14 @@ def thirdparty(bld, name, path, env, libs=[], lib_paths=[], frameworks=[], inclu
 
     target_prefix = (env.ENV_PREFIX + '/') if env.ENV_PREFIX else ''
     target_name = target_prefix + name
-    #env['DEFINES_%s' % target_name] = defines
-    #env['INCLUDES_%s' % target_name] = includes
-    #env['FRAMEWORK_%s' % target_name] = frameworks
-    #env['LIBPATH_%s' % target_name] = lib_paths
-    #env['LIB_%s' % target_name] = libs
-
+    print(libs, lib_paths)
     install_tg = bld(target=name,
                      features=['cxx'],
                      export_includes=includes,
                      export_defines=defines,
-                     libpath=lib_paths,
-                     lib=libs,
-                     framework=frameworks,
+                     export_libpath=lib_paths,
+                     export_lib=libs,
+                     export_frameworkpath=frameworks,
                      source_nodes=[source_node])
     for bin_path in bin_paths:
         install_tg.deploy_directory(env, bin_path, '', 'DEPLOY_RUNBINDIR')
