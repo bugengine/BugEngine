@@ -371,7 +371,6 @@ def thirdparty(bld, name, path, env, libs=[], lib_paths=[], frameworks=[], inclu
 
     target_prefix = (env.ENV_PREFIX + '/') if env.ENV_PREFIX else ''
     target_name = target_prefix + name
-    print(libs, lib_paths)
     install_tg = bld(target=name,
                      features=['cxx'],
                      export_includes=includes,
