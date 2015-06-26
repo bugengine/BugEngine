@@ -162,22 +162,6 @@ def module(bld, name, module_path, depends,
             build = True
 
     source_node = bld.path.make_node(module_path.replace('.', '/'))
-    install_tg = bld(target = name+'.deploy', features=[])
-    for p,e in [
-            ('data', 'DEPLOY_DATADIR'),
-            ('bin', 'DEPLOY_RUNBINDIR')]:
-        node = source_node.make_node(p)
-        if os.path.isdir(node.abspath()):
-            install_tg.deploy_directory(bld.env, node, '', e)
-        for tp in platforms:
-            node = source_node.make_node(p+'.'+tp)
-            if os.path.isdir(node.abspath()):
-                install_tg.deploy_directory(bld.env, node, '', e)
-            for a in archs:
-                node = source_node.make_node(p+'.'+tp+'.'+a)
-                if os.path.isdir(node.abspath()):
-                    install_tg.deploy_directory(bld.env, node, '', e)
-
     if 'plugin' in features:
         plugin_name = name.replace('.', '_')
     else:
@@ -340,6 +324,24 @@ def module(bld, name, module_path, depends,
         multiarch = bld(target=name, features=['multiarch'], use=internal_deps)
     else:
         multiarch = None
+
+    if multiarch or result:
+        install_tg = multiarch if multiarch else result[0]
+        for p,e in [
+                ('data', 'DEPLOY_DATADIR'),
+                ('bin', 'DEPLOY_RUNBINDIR')]:
+            node = source_node.make_node(p)
+            if os.path.isdir(node.abspath()):
+                install_tg.deploy_directory(bld.env, node, '', e)
+            for tp in platforms:
+                node = source_node.make_node(p+'.'+tp)
+                if os.path.isdir(node.abspath()):
+                    install_tg.deploy_directory(bld.env, node, '', e)
+                for a in archs:
+                    node = source_node.make_node(p+'.'+tp+'.'+a)
+                    if os.path.isdir(node.abspath()):
+                        install_tg.deploy_directory(bld.env, node, '', e)
+
     return (result, multiarch)
 
 
@@ -369,13 +371,20 @@ def thirdparty(bld, name, path, env, libs=[], lib_paths=[], frameworks=[], inclu
 
     target_prefix = (env.ENV_PREFIX + '/') if env.ENV_PREFIX else ''
     target_name = target_prefix + name
-    env['DEFINES_%s' % target_name] = defines
-    env['INCLUDES_%s' % target_name] = includes
-    env['FRAMEWORK_%s' % target_name] = frameworks
-    env['LIBPATH_%s' % target_name] = lib_paths
-    env['LIB_%s' % target_name] = libs
+    #env['DEFINES_%s' % target_name] = defines
+    #env['INCLUDES_%s' % target_name] = includes
+    #env['FRAMEWORK_%s' % target_name] = frameworks
+    #env['LIBPATH_%s' % target_name] = lib_paths
+    #env['LIB_%s' % target_name] = libs
 
-    install_tg = bld(target = name+'.deploy', features=[])
+    install_tg = bld(target=name,
+                     features=['cxx'],
+                     export_includes=includes,
+                     export_defines=defines,
+                     libpath=lib_paths,
+                     lib=libs,
+                     framework=frameworks,
+                     source_nodes=[source_node])
     for bin_path in bin_paths:
         install_tg.deploy_directory(env, bin_path, '', 'DEPLOY_RUNBINDIR')
     for data_path in data_paths:
@@ -385,11 +394,6 @@ def thirdparty(bld, name, path, env, libs=[], lib_paths=[], frameworks=[], inclu
         for bin_path in bin_paths:
             install_tg.deploy_directory(env, bin_path, '', 'DEPLOY_RUNBINDIR')
         bld.env.append_unique('THIRDPARTIES_FIRST', name)
-    if bld.env.PROJECTS:
-        bld(target=name,
-            includes=includes,
-            defines=defines,
-            source_nodes=[source_node])
 
 
 @conf
@@ -571,55 +575,51 @@ def rename_executable(self):
 @feature('kernel')
 @after_method('apply_link')
 def install_kernel(self):
-    if self.bld.is_install:
-        if not self.env.ENV_PREFIX and not self.bld.env.STATIC: #no multiarch, no static
+    if not self.env.ENV_PREFIX and not self.bld.env.STATIC: #no multiarch, no static
+        self.install_files(os.path.join(self.bld.env.PREFIX, self.bld.optim, self.bld.env.DEPLOY_KERNELDIR),
+                           [self.link_task.outputs[0]],
+                           Utils.O755)
+        if self.env.CC_NAME == 'msvc':
             self.install_files(os.path.join(self.bld.env.PREFIX, self.bld.optim, self.bld.env.DEPLOY_KERNELDIR),
-                               [self.link_task.outputs[0]],
-                               Utils.O755)
-            if self.env.CC_NAME == 'msvc':
-                self.install_files(os.path.join(self.bld.env.PREFIX, self.bld.optim, self.bld.env.DEPLOY_KERNELDIR),
-                                   [self.link_task.outputs[1]])
+                               [self.link_task.outputs[1]])
 
 
 @feature('plugin')
 @after_method('apply_link')
 def install_plugin(self):
-    if self.bld.is_install:
-        if ('cshlib' in self.features) or ('cxxshlib' in self.features):
-            if not self.env.ENV_PREFIX: #no multiarch
+    if ('cshlib' in self.features) or ('cxxshlib' in self.features):
+        if not self.env.ENV_PREFIX: #no multiarch
+            self.install_files(os.path.join(self.bld.env.PREFIX, self.bld.optim, self.bld.env.DEPLOY_PLUGINDIR),
+                               [self.link_task.outputs[0]],
+                               Utils.O755)
+            if self.env.CC_NAME == 'msvc':
                 self.install_files(os.path.join(self.bld.env.PREFIX, self.bld.optim, self.bld.env.DEPLOY_PLUGINDIR),
-                                   [self.link_task.outputs[0]],
-                                   Utils.O755)
-                if self.env.CC_NAME == 'msvc':
-                    self.install_files(os.path.join(self.bld.env.PREFIX, self.bld.optim, self.bld.env.DEPLOY_PLUGINDIR),
-                                       [self.link_task.outputs[1]])
+                                   [self.link_task.outputs[1]])
 
 
 @feature('shared_lib')
 @after_method('apply_link')
 def install_shared_lib(self):
-    if self.bld.is_install:
-        if ('cshlib' in self.features) or ('cxxshlib' in self.features):
-            if not self.env.ENV_PREFIX: #no multiarch
+    if ('cshlib' in self.features) or ('cxxshlib' in self.features):
+        if not self.env.ENV_PREFIX: #no multiarch
+            self.install_files(os.path.join(self.bld.env.PREFIX, self.bld.optim, self.bld.env.DEPLOY_RUNBINDIR),
+                               [self.link_task.outputs[0]],
+                               Utils.O755)
+            if self.env.CC_NAME == 'msvc':
                 self.install_files(os.path.join(self.bld.env.PREFIX, self.bld.optim, self.bld.env.DEPLOY_RUNBINDIR),
-                                   [self.link_task.outputs[0]],
-                                   Utils.O755)
-                if self.env.CC_NAME == 'msvc':
-                    self.install_files(os.path.join(self.bld.env.PREFIX, self.bld.optim, self.bld.env.DEPLOY_RUNBINDIR),
-                                       [self.link_task.outputs[1]])
+                                   [self.link_task.outputs[1]])
 
 
 @feature('launcher')
 @after_method('apply_link')
 def install_program(self):
-    if self.bld.is_install:
-        if not self.env.ENV_PREFIX: #no multiarch
+    if not self.env.ENV_PREFIX: #no multiarch
+        self.install_files(os.path.join(self.bld.env.PREFIX, self.bld.optim, self.bld.env.DEPLOY_BINDIR),
+                           [self.link_task.outputs[0]],
+                           chmod=Utils.O755)
+        if self.env.CC_NAME == 'msvc':
             self.install_files(os.path.join(self.bld.env.PREFIX, self.bld.optim, self.bld.env.DEPLOY_BINDIR),
-                               [self.link_task.outputs[0]],
-                               chmod=Utils.O755)
-            if self.env.CC_NAME == 'msvc':
-                self.install_files(os.path.join(self.bld.env.PREFIX, self.bld.optim, self.bld.env.DEPLOY_BINDIR),
-                                   [self.link_task.outputs[1]])
+                               [self.link_task.outputs[1]])
 
 
 @feature('game')
