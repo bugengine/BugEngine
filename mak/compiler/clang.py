@@ -136,13 +136,13 @@ def detect_clang(conf):
     bindirs = os.environ['PATH'].split(os.pathsep) + conf.env.EXTRA_PATH
     libdirs = []
     for bindir in bindirs:
-        libdir = os.path.join(bindir, '..', 'lib')
-        if os.path.isdir(libdir):
-            for x in os.listdir(libdir):
-                if x.startswith('llvm-'):
-                    b = os.path.join(libdir, x, 'bin')
-                    if os.path.isdir(b):
-                        libdirs.append(b)
+        for libdir in (os.path.join(bindir, '..', 'lib'), os.path.join(bindir, '..')):
+            if os.path.isdir(libdir):
+                for x in os.listdir(libdir):
+                    if x.startswith('llvm'):
+                        b = os.path.join(libdir, x, 'bin')
+                        if os.path.isdir(b):
+                            libdirs.append(b)
 
     conf.env.CLANG_TARGETS = []
     seen=set([])
@@ -173,13 +173,15 @@ def detect_clang(conf):
 @conf
 def load_clang(conf, directory, target, flags):
     directories = [directory, os.path.join(directory, '..', target, 'bin')]
+    sys_dirs = directories + [os.path.join(directory, '..', '..', 'bin')]
     conf.find_program('clang', var='CC', path_list=directories)
     conf.find_program('clang++', var='CXX', path_list=directories, mandatory=False)
     if not conf.find_program(target+'-ar', var='AR', path_list=directories, mandatory=False):
         conf.find_program('ar', var='AR', path_list=directories, mandatory=False)
-    conf.find_program('lldb', var='LLDB', path_list=directories, mandatory=False)
-    if not conf.find_program(target+'-gdb', var='GDB', path_list=[directory], mandatory=False):
-        conf.find_program('gdb', var='GDB', path_list=[directory], mandatory=False)
+    conf.find_program('lldb', var='LLDB', path_list=sys_dirs, mandatory=False)
+    if not conf.find_program(target+'-gdb', var='GDB', path_list=sys_dirs, mandatory=False):
+        if not conf.find_program(target+'-gdb', var='GDB', mandatory=False):
+            conf.find_program('gdb', var='GDB', path_list=sys_dirs, mandatory=False)
     conf.env.COMPILER_NAME='clang'
     conf.env.COMPILER_TARGET=target
     conf.load('gcc gxx')
