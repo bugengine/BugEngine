@@ -74,7 +74,9 @@ def get_macosx_sdk_version(self, name, compiler_list):
                 for sdk in sdk_list:
                     sdk_name,_ = os.path.splitext(sdk)
                     if sdk.startswith('MacOSX'):
-                        sdk_version = sdk_name[6:10]
+                        sdk_version = sdk_name[6:]
+                        if sdk_version[-1] == 'u':
+                            sdk_version = sdk_version[:-1]
                         sdks.append((sdk_version, os.path.join(sdks_path, sdk)))
 
     sdks.sort()
