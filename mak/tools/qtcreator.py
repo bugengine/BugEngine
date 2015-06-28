@@ -484,12 +484,12 @@ class QtCreator(Build.BuildContext):
         self.load_device_list()
         self.load_platform_list()
         for env_name in self.env.ALL_TOOLCHAINS:
-            bld_env = self.all_envs[env_name]
-            if bld_env.SUB_TOOLCHAINS:
-                env = self.all_envs[bld_env.SUB_TOOLCHAINS[0]]
+            env = self.all_envs[env_name]
+            if env.SUB_TOOLCHAINS:
+                bld_env = self.all_envs[env.SUB_TOOLCHAINS[0]]
             else:
-                env = bld_env
-            toolchain = QtToolchain(env_name, env)
+                bld_env = env
+            toolchain = QtToolchain(env_name, bld_env)
             for t_name, t in self.toolchains:
                 if t_name == toolchain.ProjectExplorer_ToolChain_Id:
                     t.copy_from(toolchain)

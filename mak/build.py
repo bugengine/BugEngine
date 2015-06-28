@@ -69,7 +69,6 @@ class install_task(Task.Task):
                 d, _ = os.path.split(target)
                 if not d:
                     raise Errors.WafError('Invalid installation given %r->%r' % (src, tgt))
-                Utils.check_dir(d)
 
                 try:
                     st1 = os.stat(target)
@@ -86,6 +85,8 @@ class install_task(Task.Task):
 
     def run(self):
         for source, target, chmod in self.install_step:
+            d, _ = os.path.split(target)
+            Utils.check_dir(d)
             # following is for shared libs and stale inodes (-_-)
             try:
                 os.remove(target)
@@ -100,7 +101,9 @@ class install_task(Task.Task):
                     os.stat(source.abspath())
                 except (OSError, IOError):
                     Logs.error('File %r does not exist' % source.abspath())
-                raise Errors.WafError('Could not install the file %r' % target)
+                    return 1
+                Logs.error('Could not install the file %r' % target)
+        return 0
 
 
 
@@ -371,13 +374,13 @@ def thirdparty(bld, name, path, env, libs=[], lib_paths=[], frameworks=[], inclu
 
     target_prefix = (env.ENV_PREFIX + '/') if env.ENV_PREFIX else ''
     target_name = target_prefix + name
-    install_tg = bld(target=name,
+    install_tg = bld(target=target_name,
                      features=['cxx'],
                      export_includes=includes,
                      export_defines=defines,
                      export_libpath=lib_paths,
                      export_lib=libs,
-                     export_frameworkpath=frameworks,
+                     export_framework=frameworks,
                      source_nodes=[source_node])
     for bin_path in bin_paths:
         install_tg.deploy_directory(env, bin_path, '', 'DEPLOY_RUNBINDIR')
@@ -509,6 +512,17 @@ def install_files(self, out_dir, file_list, chmod=Utils.O644):
     install_task.inputs += file_list
     for f in file_list:
         install_task.install_step.append((f, os.path.join(out_dir, f.name), chmod))
+
+
+@taskgen_method
+def install_as(self, target_path, file, chmod=Utils.O644):
+    try:
+        install_task = self.bug_install_task
+    except AttributeError:
+        install_task = self.bug_install_task = self.create_task('install', [], [])
+        install_task.install_step = []
+    install_task.inputs.append(file)
+    install_task.install_step.append((file, target_path, chmod))
 
 
 @feature('*')
