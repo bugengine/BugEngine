@@ -23,7 +23,7 @@ struct hash<const char*>
     u32 operator()(const char *str) const
     {
         const u8 *data = reinterpret_cast<const u8 *>(str);
-        u32 len = (u32)strlen(str);
+        u32 len = str ? (u32)strlen(str) : 0;
         u32 hashvalue = len, tmp;
         u32 rem;
         if (len == 0 || data == NULL) return 0;
@@ -73,6 +73,7 @@ struct hash<const char*>
         return strcmp(str1, str2) == 0;
     }
 };
+    
 template< typename T >
 struct hash<const T*> : public hash<T*>
 {

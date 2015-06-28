@@ -91,6 +91,7 @@ struct InterlockedType<4>
                 "1:     mov             %0, #2\n"       /* store a flag */
                 "       ldrex   %1, [%3]\n"             /* get original */
                 "       teq             %1, %4\n"       /* see if match */
+                "       it              eq\n"       /* IT block */
                 "       strexeq %0, %5, [%3]\n"         /* store new one if matched */
                 "       teq             %0, #1\n"
                 "       beq             1b\n"           /* if update failed, repeat */

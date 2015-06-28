@@ -4,36 +4,41 @@
 #include    <core/stdafx.h>
 #include    <core/environment.hh>
 #include    <unistd.h>
-#include    <sys/types.h>
-#include    <sys/sysctl.h>
-#include    <errno.h>
+#include    <cstdlib>
+#include    <cstdio>
+#include    <dlfcn.h>
 
 namespace BugEngine
 {
-
+        
+BE_EXPORT void* s_dummyData = 0;
+    
 Environment::Environment()
-:   m_homeDirectory(getenv("HOME"))
-,   m_dataDirectory("share/bugengine")
-,   m_game("sample.kernel")
-,   m_user(getenv("USER"))
+    :   m_homeDirectory(getenv("HOME"))
+    ,   m_dataDirectory("share/bugengine")
+    ,   m_game("")
+    ,   m_user(getenv("USER") ? getenv("USER") : "")
+    ,   m_programPath()
 {
     m_homeDirectory.push_back(".bugengine");
 }
 
+void Environment::init()
+{
+    Dl_info info;
+    dladdr(&s_dummyData, &info);
+    init(1, &info.dli_fname);
+}
+
 void Environment::init(int argc, const char *argv[])
 {
-    char* path = strdup(argv[0]);
-    char* filename = path;
-    char* lastSlash = path;
-    for (filename = path; *filename; ++filename)
-    {
-        if (*filename == '/')
-            lastSlash = filename;
-    }
-    *lastSlash = 0;
-    filename = lastSlash + 1;
-    chdir(path);
-    for( int arg = 1; arg < argc; arg++ )
+    m_game = istring("sample.kernel");
+    ipath rootPath = canonicalPath(argv[0], "/");
+    m_programPath = ifilename(rootPath);
+    rootPath.pop_back();
+    m_dataDirectory = rootPath + m_dataDirectory;
+    
+    for (int arg = 1; arg < argc; arg++)
     {
         if (argv[arg][0] == '-')
         {
@@ -41,10 +46,6 @@ void Environment::init(int argc, const char *argv[])
         }
         m_game = argv[arg];
     }
-    m_dataDirectory = ipath(argv[0], filename);
-    m_dataDirectory += "share";
-    m_dataDirectory += "bugengine";
-    free(path);
 }
 
 Environment::~Environment()
@@ -56,4 +57,9 @@ size_t Environment::getProcessorCount() const
     return sysconf(_SC_NPROCESSORS_ONLN);
 }
 
+const char* Environment::getEnvironmentVariable(const char *variable) const
+{
+    return getenv(variable);
+}
+    
 }
