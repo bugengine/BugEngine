@@ -37,11 +37,11 @@ def set_macosx_deployment_target(self):
 	"""
 	see WAF issue 285 and also and also http://trac.macports.org/ticket/17059
 	"""
-	if self.env['MACOSX_DEPLOYMENT_TARGET']:
-		os.environ['MACOSX_DEPLOYMENT_TARGET'] = self.env['MACOSX_DEPLOYMENT_TARGET']
-	elif 'MACOSX_DEPLOYMENT_TARGET' not in os.environ:
-		if Utils.unversioned_sys_platform() == 'darwin':
-			os.environ['MACOSX_DEPLOYMENT_TARGET'] = '.'.join(platform.mac_ver()[0].split('.')[:2])
+	#if self.env['MACOSX_DEPLOYMENT_TARGET']:
+	#	os.environ['MACOSX_DEPLOYMENT_TARGET'] = self.env['MACOSX_DEPLOYMENT_TARGET']
+	#elif 'MACOSX_DEPLOYMENT_TARGET' not in os.environ:
+	#	if Utils.unversioned_sys_platform() == 'darwin':
+	#		os.environ['MACOSX_DEPLOYMENT_TARGET'] = '.'.join(platform.mac_ver()[0].split('.')[:2])
 
 @taskgen_method
 def create_bundle_dirs(self, name, out):

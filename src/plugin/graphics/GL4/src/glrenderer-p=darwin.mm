@@ -72,7 +72,7 @@ public:
 static NSOpenGLPixelFormatAttribute s_attributes[] = {
     //NSOpenGLPFAAllRenderers,
     NSOpenGLPFADoubleBuffer,
-    NSOpenGLPFAWindow,
+    //NSOpenGLPFAWindow,
     NSOpenGLPFAAccelerated,
     NSOpenGLPFANoRecovery,
     NSOpenGLPFAMinimumPolicy,

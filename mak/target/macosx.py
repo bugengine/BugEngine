@@ -284,6 +284,8 @@ def configure(conf):
     for name, bindir, gcc, gxx, version, target, arch, options in conf.env.GCC_TARGETS:
         position = target.find('darwin')
         if position != -1 and arch in supported_architectures:
+            if bindir.find('Platforms') != -1 and bindir.find('Platforms/MacOSX') == -1:
+                continue
             version = target[position+6:].split('-')[0] + '_' + version
             key = (name, version, check_multilib_gcc, load_gcc, set_macosx_gcc_options)
             compiler = (name, bindir, gcc, gxx, version, target, arch,
@@ -353,9 +355,6 @@ def configure(conf):
                 try:
                     conf.set_macosx_options()
                     conf.set_macosx_sdk_options(sdk_name, sdk_path)
-                    toolchain = '%s-%s-%s-%s'%(os_name+conf.env.MACOSX_SDK[6:], real_arch,
-                                               name, version)
-                    conf.setenv(toolchain, conf.env.derive())
                     conf.env.KERNEL_TOOLCHAINS = [toolchain]
                     conf.env.ENV_PREFIX = real_arch
                     conf.add_toolchain(os_name+conf.env.MACOSX_SDK[6:], real_arch, name,
@@ -383,6 +382,8 @@ def configure(conf):
             if not conf.find_program('lipo', path_list=bin_paths, mandatory=False):
                 conf.find_program('lipo')
             conf.find_program('lldb', path_list=bin_paths, mandatory=False)
+            if not conf.env.LLDB:
+                print(bin_paths)
             conf.find_program('gdb', path_list=bin_paths, mandatory=False)
             conf.add_multiarch_toolchain(toolchain)
             pprint('GREEN', 'configured for toolchain %s' % (toolchain))
@@ -398,8 +399,8 @@ def plugins(bld):
 
 @extension('.plist')
 def install_plist(self, node):
-    self.bld.install_files(os.path.join(self.env.PREFIX, self.bld.optim, self.env.DEPLOY_ROOTDIR),
-                           node)
+    self.install_files(os.path.join(self.env.PREFIX, self.bld.optim, self.env.DEPLOY_ROOTDIR),
+                       [node])
 
 
 @feature('cshlib', 'cxxshlib')
@@ -475,21 +476,21 @@ def apply_multiarch_darwin(self):
 
         self.lipo_task = self.create_task('lipo', inputs, [out_node_full])
         self.strip_task = self.create_task('strip', [out_node_full], [out_node])
-        self.bld.install_as(os.path.join(self.bld.env.PREFIX, self.bld.optim, out_path, out_name),
-                            out_node,
-                            chmod=Utils.O755)
+        self.install_as(os.path.join(self.bld.env.PREFIX, self.bld.optim, out_path, out_name),
+                        out_node,
+                        chmod=Utils.O755)
 
         dsymtask = getattr(self.bld, 'dsym_task', None)
         if not dsymtask:
             infoplist = self.bld.bldnode.make_node(os.path.join(out_rootdir, 'Info.plist'))
             dsymtask = self.bld.dsym_task = self.create_task('dsym', [], [infoplist])
-            self.bld.install_as(os.path.join(self.bld.env.PREFIX, self.bld.optim,
-                                             infoplist.path_from(self.bld.bldnode)),
-                                infoplist)
+            self.install_as(os.path.join(self.bld.env.PREFIX, self.bld.optim,
+                                         infoplist.path_from(self.bld.bldnode)),
+                            infoplist)
 
         dsymtask.set_inputs(out_node_full)
         dsymtask.set_outputs(out_dsymdir.make_node(out_name))
-        self.bld.install_as(os.path.join(self.bld.env.PREFIX, self.bld.optim, appname+'.app.dSYM',
-                                         'Contents', 'Resources', 'DWARF', out_name),
-                            dsymtask.outputs[-1])
+        self.install_as(os.path.join(self.bld.env.PREFIX, self.bld.optim, appname+'.app.dSYM',
+                                     'Contents', 'Resources', 'DWARF', out_name),
+                        dsymtask.outputs[-1])
 

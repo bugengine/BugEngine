@@ -25,7 +25,7 @@ def check_iphone_multilib_gcc(self, compiler):
             cmd = [os.path.join(compiler[0], compiler[3]), '-Wp,-imultilib,v7', '-c', filename, '-o', output]
             try:
                 p = Utils.subprocess.Popen(cmd, stdin=Utils.subprocess.PIPE, stdout=Utils.subprocess.PIPE, stderr=Utils.subprocess.PIPE)
-                out = p.communicate()[0]
+                out,err = p.communicate()
             except Exception as e:
                 print(e)
             else:
@@ -215,6 +215,8 @@ def configure(conf):
         arch, flags = arch
         position = target.find('darwin')
         if position != -1 and arch in supported_architectures:
+            if bindir.find('Platforms') != -1 and bindir.find('Platforms/iPhone') == -1:
+                continue
             real_arch, os_name = supported_architectures[arch]
             key = ('clang', version, check_iphone_multilib_other, load_clang, set_iphone_clang_options)
             compiler = ('clang', directory, 'clang', 'clang++', version, target, real_arch, os_name, flags)
@@ -283,8 +285,6 @@ def configure(conf):
                 try:
                     conf.set_iphone_options([real_os])
                     conf.set_iphone_sdk_options(real_os, sdk_name, sdk_path)
-                    toolchain = '%s-%s-%s-%s'%(os+conf.env.MACOSX_SDK[6:], arch, name, version)
-                    conf.setenv(toolchain, conf.env.derive())
                     conf.env.KERNEL_TOOLCHAINS = [toolchain]
                     conf.env.ENV_PREFIX = arch
                     conf.add_toolchain(os+sdk_name, arch, name, version, arch, False)
