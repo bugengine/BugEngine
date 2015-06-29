@@ -298,6 +298,8 @@ def configure(conf):
         real_arch, flags = arch
         position = target.find('darwin')
         if position != -1 and real_arch in supported_architectures:
+            if directory.find('Platforms') != -1 and directory.find('Platforms/MacOSX') == -1:
+                continue
             key = ('clang', version, check_multilib_other, load_clang, set_macosx_clang_options)
             compiler = ('clang', directory, 'clang', 'clang++', version, target, real_arch,
                         supported_architectures[real_arch], flags)

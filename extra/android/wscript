@@ -39,13 +39,13 @@ def options(opt):
     ndk_path = []
     path_list = os.environ.get('PATH', '').split(os.pathsep)
     for path in path_list:
-            for ext in ['.cmd', '.sh', '.bat', '']:
-                p = os.path.join(path, 'android'+ext)
-                if os.path.isfile(p):
-                    sdk_path = os.path.dirname(path)
-                p = os.path.join(path, 'ndk-build'+ext)
-                if os.path.isfile(p):
-                    ndk_path.append(path)
+        for ext in ['.cmd', '.sh', '.bat', '']:
+            p = os.path.join(path, 'android'+ext)
+            if os.path.isfile(p):
+                sdk_path = os.path.dirname(path)
+            p = os.path.join(path, 'ndk-build'+ext)
+            if os.path.isfile(p):
+                ndk_path.append(path)
 
 
     gr.add_option( '--android-sdk',

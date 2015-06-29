@@ -70,6 +70,7 @@ def get_iphone_sdk_version(self, name, compiler_list):
                 self.check_sdk(os.path.join(compiler[1], compiler[3]), compiler[8], sdk_path_compiler, '-miphoneos-version-min=%s'%sdk)
                 bin_paths.append(os.path.normpath(os.path.join(sdk_path_compiler, '..', '..', 'usr', 'bin')))
                 bin_paths.append(os.path.normpath(os.path.join(sdk_path_compiler, '..', '..', '..', 'usr', 'bin')))
+                bin_paths.append(os.path.normpath(os.path.join(sdk_path_compiler, '..', '..', '..', '..', '..', 'usr', 'bin')))
                 bin_paths.append(compiler[1])
             break
         except Errors.WafError:
@@ -203,6 +204,8 @@ def configure(conf):
     for name, bindir, gcc, gxx, version, target, arch, options in conf.env.GCC_TARGETS:
         position = target.find('darwin')
         if position != -1 and arch in supported_architectures:
+            if bindir.find('Platforms') != -1 and bindir.find('Platforms/iPhone') == -1:
+                continue
             real_arch, os_name = supported_architectures[arch]
             version = target[position+6:].split('-')[0] + '_' + version
             key = (name, version, check_iphone_multilib_gcc, load_gcc, set_iphone_gcc_options)
@@ -215,7 +218,7 @@ def configure(conf):
         arch, flags = arch
         position = target.find('darwin')
         if position != -1 and arch in supported_architectures:
-            if bindir.find('Platforms') != -1 and bindir.find('Platforms/iPhone') == -1:
+            if directory.find('Platforms') != -1 and directory.find('Platforms/iPhone') == -1:
                 continue
             real_arch, os_name = supported_architectures[arch]
             key = ('clang', version, check_iphone_multilib_other, load_clang, set_iphone_clang_options)
@@ -274,8 +277,6 @@ def configure(conf):
             try:
                 conf.start_msg('Setting up compiler')
                 load_compiler(conf, compiler)
-                if arch in ['arm', 'armv7', 'arm64']:
-                    conf.find_program('codesign')
                 set_iphone_compiler_options(conf, options, arch)
             except Exception as e:
                 conf.end_msg(e, color='RED')
@@ -309,6 +310,8 @@ def configure(conf):
             conf.env.VALID_ARCHITECTURES = [iphone_archs]
             conf.find_program('dsymutil', path_list=bin_paths)
             conf.find_program('strip', path_list=bin_paths)
+            conf.find_program('codesign')
+            conf.find_program('codesign_allocate', path_list=bin_paths)
             if not conf.find_program('lipo', path_list=bin_paths, mandatory=False):
                 conf.find_program('lipo')
             conf.find_program('lldb', path_list=bin_paths, mandatory=False)
