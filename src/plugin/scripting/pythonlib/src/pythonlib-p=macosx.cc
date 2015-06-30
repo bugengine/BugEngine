@@ -177,12 +177,15 @@ PythonLibrary::~PythonLibrary()
 
 void PythonLibrary::platformInitialize()
 {
+    ifilename programPath = Environment::getEnvironment().getProgramPath();
+    programPath.pop_back();
+    static ifilename::Filename f = programPath.str();
+    (*m_Py_SetPythonHome)(f.name);
 }
 
 void PythonLibrary::setupPath()
 {
     ifilename programPath = Environment::getEnvironment().getProgramPath();
-    programPath.pop_back();
     programPath.pop_back();
     (*m_PyRun_SimpleString)(minitl::format<4096>("import sys; sys.path.append(\"%s\")")
                              | programPath.str().name);

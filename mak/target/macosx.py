@@ -125,7 +125,7 @@ def set_macosx_sdk_options(self, sdk_version, sdk_path):
 
 
 @conf
-def set_macosx_icc_options(self, flags, arch):
+def set_macosx_icc_options(self, flags, arch, version):
     v = self.env
     v.CFLAGS = flags + ['-fPIC', '-fvisibility=hidden']
     v.CXXFLAGS = flags + ['-fPIC', '-fvisibility=hidden']
@@ -160,7 +160,7 @@ def set_macosx_icc_options(self, flags, arch):
 
 
 @conf
-def set_macosx_gcc_options(self, flags, arch):
+def set_macosx_gcc_options(self, flags, arch, version):
     v = self.env
     v.CFLAGS = flags + ['-fPIC', '-fvisibility=hidden']
     v.CXXFLAGS = flags + ['-fPIC', '-fvisibility=hidden']
@@ -197,8 +197,10 @@ def set_macosx_gcc_options(self, flags, arch):
 
 
 @conf
-def set_macosx_clang_options(self, flags, arch):
+def set_macosx_clang_options(self, flags, arch, version):
     v = self.env
+    version = version.split('.')
+    version = float(version[0]) + float(version[1])/10
     v.CFLAGS = flags + ['-fPIC', '-fvisibility=hidden']
     v.CXXFLAGS = flags + ['-fPIC', '-fvisibility=hidden']
     v.LINKFLAGS = flags + ['-lobjc']
@@ -211,6 +213,10 @@ def set_macosx_clang_options(self, flags, arch):
     v.CFLAGS_warnall = ['-std=c99', '-Wall', '-Wextra', '-pedantic', '-Winline', '-Werror']
     v.CXXFLAGS_warnall = ['-Wall', '-Wextra', '-Werror', '-Wno-sign-compare',
                           '-Woverloaded-virtual', '-Wno-invalid-offsetof']
+    if int(version) == 3 and version >= 3.6:
+        v.CXXFLAGS_warnall += ['-Wno-unused-local-typedef']
+    if version >= 6.3:
+        v.CXXFLAGS_warnall += ['-Wno-unused-local-typedef']
 
     v.CFLAGS_debug = ['-pipe', '-g', '-D_DEBUG']
     v.CXXFLAGS_debug = ['-pipe', '-g', '-D_DEBUG']
@@ -348,7 +354,7 @@ def configure(conf):
             try:
                 conf.start_msg('Setting up compiler')
                 load_compiler(conf, compiler)
-                set_macosx_compiler_options(conf, options, real_arch)
+                set_macosx_compiler_options(conf, options, real_arch, version)
             except Exception as e:
                 conf.end_msg(e, color='RED')
                 raise
