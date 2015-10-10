@@ -172,6 +172,7 @@ class Context(ctx):
 		self.node_class = node_class
 		self.node_class.__module__ = "waflib.Node"
 		self.node_class.__name__ = "Nod3"
+		self.node_class.__qualname__ = "Nod3"
 		self.node_class.ctx = self
 
 		self.root = self.node_class('', None)
