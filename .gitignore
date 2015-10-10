@@ -3,13 +3,8 @@ build/*
 nbproject/*
 *.pyc
 .lock-*
-parser.out
 BugEngine.*
-be_out.txt
-be_err.txt
 .*project
 .settings
-mak/parsetab
 .tags
-BugEngine.qtcreator
 .clang_complete

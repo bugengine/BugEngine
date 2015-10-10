@@ -55,6 +55,7 @@ namespace
                          const char *filename, int line,
                          const char* thread, const char *msg) const
         {
+            using namespace BugEngine;
 #ifdef BE_PLATFORM_WIN32
             minitl::format<1024u> message = minitl::format<1024u>("%s(%d): %s\t(%s) %s%s")
                                           | filename
@@ -66,7 +67,7 @@ namespace
             OutputDebugString(message);
 # define isatty(x) 1
 #endif
-            static const char* term = BugEngine::Environment::getEnvironment().getEnvironmentVariable("TERM");
+            static const char* term = Environment::getEnvironment().getEnvironmentVariable("TERM");
             static const char* colors[] = {
                 isatty(1) && term ? "\x1b[0m" : "",
                 isatty(1) && term ? "\x1b[01;1m" : "",
@@ -82,22 +83,22 @@ namespace
             const char* color = colors[0];
             switch(level)
             {
-            case BugEngine::logDebug:
+            case logDebug:
                 color = colors[2];
                 break;
-            case BugEngine::logInfo:
+            case logInfo:
                 color = colors[3];
                 break;
-            case BugEngine::logWarning:
+            case logWarning:
                 color = colors[4];
                 break;
-            case BugEngine::logError:
+            case logError:
                 color = colors[5];
                 break;
-            case BugEngine::logFatal:
+            case logFatal:
                 color = colors[6];
                 break;
-            case BugEngine::logSpam:
+            case logSpam:
             default:
                 break;
             }
