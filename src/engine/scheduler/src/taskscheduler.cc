@@ -99,24 +99,37 @@ TaskScheduler::~TaskScheduler()
         delete m_workers[i];
 }
 
-void TaskScheduler::queue(ITaskItem* task, int priority)
+void TaskScheduler::queue(ITaskItem* head, ITaskItem* tail, u32 count, int priority)
 {
-    m_scheduler->m_runningTasks ++;
-    if (task->m_owner->affinity == Scheduler::DontCare)
+#   if BE_ENABLE_ASSERT
+    u32 debugCount = 1;
+    ITaskItem* first = head;
+    while (first != tail && first)
     {
-        m_tasks[priority].push(task);
-        m_synchro.release(1);
+        debugCount++;
+        first = (ITaskItem*)first->next;
+    }
+    be_assert(first, "queue task does not end with specified tail");
+    be_assert(tail->next == 0, "queue task tail is not the last item");
+    be_assert(debugCount == count, "queue task list is %d elements, but %d indicated"
+                                 | debugCount | count);
+#   endif
+    m_scheduler->m_runningTasks += count;
+    if (head->m_owner->affinity == Scheduler::DontCare)
+    {
+        m_tasks[priority].pushList(head, tail);
+        m_synchro.release(count);
     }
     else
     {
-        m_mainThreadTasks[priority].push(task);
-        m_mainThreadSynchro.release(1);
+        m_mainThreadTasks[priority].pushList(head, tail);
+        m_mainThreadSynchro.release(count);
     }
 }
 
-void TaskScheduler::queue(ITaskItem* task)
+void TaskScheduler::queue(ITaskItem* head, ITaskItem* tail, u32 count)
 {
-    queue(task, task->m_owner->priority);
+    queue(head, tail, count, head->m_owner->priority);
 }
 
 ITaskItem* TaskScheduler::pop(Scheduler::Affinity affinity)

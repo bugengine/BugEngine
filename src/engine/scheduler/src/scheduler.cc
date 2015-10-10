@@ -43,14 +43,15 @@ Scheduler::~Scheduler()
     m_running = false;
 }
 
-void Scheduler::queueTask(Task::ITaskItem* task, Priority priority)
+void Scheduler::queueTasks(Task::ITaskItem* head, Task::ITaskItem* tail,
+                           u32 count, Priority priority)
 {
-    m_taskScheduler->queue(task, priority);
+    m_taskScheduler->queue(head, tail, count, priority);
 }
 
-void Scheduler::queueTask(Task::ITaskItem* task)
+void Scheduler::queueTasks(Task::ITaskItem* head, Task::ITaskItem* tail, u32 count)
 {
-    m_taskScheduler->queue(task);
+    m_taskScheduler->queue(head, tail, count);
 }
 
 void Scheduler::queueKernel(weak<Task::KernelTask> task, const minitl::array< weak<const Kernel::IStream> >& parameters)
