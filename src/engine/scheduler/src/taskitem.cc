@@ -10,7 +10,8 @@ namespace BugEngine { namespace Task
 {
 
 ITaskItem::ITaskItem(weak<ITask> owner)
-    :   m_owner(owner)
+    :   node()
+    ,   m_owner(owner)
 {
 }
 
