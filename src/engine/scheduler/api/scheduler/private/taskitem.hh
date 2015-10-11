@@ -29,8 +29,11 @@ public:
     virtual void    run(weak<Scheduler> sc) = 0;
 public:
     ITaskItem(weak<ITask> owner);
-    ITaskItem(const ITaskItem& cpy);
     virtual ~ITaskItem();
+
+private:
+    ITaskItem(const ITaskItem& other);
+    ITaskItem& operator=(const ITaskItem& other);
 };
 
 template< typename Range, typename Body >
