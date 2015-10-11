@@ -21,6 +21,10 @@ public:
             : next(0)
         {
         }
+        node(const node& /*other*/)
+            : next(0)
+        {
+        }
     };
 private:
     itaggedptr<node> m_head;
