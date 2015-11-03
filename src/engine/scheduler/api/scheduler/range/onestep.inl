@@ -30,13 +30,15 @@ inline bool range_onestep::atomic() const
 
 inline u32 range_onestep::partCount(u32 /*workerCount*/) const
 {
-    be_unimplemented();
-    return 0;
+    return 1;
 }
 
-inline range_onestep range_onestep::part(u32 /*index*/, u32 /*total*/) const
+inline range_onestep range_onestep::part(u32 index, u32 total) const
 {
-    be_unimplemented();
+    be_assert(index == 0, "onestep index can only be 0");
+    be_assert(total == 1, "onestep total can only be 1");
+    be_forceuse(index);
+    be_forceuse(total);
     return *this;
 }
 

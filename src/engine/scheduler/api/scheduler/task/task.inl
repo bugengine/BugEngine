@@ -25,13 +25,27 @@ Task< Body >::Task(istring name, color32 color, const Body& body,
 template< typename Body >
 void Task< Body >::schedule(weak<Scheduler> sc)
 {
+    be_assert(m_taskCount == m_taskCompleted,
+              "task is scheduled again without having completed the previous run: "
+              "%d/%d parts completed"
+              | m_taskCompleted | m_taskCount);
     m_taskCount = 0;
     m_taskCompleted = 0;
 
     typedef typename Body::Range Range;
     Range r = body.prepare();
-    void* item = sc->allocateTask< TaskItem<Range, Body> >();
-    sc->queueTask(new(item) TaskItem<Range, Body>(this, r, body));
+    u32 splitCount = r.partCount(sc->workerCount());
+    m_taskCount += splitCount;
+    TaskItem<Range, Body>* head = 0, *tail = 0;
+    for (u32 i = 0; i < splitCount; ++i)
+    {
+        void* mem = sc->allocateTask< TaskItem<Range, Body> >();
+        TaskItem<Range, Body>* item = new (mem) TaskItem<Range, Body>(this, r, i, splitCount);
+        if (!tail) tail = item;
+        item->next = head;
+        head = item;
+    }
+    sc->queueTasks(head, tail, splitCount);
 }
 
 }}

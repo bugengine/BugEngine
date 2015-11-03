@@ -45,8 +45,8 @@ public:
     TaskScheduler(weak<Scheduler> scheduler);
     ~TaskScheduler();
 
-    void queue(ITaskItem* task);
-    void queue(ITaskItem* task, int priority);
+    void queue(ITaskItem* head, ITaskItem* tail, u32 count);
+    void queue(ITaskItem* head, ITaskItem* tail, u32 count, int priority);
 
     void mainThreadJoin();
     void notifyEnd();

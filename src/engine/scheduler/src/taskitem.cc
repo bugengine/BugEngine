@@ -14,11 +14,6 @@ ITaskItem::ITaskItem(weak<ITask> owner)
 {
 }
 
-ITaskItem::ITaskItem(const ITaskItem& cpy)
-    :   m_owner(cpy.m_owner)
-{
-}
-
 ITaskItem::~ITaskItem()
 {
 }

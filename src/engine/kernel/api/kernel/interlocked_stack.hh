@@ -17,6 +17,14 @@ public:
     struct node
     {
         node* next;
+        node()
+            : next(0)
+        {
+        }
+        node(const node& /*other*/)
+            : next(0)
+        {
+        }
     };
 private:
     itaggedptr<node> m_head;
@@ -25,6 +33,7 @@ public:
     ~istack();
 
     void    push(T* t);
+    void    pushList(T* h, T* t);
     T*      pop();
 };
 
@@ -48,6 +57,17 @@ void istack<T>::push(T* t)
         ticket = m_head.getTicket();
         t->next = static_cast<T*>((node*)m_head);
     } while (!m_head.setConditional(t, ticket));
+}
+
+template< typename T >
+void istack<T>::pushList(T* h, T* t)
+{
+    typename itaggedptr<node>::ticket_t ticket;
+    do
+    {
+        ticket = m_head.getTicket();
+        t->next = static_cast<T*>((node*)m_head);
+    } while (!m_head.setConditional(h, ticket));
 }
 
 template< typename T >
