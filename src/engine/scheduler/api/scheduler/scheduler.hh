@@ -70,8 +70,8 @@ private:
 private:
     void notifyEnd();
 private:
-    void queueTask(Task::ITaskItem* task, Priority priority);
-    void queueTask(Task::ITaskItem* task);
+    void queueTasks(Task::ITaskItem* head, Task::ITaskItem* tail, u32 count, Priority priority);
+    void queueTasks(Task::ITaskItem* head, Task::ITaskItem* tail, u32 count);
     void queueKernel(weak<Task::KernelTask> task, const minitl::array< weak<const Kernel::IStream> >& parameters);
     void* allocate(size_t size);
     void  release(void* t, size_t size);
