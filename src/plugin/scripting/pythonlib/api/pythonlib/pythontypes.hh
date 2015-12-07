@@ -19,6 +19,7 @@ typedef Py_ssize_t Py_hash_t;
 struct PyThreadState;
 struct PyObject;
 struct PyTypeObject;
+struct PyCodeObject;
 struct PyMethodDef;
 struct PyModuleDef;
 struct PyMemberDef;
@@ -39,6 +40,8 @@ typedef PyObject* (*Py_InitModule4_64Type)(const char* name, PyMethodDef* method
 
 typedef PyObject* (*PyModule_Create2Type)(PyModuleDef* module, int apiver);
 typedef int (*PyModule_AddObjectType)(PyObject* module, const char* name, PyObject* value);
+typedef PyObject* (*PyModule_GetDictType)(PyObject* module);
+typedef PyObject* (*PyImport_AddModuleType)(const char* module);
 typedef int (*PyImport_AppendInittab2Type)(const char* name, void(*)(void));
 typedef int (*PyImport_AppendInittab3Type)(const char* name, PyObject*(*)(void));
 
@@ -49,6 +52,15 @@ typedef void (*PyEval_ReleaseThreadType)(PyThreadState* tstate);
 typedef void (*PyEval_ReleaseLockType)();
 
 typedef int (*PyRun_SimpleStringType)(const char* command);
+typedef PyCodeObject* (*Py_CompileStringFlagsType)(const char* str, const char* filename,
+                                                   int start, void* flags);
+typedef PyCodeObject* (*Py_CompileStringExFlagsType)(const char* str, const char* filename,
+                                                     int start, void* flags, int optimize);
+typedef PyObject* (*PyEval_EvalCodeExType)(PyCodeObject *co, PyObject *globals, PyObject *locals,
+                                           PyObject **args, int argcount,
+                                           PyObject **kws, int kwcount,
+                                           PyObject **defs, int defcount,
+                                           PyObject *closure);
 
 typedef PyObject* (*PyCFunction)(PyObject* self, PyObject* args);
 
@@ -145,6 +157,7 @@ typedef PyObject* (*PyFloat_FromDoubleType)(double value);
 typedef double (*PyFloat_AsDoubleType)(PyObject* doubleobject);
 typedef PyObject* _Py_NoneStructType;
 
+typedef void (*PyErr_PrintType)();
 typedef void (*PyErr_SetStringType)(PyTypeObject* errorType, const char* message);
 typedef PyObject* (*PyErr_FormatType)(PyTypeObject* errorType, const char* format, ...);
 typedef int (*PyErr_BadArgumentType)();
@@ -163,6 +176,13 @@ struct PyObject
 {
     minitl::size_type   py_refcount;
     PyTypeObject*       py_type;
+};
+
+enum Py_InputStart
+{
+    Py_single_input = 256,
+    Py_file_input = 257,
+    Py_eval_input = 258
 };
 
 struct PyVarObject

@@ -69,7 +69,21 @@ PythonLibrary::PythonLibrary(const char* pythonLibraryName)
             be_get_func_opt(Py_InitModule4_64);
             be_get_func_name(PyImport_AppendInittab, PyImport_AppendInittab2);
         }
+        if (m_version >= 32)
+        {
+            m_Py_CompileStringFlags = 0;
+            be_get_func(Py_CompileStringExFlags);
+        }
+        else
+        {
+            m_Py_CompileStringExFlags = 0;
+            be_get_func(Py_CompileStringFlags);
+        }
+        be_get_func(PyEval_EvalCodeEx);
+
         be_get_func(PyModule_AddObject);
+        be_get_func(PyModule_GetDict);
+        be_get_func(PyImport_AddModule);
         be_get_func(PyEval_InitThreads);
         be_get_func(PyEval_SaveThread);
         be_get_func(PyEval_AcquireThread);
@@ -146,6 +160,7 @@ PythonLibrary::PythonLibrary(const char* pythonLibraryName)
         be_get_func(PyLong_FromUnsignedLongLong);
         be_get_func(PyFloat_FromDouble);
         be_get_func(PyFloat_AsDouble);
+        be_get_func(PyErr_Print);
         be_get_func(PyErr_SetString);
         be_get_func(PyErr_Format);
         be_get_func(PyErr_BadArgument);

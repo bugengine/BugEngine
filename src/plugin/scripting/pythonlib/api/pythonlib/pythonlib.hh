@@ -68,10 +68,15 @@ private: // friend ThreadLock
     PyEval_ReleaseLockType                  m_PyEval_ReleaseLock;
 public:
     PyRun_SimpleStringType                  m_PyRun_SimpleString;
+    Py_CompileStringFlagsType               m_Py_CompileStringFlags;
+    Py_CompileStringExFlagsType             m_Py_CompileStringExFlags;
+    PyEval_EvalCodeExType                   m_PyEval_EvalCodeEx;
     Py_InitModule4Type                      m_Py_InitModule4;
     Py_InitModule4_64Type                   m_Py_InitModule4_64;
     PyModule_Create2Type                    m_PyModule_Create2;
     PyModule_AddObjectType                  m_PyModule_AddObject;
+    PyModule_GetDictType                    m_PyModule_GetDict;
+    PyImport_AddModuleType                  m_PyImport_AddModule;
     PyImport_AppendInittab2Type             m_PyImport_AppendInittab2;
     PyImport_AppendInittab3Type             m_PyImport_AppendInittab3;
     _Py_NoneStructType                      m__Py_NoneStruct;
@@ -132,6 +137,7 @@ public:
     PyFloat_FromDoubleType                  m_PyFloat_FromDouble;
     PyFloat_AsDoubleType                    m_PyFloat_AsDouble;
 
+    PyErr_PrintType                         m_PyErr_Print;
     PyErr_SetStringType                     m_PyErr_SetString;
     PyErr_FormatType                        m_PyErr_Format;
     PyErr_BadArgumentType                   m_PyErr_BadArgument;
