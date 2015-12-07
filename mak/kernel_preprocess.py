@@ -36,7 +36,7 @@ def split_type(name):
         raise Exception('invalid kernel input type: %s' % name)
     template_name = name[0:template_begin].strip()
     type_name = name[template_begin+1:-1].strip()
-    if template_name not in ['in', 'out', 'inout']:
+    if template_name not in ['segment']:
         raise Exception('invalid kernel input type: %s' % name)
     return (template_name, type_name)
 
