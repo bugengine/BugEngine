@@ -10,6 +10,7 @@ except ImportError:
     except ImportError:
         from io import StringIO
 
+
 option_decl = OptionParser()
 option_decl.set_usage('kernel.py input output')
 option_decl.add_option("-d", dest="macro_file", action="append", help="Add the content of <macrofile> to the macros, one macro per line")
@@ -35,7 +36,7 @@ def split_type(name):
         raise Exception('invalid kernel input type: %s' % name)
     template_name = name[0:template_begin].strip()
     type_name = name[template_begin+1:-1].strip()
-    if template_name not in ['in', 'out', 'inout']:
+    if template_name not in ['segment']:
         raise Exception('invalid kernel input type: %s' % name)
     return (template_name, type_name)
 
@@ -136,19 +137,19 @@ if __name__ == '__main__':
                 'includes': '\n'.join(result.includes),
                 'argument_count': len(args),
                 'argument_field':
-                    '\n    '.join(('BugEngine::Kernel::Product< %s > const m_%s;' % (arg_type, arg_name)
+                    '\n    '.join(('BugEngine::Kernel::Product< minitl::remove_const< %s >::type > const m_%s;' % (arg_type, arg_name)
                                    for arg_name, arg_type, out_type in args)),
                 'callbacks':
                     '\n    '.join(('BugEngine::Task::ITask::CallbackConnection const m_%sChain;' % (arg_name)
                                    for arg_name, arg_type, out_type in args)),
                 'argument_result_assign':
                     '\n        '.join(('result[%d] = m_%s.stream;' % (i, arg[0])
-                                   for i, arg in enumerate(args) if arg[2] in ('in', 'inout'))),
+                                   for i, arg in enumerate(args) if arg[2] not in ('product'))),
                 'argument_outs':
-                    '\n    '.join(('BugEngine::Kernel::Product< %s > const %s;' % (arg_type, arg_name)
+                    '\n    '.join(('BugEngine::Kernel::Product< minitl::remove_const< %s >::type > const %s;' % (arg_type, arg_name)
                                    for arg_name, arg_type, out_type in args)),
                 'argument_params':
-                    ', '.join(('const BugEngine::Kernel::Product< %s >& %s' % (arg_type, arg_name)
+                    ', '.join(('const BugEngine::Kernel::Product< minitl::remove_const< %s >::type >& %s' % (arg_type, arg_name)
                                    for arg_name, arg_type, out_type in args)),
                 'argument_assign':
                     '\n        ,   '.join(('m_%s(%s)' % (arg_name, arg_name)
@@ -158,7 +159,7 @@ if __name__ == '__main__':
                                            for arg_name, arg_type, out_type in args)),
                 'argument_out_assign':
                     '\n        ,   '.join(('%s(%s.stream, m_kernelTask)' % (arg_name, arg_name)
-                                           for arg_name, arg_type, out_type in args if out_type in ('in', 'inout'))),
+                                           for arg_name, arg_type, out_type in args if out_type not in ('product'))),
             }
             with open(arguments[1], 'w') as out:
                 out.write(template % params)

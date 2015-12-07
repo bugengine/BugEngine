@@ -5,11 +5,11 @@
 #include    <cstdio>
 
 void kmain(const u32 /*index*/, const u32 /*total*/,
-           in<BugEngine::A> input,
-           inout<BugEngine::B> output,
-           inout<BugEngine::C> output2,
-           inout<BugEngine::D> output3,
-           inout<BugEngine::E> output4)
+           segment<const BugEngine::A> input,
+           segment<BugEngine::B> output,
+           segment<BugEngine::C> output2,
+           segment<BugEngine::D> output3,
+           segment<BugEngine::E> output4)
 {
     while(input)
     {

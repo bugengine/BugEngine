@@ -54,7 +54,8 @@ void Scheduler::queueTasks(Task::ITaskItem* head, Task::ITaskItem* tail, u32 cou
     m_taskScheduler->queue(head, tail, count);
 }
 
-void Scheduler::queueKernel(weak<Task::KernelTask> task, const minitl::array< weak<const Kernel::IStream> >& parameters)
+void Scheduler::queueKernel(weak<Task::KernelTask> task,
+                            const minitl::array< weak<const Kernel::IStream> >& parameters)
 {
     be_assert(m_kernelSchedulers.size() > 0, "no kernel scheduler installed");
     u32 paramCount = parameters.size();
@@ -94,7 +95,9 @@ void Scheduler::addKernelScheduler(weak<Kernel::IKernelScheduler> scheduler)
 
 void Scheduler::removeKernelScheduler(weak<Kernel::IKernelScheduler> scheduler)
 {
-    for (minitl::vector< weak<Kernel::IKernelScheduler> >::iterator it = m_kernelSchedulers.begin(); it != m_kernelSchedulers.end(); ++it)
+    for (minitl::vector< weak<Kernel::IKernelScheduler> >::iterator it = m_kernelSchedulers.begin();
+         it != m_kernelSchedulers.end();
+         ++it)
     {
         if (*it == scheduler)
         {
