@@ -682,6 +682,7 @@ def make_bld_node_common(self, node, path, name):
         if out_dir[0] == '.':
             out_dir = out_dir[out_dir.find(os.path.sep)+1:]
             node = node.make_node(out_dir)
+            node = node.make_node(name)
         else:
             node = self.bld.bldnode.make_node(out_dir).make_node(name)
     else:
