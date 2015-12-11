@@ -170,8 +170,8 @@ def module(bld, name, module_path, depends,
     else:
         plugin_name = 'game'
 
-    compile_extensions = ['cxx', 'cpp', 'cc', 'c', 'rc', 'm', 'mm']
-    preprocess_extensions = ['yy', 'll', 'plist']
+    compile_extensions = ['cxx', 'cpp', 'cc', 'c', 'rc', 'm', 'mm', 'plist']
+    preprocess_extensions = ['yy', 'll']
     try:
         sources = source_node.ant_glob(['src/**/*.%s'%(ext) for ext in compile_extensions])
     except OSError:
@@ -227,7 +227,7 @@ def module(bld, name, module_path, depends,
 
     if build and not bld.env.PROJECTS:
         preprocess = bld(
-            env=bld.env.derive(),
+            env=bld.common_env.derive(),
             target = name + '.preprocess',
             features= ['preprocess'],
             pchstop = pchstop,
@@ -673,23 +673,38 @@ def gather_extra_source(self):
         self.source += getattr(preprocess, 'out_sources', [])
 
 @taskgen_method
-def make_bld_node(self, category, path, name):
+def make_bld_node_common(self, node, path, name):
     if not path:
-        node = self.bld.bldnode.make_node(category)
         node = node.make_node(self.target)
         node = node.make_node(name)
     elif path.is_child_of(self.bld.bldnode):
         out_dir = path.path_from(self.bld.bldnode)
         if out_dir[0] == '.':
-            out_dir = os.path.join(category, out_dir[out_dir.find(os.path.sep)+1:])
-        node = self.bld.bldnode.make_node(out_dir).make_node(name)
+            out_dir = out_dir[out_dir.find(os.path.sep)+1:]
+            node = node.make_node(out_dir)
+        else:
+            node = self.bld.bldnode.make_node(out_dir).make_node(name)
     else:
-        node = self.bld.bldnode.make_node(category)
         node = node.make_node(self.target)
         node = node.make_node(path.path_from(self.path))
         node = node.make_node(name)
     node.parent.mkdir()
     return node
+
+
+@taskgen_method
+def make_bld_node(self, category, path, name):
+    try:
+        node = self.bld.bldnode.make_node(self.bld.bugengine_variant).make_node(category)
+    except AttributeError:
+        node = self.bld.bldnode.make_node(category)
+    return self.make_bld_node_common(node, path, name)
+
+
+@taskgen_method
+def make_preprocess_node(self, category, path, name):
+    node = self.bld.bldnode.make_node(category)
+    return self.make_bld_node_common(node, path, name)
 
 
 @taskgen_method
@@ -780,7 +795,7 @@ def create_compiled_task(self, name, node):
 def create_kernel_namespace(self):
     kernels = getattr(self, 'kernels', [])
     if kernels:
-        out = self.make_bld_node('.src', None, 'namespace.cc')
+        out = self.make_preprocess_node('.src', None, 'namespace.cc')
         self.create_task('namespace', [], [out])
         try:
             self.out_sources.append(out)

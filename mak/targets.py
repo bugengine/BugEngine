@@ -10,10 +10,10 @@ def add_build_command(toolchain, optimisation):
         class Command(command):
             optim = optimisation
             cmd = name + ':' + toolchain + ':' + optimisation
-            variant = toolchain
+            bugengine_variant = toolchain
 
             def get_variant_dir(self):
-                return os.path.join(self.out_dir, self.variant, self.optim)
+                return os.path.join(self.out_dir, self.optim)
             variant_dir = property(get_variant_dir, None)
 
 @conf
