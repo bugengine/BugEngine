@@ -35,12 +35,12 @@ def big_bison(self, node):
 
     outs = []
     if node.name.endswith('.yc') or node.name.endswith('.yy'):
-        out_node = self.make_bld_node('.src', node.parent, node.name[:-2]+'cc')
+        out_node = self.make_preprocess_node('.src', node.parent, node.name[:-2]+'cc')
         outs.append(out_node)
         if has_h:
             outs.append(out_node.change_ext('.hh'))
     else:
-        out_node = self.make_bld_node('.src', node.parent, node.name[:-1]+'c')
+        out_node = self.make_preprocess_node('.src', node.parent, node.name[:-1]+'c')
         outs.append(out_node)
         if has_h:
             outs.append(out_node.change_ext('.h'))
