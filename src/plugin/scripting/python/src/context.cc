@@ -27,55 +27,30 @@ void Context::unload(Resource::Resource& /*handle*/)
 void Context::runBuffer(weak<const PythonScript> script, Resource::Resource& /*resource*/,
                         const minitl::Allocator::Block<u8>& block)
 {
-    PythonLibrary::ThreadLock lock(m_library, m_pythonState);
-    PyCodeObject* code = 0;
-    if (m_library->m_Py_CompileStringExFlags)
-    {
-        code = (*m_library->m_Py_CompileStringExFlags)((const char*)block.begin(),
-                                                       script->getScriptName().str().name,
-                                                       Py_file_input, NULL,
-                                                       -1);
-    }
-    else
-    {
-        code = (*m_library->m_Py_CompileStringFlags)((const char*)block.begin(),
-                                                     script->getScriptName().str().name,
-                                                     Py_file_input, NULL);
-    }
-    if (code)
-    {
-        PyObject* m = (*m_library->m_PyImport_AddModule)("__main__");
-        PyObject* d = (*m_library->m_PyModule_GetDict)(m);
-        PyObject* result = (*m_library->m_PyEval_EvalCodeEx)(code, d, d, NULL, 0,
-                                                             NULL, 0, NULL, 0, NULL);
-        if (!result)
-        {
-            (*m_library->m_PyErr_Print)();
-        }
-        else
-        {
-            Py_DECREF(result);
-        }
-        Py_DECREF(code);
-    }
+    runCode(reinterpret_cast<const char*>(block.begin()), script->getScriptName().str().name);
 }
 
 void Context::reloadBuffer(weak<const PythonScript> script, Resource::Resource& /*resource*/,
                            const minitl::Allocator::Block<u8>& block)
 {
+    runCode(reinterpret_cast<const char*>(block.begin()), script->getScriptName().str().name);
+}
+
+void Context::runCode(const char *buffer, const ifilename &filename)
+{
     PythonLibrary::ThreadLock lock(m_library, m_pythonState);
     PyCodeObject* code = 0;
     if (m_library->m_Py_CompileStringExFlags)
     {
-        code = (*m_library->m_Py_CompileStringExFlags)((const char*)block.begin(),
-                                                       script->getScriptName().str().name,
+        code = (*m_library->m_Py_CompileStringExFlags)(buffer,
+                                                       filename.str().name,
                                                        Py_file_input, NULL,
                                                        -1);
     }
     else
     {
-        code = (*m_library->m_Py_CompileStringFlags)((const char*)block.begin(),
-                                                     script->getScriptName().str().name,
+        code = (*m_library->m_Py_CompileStringFlags)(buffer,
+                                                     filename.str().name,
                                                      Py_file_input, NULL);
     }
     if (code)
@@ -94,7 +69,10 @@ void Context::reloadBuffer(weak<const PythonScript> script, Resource::Resource& 
         }
         Py_DECREF(code);
     }
-    Py_DECREF(code);
+    else
+    {
+        (*m_library->m_PyErr_Print)();
+    }
 }
 
 }}

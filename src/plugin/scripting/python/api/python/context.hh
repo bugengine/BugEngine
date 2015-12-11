@@ -30,6 +30,8 @@ public:
                               const minitl::Allocator::Block<u8>& buffer) override;
     static void pythonInitialise();
 private:
+    void runCode(const char* buffer, const ifilename& filename);
+private:
     ref<PythonLibrary>  m_library;
     PyThreadState*      m_pythonState;
 };

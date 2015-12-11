@@ -26,4 +26,6 @@ def help(klass):
         print(' ', object.name)
         object = object.next
 
-help(BugEngine.RTTI.Class.ClassType.metaclass)
+if __name__ == '__main__':
+    help(BugEngine.RTTI.Class.ClassType.metaclass)
+
