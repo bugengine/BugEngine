@@ -14,7 +14,8 @@ __declspec(dllexport) int be_test()
 #endif
 int main(int argc, char *argv[])
 {
-    return (long int)%(function)s;
+    (void)%(function)s;
+    return 0;
 }
 """
 
