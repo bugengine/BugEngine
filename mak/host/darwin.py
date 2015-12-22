@@ -9,7 +9,6 @@ from waflib import Options, Utils
 def options(opt):
     try:
         p = Utils.subprocess.Popen(['xcode-select', '--print-path'], stdin=Utils.subprocess.PIPE, stdout=Utils.subprocess.PIPE, stderr=Utils.subprocess.PIPE)
-        p.stdin.write('\n'.encode())
         out = p.communicate()[0]
     except:
         out = '/Developper,/Applications/Xcode.app/Contents/Developer'

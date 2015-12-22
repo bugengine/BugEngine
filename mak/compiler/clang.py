@@ -240,7 +240,6 @@ def load_clang(conf, directory, target, flags):
     cmd = conf.env.CC + flags + ['-x', 'c++', '-print-search-dirs']
     try:
         p = Utils.subprocess.Popen(cmd, stdin=Utils.subprocess.PIPE, stdout=Utils.subprocess.PIPE, stderr=Utils.subprocess.PIPE)
-        p.stdin.write('\n'.encode())
         out = p.communicate()[0]
     except Exception as e:
         print('could not retrieve system defines: %s' % str(e))

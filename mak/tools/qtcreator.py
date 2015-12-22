@@ -533,6 +533,8 @@ class QtCreator(Build.BuildContext):
             else:
                 self.platforms.append((platform.PE_Profile_Id, platform))
 
+        if not os.path.exists(HOME_DIRECTORY):
+            os.makedirs(HOME_DIRECTORY)
         with XmlDocument(open(os.path.join(HOME_DIRECTORY, 'profiles.xml'), 'w'), 'UTF-8', [('DOCTYPE', 'QtCreatorProfiles')]) as document:
             with XmlNode(document, 'qtcreator') as creator:
                 profile_index = 0
