@@ -1,6 +1,15 @@
-import platform
+import os
 from waflib.TaskGen import feature, before_method, after_method
 from waflib.Configure import conf
+
+def os_platform():
+    true_platform = os.environ['PROCESSOR_ARCHITECTURE']
+    try:
+            true_platform = os.environ["PROCESSOR_ARCHITEW6432"]
+    except KeyError:
+            pass
+            #true_platform not assigned to if this does not exist
+    return true_platform
 
 def options(opt):
     # The options for MSVC are not used
@@ -23,7 +32,7 @@ def load_msvc(self, version, target_arch):
     self.env.MSVC_TARGETS = [target_arch]
     self.env.COMPILER_NAME='msvc'
     self.env.COMPILER_TARGET='windows-win32-msvc-%s'%version
-    if platform.machine().endswith('64'):
+    if os_platform().endswith('64'):
         self.find_program('cdb64', var='CDB', mandatory=False)
     else:
         self.find_program('cdb', var='CDB', mandatory=False)
