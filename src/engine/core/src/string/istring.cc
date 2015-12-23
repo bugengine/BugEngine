@@ -436,10 +436,11 @@ void igenericnamespace::str(char* buffer, char separator, u32 size) const
 
 void igenericnamespace::grow(u16 newCapacity)
 {
-    void* newBuffer = Arena::string().alloc(newCapacity * sizeof(istring));
-    istring* newStrings = new (newBuffer) istring[newCapacity];
+    istring* newStrings = (istring*)Arena::string().alloc(newCapacity * sizeof(istring));
     for (u16 i = 0; i < m_size; ++i)
-        newStrings[i] = m_namespace[i];
+		new (&newStrings[i]) istring(m_namespace[i]);
+	for (u16 i = m_size; i < newCapacity; ++i)
+		new (&newStrings[i]) istring;
     for (u16 i = 0; i < m_size; ++i)
     {
         m_namespace[m_size-i-1].~istring();
