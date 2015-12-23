@@ -67,7 +67,7 @@ PyObject* PyBoundMethod::create(raw<const RTTI::Method> method, PyBugObject* val
 {
     PyBoundMethod* result = reinterpret_cast<PyBoundMethod*>(s_pyType.tp_alloc(&s_pyType, 0));
     result->method = method;
-    result->value = reinterpret_cast<PyObject*>(value);
+    result->value = static_cast<PyObject*>(value);
     Py_INCREF(result->value);
     return reinterpret_cast<PyObject*>(result);
 }

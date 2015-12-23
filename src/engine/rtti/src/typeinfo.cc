@@ -91,11 +91,11 @@ u32 Type::distance(const Type& other) const
 {
     u32 result = 0;
     if (other.indirection > 0 && access < other.access)
-        return MaxTypeDistance;
+        return static_cast<u32>(MaxTypeDistance);
     else
         result += access - other.access;
     if (indirection < other.indirection)
-        return MaxTypeDistance;
+        return static_cast<u32>(MaxTypeDistance);
     else
         result += indirection - other.indirection;
     return result + metaclass->distance(other.metaclass);

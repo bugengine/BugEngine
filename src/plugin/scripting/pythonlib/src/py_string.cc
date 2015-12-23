@@ -162,7 +162,7 @@ template< typename T >
 int PyBugString<T>::init(PyObject* self, PyObject* args, PyObject* kwds)
 {
     be_forceuse(kwds);
-    PyBugObject* self_ = reinterpret_cast<PyBugObject*>(self);
+    PyBugObject* self_ = static_cast<PyBugObject*>(self);
     Py_ssize_t argCount = s_library->m_PyTuple_Size(args);
     if (argCount == 0)
     {
@@ -173,7 +173,7 @@ int PyBugString<T>::init(PyObject* self, PyObject* args, PyObject* kwds)
         PyObject* arg = s_library->m_PyTuple_GetItem(args, 0);
         if (arg->py_type == &s_pyType)
         {
-            self_->value = reinterpret_cast<PyBugString*>(arg)->value;
+            self_->value = static_cast<PyBugString*>(arg)->value;
         }
         else if (arg->py_type->tp_flags & Py_TPFLAGS_STRING_SUBCLASS)
         {
@@ -210,7 +210,7 @@ int PyBugString<T>::init(PyObject* self, PyObject* args, PyObject* kwds)
 template< typename T >
 PyObject* PyBugString<T>::repr(PyObject *self)
 {
-    PyBugObject* self_ = reinterpret_cast<PyBugObject*>(self);
+    PyBugObject* self_ = static_cast<PyBugObject*>(self);
     const RTTI::Value& v = self_->value;
     typedef PyObject* (*toStringType)(const char* format, ...);
     toStringType toString = s_library->getVersion() >= 30
@@ -223,7 +223,7 @@ PyObject* PyBugString<T>::repr(PyObject *self)
 template< typename T >
 PyObject* PyBugString<T>::str(PyObject *self)
 {
-    PyBugObject* self_ = reinterpret_cast<PyBugObject*>(self);
+    PyBugObject* self_ = static_cast<PyBugObject*>(self);
     const RTTI::Value& v = self_->value;
     typedef PyObject* (*toStringType)(const char* format);
     toStringType toString = s_library->getVersion() >= 30
@@ -247,7 +247,7 @@ bool nonZeroString<istring>(const istring& t)
 template< typename T >
 int PyBugString<T>::nonZero(PyObject *self)
 {
-    PyBugObject* self_ = reinterpret_cast<PyBugObject*>(self);
+    PyBugObject* self_ = static_cast<PyBugObject*>(self);
     const RTTI::Type t = self_->value.type();
     be_assert(t.metaclass->type() == RTTI::ClassType_String,
               "PyBugString expected string value");

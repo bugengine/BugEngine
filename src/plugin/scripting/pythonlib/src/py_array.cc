@@ -153,7 +153,7 @@ PyObject* PyBugArray::create(PyObject* owner, const RTTI::Value& value)
 
 PyObject* PyBugArray::repr(PyObject *self)
 {
-    PyBugObject* self_ = reinterpret_cast<PyBugObject*>(self);
+    PyBugObject* self_ = static_cast<PyBugObject*>(self);
     const RTTI::Value& v = self_->value;
 
     const char* constness = (v.type().constness == RTTI::Type::Const) ? "const " : "mutable ";
@@ -204,7 +204,7 @@ PyObject* PyBugArray::repr(PyObject *self)
 
 int PyBugArray::nonZero(PyObject *self)
 {
-    PyBugArray* self_ = reinterpret_cast<PyBugArray*>(self);
+    PyBugArray* self_ = static_cast<PyBugArray*>(self);
     const RTTI::Type t = self_->value.type();
     be_assert(t.metaclass->type() == RTTI::ClassType_Array,
               "PyBugArray expected array value");

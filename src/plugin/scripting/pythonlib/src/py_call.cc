@@ -27,7 +27,7 @@ static RTTI::Type getTypeFromPyObject(PyObject* object)
 {
     if (object->py_type == &PyBugObject::s_pyType)
     {
-        PyBugObject* o = reinterpret_cast<PyBugObject*>(object);
+        PyBugObject* o = static_cast<PyBugObject*>(object);
         return o->value.type();
     }
     else
@@ -110,7 +110,7 @@ static u32 distance(raw<const RTTI::Method::Overload> overload, ArgInfo* args, u
         result += argDistance;
         if (argDistance == RTTI::Type::MaxTypeDistance)
         {
-            return RTTI::Type::MaxTypeDistance;
+            return static_cast<u32>(RTTI::Type::MaxTypeDistance);
         }
         param = param->next;
     }
@@ -123,12 +123,12 @@ static u32 distance(raw<const RTTI::Method::Overload> overload, ArgInfo* args, u
             result += argDistance;
             if (argDistance == RTTI::Type::MaxTypeDistance)
             {
-                return RTTI::Type::MaxTypeDistance;
+                return static_cast<u32>(RTTI::Type::MaxTypeDistance);
             }
         }
         else
         {
-            return RTTI::Type::MaxTypeDistance;
+            return static_cast<u32>(RTTI::Type::MaxTypeDistance);
         }
     }
     return result;
@@ -136,8 +136,8 @@ static u32 distance(raw<const RTTI::Method::Overload> overload, ArgInfo* args, u
 
 PyObject* call(raw<const RTTI::Method> method, PyObject* self, PyObject* args, PyObject* kwargs)
 {
-    const u32 unnamedArgCount = s_library->m_PyTuple_Size(args);
-    const u32 namedArgCount = kwargs ? s_library->m_PyDict_Size(kwargs) : 0;
+    const u32 unnamedArgCount = be_checked_numcast<u32>(s_library->m_PyTuple_Size(args));
+    const u32 namedArgCount = kwargs ? be_checked_numcast<u32>(s_library->m_PyDict_Size(kwargs)) : 0;
     const u32 argCount = unnamedArgCount + namedArgCount + (self ? 1 : 0);
     ArgInfo* argInfos = (ArgInfo*)malloca(argCount * sizeof(ArgInfo));
     u32 i = 0;
@@ -181,7 +181,7 @@ PyObject* call(raw<const RTTI::Method> method, PyObject* self, PyObject* args, P
         }
     }
     raw<const RTTI::Method::Overload> o = method->overloads;
-    u32 bestDistance = RTTI::Type::MaxTypeDistance;
+    u32 bestDistance = static_cast<u32>(RTTI::Type::MaxTypeDistance);
     raw<const RTTI::Method::Overload> bestOverload = { 0 };
     while (o)
     {

@@ -162,7 +162,7 @@ template< typename T >
 int PyBugNumber<T>::init(PyObject* self, PyObject* args, PyObject* kwds)
 {
     be_forceuse(kwds);
-    PyBugObject* self_ = reinterpret_cast<PyBugObject*>(self);
+    PyBugObject* self_ = static_cast<PyBugObject*>(self);
     Py_ssize_t argCount = s_library->m_PyTuple_Size(args);
     if (argCount == 0)
     {
@@ -173,7 +173,7 @@ int PyBugNumber<T>::init(PyObject* self, PyObject* args, PyObject* kwds)
         PyObject* arg = s_library->m_PyTuple_GetItem(args, 0);
         if (arg->py_type == &s_pyType)
         {
-            self_->value = reinterpret_cast<PyBugNumber*>(arg)->value;
+            self_->value = static_cast<PyBugNumber*>(arg)->value;
         }
         else if (arg->py_type->tp_flags & Py_TPFLAGS_INT_SUBCLASS)
         {
@@ -199,7 +199,7 @@ int PyBugNumber<T>::init(PyObject* self, PyObject* args, PyObject* kwds)
 template< typename T >
 PyObject* PyBugNumber<T>::repr(PyObject *self)
 {
-    PyBugObject* self_ = reinterpret_cast<PyBugObject*>(self);
+    PyBugObject* self_ = static_cast<PyBugObject*>(self);
     const RTTI::Value& v = self_->value;
     minitl::format<1024u> format = minitl::format<1024u>("[%s %d]")
             |   v.type().name().c_str()
@@ -217,7 +217,7 @@ PyObject* PyBugNumber<T>::repr(PyObject *self)
 template< typename T >
 PyObject* PyBugNumber<T>::toint(PyObject *self)
 {
-    PyBugObject* self_ = reinterpret_cast<PyBugObject*>(self);
+    PyBugObject* self_ = static_cast<PyBugObject*>(self);
     long value = (long)self_->value.as<const T>();
     return s_library->m_PyInt_FromLong(value);
 }
@@ -225,7 +225,7 @@ PyObject* PyBugNumber<T>::toint(PyObject *self)
 template< typename T >
 PyObject* PyBugNumber<T>::tolong(PyObject *self)
 {
-    PyBugObject* self_ = reinterpret_cast<PyBugObject*>(self);
+    PyBugObject* self_ = static_cast<PyBugObject*>(self);
     unsigned long long value = (unsigned long long)self_->value.as<const T>();
     return s_library->m_PyLong_FromUnsignedLongLong(value);
 }
@@ -233,7 +233,7 @@ PyObject* PyBugNumber<T>::tolong(PyObject *self)
 template< typename T >
 PyObject* PyBugNumber<T>::tofloat(PyObject *self)
 {
-    PyBugObject* self_ = reinterpret_cast<PyBugObject*>(self);
+    PyBugObject* self_ = static_cast<PyBugObject*>(self);
     double value = (double)self_->value.as<const T>();
     return s_library->m_PyFloat_FromDouble(value);
 }
@@ -241,7 +241,7 @@ PyObject* PyBugNumber<T>::tofloat(PyObject *self)
 template< typename T >
 PyObject* PyBugNumber<T>::str(PyObject *self)
 {
-    PyBugObject* self_ = reinterpret_cast<PyBugObject*>(self);
+    PyBugObject* self_ = static_cast<PyBugObject*>(self);
     const RTTI::Value& v = self_->value;
     PyObject* (*tostring)(const char* format, ...) = s_library->getVersion() >= 30
             ?   s_library->m_PyUnicode_FromFormat
@@ -252,7 +252,7 @@ PyObject* PyBugNumber<T>::str(PyObject *self)
 template< typename T >
 int PyBugNumber<T>::nonZero(PyObject *self)
 {
-    PyBugNumber* self_ = reinterpret_cast<PyBugNumber*>(self);
+    PyBugNumber* self_ = static_cast<PyBugNumber*>(self);
     const RTTI::Type t = self_->value.type();
     be_assert(t.metaclass->type() == RTTI::ClassType_Number,
               "PyBugNumber expected number value");
