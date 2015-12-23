@@ -245,7 +245,10 @@ def init_log():
 	log = logging.getLogger('waflib')
 	log.handlers = []
 	log.filters = []
-	hdlr = logging.StreamHandler(stream=sys.stdout)
+	try:
+		hdlr = logging.StreamHandler(stream=sys.stdout)
+	except TypeError:
+		hdlr = logging.StreamHandler()
 	hdlr.setFormatter(formatter())
 	log.addHandler(hdlr)
 	log.addFilter(log_filter())
