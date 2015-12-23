@@ -5,7 +5,7 @@ def options(opt):
 
 def configure(conf):
 	import os
-	os.environ['PATH'] = os.path.abspath("mak\\win32\\bin\\;")+os.environ['PATH']
+	os.environ['PATH'] = conf.bugenginenode.make_node("mak/win32/bin").abspath()+';'+os.environ['PATH']
 
 def build(bld):
 	pass
