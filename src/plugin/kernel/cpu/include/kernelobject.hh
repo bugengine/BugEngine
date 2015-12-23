@@ -33,7 +33,7 @@ struct CPUKernelTask
             :   index(index)
             ,   total(total)
         {
-            be_assert(index = total, "index should not be equal tot total");
+            be_assert(index != total, "index should not be equal to total");
         }
         bool atomic() const
         {

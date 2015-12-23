@@ -86,7 +86,7 @@ int PyBugNamespace::init(PyObject* self, PyObject* args, PyObject* kwds)
 
 PyObject* PyBugNamespace::getattr(PyObject* self, const char* name)
 {
-    PyBugNamespace* self_ = reinterpret_cast<PyBugNamespace*>(self);
+    PyBugNamespace* self_ = static_cast<PyBugNamespace*>(self);
     const RTTI::Class& klass = self_->value.as<const RTTI::Class&>();
     istring name_(name);
     for (raw<const RTTI::ObjectInfo> o = klass.objects; o; o = o->next)
@@ -101,7 +101,7 @@ PyObject* PyBugNamespace::getattr(PyObject* self, const char* name)
 
 int PyBugNamespace::setattr(PyObject* self, const char* name, PyObject* value)
 {
-    PyBugObject* self_ = reinterpret_cast<PyBugObject*>(self);
+    PyBugObject* self_ = static_cast<PyBugObject*>(self);
     istring name_(name);
     const RTTI::Class& klass = self_->value.as<const RTTI::Class&>();
     for (raw<const RTTI::ObjectInfo> ob = klass.objects; ob; ob = ob->next)
@@ -147,7 +147,7 @@ int PyBugNamespace::setattr(PyObject* self, const char* name, PyObject* value)
 
 PyObject* PyBugNamespace::repr(PyObject *self)
 {
-    PyBugObject* self_ = reinterpret_cast<PyBugObject*>(self);
+    PyBugObject* self_ = static_cast<PyBugObject*>(self);
     const RTTI::Value& v = self_->value;
     const RTTI::Class& ns = v.as<const RTTI::Class&>();
     

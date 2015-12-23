@@ -211,7 +211,7 @@ PyObject* PyBugObject::newinst(PyTypeObject* type, PyObject* args, PyObject* kwd
 {
     be_forceuse(args);
     be_forceuse(kwds);
-    PyBugObject* inst = reinterpret_cast<PyBugObject*>(type->tp_alloc(type, 0));
+    PyBugObject* inst = static_cast<PyBugObject*>(type->tp_alloc(type, 0));
     inst->owner = 0;
     new (&inst->value) RTTI::Value();
     return inst;
@@ -219,7 +219,7 @@ PyObject* PyBugObject::newinst(PyTypeObject* type, PyObject* args, PyObject* kwd
 
 PyObject* PyBugObject::getattr(PyObject* self, const char* name)
 {
-    PyBugObject* self_ = reinterpret_cast<PyBugObject*>(self);
+    PyBugObject* self_ = static_cast<PyBugObject*>(self);
     raw<const RTTI::Class> metaclass = self_->value.type().metaclass;
     istring name_(name);
     for (raw<const RTTI::Property> p = metaclass->properties; p; p = p->next)
@@ -245,7 +245,7 @@ PyObject* PyBugObject::getattr(PyObject* self, const char* name)
 
 int PyBugObject::setattr(PyObject* self, const char* name, PyObject* value)
 {
-    PyBugObject* self_ = reinterpret_cast<PyBugObject*>(self);
+    PyBugObject* self_ = static_cast<PyBugObject*>(self);
     if (self_->value.type().access == RTTI::Type::Const)
     {
         s_library->m_PyErr_Format(*s_library->m_PyExc_TypeError,
@@ -288,7 +288,7 @@ int PyBugObject::setattr(PyObject* self, const char* name, PyObject* value)
 
 PyObject* PyBugObject::repr(PyObject *self)
 {
-    PyBugObject* self_ = reinterpret_cast<PyBugObject*>(self);
+    PyBugObject* self_ = static_cast<PyBugObject*>(self);
     const RTTI::Value& v = self_->value;
     if (s_library->getVersion() >= 30)
     {
@@ -306,7 +306,7 @@ PyObject* PyBugObject::repr(PyObject *self)
 
 void PyBugObject::dealloc(PyObject* self)
 {
-    PyBugObject* self_ = reinterpret_cast<PyBugObject*>(self);
+    PyBugObject* self_ = static_cast<PyBugObject*>(self);
     if (self_->owner)
     {
         Py_DECREF(self_->owner);
@@ -317,7 +317,7 @@ void PyBugObject::dealloc(PyObject* self)
 
 PyObject* PyBugObject::call(PyObject* self, PyObject* args, PyObject* kwds)
 {
-    PyBugObject* self_ = reinterpret_cast<PyBugObject*>(self);
+    PyBugObject* self_ = static_cast<PyBugObject*>(self);
     static const istring callName("?call");
     RTTI::Value v(self_->value[callName]);
     if (!v)
@@ -336,7 +336,7 @@ PyObject* PyBugObject::call(PyObject* self, PyObject* args, PyObject* kwds)
 
 int PyBugObject::nonZero(PyObject *self)
 {
-    PyBugObject* self_ = reinterpret_cast<PyBugObject*>(self);
+    PyBugObject* self_ = static_cast<PyBugObject*>(self);
     const RTTI::Type t = self_->value.type();
     if (t.indirection == RTTI::Type::Value)
     {
@@ -627,7 +627,7 @@ u32 PyBugObject::distance(PyObject* object, const RTTI::Type& desiredType)
     else if (object->py_type == &PyBugObject::s_pyType
           || object->py_type->tp_base == &PyBugObject::s_pyType)
     {
-        PyBugObject* object_ = reinterpret_cast<PyBugObject*>(object);
+        PyBugObject* object_ = static_cast<PyBugObject*>(object);
         return object_->value.type().distance(desiredType);
     }
     else if (object->py_type->tp_flags & (Py_TPFLAGS_INT_SUBCLASS|Py_TPFLAGS_LONG_SUBCLASS))
@@ -759,7 +759,7 @@ void PyBugObject::unpack(PyObject* object, const RTTI::Type& desiredType, RTTI::
     else if (object->py_type == &PyBugObject::s_pyType
           || object->py_type->tp_base == &PyBugObject::s_pyType)
     {
-        PyBugObject* object_ = reinterpret_cast<PyBugObject*>(object);
+        PyBugObject* object_ = static_cast<PyBugObject*>(object);
         be_assert(desiredType <= object_->value.type(),
                   "incompatible types: %s is not compatible with %s"
                     | object_->value.type().name().c_str()
@@ -806,7 +806,7 @@ void PyBugObject::unpackAny(PyObject* object, RTTI::Value* buffer)
     if (object->py_type == &PyBugObject::s_pyType
      || object->py_type->tp_base == &PyBugObject::s_pyType)
     {
-        PyBugObject* object_ = reinterpret_cast<PyBugObject*>(object);
+        PyBugObject* object_ = static_cast<PyBugObject*>(object);
         new (buffer) RTTI::Value(object_->value);
     }
     else if (object->py_type->tp_flags & Py_TPFLAGS_INT_SUBCLASS)

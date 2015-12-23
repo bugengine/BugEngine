@@ -394,7 +394,7 @@ u32 Class::distance(raw<const Class> other) const
         ci = ci->parent;
         result++;
     }
-    return Type::MaxTypeDistance;
+    return static_cast<u32>(Type::MaxTypeDistance);
 }
 
 inamespace Class::fullname() const

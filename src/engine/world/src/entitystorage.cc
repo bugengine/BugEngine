@@ -313,7 +313,8 @@ void EntityStorage::buildGroups(const WorldComposition& composition)
 
         u32 componentTypeCount = be_checked_numcast<u32>(group->components.size());
         u32 componentTupeFirst = totalComponents - componentTypeCount;
-        m_componentGroups.push_back(ComponentGroup(m_componentGroups.size(), componentTupeFirst,
+        m_componentGroups.push_back(ComponentGroup(be_checked_numcast<u32>(m_componentGroups.size()),
+                                                   componentTupeFirst,
                                                    group->components,
                                                    masks, m_allocator256k));
         ComponentStorage* backlink = new (m_allocator4k.allocate()) ComponentStorage(m_allocator4k,
@@ -457,8 +458,8 @@ Entity EntityStorage::spawn()
             info.next = index + i + 1;
             for (u32 i = 0; i < m_componentTypes.size(); ++i)
             {
-                info.buckets[i].group = ~(u16)0;
-                info.buckets[i].bucket = ~(u16)0;
+                info.buckets[i].group = (u16)~(u16)0;
+                info.buckets[i].bucket = (u16)~(u16)0;
                 info.buckets[i].offset = ~(u32)0;
             }
         }
@@ -486,8 +487,8 @@ void EntityStorage::unspawn(Entity e)
     info.next = m_freeEntityId;
     for (u32 i = 0; i < m_componentTypes.size(); ++i)
     {
-        info.buckets[i].group = ~(u16)0;
-        info.buckets[i].bucket = ~(u16)0;
+        info.buckets[i].group = (u16)~(u16)0;
+        info.buckets[i].bucket = (u16)~(u16)0;
         info.buckets[i].offset = ~(u32)0;
     }
     m_freeEntityId = e.id;

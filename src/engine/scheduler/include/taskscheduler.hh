@@ -57,7 +57,7 @@ public:
 
     u32 workerCount() const
     {
-        return m_workers.size();
+        return be_checked_numcast<u32>(m_workers.size());
     }
 };
 
