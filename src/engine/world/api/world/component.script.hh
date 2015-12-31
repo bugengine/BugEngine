@@ -13,12 +13,11 @@ class World;
 
 struct Component
 {
-    void created(World& world)      { (void*)(&world); }
-    void destroyed(World& world)    { (void*)(&world); }
+    void created(World& /*world*/)      { }
+    void destroyed(World& /*world*/)    { }
 };
 
 }}
-
 
 /**************************************************************************************************/
 #endif
