@@ -11,7 +11,7 @@ def check_python_test(self):
     bld = self.bld
     bld(rule=write_test_file, target='main.cc', code=self.code)
     bld(features='cxx cxxprogram', source='main.cc', target='app',
-        cxxflags=self.cxxflags, linkflags=self.ldflags, use=self.use)
+        cxxflags=self.cxxflags, linkflags=self.ldflags, lib=self.libs, use=self.use)
 
 @conf
 def python_config(conf, version, var=''):
@@ -19,10 +19,11 @@ def python_config(conf, version, var=''):
     if not var: var = '3rdparty.python%s'%(version_number)
     if 'posix' in conf.env.VALID_PLATFORMS:
         try:
-            cflags, libs = conf.run_pkg_config('python-%s'%version)
+            cflags, libs, ldflags = conf.run_pkg_config('python-%s'%version)
         except Errors.WafError as error:
             cflags = ['-I/usr/include/python%s'%version]
-            libs = ['-lpython%s'%version]
+            ldflags=[]
+            libs = ['python%s'%version]
         conf.env['CFLAGS_%s'%var] = cflags
         conf.env['CXXFLAGS_%s'%var] = cflags
         conf.check(
@@ -30,15 +31,16 @@ def python_config(conf, version, var=''):
             features='check_python',
             msg='check for python %s'%version,
             cxxflags=cflags,
-            ldflags=libs,
+            libs=libs,
+            ldflags=ldflags,
             use=[var],
             code="""
                 #include <Python.h>
                 int main() { Py_Initialize(); return 0; }
             """)
         for lib in libs:
-            if lib.startswith('-lpython'):
-                lib_name = lib[2:]
+            if lib.startswith('python'):
+                lib_name = lib
         conf.env['DEFINES_%s'%var] = ['PYTHON_LIBRARY="%s"'%lib_name]
     elif 'macosx' in conf.env.VALID_PLATFORMS:
         conf.recurse('../python%s/python%s.py' % (version_number, version_number), name='setup_python', once=False)
