@@ -412,7 +412,7 @@ class Typedef(CppObject):
     def write_object(self, owner, struct_owner, namespace, object_name, definition, instance):
         tag = self.write_tags('s_object_%s' % self.id(), definition)
         for alias, alias_cpp in self.all_names():
-            definition.write('    static ::BugEngine::RTTI::ObjectInfo s_object_%s = {\n'
+            definition.write('    static ::BugEngine::RTTI::ObjectInfo s_object_td_%s = {\n'
                              '        %s,\n'
                              '        %s,\n'
                              '        ::BugEngine::istring(%s),\n'
@@ -420,7 +420,7 @@ class Typedef(CppObject):
                              '            ::BugEngine::be_typeid< %s >::type())\n'
                              '    };\n' % (alias_cpp, object_name, tag,
                                            alias, self.name))
-            object_name = '{&s_object_%s}' % alias_cpp
+            object_name = '{&s_object_td_%s}' % alias_cpp
         return object_name
 
 

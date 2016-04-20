@@ -44,9 +44,9 @@ struct CPUKernelTask
             be_forceuse(workerCount);
             return total;
         }
-        Range part(u32 index, u32 total) const
+        Range part(u32 i, u32 t) const
         {
-            return Range(index, total);
+            return Range(i, t);
         }
     };
 
