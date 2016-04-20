@@ -10,7 +10,7 @@ namespace BugEngine
 void* ThreadLocal::tlsAlloc()
 {
     DWORD key = TlsAlloc();
-    return reinterpret_cast<void*>(key);
+    return reinterpret_cast<void*>((uintptr_t)(key));
 }
 
 
