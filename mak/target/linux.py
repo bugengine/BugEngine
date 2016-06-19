@@ -313,7 +313,8 @@ def configure(conf):
                     pprint('GREEN', 'configured for toolchain %s' % (toolchain))
 
 def build(bld):
-    bld.platforms.append(bld.external('3rdparty.X11'))
+    #bld.platforms.append(bld.external('3rdparty.X11'))
+    pass
 
 def plugins(bld):
     pass
