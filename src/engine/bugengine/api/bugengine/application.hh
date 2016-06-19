@@ -65,6 +65,9 @@ protected:
     void removeTask(ref<Task::ITask> task);
     const Plugin::Context& pluginContext() const { return m_pluginContext; }
     Application(ref<Folder> dataFolder, weak<Scheduler> scheduler);
+
+    weak<Task::ITask> applicationUpdateTask() const { return m_updateTask; }
+    weak<Task::ITask> worlUpdateTask() const        { return m_worldTask; }
 public:
     virtual ~Application();
 

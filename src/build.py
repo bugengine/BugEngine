@@ -32,6 +32,8 @@ def build(bld):
     bld.engine('bugengine', ['engine.bugengine'], path='engine.main')
 
     bld.external('3rdparty.console')
+    bld.external('3rdparty.X11')
+    bld.external('3rdparty.win32')
     bld.external('3rdparty.DirectX9')
     bld.external('3rdparty.DirectX10')
     bld.external('3rdparty.DirectX11')
@@ -130,7 +132,7 @@ def build(bld):
                 'plugin.graphics.shadermodel4'])
     bld.plugin('plugin.graphics.windowing',
                ['engine.bugengine', 'plugin.graphics.3d',
-                '3rdparty.OpenGL'],
+                '3rdparty.X11', '3rdparty.OpenGL'],
                features=['GUI'])
     bld.plugin('plugin.graphics.GL4',
                ['engine.bugengine', 'plugin.graphics.windowing',
@@ -178,7 +180,7 @@ def build(bld):
     bld.game('sample.kernel',
              ['engine.bugengine', 'plugin.scripting.package'])
     bld.game('sample.text',
-             ['engine.bugengine', 'plugin.scripting.package'])
+             ['engine.bugengine', 'plugin.scripting.package', 'plugin.graphics.3d'])
     bld.game('sample.python',
              ['engine.bugengine', 'plugin.scripting.package'])
     bld.game('help', ['engine.bugengine', 'plugin.ui.console',
