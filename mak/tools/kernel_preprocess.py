@@ -13,7 +13,7 @@ kernel_preprocess = """
 -d ${MACROS_IGNORE}
 --module ${PLUGIN}
 --tmp ${TMPDIR}
-${SRC[0].abspath()}
+${SRC[0].path_from(bld.bldnode)}
 ${TGT[0].abspath()}
 """ % sys.executable.replace('\\', '/')
 cls = Task.task_factory('kernel_preprocess', kernel_preprocess, [], 'PINK')

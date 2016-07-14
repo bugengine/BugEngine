@@ -87,7 +87,7 @@ def set_iphone_sdk_options(self, target, sdk, sdk_path):
     sdk_path = sdk_path.replace('/iPhoneOS', '/%s'%target)
     self.env.MACOSX_SDK = '%s%s'%(target, sdk)
     self.env.XCODE_SDK_PATH = sdk_path
-    self.env.SYSROOT = [sdk_path]
+    self.env.SYSROOT = sdk_path
     self.env.append_unique('CFLAGS', ['-miphoneos-version-min=%s'%sdk, '-isysroot', sdk_path])
     self.env.append_unique('CXXFLAGS', ['-miphoneos-version-min=%s'%sdk, '-isysroot', sdk_path])
     self.env.append_unique('LINKFLAGS', ['-miphoneos-version-min=%s'%sdk, '-isysroot', sdk_path, '-L%s/usr/lib'%sdk_path])

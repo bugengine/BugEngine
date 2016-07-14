@@ -115,7 +115,7 @@ def get_macosx_sdk_version(self, name, compiler_list):
 def set_macosx_sdk_options(self, sdk_version, sdk_path):
     self.env.MACOSX_SDK = os.path.splitext(os.path.basename(sdk_path))[0]
     self.env.XCODE_SDK_PATH = sdk_path
-    self.env.SYSROOT = [sdk_path]
+    self.env.SYSROOT = sdk_path
     self.env.append_unique('CFLAGS', ['-mmacosx-version-min=%s'%sdk_version,
                                       '-isysroot', sdk_path])
     self.env.append_unique('CXXFLAGS', ['-mmacosx-version-min=%s'%sdk_version,
