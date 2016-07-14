@@ -182,7 +182,6 @@ def detect_gcc(conf):
         try:
             for lib in os.listdir(path):
                 if lib.startswith('gcc'):
-                    print(path)
                     conf.detect_gcc_from_path(os.path.join(path, lib), compilers_gcc_found)
         except OSError:
             pass
