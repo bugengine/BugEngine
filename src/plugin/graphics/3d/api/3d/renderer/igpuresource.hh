@@ -27,8 +27,8 @@ class be_api(_3D) IGPUResource :   public minitl::refcountable
     BE_NOCOPY(IGPUResource);
 protected:
     const weak<const IRenderer>         m_renderer;
-private:
     weak<const Resource::Description>   m_resource;
+private:
     i32                                 m_index;
 public:
     IGPUResource(weak<const Resource::Description> description, weak<const IRenderer> renderer);
@@ -36,6 +36,8 @@ public:
 
     virtual void load(weak<const Resource::Description> description) = 0;
     virtual void unload() = 0;
+
+    weak<const Resource::Description> resource() const { return m_resource; }
 };
 
 }

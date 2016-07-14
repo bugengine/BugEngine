@@ -26,8 +26,8 @@ published:
     Value get(Value& from) const;
     void  set(Value& from, const Value& value) const;
 
-    Value getTag(const Type& type) const;
-    Value getTag(raw<const Class> type) const;
+    Value getTag(const Type& tagType) const;
+    Value getTag(raw<const Class> tagType) const;
 public:
     Value (*getter)(void* data, bool isConst);
 private:

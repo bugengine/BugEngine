@@ -1,5 +1,6 @@
 load plugin.graphics.text as text;
 load plugin.graphics.shadermodel1 as sm1;
+load plugin.graphics.3d as 3d;
 
 font = text.OutlineFont
 (
@@ -16,5 +17,15 @@ shader = text.OutlineShader
     (
         value = (1.0, 1.0, 1.0, 1.0);
     );
+)
+
+window = 3d.RenderWindowDescription
+(
+    title = "Test";
+)
+
+window2 = 3d.RenderWindowDescription
+(
+    title = "Test2";
 )
 

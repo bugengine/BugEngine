@@ -57,8 +57,8 @@ class utest(Task.Task):
 		Always execute the task if `waf --alltests` was used or no
                 tests if ``waf --notests`` was used
 		"""
-                if getattr(Options.options, 'no_tests', False):
-                        return Task.SKIP_ME
+		if getattr(Options.options, 'no_tests', False):
+			return Task.SKIP_ME
 
 		ret = super(utest, self).runnable_status()
 		if ret == Task.SKIP_ME:

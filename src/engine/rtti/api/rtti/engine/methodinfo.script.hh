@@ -39,8 +39,8 @@ published:
         raw<const Parameter>    params;
         bool                    vararg;
     published:
-        Value getTag(const Type& type) const;
-        Value getTag(raw<const Class> type) const;
+        Value getTag(const Type& tagType) const;
+        Value getTag(raw<const Class> tagType) const;
     public:
         Value (*call)(Value* params, u32 nparams);
         u32 distance(Value* p, u32 paramCount) const;

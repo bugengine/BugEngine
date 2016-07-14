@@ -17,6 +17,18 @@ TextSample::TextSample(const Plugin::Context& context)
     ,   m_3dgl("plugin.graphics.GL4", pluginContext())
     ,   m_mainPackage(ref<Package>::create(Arena::game(), pluginContext().dataFolder->openFile(istring("sample-text.pkg"))))
 {
+    if (m_3ddx)
+    {
+        m_startRenderDx = Task::ITask::CallbackConnection(worlUpdateTask(), m_3ddx->syncTask()->startCallback());
+        m_startNextUpdateDx = Task::ITask::CallbackConnection(m_3ddx->syncTask(), worlUpdateTask()->startCallback(),
+                                                              Task::ITask::ICallback::Completed);
+    }
+    if (m_3dgl)
+    {
+        m_startRenderGL = Task::ITask::CallbackConnection(worlUpdateTask(), m_3dgl->syncTask()->startCallback());
+        m_startNextUpdateGL = Task::ITask::CallbackConnection(m_3dgl->syncTask(), worlUpdateTask()->startCallback(),
+                                                              Task::ITask::ICallback::Completed);
+    }
     pluginContext().resourceManager->load(m_mainPackage);
 }
 
