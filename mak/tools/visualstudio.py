@@ -260,7 +260,7 @@ class VCproj:
                                     tool['Output'] = os.path.join('$(OutDir)', env.DEPLOY_BINDIR, sub_env.cxxprogram_PATTERN%task_gen.bld.launcher[0][0].target)
                             if float(version_project) >= 8:
                                 tool['PreprocessorDefinitions'] = ';'.join(defines + sub_env.DEFINES + sub_env.SYSTEM_DEFINES)
-                                tool['IncludeSearchPath'] = ';'.join([path_from(p, task_gen.bld) for p in includes + sub_env.INCLUDES + sub_env.SYSTEM_INCLUDES + [os.path.join(i, 'usr', 'include') for i in sub_env.SYSROOT]])
+                                tool['IncludeSearchPath'] = ';'.join([path_from(p, task_gen.bld) for p in includes + sub_env.INCLUDES + sub_env.SYSTEM_INCLUDES + [os.path.join(sub_env.SYSROOT, 'usr', 'include')]])
                             XmlNode(configuration, 'Tool', tool).close()
             XmlNode(project, 'References').close()
             with XmlNode(project, 'Files') as files:
@@ -378,7 +378,7 @@ class VCxproj:
                         self.vcxproj._add(properties, 'LocalDebuggerCommand', '$(NMakeOutput)')
                         self.vcxproj._add(properties, 'LocalDebuggerCommandArguments', task_gen.target)
                     self.vcxproj._add(properties, 'NMakePreprocessorDefinitions', ';'.join(defines + sub_env.DEFINES + sub_env.SYSTEM_DEFINES))
-                    includes += ['%s/usr/include'%sysroot for sysroot in sub_env.SYSROOT]
+                    includes += ['%s/usr/include' % sub_env.SYSROOT]
                     self.vcxproj._add(properties, 'NMakeIncludeSearchPath', ';'.join([path_from(i, task_gen.bld) for i in includes] + sub_env.INCLUDES + sub_env.SYSTEM_INCLUDES))
         files = self.vcxproj._add(project, 'ItemGroup')
 
@@ -568,13 +568,21 @@ class vs2013e(vs2003):
     "creates projects for Visual Studio 2013 Express"
     cmd = 'vs2013e'
     fun = 'build'
-    version =	(('Visual C++ Express 12', '13.00', False),(VCxproj, ('12.0','12.0')))
+    version =	(('Visual C++ Express 12', '13.00', False),(VCxproj, ('4.5','12.0')))
     platforms = ['Win32', 'x64', 'ARM', 'Itanium']
 
 class vs2013(vs2003):
     "creates projects for Visual Studio 2013"
     cmd = 'vs2013'
     fun = 'build'
-    version =	(('Visual Studio 12', '13.00', True),(VCxproj, ('12.0','12.0')))
+    version =	(('Visual Studio 12', '13.00', True),(VCxproj, ('4.5','12.0')))
+    platforms = ['Win32', 'x64', 'ARM', 'Itanium']
+
+
+class vs2015(vs2003):
+    "creates projects for Visual Studio 2015"
+    cmd = 'vs2015'
+    fun = 'build'
+    version =	(('Visual Studio 13', '14.00', True),(VCxproj, ('4.5','13.0')))
     platforms = ['Win32', 'x64', 'ARM', 'Itanium']
 

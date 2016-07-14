@@ -1,12 +1,14 @@
 from waflib import Utils, Logs
 from waflib.Configure import conf
-import os, sys
+import os
+import sys
+import shlex
 
 all_clang_archs = [
     ('x86', ['x86', 'i386']),
     ('amd64', ['x86_64', 'amd64', 'x64']),
-    ('arm', ['armv7']),
-    ('arm64', ['arm64']),
+    ('arm', ['arm', 'armv6', 'armv7']),
+    ('arm64', ['arm64', 'aarch64']),
     ('ppc', ['ppc', 'powerpc']),
     ('ppc64', ['ppc64', 'powerpc64']),
     ('mips', ['mips']),
@@ -14,32 +16,60 @@ all_clang_archs = [
     ('mips64', ['mips64']),
     ('mipsel64', ['mips64el', 'mipsel64']),
 ]
+all_valid_clang_archs = [i for _,l in all_clang_archs for i in l]
+
+
 def expand_clang_archs(arch):
     if arch in ('x86', 'i686', 'i586', 'i486', 'i386'):
-        return [(['-m64'], 'amd64'), (['-m32'], 'x86')]
+        return [(['-m64'], 'amd64'), ([], 'x86')]
     elif arch in ('amd64', 'x64', 'x86_64'):
-        return [(['-m32'], 'x86'), (['-m64'], 'amd64')]
-    elif arch == 'arm':
-        return [([], 'armv7')]
+        return [(['-m32'], 'x86'), ([], 'amd64')]
+    elif arch in ('arm', 'armv6', 'armv7'):
+        return [([], arch)]
+    elif arch == 'aarch64':
+        return [([], 'arm64')]
     elif arch == 'arm64':
         return [(['-miphoneos-version-min=7.0'], 'arm64')]
     elif arch == 'mips':
-        return [(['-m64'], 'mips64'), (['-m32'], 'mips')]
+        return [(['-m64'], 'mips64'), ([], 'mips')]
     elif arch == 'mips64':
-        return [(['-m32'], 'mips'), (['-m64'], 'mips64')]
+        return [(['-m32'], 'mips'), ([], 'mips64')]
     elif arch == 'mipsel':
-        return [(['-m64'], 'mipsel64'), (['-m32'], 'mipsel')]
+        return [(['-m64'], 'mipsel64'), ([], 'mipsel')]
     elif arch == 'mipsel64' or arch == 'mips64el':
-        return [(['-m32'], 'mipsel'), (['-m64'], arch)]
+        return [(['-m32'], 'mipsel'), ([], arch)]
     elif arch == 'powerpc' or arch == 'ppc':
-        return [(['-m64'], arch+'64'), (['-m32'], arch)]
+        return [(['-m64'], arch+'64'), ([], arch)]
     elif arch == 'powerpc64' or arch == 'ppc64':
-        return [(['-m32'], arch[:-2]), (['-m64'], arch)]
+        return [(['-m32'], arch[:-2]), ([], arch)]
     elif arch == 'spu':
         return [[], 'spu']
     else:
         Logs.warn('unknown architecture : %s' % arch)
         return [([], arch)]
+
+
+def unique_arch(arch):
+    if arch in ('x86', 'i686', 'i586', 'i486', 'i386'):
+        return 'x86'
+    elif arch in ('amd64', 'x64', 'x86_64'):
+        return 'amd64'
+    elif arch == 'aarch64':
+        return 'arm64'
+    elif arch == 'mipsel64' or arch == 'mips64el':
+        return 'mipsel64'
+    elif arch == 'powerpc' or arch == 'ppc':
+        return 'powerpc'
+    elif arch == 'powerpc64' or arch == 'ppc64':
+        return 'powerpc64'
+    elif arch == 'spu':
+        return 'spu'
+    elif arch in ['arm64', 'mips', 'mips64', 'mipsel', 'arm', 'armv6', 'armv7']:
+        return arch
+    else:
+        Logs.warn('unknown architecture : %s' % arch)
+        return arch
+
 
 @conf
 def is_clang_working(conf, clang, options):
@@ -48,6 +78,7 @@ def is_clang_working(conf, clang, options):
     p.stdin.write('#include <iostream>\n#include <cstring>\n'.encode())
     out = p.communicate()[0]
     return p.returncode == 0
+
 
 @conf
 def has_arch_flag(self, clang):
@@ -58,13 +89,81 @@ def has_arch_flag(self, clang):
     # if clang manages to compile, then the -arch keyword was ignored
     return p.returncode != 0
 
+
 @conf
-def find_clang_archs_legacy(self, clang, target):
+def get_clang_include_paths(clang,):
+    cmd = [clang, '-E', '-x', 'c++', '-v', '-']
+    try:
+        p = Utils.subprocess.Popen(cmd, stdin=Utils.subprocess.PIPE, stdout=Utils.subprocess.PIPE, stderr=Utils.subprocess.STDOUT)
+        out, err = p.communicate()
+    except Exception as e:
+        print(e)
+        return []
+    else:
+        if not isinstance(out, str):
+            out = out.decode()
+        return out.split('\n')
+
+
+@conf
+def find_clang_archs_multilib(self, clang, target):
     result = []
-    original_arch = target.split('-')[0]
-    for arch_flags, arch_name in expand_clang_archs(original_arch):
-        result.append((arch_name, arch_flags))
+    target_tuple = target.split('-')
+    arch = target_tuple[0]
+
+    for flags, a in expand_clang_archs(arch):
+        node = self.bldnode.make_node('main.c')
+        tgtnode = node.change_ext('')
+        node.write('int main() {}\n')
+        cmd = [clang] + flags + [node.abspath(), '-o', tgtnode.abspath()]
+        try:
+            p = Utils.subprocess.Popen(cmd, stdin=Utils.subprocess.PIPE, stdout=Utils.subprocess.PIPE, stderr=Utils.subprocess.STDOUT)
+            out, err = p.communicate()
+        except Exception as e:
+            continue
+        else:
+            if p.returncode == 0:
+                result.append((a, flags))
+        finally:
+            node.delete()
+            tgtnode.delete()
     return result
+
+
+@conf
+def find_clang_archs_multiarch(self, clang, target):
+    result = []
+    seen = set([])
+    target_tuple = target.split('-')
+    arch = target_tuple[0]
+
+    for line in get_clang_include_paths(clang):
+        line = line.strip()
+        if os.path.isdir(line):
+            if os.path.split(line)[1].startswith(arch):
+                line = os.path.split(line)[0]
+                for x in os.listdir(line):
+                    c = x.split('-')
+                    if len(c) < 2:
+                        continue
+                    if c[0] not in all_valid_clang_archs:
+                        continue
+                    if os.path.isdir(os.path.join(line, x)) and not x.startswith(arch):
+                        a = unique_arch(c[0])
+                        if a in seen:
+                            continue
+                        cmd = [clang, '-target', x, '-E', '-x', 'c++', '-v', '-']
+                        try:
+                            p = Utils.subprocess.Popen(cmd, stdin=Utils.subprocess.PIPE, stdout=Utils.subprocess.PIPE, stderr=Utils.subprocess.STDOUT)
+                            out, err = p.communicate()
+                        except Exception:
+                            continue
+                        else:
+                            if p.returncode == 0:
+                                seen.add(a)
+                                result.append((a, ['-target', x]))
+    return result
+
 
 @conf
 def find_clang_archs(self, clang):
@@ -94,7 +193,6 @@ def find_clang_archs(self, clang):
                                 if err.find('not using the clang compiler') == -1:
                                     result.append((arch_name, ['-arch', arch]))
                                     break
-
     return result
 
 
@@ -164,11 +262,18 @@ def detect_clang(conf):
                     for arch in conf.find_clang_archs(conf.env.CLANG):
                         conf.env.CLANG_TARGETS.append((version, toolchaindir, target, arch))
                 else:
-                    for arch in conf.find_clang_archs_legacy(conf.env.CLANG, target):
-                        conf.env.CLANG_TARGETS.append((version, toolchaindir, target, arch))
+                    archs = conf.find_clang_archs_multiarch(conf.env.CLANG, target)
+                    if archs:
+                        for arch in archs:
+                            conf.env.CLANG_TARGETS.append((version, toolchaindir, target, arch))
+                    else:
+                        archs = conf.find_clang_archs_multilib(conf.env.CLANG, target)
+                        for arch in archs:
+                            conf.env.CLANG_TARGETS.append((version, toolchaindir, target, arch))
         del conf.env['CLANG']
         del conf.env['CLANGXX']
     conf.env.CLANG_TARGETS.sort(key = lambda x: x[0])
+
 
 @conf
 def load_clang(conf, directory, target, flags):
@@ -185,7 +290,7 @@ def load_clang(conf, directory, target, flags):
     conf.env.COMPILER_NAME='clang'
     conf.env.COMPILER_TARGET=target
     conf.load('gcc gxx')
-    if target.find('mingw') != -1:
+    if target.find('mingw') != -1 or target.find('windows') != -1 or target.find('win32') != -1:
         winres = conf.find_program(target + '-windres', var='WINRC', path_list=[directory], mandatory=False)
         if not winres:
             winres = conf.find_program('windres', var='WINRC', path_list=[directory], mandatory=False)
@@ -193,7 +298,7 @@ def load_clang(conf, directory, target, flags):
             winres = conf.find_program('windres', var='WINRC', mandatory=False)
         conf.load('winres')
 
-    cmd = conf.env.CC + flags + ['-x', 'c++', '-Wp,-v', '-E', '-']
+    cmd = conf.env.CC + flags + ['-x', 'c++', '-v', '-Wp,-v', '-E', '-']
     try:
         p = Utils.subprocess.Popen(cmd, stdin=Utils.subprocess.PIPE, stdout=Utils.subprocess.PIPE, stderr=Utils.subprocess.PIPE)
         p.stdin.write('\n'.encode())
@@ -206,7 +311,11 @@ def load_clang(conf, directory, target, flags):
         out = out.split('\n')
         while out:
             line = out.pop(0)
-            if line.startswith('#include <...>'):
+            sysroot = line.find('-isysroot')
+            if sysroot != -1:
+                sysroot = shlex.split(line[sysroot:].replace('\\', '\\\\'))[1]
+                conf.env.SYSROOT = os.path.normpath(sysroot)
+            elif line.startswith('#include <...>'):
                 while out:
                     path = out.pop(0).strip()
                     if path.startswith('End of search list'):
@@ -266,11 +375,13 @@ def load_clang(conf, directory, target, flags):
 def options(opt):
     pass
 
+
 def configure(conf):
     conf.start_msg('Looking for clang compilers')
     conf.env.append_unique('useful_defines', ['__clang__', '__GNUC__', '__GNUG__'])
     conf.detect_clang()
     conf.end_msg('done')
+
 
 def build(bld):
     pass

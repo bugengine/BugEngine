@@ -204,7 +204,7 @@ def module(bld, name, module_path, depends,
                 preprocess_sources += extra_source_node.ant_glob(['src/**/*'], excl=source_filter)
 
     api = [i for i in [source_node.make_node('api')] if os.path.isdir(i.abspath())]
-    include = [i for i in [source_node.make_node('include')] if os.path.isdir(i.abspath())]
+    include = [i for i in [source_node.make_node('include')] if os.path.isdir(i.abspath())] + [bld.bldnode]
     lib_paths = [i.path_from(bld.bldnode) for i in [source_node.make_node('lib')] if os.path.isdir(i.abspath())]
 
     if api and os.path.isfile(os.path.join(api[0].abspath(), module_path.split('.')[-1], 'stdafx.h')):

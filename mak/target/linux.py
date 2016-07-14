@@ -101,6 +101,12 @@ def set_linux_icc_options(self, flags, version, arch):
     v.LINKFLAGS_final = ['-pipe', '-g']
 
 
+def filter_linux_arch(arch):
+    arch_name, options = arch
+    if arch_name == 'arm':
+        arch_name = 'armv7'
+        options = options + ['-march=armv7-a', '-mtune=cortex-a7']
+    return arch_name, options
 
 @conf
 def set_linux_gcc_options(self, flags, version):
@@ -176,8 +182,10 @@ def set_linux_clang_options(self, options, version):
     v.ASFLAGS_final = ['-pipe', '-g', '-DNDEBUG', '-O3']
     v.LINKFLAGS_final = ['-pipe', '-g']
 
+
 def options(opt):
     pass
+
 
 def configure(conf):
     seen = set([])
@@ -245,6 +253,7 @@ def configure(conf):
                         pprint('GREEN', 'configured for toolchain %s' % (toolchain))
 
     for name, bindir, gcc, gxx, version, target, arch, options in conf.env.GCC_TARGETS:
+        arch, options = filter_linux_arch((arch, options))
         position = target.find('linux-gnu')
         if position != -1:
             os_name = 'linux'
@@ -278,7 +287,7 @@ def configure(conf):
 
     for version, directory, target, arch in conf.env.CLANG_TARGETS:
         if target.find('linux') != -1:
-            arch_name, options = arch
+            arch_name, options = filter_linux_arch(arch)
             os_name = 'linux'
             toolchain = '%s-%s-%s-%s'%(os_name, arch_name, 'clang', version)
             if toolchain in seen:
@@ -313,7 +322,8 @@ def configure(conf):
                     pprint('GREEN', 'configured for toolchain %s' % (toolchain))
 
 def build(bld):
-    bld.platforms.append(bld.external('3rdparty.X11'))
+    #bld.platforms.append(bld.external('3rdparty.X11'))
+    pass
 
 def plugins(bld):
     pass

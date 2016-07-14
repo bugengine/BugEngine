@@ -1,6 +1,8 @@
 from waflib import Utils, Logs
 from waflib.Configure import conf
-import os, sys
+import os
+import sys
+import shlex
 
 def allarchs(arch):
     if arch == 'x86':
@@ -9,8 +11,8 @@ def allarchs(arch):
         return [(['-m32'], 'x86'), (['-m64'], 'amd64')]
     elif arch == 'arm64':
         return [([], 'arm64')]
-    elif arch == 'arm':
-        return [(['-mcpu=cortex-a7', '-mfpu=neon'], 'arm')]
+    elif arch in ('arm', 'armv6', 'armv7'):
+        return [([], arch)]
     elif arch == 'mips':
         return [(['-m64'], 'mips64'), (['-m32'], 'mips')]
     elif arch == 'mips64':
@@ -57,14 +59,22 @@ def add_all_archs_to_env(conf, name, bindir, cc, cxx, version, target, arch):
     if cc and cxx:
         found = False
         for gcc_option, gcc_arch in allarchs(arch):
-            cmd = [cc] + gcc_option + ['-dM', '-E', '-']
-            p = Utils.subprocess.Popen(cmd, stdin=Utils.subprocess.PIPE, stdout=Utils.subprocess.PIPE, stderr=Utils.subprocess.PIPE)
-            p.stdin.write('\n'.encode())
-            out,err = p.communicate()
-            if p.returncode != 0:
+            node = conf.bldnode.make_node('main.c')
+            tgtnode = node.change_ext('')
+            node.write('int main() {}\n')
+            cmd = [cc] + gcc_option + [node.abspath(), '-o', tgtnode.abspath()]
+            try:
+                p = Utils.subprocess.Popen(cmd, stdin=Utils.subprocess.PIPE, stdout=Utils.subprocess.PIPE, stderr=Utils.subprocess.PIPE)
+                out,err = p.communicate()
+            except Exception:
                 continue
-            found = True
-            conf.env.GCC_TARGETS.append((name, bindir, cc, cxx, version, target, gcc_arch, gcc_option))
+            else:
+                if p.returncode == 0:
+                    found = True
+                    conf.env.GCC_TARGETS.append((name, bindir, cc, cxx, version, target, gcc_arch, gcc_option))
+            finally:
+                node.delete()
+                tgtnode.delete()
         if not found:
             conf.env.GCC_TARGETS.append((name, bindir, cc, cxx, version, target, arch, []))
 
@@ -72,7 +82,7 @@ def add_all_archs_to_env(conf, name, bindir, cc, cxx, version, target, arch):
 @conf
 def detect_gcc_archs_from_path(conf, name, bindir, gcc, gxx, version, target, arch):
     versionsmall = '.'.join(version.split('.')[0:2])
-    versionverysmall = ''.join(version.split('.')[0:2])
+    versionverysmall = ''.join(version.split('.')[0:1])
 
     cc = cxx = None
     for v in ['-%s'%version, '-%s'%versionsmall, '-%s'%versionverysmall, versionverysmall, '']:
@@ -172,6 +182,7 @@ def detect_gcc(conf):
         try:
             for lib in os.listdir(path):
                 if lib.startswith('gcc'):
+                    print(path)
                     conf.detect_gcc_from_path(os.path.join(path, lib), compilers_gcc_found)
         except OSError:
             pass
@@ -201,7 +212,7 @@ def load_gcc(self, bindir, gcc, gxx, version, target, arch, options):
             winres = self.find_program('windres', var='WINRC', mandatory=False)
         self.load('winres')
 
-    cmd = self.env.CC + options + ['-x', 'c++', '-Wp,-v', '-E', '-']
+    cmd = self.env.CC + options + ['-x', 'c++', '-v', '-Wp,-v', '-E', '-']
     try:
         p = Utils.subprocess.Popen(cmd, stdin=Utils.subprocess.PIPE, stdout=Utils.subprocess.PIPE, stderr=Utils.subprocess.PIPE)
         p.stdin.write('\n'.encode())
@@ -214,7 +225,11 @@ def load_gcc(self, bindir, gcc, gxx, version, target, arch, options):
         out = out.split('\n')
         while out:
             line = out.pop(0)
-            if line.startswith('#include <...>'):
+            sysroot = line.find('-isysroot')
+            if sysroot != -1:
+                sysroot = shlex.split(line[sysroot:].replace('\\', '\\\\'))[1]
+                self.env.SYSROOT = os.path.normpath(sysroot)
+            elif line.startswith('#include <...>'):
                 while out:
                     path = out.pop(0).strip()
                     if path.startswith('End of search list'):
@@ -277,6 +292,8 @@ def configure(conf):
         ('i586', 'x86'),
         ('i686', 'x86'),
         ('arm-eabi', 'arm'),
+        ('armv7', 'armv7'),
+        ('armv6', 'armv6'),
         ('arm', 'arm'),
         ('mips64el', 'mips64el'),
         ('mipsel', 'mipsel'),

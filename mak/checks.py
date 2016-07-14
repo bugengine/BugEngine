@@ -204,7 +204,7 @@ def run_pkg_config(conf, name):
     sysroot = conf.env.SYSROOT or ''
     def extend_lib_path(lib_path):
         if lib_path[0] == '=':
-            return os.path.join(sysroot, lib_path[1:])
+            return os.path.join(sysroot, lib_path[2:])
         else:
             return lib_path
     expand = {}

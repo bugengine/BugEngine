@@ -69,6 +69,7 @@ def set_windows_gcc_options(self, options, version):
 @conf
 def set_windows_clang_options(self, options, version):
     v = self.env
+    version_number = self.get_gcc_version_float(version)
     v.append_unique('CFLAGS', options)
     v.append_unique('CXXFLAGS', options)
     v.append_unique('LINKFLAGS', options + ['-Wl,--export-all-symbols'])
@@ -76,6 +77,8 @@ def set_windows_clang_options(self, options, version):
     v.CXXFLAGS_warnnone = ['-w']
     v.CFLAGS_warnall = ['-std=c99', '-Wall', '-Wextra', '-pedantic', '-Winline', '-Werror']
     v.CXXFLAGS_warnall = ['-Wall', '-Wextra', '-Werror', '-Wno-sign-compare', '-Woverloaded-virtual', '-Wno-invalid-offsetof', '-Wno-unknown-pragmas', '-Wno-comment']
+    if version_number >= 3.6:
+        v.CXXFLAGS_warnall.append('-Wno-unused-local-typedefs')
 
     v.CFLAGS_debug = ['-pipe', '-g', '-D_DEBUG']
     v.CXXFLAGS_debug = ['-pipe', '-g', '-D_DEBUG']
@@ -169,8 +172,7 @@ def configure(conf):
 
 
     for name, bindir, gcc, gxx, version, target, arch, options in conf.env.GCC_TARGETS:
-        position = target.find('mingw')
-        if position != -1:
+        if target.find('mingw') != -1 or target.find('windows') != -1:
             os = 'windows'
             toolchain = '%s-%s-%s-%s'%(os, arch, name, version)
             if toolchain not in seen:
@@ -203,7 +205,7 @@ def configure(conf):
                         Logs.pprint('GREEN', 'configured for toolchain %s' % (toolchain))
 
     for version, directory, target, arch in conf.env.CLANG_TARGETS:
-        if target.find('win32') != -1 or target.find('mingw') != -1:
+        if target.find('win32') != -1 or target.find('mingw') != -1 or target.find('windows') != -1:
             arch_name, options = arch
             os = 'windows'
             toolchain = '%s-%s-%s-%s'%(os, arch_name, 'clang', version)
