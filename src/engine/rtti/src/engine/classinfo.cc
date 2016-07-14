@@ -268,12 +268,12 @@ void Class::enumerateObjects(EnumerateRecursion recursion, EnumerateCallback cal
 }
 
 
-raw<const Property> Class::getProperty(istring name) const
+raw<const Property> Class::getProperty(istring propertyName) const
 {
     raw<const Property> p = properties;
     while(p)
     {
-        if (p->name == name)
+        if (p->name == propertyName)
         {
             break;
         }
@@ -282,12 +282,12 @@ raw<const Property> Class::getProperty(istring name) const
     return p;
 }
 
-raw<const Method> Class::getMethod(istring name) const
+raw<const Method> Class::getMethod(istring methodName) const
 {
     raw<const Method> m = methods;
     while(m)
     {
-        if (m->name == name)
+        if (m->name == methodName)
         {
             break;
         }

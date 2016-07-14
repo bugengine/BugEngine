@@ -586,3 +586,10 @@ class vs2015(vs2003):
     version =	(('Visual Studio 13', '14.00', True),(VCxproj, ('4.5','13.0')))
     platforms = ['Win32', 'x64', 'ARM', 'Itanium']
 
+class vs2015(vs2003):
+    "creates projects for Visual Studio 2013"
+    cmd = 'vs2015'
+    fun = 'build'
+    version =	(('Visual Studio 13', '14.00', True),(VCxproj, ('5.0','13.0')))
+    platforms = ['Win32', 'x64', 'ARM', 'Itanium']
+

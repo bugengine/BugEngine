@@ -45,6 +45,8 @@ PlatformData::PlatformData(::Display* display)
 :   display(display)
 ,   fbConfig(display ? selectGLXFbConfig(display, XDefaultScreen(display)) : 0)
 ,   visual(display ? glXGetVisualFromFBConfig(display, fbConfig) : 0)
+,   wm_protocols(XInternAtom(display, "WM_PROTOCOLS", False))
+,   wm_delete_window(XInternAtom(display, "WM_DELETE_WINDOW", False))
 {
 }
 
@@ -57,6 +59,7 @@ Renderer::PlatformRenderer::PlatformRenderer()
     if (m_platformData.display)
     {
         XSetErrorHandler(&Renderer::PlatformRenderer::xError);
+        XSetIOErrorHandler(&Renderer::PlatformRenderer::ioError);
         XSync(m_platformData.display, false);
     }
 }
@@ -70,6 +73,22 @@ Renderer::PlatformRenderer::~PlatformRenderer()
     }
 }
 
+weak<Window> Renderer::PlatformRenderer::getWindowFromXWindow(::Window w)
+{
+    ::Atom type;
+    int format;
+    unsigned long nbItems;
+    unsigned long leftBytes;
+    unsigned char *property = 0;
+    XGetWindowProperty(m_platformData.display, w,
+                       m_windowProperty, 0, sizeof(Window*)/4,
+                       False, AnyPropertyType, &type, &format, &nbItems, &leftBytes,
+                       &property);
+    be_assert(property, "could not retrieve engine window handle from X11 window");
+    weak<Window> result (*(Window**)property);
+    XFree(property);
+    return result;
+}
 
 static const char *s_messages[] =
 {
@@ -104,6 +123,12 @@ int Renderer::PlatformRenderer::xError(::Display* /*display*/, XErrorEvent* even
     return 0;
 }
 
+int Renderer::PlatformRenderer::ioError(::Display* /*display*/)
+{
+    be_fatal("X11 IO error");
+    return 0;
+}
+
 ::Window Renderer::PlatformRenderer::createWindow(i16 x, i16 y, u16 w, u16 h)
 {
     XSetWindowAttributes attributes;
@@ -126,6 +151,7 @@ int Renderer::PlatformRenderer::xError(::Display* /*display*/, XErrorEvent* even
     {
         XMapRaised(m_platformData.display, result);
     }
+    XSetWMProtocols(m_platformData.display, result, &m_platformData.wm_delete_window, 1);
     XSync(m_platformData.display, false);
     return result;
 }
@@ -158,10 +184,11 @@ void Renderer::flush()
 {
     IRenderer::flush();
     XEvent event;
+    ::Display* display = m_platformRenderer->m_platformData.display;
     /* wait for events*/
-    while (XPending(m_platformRenderer->m_platformData.display) > 0)
+    while (XPending(display) > 0)
     {
-        XNextEvent(m_platformRenderer->m_platformData.display, &event);
+        XNextEvent(display, &event);
         switch (event.type)
         {
         case DestroyNotify:
@@ -180,16 +207,58 @@ void Renderer::flush()
         case KeyPress:
             if (XLookupKeysym(&event.xkey, 0) == XK_Escape)
             {
-                ::Atom type;
-                int format;
-                unsigned long nbItems;
-                unsigned long leftBytes;
-                unsigned char *result = 0;
-                XGetWindowProperty(m_platformRenderer->m_platformData.display, event.xkey.window, m_platformRenderer->m_windowProperty, 0, sizeof(Window*)/4,
-                                   False, AnyPropertyType, &type, &format, &nbItems, &leftBytes, &result);
-                be_assert(result, "could not retrieve engine window handle from X11 window");
-                be_info("%d items (%d): %p" | nbItems | leftBytes | *(Window**)result);
-                XFree(result);
+                be_info("Close request on window");
+                XUnmapWindow(m_platformRenderer->m_platformData.display, event.xclient.window);
+
+                XEvent ev;
+                ::Window root_window = XRootWindow(display,
+                                                   m_platformRenderer->m_platformData.visual->screen);
+                ev.type = UnmapNotify;
+                ev.xunmap.event = root_window;
+                ev.xunmap.window = event.xkey.window;
+                ev.xunmap.from_configure = False;
+                int result = XSendEvent(display,
+                                        root_window,
+                                        False,
+                                        SubstructureRedirectMask|SubstructureNotifyMask,
+                                        &ev);
+                if (!result)
+                {
+                    be_error("XSendEvent return error %d" | result);
+                }
+            }
+            break;
+        case ClientMessage:
+            if (event.xclient.message_type == m_platformRenderer->m_platformData.wm_protocols)
+            {
+                if (event.xclient.data.l[0] == m_platformRenderer->m_platformData.wm_delete_window)
+                {
+                    be_info("Close request on window");
+                    XUnmapWindow(m_platformRenderer->m_platformData.display, event.xclient.window);
+
+                    XEvent ev;
+                    ::Window root_window = XRootWindow(display,
+                                                       m_platformRenderer->m_platformData.visual->screen);
+                    ev.type = UnmapNotify;
+                    ev.xunmap.event = root_window;
+                    ev.xunmap.window = event.xclient.window;
+                    ev.xunmap.from_configure = False;
+                    int result = XSendEvent(display,
+                                            root_window,
+                                            False,
+                                            SubstructureRedirectMask|SubstructureNotifyMask,
+                                            &ev);
+                    if (!result)
+                    {
+                        be_error("XSendEvent return error %d" | result);
+                    }
+                }
+            }
+            else
+            {
+                char* atom_name = ::XGetAtomName(display, event.xclient.message_type);
+                be_info("Unhandled client message: %s" | atom_name);
+                XFree(atom_name);
             }
             break;
         default:

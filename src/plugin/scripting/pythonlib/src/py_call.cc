@@ -140,44 +140,46 @@ PyObject* call(raw<const RTTI::Method> method, PyObject* self, PyObject* args, P
     const u32 namedArgCount = kwargs ? be_checked_numcast<u32>(s_library->m_PyDict_Size(kwargs)) : 0;
     const u32 argCount = unnamedArgCount + namedArgCount + (self ? 1 : 0);
     ArgInfo* argInfos = (ArgInfo*)malloca(argCount * sizeof(ArgInfo));
-    u32 i = 0;
-    if (self)
     {
-         new (&argInfos[i]) ArgInfo(self);
-        i++;
-    }
-    for (u32 j = 0; j < unnamedArgCount; ++i, ++j)
-    {
-        new (&argInfos[i]) ArgInfo(s_library->m_PyTuple_GetItem(args, j));
-    }
-    if (kwargs)
-    {
-        Py_ssize_t pos = 0;
-        PyObject* key = 0;
-        PyObject* item = 0;
-        while (s_library->m_PyDict_Next(kwargs, &pos, &key, &item))
+        u32 argIndex = 0;
+        if (self)
         {
-            int version = s_library->getVersion();
-            if (version >= 33)
+             new (&argInfos[argIndex]) ArgInfo(self);
+             argIndex++;
+        }
+        for (u32 i = 0; i < unnamedArgCount; ++argIndex, ++i)
+        {
+            new (&argInfos[argIndex]) ArgInfo(s_library->m_PyTuple_GetItem(args, argIndex));
+        }
+        if (kwargs)
+        {
+            Py_ssize_t pos = 0;
+            PyObject* key = 0;
+            PyObject* item = 0;
+            while (s_library->m_PyDict_Next(kwargs, &pos, &key, &item))
             {
-                new (&argInfos[i]) ArgInfo(s_library->m_PyUnicode_AsUTF8(key), item);
-            }
-            else if (version >= 30)
-            {
-                PyObject* bytes = s_library->m_PyUnicode_AsASCIIString(key);
-                if (!bytes)
+                int version = s_library->getVersion();
+                if (version >= 33)
                 {
-                    return 0;
+                    new (&argInfos[argIndex]) ArgInfo(s_library->m_PyUnicode_AsUTF8(key), item);
                 }
-                const char* name = s_library->m_PyBytes_AsString(bytes);
-                new (&argInfos[i]) ArgInfo(name, item);
-                Py_DECREF(bytes);
+                else if (version >= 30)
+                {
+                    PyObject* bytes = s_library->m_PyUnicode_AsASCIIString(key);
+                    if (!bytes)
+                    {
+                        return 0;
+                    }
+                    const char* name = s_library->m_PyBytes_AsString(bytes);
+                    new (&argInfos[argIndex]) ArgInfo(name, item);
+                    Py_DECREF(bytes);
+                }
+                else
+                {
+                    new (&argInfos[argIndex]) ArgInfo(s_library->m_PyString_AsString(key), item);
+                }
+                ++argIndex;
             }
-            else
-            {
-                new (&argInfos[i]) ArgInfo(s_library->m_PyString_AsString(key), item);
-            }
-            ++i;
         }
     }
     raw<const RTTI::Method::Overload> o = method->overloads;
