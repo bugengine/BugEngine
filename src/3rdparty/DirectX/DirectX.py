@@ -38,9 +38,19 @@ def options(opt):
 
 def setup(conf):
     from waflib import Options
-    includes=[os.path.join(Options.options.dx_sdk, 'Include')]
-    libdirs=[os.path.join(Options.options.dx_sdk, 'Lib', 'x86'), os.path.join(Options.options.dx_sdk, 'Lib', 'x64'), os.path.join(Options.options.dx_sdk, 'Lib', 'arm')]
-    conf.check_lib('d3d9', var='dx9', libpath=libdirs)
-    conf.check_lib('d3d10', var='dx10', libpath=libdirs)
-    conf.check_lib('d3d11', var='dx11', libpath=libdirs)
+    if Options.options.dx_sdk:
+        includes=[os.path.join(Options.options.dx_sdk, 'Include')]
+        libdirs=[os.path.join(Options.options.dx_sdk, 'Lib', 'x86'), os.path.join(Options.options.dx_sdk, 'Lib', 'x64'), os.path.join(Options.options.dx_sdk, 'Lib', 'arm')]
+    else:
+        includes=[]
+        libdirs=[]
+    conf.check_lib('d3d9', var='dx9', libpath=libdirs, includepath=includes,
+                   includes=['d3d9.h'],
+                   functions=['Direct3DCreate9(0)'])
+    conf.check_lib('d3d10', var='dx10', libpath=libdirs, includepath=includes,
+                   includes=['d3d10.h'],
+                   functions=['D3D10CreateDevice(0, D3D10_DRIVER_TYPE_HARDWARE, 0, 0, 0, 0)'])
+    conf.check_lib('d3d11', var='dx11', libpath=libdirs, includepath=includes,
+                   includes=['d3d11.h'],
+                   functions=['D3D11CreateDevice(0, D3D_DRIVER_TYPE_HARDWARE, 0, 0, 0, 0, 0, 0, 0, 0)'])
 
