@@ -149,7 +149,7 @@ def get_native_gcc(conf):
         try:
             p = Utils.subprocess.Popen(cmd, stdin=Utils.subprocess.PIPE, stdout=Utils.subprocess.PIPE, stderr=Utils.subprocess.PIPE)
             out = p.communicate()[1]
-        except:
+        except Exception:
             return (None, None)
 
         if not isinstance(out, str):

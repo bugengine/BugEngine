@@ -202,7 +202,7 @@ def get_native_clang_target(conf, clang):
     try:
         p = Utils.subprocess.Popen(cmd, stdin=Utils.subprocess.PIPE, stdout=Utils.subprocess.PIPE, stderr=Utils.subprocess.PIPE)
         out = p.communicate()[1]
-    except:
+    except Exception:
         return (None, None)
     if p.returncode != 0:
         return (None, None)
