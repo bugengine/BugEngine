@@ -22,6 +22,7 @@ def set_linux_options(self):
     self.env.DEPLOY_KERNELDIR = os.path.join('share', 'bugengine', 'kernel')
     self.env.pymodule_PATTERN = '%s.so'
 
+    self.env.append_unique('DEFINES', ['_GNU_SOURCE'])
     self.env.RPATH = '$ORIGIN/../share/bugengine/plugin:$ORIGIN/../lib:$ORIGIN:$ORIGIN/../plugin'
     self.env.append_unique('LIB', ['dl', 'rt', 'pthread', 'm'])
 
@@ -39,8 +40,7 @@ def set_linux_suncc_options(conf, arch):
         v.append_unique('LINKFLAGS', ['-m64'])
     v.append_unique('CFLAGS', ['-mt', '-xldscope=hidden', '-Kpic', '-DPIC', '-D__PIC__'])
     v.append_unique('CXXFLAGS', ['-mt', '-xldscope=hidden', '-Kpic', '-DPIC', '-D__PIC__', '-library=Crun,stlport4'])
-    v.append_unique('LINKFLAGS', ['-lrt', '-mt', '-znow', '-xldscope=hidden', '-z absexec', '-Kpic', '-library=Crun,stlport4', '-staticlib=%all'])
-    v.append_unique('LIBPATH', v.SYSTEM_LIB_PATHS)
+    v.append_unique('LINKFLAGS', ['-lrt', '-mt', '-znow', '-xldscope=hidden', '-z', 'absexec', '-Kpic', '-library=Crun,stlport4', '-staticlib=Crun,stlport4'])
 
     v['RPATH_ST'] = '-R%s'
 
@@ -78,7 +78,6 @@ def set_linux_icc_options(self, flags, version, arch):
         v.CFLAGS = flags + ['-fPIC']
         v.CXXFLAGS = flags + ['-fPIC']
     v.LINKFLAGS = flags + ['-rdynamic', '-Wl,-E', '-static-libgcc', '-static-intel']
-    v.append_unique('LIBPATH', v.SYSTEM_LIB_PATHS)
 
     v.CFLAGS_warnnone = ['-w']
     v.CXXFLAGS_warnnone = ['-w']
@@ -211,14 +210,13 @@ def configure(conf):
                         conf.env.KERNEL_TOOLCHAINS = [toolchain]
                         conf.add_toolchain(target, arch, 'suncc', version, arch)
                     except Errors.WafError as e:
-                        conf.variant = ''
                         pprint('YELLOW', '%s failed: %s' % (toolchain, e))
                     except Exception as e:
-                        conf.variant = ''
                         raise
                     else:
-                        conf.variant = ''
                         pprint('GREEN', 'configured for toolchain %s' % (toolchain))
+                finally:
+                    conf.variant = ''
 
     for name, bindir, gcc, gxx, version, target, arch, options in conf.env.ICC_TARGETS:
         position = target.find('linux')
@@ -243,19 +241,18 @@ def configure(conf):
                         conf.env.KERNEL_TOOLCHAINS = [toolchain]
                         conf.add_toolchain(os_name, arch, name, version, arch)
                     except Errors.WafError as e:
-                        conf.variant = ''
                         pprint('YELLOW', '%s failed: %s' % (toolchain, e))
                     except Exception as e:
-                        conf.variant = ''
                         raise
                     else:
-                        conf.variant = ''
                         pprint('GREEN', 'configured for toolchain %s' % (toolchain))
+                finally:
+                    conf.variant = ''
 
     for name, bindir, gcc, gxx, version, target, arch, options in conf.env.GCC_TARGETS:
         arch, options = filter_linux_arch((arch, options))
         position = target.find('linux-gnu')
-        if position != -1:
+        if position != -1 or target.endswith('linux'):
             os_name = 'linux'
             toolchain = '%s-%s-%s-%s'%(os_name, arch, name, version)
             if toolchain not in seen:
@@ -276,14 +273,13 @@ def configure(conf):
                         conf.env.KERNEL_TOOLCHAINS = [toolchain]
                         conf.add_toolchain(os_name, arch, name, version, arch)
                     except Errors.WafError as e:
-                        conf.variant = ''
                         pprint('YELLOW', '%s failed: %s' % (toolchain, e))
                     except Exception as e:
-                        conf.variant = ''
                         raise
                     else:
-                        conf.variant = ''
                         pprint('GREEN', 'configured for toolchain %s' % (toolchain))
+                finally:
+                    conf.variant = ''
 
     for version, directory, target, arch in conf.env.CLANG_TARGETS:
         if target.find('linux') != -1:
@@ -312,14 +308,13 @@ def configure(conf):
                     conf.env.KERNEL_TOOLCHAINS = [toolchain]
                     conf.add_toolchain(os_name, arch_name, 'clang', version, arch_name)
                 except Errors.WafError as e:
-                    conf.variant = ''
                     pprint('YELLOW', '%s failed: %s' % (toolchain, e))
                 except Exception as e:
-                    conf.variant = ''
                     raise
                 else:
-                    conf.variant = ''
                     pprint('GREEN', 'configured for toolchain %s' % (toolchain))
+            finally:
+                conf.variant = ''
 
 def build(bld):
     #bld.platforms.append(bld.external('3rdparty.X11'))

@@ -116,13 +116,6 @@ const format<SIZE>& operator|(const format<SIZE>& f, const char* value)
 }
 
 template< u16 SIZE >
-const format<SIZE>& operator|(const format<SIZE>& f, const format<SIZE>& value)
-{
-    f.put(value.c_str());
-    return f;
-}
-
-template< u16 SIZE >
 const format<SIZE>& operator|(const format<SIZE>& f, i64 value)
 {
     char result[16];

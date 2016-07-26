@@ -24,8 +24,10 @@ def set_freebsd_options(self):
 
     self.env.RPATH = '$ORIGIN/../share/bugengine/plugin:$ORIGIN/../lib:$ORIGIN:$ORIGIN/../plugin'
     self.env.append_unique('LIB', ['rt', 'pthread', 'm'])
-    self.env.append_unique('INCLUDES', ['/usr/local/include'])
-    self.env.append_unique('LIBPATH', ['/usr/local/lib'])
+    self.env.append_unique('CFLAGS', ['-I%s/usr/local/include'%(self.env.SYSROOT or '')])
+    self.env.append_unique('CXXFLAGS', ['-I%s/usr/local/include'%(self.env.SYSROOT or '')])
+    self.env.append_unique('LIBPATH', ['%s/usr/local/lib'%(self.env.SYSROOT or '')])
+    self.env.append_unique('DEFINES', ['_BSD_SOURCE'])
 
 @conf
 def set_freebsd_gcc_options(self, flags, version):
