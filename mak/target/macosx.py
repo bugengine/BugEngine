@@ -26,6 +26,7 @@ def set_macosx_options(self):
     self.env.DEPLOY_DATADIR = share
     self.env.DEPLOY_PLUGINDIR = os.path.join(share, 'plugin')
     self.env.DEPLOY_KERNELDIR = os.path.join(share, 'kernel')
+    self.env.append_unique('DEFINES', ['_BSD_SOURCE'])
 
 
 @conf

@@ -75,7 +75,7 @@ def check_lib(self, libname, var='', libpath=[], includepath=[], includes=[], fu
         return
     try:
         if functions:
-            functions =  '+'.join(['(char*)&%s'%f for f in functions])
+            functions =  '+'.join(['%s'%f for f in functions])
         else:
             functions = '0'
         self.check(

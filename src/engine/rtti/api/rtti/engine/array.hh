@@ -69,8 +69,8 @@ raw<RTTI::Class> be_typeid< minitl::array<T> >::preklass()
 {
     static RTTI::Class klass = {
         istring(minitl::format<512u>("array<%s>") | be_typeid<T>::type().name()),
-        be_game_Namespace(),
-        be_typeid< void >::preklass(),
+        {be_game_Namespace().m_ptr},
+        {be_typeid< void >::preklass().m_ptr},
         0, 0, RTTI::ClassType_Array, {0}, {0},
         {0},
         {0},
@@ -92,7 +92,7 @@ raw<const RTTI::Class> be_typeid< minitl::array<T> >::registerProperties()
     static RTTI::Method::Overload constructor_overload = {
         {0},
         {0},
-        { result, RTTI::Type::Value, RTTI::Type::Mutable, RTTI::Type::Mutable},
+        { {result.m_ptr}, RTTI::Type::Value, RTTI::Type::Mutable, RTTI::Type::Mutable},
         0,
         {0},
         true,

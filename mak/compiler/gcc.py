@@ -81,15 +81,28 @@ def add_all_archs_to_env(conf, name, bindir, cc, cxx, version, target, arch):
 
 @conf
 def detect_gcc_archs_from_path(conf, name, bindir, gcc, gxx, version, target, arch):
-    versionsmall = '.'.join(version.split('.')[0:2])
-    versionverysmall = ''.join(version.split('.')[0:1])
+    v = version.split('.')
+    versions = [
+        '.'.join(v),
+        ''.join(v),
+        '.'.join(v[0:2]),
+        ''.join(v[0:2]),
+        v[0],
+        '',
+    ]
 
     cc = cxx = None
-    for v in ['-%s'%version, '-%s'%versionsmall, '-%s'%versionverysmall, versionverysmall, '']:
+    for v in versions:
+        cc = conf.find_program('%s-%s-%s'%(target, gcc, v), var='CC', path_list=[bindir], mandatory=False)
+        if cc:
+            break
         cc = conf.find_program('%s-%s%s'%(target, gcc, v), var='CC', path_list=[bindir], mandatory=False)
         if cc:
             break
-    for v in ['-%s'%version, '-%s'%versionsmall, '-%s'%versionverysmall, versionverysmall, '']:
+    for v in versions:
+        cxx = conf.find_program('%s-%s-%s'%(target, gxx, v), var='CXX', path_list=[bindir], mandatory=False)
+        if cxx:
+            break
         cxx = conf.find_program('%s-%s%s'%(target, gxx, v), var='CXX', path_list=[bindir], mandatory=False)
         if cxx:
             break
@@ -274,6 +287,32 @@ def load_gcc(self, bindir, gcc, gxx, version, target, arch, options):
             if line and line.startswith('libraries:'):
                 line = line[10:].strip()
                 self.env.append_unique('SYSTEM_LIBPATHS', line.split(os.pathsep))
+
+    try:
+        node = self.bldnode.make_node('main.c')
+        outnode = node.change_ext('')
+        node.write('int main(){}\n')
+        cmd = self.env.CC + options + ['-v', node.abspath(), '-o', outnode.abspath()]
+        p = Utils.subprocess.Popen(cmd, stdin=Utils.subprocess.PIPE, stdout=Utils.subprocess.PIPE, stderr=Utils.subprocess.PIPE)
+        out, err = p.communicate()
+    except Exception as e:
+        print('could not retrieve system defines: %s' % str(e))
+    else:
+        if not isinstance(out, str):
+            out = out.decode(sys.stdout.encoding)
+        if not isinstance(err, str):
+            err = err.decode(sys.stdout.encoding)
+        out = out.split('\n') + err.split('\n')
+        while out:
+            line = out.pop(0)
+            sysroot = line.find('--sysroot')
+            if sysroot != -1:
+                sysroot = shlex.split(line[sysroot+len('--sysroot')+1:].replace('\\', '\\\\'))[0]
+                self.env.SYSROOT = os.path.normpath(sysroot)
+    finally:
+        node.delete()
+        outnode.delete()
+
 
 
 

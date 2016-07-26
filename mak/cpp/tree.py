@@ -601,8 +601,8 @@ class Class(Container):
                 classtype = '0'
         definition.write('    static ::BugEngine::RTTI::Class cls = {\n'
                          '        ::BugEngine::istring("%s"),\n'
-                         '        %s,\n'
-                         '        %s,\n'
+                         '        {%s.m_ptr},\n'
+                         '        {%s.m_ptr},\n'
                          '        u32(sizeof(%s)),\n'
                          '        %s,\n'
                          '        %s,\n'
@@ -625,9 +625,9 @@ class Class(Container):
         else:
             self.typedef(definition)
         if self.parent:
-            next_object = '::BugEngine::be_typeid< %s >::klass()->objects' % self.parent
-            next_method = '::BugEngine::be_typeid< %s >::klass()->methods' % self.parent
-            next_property = '::BugEngine::be_typeid< %s >::klass()->properties' % self.parent
+            next_object = '{::BugEngine::be_typeid< %s >::klass()->objects.m_ptr}' % self.parent
+            next_method = '{::BugEngine::be_typeid< %s >::klass()->methods.m_ptr}' % self.parent
+            next_property = '{::BugEngine::be_typeid< %s >::klass()->properties.m_ptr}' % self.parent
         else:
             next_object = '{0}'
             next_method = '{0}'
