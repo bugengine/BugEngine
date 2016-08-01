@@ -1061,7 +1061,7 @@ def get_cc_version(conf, cc, gcc=False, icc=False):
 			conf.fatal('Could not determine the compiler type')
 
 	if icc and out.find('__INTEL_COMPILER') < 0:
-		conf.fatal('Not icc/icpc')
+		conf.fatal('%s: Not icc/icpc' % ' '.join(cmd))
 
 	k = {}
 	if icc or gcc:

@@ -117,8 +117,7 @@ as                                                      { update(be_package_leng
 \"[^\r\n\"]*\"                                          { update(be_package_leng); yylval.sValue = be_strdup(be_package_text+1); yylval.sValue[be_package_leng-2] = 0; return VAL_STRING; }
 \<[^\r\n\"]*\>                                          { update(be_package_leng); yylval.sValue = be_strdup(be_package_text+1); yylval.sValue[be_package_leng-2] = 0; return VAL_FILENAME; }
 -?[0-9]+                                                { update(be_package_leng); yylval.iValue = strToInteger(be_package_text, be_package_leng); return VAL_INTEGER; }
-{DIGITS}("."{DIGITS}?)?([eE]{SIGN}?{DIGITS})?   |
-"."{DIGITS}([eE]{SIGN}?{DIGITS})?                       { update(be_package_leng); yylval.fValue = strToDouble(be_package_text, be_package_leng); return VAL_FLOAT; }
+{DIGITS}("."{DIGITS}?)?([eE]{SIGN}?{DIGITS})?           { update(be_package_leng); yylval.fValue = strToDouble(be_package_text, be_package_leng); return VAL_FLOAT; }
 "\n"                                                    { newline(); }
 [ \r\t]+                                                { update(be_package_leng); }
 \#[^\n]*\n                                              { update(be_package_leng); }

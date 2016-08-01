@@ -308,7 +308,7 @@ def set_android_sdk_options(conf, arch, ndk_path, sdk_path, sdk_version):
     if not os.path.isfile(os.path.join(ndk_path, '..', '..', 'prebuilt', 'android-%s'%get_android_arch(arch), 'gdbserver', 'gdbserver')):
         raise Errors.WafError('could not find gdbserver for architecture %s' % get_android_arch(arch))
     ndk_path = os.path.join(ndk_path, 'arch-%s'%get_android_arch(arch))
-    conf.env.SYSROOT = [ndk_path]
+    conf.env.SYSROOT = ndk_path
     conf.env.append_unique('CFLAGS', ['--sysroot', ndk_path])
     conf.env.append_unique('CXXFLAGS', ['--sysroot', ndk_path])
     conf.env.append_unique('LINKFLAGS', ['--sysroot', ndk_path])

@@ -10,10 +10,10 @@
 #define BE_PLATFORM_POSIX       1
 #define BE_PLATFORM_PC          1
 
-#define     _GNU_SOURCE 1
 #include    <strings.h>
 #include    <stdlib.h>
 #include    <malloc.h>
+#include    <alloca.h>
 #define     stricmp     strcasecmp
 #define     strnicmp    strncasecmp
 #define     malloca     alloca

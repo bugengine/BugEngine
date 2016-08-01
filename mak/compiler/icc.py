@@ -2,32 +2,44 @@ from waflib import Utils, Logs
 from waflib.Configure import conf
 import os, sys
 
+archs = {
+    '__i386__': 'x86',
+    '__x86_64__': 'amd64',
+}
 
 @conf
-def get_native_icc_target(conf, icc):
-    cmd = [icc, '-V']
+def get_native_icc_target(conf, icc, options):
+    cmd = [icc] + options + ['-dM', '-E', '-']
     try:
         p = Utils.subprocess.Popen(cmd, stdin=Utils.subprocess.PIPE, stdout=Utils.subprocess.PIPE, stderr=Utils.subprocess.PIPE)
-        out = p.communicate()[1]
-    except:
+        p.stdin.write(b'\n')
+        out, err = p.communicate()
+    except Exception as e:
+        print(e)
         return (None, None)
-
     if not isinstance(out, str):
         out = out.decode(sys.stdout.encoding)
+        err = err.decode(sys.stderr.encoding)
+    if p.returncode != 0:
+        return (None, None)
+    for line in err.split('\n'):
+        if line.find('#10148') != -1:
+            # command-line option not supported
+            return (None, None)
+
     out = out.split('\n')
-    arch = 'x86'
+    arch = None
     version = None
     for line in out:
         words = line.split()
-        while len(words):
-            if words[0] == 'Intel(R)' and words[1] == '64':
-                arch = 'amd64'
-            if words[0] == 'ID:':
-                if words[1].startswith('m_cproc_'):
-                    version = words[1][10:].split('.')[0]
-            if words[0] == 'Version':
-                version = words[1].split('.')[0]
-            words = words[1:]
+        if not words: continue
+        if words[1] in archs:
+            arch = archs[words[1]]
+        elif words[1] == '__INTEL_COMPILER':
+            patch = words[2][-1]
+            minor = words[2][-2]
+            major = words[2][:-2]
+            version='%s.%s%s' % (major, minor, patch if patch != '0' else '')
     return (arch, version)
 
 
@@ -40,8 +52,15 @@ def detect_icc(conf):
         conf.env.ICC = []
         conf.env.ICPC = []
         if icc and icpc:
-            arch, version = conf.get_native_icc_target(icc)
-            conf.env.ICC_TARGETS.append(('icc', bindir, icc, icpc, version, os.uname()[0].lower(), arch, []))
+            found = False
+            for options in (['-m32'], ['-m64']):
+                arch, version = conf.get_native_icc_target(icc, options)
+                if arch:
+                    found = True
+                    conf.env.ICC_TARGETS.append(('icc', bindir, icc, icpc, version, os.uname()[0].lower(), arch, options))
+                if not found:
+                    arch, version = conf.get_native_icc_target(icc, [])
+                    conf.env.ICC_TARGETS.append(('icc', bindir, icc, icpc, version, os.uname()[0].lower(), arch, []))
 
 
 @conf

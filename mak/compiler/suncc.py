@@ -8,6 +8,25 @@ def all_suncc_archs(arch):
     return [arch]
 
 @conf
+def test_suncc(conf, suncc):
+    main = conf.bldnode.make_node('main.cpp')
+    target = main.change_ext('')
+    main.write('#include <stdio.h>\n#include <stdlib.h>\n\nint main() { printf("Hello, world!\\n"); return EXIT_SUCCESS; }\n')
+    cmd = [suncc, main.abspath(), '-o', target.abspath(), '-D_GNU_SOURCE']
+    success = False
+    try:
+        p = Utils.subprocess.Popen(cmd, stdin=Utils.subprocess.PIPE, stdout=Utils.subprocess.PIPE, stderr=Utils.subprocess.PIPE)
+        out, err = p.communicate()
+    except Exception:
+        pass
+    else:
+        success = (p.returncode == 0)
+    finally:
+        main.delete()
+        target.delete()
+    return success
+
+@conf
 def get_native_suncc_target(conf, suncc):
     cmd = [suncc, '-V']
     try:
@@ -44,7 +63,8 @@ def detect_suncc(conf):
     for bindir in bindirs:
         suncc = os.path.join(bindir, 'suncc')
         if os.path.isfile(suncc):
-            conf.env.SUNCC_TARGETS += conf.get_native_suncc_target(suncc)
+            if conf.test_suncc(suncc[:-2]+'CC'):
+                conf.env.SUNCC_TARGETS += conf.get_native_suncc_target(suncc)
     conf.env.SUNCC_TARGETS.sort(key= lambda x: (x[1], x[2], x[0]))
 
 @conf

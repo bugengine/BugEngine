@@ -102,8 +102,9 @@ public:
     void clear()
     {
         #if BE_ENABLE_WEAKCHECK
-            if (m_ptr) m_ptr->decweak(); m_ptr = 0;
+            if (m_ptr) m_ptr->decweak();
         #endif
+        m_ptr = 0;
     }
 };
 

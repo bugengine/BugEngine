@@ -66,6 +66,30 @@ static GLXContext createGLXContext(::Display* display, ::GLXFBConfig fbConfig)
             {
                 {
                     GLX_CONTEXT_MAJOR_VERSION_ARB, 4,
+                    GLX_CONTEXT_MINOR_VERSION_ARB, 6,
+                    GLX_CONTEXT_FLAGS_ARB, GLX_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB,
+                    None
+                },
+                {
+                    GLX_CONTEXT_MAJOR_VERSION_ARB, 4,
+                    GLX_CONTEXT_MINOR_VERSION_ARB, 5,
+                    GLX_CONTEXT_FLAGS_ARB, GLX_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB,
+                    None
+                },
+                {
+                    GLX_CONTEXT_MAJOR_VERSION_ARB, 4,
+                    GLX_CONTEXT_MINOR_VERSION_ARB, 4,
+                    GLX_CONTEXT_FLAGS_ARB, GLX_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB,
+                    None
+                },
+                {
+                    GLX_CONTEXT_MAJOR_VERSION_ARB, 4,
+                    GLX_CONTEXT_MINOR_VERSION_ARB, 3,
+                    GLX_CONTEXT_FLAGS_ARB, GLX_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB,
+                    None
+                },
+                {
+                    GLX_CONTEXT_MAJOR_VERSION_ARB, 4,
                     GLX_CONTEXT_MINOR_VERSION_ARB, 2,
                     GLX_CONTEXT_FLAGS_ARB, GLX_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB,
                     None
@@ -241,6 +265,7 @@ GLWindow::GLWindow(weak<const RenderWindowDescription> renderwindow, weak<const 
 :   Windowing::Window(renderwindow, renderer)
 ,   m_context(scoped<Context>())
 {
+    be_info("creating window %s" | renderwindow->title);
 }
 
 GLWindow::~GLWindow()

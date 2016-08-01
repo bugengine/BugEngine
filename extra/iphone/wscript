@@ -87,7 +87,7 @@ def set_iphone_sdk_options(self, target, sdk, sdk_path):
     sdk_path = sdk_path.replace('/iPhoneOS', '/%s'%target)
     self.env.MACOSX_SDK = '%s%s'%(target, sdk)
     self.env.XCODE_SDK_PATH = sdk_path
-    self.env.SYSROOT = [sdk_path]
+    self.env.SYSROOT = sdk_path
     self.env.append_unique('CFLAGS', ['-miphoneos-version-min=%s'%sdk, '-isysroot', sdk_path])
     self.env.append_unique('CXXFLAGS', ['-miphoneos-version-min=%s'%sdk, '-isysroot', sdk_path])
     self.env.append_unique('LINKFLAGS', ['-miphoneos-version-min=%s'%sdk, '-isysroot', sdk_path, '-L%s/usr/lib'%sdk_path])
@@ -109,6 +109,8 @@ def set_iphone_options(self, targets):
     self.env.DEPLOY_DATADIR = os.path.join(appname + '.app', 'share', 'bugengine')
     self.env.DEPLOY_PLUGINDIR = os.path.join(appname + '.app', 'share', 'bugengine', 'plugin')
     self.env.DEPLOY_KERNELDIR = os.path.join(appname + '.app', 'share', 'bugengine', 'kernel')
+    self.env.append_unique('DEFINES', ['_BSD_SOURCE'])
+
 
 @conf
 def set_iphone_gcc_options(self, flags, arch, version):

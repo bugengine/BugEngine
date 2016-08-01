@@ -412,7 +412,7 @@ class Typedef(CppObject):
     def write_object(self, owner, struct_owner, namespace, object_name, definition, instance):
         tag = self.write_tags('s_object_%s' % self.id(), definition)
         for alias, alias_cpp in self.all_names():
-            definition.write('    static ::BugEngine::RTTI::ObjectInfo s_object_%s = {\n'
+            definition.write('    static ::BugEngine::RTTI::ObjectInfo s_object_td_%s = {\n'
                              '        %s,\n'
                              '        %s,\n'
                              '        ::BugEngine::istring(%s),\n'
@@ -420,7 +420,7 @@ class Typedef(CppObject):
                              '            ::BugEngine::be_typeid< %s >::type())\n'
                              '    };\n' % (alias_cpp, object_name, tag,
                                            alias, self.name))
-            object_name = '{&s_object_%s}' % alias_cpp
+            object_name = '{&s_object_td_%s}' % alias_cpp
         return object_name
 
 
@@ -601,8 +601,8 @@ class Class(Container):
                 classtype = '0'
         definition.write('    static ::BugEngine::RTTI::Class cls = {\n'
                          '        ::BugEngine::istring("%s"),\n'
-                         '        %s,\n'
-                         '        %s,\n'
+                         '        {%s.m_ptr},\n'
+                         '        {%s.m_ptr},\n'
                          '        u32(sizeof(%s)),\n'
                          '        %s,\n'
                          '        %s,\n'
@@ -625,9 +625,9 @@ class Class(Container):
         else:
             self.typedef(definition)
         if self.parent:
-            next_object = '::BugEngine::be_typeid< %s >::klass()->objects' % self.parent
-            next_method = '::BugEngine::be_typeid< %s >::klass()->methods' % self.parent
-            next_property = '::BugEngine::be_typeid< %s >::klass()->properties' % self.parent
+            next_object = '{::BugEngine::be_typeid< %s >::klass()->objects.m_ptr}' % self.parent
+            next_method = '{::BugEngine::be_typeid< %s >::klass()->methods.m_ptr}' % self.parent
+            next_property = '{::BugEngine::be_typeid< %s >::klass()->properties.m_ptr}' % self.parent
         else:
             next_object = '{0}'
             next_method = '{0}'

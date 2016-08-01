@@ -16,7 +16,7 @@ kernel = """
 --pch ${PCH}
 --module ${PLUGIN}
 --tmp ${TMPDIR}
-${SRC[0].abspath()}
+${SRC[0].path_from(bld.bldnode)}
 ${TGT[0].abspath()}
 """ % sys.executable.replace('\\', '/')
 cls = Task.task_factory('kernel', kernel, [], 'PINK', ext_out=['.script.hh'])

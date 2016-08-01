@@ -456,11 +456,11 @@ Entity EntityStorage::spawn()
         {
             EntityInfo& info = *(EntityInfo*)(buffer + i * infoSize);
             info.next = index + i + 1;
-            for (u32 i = 0; i < m_componentTypes.size(); ++i)
+            for (u32 j = 0; j < m_componentTypes.size(); ++j)
             {
-                info.buckets[i].group = (u16)~(u16)0;
-                info.buckets[i].bucket = (u16)~(u16)0;
-                info.buckets[i].offset = ~(u32)0;
+                info.buckets[j].group = (u16)~(u16)0;
+                info.buckets[j].bucket = (u16)~(u16)0;
+                info.buckets[j].offset = ~(u32)0;
             }
         }
         EntityInfo& info = *(EntityInfo*)(buffer + (m_bufferCapacity-1) * infoSize);

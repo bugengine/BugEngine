@@ -26,7 +26,7 @@ def configure(conf):
     if os.path.isdir('/etc/ld.so.conf.d'):
         for f in sorted(os.listdir('/etc/ld.so.conf.d')):
             add_ld_so(conf, '/etc/ld.so.conf.d/'+f, lib_paths)
-    conf.env.SYSTEM_LIB_PATHS = ['/lib', '/usr/lib'] + lib_paths
+    conf.env.SYSTEM_LIB_PATHS = lib_paths
 
 
 def build(bld):

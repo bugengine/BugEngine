@@ -26,6 +26,7 @@ def set_macosx_options(self):
     self.env.DEPLOY_DATADIR = share
     self.env.DEPLOY_PLUGINDIR = os.path.join(share, 'plugin')
     self.env.DEPLOY_KERNELDIR = os.path.join(share, 'kernel')
+    self.env.append_unique('DEFINES', ['_BSD_SOURCE'])
 
 
 @conf
@@ -115,7 +116,7 @@ def get_macosx_sdk_version(self, name, compiler_list):
 def set_macosx_sdk_options(self, sdk_version, sdk_path):
     self.env.MACOSX_SDK = os.path.splitext(os.path.basename(sdk_path))[0]
     self.env.XCODE_SDK_PATH = sdk_path
-    self.env.SYSROOT = [sdk_path]
+    self.env.SYSROOT = sdk_path
     self.env.append_unique('CFLAGS', ['-mmacosx-version-min=%s'%sdk_version,
                                       '-isysroot', sdk_path])
     self.env.append_unique('CXXFLAGS', ['-mmacosx-version-min=%s'%sdk_version,

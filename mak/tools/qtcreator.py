@@ -308,7 +308,7 @@ class QtPlatform(QtObject):
     def __init__(self, bld, env_name=None, env=None, toolchain=None, debugger=None):
         if env_name:
             assert(env)
-            sysroot = env.SYSROOT[0] if env.SYSROOT else ''
+            sysroot = env.SYSROOT or ''
             self.PE_Profile_AutoDetected = False
             device = 'Desktop Device'
             device_type = 'Desktop'

@@ -43,7 +43,14 @@ template< u16 SIZE >
 format<SIZE>::format(const char *formatstr)
     :   m_firstFormat(m_buffer)
 {
-    strncpy(m_buffer, formatstr, SIZE-1);
+    if (formatstr)
+    {
+        strncpy(m_buffer, formatstr, SIZE-1);
+    }
+    else
+    {
+        m_buffer[0] = 0;
+    }
     m_buffer[SIZE-1] = 0;
     findToken();
 }
@@ -105,13 +112,6 @@ template< u16 SIZE >
 const format<SIZE>& operator|(const format<SIZE>& f, const char* value)
 {
     f.put(value);
-    return f;
-}
-
-template< u16 SIZE >
-const format<SIZE>& operator|(const format<SIZE>& f, const format<SIZE>& value)
-{
-    f.put(value.c_str());
     return f;
 }
 

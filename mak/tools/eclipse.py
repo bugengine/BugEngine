@@ -338,7 +338,7 @@ class eclipse(Build.BuildContext):
                                                         continue
                                                     task_includes, task_defines = gather_includes_defines(tg, appname)
                                                     with XmlNode(language, 'resource', {'project-relative-path': tg.name.replace('.', '/')}) as resource:
-                                                        for include in sub_env.INCLUDES + ['%s/usr/include'%sysroot for sysroot in sub_env.SYSROOT] + sub_env.SYSTEM_INCLUDES:
+                                                        for include in sub_env.INCLUDES + ['%s/usr/include'%sub_env.SYSROOT] + sub_env.SYSTEM_INCLUDES:
                                                             with XmlNode(resource, 'entry', {'kind': 'includePath', 'name': include}) as entry:
                                                                 XmlNode(entry, 'flag', {'value': 'BUILTIN'}).close()
                                                         for flags, include in task_includes:
