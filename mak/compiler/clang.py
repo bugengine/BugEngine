@@ -185,7 +185,7 @@ def load_clang(conf, directory, target, flags):
     conf.env.COMPILER_NAME='clang'
     conf.env.COMPILER_TARGET=target
     conf.load('gcc gxx')
-    if target.find('mingw') != -1:
+    if target.find('mingw') != -1 or target.find('windows') != -1:
         winres = conf.find_program(target + '-windres', var='WINRC', path_list=[directory], mandatory=False)
         if not winres:
             winres = conf.find_program('windres', var='WINRC', path_list=[directory], mandatory=False)
