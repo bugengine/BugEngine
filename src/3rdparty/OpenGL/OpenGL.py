@@ -5,5 +5,11 @@ def options(opt):
 def setup(conf):
     if 'darwin' in conf.env.VALID_PLATFORMS:
         conf.check_framework('OpenGL', var='GLFramework')
+    elif 'windows' in conf.env.VALID_PLATFORMS:
+        conf.check_lib(['opengl32', 'gdi32'], var='OpenGL',
+                       includes=['GL/gl.h'],
+                       functions=['glBegin(GL_TRIANGLES)'])
     else:
-        conf.check_lib(['OpenGL32', 'gdi32'], var='OpenGL') or conf.check_lib('GL', var='OpenGL')
+        conf.check_lib('GL', var='OpenGL',
+                       includes=['GL/gl.h'],
+                       functions=['glBegin(GL_TRIANGLES)'])

@@ -14,21 +14,21 @@ static const u32 s_overloadMaxDistance = 1000000;
 static const u32 s_overloadVarargDistance = s_overloadMaxDistance-1;
 
 
-Value Method::Parameter::getTag(const Type& type) const
+Value Method::Parameter::getTag(const Type& tagType) const
 {
     raw<const Tag> tag = tags;
     while(tag)
     {
-        if (type <= tag->tag.type())
+        if (tagType <= tag->tag.type())
             return Value(Value::ByRef(tag->tag));
         tag = tag->next;
     }
     return Value();
 }
 
-Value Method::Parameter::getTag(raw<const Class> type) const
+Value Method::Parameter::getTag(raw<const Class> tagType) const
 {
-    return getTag(Type::makeType(type, Type::Value, Type::Const, Type::Const));
+    return getTag(Type::makeType(tagType, Type::Value, Type::Const, Type::Const));
 }
 
 u32 Method::Overload::distance(Value* p, u32 nparams) const

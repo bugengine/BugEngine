@@ -23,21 +23,21 @@ void Property::set(Value& from, const Value& value) const
     get(from) = value;
 }
 
-Value Property::getTag(const Type& type) const
+Value Property::getTag(const Type& tagType) const
 {
     raw<const Tag> tag = tags;
     while(tag)
     {
-        if (type <= tag->tag.type())
+        if (tagType <= tag->tag.type())
             return Value(Value::ByRef(tag->tag));
         tag = tag->next;
     }
     return Value();
 }
 
-Value Property::getTag(raw<const Class> type) const
+Value Property::getTag(raw<const Class> tagType) const
 {
-    return getTag(Type::makeType(type, Type::Value, Type::Const, Type::Const));
+    return getTag(Type::makeType(tagType, Type::Value, Type::Const, Type::Const));
 }
 
 }}

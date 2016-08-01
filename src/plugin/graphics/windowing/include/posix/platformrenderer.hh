@@ -17,6 +17,8 @@ struct PlatformData
     ::Display*      display;
     ::GLXFBConfig   fbConfig;
     ::XVisualInfo*  visual;
+    ::Atom          wm_protocols;
+    ::Atom          wm_delete_window;
     PlatformData(::Display* display);
 };
 
@@ -29,10 +31,13 @@ private:
     ::Atom          m_windowProperty;
 private:
     static int xError(::Display* display, XErrorEvent* event);
+    static int ioError(::Display* display);
 public:
     PlatformRenderer();
     ~PlatformRenderer();
     ::Window createWindow(i16 x, i16 y, u16 w, u16 h);
+
+    weak<Window> getWindowFromXWindow(::Window w);
 };
 
 }}

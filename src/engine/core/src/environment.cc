@@ -38,7 +38,7 @@ ipath Environment::canonicalPath(const char *path, const char *pathSeparators)
         if (*path) path++;
         while (*path)
         {
-            const char* sep = path;
+            sep = path;
             while (*sep != separators[0]
                 && *sep != separators[1]
                 && *sep != separators[2]

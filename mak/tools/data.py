@@ -17,7 +17,7 @@ ddf = """
 --pch ${PCH}
 --module ${PLUGIN}
 --tmp ${TMPDIR}
-${SRC[0].abspath()}
+${SRC[0].path_from(bld.bldnode)}
 ${TGT[0].abspath()}
 ${TGT[1].abspath()}
 ${TGT[2].abspath()}

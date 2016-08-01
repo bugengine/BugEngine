@@ -44,6 +44,7 @@ typedef u8                      byte;
 #pragma warning(disable:4512)   // assignment operator could not be generated
 #pragma warning(disable:4610)   // struct X can never be instantiated - user defined constructor required
 #pragma warning(disable:4800)   // forcing value to bool 'true' or 'false' (performance warning)
+#pragma warning(disable:4359)   // Alignment specifier is less than actual alignment (X) and will be ignored
 #define BE_NOINLINE             __declspec(noinline)
 #define BE_ALWAYSINLINE         __forceinline
 #define BE_SELECTOVERLOAD(o)    (o)

@@ -19,6 +19,7 @@ void GLWindow::begin(ClearMode clear) const
             glClear(GL_COLOR_BUFFER_BIT);
         }
     }
+    be_info("blabla");
 }
 
 void GLWindow::end(PresentMode presentMode) const
@@ -32,6 +33,7 @@ void GLWindow::end(PresentMode presentMode) const
         }
         clearCurrent();
     }
+    be_info("blabla");
 }
 
 }}

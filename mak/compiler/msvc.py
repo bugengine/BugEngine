@@ -22,7 +22,7 @@ def configure(conf):
     conf.env.append_unique('useful_defines', ['__INTEL_COMPILER', '__clang__', '_MSC_VER'])
     try:
         conf.get_msvc_versions()
-    except:
+    except Exception:
         pass
     conf.end_msg('done')
 

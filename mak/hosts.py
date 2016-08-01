@@ -1,6 +1,6 @@
 import platform
 
-os_name = platform.uname()[0].lower()
+os_name = platform.uname()[0].lower().split('-')[0]
 
 def options(opt):
     opt.recurse('host/%s'%os_name)

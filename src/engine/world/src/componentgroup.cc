@@ -359,9 +359,11 @@ void ComponentGroup::groupEntityOperations(weak<EntityStorage> storage, Operatio
                 u32 maskBefore = operation->maskBefore;
                 u32 maskAfter = operation->maskAfter;
                 u32 maskChanged = 0;
-                byte* components = ((byte*)operation) + sizeof(EntityOperation);
-                unpackComponents((maskAfter & ~maskBefore)|maskChanged, components,
-                                 componentBuffer.begin(), componentOffsets.begin());
+                {
+                    byte* componentsBuffer = ((byte*)operation) + sizeof(EntityOperation);
+                    unpackComponents((maskAfter & ~maskBefore)|maskChanged, componentsBuffer,
+                                     componentBuffer.begin(), componentOffsets.begin());
+                }
                 for (EntityOperation* sibling = operation->next();
                      sibling < last;
                      sibling = sibling->next())
@@ -376,9 +378,9 @@ void ComponentGroup::groupEntityOperations(weak<EntityStorage> storage, Operatio
                         maskChanged |= maskRemoved & maskAdded;
                         maskAfter = sibling->maskAfter;
                         sibling->owner = s_invalidEntity;
-                        byte* components = (byte*)sibling + sizeof(EntityOperation);
+                        byte* componentsBuffer = (byte*)sibling + sizeof(EntityOperation);
                         u32 maskComponents = sibling->maskAfter & ~sibling->maskBefore;
-                        unpackComponents(maskComponents, components,
+                        unpackComponents(maskComponents, componentsBuffer,
                                          componentBuffer.begin(), componentOffsets.begin());
                     }
                 }
@@ -386,9 +388,9 @@ void ComponentGroup::groupEntityOperations(weak<EntityStorage> storage, Operatio
                      siblingBuffer;
                      siblingBuffer = siblingBuffer->m_next)
                 {
-                    EntityOperation* last = (EntityOperation*)(siblingBuffer->m_data + siblingBuffer->m_used);
+                    EntityOperation* lastOp = (EntityOperation*)(siblingBuffer->m_data + siblingBuffer->m_used);
                     for (EntityOperation* sibling = (EntityOperation*)siblingBuffer->m_data;
-                         sibling < last;
+                         sibling < lastOp;
                          sibling = sibling->next())
                     {
                         if (sibling->owner == operation->owner)
@@ -401,9 +403,9 @@ void ComponentGroup::groupEntityOperations(weak<EntityStorage> storage, Operatio
                             maskChanged |= maskRemoved & maskAdded;
                             maskAfter = sibling->maskAfter;
                             sibling->owner = s_invalidEntity;
-                            byte* components = (byte*)sibling + sizeof(EntityOperation);
+                            byte* componentsBuffer = (byte*)sibling + sizeof(EntityOperation);
                             u32 maskComponents = sibling->maskAfter & ~sibling->maskBefore;
-                            unpackComponents(maskComponents, components,
+                            unpackComponents(maskComponents, componentsBuffer,
                                              componentBuffer.begin(), componentOffsets.begin());
                         }
                     }
@@ -519,10 +521,10 @@ ComponentGroup::OperationBuffer* ComponentGroup::sortEntityOperations(OperationD
                     OperationBuffer* newBuffer = new (m_allocator.allocate()) OperationBuffer(current);
                     current->m_next = newBuffer;
                     current = newBuffer;
-                    u32 maxOps = (bufferSpace - current->m_used) / operationAddSize;
-                    u32 placedOp = minitl::min(maxOps, deltas[i].added-opCount);
-                    current->m_used += placedOp * operationAddSize;
-                    opCount += placedOp;
+                    u32 maxOpsNext = (bufferSpace - current->m_used) / operationAddSize;
+                    u32 placedOpNext = minitl::min(maxOpsNext, deltas[i].added-opCount);
+                    current->m_used += placedOpNext * operationAddSize;
+                    opCount += placedOpNext;
                 }
             }
             else
@@ -546,10 +548,10 @@ ComponentGroup::OperationBuffer* ComponentGroup::sortEntityOperations(OperationD
                     OperationBuffer* newBuffer = new (m_allocator.allocate()) OperationBuffer(current);
                     current->m_next = newBuffer;
                     current = newBuffer;
-                    u32 maxOps = (bufferSpace - current->m_used) / operationRemoveSize;
-                    u32 placedOp = minitl::min(maxOps, deltas[i].removed-opCount);
-                    current->m_used += placedOp * operationRemoveSize;
-                    opCount += placedOp;
+                    u32 maxOpsNext = (bufferSpace - current->m_used) / operationRemoveSize;
+                    u32 placedOpNext = minitl::min(maxOpsNext, deltas[i].removed-opCount);
+                    current->m_used += placedOpNext * operationRemoveSize;
+                    opCount += placedOpNext;
                 }
             }
             else
