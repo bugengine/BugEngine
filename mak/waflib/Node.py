@@ -399,7 +399,7 @@ class Node(object):
 			pass
 		# think twice before touching this (performance + complexity + correctness)
 
-		if os.sep == '/':
+		if not Utils.is_win32:
 			if not self.parent:
 				val = os.sep
 			elif not self.parent.name:

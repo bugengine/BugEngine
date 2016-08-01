@@ -203,7 +203,7 @@ def configure(conf):
                         Logs.pprint('GREEN', 'configured for toolchain %s' % (toolchain))
 
     for version, directory, target, arch in conf.env.CLANG_TARGETS:
-        if target.find('win32') != -1 or target.find('mingw') != -1:
+        if target.find('win32') != -1 or target.find('mingw') != -1 or target.find('windows') != -1:
             arch_name, options = arch
             os = 'windows'
             toolchain = '%s-%s-%s-%s'%(os, arch_name, 'clang', version)
