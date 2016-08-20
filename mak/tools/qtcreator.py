@@ -5,6 +5,7 @@ import os
 import sys
 import re
 import string
+import datetime
 from waflib import Context, Build, Logs
 from minixml import XmlDocument, XmlNode
 from xml.dom.minidom import parse
@@ -83,6 +84,8 @@ def write_value(node, value, key=''):
             return 'QVariantList', ''
         elif isinstance(v, list):
             return 'QVariantMap', ''
+        elif isinstance(v, datetime.datetime):
+            return 'QDateTime', v.strftime('%Y-%m-%dT%H:%M:%S')
         else:
             raise Exception('key \'%s\': unknown type in a map: %s'%(key, v.__class__.__name__))
     type, strvalue = convert_value(value)
@@ -126,6 +129,11 @@ def read_value(node):
         value = tuple((read_value(n)[1] for n in node.childNodes if n.nodeType == n.ELEMENT_NODE))
     elif type == 'QVariantMap':
         value = list([read_value(n) for n in node.childNodes if n.nodeType == n.ELEMENT_NODE])
+    elif type == 'QDateTime':
+        if node.childNodes:
+            value = datetime.datetime.strptime(node.childNodes[0].wholeText.strip(), '%Y-%m-%dT%H:%M:%S')
+        else:
+            value = datetime.datetime(1970,1,1)
     else:
         Logs.warn('unknown Qt type: %s' % node.toxml())
         value = ''
@@ -231,32 +239,39 @@ class QtToolchain(QtObject):
                 env.DEST_BINFMT,
                 variant
             )
-
-            toolchain_id =  'ProjectExplorer.ToolChain.Custom:%s' % generateGUID('BugEngine:toolchain:%s'%env_name)
             if isinstance(env.CXX, list):
-                self.ProjectExplorer_CustomToolChain_CompilerPath = env.CXX[0]
+                cxx = env.CXX[0]
             else:
-                self.ProjectExplorer_CustomToolChain_CompilerPath = env.CXX
-            self.ProjectExplorer_CustomToolChain_Cxx11Flags = ()
-            self.ProjectExplorer_CustomToolChain_ErrorPattern = ''
-            self.ProjectExplorer_CustomToolChain_FileNameCap = 1
-            self.ProjectExplorer_CustomToolChain_HeaderPaths = tuple(env.INCLUDES + env.SYSTEM_INCLUDES)
-            self.ProjectExplorer_CustomToolChain_LineNumberCap = 2
-            self.ProjectExplorer_CustomToolChain_MakePath = ''
-            self.ProjectExplorer_CustomToolChain_MessageCap = 3
-            self.ProjectExplorer_CustomToolChain_Mkspecs = ''
+                cxx = env.CXX
+
             if env.COMPILER_NAME == 'gcc':
-                self.ProjectExplorer_CustomToolChain_OutputParser = 0
-            elif env.COMPILER_NAME == 'clang':
-                self.ProjectExplorer_CustomToolChain_OutputParser = 1
+                self.ProjectExplorer_GccToolChain_Path = cxx
+                self.ProjectExplorer_GccToolChain_TargetAbi = abi
+                toolchain_id =  'ProjectExplorer.ToolChain.Gcc:%s' % generateGUID('BugEngine:toolchain:%s'%env_name)
+            elif env.COMPILER_NAME in ('clang', 'llvm'):
+                self.ProjectExplorer_GccToolChain_Path = cxx
+                self.ProjectExplorer_GccToolChain_TargetAbi = abi
+                toolchain_id =  'ProjectExplorer.ToolChain.Clang:%s' % generateGUID('BugEngine:toolchain:%s'%env_name)
             elif env.COMPILER_NAME == 'icc':
-                self.ProjectExplorer_CustomToolChain_OutputParser = 2
+                self.ProjectExplorer_GccToolChain_Path = cxx
+                self.ProjectExplorer_GccToolChain_TargetAbi = abi
+                toolchain_id =  'ProjectExplorer.ToolChain.LinuxIcc:%s' % generateGUID('BugEngine:toolchain:%s'%env_name)
             elif env.COMPILER_NAME == 'msvc':
-                self.ProjectExplorer_CustomToolChain_OutputParser = 3
+                toolchain_id =  'ProjectExplorer.ToolChain.Msvc:%s' % generateGUID('BugEngine:toolchain:%s'%env_name)
             else:
+                self.ProjectExplorer_CustomToolChain_CompilerPath = cxx
+                self.ProjectExplorer_CustomToolChain_Cxx11Flags = ()
+                self.ProjectExplorer_CustomToolChain_ErrorPattern = ''
+                self.ProjectExplorer_CustomToolChain_FileNameCap = 1
+                self.ProjectExplorer_CustomToolChain_HeaderPaths = tuple(env.INCLUDES + env.SYSTEM_INCLUDES)
+                self.ProjectExplorer_CustomToolChain_LineNumberCap = 2
+                self.ProjectExplorer_CustomToolChain_MakePath = ''
+                self.ProjectExplorer_CustomToolChain_MessageCap = 3
+                self.ProjectExplorer_CustomToolChain_Mkspecs = ''
                 self.ProjectExplorer_CustomToolChain_OutputParser = 0
-            self.ProjectExplorer_CustomToolChain_PredefinedMacros = tuple(env.DEFINES + env.SYSTEM_DEFINES)
-            self.ProjectExplorer_CustomToolChain_TargetAbi = abi
+                toolchain_id =  'ProjectExplorer.ToolChain.Custom:%s' % generateGUID('BugEngine:toolchain:%s'%env_name)
+                self.ProjectExplorer_CustomToolChain_PredefinedMacros = tuple(env.DEFINES + env.SYSTEM_DEFINES)
+                self.ProjectExplorer_CustomToolChain_TargetAbi = abi
             self.ProjectExplorer_ToolChain_Autodetect = False
             self.ProjectExplorer_ToolChain_DisplayName = 'BugEngine:toolchain:'+env_name
             self.ProjectExplorer_ToolChain_Id = toolchain_id
@@ -284,7 +299,10 @@ class QtDebugger(QtObject):
             else:
                 self.Binary = env.GDB or '/usr/bin/gdb'
                 self.EngineType = 1
-            self.Abis = tuple([toolchain.ProjectExplorer_CustomToolChain_TargetAbi])
+            abi = getattr(toolchain, 'ProjectExplorer_CustomToolChain_TargetAbi', None)
+            abi = abi or getattr(toolchain, 'ProjectExplorer_GccToolChain_TargetAbi', None)
+            abi = abi or getattr(toolchain, 'ProjectExplorer_MsvcToolChain_TargetAbi', None)
+            self.Abis = tuple([abi])
             self.AutoDetected = False
             self.DisplayName = 'BugEngine:debugger:'+env_name
             self.Id = generateGUID('BugEngine:debugger:%s'%env_name)
@@ -374,7 +392,9 @@ class QtCreator(Build.BuildContext):
                 includes, defines = self.gather_includes_defines(task_gen)
                 self.write_includes(task_gen, includes)
                 self.write_defines(task_gen, defines)
-                self.write_user(task_gen)
+                node = self.base_node.make_node('%s.creator.user' % task_gen.target)
+                with open(node.abspath(), 'w') as f:
+                    self.write_user(f, [task_gen])
         self.write_workspace(projects, appname, launcher_project)
 
     def get_environment_id(self):
@@ -633,11 +653,12 @@ class QtCreator(Build.BuildContext):
     def write_defines(self, task_gen, defines):
         self.base_node.make_node('%s.config'%task_gen.target).write('\n'.join(defines))
 
-    def write_user(self, task_gen):
-        node = self.base_node.make_node('%s.creator.user' % task_gen.target)
-        file = open(node.abspath(), 'w')
+    def write_user(self, file, task_gens):
         with XmlDocument(file, 'UTF-8', [('DOCTYPE', 'QtCreatorProject')]) as project:
             with XmlNode(project, 'qtcreator') as qtcreator:
+                with XmlNode(qtcreator, 'data') as data:
+                    XmlNode(data, 'variable', 'EnvironmentId').close()
+                    write_value(data, self.environment_id)
                 with XmlNode(qtcreator, 'data') as data_node:
                     XmlNode(data_node, 'variable', 'ProjectExplorer.Project.ActiveTarget').close()
                     write_value(data_node, 0)
@@ -696,15 +717,24 @@ class QtCreator(Build.BuildContext):
                                     ('GenericProjectManager.GenericBuildConfiguration.BuildDirectory', self.srcnode.abspath()),
                                     ('ProjectExplorer.BuildConfiguration.BuildStepList.0', [
                                         ('ProjectExplorer.BuildStepList.Step.0', [
+                                            ('ProjectExplorer.BuildStep.Enabled', False),
+                                            ('ProjectExplorer.ProjectConfiguration.DefaultDisplayName', 'Qbs configuration'),
+                                            ('ProjectExplorer.ProjectConfiguration.DisplayName', ''),
+                                            ('Qbs.Configuration', [
+                                                ('qbs.buildVariant', 'debug')
+                                            ]),
+                                            ('ProjectExplorer.ProjectConfiguration.Id', 'Qbs.BuildStep')
+                                        ]),
+                                        ('ProjectExplorer.BuildStepList.Step.1', [
                                             ('ProjectExplorer.BuildStep.Enabled', True),
                                             ('ProjectExplorer.ProcessStep.Arguments', '%s build:%s:%s'%(sys.argv[0], env_name, variant)),
                                             ('ProjectExplorer.ProcessStep.Command', sys.executable),
                                             ('ProjectExplorer.ProcessStep.WorkingDirectory', self.srcnode.abspath()),
                                             ('ProjectExplorer.ProjectConfiguration.DefaultDisplayName', 'Waf configuration'),
                                             ('ProjectExplorer.ProjectConfiguration.DisplayName', ''),
-                                            ('ProjectExplorer.ProjectConfiguration.Id', 'ProjectExplorer.ProcessStep')
+                                            ('ProjectExplorer.ProjectConfiguration.Id', 'ProjectExplorer.ProcessStep'),
                                         ]),
-                                        ('ProjectExplorer.BuildStepList.StepsCount', 1),
+                                        ('ProjectExplorer.BuildStepList.StepsCount', 2),
                                         ('ProjectExplorer.ProjectConfiguration.DefaultDisplayName', 'Build'),
                                         ('ProjectExplorer.ProjectConfiguration.DisplayName', ''),
                                         ('ProjectExplorer.ProjectConfiguration.Id', 'ProjectExplorer.BuildSteps.Build')
@@ -742,84 +772,88 @@ class QtCreator(Build.BuildContext):
                                         )),
                                     ('ProjectExplorer.ProjectConfiguration.DefaultDisplayName', 'Default'),
                                     ('ProjectExplorer.ProjectConfiguration.DisplayName', variant),
-                                    ('ProjectExplorer.ProjectConfiguration.Id', 'GenericProjectManager.GenericBuildConfiguration')
+                                    ('ProjectExplorer.ProjectConfiguration.Id', 'Qbs.QbsBuildConfiguration')
                                 ]))
                             build_configuration_index += 1
                         run_configurations = []
-                        if 'game' in task_gen.features:
-                            run_configurations.append((
-                                'ProjectExplorer.Target.RunConfiguration.0', [
-                                ('Analyzer.Valgrind.AddedSuppressionFiles', ()),
-                                ('Analyzer.Valgrind.Callgrind.CollectBusEvents', False),
-                                ('Analyzer.Valgrind.Callgrind.CollectSystime', False),
-                                ('Analyzer.Valgrind.Callgrind.EnableBranchSim', False),
-                                ('Analyzer.Valgrind.Callgrind.EnableCacheSim', False),
-                                ('Analyzer.Valgrind.Callgrind.EnableEventTooltips', True),
-                                ('Analyzer.Valgrind.Callgrind.MinimumCastRatio', 0.01),
-                                ('Analyzer.Valgrind.Callgrind.VisualisationMinimumCostRatio', 10),
-                                ('Analyzer.Valgrind.FilterExternalIssues', True),
-                                ('Analyzer.Valgrind.LeakCheckOnFinish', 1),
-                                ('Analyzer.Valgrind.NumCallers', 32),
-                                ('Analyzer.Valgrind.RemovedSuppressionFiles', ()),
-                                ('Analyzer.Valgrind.SelfModifyingCodeDetection', 1),
-                                ('Analyzer.Valgrind.Settings.UseGlobalSettings', True),
-                                ('Analyzer.Valgrind.ShowReachable', False),
-                                ('Analyzer.Valgrind.TrackOrigins', True),
-                                ('Analyzer.Valgrind.ValgrindExecutable', 'valgrind'),
-                                ('Analyzer.Valgrind.VisibleErrorKinds', (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14)),
-                                ('PE.EnvironmentAspect.Base', 2),
-                                ('PE.EnvironmentAspect.Changes', ()),
-                                ('ProjectExplorer.CustomExecutableRunConfiguration.Arguments', task_gen.target),
-                                ('ProjectExplorer.CustomExecutableRunConfiguration.Executable', to_var('OUT_NAME')),
-                                ('ProjectExplorer.CustomExecutableRunConfiguration.UseTerminal', False),
-                                ('ProjectExplorer.CustomExecutableRunConfiguration.WorkingDirectory', to_var('OUT_DIR')),
-                                ('ProjectExplorer.ProjectConfiguration.DefaultDisplayName', 'Run %s' % task_gen.target),
-                                ('ProjectExplorer.ProjectConfiguration.DisplayName', ''),
-                                ('ProjectExplorer.ProjectConfiguration.Id', 'ProjectExplorer.CustomExecutableRunConfiguration'),
-                                ('RunConfiguration.QmlDebugServerPort', 3768),
-                                ('RunConfiguration.UseCppDebugger', True),
-                                ('RunConfiguration.UseCppDebuggerAuto', False),
-                                ('RunConfiguration.UseMultiProcess', False),
-                                ('RunConfiguration.UseQmlDebugger', False),
-                                ('RunConfiguration.UseQmlDebuggerAuto', True),
-                            ]))
-                        elif 'python_module' in task_gen.features:
-                            run_configurations.append((
-                                'ProjectExplorer.Target.RunConfiguration.0', [
-                                ('Analyzer.Valgrind.AddedSuppressionFiles', ()),
-                                ('Analyzer.Valgrind.Callgrind.CollectBusEvents', False),
-                                ('Analyzer.Valgrind.Callgrind.CollectSystime', False),
-                                ('Analyzer.Valgrind.Callgrind.EnableBranchSim', False),
-                                ('Analyzer.Valgrind.Callgrind.EnableCacheSim', False),
-                                ('Analyzer.Valgrind.Callgrind.EnableEventTooltips', True),
-                                ('Analyzer.Valgrind.Callgrind.MinimumCastRatio', 0.01),
-                                ('Analyzer.Valgrind.Callgrind.VisualisationMinimumCostRatio', 10),
-                                ('Analyzer.Valgrind.FilterExternalIssues', True),
-                                ('Analyzer.Valgrind.LeakCheckOnFinish', 1),
-                                ('Analyzer.Valgrind.NumCallers', 32),
-                                ('Analyzer.Valgrind.RemovedSuppressionFiles', ()),
-                                ('Analyzer.Valgrind.SelfModifyingCodeDetection', 1),
-                                ('Analyzer.Valgrind.Settings.UseGlobalSettings', True),
-                                ('Analyzer.Valgrind.ShowReachable', False),
-                                ('Analyzer.Valgrind.TrackOrigins', True),
-                                ('Analyzer.Valgrind.ValgrindExecutable', 'valgrind'),
-                                ('Analyzer.Valgrind.VisibleErrorKinds', (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14)),
-                                ('PE.EnvironmentAspect.Base', 2),
-                                ('PE.EnvironmentAspect.Changes', ()),
-                                ('ProjectExplorer.CustomExecutableRunConfiguration.Arguments', '-c "import %s; import code; code.InteractiveConsole(globals()).interact()"' % task_gen.target),
-                                ('ProjectExplorer.CustomExecutableRunConfiguration.Executable', sys.executable),
-                                ('ProjectExplorer.CustomExecutableRunConfiguration.UseTerminal', True),
-                                ('ProjectExplorer.CustomExecutableRunConfiguration.WorkingDirectory', to_var('RUNBIN_DIR')),
-                                ('ProjectExplorer.ProjectConfiguration.DefaultDisplayName', 'Run %s' % task_gen.target),
-                                ('ProjectExplorer.ProjectConfiguration.DisplayName', ''),
-                                ('ProjectExplorer.ProjectConfiguration.Id', 'ProjectExplorer.CustomExecutableRunConfiguration'),
-                                ('RunConfiguration.QmlDebugServerPort', 3768),
-                                ('RunConfiguration.UseCppDebugger', True),
-                                ('RunConfiguration.UseCppDebuggerAuto', False),
-                                ('RunConfiguration.UseMultiProcess', False),
-                                ('RunConfiguration.UseQmlDebugger', False),
-                                ('RunConfiguration.UseQmlDebuggerAuto', True),
-                            ]))
+                        index = 0
+                        for task_gen in task_gens:
+                            if 'game' in task_gen.features:
+                                run_configurations.append((
+                                    'ProjectExplorer.Target.RunConfiguration.%d'%index, [
+                                    ('Analyzer.Valgrind.AddedSuppressionFiles', ()),
+                                    ('Analyzer.Valgrind.Callgrind.CollectBusEvents', False),
+                                    ('Analyzer.Valgrind.Callgrind.CollectSystime', False),
+                                    ('Analyzer.Valgrind.Callgrind.EnableBranchSim', False),
+                                    ('Analyzer.Valgrind.Callgrind.EnableCacheSim', False),
+                                    ('Analyzer.Valgrind.Callgrind.EnableEventTooltips', True),
+                                    ('Analyzer.Valgrind.Callgrind.MinimumCastRatio', 0.01),
+                                    ('Analyzer.Valgrind.Callgrind.VisualisationMinimumCostRatio', 10),
+                                    ('Analyzer.Valgrind.FilterExternalIssues', True),
+                                    ('Analyzer.Valgrind.LeakCheckOnFinish', 1),
+                                    ('Analyzer.Valgrind.NumCallers', 32),
+                                    ('Analyzer.Valgrind.RemovedSuppressionFiles', ()),
+                                    ('Analyzer.Valgrind.SelfModifyingCodeDetection', 1),
+                                    ('Analyzer.Valgrind.Settings.UseGlobalSettings', True),
+                                    ('Analyzer.Valgrind.ShowReachable', False),
+                                    ('Analyzer.Valgrind.TrackOrigins', True),
+                                    ('Analyzer.Valgrind.ValgrindExecutable', 'valgrind'),
+                                    ('Analyzer.Valgrind.VisibleErrorKinds', (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14)),
+                                    ('PE.EnvironmentAspect.Base', 2),
+                                    ('PE.EnvironmentAspect.Changes', ()),
+                                    ('ProjectExplorer.CustomExecutableRunConfiguration.Arguments', task_gen.target),
+                                    ('ProjectExplorer.CustomExecutableRunConfiguration.Executable', to_var('OUT_NAME')),
+                                    ('ProjectExplorer.CustomExecutableRunConfiguration.UseTerminal', False),
+                                    ('ProjectExplorer.CustomExecutableRunConfiguration.WorkingDirectory', to_var('OUT_DIR')),
+                                    ('ProjectExplorer.ProjectConfiguration.DefaultDisplayName', 'Run %s' % task_gen.target),
+                                    ('ProjectExplorer.ProjectConfiguration.DisplayName', task_gen.target),
+                                    ('ProjectExplorer.ProjectConfiguration.Id', 'ProjectExplorer.CustomExecutableRunConfiguration'),
+                                    ('RunConfiguration.QmlDebugServerPort', 3768),
+                                    ('RunConfiguration.UseCppDebugger', True),
+                                    ('RunConfiguration.UseCppDebuggerAuto', False),
+                                    ('RunConfiguration.UseMultiProcess', False),
+                                    ('RunConfiguration.UseQmlDebugger', False),
+                                    ('RunConfiguration.UseQmlDebuggerAuto', True),
+                                ]))
+                                index += 1
+                            elif 'python_module' in task_gen.features:
+                                run_configurations.append((
+                                    'ProjectExplorer.Target.RunConfiguration.%d'%index, [
+                                    ('Analyzer.Valgrind.AddedSuppressionFiles', ()),
+                                    ('Analyzer.Valgrind.Callgrind.CollectBusEvents', False),
+                                    ('Analyzer.Valgrind.Callgrind.CollectSystime', False),
+                                    ('Analyzer.Valgrind.Callgrind.EnableBranchSim', False),
+                                    ('Analyzer.Valgrind.Callgrind.EnableCacheSim', False),
+                                    ('Analyzer.Valgrind.Callgrind.EnableEventTooltips', True),
+                                    ('Analyzer.Valgrind.Callgrind.MinimumCastRatio', 0.01),
+                                    ('Analyzer.Valgrind.Callgrind.VisualisationMinimumCostRatio', 10),
+                                    ('Analyzer.Valgrind.FilterExternalIssues', True),
+                                    ('Analyzer.Valgrind.LeakCheckOnFinish', 1),
+                                    ('Analyzer.Valgrind.NumCallers', 32),
+                                    ('Analyzer.Valgrind.RemovedSuppressionFiles', ()),
+                                    ('Analyzer.Valgrind.SelfModifyingCodeDetection', 1),
+                                    ('Analyzer.Valgrind.Settings.UseGlobalSettings', True),
+                                    ('Analyzer.Valgrind.ShowReachable', False),
+                                    ('Analyzer.Valgrind.TrackOrigins', True),
+                                    ('Analyzer.Valgrind.ValgrindExecutable', 'valgrind'),
+                                    ('Analyzer.Valgrind.VisibleErrorKinds', (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14)),
+                                    ('PE.EnvironmentAspect.Base', 2),
+                                    ('PE.EnvironmentAspect.Changes', ()),
+                                    ('ProjectExplorer.CustomExecutableRunConfiguration.Arguments', '-c "import %s; import code; code.InteractiveConsole(globals()).interact()"' % task_gen.target),
+                                    ('ProjectExplorer.CustomExecutableRunConfiguration.Executable', sys.executable),
+                                    ('ProjectExplorer.CustomExecutableRunConfiguration.UseTerminal', True),
+                                    ('ProjectExplorer.CustomExecutableRunConfiguration.WorkingDirectory', to_var('RUNBIN_DIR')),
+                                    ('ProjectExplorer.ProjectConfiguration.DefaultDisplayName', 'Run %s' % task_gen.target),
+                                    ('ProjectExplorer.ProjectConfiguration.DisplayName', ''),
+                                    ('ProjectExplorer.ProjectConfiguration.Id', 'ProjectExplorer.CustomExecutableRunConfiguration'),
+                                    ('RunConfiguration.QmlDebugServerPort', 3768),
+                                    ('RunConfiguration.UseCppDebugger', True),
+                                    ('RunConfiguration.UseCppDebuggerAuto', False),
+                                    ('RunConfiguration.UseMultiProcess', False),
+                                    ('RunConfiguration.UseQmlDebugger', False),
+                                    ('RunConfiguration.UseQmlDebuggerAuto', True),
+                                ]))
+                                index += 1
 
                         write_value(data, [
                             ('ProjectExplorer.ProjectConfiguration.DefaultDisplayName', env_name),
@@ -841,10 +875,10 @@ class QtCreator(Build.BuildContext):
                     XmlNode(data, 'variable', 'ProjectExplorer.Project.TargetCount').close()
                     write_value(data, target_index)
                 with XmlNode(qtcreator, 'data') as data:
-                    XmlNode(data, 'variable', 'ProjectExplorer.Project.Updater.EnvironmentId').close()
-                    write_value(data, self.environment_id)
-                with XmlNode(qtcreator, 'data') as data:
                     XmlNode(data, 'variable', 'ProjectExplorer.Project.Updater.FileVersion').close()
+                    write_value(data, self.__class__.version[1])
+                with XmlNode(qtcreator, 'data') as data:
+                    XmlNode(data, 'variable', 'Version').close()
                     write_value(data, self.__class__.version[1])
 
     def write_workspace(self, projects, appname, launcher):
@@ -911,3 +945,113 @@ class QtCreator3(QtCreator):
     optim = 'debug'
     version = (3, 15)
 
+class QtCreator4(QtCreator):
+    "creates projects for QtCreator 4.x"
+    cmd = 'qtcreator3'
+    fun = 'build'
+    optim = 'debug'
+    version = (4, 18)
+
+class Qbs(QtCreator4):
+    cmd = 'qbs'
+    fun = 'build'
+    optim = 'debug'
+
+    def execute(self):
+        self.restore()
+        if not self.all_envs:
+            self.load_envs()
+        self.env.PROJECTS=[self.__class__.cmd]
+        self.env.VARIANT = to_var('Variant')
+        self.env.TOOLCHAIN = to_var('Toolchain')
+        self.env.PREFIX = to_var('Prefix')
+        self.env.DEPLOY_ROOTDIR = to_var('Deploy_RootDir')
+        self.env.DEPLOY_BINDIR = to_var('Deploy_BinDir')
+        self.env.DEPLOY_RUNBINDIR = to_var('Deploy_RunBinDir')
+        self.env.DEPLOY_LIBDIR = to_var('Deploy_LibDir')
+        self.env.DEPLOY_INCLUDEDIR = to_var('Deploy_IncludeDir')
+        self.env.DEPLOY_DATADIR = to_var('Deploy_DataDir')
+        self.env.DEPLOY_PLUGINDIR = to_var('Deploy_PluginDir')
+        self.env.DEPLOY_KERNELDIR = to_var('Deploy_KernelDir')
+        self.features = ['GUI']
+        self.recurse([self.run_dir])
+
+        self.environment_id = self.get_environment_id()
+        self.build_platform_list()
+        appname = getattr(Context.g_module, Context.APPNAME, self.srcnode.name)
+        self.base_node = self.srcnode
+        qbs_project = self.base_node.make_node('%s.qbs'%appname)
+        qbs_user = self.base_node.make_node('%s.qbs.user'%appname)
+        projects = { }
+        project_list = []
+        for group in self.groups:
+            for task_gen in group:
+                name = task_gen.name.split('.')
+                p = projects
+                for c in name[:-1]:
+                    try:
+                        p = p[c]
+                    except KeyError:
+                        p[c] = {}
+                        p = p[c]
+                p[name[-1]] = task_gen
+                project_list.append(task_gen)
+        with open(qbs_project.abspath(), 'w') as pfile:
+            pfile.write('import qbs\n\n')
+            pfile.write('Project {\n')
+            pfile.write('    name: "%s"\n' % appname)
+            self.write_project_list(pfile, projects)
+            pfile.write('}\n')
+        with open(qbs_user.abspath(), 'w') as f:
+            self.write_user(f, project_list)
+        self.write_workspace([qbs_project], appname, qbs_project)
+
+
+    def write_project_list(self, project_file, project_list, indent = '    '):
+        for k in sorted(project_list.keys()):
+            p = project_list[k]
+            if isinstance(p, dict):
+                project_file.write('%sProject {\n' % indent)
+                project_file.write('%s    name: "%s"\n' % (indent, k))
+                self.write_project_list(project_file, p, indent + '    ')
+                project_file.write('%s}\n' % indent)
+            else:
+                includes, defines = self.gather_includes_defines(p)
+                project_file.write('%sProduct {\n' % indent)
+                project_file.write('%s    Depends { name: "cpp" }\n' % (indent))
+                project_file.write('%s    name: "%s"\n' % (indent, p.name))
+                project_file.write('%s    targetName: "%s"\n' % (indent, p.name.split('.')[-1]))
+                project_file.write('%s    cpp.includePaths: [\n' % (indent))
+                for include in includes:
+                    project_file.write('%s        "%s",\n' % (indent, include))
+                project_file.write('%s    ]\n' % (indent))
+                project_file.write('%s    cpp.defines: [\n' % (indent))
+                for define in defines:
+                    project_file.write('%s        "%s",\n' % (indent, define))
+                project_file.write('%s    ]\n' % (indent))
+                project_file.write('%s    files: [\n' % indent)
+                for source_node in getattr(p, 'source_nodes', []):
+                    for node in source_node.ant_glob('**'):
+                        node_path = node.path_from(self.srcnode)
+                        project_file.write('%s        "%s",\n' % (indent, node_path))
+                project_file.write('%s    ]\n' % indent)
+                #if 'Makefile' in p.features:
+                #    project_file.write('%s    Transformer {\n' % indent)
+                #    project_file.write('%s        inputs: []\n' % indent)
+                #    project_file.write('%s        alwaysRun: true\n' % indent)
+                #    project_file.write('%s        Artifact {\n' % indent)
+                #    project_file.write('%s            filePath: \'build/linux-amd64-gcc-5.4.0/debug/bin/bugengine\'\n' % indent)
+                #    project_file.write('%s            fileTags: [\'application\']\n' % indent)
+                #    project_file.write('%s        }\n' % indent)
+                #    project_file.write('%s        prepare: {\n' % indent)
+                #    project_file.write('%s            var args = [];\n' % indent)
+                #    project_file.write('%s            args.push(\'%s\');\n' % (indent, sys.argv[0]))
+                #    project_file.write('%s            args.push(\'build:%s:%s\');\n' % (indent, 'linux-amd64-gcc-5.4.0', 'debug'))
+                #    project_file.write('%s            var cmd = new Command(\'%s\', args);\n' % (indent, sys.executable))
+                #    project_file.write('%s            cmd.description = \'running waf\';\n' % indent)
+                #    project_file.write('%s            cmd.highlight = \'compiler\';\n' % indent)
+                #    project_file.write('%s            cmd.workingDirectory = \'/home/yngwe/game/\';\n' % indent)
+                #    project_file.write('%s            return cmd;\n' % indent)
+                #    project_file.write('%s        }\n' % indent)
+                #    project_file.write('%s    }\n' % indent)
+                project_file.write('%s}\n' % indent)

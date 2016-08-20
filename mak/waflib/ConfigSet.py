@@ -31,6 +31,7 @@ class ConfigSet(object):
 		env['FOO'] = 'test'
 	"""
 	__slots__ = ('table', 'parent')
+	unique_id = 0
 	def __init__(self, filename=None):
 		self.table = {}
 		"""
@@ -38,6 +39,8 @@ class ConfigSet(object):
 		"""
 		#self.parent = None
 
+		self.id = ConfigSet.unique_id
+		ConfigSet.unique_id += 1
 		if filename:
 			self.load(filename)
 

@@ -217,9 +217,9 @@ def module(bld, name, module_path, depends,
     if use_master:
         features = features + ['master']
     if warnings:
-        extra_features = ['warnall', bld.__class__.optim]
+        extra_features = ['warnall', bld.__class__.optim] + (bld.env.STATIC and [] or ['dynamic'])
     else:
-        extra_features = ['warnnone', bld.__class__.optim]
+        extra_features = ['warnnone', bld.__class__.optim] + (bld.env.STATIC and [] or ['dynamic'])
 
     result = []
     internal_deps = []

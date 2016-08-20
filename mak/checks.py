@@ -1,4 +1,4 @@
-from waflib import Utils, ConfigSet, Errors
+from waflib import Utils, ConfigSet, Errors, Logs
 from waflib.Configure import conf
 from waflib.TaskGen import feature, before_method, after_method
 import os
@@ -92,10 +92,12 @@ def check_lib(self, libname, var='', libpath=[], includepath=[], includes=[], fu
             use=['debug'],
             envname=self.env.TOOLCHAIN)
     except self.errors.ConfigurationError:
+        #Logs.pprint('YELLOW', '-%s' % var, sep=' ')
         pass
     else:
         self.env[var] = libname
-        self.detected += libname
+        Logs.pprint('GREEN', '+%s' % var, sep=' ')
+
     return self.env[var]
 
 
@@ -161,11 +163,12 @@ def check_framework(self, frameworks, var='', libpath=[], includepath=[], includ
             use=['debug'],
             envname=self.env.TOOLCHAIN)
     except self.errors.ConfigurationError as e:
+        #Logs.pprint('YELLOW', '-%s' % var, sep=' ')
         pass
     else:
         self.env[var] = frameworks
         self.env.append_unique('XCODE_FRAMEWORKS', frameworks)
-        self.detected += frameworks
+        Logs.pprint('GREEN', '+%s' % var, sep=' ')
     return self.env[var]
 
 
@@ -204,7 +207,10 @@ def run_pkg_config(conf, name):
     sysroot = conf.env.SYSROOT or ''
     def extend_lib_path(lib_path):
         if lib_path[0] == '=':
-            return os.path.join(sysroot, lib_path[2:])
+            if sysroot:
+                return os.path.join(sysroot, lib_path[2:])
+            else:
+                return lib_path[1:]
         else:
             return lib_path
     expand = {}
@@ -232,8 +238,10 @@ def run_pkg_config(conf, name):
                 continue
             if line[0] == '#':
                 continue
-            if line.find('=') != -1:
-                var_name, value = line.split('=')
+            pos = line.find('=')
+            if pos != -1:
+                var_name = line[:pos].strip()
+                value = line[pos+1:].strip()
                 value = value.replace('${', '{')
                 value = value.format(value, **expand)
                 if value[0] == '"' and value[-1] == '"':
@@ -241,12 +249,14 @@ def run_pkg_config(conf, name):
                 if var_name == 'prefix':
                     value = os.path.join(sysroot, value[1:])
                 expand[var_name] = value
-            elif line.find(':') != -1:
-                var_name, value = line.split(':')
+                continue
+            pos = line.find(':')
+            if pos != -1:
+                var_name = line[:pos].strip()
+                value = line[pos+1:].strip()
                 value = value.replace('${', '{')
                 value = value.format(value, **expand)
                 configs[var_name.strip()] = value.strip().split()
-
     ld_flags = configs.get('Libs') or []
     configs['Libs'] = [i[2:] for i in ld_flags if i[0:2] == '-l']
     configs['LdFlags'] = [i for i in ld_flags if i[0:2] != '-l']
@@ -256,10 +266,10 @@ def run_pkg_config(conf, name):
 @conf
 def pkg_config(conf, name, var=''):
     if not var: var = name
-    cflags, libs = conf.run_pkg_config(name)
-    conf.env['CFLAGS_%s'%var] = configs.get('Cflags', [])
-    conf.env['CXXFLAGS_%s'%var] = configs.get('Cflags', [])
-    conf.env['LINKFLAGS_%s'%var] = configs.get('Libs', [])
+    cflags, libs, ldflags = conf.run_pkg_config(name)
+    conf.env['CFLAGS_%s'%var] = cflags
+    conf.env['CXXFLAGS_%s'%var] = cflags
+    conf.env['LINKFLAGS_%s'%var] = [conf.env.LIB_ST % l for l in libs] + ldflags
 
 
 def configure(conf):

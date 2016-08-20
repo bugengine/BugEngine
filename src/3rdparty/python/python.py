@@ -1,4 +1,4 @@
-from waflib import Errors, Options
+from waflib import Errors, Options, Logs
 from waflib.Configure import conf
 from waflib.TaskGen import feature, before_method, after_method
 
@@ -64,8 +64,9 @@ def setup(conf):
         try:
             conf.python_config(version)
         except Errors.WafError:
+            #Logs.pprint('YELLOW', '-py%s'%version, sep=' ')
             pass
         else:
             conf.env.append_unique('FEATURES', 'python%s'%version)
-            conf.detected.append('Python %s'%version)
+            Logs.pprint('GREEN', '+py%s'%version, sep=' ')
 

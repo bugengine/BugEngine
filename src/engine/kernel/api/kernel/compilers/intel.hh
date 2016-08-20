@@ -5,6 +5,7 @@
 #define BE_KERNEL_COMPILERS_INTEL_HH_
 /**************************************************************************************************/
 
+#include <stdint.h>
 #define be_alignof(t)           __alignof(t)
 #define be_break()              /*__asm("int $3")*/
 

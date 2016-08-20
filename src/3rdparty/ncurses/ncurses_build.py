@@ -6,6 +6,6 @@ def build(bld):
         bld.env.append_unique('FEATURES', ['ncurses'])
     else:
         for env in bld.multiarch_envs:
-            if env.NCurses:
-                bld.thirdparty('3rdparty.ncurses', '.', env, libs=env.NCurses)
+            if env.curses:
+                bld.thirdparty('3rdparty.ncurses', '.', env, libs=env.curses)
                 env.append_unique('FEATURES', ['ncurses'])

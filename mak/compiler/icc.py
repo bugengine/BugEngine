@@ -1,103 +1,103 @@
 from waflib import Utils, Logs
 from waflib.Configure import conf
+from mak import compilers
 import os, sys
 
-archs = {
-    '__i386__': 'x86',
-    '__x86_64__': 'amd64',
-}
-
-@conf
-def get_native_icc_target(conf, icc, options):
-    cmd = [icc] + options + ['-dM', '-E', '-']
-    try:
-        p = Utils.subprocess.Popen(cmd, stdin=Utils.subprocess.PIPE, stdout=Utils.subprocess.PIPE, stderr=Utils.subprocess.PIPE)
-        p.stdin.write(b'\n')
-        out, err = p.communicate()
-    except Exception as e:
-        print(e)
-        return (None, None)
-    if not isinstance(out, str):
-        out = out.decode(sys.stdout.encoding)
-        err = err.decode(sys.stderr.encoding)
-    if p.returncode != 0:
-        return (None, None)
-    for line in err.split('\n'):
-        if line.find('#10148') != -1:
-            # command-line option not supported
-            return (None, None)
-
-    out = out.split('\n')
-    arch = None
-    version = None
-    for line in out:
-        words = line.split()
-        if not words: continue
-        if words[1] in archs:
-            arch = archs[words[1]]
-        elif words[1] == '__INTEL_COMPILER':
-            patch = words[2][-1]
-            minor = words[2][-2]
-            major = words[2][:-2]
-            version='%s.%s%s' % (major, minor, patch if patch != '0' else '')
-    return (arch, version)
 
 
-@conf
+class ICC(compilers.GnuCompiler):
+    DEFINES = ['__INTEL_COMPILER', '__GNUC__', '_MSC_VER']
+    NAMES = ('ICC',)
+    ICC_PLATFORMS = {
+        '__gnu_linux__': 'linux-gnu',
+        '__APPLE__': 'darwin',
+    }
+    ICC_ARCHS = {
+        '__i386__': 'x86',
+        '__x86_64__': 'amd64',
+    }
+    TOOLS = 'icc icpc'
+
+    def __init__(self, icc, icpc, extra_args = [], extra_env={}):
+        super(ICC, self).__init__(icc, icpc, extra_args, extra_env)
+
+    def get_version(self, icc, extra_args, extra_env):
+        env = os.environ.copy()
+        for env_name, env_value in extra_env.items():
+            env[env_name] = env_value
+        result, out, err = self.run([icc] + extra_args + ['-dM', '-E', '-'], '', env=env)
+        if result != 0:
+            raise Exception('could not run ICC %s (%s)' % (icc, err))
+        for l in out.split('\n'):
+            if l.startswith('#define '):
+                l = l.strip()[len('#define '):]
+                sp = l.find(' ')
+                if sp == -1:
+                    macro = l
+                    value = None
+                else:
+                    macro = l[:sp]
+                    value = l[sp+1:]
+                if macro in self.ICC_PLATFORMS:
+                    platform = self.ICC_PLATFORMS[macro]
+                elif macro in self.ICC_ARCHS:
+                    arch = self.ICC_ARCHS[macro]
+                elif macro == '__INTEL_COMPILER':
+                    patch = value[-1]
+                    minor = value[-2]
+                    major = value[:-2]
+                    version = '%s.%s%s' % (major, minor, patch if patch != '0' else '')
+        self.target = '%s-%s' % (arch, platform)
+        return version, platform, arch
+
+    def set_optimisation_options(self, conf):
+        super(ICC, self).set_optimisation_options(conf)
+
+    def set_warning_options(self, conf):
+        super(ICC, self).set_warning_options(conf)
+        conf.env.append_unique('CXXFLAGS_warnall', ['-wd597'])
+
+    def load_in_env(self, conf, platform):
+        super(ICC, self).load_in_env(conf, platform)
+        v = conf.env
+        v.append_unique('CFLAGS', ['-fPIC'])
+        v.append_unique('CXXFLAGS', ['-fPIC'])
+        if self.version_number >= 11:
+            v.append_unique('CFLAGS', ['-fvisibility=hidden'])
+            v.append_unique('CXXFLAGS', ['-fvisibility=hidden'])
+            v.CFLAGS_exportall = ['-fvisibility=default']
+            v.CXXFLAGS_exportall = ['-fvisibility=default']
+
+
 def detect_icc(conf):
     bindirs = os.environ['PATH'].split(os.pathsep) + conf.env.EXTRA_PATH
+    seen = set([])
     for bindir in bindirs:
-        icc = conf.find_program('icc', path_list=[bindir], mandatory=False)
-        icpc = conf.find_program('icpc', path_list=[bindir], mandatory=False)
-        conf.env.ICC = []
-        conf.env.ICPC = []
+        icc = conf.detect_executable('icc', path_list=[bindir])
+        icpc = conf.detect_executable('icpc', path_list=[bindir])
         if icc and icpc:
-            found = False
-            for options in (['-m32'], ['-m64']):
-                arch, version = conf.get_native_icc_target(icc, options)
-                if arch:
-                    found = True
-                    conf.env.ICC_TARGETS.append(('icc', bindir, icc, icpc, version, os.uname()[0].lower(), arch, options))
-                if not found:
-                    arch, version = conf.get_native_icc_target(icc, [])
-                    conf.env.ICC_TARGETS.append(('icc', bindir, icc, icpc, version, os.uname()[0].lower(), arch, []))
-
-
-@conf
-def load_icc(self, bindir, icc, icpc, version, target, arch, options):
-    self.env.CC = icc
-    self.env.CXX = icpc
-    self.env.COMPILER_NAME='icc'
-    self.env.COMPILER_TARGET=target
-    self.find_program('gdb', mandatory=False)
-    self.load('icc icpc')
-
-    cmd = self.env.CC + ['-x', 'c++', '-print-search-dirs']
-    try:
-        p = Utils.subprocess.Popen(cmd, stdin=Utils.subprocess.PIPE, stdout=Utils.subprocess.PIPE, stderr=Utils.subprocess.PIPE)
-        p.stdin.write('\n'.encode())
-        out = p.communicate()[0]
-    except Exception as e:
-        print('could not retrieve system defines: %s' % str(e))
-    else:
-        if not isinstance(out, str):
-            out = out.decode(sys.stdout.encoding)
-        out = out.split('\n')
-        while out:
-            line = out.pop(0)
-            if line and line.startswith('libraries:'):
-                line = line[10:].strip()
-                self.env.append_unique('SYSTEM_LIBPATHS', line.split(':'))
+            c = ICC(icc, icpc)
+            if c.name() in seen:
+                continue
+            if not c.is_valid(conf):
+                continue
+            seen.add(c.name())
+            conf.compilers.append(c)
+            for multilib_compiler in c.get_multilib_compilers():
+                if multilib_compiler.name() in seen:
+                    continue
+                if not multilib_compiler.is_valid(conf):
+                    continue
+                seen.add(multilib_compiler.name())
+                conf.compilers.append(multilib_compiler)
 
 
 def options(opt):
     pass
 
+
 def configure(conf):
     conf.start_msg('Looking for intel compilers')
-    conf.env.append_unique('useful_defines', ['__INTEL_COMPILER', '__GNUC__', '_MSC_VER'])
-    conf.env.ICC_TARGETS = []
-    conf.detect_icc()
-    conf.env.ICC_TARGETS.sort(key= lambda x: (x[2], x[3], x[0]))
+    detect_icc(conf)
     conf.end_msg('done')
 
