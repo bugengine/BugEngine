@@ -32,20 +32,16 @@ def configure(conf):
         directory = extra.make_node(e).abspath()
         if os.path.isdir(directory) and os.path.isfile(os.path.join(directory, 'wscript')):
             conf.recurse(extra.make_node(e).abspath(), name='host_configure')
-    conf.recurse('compilers.py')
-    conf.recurse('targets.py')
     conf.load('flex', tooldir=[os.path.join(conf.path.abspath(), 'tools')])
     conf.load('bison', tooldir=[os.path.join(conf.path.abspath(), 'tools')])
     conf.load('kernel_preprocess', tooldir=[os.path.join(conf.path.abspath(), 'tools')])
-
+    conf.recurse('compilers.py')
+    conf.recurse('targets.py')
     conf.env.ALL_TOOLCHAINS.sort(key = lambda x: x.split('-'))
 
 def setup(conf):
-    conf.detected = []
-    conf.start_msg("Checking libraries")
     for third_party in conf.bugenginenode.make_node('src').make_node('3rdparty').listdir():
         conf.recurse('../src/3rdparty/%s/%s.py'%(third_party, third_party), name='setup', once=False)
-    conf.end_msg(', '.join(conf.detected) or False)
 
 def build(bld):
     bld.bugenginenode = bld.path.parent

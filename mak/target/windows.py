@@ -1,247 +1,134 @@
-from waflib import Errors, Logs
-from waflib.Configure import conf
-from waflib.TaskGen import feature, before_method, after_method
-import os
+from mak import targets
+from mak.compiler import clang, gcc
+import re
 
 
-@conf
-def set_windows_options(self, arch):
-    self.env.ABI = 'pe'
-    self.env.VALID_PLATFORMS = ['windows', 'pc']
-    self.env.pymodule_PATTERN = '%s.pyd'
+class Windows(targets.Platform):
+    NAME = 'windows'
+    SUPPORTED_TARGETS = (re.compile('.*-mingw32'),
+                         re.compile('.*-windows'))
 
-    self.env.DEPLOY_BINDIR = ''
-    self.env.DEPLOY_RUNBINDIR = ''
-    self.env.DEPLOY_LIBDIR = 'lib'
-    self.env.DEPLOY_INCLUDEDIR = 'include'
-    self.env.DEPLOY_DATADIR = 'data'
-    self.env.DEPLOY_PLUGINDIR = 'data/plugin'
-    self.env.DEPLOY_KERNELDIR = 'data/kernel'
+    def __init__(self):
+        super(Windows, self).__init__()
 
-    if arch == 'arm':
-        self.env.MS_PROJECT_PLATFORM = 'ARM'
-    elif arch in ['x64', 'x86_64', 'amd64']:
-        self.env.MS_PROJECT_PLATFORM = 'x64'
-    else:
-        self.env.MS_PROJECT_PLATFORM = 'Win32'
+    def get_available_compilers(self, compiler_list):
+        result = []
+        for c in compiler_list:
+            for regexp in self.SUPPORTED_TARGETS:
+                if regexp.match(c.target):
+                    if c is clang.Clang:
+                        result.append((c, [], Windows_Clang()))
+                    elif c is gcc.GCC:
+                        result.append((c, [], Windows_GCC()))
+                    else:
+                        result.append((c, [], self))
+        return result
 
-    self.env.append_unique('DEFINES', ['_WIN32_WINNT=0x0502', 'WINVER=0x0502'])
+    def load_in_env(self, conf, compiler):
+        env = conf.env
+        env.ABI = 'pe'
+        env.VALID_PLATFORMS = ['windows', 'pc']
+        env.pymodule_PATTERN = '%s.pyd'
 
-@conf
-def set_windows_gcc_options(self, options, version):
-    v = self.env
-    version_number = self.get_gcc_version_float(version)
-    v.append_unique('CFLAGS', options + ['-static-libgcc'])
-    v.append_unique('CXXFLAGS', options + ['-static-libgcc'])
-    v.append_unique('LINKFLAGS', options + ['-static-libgcc'])
-    v.CFLAGS_warnnone = ['-w']
-    v.CXXFLAGS_warnnone = ['-w']
-    v.CFLAGS_warnall = ['-std=c99', '-Wall', '-Wextra', '-pedantic', '-Winline', '-Werror']
-    v.CXXFLAGS_warnall = ['-Wall', '-Wextra', '-Werror', '-Wno-sign-compare', '-Woverloaded-virtual', '-Wno-invalid-offsetof', '-Wno-unknown-pragmas', '-Wno-comment']
-    if version_number >= 4.5:
-        v.append_unique('CFLAGS', ['-static-libstdc++'])
-        v.append_unique('CXXFLAGS', ['-static-libstdc++'])
-        v.append_unique('LINKFLAGS', ['-static-libstdc++'])
-    if version_number >= 4.8:
-        v.CXXFLAGS_warnall.append('-Wno-unused-local-typedefs')
+        env.DEPLOY_BINDIR = ''
+        env.DEPLOY_RUNBINDIR = ''
+        env.DEPLOY_LIBDIR = 'lib'
+        env.DEPLOY_INCLUDEDIR = 'include'
+        env.DEPLOY_DATADIR = 'data'
+        env.DEPLOY_PLUGINDIR = 'data/plugin'
+        env.DEPLOY_KERNELDIR = 'data/kernel'
 
-    v.CFLAGS_debug = ['-pipe', '-g', '-D_DEBUG']
-    v.CXXFLAGS_debug = ['-pipe', '-g', '-D_DEBUG']
-    v.ASFLAGS_debug = ['-pipe', '-g', '-D_DEBUG']
-    v.LINKFLAGS_debug = ['-pipe', '-g']
+        if compiler.arch == 'arm':
+            env.MS_PROJECT_PLATFORM = 'ARM'
+        elif compiler.arch == 'amd64':
+            env.MS_PROJECT_PLATFORM = 'x64'
+        else:
+            env.MS_PROJECT_PLATFORM = 'Win32'
 
-    v.CFLAGS_profile = ['-pipe', '-g', '-DNDEBUG', '-O3']
-    v.CXXFLAGS_profile = ['-pipe', '-Wno-unused-parameter', '-g', '-DNDEBUG', '-O3', '-fno-rtti', '-fno-exceptions']
-    v.ASFLAGS_profile = ['-pipe', '-g', '-DNDEBUG', '-O3']
-    v.LINKFLAGS_profile = ['-pipe', '-g']
+        env.append_unique('DEFINES', ['_WIN32_WINNT=0x0502', 'WINVER=0x0502'])
 
-    v.CFLAGS_final = ['-pipe', '-g', '-DNDEBUG', '-O3']
-    v.CXXFLAGS_final = ['-pipe', '-Wno-unused-parameter', '-g', '-DNDEBUG', '-O3', '-fno-rtti', '-fno-exceptions']
-    v.ASFLAGS_final = ['-pipe', '-g', '-DNDEBUG', '-O3']
-    v.LINKFLAGS_final = ['-pipe', '-g']
-
-    v.CFLAGS_console = ['-D_CONSOLE=1']
-    v.CXXFLAGS_console = ['-D_CONSOLE=1']
-    v.LINKFLAGS_console = ['-mconsole']
+    def find_winres(self, conf, compiler):
+        winres = conf.find_program(compiler.target + '-windres', var='WINRC',
+                                   path_list=compiler.directories, mandatory=False)
+        if not winres:
+            winres = conf.find_program('windres', var='WINRC', path_list=compiler.directories,
+                                       mandatory=False)
+        if not winres:
+            winres = conf.find_program('windres', var='WINRC', mandatory=False)
+        conf.load('winres')
 
 
-
-@conf
-def set_windows_clang_options(self, options, version):
-    v = self.env
-    version_number = self.get_gcc_version_float(version)
-    v.append_unique('CFLAGS', options)
-    v.append_unique('CXXFLAGS', options)
-    v.append_unique('LINKFLAGS', options + ['-Wl,--export-all-symbols'])
-    v.CFLAGS_warnnone = ['-w']
-    v.CXXFLAGS_warnnone = ['-w']
-    v.CFLAGS_warnall = ['-std=c99', '-Wall', '-Wextra', '-pedantic', '-Winline', '-Werror']
-    v.CXXFLAGS_warnall = ['-Wall', '-Wextra', '-Werror', '-Wno-sign-compare', '-Woverloaded-virtual', '-Wno-invalid-offsetof', '-Wno-unknown-pragmas', '-Wno-comment']
-    if version_number >= 3.6:
-        v.CXXFLAGS_warnall.append('-Wno-unused-local-typedefs')
-
-    v.CFLAGS_debug = ['-pipe', '-g', '-D_DEBUG']
-    v.CXXFLAGS_debug = ['-pipe', '-g', '-D_DEBUG']
-    v.ASFLAGS_debug = ['-pipe', '-g', '-D_DEBUG']
-    v.LINKFLAGS_debug = ['-pipe', '-g']
-
-    v.CFLAGS_profile = ['-pipe', '-g', '-DNDEBUG', '-O3']
-    v.CXXFLAGS_profile = ['-pipe', '-Wno-unused-parameter', '-g', '-DNDEBUG', '-O3', '-fno-rtti', '-fno-exceptions']
-    v.ASFLAGS_profile = ['-pipe', '-g', '-DNDEBUG', '-O3']
-    v.LINKFLAGS_profile = ['-pipe', '-g']
-
-    v.CFLAGS_final = ['-pipe', '-g', '-DNDEBUG', '-O3']
-    v.CXXFLAGS_final = ['-pipe', '-Wno-unused-parameter', '-g', '-DNDEBUG', '-O3', '-fno-rtti', '-fno-exceptions']
-    v.ASFLAGS_final = ['-pipe', '-g', '-DNDEBUG', '-O3']
-    v.LINKFLAGS_final = ['-pipe', '-g']
-
-    v.CFLAGS_console = ['-D_CONSOLE=1']
-    v.CXXFLAGS_console = ['-D_CONSOLE=1']
-    v.LINKFLAGS_console = ['-mconsole']
+class Windows_Clang(Windows):
+    def load_in_env(self, conf, compiler):
+        super(Windows_GCC, self).load_in_env(conf, compiler)
+        env.append_unique('CFLAGS', ['-static-libgcc'])
+        env.append_unique('CXXFLAGS', ['-static-libgcc'])
+        env.append_unique('LINKFLAGS', ['-static-libgcc'])
+        env.append_unique('CXXFLAGS_warnall', ['-Wno-unknown-pragmas', '-Wno-comment'])
+        self.find_winres(conf, compiler)
+        v.CFLAGS_console = ['-D_CONSOLE=1']
+        v.CXXFLAGS_console = ['-D_CONSOLE=1']
+        v.LINKFLAGS_console = ['-mconsole']
 
 
-@conf
-def set_windows_msvc_options(self):
-    self.env.CFLAGS.append('/D_ARM_WINAPI_PARTITION_DESKTOP_SDK_AVAILABLE=1')
-    self.env.CXXFLAGS.append('/D_ARM_WINAPI_PARTITION_DESKTOP_SDK_AVAILABLE=1')
-    self.env.CFLAGS_warnall = ['/D_CRT_SECURE_NO_WARNINGS=1', '/W4', '/WX']
-    self.env.CFLAGS_warnnone = ['/D_CRT_SECURE_NO_WARNINGS=1', '/W0']
-    self.env.CXXFLAGS_warnall = ['/D_CRT_SECURE_NO_WARNINGS=1', '/W4', '/WX']
-    self.env.CXXFLAGS_warnnone = ['/D_CRT_SECURE_NO_WARNINGS=1', '/W0']
+class Windows_GCC(Windows):
+    def load_in_env(self, conf, compiler):
+        super(Windows_GCC, self).load_in_env(conf, compiler)
+        env.append_unique('CFLAGS', ['-static-libgcc'])
+        env.append_unique('CXXFLAGS', ['-static-libgcc'])
+        env.append_unique('LINKFLAGS', ['-static-libgcc'])
+        env.append_unique('CXXFLAGS_warnall', ['-Wno-unknown-pragmas', '-Wno-comment'])
+        if version_number >= 4.5:
+            env.append_unique('CFLAGS', ['-static-libstdc++'])
+            env.append_unique('CXXFLAGS', ['-static-libstdc++'])
+            env.append_unique('LINKFLAGS', ['-static-libstdc++'])
+        self.find_winres(conf, compiler)
+        v.CFLAGS_console = ['-D_CONSOLE=1']
+        v.CXXFLAGS_console = ['-D_CONSOLE=1']
+        v.LINKFLAGS_console = ['-mconsole']
 
-    self.env.CFLAGS_debug = ['/Od', '/Ob1', '/EHsc', '/RTC1', '/RTCc', '/Zi', '/MTd', '/D_DEBUG']
-    self.env.CXXFLAGS_debug = ['/Od', '/Ob1', '/EHsc', '/RTC1', '/RTCc', '/Zi', '/MTd', '/D_DEBUG', '/GR']
-    self.env.LINKFLAGS_debug = ['/DEBUG', '/INCREMENTAL:no']
-    self.env.ARFLAGS_debug = []
 
-    self.env.CFLAGS_profile = ['/DNDEBUG', '/MT', '/Ox', '/Ob2', '/Oi', '/Ot', '/Oy', '/GT', '/GL', '/GF', '/FD', '/GS-', '/Gy', '/GR-']
-    self.env.CXXFLAGS_profile = ['/DNDEBUG', '/D_HAS_EXCEPTIONS=0', '/MT', '/Ox', '/Ob2', '/Oi', '/Ot', '/Oy', '/GT', '/GL', '/GF', '/FD', '/GS-', '/Gy', '/GR-']
-    self.env.LINKFLAGS_profile = ['/DEBUG', '/LTCG', '/INCREMENTAL:no']
-    self.env.ARFLAGS_profile = ['/LTCG']
+class Windows_MSVC(Windows):
+    def load_in_env(self, conf, compiler):
+        conf.env.CFLAGS.append('/D_ARM_WINAPI_PARTITION_DESKTOP_SDK_AVAILABLE=1')
+        conf.env.CXXFLAGS.append('/D_ARM_WINAPI_PARTITION_DESKTOP_SDK_AVAILABLE=1')
+        conf.env.CFLAGS_warnall = ['/D_CRT_SECURE_NO_WARNINGS=1', '/W4', '/WX']
+        conf.env.CFLAGS_warnnone = ['/D_CRT_SECURE_NO_WARNINGS=1', '/W0']
+        conf.env.CXXFLAGS_warnall = ['/D_CRT_SECURE_NO_WARNINGS=1', '/W4', '/WX']
+        conf.env.CXXFLAGS_warnnone = ['/D_CRT_SECURE_NO_WARNINGS=1', '/W0']
 
-    self.env.CFLAGS_final = ['/DNDEBUG', '/MT', '/Ox', '/Ob2', '/Oi', '/Ot', '/Oy', '/GT', '/GL', '/GF', '/FD', '/GS-', '/Gy', '/GR-']
-    self.env.CXXFLAGS_final = ['/DNDEBUG', '/D_HAS_EXCEPTIONS=0', '/MT', '/Ox', '/Ob2', '/Oi', '/Ot', '/Oy', '/GT', '/GL', '/GF', '/FD', '/GS-', '/Gy', '/GR-']
-    self.env.LINKFLAGS_final = ['/DEBUG', '/LTCG', '/INCREMENTAL:no']
-    self.env.ARFLAGS_final = ['/LTCG']
+        conf.env.CFLAGS_debug = ['/Od', '/Ob1', '/EHsc', '/RTC1', '/RTCc', '/Zi', '/MTd', '/D_DEBUG']
+        conf.env.CXXFLAGS_debug = ['/Od', '/Ob1', '/EHsc', '/RTC1', '/RTCc', '/Zi', '/MTd', '/D_DEBUG', '/GR']
+        conf.env.LINKFLAGS_debug = ['/DEBUG', '/INCREMENTAL:no']
+        conf.env.ARFLAGS_debug = []
 
-    self.env.CFLAGS_console = ['/D_CONSOLE=1']
-    self.env.CXXFLAGS_console = ['/D_CONSOLE=1']
-    self.env.LINKFLAGS_console = ['/SUBSYSTEM:console']
+        conf.env.CFLAGS_profile = ['/DNDEBUG', '/MT', '/Ox', '/Ob2', '/Oi', '/Ot', '/Oy', '/GT', '/GL', '/GF', '/FD', '/GS-', '/Gy', '/GR-']
+        conf.env.CXXFLAGS_profile = ['/DNDEBUG', '/D_HAS_EXCEPTIONS=0', '/MT', '/Ox', '/Ob2', '/Oi', '/Ot', '/Oy', '/GT', '/GL', '/GF', '/FD', '/GS-', '/Gy', '/GR-']
+        conf.env.LINKFLAGS_profile = ['/DEBUG', '/LTCG', '/INCREMENTAL:no']
+        conf.env.ARFLAGS_profile = ['/LTCG']
+
+        conf.env.CFLAGS_final = ['/DNDEBUG', '/MT', '/Ox', '/Ob2', '/Oi', '/Ot', '/Oy', '/GT', '/GL', '/GF', '/FD', '/GS-', '/Gy', '/GR-']
+        conf.env.CXXFLAGS_final = ['/DNDEBUG', '/D_HAS_EXCEPTIONS=0', '/MT', '/Ox', '/Ob2', '/Oi', '/Ot', '/Oy', '/GT', '/GL', '/GF', '/FD', '/GS-', '/Gy', '/GR-']
+        conf.env.LINKFLAGS_final = ['/DEBUG', '/LTCG', '/INCREMENTAL:no']
+        conf.env.ARFLAGS_final = ['/LTCG']
+
+        conf.env.CFLAGS_console = ['/D_CONSOLE=1']
+        conf.env.CXXFLAGS_console = ['/D_CONSOLE=1']
+        conf.env.LINKFLAGS_console = ['/SUBSYSTEM:console']
 
 
 def options(opt):
     pass
 
+
 def configure(conf):
-    seen = set([])
-    for version, config in conf.env.MSVC_INSTALLED_VERSIONS:
-        version_name, version_number = version.split()
-        if version_name in ['intel', 'wsdk', 'msvc']:
-            for target_arch, infos in config:
-                if (target_arch, version) in seen:
-                    continue
-                seen.add((target_arch, version))
-                arch, (bindir, libdir, includedir) = infos
-                toolchain = '%s-%s-%s-%s'%('windows', target_arch, version_name, version_number)
-                env = conf.env.derive()
-                conf.setenv(toolchain, env)
-                env.DEST_OS = 'win32'
-                try:
-                    conf.start_msg('Setting up compiler')
-                    conf.load_msvc(version, target_arch)
-                    conf.set_windows_msvc_options()
-                except Exception as e:
-                    conf.variant = ''
-                    conf.end_msg(e, color='RED')
-                else:
-                    conf.end_msg('done')
-                    try:
-                        conf.set_windows_options(arch)
-                        conf.env.KERNEL_TOOLCHAINS = [toolchain]
-                        conf.add_toolchain('windows', target_arch, version_name, version_number, arch)
-                    except Errors.WafError as e:
-                        conf.variant = ''
-                        Logs.pprint('YELLOW', '%s failed: %s' % (toolchain, e))
-                    except Exception as e:
-                        conf.variant = ''
-                        Logs.pprint('RED', '%s failed: %s' % (toolchain, e))
-                        raise
-                    else:
-                        conf.variant = ''
-                        Logs.pprint('GREEN', 'configured for toolchain %s' % (toolchain))
-
-
-    for name, bindir, gcc, gxx, version, target, arch, options in conf.env.GCC_TARGETS:
-        if target.find('mingw') != -1 or target.find('windows') != -1:
-            os = 'windows'
-            toolchain = '%s-%s-%s-%s'%(os, arch, name, version)
-            if toolchain not in seen:
-                seen.add(toolchain)
-                env = conf.env.derive()
-                conf.setenv(toolchain, env)
-                env.DEST_OS = 'win32'
-                try:
-                    conf.start_msg('Setting up compiler')
-                    conf.load_gcc(bindir, gcc, gxx, version, target, arch, options)
-                    conf.set_windows_gcc_options(options, version)
-                except Exception as e:
-                    conf.variant = ''
-                    conf.end_msg(e, color='RED')
-                else:
-                    conf.end_msg('done')
-                    try:
-                        conf.set_windows_options(arch)
-                        conf.env.KERNEL_TOOLCHAINS = [toolchain]
-                        conf.add_toolchain(os, arch, name, version, arch)
-                    except Errors.WafError as e:
-                        conf.variant = ''
-                        Logs.pprint('YELLOW', '%s failed: %s' % (toolchain, e))
-                    except Exception as e:
-                        conf.variant = ''
-                        Logs.pprint('RED', '%s failed: %s' % (toolchain, e))
-                        raise
-                    else:
-                        conf.variant = ''
-                        Logs.pprint('GREEN', 'configured for toolchain %s' % (toolchain))
-
-    for version, directory, target, arch in conf.env.CLANG_TARGETS:
-        if target.find('win32') != -1 or target.find('mingw') != -1 or target.find('windows') != -1:
-            arch_name, options = arch
-            os = 'windows'
-            toolchain = '%s-%s-%s-%s'%(os, arch_name, 'clang', version)
-            if toolchain not in seen:
-                seen.add(toolchain)
-                env = conf.env.derive()
-                conf.setenv(toolchain, env)
-                env.DEST_OS = 'win32'
-                try:
-                    conf.start_msg('Setting up compiler')
-                    conf.load_clang(directory, target, options)
-                    conf.set_windows_clang_options(options, version)
-                except Exception as e:
-                    conf.variant = ''
-                    conf.end_msg(e, color='RED')
-                else:
-                    conf.end_msg('done')
-                    try:
-                        conf.set_windows_options(arch)
-                        conf.env.KERNEL_TOOLCHAINS = [toolchain]
-                        conf.add_toolchain(os, arch_name, 'clang', version, arch_name)
-                    except Errors.WafError as e:
-                        conf.variant = ''
-                        Logs.pprint('YELLOW', '%s failed: %s' % (toolchain, e))
-                    except Exception as e:
-                        conf.variant = ''
-                        Logs.pprint('RED', '%s failed: %s' % (toolchain, e))
-                        raise
-                    else:
-                        conf.variant = ''
-                        Logs.pprint('GREEN', 'configured for toolchain %s' % (toolchain))
+    conf.platforms.append(Windows())
 
 
 def build(bld):
     bld.platforms.append(bld.external('3rdparty.win32'))
     bld.platforms.append(bld.external('3rdparty.dbghelp'))
+
 
 def plugins(bld):
     pass

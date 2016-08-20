@@ -1067,7 +1067,7 @@ def get_cc_version(conf, cc, gcc=False, icc=False):
 	if icc or gcc:
 		out = out.splitlines()
 		for line in out:
-			lst = shlex.split(line)
+			lst = line.split(' ') #shlex.split(line)
 			if len(lst)>2:
 				key = lst[1]
 				val = lst[2]

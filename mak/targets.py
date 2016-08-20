@@ -1,4 +1,5 @@
 import os, platform
+from waflib import Options
 from waflib.Logs import pprint
 from waflib.Build import BuildContext, CleanContext, InstallContext, UninstallContext, ListContext
 from waflib.Configure import conf
@@ -15,40 +16,84 @@ def add_build_command(toolchain, optimisation):
             def get_variant_dir(self):
                 return os.path.join(self.out_dir, self.optim)
             variant_dir = property(get_variant_dir, None)
+        class Test(BuildContext):
+            optim = optimisation
+            cmd = 'test:' + toolchain + ':' + optimisation
+            bugengine_variant = toolchain
 
-@conf
-def add_toolchain(self, platform, compiler_arch, compiler, version, arch, add=True):
-    toolchain = '%s-%s-%s-%s' % (platform, compiler_arch, compiler, version)
-    e = self.env
-    e.TOOLCHAIN=toolchain
-    self.recurse(self.bugenginenode.abspath()+'/mak/arch/%s'%arch, once=False)
-    self.recurse(self.bugenginenode.abspath()+'/mak', name='setup', once=False)
-    e.DEFINES.append('BE_PLATFORM=platform_%s'%e.VALID_PLATFORMS[0])
-    if e.STATIC:
-        e.DEFINES.append('BE_STATIC=1')
-    if add:
+            def get_variant_dir(self):
+                return os.path.join(self.out_dir, self.optim)
+            variant_dir = property(get_variant_dir, None)
+
+            def execute(self):
+                self.restore()
+                if not self.all_envs:
+                    self.load_envs()
+                env = self.all_envs[self.bugengine_variant]
+                print(env)
+                while env:
+                    print(env.TOOLCHAIN)
+                    env = getattr(env, 'parent', None)
+
+
+
+class Platform:
+    def __init__(self):
+        pass
+
+    def get_available_compilers(self, compiler_list):
+        result = []
+        for c in compiler_list:
+            for regexp in self.SUPPORTED_TARGETS:
+                if regexp.match(c.target):
+                    result.append((c, [], self))
+        return result
+
+    def add_toolchain(self, conf, compiler, sub_compilers=[], add=True):
+        toolchain = '%s-%s-%s-%s' % (self.NAME.lower(), compiler.arch, compiler.NAMES[0].lower(), compiler.version)
+        if add:
+            conf.start_msg('  `- %s' % toolchain)
+        else:
+            conf.start_msg('    `- %s' % compiler.arch)
+        try:
+            conf.setenv(toolchain, conf.env)
+            compiler.load_in_env(conf, self)
+            self.load_in_env(conf, compiler)
+            v = conf.env
+            v.TOOLCHAIN=toolchain
+            v.DEFINES.append('BE_PLATFORM=platform_%s'%v.VALID_PLATFORMS[0])
+            if not sub_compilers:
+                conf.recurse(conf.bugenginenode.abspath()+'/mak/arch/%s'%compiler.arch, once=False)
+                conf.recurse(conf.bugenginenode.abspath()+'/mak', name='setup', once=False)
+            if v.STATIC:
+                v.DEFINES.append('BE_STATIC=1')
+            conf.variant = ''
+        except Exception as e:
+            conf.end_msg(e, color='RED')
+            conf.variant = ''
+        else:
+            conf.end_msg(' ')
+            for c in sub_compilers:
+                self.add_toolchain(conf, c, add=False)
+            if add:
+                v.PREFIX = os.path.join('build', toolchain)
+                conf.variant = ''
+                for optim in conf.env.ALL_VARIANTS:
+                    add_build_command(toolchain, optim)
+                conf.env.append_unique('ALL_TOOLCHAINS', toolchain)
+
+    def add_multiarch_toolchain(self, toolchain):
+        e = self.env
+        e.TOOLCHAIN=toolchain
+        e.DEFINES.append('BE_PLATFORM=platform_%s'%e.VALID_PLATFORMS[0])
         e.PREFIX = os.path.join('build', toolchain)
+        if e.STATIC:
+            e.DEFINES.append('BE_STATIC=1')
         for optim in self.env.ALL_VARIANTS:
             add_build_command(toolchain, optim)
         self.variant = ''
         self.env.append_unique('ALL_TOOLCHAINS', toolchain)
-        self.env.append_unique('ALL_PLATFORMS', [p for p in e.VALID_PLATFORMS if p not in self.env.ALL_PLATFORMS])
-        self.env.append_unique('ALL_ARCHITECTURES', [a for a in e.VALID_ARCHITECTURES if a not in self.env.ALL_ARCHITECTURES])
 
-@conf
-def add_multiarch_toolchain(self, toolchain):
-    e = self.env
-    e.TOOLCHAIN=toolchain
-    e.DEFINES.append('BE_PLATFORM=platform_%s'%e.VALID_PLATFORMS[0])
-    e.PREFIX = os.path.join('build', toolchain)
-    if e.STATIC:
-        e.DEFINES.append('BE_STATIC=1')
-    for optim in self.env.ALL_VARIANTS:
-        add_build_command(toolchain, optim)
-    self.variant = ''
-    self.env.append_unique('ALL_TOOLCHAINS', toolchain)
-    self.env.append_unique('ALL_PLATFORMS', [p for p in e.VALID_PLATFORMS if p not in self.env.ALL_PLATFORMS])
-    self.env.append_unique('ALL_ARCHITECTURES', [a for a in e.VALID_ARCHITECTURES if a not in self.env.ALL_ARCHITECTURES])
 
 
 def options(opt):
@@ -69,22 +114,22 @@ def options(opt):
 
 def configure(conf):
     conf.env.ALL_VARIANTS = ['debug', 'profile', 'final']
-    from waflib import Options
+    conf.platforms = []
     platforms = Options.options.platforms
     platforms = platforms.split(',') if platforms else []
     for extra in conf.bugenginenode.make_node('extra').listdir():
         if not platforms or extra in platforms:
             if os.path.isfile(os.path.join(conf.bugenginenode.abspath(), 'extra', extra, 'wscript')):
-                pprint('BLUE', '_'*40)
-                pprint('BLUE', '| '+('configure package %s'%extra).ljust(36)+' |')
                 conf.recurse(os.path.join(conf.bugenginenode.abspath(), 'extra', extra))
     for target in conf.path.make_node('target').listdir():
         if not platforms or target[:-3] in platforms:
-            pprint('BLUE', '_'*40)
-            pprint('BLUE', '| '+('configure for target %s'%target[:-3]).ljust(36)+' |')
             conf.recurse('target/%s'%target)
-    conf.env.VALID_PLATFORMS = conf.env.ALL_PLATFORMS
-    conf.env.VALID_RCHITECTURES = conf.env.ALL_ARCHITECTURES
+    for p in conf.platforms:
+        configuration_list = p.get_available_compilers(conf.compilers)
+        if configuration_list:
+            pprint('BLUE', ' + configuring for platform %s' % p.NAME)
+            for main_toolchain, sub_toolchains, platform in configuration_list:
+                platform.add_toolchain(conf, main_toolchain, sub_toolchains)
     conf.env.store('.build/be_toolchains.py')
 
 
