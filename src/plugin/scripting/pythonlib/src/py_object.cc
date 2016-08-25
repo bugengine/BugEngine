@@ -701,7 +701,7 @@ u32 PyBugObject::distance(PyObject* object, const RTTI::Type& desiredType)
                     return (u32)RTTI::Type::MaxTypeDistance;
                 }
             }
-            return i == s_library->m_PyDict_Size(object)
+            return i == (u32)s_library->m_PyDict_Size(object)
                     ?   0
                     :   (u32)RTTI::Type::MaxTypeDistance;
         }
