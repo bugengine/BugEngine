@@ -26,6 +26,8 @@ class FreeBSD(targets.Platform):
         env.DEPLOY_KERNELDIR = os.path.join('share', 'bugengine', 'kernel')
         env.pymodule_PATTERN = '%s.so'
 
+        env.append_unique('CFLAGS', ['-fPIC'])
+        env.append_unique('CXXFLAGS', ['-fPIC'])
         env.RPATH = '$ORIGIN/../share/bugengine/plugin:$ORIGIN/../lib:$ORIGIN:$ORIGIN/../plugin'
         env.append_unique('LIB', ['rt', 'pthread', 'm'])
         env.append_unique('CFLAGS', ['-I%s/usr/local/include'%(compiler.sysroot or '')])

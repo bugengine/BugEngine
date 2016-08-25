@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#! /Usr/bin/env python
 # encoding: utf-8
 
 import os
@@ -201,6 +201,7 @@ class QtToolchain(QtObject):
                 ('linux', 'linux'),
                 ('windows', 'windows'),
                 ('mingw', 'windows'),
+                ('freebsd', 'bsd'),
             )
         supported_platform = (
                 ('android', 'android'),
@@ -212,6 +213,7 @@ class QtToolchain(QtObject):
                 ('msvc-10.0', 'msvc2010'),
                 ('msvc-11.0', 'msvc2012'),
                 ('msvc-12.0', 'msvc2013'),
+                ('msvc-14.0', 'msvc2015'),
             )
         for o, o_name in supported_os:
             if target.find(o) != -1:
@@ -256,8 +258,10 @@ class QtToolchain(QtObject):
                 self.ProjectExplorer_GccToolChain_Path = cxx
                 self.ProjectExplorer_GccToolChain_TargetAbi = abi
                 toolchain_id =  'ProjectExplorer.ToolChain.LinuxIcc:%s' % generateGUID('BugEngine:toolchain:%s'%env_name)
-            elif env.COMPILER_NAME == 'msvc':
-                toolchain_id =  'ProjectExplorer.ToolChain.Msvc:%s' % generateGUID('BugEngine:toolchain:%s'%env_name)
+            elif env.COMPILER_NAME in ('suncc', 'msvc'):
+                self.ProjectExplorer_GccToolChain_Path = cxx
+                self.ProjectExplorer_GccToolChain_TargetAbi = abi
+                toolchain_id =  'ProjectExplorer.ToolChain.Gcc:%s' % generateGUID('BugEngine:toolchain:%s'%env_name)
             else:
                 self.ProjectExplorer_CustomToolChain_CompilerPath = cxx
                 self.ProjectExplorer_CustomToolChain_Cxx11Flags = ()
@@ -1023,7 +1027,7 @@ class Qbs(QtCreator4):
                 project_file.write('%s    targetName: "%s"\n' % (indent, p.name.split('.')[-1]))
                 project_file.write('%s    cpp.includePaths: [\n' % (indent))
                 for include in includes:
-                    project_file.write('%s        "%s",\n' % (indent, include))
+                    project_file.write('%s        "%s",\n' % (indent, include.replace('\\', '/')))
                 project_file.write('%s    ]\n' % (indent))
                 project_file.write('%s    cpp.defines: [\n' % (indent))
                 for define in defines:
@@ -1032,7 +1036,7 @@ class Qbs(QtCreator4):
                 project_file.write('%s    files: [\n' % indent)
                 for source_node in getattr(p, 'source_nodes', []):
                     for node in source_node.ant_glob('**'):
-                        node_path = node.path_from(self.srcnode)
+                        node_path = node.path_from(self.srcnode).replace('\\', '/')
                         project_file.write('%s        "%s",\n' % (indent, node_path))
                 project_file.write('%s    ]\n' % indent)
                 #if 'Makefile' in p.features:

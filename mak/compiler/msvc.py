@@ -1,6 +1,60 @@
 import os
 from waflib.TaskGen import feature, before_method, after_method
 from waflib.Configure import conf
+from mak import compilers
+import os
+
+class MSVC(compilers.Compiler):
+    def __init__(self, cl, name, version, target_arch, arch, path, includes, libdirs):
+        self.NAMES = [name, 'msvc']
+        p = os.pathsep.join([os.environ.get('PATH', '')] + path)
+        flags = ['/I%s'%i for i in includes] + ['/LIBPATH:%i' for l in libdirs]
+        super(MSVC, self).__init__(cl, cl, version, 'windows-%s'%name, arch, [], {'PATH': p})
+        self.arch_name = target_arch
+        self.includes = includes
+        self.libdirs = libdirs
+
+    def set_optimisation_options(self, conf):
+        conf.env.append_unique('CFLAGS_debug', ['/Od', '/Ob1', '/EHsc', '/RTC1', '/RTCc', '/Zi', '/MTd', '/D_DEBUG'])
+        conf.env.append_unique('CXXFLAGS_debug', ['/Od', '/Ob1', '/EHsc', '/RTC1', '/RTCc', '/Zi', '/MTd', '/D_DEBUG', '/GR'])
+        conf.env.append_unique('LINKFLAGS_debug', ['/DEBUG', '/INCREMENTAL:no'])
+        conf.env.append_unique('ARFLAGS_debug', [])
+
+        conf.env.append_unique('CFLAGS_profile', ['/DNDEBUG', '/MT', '/Ox', '/Ob2', '/Oi', '/Ot', '/Oy', '/GT', '/GL', '/GF', '/FD', '/GS-', '/Gy', '/GR-'])
+        conf.env.append_unique('CXXFLAGS_profile', ['/DNDEBUG', '/D_HAS_EXCEPTIONS=0', '/MT', '/Ox', '/Ob2', '/Oi', '/Ot', '/Oy', '/GT', '/GL', '/GF', '/FD', '/GS-', '/Gy', '/GR-'])
+        conf.env.append_unique('LINKFLAGS_profile', ['/DEBUG', '/LTCG', '/INCREMENTAL:no'])
+        conf.env.append_unique('ARFLAGS_profile', ['/LTCG'])
+
+        conf.env.append_unique('CFLAGS_final', ['/DNDEBUG', '/MT', '/Ox', '/Ob2', '/Oi', '/Ot', '/Oy', '/GT', '/GL', '/GF', '/FD', '/GS-', '/Gy', '/GR-'])
+        conf.env.append_unique('CXXFLAGS_final', ['/DNDEBUG', '/D_HAS_EXCEPTIONS=0', '/MT', '/Ox', '/Ob2', '/Oi', '/Ot', '/Oy', '/GT', '/GL', '/GF', '/FD', '/GS-', '/Gy', '/GR-'])
+        conf.env.append_unique('LINKFLAGS_final', ['/DEBUG', '/LTCG', '/INCREMENTAL:no'])
+        conf.env.append_unique('ARFLAGS_final', ['/LTCG'])
+
+
+    def set_warning_options(self, conf):
+        conf.env.append_unique('CFLAGS_warnall', ['/D_CRT_SECURE_NO_WARNINGS=1', '/W4', '/WX'])
+        conf.env.append_unique('CFLAGS_warnnone', ['/D_CRT_SECURE_NO_WARNINGS=1', '/W0'])
+        conf.env.append_unique('CXXFLAGS_warnall', ['/D_CRT_SECURE_NO_WARNINGS=1', '/W4', '/WX'])
+        conf.env.append_unique('CXXFLAGS_warnnone', ['/D_CRT_SECURE_NO_WARNINGS=1', '/W0'])
+        if self.NAMES[0] == 'msvc' and self.version_number >= 14:
+            conf.env.append_unique('CFLAGS_warnall', ['/D_ALLOW_RTCc_IN_STL=1'])
+            conf.env.append_unique('CXXFLAGS_warnall', ['/D_ALLOW_RTCc_IN_STL=1'])
+            conf.env.append_unique('CFLAGS_warnnone', ['/D_ALLOW_RTCc_IN_STL=1'])
+            conf.env.append_unique('CXXFLAGS_warnnone', ['/D_ALLOW_RTCc_IN_STL=1'])
+
+    def load_in_env(self, conf, platform):
+        super(MSVC, self).load_in_env(conf, platform)
+        version = '%s %s'%(self.NAMES[0], self.version)
+        conf.env.MSVC_VERSIONS = [version]
+        conf.env.MSVC_TARGETS = [self.arch_name]
+        conf.env.COMPILER_NAME='msvc'
+        conf.env.COMPILER_TARGET='windows-win32-msvc-%s'%version
+        if os_platform().endswith('64'):
+            conf.find_program('cdb64', var='CDB', mandatory=False)
+        else:
+            conf.find_program('cdb', var='CDB', mandatory=False)
+        conf.load('msvc')
+
 
 def os_platform():
     true_platform = os.environ['PROCESSOR_ARCHITECTURE']
@@ -11,35 +65,39 @@ def os_platform():
             #true_platform not assigned to if this does not exist
     return true_platform
 
+
 def options(opt):
     # The options for MSVC are not used
     #opt.load('msvc')
     from waflib.Tools import msvc
 
+
 def configure(conf):
+    seen = set([])
     from waflib.Tools import msvc
     conf.start_msg('Looking for msvc compilers')
     conf.env.append_unique('useful_defines', ['__INTEL_COMPILER', '__clang__', '_MSC_VER'])
     try:
-        conf.get_msvc_versions()
-    except Exception:
+        for version, targets in conf.get_msvc_versions():
+            name, version = version.split()
+            for target_name, target in targets:
+                arch, flags = target
+                path, includes, libdirs = flags
+                cl = conf.detect_executable('cl', path)
+                c = MSVC(cl, name, version, target_name, arch, path, includes, libdirs)
+                if c.name() in seen:
+                    continue
+                seen.add(c.name())
+                conf.compilers.append(c)
+    except Exception as e:
+        print(e)
         pass
     conf.end_msg('done')
 
-@conf
-def load_msvc(self, version, target_arch):
-    self.env.MSVC_VERSIONS = [version]
-    self.env.MSVC_TARGETS = [target_arch]
-    self.env.COMPILER_NAME='msvc'
-    self.env.COMPILER_TARGET='windows-win32-msvc-%s'%version
-    if os_platform().endswith('64'):
-        self.find_program('cdb64', var='CDB', mandatory=False)
-    else:
-        self.find_program('cdb', var='CDB', mandatory=False)
-    self.load('msvc')
 
 def build(bld):
     pass
+
 
 @feature('c', 'cxx')
 @after_method('process_source')
