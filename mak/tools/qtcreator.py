@@ -343,8 +343,10 @@ class QtPlatform(QtObject):
                     ('QtPM4.mkSPecInformation', ''),
                     ('QtSupport.QtInformation', -1),
                 ]
-            icon_path = os.path.join(bld.bugenginenode.abspath(), 'mak', 'icons', '%s.png'%env.VALID_PLATFORMS[0])
-            icon_extra = os.path.join(bld.bugenginenode.abspath(), 'extra', env.VALID_PLATFORMS[0], 'icon.png')
+            icon_path = os.path.join(bld.bugenginenode.abspath(), 'mak', 'icons',
+                                     '%s.png'%env.VALID_PLATFORMS[0])
+            icon_extra = os.path.join(bld.bugenginenode.abspath(), 'extra',
+                                      env.VALID_PLATFORMS[0], 'icon.png')
             if os.path.isfile(icon_path):
                 self.PE_Profile_Icon = icon_path
             elif os.path.isfile(icon_extra):
@@ -561,7 +563,8 @@ class QtCreator(Build.BuildContext):
 
         if not os.path.exists(HOME_DIRECTORY):
             os.makedirs(HOME_DIRECTORY)
-        with XmlDocument(open(os.path.join(HOME_DIRECTORY, 'profiles.xml'), 'w'), 'UTF-8', [('DOCTYPE', 'QtCreatorProfiles')]) as document:
+        with XmlDocument(open(os.path.join(HOME_DIRECTORY, 'profiles.xml'), 'w'),
+                         'UTF-8', [('DOCTYPE', 'QtCreatorProfiles')]) as document:
             with XmlNode(document, 'qtcreator') as creator:
                 profile_index = 0
                 for platform_name, platform in self.platforms:
@@ -580,7 +583,8 @@ class QtCreator(Build.BuildContext):
                     XmlNode(data, 'variable', 'Version')
                     XmlNode(data, 'value', '1', [('type', 'int')])
 
-        with XmlDocument(open(os.path.join(HOME_DIRECTORY, 'debuggers.xml'), 'w'), 'UTF-8', [('DOCTYPE', 'QtCreatorDebugger')]) as document:
+        with XmlDocument(open(os.path.join(HOME_DIRECTORY, 'debuggers.xml'), 'w'),
+                         'UTF-8', [('DOCTYPE', 'QtCreatorDebugger')]) as document:
             with XmlNode(document, 'qtcreator') as creator:
                 debugger_index = 0
                 for debugger_name, debugger in self.debuggers:
@@ -596,7 +600,8 @@ class QtCreator(Build.BuildContext):
                     XmlNode(data, 'variable', 'Version')
                     XmlNode(data, 'value', '1', [('type', 'int')])
 
-        with XmlDocument(open(os.path.join(HOME_DIRECTORY, 'toolchains.xml'), 'w'), 'UTF-8', [('DOCTYPE', 'QtCreatorToolChains')]) as document:
+        with XmlDocument(open(os.path.join(HOME_DIRECTORY, 'toolchains.xml'), 'w'),
+                         'UTF-8', [('DOCTYPE', 'QtCreatorToolChains')]) as document:
             with XmlNode(document, 'qtcreator') as creator:
                 toolchain_index = 0
                 for toolchain_name, toolchain in self.toolchains:
@@ -719,45 +724,72 @@ class QtCreator(Build.BuildContext):
                             build_configurations.append((
                                 'ProjectExplorer.Target.BuildConfiguration.%d'%build_configuration_index,
                                 [
-                                    ('ProjectExplorer.BuildConfiguration.BuildDirectory', self.srcnode.abspath()),
-                                    ('GenericProjectManager.GenericBuildConfiguration.BuildDirectory', self.srcnode.abspath()),
+                                    ('ProjectExplorer.BuildConfiguration.BuildDirectory',
+                                       self.bldnode.make_node('qtcreator').abspath()),
+                                    ('GenericProjectManager.GenericBuildConfiguration.BuildDirectory',
+                                       self.bldnode.make_node('qtcreator').abspath()),
                                     ('ProjectExplorer.BuildConfiguration.BuildStepList.0', [
                                         ('ProjectExplorer.BuildStepList.Step.0', [
-                                            ('ProjectExplorer.BuildStep.Enabled', False),
-                                            ('ProjectExplorer.ProjectConfiguration.DefaultDisplayName', 'Qbs configuration'),
+                                            ('ProjectExplorer.BuildStep.Enabled',
+                                              False),
+                                            ('ProjectExplorer.ProjectConfiguration.DefaultDisplayName',
+                                              'Qbs configuration'),
                                             ('ProjectExplorer.ProjectConfiguration.DisplayName', ''),
                                             ('Qbs.Configuration', [
                                                 ('qbs.buildVariant', 'debug')
                                             ]),
-                                            ('ProjectExplorer.ProjectConfiguration.Id', 'Qbs.BuildStep')
+                                            ('ProjectExplorer.ProjectConfiguration.Id',
+                                              'Qbs.BuildStep')
                                         ]),
                                         ('ProjectExplorer.BuildStepList.Step.1', [
-                                            ('ProjectExplorer.BuildStep.Enabled', True),
-                                            ('ProjectExplorer.ProcessStep.Arguments', '%s build:%s:%s'%(sys.argv[0], env_name, variant)),
-                                            ('ProjectExplorer.ProcessStep.Command', sys.executable),
-                                            ('ProjectExplorer.ProcessStep.WorkingDirectory', self.srcnode.abspath()),
-                                            ('ProjectExplorer.ProjectConfiguration.DefaultDisplayName', 'Waf configuration'),
-                                            ('ProjectExplorer.ProjectConfiguration.DisplayName', ''),
-                                            ('ProjectExplorer.ProjectConfiguration.Id', 'ProjectExplorer.ProcessStep'),
+                                            ('ProjectExplorer.BuildStep.Enabled',
+                                              True),
+                                            ('ProjectExplorer.ProcessStep.Arguments',
+                                              '%s build:%s:%s'%(sys.argv[0], env_name, variant)),
+                                            ('ProjectExplorer.ProcessStep.Command',
+                                              sys.executable),
+                                            ('ProjectExplorer.ProcessStep.WorkingDirectory',
+                                              self.srcnode.abspath()),
+                                            ('ProjectExplorer.ProjectConfiguration.DefaultDisplayName',
+                                              'Waf configuration'),
+                                            ('ProjectExplorer.ProjectConfiguration.DisplayName',
+                                              ''),
+                                            ('ProjectExplorer.ProjectConfiguration.Id',
+                                              'ProjectExplorer.ProcessStep'),
                                         ]),
-                                        ('ProjectExplorer.BuildStepList.StepsCount', 2),
-                                        ('ProjectExplorer.ProjectConfiguration.DefaultDisplayName', 'Build'),
-                                        ('ProjectExplorer.ProjectConfiguration.DisplayName', ''),
-                                        ('ProjectExplorer.ProjectConfiguration.Id', 'ProjectExplorer.BuildSteps.Build')
+                                        ('ProjectExplorer.BuildStepList.StepsCount',
+                                          2),
+                                        ('ProjectExplorer.ProjectConfiguration.DefaultDisplayName',
+                                          'Build'),
+                                        ('ProjectExplorer.ProjectConfiguration.DisplayName',
+                                          ''),
+                                        ('ProjectExplorer.ProjectConfiguration.Id',
+                                          'ProjectExplorer.BuildSteps.Build')
                                     ]),
                                     ('ProjectExplorer.BuildConfiguration.BuildStepList.1', [
                                         ('ProjectExplorer.BuildStepList.Step.0', [
-                                            ('ProjectExplorer.BuildStep.Enabled', True),
-                                            ('ProjectExplorer.ProcessStep.Arguments', '%s clean:%s:%s'%(sys.argv[0], env_name, variant)),
-                                            ('ProjectExplorer.ProcessStep.Command', sys.executable),
-                                            ('ProjectExplorer.ProcessStep.WorkingDirectory', self.srcnode.abspath()),
-                                            ('ProjectExplorer.ProjectConfiguration.DefaultDisplayName', 'Waf configuration'),
-                                            ('ProjectExplorer.ProjectConfiguration.DisplayName', ''),
-                                            ('ProjectExplorer.ProjectConfiguration.Id', 'ProjectExplorer.ProcessStep')
+                                            ('ProjectExplorer.BuildStep.Enabled',
+                                              True),
+                                            ('ProjectExplorer.ProcessStep.Arguments',
+                                              '%s clean:%s:%s'%(sys.argv[0], env_name, variant)),
+                                            ('ProjectExplorer.ProcessStep.Command',
+                                              sys.executable),
+                                            ('ProjectExplorer.ProcessStep.WorkingDirectory',
+                                              self.srcnode.abspath()),
+                                            ('ProjectExplorer.ProjectConfiguration.DefaultDisplayName',
+                                              'Waf configuration'),
+                                            ('ProjectExplorer.ProjectConfiguration.DisplayName',
+                                              ''),
+                                            ('ProjectExplorer.ProjectConfiguration.Id',
+                                              'ProjectExplorer.ProcessStep')
                                         ]),
-                                        ('ProjectExplorer.BuildStepList.StepsCount', 1),
-                                        ('ProjectExplorer.ProjectConfiguration.DefaultDisplayName', 'Clean'),
-                                        ('ProjectExplorer.ProjectConfiguration.DisplayName', ''),
+                                        ('ProjectExplorer.BuildStepList.StepsCount',
+                                          1),
+                                        ('ProjectExplorer.ProjectConfiguration.DefaultDisplayName',
+                                          'Clean'),
+                                        ('ProjectExplorer.ProjectConfiguration.DisplayName',
+                                          ''),
+
                                         ('ProjectExplorer.ProjectConfiguration.Id', 'ProjectExplorer.BuildSteps.Clean')
                                     ]),
                                     ('ProjectExplorer.BuildConfiguration.BuildStepListCount', 2),
@@ -772,8 +804,11 @@ class QtCreator(Build.BuildContext):
                                             self.srcnode.abspath(),
                                             bld_env.PREFIX, variant, env.DEPLOY_BINDIR,
                                             env.cxxprogram_PATTERN%self.launcher[0][0].target),
-                                         'OUT_DIR=%s' % os.path.join(self.srcnode.abspath(), bld_env.PREFIX, variant),
-                                         'RUNBIN_DIR=%s' % os.path.join(self.srcnode.abspath(), bld_env.PREFIX, variant, env.DEPLOY_RUNBINDIR),
+                                         'OUT_DIR=%s' % os.path.join(self.srcnode.abspath(),
+                                                                     bld_env.PREFIX, variant),
+                                         'RUNBIN_DIR=%s' % os.path.join(self.srcnode.abspath(),
+                                                                        bld_env.PREFIX, variant,
+                                                                        env.DEPLOY_RUNBINDIR),
                                          'TERM=msys',
                                         )),
                                     ('ProjectExplorer.ProjectConfiguration.DefaultDisplayName', 'Default'),
