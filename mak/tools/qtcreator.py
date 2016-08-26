@@ -360,6 +360,8 @@ def to_var(name):
     return VAR_PATTERN%name
 
 class QtCreator(Build.BuildContext):
+    PROJECT_TYPE = 'GenericProjectManager.GenericBuildConfiguration'
+    
     def execute(self):
         self.restore()
         if not self.all_envs:
@@ -776,7 +778,7 @@ class QtCreator(Build.BuildContext):
                                         )),
                                     ('ProjectExplorer.ProjectConfiguration.DefaultDisplayName', 'Default'),
                                     ('ProjectExplorer.ProjectConfiguration.DisplayName', variant),
-                                    ('ProjectExplorer.ProjectConfiguration.Id', 'Qbs.QbsBuildConfiguration')
+                                    ('ProjectExplorer.ProjectConfiguration.Id', self.PROJECT_TYPE)
                                 ]))
                             build_configuration_index += 1
                         run_configurations = []
@@ -933,33 +935,8 @@ class QtCreator(Build.BuildContext):
                 new_file.write(document.toxml())
 
 
-
-
-class QtCreator2(QtCreator):
-    "creates projects for QtCreator 2.x"
-    cmd = 'qtcreator2'
-    fun = 'build'
-    optim = 'debug'
-    version = (2, 12)
-
-class QtCreator3(QtCreator):
-    "creates projects for QtCreator 3.x"
-    cmd = 'qtcreator3'
-    fun = 'build'
-    optim = 'debug'
-    version = (3, 15)
-
-class QtCreator4(QtCreator):
-    "creates projects for QtCreator 4.x"
-    cmd = 'qtcreator3'
-    fun = 'build'
-    optim = 'debug'
-    version = (4, 18)
-
-class Qbs(QtCreator4):
-    cmd = 'qbs'
-    fun = 'build'
-    optim = 'debug'
+class Qbs(QtCreator):
+    PROJECT_TYPE = 'Qbs.QbsBuildConfiguration'
 
     def execute(self):
         self.restore()
@@ -1008,7 +985,6 @@ class Qbs(QtCreator4):
             pfile.write('}\n')
         with open(qbs_user.abspath(), 'w') as f:
             self.write_user(f, project_list)
-        self.write_workspace([qbs_project], appname, qbs_project)
 
 
     def write_project_list(self, project_file, project_list, indent = '    '):
@@ -1039,23 +1015,53 @@ class Qbs(QtCreator4):
                         node_path = node.path_from(self.srcnode).replace('\\', '/')
                         project_file.write('%s        "%s",\n' % (indent, node_path))
                 project_file.write('%s    ]\n' % indent)
-                #if 'Makefile' in p.features:
-                #    project_file.write('%s    Transformer {\n' % indent)
-                #    project_file.write('%s        inputs: []\n' % indent)
-                #    project_file.write('%s        alwaysRun: true\n' % indent)
-                #    project_file.write('%s        Artifact {\n' % indent)
-                #    project_file.write('%s            filePath: \'build/linux-amd64-gcc-5.4.0/debug/bin/bugengine\'\n' % indent)
-                #    project_file.write('%s            fileTags: [\'application\']\n' % indent)
-                #    project_file.write('%s        }\n' % indent)
-                #    project_file.write('%s        prepare: {\n' % indent)
-                #    project_file.write('%s            var args = [];\n' % indent)
-                #    project_file.write('%s            args.push(\'%s\');\n' % (indent, sys.argv[0]))
-                #    project_file.write('%s            args.push(\'build:%s:%s\');\n' % (indent, 'linux-amd64-gcc-5.4.0', 'debug'))
-                #    project_file.write('%s            var cmd = new Command(\'%s\', args);\n' % (indent, sys.executable))
-                #    project_file.write('%s            cmd.description = \'running waf\';\n' % indent)
-                #    project_file.write('%s            cmd.highlight = \'compiler\';\n' % indent)
-                #    project_file.write('%s            cmd.workingDirectory = \'/home/yngwe/game/\';\n' % indent)
-                #    project_file.write('%s            return cmd;\n' % indent)
-                #    project_file.write('%s        }\n' % indent)
-                #    project_file.write('%s    }\n' % indent)
                 project_file.write('%s}\n' % indent)
+
+
+
+class QtCreator2(QtCreator):
+    "creates projects for QtCreator 2.x"
+    cmd = 'qtcreator2'
+    fun = 'build'
+    optim = 'debug'
+    version = (2, 12)
+
+
+class QtCreator3(QtCreator):
+    "creates projects for QtCreator 3.x"
+    cmd = 'qtcreator3'
+    fun = 'build'
+    optim = 'debug'
+    version = (3, 15)
+
+
+class QtCreator4(QtCreator):
+    "creates projects for QtCreator 4.x"
+    cmd = 'qtcreator4'
+    fun = 'build'
+    optim = 'debug'
+    version = (4, 18)
+
+
+class Qbs2(Qbs):
+    "creates Qbs projects for QtCreator 2.x"
+    cmd = 'qbs2'
+    fun = 'build'
+    optim = 'debug'
+    version = (2, 12)
+
+
+class Qbs3(Qbs):
+    "creates Qbs projects for QtCreator 3.x"
+    cmd = 'qbs3'
+    fun = 'build'
+    optim = 'debug'
+    version = (3, 15)
+
+
+class Qbs4(Qbs):
+    "creates Qbs projects for QtCreator 4.x"
+    cmd = 'qbs4'
+    fun = 'build'
+    optim = 'debug'
+    version = (4, 18)
