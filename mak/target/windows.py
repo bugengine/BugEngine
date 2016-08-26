@@ -1,5 +1,4 @@
 from mak import targets
-from mak.compiler import clang, gcc
 import re
 
 
