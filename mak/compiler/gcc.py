@@ -28,11 +28,12 @@ class GCC(Configure.ConfigurationContext.GnuCompiler):
     def load_in_env(self, conf, platform, sysroot=None):
         Configure.ConfigurationContext.GnuCompiler.load_in_env(self, conf, platform, sysroot)
         if self.version_number >= 4:
-            v = conf.env
-            v.append_unique('CFLAGS', ['-fvisibility=hidden'])
-            v.append_unique('CXXFLAGS', ['-fvisibility=hidden'])
-            v.CFLAGS_exportall = ['-fvisibility=default']
-            v.CXXFLAGS_exportall = ['-fvisibility=default']
+            if platform.NAME != 'windows':
+                v = conf.env
+                v.append_unique('CFLAGS', ['-fvisibility=hidden'])
+                v.append_unique('CXXFLAGS', ['-fvisibility=hidden'])
+                v.CFLAGS_exportall = ['-fvisibility=default']
+                v.CXXFLAGS_exportall = ['-fvisibility=default']
 
 
 class LLVM(GCC):
