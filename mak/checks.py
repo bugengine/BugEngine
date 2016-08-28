@@ -92,7 +92,7 @@ def check_lib(self, libname, var='', libpath=[], includepath=[], includes=[], fu
             use=['debug'],
             envname=self.env.TOOLCHAIN)
     except self.errors.ConfigurationError:
-        Logs.pprint('YELLOW', '-%s' % var, sep=' ')
+        #Logs.pprint('YELLOW', '-%s' % var, sep=' ')
         pass
     else:
         self.env[var] = libname
@@ -269,8 +269,8 @@ def pkg_config(conf, name, var=''):
     cflags, libs, ldflags = conf.run_pkg_config(name)
     conf.env['CFLAGS_%s'%var] = cflags
     conf.env['CXXFLAGS_%s'%var] = cflags
-    conf.env['LINKFLAGS_%s'%var] = [conf.env.LIB_ST % l for l in libs] + ldflags
-    print(name, cflags, libs, ldflags)
+    conf.env['LINKFLAGS_%s'%var] = ldflags
+    conf.env['LIB_%s'%var] = libs
 
 
 def configure(conf):
