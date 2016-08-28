@@ -63,11 +63,12 @@ class Clang(Configure.ConfigurationContext.GnuCompiler):
     def load_in_env(self, conf, platform, sysroot=None):
         Configure.ConfigurationContext.GnuCompiler.load_in_env(self, conf, platform)
         if self.version_number >= 3.1:
-            env = conf.env
-            env.append_unique('CFLAGS', ['-fvisibility=hidden'])
-            env.append_unique('CXXFLAGS', ['-fvisibility=hidden'])
-            env.CFLAGS_exportall = ['-fvisibility=default']
-            env.CXXFLAGS_exportall = ['-fvisibility=default']
+            if platform.NAME != 'windows':
+                env = conf.env
+                env.append_unique('CFLAGS', ['-fvisibility=hidden'])
+                env.append_unique('CXXFLAGS', ['-fvisibility=hidden'])
+                env.CFLAGS_exportall = ['-fvisibility=default']
+                env.CXXFLAGS_exportall = ['-fvisibility=default']
 
 
 def detect_clang(conf):
