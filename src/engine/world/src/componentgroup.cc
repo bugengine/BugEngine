@@ -665,10 +665,10 @@ void ComponentGroup::repack(weak<EntityStorage> storage, u32 componentIndex, Buc
             lastRemoveOpBuffer = lastRemoveOpBuffer->m_next;
         }
         const EntityOperationRemove* firstRemoveOp = reinterpret_cast<const EntityOperationRemove*>(bufferRemove->m_data + bufferRemoveOffset);
-        be_assert(firstRemoveOp->operation.maskBefore == &bucket - m_buckets.begin(),
+        be_assert(firstRemoveOp->operation.maskBefore == (u32)(&bucket - m_buckets.begin()),
                   "Operation buffer inconsistency");
         const EntityOperationRemove* lastRemoveOp =  reinterpret_cast<const EntityOperationRemove*>(lastRemoveOpBuffer->m_data + lastRemoveOpOffset);
-        be_assert(lastRemoveOp->operation.maskBefore == &bucket - m_buckets.begin(),
+        be_assert(lastRemoveOp->operation.maskBefore == (u32)(&bucket - m_buckets.begin()),
                   "Operation buffer inconsistency");
         for (u32 entityIndex = entityCount;
              entityIndex > newEntityCount;
@@ -691,7 +691,7 @@ void ComponentGroup::repack(weak<EntityStorage> storage, u32 componentIndex, Buc
                     lastRemoveOpOffset = lastRemoveOpBuffer->m_used - sizeof(EntityOperationRemove);
                 }
                 lastRemoveOp =  reinterpret_cast<const EntityOperationRemove*>(lastRemoveOpBuffer->m_data + lastRemoveOpOffset);
-                be_assert(lastRemoveOp->operation.maskBefore == &bucket - m_buckets.begin(),
+                be_assert(lastRemoveOp->operation.maskBefore == (u32)(&bucket - m_buckets.begin()),
                           "Operation buffer inconsistency");
             }
             else
@@ -731,7 +731,7 @@ void ComponentGroup::repack(weak<EntityStorage> storage, u32 componentIndex, Buc
                     }
                     ++currentRemoveOperationFront;
                     firstRemoveOp = reinterpret_cast<const EntityOperationRemove*>(bufferRemove->m_data + bufferRemoveOffset);
-                    be_assert(firstRemoveOp->operation.maskBefore == &bucket - m_buckets.begin(),
+                    be_assert(firstRemoveOp->operation.maskBefore == (u32)(&bucket - m_buckets.begin()),
                               "Operation buffer inconsistency");
                 }
             }
@@ -817,13 +817,13 @@ void ComponentGroup::repack(weak<EntityStorage> storage, u32 componentIndex, Buc
     {
         byte* buffer = bufferRemove->m_data + bufferRemoveOffset;
         const EntityOperationRemove* remove = reinterpret_cast<const EntityOperationRemove*>(buffer);
-        be_assert(remove->operation.maskBefore == &bucket - m_buckets.begin(),
+        be_assert(remove->operation.maskBefore == (u32)(&bucket - m_buckets.begin()),
                   "Operation buffer inconsistency");
         be_assert (remove->componentIndex < entitiesToMove,
                    "mismatch added/removed ops");
         buffer = bufferAdd->m_data + bufferAddOffset;
         const EntityOperation* add = reinterpret_cast<const EntityOperation*>(buffer);
-        be_assert(add->maskAfter == &bucket - m_buckets.begin(),
+        be_assert(add->maskAfter == (u32)(&bucket - m_buckets.begin()),
                   "Operation buffer inconsistency");
         Entity e = { add->owner };
         EntityInfo& info = storage->getEntityInfo(e);
@@ -860,7 +860,7 @@ void ComponentGroup::repack(weak<EntityStorage> storage, u32 componentIndex, Buc
         u32 destIndex = entitiesToMove + i;
         byte* buffer = bufferAdd->m_data + bufferAddOffset;
         const EntityOperation* add = reinterpret_cast<const EntityOperation*>(buffer);
-        be_assert(add->maskAfter == &bucket - m_buckets.begin(),
+        be_assert(add->maskAfter == (u32)(&bucket - m_buckets.begin()),
                   "Operation buffer inconsistency");
         Entity e = {add->owner};
         EntityInfo& info = storage->getEntityInfo(e);
@@ -896,7 +896,7 @@ void ComponentGroup::executeEntityOperations(weak<EntityStorage> storage,
         u32 absoluteComponentIndex = componentIndex + firstComponent;
         EntityStorage::ComponentStorage& componentStorage = *storage->m_components[absoluteComponentIndex];
         const u32 mask = 1 << componentIndex;
-        memset(offsets.begin(), 0, offsets.byteCount());
+        memset(offsets.begin(), 0, be_checked_numcast<size_t>(offsets.byteCount()));
         i32 absoluteOffset = 0;
         u32 entityCount = 0;
         u32 entityCountAll = 0;

@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#! /Usr/bin/env python
 # encoding: utf-8
 
 import os
@@ -201,6 +201,7 @@ class QtToolchain(QtObject):
                 ('linux', 'linux'),
                 ('windows', 'windows'),
                 ('mingw', 'windows'),
+                ('freebsd', 'bsd'),
             )
         supported_platform = (
                 ('android', 'android'),
@@ -212,6 +213,7 @@ class QtToolchain(QtObject):
                 ('msvc-10.0', 'msvc2010'),
                 ('msvc-11.0', 'msvc2012'),
                 ('msvc-12.0', 'msvc2013'),
+                ('msvc-14.0', 'msvc2015'),
             )
         for o, o_name in supported_os:
             if target.find(o) != -1:
@@ -256,8 +258,10 @@ class QtToolchain(QtObject):
                 self.ProjectExplorer_GccToolChain_Path = cxx
                 self.ProjectExplorer_GccToolChain_TargetAbi = abi
                 toolchain_id =  'ProjectExplorer.ToolChain.LinuxIcc:%s' % generateGUID('BugEngine:toolchain:%s'%env_name)
-            elif env.COMPILER_NAME == 'msvc':
-                toolchain_id =  'ProjectExplorer.ToolChain.Msvc:%s' % generateGUID('BugEngine:toolchain:%s'%env_name)
+            elif env.COMPILER_NAME in ('suncc', 'msvc'):
+                self.ProjectExplorer_GccToolChain_Path = cxx
+                self.ProjectExplorer_GccToolChain_TargetAbi = abi
+                toolchain_id =  'ProjectExplorer.ToolChain.Gcc:%s' % generateGUID('BugEngine:toolchain:%s'%env_name)
             else:
                 self.ProjectExplorer_CustomToolChain_CompilerPath = cxx
                 self.ProjectExplorer_CustomToolChain_Cxx11Flags = ()
@@ -339,8 +343,10 @@ class QtPlatform(QtObject):
                     ('QtPM4.mkSPecInformation', ''),
                     ('QtSupport.QtInformation', -1),
                 ]
-            icon_path = os.path.join(bld.bugenginenode.abspath(), 'mak', 'icons', '%s.png'%env.VALID_PLATFORMS[0])
-            icon_extra = os.path.join(bld.bugenginenode.abspath(), 'extra', env.VALID_PLATFORMS[0], 'icon.png')
+            icon_path = os.path.join(bld.bugenginenode.abspath(), 'mak', 'icons',
+                                     '%s.png'%env.VALID_PLATFORMS[0])
+            icon_extra = os.path.join(bld.bugenginenode.abspath(), 'extra',
+                                      env.VALID_PLATFORMS[0], 'icon.png')
             if os.path.isfile(icon_path):
                 self.PE_Profile_Icon = icon_path
             elif os.path.isfile(icon_extra):
@@ -356,6 +362,8 @@ def to_var(name):
     return VAR_PATTERN%name
 
 class QtCreator(Build.BuildContext):
+    PROJECT_TYPE = 'GenericProjectManager.GenericBuildConfiguration'
+    
     def execute(self):
         self.restore()
         if not self.all_envs:
@@ -555,7 +563,8 @@ class QtCreator(Build.BuildContext):
 
         if not os.path.exists(HOME_DIRECTORY):
             os.makedirs(HOME_DIRECTORY)
-        with XmlDocument(open(os.path.join(HOME_DIRECTORY, 'profiles.xml'), 'w'), 'UTF-8', [('DOCTYPE', 'QtCreatorProfiles')]) as document:
+        with XmlDocument(open(os.path.join(HOME_DIRECTORY, 'profiles.xml'), 'w'),
+                         'UTF-8', [('DOCTYPE', 'QtCreatorProfiles')]) as document:
             with XmlNode(document, 'qtcreator') as creator:
                 profile_index = 0
                 for platform_name, platform in self.platforms:
@@ -574,7 +583,8 @@ class QtCreator(Build.BuildContext):
                     XmlNode(data, 'variable', 'Version')
                     XmlNode(data, 'value', '1', [('type', 'int')])
 
-        with XmlDocument(open(os.path.join(HOME_DIRECTORY, 'debuggers.xml'), 'w'), 'UTF-8', [('DOCTYPE', 'QtCreatorDebugger')]) as document:
+        with XmlDocument(open(os.path.join(HOME_DIRECTORY, 'debuggers.xml'), 'w'),
+                         'UTF-8', [('DOCTYPE', 'QtCreatorDebugger')]) as document:
             with XmlNode(document, 'qtcreator') as creator:
                 debugger_index = 0
                 for debugger_name, debugger in self.debuggers:
@@ -590,7 +600,8 @@ class QtCreator(Build.BuildContext):
                     XmlNode(data, 'variable', 'Version')
                     XmlNode(data, 'value', '1', [('type', 'int')])
 
-        with XmlDocument(open(os.path.join(HOME_DIRECTORY, 'toolchains.xml'), 'w'), 'UTF-8', [('DOCTYPE', 'QtCreatorToolChains')]) as document:
+        with XmlDocument(open(os.path.join(HOME_DIRECTORY, 'toolchains.xml'), 'w'),
+                         'UTF-8', [('DOCTYPE', 'QtCreatorToolChains')]) as document:
             with XmlNode(document, 'qtcreator') as creator:
                 toolchain_index = 0
                 for toolchain_name, toolchain in self.toolchains:
@@ -713,45 +724,72 @@ class QtCreator(Build.BuildContext):
                             build_configurations.append((
                                 'ProjectExplorer.Target.BuildConfiguration.%d'%build_configuration_index,
                                 [
-                                    ('ProjectExplorer.BuildConfiguration.BuildDirectory', self.srcnode.abspath()),
-                                    ('GenericProjectManager.GenericBuildConfiguration.BuildDirectory', self.srcnode.abspath()),
+                                    ('ProjectExplorer.BuildConfiguration.BuildDirectory',
+                                       self.bldnode.make_node('qtcreator').abspath()),
+                                    ('GenericProjectManager.GenericBuildConfiguration.BuildDirectory',
+                                       self.bldnode.make_node('qtcreator').abspath()),
                                     ('ProjectExplorer.BuildConfiguration.BuildStepList.0', [
                                         ('ProjectExplorer.BuildStepList.Step.0', [
-                                            ('ProjectExplorer.BuildStep.Enabled', False),
-                                            ('ProjectExplorer.ProjectConfiguration.DefaultDisplayName', 'Qbs configuration'),
+                                            ('ProjectExplorer.BuildStep.Enabled',
+                                              False),
+                                            ('ProjectExplorer.ProjectConfiguration.DefaultDisplayName',
+                                              'Qbs configuration'),
                                             ('ProjectExplorer.ProjectConfiguration.DisplayName', ''),
                                             ('Qbs.Configuration', [
                                                 ('qbs.buildVariant', 'debug')
                                             ]),
-                                            ('ProjectExplorer.ProjectConfiguration.Id', 'Qbs.BuildStep')
+                                            ('ProjectExplorer.ProjectConfiguration.Id',
+                                              'Qbs.BuildStep')
                                         ]),
                                         ('ProjectExplorer.BuildStepList.Step.1', [
-                                            ('ProjectExplorer.BuildStep.Enabled', True),
-                                            ('ProjectExplorer.ProcessStep.Arguments', '%s build:%s:%s'%(sys.argv[0], env_name, variant)),
-                                            ('ProjectExplorer.ProcessStep.Command', sys.executable),
-                                            ('ProjectExplorer.ProcessStep.WorkingDirectory', self.srcnode.abspath()),
-                                            ('ProjectExplorer.ProjectConfiguration.DefaultDisplayName', 'Waf configuration'),
-                                            ('ProjectExplorer.ProjectConfiguration.DisplayName', ''),
-                                            ('ProjectExplorer.ProjectConfiguration.Id', 'ProjectExplorer.ProcessStep'),
+                                            ('ProjectExplorer.BuildStep.Enabled',
+                                              True),
+                                            ('ProjectExplorer.ProcessStep.Arguments',
+                                              '%s build:%s:%s'%(sys.argv[0], env_name, variant)),
+                                            ('ProjectExplorer.ProcessStep.Command',
+                                              sys.executable),
+                                            ('ProjectExplorer.ProcessStep.WorkingDirectory',
+                                              self.srcnode.abspath()),
+                                            ('ProjectExplorer.ProjectConfiguration.DefaultDisplayName',
+                                              'Waf configuration'),
+                                            ('ProjectExplorer.ProjectConfiguration.DisplayName',
+                                              ''),
+                                            ('ProjectExplorer.ProjectConfiguration.Id',
+                                              'ProjectExplorer.ProcessStep'),
                                         ]),
-                                        ('ProjectExplorer.BuildStepList.StepsCount', 2),
-                                        ('ProjectExplorer.ProjectConfiguration.DefaultDisplayName', 'Build'),
-                                        ('ProjectExplorer.ProjectConfiguration.DisplayName', ''),
-                                        ('ProjectExplorer.ProjectConfiguration.Id', 'ProjectExplorer.BuildSteps.Build')
+                                        ('ProjectExplorer.BuildStepList.StepsCount',
+                                          2),
+                                        ('ProjectExplorer.ProjectConfiguration.DefaultDisplayName',
+                                          'Build'),
+                                        ('ProjectExplorer.ProjectConfiguration.DisplayName',
+                                          ''),
+                                        ('ProjectExplorer.ProjectConfiguration.Id',
+                                          'ProjectExplorer.BuildSteps.Build')
                                     ]),
                                     ('ProjectExplorer.BuildConfiguration.BuildStepList.1', [
                                         ('ProjectExplorer.BuildStepList.Step.0', [
-                                            ('ProjectExplorer.BuildStep.Enabled', True),
-                                            ('ProjectExplorer.ProcessStep.Arguments', '%s clean:%s:%s'%(sys.argv[0], env_name, variant)),
-                                            ('ProjectExplorer.ProcessStep.Command', sys.executable),
-                                            ('ProjectExplorer.ProcessStep.WorkingDirectory', self.srcnode.abspath()),
-                                            ('ProjectExplorer.ProjectConfiguration.DefaultDisplayName', 'Waf configuration'),
-                                            ('ProjectExplorer.ProjectConfiguration.DisplayName', ''),
-                                            ('ProjectExplorer.ProjectConfiguration.Id', 'ProjectExplorer.ProcessStep')
+                                            ('ProjectExplorer.BuildStep.Enabled',
+                                              True),
+                                            ('ProjectExplorer.ProcessStep.Arguments',
+                                              '%s clean:%s:%s'%(sys.argv[0], env_name, variant)),
+                                            ('ProjectExplorer.ProcessStep.Command',
+                                              sys.executable),
+                                            ('ProjectExplorer.ProcessStep.WorkingDirectory',
+                                              self.srcnode.abspath()),
+                                            ('ProjectExplorer.ProjectConfiguration.DefaultDisplayName',
+                                              'Waf configuration'),
+                                            ('ProjectExplorer.ProjectConfiguration.DisplayName',
+                                              ''),
+                                            ('ProjectExplorer.ProjectConfiguration.Id',
+                                              'ProjectExplorer.ProcessStep')
                                         ]),
-                                        ('ProjectExplorer.BuildStepList.StepsCount', 1),
-                                        ('ProjectExplorer.ProjectConfiguration.DefaultDisplayName', 'Clean'),
-                                        ('ProjectExplorer.ProjectConfiguration.DisplayName', ''),
+                                        ('ProjectExplorer.BuildStepList.StepsCount',
+                                          1),
+                                        ('ProjectExplorer.ProjectConfiguration.DefaultDisplayName',
+                                          'Clean'),
+                                        ('ProjectExplorer.ProjectConfiguration.DisplayName',
+                                          ''),
+
                                         ('ProjectExplorer.ProjectConfiguration.Id', 'ProjectExplorer.BuildSteps.Clean')
                                     ]),
                                     ('ProjectExplorer.BuildConfiguration.BuildStepListCount', 2),
@@ -766,13 +804,16 @@ class QtCreator(Build.BuildContext):
                                             self.srcnode.abspath(),
                                             bld_env.PREFIX, variant, env.DEPLOY_BINDIR,
                                             env.cxxprogram_PATTERN%self.launcher[0][0].target),
-                                         'OUT_DIR=%s' % os.path.join(self.srcnode.abspath(), bld_env.PREFIX, variant),
-                                         'RUNBIN_DIR=%s' % os.path.join(self.srcnode.abspath(), bld_env.PREFIX, variant, env.DEPLOY_RUNBINDIR),
+                                         'OUT_DIR=%s' % os.path.join(self.srcnode.abspath(),
+                                                                     bld_env.PREFIX, variant),
+                                         'RUNBIN_DIR=%s' % os.path.join(self.srcnode.abspath(),
+                                                                        bld_env.PREFIX, variant,
+                                                                        env.DEPLOY_RUNBINDIR),
                                          'TERM=msys',
                                         )),
                                     ('ProjectExplorer.ProjectConfiguration.DefaultDisplayName', 'Default'),
                                     ('ProjectExplorer.ProjectConfiguration.DisplayName', variant),
-                                    ('ProjectExplorer.ProjectConfiguration.Id', 'Qbs.QbsBuildConfiguration')
+                                    ('ProjectExplorer.ProjectConfiguration.Id', self.PROJECT_TYPE)
                                 ]))
                             build_configuration_index += 1
                         run_configurations = []
@@ -929,33 +970,8 @@ class QtCreator(Build.BuildContext):
                 new_file.write(document.toxml())
 
 
-
-
-class QtCreator2(QtCreator):
-    "creates projects for QtCreator 2.x"
-    cmd = 'qtcreator2'
-    fun = 'build'
-    optim = 'debug'
-    version = (2, 12)
-
-class QtCreator3(QtCreator):
-    "creates projects for QtCreator 3.x"
-    cmd = 'qtcreator3'
-    fun = 'build'
-    optim = 'debug'
-    version = (3, 15)
-
-class QtCreator4(QtCreator):
-    "creates projects for QtCreator 4.x"
-    cmd = 'qtcreator3'
-    fun = 'build'
-    optim = 'debug'
-    version = (4, 18)
-
-class Qbs(QtCreator4):
-    cmd = 'qbs'
-    fun = 'build'
-    optim = 'debug'
+class Qbs(QtCreator):
+    PROJECT_TYPE = 'Qbs.QbsBuildConfiguration'
 
     def execute(self):
         self.restore()
@@ -1004,7 +1020,6 @@ class Qbs(QtCreator4):
             pfile.write('}\n')
         with open(qbs_user.abspath(), 'w') as f:
             self.write_user(f, project_list)
-        self.write_workspace([qbs_project], appname, qbs_project)
 
 
     def write_project_list(self, project_file, project_list, indent = '    '):
@@ -1023,7 +1038,7 @@ class Qbs(QtCreator4):
                 project_file.write('%s    targetName: "%s"\n' % (indent, p.name.split('.')[-1]))
                 project_file.write('%s    cpp.includePaths: [\n' % (indent))
                 for include in includes:
-                    project_file.write('%s        "%s",\n' % (indent, include))
+                    project_file.write('%s        "%s",\n' % (indent, include.replace('\\', '/')))
                 project_file.write('%s    ]\n' % (indent))
                 project_file.write('%s    cpp.defines: [\n' % (indent))
                 for define in defines:
@@ -1032,26 +1047,56 @@ class Qbs(QtCreator4):
                 project_file.write('%s    files: [\n' % indent)
                 for source_node in getattr(p, 'source_nodes', []):
                     for node in source_node.ant_glob('**'):
-                        node_path = node.path_from(self.srcnode)
+                        node_path = node.path_from(self.srcnode).replace('\\', '/')
                         project_file.write('%s        "%s",\n' % (indent, node_path))
                 project_file.write('%s    ]\n' % indent)
-                #if 'Makefile' in p.features:
-                #    project_file.write('%s    Transformer {\n' % indent)
-                #    project_file.write('%s        inputs: []\n' % indent)
-                #    project_file.write('%s        alwaysRun: true\n' % indent)
-                #    project_file.write('%s        Artifact {\n' % indent)
-                #    project_file.write('%s            filePath: \'build/linux-amd64-gcc-5.4.0/debug/bin/bugengine\'\n' % indent)
-                #    project_file.write('%s            fileTags: [\'application\']\n' % indent)
-                #    project_file.write('%s        }\n' % indent)
-                #    project_file.write('%s        prepare: {\n' % indent)
-                #    project_file.write('%s            var args = [];\n' % indent)
-                #    project_file.write('%s            args.push(\'%s\');\n' % (indent, sys.argv[0]))
-                #    project_file.write('%s            args.push(\'build:%s:%s\');\n' % (indent, 'linux-amd64-gcc-5.4.0', 'debug'))
-                #    project_file.write('%s            var cmd = new Command(\'%s\', args);\n' % (indent, sys.executable))
-                #    project_file.write('%s            cmd.description = \'running waf\';\n' % indent)
-                #    project_file.write('%s            cmd.highlight = \'compiler\';\n' % indent)
-                #    project_file.write('%s            cmd.workingDirectory = \'/home/yngwe/game/\';\n' % indent)
-                #    project_file.write('%s            return cmd;\n' % indent)
-                #    project_file.write('%s        }\n' % indent)
-                #    project_file.write('%s    }\n' % indent)
                 project_file.write('%s}\n' % indent)
+
+
+
+class QtCreator2(QtCreator):
+    "creates projects for QtCreator 2.x"
+    cmd = 'qtcreator2'
+    fun = 'build'
+    optim = 'debug'
+    version = (2, 12)
+
+
+class QtCreator3(QtCreator):
+    "creates projects for QtCreator 3.x"
+    cmd = 'qtcreator3'
+    fun = 'build'
+    optim = 'debug'
+    version = (3, 15)
+
+
+class QtCreator4(QtCreator):
+    "creates projects for QtCreator 4.x"
+    cmd = 'qtcreator4'
+    fun = 'build'
+    optim = 'debug'
+    version = (4, 18)
+
+
+class Qbs2(Qbs):
+    "creates Qbs projects for QtCreator 2.x"
+    cmd = 'qbs2'
+    fun = 'build'
+    optim = 'debug'
+    version = (2, 12)
+
+
+class Qbs3(Qbs):
+    "creates Qbs projects for QtCreator 3.x"
+    cmd = 'qbs3'
+    fun = 'build'
+    optim = 'debug'
+    version = (3, 15)
+
+
+class Qbs4(Qbs):
+    "creates Qbs projects for QtCreator 4.x"
+    cmd = 'qbs4'
+    fun = 'build'
+    optim = 'debug'
+    version = (4, 18)
