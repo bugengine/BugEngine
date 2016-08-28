@@ -1,4 +1,4 @@
-from waflib import Options, Utils
+from waflib import Options, Utils, Configure
 from waflib.Configure import conf
 import os
 import sys
@@ -124,8 +124,8 @@ class GnuCompiler(Compiler):
         extra_env['LANG'] = 'C'
         self.sysroot = None
         version, platform, arch = self.get_version(compiler_cxx, extra_args, extra_env)
-        super(GnuCompiler, self).__init__(compiler_c, compiler_cxx, version,
-                                          platform, arch, extra_args, extra_env)
+        Compiler.__init__(self, compiler_c, compiler_cxx, version,
+                          platform, arch, extra_args, extra_env)
         target_dir = os.path.normpath(os.path.join(self.directories[0], '..', self.target, 'bin'))
         if os.path.isdir(target_dir):
             self.directories.append(target_dir)
@@ -218,7 +218,7 @@ class GnuCompiler(Compiler):
         env.CC = self.compiler_c
         env.CXX = self.compiler_cxx
         env.SYSROOT = sysroot or self.sysroot or []
-        super(GnuCompiler, self).load_in_env(conf, platform)
+        Compiler.load_in_env(self, conf, platform)
 
 
         sys_dirs = self.directories[:]
@@ -289,6 +289,9 @@ class GnuCompiler(Compiler):
         self.set_warning_options(conf)
         self.set_optimisation_options(conf)
 
+
+Configure.ConfigurationContext.Compiler = Compiler
+Configure.ConfigurationContext.GnuCompiler = GnuCompiler
 
 @conf
 def detect_executable(conf, program_name, path_list=[]):

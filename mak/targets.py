@@ -1,5 +1,5 @@
 import os, platform
-from waflib import Options
+from waflib import Options, Configure
 from waflib.Logs import pprint
 from waflib.Build import BuildContext, CleanContext, InstallContext, UninstallContext, ListContext
 from waflib.Configure import conf
@@ -98,6 +98,8 @@ class Platform:
         self.variant = ''
         self.env.append_unique('ALL_TOOLCHAINS', toolchain)
 
+
+Configure.ConfigurationContext.Platform = Platform
 
 
 def options(opt):

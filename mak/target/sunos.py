@@ -234,7 +234,7 @@ def configure(conf):
 
 
 def build(bld):
-    bld.platforms.append(bld.external('3rdparty.X11'))
+    pass
 
 def plugins(bld):
     pass

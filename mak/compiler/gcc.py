@@ -1,35 +1,32 @@
-from waflib import Utils, Logs
-from waflib.Configure import conf
-from mak import compilers
+from waflib import Utils, Logs, Configure
 import os
 import sys
-import shlex
 
 
-class GCC(compilers.GnuCompiler):
+class GCC(Configure.ConfigurationContext.GnuCompiler):
     DEFINES = ['__GNUC__', '__GNUG__']
     NAMES = ('GCC',)
     TOOLS = 'gcc gxx'
 
     def __init__(self, gcc, gxx, extra_args = []):
-        super(GCC, self).__init__(gcc, gxx, extra_args)
+        Configure.ConfigurationContext.GnuCompiler.__init__(self, gcc, gxx, extra_args)
 
     def set_warning_options(self, conf):
-        super(GCC, self).set_warning_options(conf)
+        Configure.ConfigurationContext.GnuCompiler.set_warning_options(self, conf)
         if self.version_number >= 4.8:
             v.CXXFLAGS_warnall.append('-Wno-unused-local-typedefs')
 
     def set_optimisation_options(self, conf):
-        super(GCC, self).set_optimisation_options(conf)
+        Configure.ConfigurationContext.GnuCompiler.set_optimisation_options(self, conf)
 
     def set_warning_options(self, conf):
-        super(GCC, self).set_warning_options(conf)
+        Configure.ConfigurationContext.GnuCompiler.set_warning_options(self, conf)
         if self.version_number >= 4.8:
             v = conf.env
             v.CXXFLAGS_warnall.append('-Wno-unused-local-typedefs')
 
     def load_in_env(self, conf, platform, sysroot=None):
-        super(GCC, self).load_in_env(conf, platform, sysroot)
+        Configure.ConfigurationContext.GnuCompiler.load_in_env(self, conf, platform, sysroot)
         if self.version_number >= 4:
             v = conf.env
             v.append_unique('CFLAGS', ['-fvisibility=hidden'])
@@ -43,7 +40,7 @@ class LLVM(GCC):
     NAMES = ('LLVM', 'GCC')
 
     def __init__(self, gcc, gxx, extra_args = []):
-        super(LLVM, self).__init__(gcc, gxx, extra_args)
+        GCC.__init__(self, gcc, gxx, extra_args)
 
 
 def detect_gcc_from_path(conf, path, seen):
@@ -80,7 +77,7 @@ def detect_gcc_from_path(conf, path, seen):
                     '',
                 ]
 
-                def find_gcc(gcc_name_prefix, cls):
+                def find_target_gcc(gcc_name_prefix, cls):
                     cc = cxx = None
                     for v in versions:
                         cc = conf.detect_executable('%s-gcc%s'%(gcc_name_prefix, v), path_list=[bindir])
@@ -106,11 +103,11 @@ def detect_gcc_from_path(conf, path, seen):
                             seen.add(multilib_compiler.name())
                             conf.compilers.append(multilib_compiler)
                         return c
-                c = find_gcc(target, GCC)
+                c = find_target_gcc(target, GCC)
                 if c:
                     result, out, err = c.run_c(['-fplugin=dragonegg', '-E', '-'], '')
                     if result == 0:
-                        find_gcc('llvm', LLVM)
+                        find_target_gcc('llvm', LLVM)
 
 
 def get_native_gcc(conf, seen):

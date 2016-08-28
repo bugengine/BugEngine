@@ -1,8 +1,8 @@
-from mak import targets
+from waflib import Configure
 import re
 
 
-class Windows(targets.Platform):
+class Windows(Configure.ConfigurationContext.Platform):
     NAME = 'windows'
     SUPPORTED_TARGETS = (re.compile('.*mingw32.*'),
                          re.compile('.*windows-gnu'),
@@ -11,7 +11,7 @@ class Windows(targets.Platform):
                          re.compile('.*windows-wsdk'))
 
     def __init__(self):
-        super(Windows, self).__init__()
+        Configure.ConfigurationContext.Platform.__init__(self)
 
     def get_available_compilers(self, compiler_list):
         result = []
@@ -64,7 +64,7 @@ class Windows(targets.Platform):
 
 class Windows_Clang(Windows):
     def load_in_env(self, conf, compiler):
-        super(Windows_Clang, self).load_in_env(conf, compiler)
+        Windows.load_in_env(self, conf, compiler)
         env = conf.env
         env.append_unique('LINKFLAGS', ['-static-libgcc', '-static-libstdc++', '-pthread'])
         env.append_unique('STLIB', ['pthread'])
@@ -77,7 +77,7 @@ class Windows_Clang(Windows):
 
 class Windows_GCC(Windows):
     def load_in_env(self, conf, compiler):
-        super(Windows_GCC, self).load_in_env(conf, compiler)
+        Windows.load_in_env(self, conf, compiler)
         env = conf.env
         env.append_unique('CFLAGS', ['-static-libgcc'])
         env.append_unique('CXXFLAGS', ['-static-libgcc'])
@@ -95,7 +95,7 @@ class Windows_GCC(Windows):
 
 class Windows_MSVC(Windows):
     def load_in_env(self, conf, compiler):
-        super(Windows_MSVC, self).load_in_env(conf, compiler)
+        Windows.load_in_env(self, conf, compiler)
         if compiler.arch == 'arm':
             conf.env.CFLAGS.append('/D_ARM_WINAPI_PARTITION_DESKTOP_SDK_AVAILABLE=1')
             conf.env.CXXFLAGS.append('/D_ARM_WINAPI_PARTITION_DESKTOP_SDK_AVAILABLE=1')
