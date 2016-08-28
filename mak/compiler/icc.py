@@ -1,11 +1,9 @@
-from waflib import Utils, Logs
-from waflib.Configure import conf
-from mak import compilers
-import os, sys
+from waflib import Utils, Logs, Configure
+import os
+import sys
 
 
-
-class ICC(compilers.GnuCompiler):
+class ICC(Configure.ConfigurationContext.GnuCompiler):
     DEFINES = ['__INTEL_COMPILER', '__GNUC__', '_MSC_VER']
     NAMES = ('ICC',)
     ICC_PLATFORMS = {
@@ -19,7 +17,7 @@ class ICC(compilers.GnuCompiler):
     TOOLS = 'icc icpc'
 
     def __init__(self, icc, icpc, extra_args = [], extra_env={}):
-        super(ICC, self).__init__(icc, icpc, extra_args, extra_env)
+        Configure.ConfigurationContext.GnuCompiler.__init__(self, icc, icpc, extra_args, extra_env)
 
     def get_version(self, icc, extra_args, extra_env):
         env = os.environ.copy()
@@ -51,14 +49,14 @@ class ICC(compilers.GnuCompiler):
         return version, platform, arch
 
     def set_optimisation_options(self, conf):
-        super(ICC, self).set_optimisation_options(conf)
+        Configure.ConfigurationContext.GnuCompiler.set_optimisation_options(self, conf)
 
     def set_warning_options(self, conf):
-        super(ICC, self).set_warning_options(conf)
+        Configure.ConfigurationContext.GnuCompiler.set_warning_options(self, conf)
         conf.env.append_unique('CXXFLAGS_warnall', ['-wd597'])
 
     def load_in_env(self, conf, platform):
-        super(ICC, self).load_in_env(conf, platform)
+        Configure.ConfigurationContext.GnuCompiler.load_in_env(self, conf, platform)
         v = conf.env
         v.append_unique('CFLAGS', ['-fPIC'])
         v.append_unique('CXXFLAGS', ['-fPIC'])

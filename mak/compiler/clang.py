@@ -1,25 +1,22 @@
-from waflib import Utils, Logs
-from waflib.Configure import conf
-from mak import compilers
+from waflib import Utils, Logs, Configure
 import os
 import sys
-import shlex
 
 
-class Clang(compilers.GnuCompiler):
+class Clang(Configure.ConfigurationContext.GnuCompiler):
     DEFINES = ['__clang__', '__GNUC__', '__GNUG__']
     NAMES = ('Clang',)
     TOOLS = 'gcc gxx'
 
     def __init__(self, clang, clangxx, extra_args = []):
-        super(Clang, self).__init__(clang, clangxx, extra_args)
+        Configure.ConfigurationContext.GnuCompiler.__init__(self, clang, clangxx, extra_args)
 
     def has_arch_flag(self):
         # if clang manages to compile, then the -arch keyword was ignored
         return self.run(['-arch', 'no arch of that name', '-E', '-'], '\n')[0] != 0
 
     def set_warning_options(self, conf):
-        super(Clang, self).set_warning_options(conf)
+        Configure.ConfigurationContext.GnuCompiler.set_warning_options(self, conf)
         if self.version_number >= 3.6:
             conf.env.CXXFLAGS_warnall.append('-Wno-unused-local-typedefs')
 
@@ -60,11 +57,11 @@ class Clang(compilers.GnuCompiler):
                                     except Exception:
                                         pass
         if not result:
-            result = super(Clang, self).get_multilib_compilers()
+            result = Configure.ConfigurationContext.GnuCompiler.get_multilib_compilers(self)
         return result
 
     def load_in_env(self, conf, platform, sysroot=None):
-        super(Clang, self).load_in_env(conf, platform)
+        Configure.ConfigurationContext.GnuCompiler.load_in_env(self, conf, platform)
         if self.version_number >= 3.1:
             env = conf.env
             env.append_unique('CFLAGS', ['-fvisibility=hidden'])

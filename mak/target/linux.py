@@ -1,15 +1,17 @@
-from mak import targets
+from waflib import Configure
 import os
 import re
 
 
-class Linux(targets.Platform):
+class Linux(Configure.ConfigurationContext.Platform):
     NAME = 'Linux'
     SUPPORTED_TARGETS = (re.compile('.*-linux-gnu$'),
-                         re.compile('.*-linux$'))
+                         re.compile('^linux-gnu$'),
+                         re.compile('.*-linux$'),
+                         re.compile('^linux$'),)
 
     def __init__(self):
-        super(Linux, self).__init__()
+        Configure.ConfigurationContext.Platform.__init__(self)
 
     def load_in_env(self, conf, compiler):
         env = conf.env
@@ -43,7 +45,6 @@ def configure(conf):
 
 
 def build(bld):
-    #bld.platforms.append(bld.external('3rdparty.X11'))
     pass
 
 

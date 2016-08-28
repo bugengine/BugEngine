@@ -1,14 +1,15 @@
-from mak import targets
+from waflib import Configure
 import os
 import re
 
 
-class FreeBSD(targets.Platform):
+class FreeBSD(Configure.ConfigurationContext.Platform):
     NAME = 'FreeBSD'
-    SUPPORTED_TARGETS = (re.compile('.*-freebsd[0-9\.]*$'),)
+    SUPPORTED_TARGETS = (re.compile('.*-freebsd[0-9\.]*$'),
+                         re.compile('^freebsd[0-9\.]*$'),)
 
     def __init__(self):
-        super(FreeBSD, self).__init__()
+        Configure.ConfigurationContext.Platform.__init__(self)
 
     def load_in_env(self, conf, compiler):
         env = conf.env
@@ -46,7 +47,6 @@ def configure(conf):
 
 
 def build(bld):
-    #bld.platforms.append(bld.external('3rdparty.X11'))
     pass
 
 

@@ -1,15 +1,14 @@
-import os
+from waflib import Configure
 from waflib.TaskGen import feature, before_method, after_method
-from waflib.Configure import conf
-from mak import compilers
 import os
 
-class MSVC(compilers.Compiler):
+
+class MSVC(Configure.ConfigurationContext.Compiler):
     def __init__(self, cl, name, version, target_arch, arch, path, includes, libdirs):
         self.NAMES = [name, 'msvc']
         p = os.pathsep.join([os.environ.get('PATH', '')] + path)
         flags = ['/I%s'%i for i in includes] + ['/LIBPATH:%i' for l in libdirs]
-        super(MSVC, self).__init__(cl, cl, version, 'windows-%s'%name, arch, [], {'PATH': p})
+        Configure.ConfigurationContext.Compiler.__init__(self, cl, cl, version, 'windows-%s'%name, arch, [], {'PATH': p})
         self.arch_name = target_arch
         self.includes = includes
         self.libdirs = libdirs
@@ -43,7 +42,7 @@ class MSVC(compilers.Compiler):
             conf.env.append_unique('CXXFLAGS_warnnone', ['/D_ALLOW_RTCc_IN_STL=1'])
 
     def load_in_env(self, conf, platform):
-        super(MSVC, self).load_in_env(conf, platform)
+        Configure.ConfigurationContext.Compiler.load_in_env(self, conf, platform)
         version = '%s %s'%(self.NAMES[0], self.version)
         conf.env.MSVC_VERSIONS = [version]
         conf.env.MSVC_TARGETS = [self.arch_name]
@@ -90,7 +89,6 @@ def configure(conf):
                 seen.add(c.name())
                 conf.compilers.append(c)
     except Exception as e:
-        print(e)
         pass
     conf.end_msg('done')
 

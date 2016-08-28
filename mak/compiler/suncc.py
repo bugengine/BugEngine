@@ -1,11 +1,9 @@
-from waflib import Utils, Logs
-from waflib.Configure import conf
-from mak import compilers
-import os, sys
+from waflib import Utils, Logs, Configure
+import os
+import sys
 
 
-
-class SunCC(compilers.GnuCompiler):
+class SunCC(Configure.ConfigurationContext.GnuCompiler):
     DEFINES = ['__SUNPRO_CC']
     NAMES = ('SunCC',)
     SUNCC_PLATFORMS = {
@@ -20,7 +18,7 @@ class SunCC(compilers.GnuCompiler):
     TOOLS = 'suncc suncxx'
 
     def __init__(self, suncc, sunCC, extra_args = [], extra_env={}):
-        super(SunCC, self).__init__(suncc, sunCC, extra_args, extra_env)
+        Configure.ConfigurationContext.GnuCompiler.__init__(self, suncc, sunCC, extra_args, extra_env)
         if self.platform == 'linux-gnu':
             self.extra_args.append('-library=Crun,stlport4')
             if self.arch == 'amd64':
@@ -94,7 +92,7 @@ class SunCC(compilers.GnuCompiler):
 
 
     def load_in_env(self, conf, platform):
-        super(SunCC, self).load_in_env(conf, platform)
+        Configure.ConfigurationContext.GnuCompiler.load_in_env(self, conf, platform)
         v = conf.env
         if platform.NAME == 'Linux':
             v.STATIC = 1
