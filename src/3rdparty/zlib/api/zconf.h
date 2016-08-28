@@ -16,7 +16,7 @@
  */
 #ifdef Z_PREFIX     /* may be set to #if 1 by ./configure */
 #  define Z_PREFIX_SET
-#error
+
 /* all linked symbols */
 #  define _dist_code            z__dist_code
 #  define _length_code          z__length_code
