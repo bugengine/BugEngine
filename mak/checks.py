@@ -92,7 +92,7 @@ def check_lib(self, libname, var='', libpath=[], includepath=[], includes=[], fu
             use=['debug'],
             envname=self.env.TOOLCHAIN)
     except self.errors.ConfigurationError as e:
-        Logs.pprint('YELLOW', '-%s(%s)' % (var, e), sep=' ')
+        #Logs.pprint('YELLOW', '-%s' % var, sep=' ')
         pass
     else:
         self.env[var] = libname
