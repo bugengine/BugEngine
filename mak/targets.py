@@ -71,16 +71,20 @@ class Platform:
         except Exception as e:
             conf.end_msg(e, color='RED')
             conf.variant = ''
+            return None
         else:
             conf.end_msg(' ')
+            v.PREFIX = os.path.join('build', toolchain)
+            conf.variant = ''
             for c in sub_compilers:
-                self.add_toolchain(conf, c, add=False)
+                t = self.add_toolchain(conf, c, add=False)
+                if t:
+                    v.append_unique('SUB_TOOLCHAINS', [t])
             if add:
-                v.PREFIX = os.path.join('build', toolchain)
-                conf.variant = ''
                 for optim in conf.env.ALL_VARIANTS:
                     add_build_command(toolchain, optim)
                 conf.env.append_unique('ALL_TOOLCHAINS', toolchain)
+            return toolchain
 
     def add_multiarch_toolchain(self, toolchain):
         e = self.env
