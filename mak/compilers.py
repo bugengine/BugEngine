@@ -56,9 +56,11 @@ class Compiler:
         self.version_number = to_number(version)
         self.platform = platform
         self.arch = self.to_target_arch(arch)
+        self.arch_name = self.arch
         self.env = os.environ.copy()
         for env_name, env_value in extra_env.items():
             self.env[env_name] = env_value
+        self.directories = [os.path.dirname(compiler_c)]
 
     @classmethod
     def to_target_arch(self, arch):
@@ -91,7 +93,7 @@ class Compiler:
 
     def name(self):
         compiler_name = self.__class__.__name__.lower()
-        return '%s-%s-%s-%s' % (compiler_name, self.platform, self.arch, self.version)
+        return '%s-%s-%s-%s' % (compiler_name, self.platform, self.arch_name, self.version)
 
     def get_multilib_compilers(self):
         return []
@@ -102,7 +104,6 @@ class Compiler:
         conf.env.append_unique('LINKFLAGS', self.extra_args)
         self.set_optimisation_options(conf)
         self.set_warning_options(conf)
-
 
 
 class GnuCompiler(Compiler):
@@ -125,6 +126,9 @@ class GnuCompiler(Compiler):
         version, platform, arch = self.get_version(compiler_cxx, extra_args, extra_env)
         super(GnuCompiler, self).__init__(compiler_c, compiler_cxx, version,
                                           platform, arch, extra_args, extra_env)
+        target_dir = os.path.normpath(os.path.join(self.directories[0], '..', self.target, 'bin'))
+        if os.path.isdir(target_dir):
+            self.directories.append(target_dir)
 
     def get_version(self, compiler_c, extra_args, extra_env):
         env = os.environ.copy()
@@ -213,21 +217,24 @@ class GnuCompiler(Compiler):
         env = conf.env
         env.CC = self.compiler_c
         env.CXX = self.compiler_cxx
-        env.append_unique('CFLAGS', ['-fPIC'])
-        env.append_unique('CXXFLAGS', ['-fPIC'])
         env.SYSROOT = sysroot or self.sysroot or []
         super(GnuCompiler, self).load_in_env(conf, platform)
 
-        directory = os.path.dirname(self.compiler_c)
-        directories = [directory, os.path.join(directory, '..', self.target, 'bin')]
-        sys_dirs = directories + [os.path.join(directory, '..', '..', 'bin')]
 
-        if not conf.find_program(self.target+'-ar', var='AR', path_list=directories, mandatory=False):
-            conf.find_program('ar', var='AR', path_list=directories, mandatory=False)
+        sys_dirs = self.directories[:]
+        d, a = os.path.split(self.directories[0])
+        while a:
+            pd = os.path.join(d, 'bin')
+            if os.path.isdir(pd):
+                sys_dirs.append(pd)
+            d, a = os.path.split(d)
+
+        if not conf.find_program(self.target+'-ar', var='AR', path_list=self.directories, mandatory=False):
+            conf.find_program('ar', var='AR', path_list=self.directories, mandatory=False)
         conf.find_program('lldb', var='LLDB', path_list=sys_dirs, mandatory=False)
-        if not conf.find_program(self.target+'-gdb', var='GDB', path_list=sys_dirs, mandatory=False):
-            if not conf.find_program(self.target+'-gdb', var='GDB', mandatory=False):
-                conf.find_program('gdb', var='GDB', path_list=sys_dirs, mandatory=False)
+        if not conf.find_program(self.target+'-gdb', var='GDB', mandatory=False):
+            if not conf.find_program('gdb', var='GDB', path_list=sys_dirs, mandatory=False):
+                conf.find_program('gdb', var='GDB', mandatory=False)
         env.COMPILER_NAME = self.__class__.__name__.lower()
         env.COMPILER_TARGET = self.target
         conf.load(self.TOOLS)

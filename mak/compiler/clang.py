@@ -8,7 +8,7 @@ import shlex
 
 class Clang(compilers.GnuCompiler):
     DEFINES = ['__clang__', '__GNUC__', '__GNUG__']
-    NAMES = ('CLANG',)
+    NAMES = ('Clang',)
     TOOLS = 'gcc gxx'
 
     def __init__(self, clang, clangxx, extra_args = []):

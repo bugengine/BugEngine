@@ -45,12 +45,12 @@ class Platform:
         result = []
         for c in compiler_list:
             for regexp in self.SUPPORTED_TARGETS:
-                if regexp.match(c.target):
+                if regexp.match(c.platform):
                     result.append((c, [], self))
         return result
 
     def add_toolchain(self, conf, compiler, sub_compilers=[], add=True):
-        toolchain = '%s-%s-%s-%s' % (self.NAME.lower(), compiler.arch, compiler.NAMES[0].lower(), compiler.version)
+        toolchain = '%s-%s-%s-%s' % (self.NAME.lower(), compiler.arch_name, compiler.NAMES[0].lower(), compiler.version)
         if add:
             conf.start_msg('  `- %s' % toolchain)
         else:
