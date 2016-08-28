@@ -363,7 +363,7 @@ def to_var(name):
 
 class QtCreator(Build.BuildContext):
     PROJECT_TYPE = 'GenericProjectManager.GenericBuildConfiguration'
-    
+
     def execute(self):
         self.restore()
         if not self.all_envs:
