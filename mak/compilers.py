@@ -117,6 +117,22 @@ class GnuCompiler(Compiler):
         'mips64':   (['-m32'], 'mips'),
         'mips64el': (['-m32'], 'mipsel'),
     }
+    MACRO_ARCHS = {
+        ('__x86_64__',):                    'amd64',
+        ('__i386__',):                      'x86',
+        ('__i486__',):                      'x86',
+        ('__i586__',):                      'x86',
+        ('__i686__',):                      'x86',
+        ('__powerpc__',):                   'ppc',
+        ('__powerpc__', '__powerpc64__'):   'ppc64',
+        ('__mips64', '__mips', '_MIPSEL'):  'mips64el',
+        ('__mips', '_MIPSEL'):              'mipsel',
+        ('__mips64', '__mips'):             'mips64',
+        ('__mips__',):                      'mips',
+        ('__arm',):                         'arm',
+        ('__aarch64',):                     'aarch64',
+        ('__aarch32',):                     'aarch32',
+    }
 
     def __init__(self, compiler_c, compiler_cxx, extra_args = [], extra_env={}):
         extra_env = dict(extra_env)
@@ -137,7 +153,9 @@ class GnuCompiler(Compiler):
         def split_triple(t):
             t = t.split('-')
             return t[0], '-'.join(t[1:])
-        result, out, err = self.run([compiler_c] + extra_args + ['-v', '-E', '-'], '\n', env=env)
+        result, out, err = self.run([compiler_c] + extra_args + ['-v', '-dM', '-E', '-'], '\n', env=env)
+        macros = set([])
+        platform = None
         if result != 0:
             #print(result, out, err)
             raise Exception('Error running %s: %s' % (compiler_c, err))
@@ -157,10 +175,31 @@ class GnuCompiler(Compiler):
                 while words[0] != 'Apple' and words[1] != 'LLVM' and words[2] != 'version':
                     words.pop(0)
                 version = words[3].split('-')[0]
+            if line.startswith('#define'):
+                macro = line[len('#define'):].strip()
+                macro = macro.split(' ')[0].strip()
+                macros.add(macro)
             sysroot = line.find('-isysroot')
             if sysroot != -1:
                 sysroot = shlex.split(line[sysroot:].replace('\\', '\\\\'))[1]
                 self.sysroot = os.path.normpath(sysroot)
+        if not platform:
+            result, out, err = self.run([compiler_c] + extra_args + ['-dumpmachine'], env=env)
+            platform = out.strip()
+            if platform.find('-') != -1:
+                arch, platform = split_triple(platform)
+            best = 0
+            for values, a in self.MACRO_ARCHS.items():
+                for v in values:
+                    if v not in macros:
+                        break
+                else:
+                    if len(values) > best:
+                        best = len(values)
+                        arch = a
+            if not best:
+                raise Exception('could not find architecture')
+            self.target = arch + '-' + platform
         return version, platform, arch
 
     def get_multilib_compilers(self):
