@@ -206,6 +206,7 @@ class QtToolchain(QtObject):
         supported_platform = (
                 ('android', 'android'),
                 ('mingw', 'msys'),
+                ('windows-gnu', 'msys'),
                 ('msvc-7.0', 'msvc2002'),
                 ('msvc-7.1', 'msvc2003'),
                 ('msvc-8.0', 'msvc2005'),
