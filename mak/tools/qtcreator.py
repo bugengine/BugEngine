@@ -246,7 +246,6 @@ class QtToolchain(QtObject):
                 cxx = env.CXX[0]
             else:
                 cxx = env.CXX
-            print('BugEngine:toolchain:%s'%env_name, '=',abi, env)
 
             if env.COMPILER_NAME == 'gcc':
                 self.ProjectExplorer_GccToolChain_Path = cxx
