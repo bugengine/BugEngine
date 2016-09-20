@@ -93,7 +93,7 @@ PythonLibrary::PythonLibrary(const char* pythonLibraryName)
     {
 #   define be_get_func_name_opt(f, dest)                                        \
         do {                                                                    \
-            void* tmp = reinterpret_cast<void*>(                                \
+            void* tmp = (void*)(                                \
                             GetProcAddress((HMODULE)m_handle, #f));             \
             if (tmp)                                                            \
                 memcpy(&m_##dest, &tmp, sizeof(dest##Type));                    \

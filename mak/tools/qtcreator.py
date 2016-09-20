@@ -206,6 +206,7 @@ class QtToolchain(QtObject):
         supported_platform = (
                 ('android', 'android'),
                 ('mingw', 'msys'),
+                ('windows-gnu', 'msys'),
                 ('msvc-7.0', 'msvc2002'),
                 ('msvc-7.1', 'msvc2003'),
                 ('msvc-8.0', 'msvc2005'),
@@ -227,18 +228,18 @@ class QtToolchain(QtObject):
                 break
         else:
             platform='unknown'
-        return (os, platform)
+        return (target, os, platform)
 
     def __init__(self, env_name=None, env=None):
         if env_name:
             assert(env)
-            arch,variant = self.get_architecture(env)
-            os,platform = self.get_platform(env)
+            arch, variant = self.get_architecture(env)
+            target, os, platform = self.get_platform(env)
             abi = '%s-%s-%s-%s-%s'%(
                 arch,
                 os,
                 platform,
-                env.DEST_BINFMT,
+                env.ABI,
                 variant
             )
             if isinstance(env.CXX, list):
@@ -248,19 +249,35 @@ class QtToolchain(QtObject):
 
             if env.COMPILER_NAME == 'gcc':
                 self.ProjectExplorer_GccToolChain_Path = cxx
+                self.ProjectExplorer_GccToolChain_SupportedAbis = (abi,)
                 self.ProjectExplorer_GccToolChain_TargetAbi = abi
+                self.ProjectExplorer_GccToolChain_OriginalTargetTriple = target
+                self.ProjectExplorer_GccToolChain_PlatformCodeGenFlags = tuple(env.CXXFLAGS)
+                self.ProjectExplorer_GccToolChain_PlatformLinkerFlags = tuple(env.LINKFLAGS)
                 toolchain_id =  'ProjectExplorer.ToolChain.Gcc:%s' % generateGUID('BugEngine:toolchain:%s'%env_name)
             elif env.COMPILER_NAME in ('clang', 'llvm'):
                 self.ProjectExplorer_GccToolChain_Path = cxx
+                self.ProjectExplorer_GccToolChain_SupportedAbis = (abi,)
                 self.ProjectExplorer_GccToolChain_TargetAbi = abi
+                self.ProjectExplorer_GccToolChain_OriginalTargetTriple = target
+                self.ProjectExplorer_GccToolChain_PlatformCodeGenFlags = tuple(env.CXXFLAGS)
+                self.ProjectExplorer_GccToolChain_PlatformLinkerFlags = tuple(env.LINKFLAGS)
                 toolchain_id =  'ProjectExplorer.ToolChain.Clang:%s' % generateGUID('BugEngine:toolchain:%s'%env_name)
             elif env.COMPILER_NAME == 'icc':
                 self.ProjectExplorer_GccToolChain_Path = cxx
+                self.ProjectExplorer_GccToolChain_SupportedAbis = (abi,)
                 self.ProjectExplorer_GccToolChain_TargetAbi = abi
+                self.ProjectExplorer_GccToolChain_OriginalTargetTriple = target
+                self.ProjectExplorer_GccToolChain_PlatformCodeGenFlags = tuple(env.CXXFLAGS)
+                self.ProjectExplorer_GccToolChain_PlatformLinkerFlags = tuple(env.LINKFLAGS)
                 toolchain_id =  'ProjectExplorer.ToolChain.LinuxIcc:%s' % generateGUID('BugEngine:toolchain:%s'%env_name)
             elif env.COMPILER_NAME in ('suncc', 'msvc'):
                 self.ProjectExplorer_GccToolChain_Path = cxx
+                self.ProjectExplorer_GccToolChain_SupportedAbis = (abi,)
                 self.ProjectExplorer_GccToolChain_TargetAbi = abi
+                self.ProjectExplorer_GccToolChain_OriginalTargetTriple = target
+                self.ProjectExplorer_GccToolChain_PlatformCodeGenFlags = tuple(env.CXXFLAGS)
+                self.ProjectExplorer_GccToolChain_PlatformLinkerFlags = tuple(env.LINKFLAGS)
                 toolchain_id =  'ProjectExplorer.ToolChain.Gcc:%s' % generateGUID('BugEngine:toolchain:%s'%env_name)
             else:
                 self.ProjectExplorer_CustomToolChain_CompilerPath = cxx
