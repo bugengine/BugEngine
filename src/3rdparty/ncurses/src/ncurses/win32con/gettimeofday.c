@@ -26,7 +26,7 @@
  * authorization.                                                           *
  ****************************************************************************/
 
-#define WINVER 0x0501
+//#define WINVER 0x0501
 
 #include <curses.priv.h>
 
