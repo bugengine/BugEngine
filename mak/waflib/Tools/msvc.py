@@ -105,7 +105,7 @@ def setup_msvc(conf, versions, arch = False):
 			targets = dict(versiondict [version])
 			for target in platforms:
 				try:
-					arch,(p1,p2,p3) = targets[target]
+					arch,(b,a,p1,p2,p3) = targets[target]
 					compiler,revision = version.rsplit(' ', 1)
 					if arch:
 						return compiler,revision,p1,p2,p3,arch
@@ -179,7 +179,7 @@ echo LIB=%%LIB%%;%%LIBPATH%%
 	finally:
 		conf.env[compiler_name] = ''
 
-	return (MSVC_PATH, MSVC_INCDIR, MSVC_LIBDIR)
+	return (vcvars, target, MSVC_PATH, MSVC_INCDIR, MSVC_LIBDIR)
 
 @conf
 def gather_wsdk_versions(conf, versions):
@@ -333,14 +333,14 @@ def gather_wince_targets(conf, versions, version, vc_path, vsvars, supported_pla
 			if not os.path.isdir(winCEpath):
 				continue
 			try:
-				common_bindirs,_1,_2 = conf.get_msvc_version('msvc', version, 'x86', vsvars)
+				__, __, common_bindirs,_1,_2 = conf.get_msvc_version('msvc', version, 'x86', vsvars)
 			except conf.errors.ConfigurationError:
 				continue
 			if os.path.isdir(os.path.join(winCEpath, 'lib', platform)):
 				bindirs = [os.path.join(winCEpath, 'bin', compiler), os.path.join(winCEpath, 'bin', 'x86_'+compiler)] + common_bindirs
 				incdirs = [os.path.join(winCEpath, 'include'), os.path.join(winCEpath, 'atlmfc', 'include'), include]
 				libdirs = [os.path.join(winCEpath, 'lib', platform), os.path.join(winCEpath, 'atlmfc', 'lib', platform), lib]
-				cetargets.append((platform, (platform, (bindirs,incdirs,libdirs))))
+				cetargets.append((platform, (platform, (vsvars, 'x86', bindirs,incdirs,libdirs))))
 		if cetargets:
 			versions.append((device + ' ' + version, cetargets))
 

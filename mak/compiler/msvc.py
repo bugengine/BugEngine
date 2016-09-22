@@ -4,31 +4,42 @@ import os
 
 
 class MSVC(Configure.ConfigurationContext.Compiler):
-    def __init__(self, cl, name, version, target_arch, arch, path, includes, libdirs):
+    def __init__(self, cl, name, version, target_arch, arch, bat, args, path, includes, libdirs):
         self.NAMES = [name, 'msvc']
         p = os.pathsep.join([os.environ.get('PATH', '')] + path)
         flags = ['/I%s'%i for i in includes] + ['/LIBPATH:%i' for l in libdirs]
         Configure.ConfigurationContext.Compiler.__init__(self, cl, cl, version, 'windows-%s'%name, arch, [], {'PATH': p})
+        self.batfile = bat
+        self.args = args
         self.arch_name = target_arch
         self.includes = includes
         self.libdirs = libdirs
 
     def set_optimisation_options(self, conf):
-        conf.env.append_unique('CFLAGS_debug', ['/Od', '/Ob1', '/EHsc', '/RTC1', '/RTCc', '/Zi', '/MTd', '/D_DEBUG'])
-        conf.env.append_unique('CXXFLAGS_debug', ['/Od', '/Ob1', '/EHsc', '/RTC1', '/RTCc', '/Zi', '/MTd', '/D_DEBUG', '/GR'])
+        conf.env.append_unique('CFLAGS_debug', ['/Od', '/Ob1', '/EHsc', '/RTC1', '/RTCc', '/Zi',
+                                                '/MTd', '/D_DEBUG'])
+        conf.env.append_unique('CXXFLAGS_debug', ['/Od', '/Ob1', '/EHsc', '/RTC1', '/RTCc', '/Zi',
+                                                  '/MTd', '/D_DEBUG', '/GR'])
         conf.env.append_unique('LINKFLAGS_debug', ['/DEBUG', '/INCREMENTAL:no'])
         conf.env.append_unique('ARFLAGS_debug', [])
 
-        conf.env.append_unique('CFLAGS_profile', ['/DNDEBUG', '/MT', '/Ox', '/Ob2', '/Oi', '/Ot', '/Oy', '/GT', '/GL', '/GF', '/FD', '/GS-', '/Gy', '/GR-'])
-        conf.env.append_unique('CXXFLAGS_profile', ['/DNDEBUG', '/D_HAS_EXCEPTIONS=0', '/MT', '/Ox', '/Ob2', '/Oi', '/Ot', '/Oy', '/GT', '/GL', '/GF', '/FD', '/GS-', '/Gy', '/GR-'])
+        conf.env.append_unique('CFLAGS_profile', ['/DNDEBUG', '/MT', '/Ox', '/Ob2', '/Oi', '/Ot',
+                                                  '/Oy', '/GT', '/GL', '/GF', '/FD', '/GS-', '/Gy',
+                                                  '/GR-'])
+        conf.env.append_unique('CXXFLAGS_profile', ['/DNDEBUG', '/D_HAS_EXCEPTIONS=0', '/MT', '/Ox',
+                                                    '/Ob2', '/Oi', '/Ot', '/Oy', '/GT', '/GL',
+                                                    '/GF', '/FD', '/GS-', '/Gy', '/GR-'])
         conf.env.append_unique('LINKFLAGS_profile', ['/DEBUG', '/LTCG', '/INCREMENTAL:no'])
         conf.env.append_unique('ARFLAGS_profile', ['/LTCG'])
 
-        conf.env.append_unique('CFLAGS_final', ['/DNDEBUG', '/MT', '/Ox', '/Ob2', '/Oi', '/Ot', '/Oy', '/GT', '/GL', '/GF', '/FD', '/GS-', '/Gy', '/GR-'])
-        conf.env.append_unique('CXXFLAGS_final', ['/DNDEBUG', '/D_HAS_EXCEPTIONS=0', '/MT', '/Ox', '/Ob2', '/Oi', '/Ot', '/Oy', '/GT', '/GL', '/GF', '/FD', '/GS-', '/Gy', '/GR-'])
+        conf.env.append_unique('CFLAGS_final', ['/DNDEBUG', '/MT', '/Ox', '/Ob2', '/Oi', '/Ot',
+                                                '/Oy', '/GT', '/GL', '/GF', '/FD', '/GS-', '/Gy',
+                                                '/GR-'])
+        conf.env.append_unique('CXXFLAGS_final', ['/DNDEBUG', '/D_HAS_EXCEPTIONS=0', '/MT', '/Ox',
+                                                  '/Ob2', '/Oi', '/Ot', '/Oy', '/GT', '/GL', '/GF',
+                                                  '/FD', '/GS-', '/Gy', '/GR-'])
         conf.env.append_unique('LINKFLAGS_final', ['/DEBUG', '/LTCG', '/INCREMENTAL:no'])
         conf.env.append_unique('ARFLAGS_final', ['/LTCG'])
-
 
     def set_warning_options(self, conf):
         conf.env.append_unique('CFLAGS_warnall', ['/D_CRT_SECURE_NO_WARNINGS=1', '/W4', '/WX'])
@@ -46,6 +57,7 @@ class MSVC(Configure.ConfigurationContext.Compiler):
         version = '%s %s'%(self.NAMES[0], self.version)
         conf.env.MSVC_VERSIONS = [version]
         conf.env.MSVC_TARGETS = [self.arch_name]
+        conf.env.MSVC_BATFILE = [self.batfile, self.args]
         conf.env.COMPILER_NAME='msvc'
         conf.env.COMPILER_TARGET='windows-win32-msvc-%s'%version
         if os_platform().endswith('64'):
@@ -81,9 +93,9 @@ def configure(conf):
             name, version = version.split()
             for target_name, target in targets:
                 arch, flags = target
-                path, includes, libdirs = flags
+                batfile, args, path, includes, libdirs = flags
                 cl = conf.detect_executable('cl', path)
-                c = MSVC(cl, name, version, target_name, arch, path, includes, libdirs)
+                c = MSVC(cl, name, version, target_name, arch, batfile, args, path, includes, libdirs)
                 if c.name() in seen:
                     continue
                 seen.add(c.name())
