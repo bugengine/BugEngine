@@ -318,19 +318,14 @@ class GnuCompiler(Compiler):
             while out:
                 line = out.pop(0)
                 if line and line.startswith('libraries:'):
-                    # clang uses ':' even on windows :-/
                     line = line[10:].strip()
-                    libs = []
-                    try:
-                        while True:
-                            index = line.index(':', 3)
-                            libs.append(line[:index])
-                            line = line[index+1:]
-                    except ValueError:
-                        pass
+                    libs = self.split_path_list(line)
             env.append_unique('SYSTEM_LIBPATHS', libs)
         self.set_warning_options(conf)
         self.set_optimisation_options(conf)
+
+    def split_path_list(self, line):
+        return line.split(os.pathsep)
 
 
 Configure.ConfigurationContext.Compiler = Compiler

@@ -70,6 +70,18 @@ class Clang(Configure.ConfigurationContext.GnuCompiler):
                 env.CFLAGS_exportall = ['-fvisibility=default']
                 env.CXXFLAGS_exportall = ['-fvisibility=default']
 
+    def split_path_list(self, line):
+        result = []
+        try:
+            while True:
+                index = line.index(':', 3)
+                result.append(line[:index])
+                line = line[index+1:]
+        except ValueError:
+            pass
+        return result
+
+
 
 def detect_clang(conf):
     bindirs = os.environ['PATH'].split(os.pathsep) + conf.env.EXTRA_PATH
