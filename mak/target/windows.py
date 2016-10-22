@@ -7,7 +7,7 @@ class Windows(Configure.ConfigurationContext.Platform):
     SUPPORTED_TARGETS = (re.compile('.*mingw32.*'),
                          re.compile('.*windows-gnu'),
                          re.compile('.*windows-msvc'),
-                         re.compile('.*windows-icl'),
+                         re.compile('.*windows-intel'),
                          re.compile('.*windows-wsdk'))
 
     def __init__(self):
