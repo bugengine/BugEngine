@@ -91,6 +91,10 @@ class Compiler:
     def run_cxx(self, args, input=None):
         return self.run([self.compiler_cxx] + self.extra_args + args, input, self.env)
 
+    def sort_name(self):
+        compiler_name = self.__class__.__name__.lower()
+        return self.arch, compiler_name, self.platform, self.version_number, self.arch_name
+
     def name(self):
         compiler_name = self.__class__.__name__.lower()
         return '%s-%s-%s-%s' % (compiler_name, self.platform, self.arch_name, self.version)
@@ -360,7 +364,7 @@ def configure(conf):
         if path.endswith('.py'):
             if not compilers or path[:-3] in compilers:
                 conf.recurse('compiler/%s'%path)
-    conf.compilers.sort(key = lambda x: x.name())
+    conf.compilers.sort(key = lambda x: x.sort_name())
 
 
 def build(bld):

@@ -16,25 +16,6 @@ def add_build_command(toolchain, optimisation):
             def get_variant_dir(self):
                 return os.path.join(self.out_dir, self.optim)
             variant_dir = property(get_variant_dir, None)
-        class Test(BuildContext):
-            optim = optimisation
-            cmd = 'test:' + toolchain + ':' + optimisation
-            bugengine_variant = toolchain
-
-            def get_variant_dir(self):
-                return os.path.join(self.out_dir, self.optim)
-            variant_dir = property(get_variant_dir, None)
-
-            def execute(self):
-                self.restore()
-                if not self.all_envs:
-                    self.load_envs()
-                env = self.all_envs[self.bugengine_variant]
-                print(env)
-                while env:
-                    print(env.TOOLCHAIN)
-                    env = getattr(env, 'parent', None)
-
 
 
 class Platform:
@@ -50,7 +31,8 @@ class Platform:
         return result
 
     def add_toolchain(self, conf, compiler, sub_compilers=[], add=True):
-        toolchain = '%s-%s-%s-%s' % (self.NAME.lower(), compiler.arch_name, compiler.NAMES[0].lower(), compiler.version)
+        toolchain = '%s_%s-%s_%s-%s' % (self.NAME.lower(), compiler.arch, compiler.NAMES[0].lower(),
+                                        compiler.arch_name, compiler.version)
         if add:
             conf.start_msg('  `- %s' % toolchain)
         else:

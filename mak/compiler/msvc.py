@@ -74,22 +74,24 @@ def options(opt):
 def configure(conf):
     seen = set([])
     from waflib.Tools import msvc
-    conf.start_msg('Looking for msvc compilers')
     conf.env.append_unique('useful_defines', ['__INTEL_COMPILER', '__clang__', '_MSC_VER'])
+    conf.start_msg('Looking for msvc compilers')
     try:
-        for version, targets in conf.get_msvc_versions():
+        versions = conf.get_msvc_versions()
+    except Exception as e:
+        pass
+    else:
+        for version, targets in versions:
             name, version = version.split()
             for target_name, target in targets:
                 arch, flags = target
                 path, includes, libdirs = flags
-                cl = conf.detect_executable('cl', path)
+                cl = conf.detect_executable(name == 'intel' and 'icl' or 'cl', path)
                 c = MSVC(cl, name, version, target_name, arch, path, includes, libdirs)
                 if c.name() in seen:
                     continue
                 seen.add(c.name())
                 conf.compilers.append(c)
-    except Exception as e:
-        pass
     conf.end_msg('done')
 
 

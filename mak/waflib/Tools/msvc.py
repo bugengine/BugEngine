@@ -190,35 +190,38 @@ def gather_wsdk_versions(conf, versions):
 	:type versions: list
 	"""
 	version_pattern = re.compile('^v..?.?\...?.?')
+	all_versions = []
 	try:
-		all_versions = Utils.winreg.OpenKey(Utils.winreg.HKEY_LOCAL_MACHINE, 'SOFTWARE\\Wow6432node\\Microsoft\\Microsoft SDKs\\Windows')
+		all_versions.append(Utils.winreg.OpenKey(Utils.winreg.HKEY_LOCAL_MACHINE, 'SOFTWARE\\Wow6432node\\Microsoft\\Microsoft SDKs\\Windows'))
 	except WindowsError:
-		try:
-			all_versions = Utils.winreg.OpenKey(Utils.winreg.HKEY_LOCAL_MACHINE, 'SOFTWARE\\Microsoft\\Microsoft SDKs\\Windows')
-		except WindowsError:
-			return
-	index = 0
-	while 1:
-		try:
-			version = Utils.winreg.EnumKey(all_versions, index)
-		except WindowsError:
-			break
-		index = index + 1
-		if not version_pattern.match(version):
-			continue
-		try:
-			msvc_version = Utils.winreg.OpenKey(all_versions, version)
-			path,type = Utils.winreg.QueryValueEx(msvc_version,'InstallationFolder')
-		except WindowsError:
-			continue
-		if os.path.isfile(os.path.join(path, 'bin', 'SetEnv.cmd')):
-			targets = []
-			for target,arch in all_msvc_platforms:
-				try:
-					targets.append((target, (arch, conf.get_msvc_version('wsdk', version, '/'+target, os.path.join(path, 'bin', 'SetEnv.cmd')))))
-				except conf.errors.ConfigurationError:
-					pass
-			versions.append(('wsdk ' + version[1:], targets))
+		pass
+	try:
+		all_versions.append(Utils.winreg.OpenKey(Utils.winreg.HKEY_LOCAL_MACHINE, 'SOFTWARE\\Microsoft\\Microsoft SDKs\\Windows'))
+	except WindowsError:
+		pass
+	for root_version in all_versions:
+		index = 0
+		while 1:
+			try:
+				version = Utils.winreg.EnumKey(root_version, index)
+			except WindowsError:
+				break
+			index = index + 1
+			if not version_pattern.match(version):
+				continue
+			try:
+				msvc_version = Utils.winreg.OpenKey(root_version, version)
+				path,type = Utils.winreg.QueryValueEx(msvc_version,'InstallationFolder')
+			except WindowsError:
+				continue
+			if os.path.isfile(os.path.join(path, 'bin', 'SetEnv.cmd')):
+				targets = []
+				for target,arch in all_msvc_platforms:
+					try:
+						targets.append((target, (arch, conf.get_msvc_version('wsdk', version, '/'+target, os.path.join(path, 'bin', 'SetEnv.cmd')))))
+					except conf.errors.ConfigurationError:
+						pass
+				versions.append(('wsdk ' + version[1:], targets))
 
 def gather_wince_supported_platforms():
 	"""
