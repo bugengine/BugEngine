@@ -272,9 +272,9 @@ class QtToolchain(QtObject):
                 self.ProjectExplorer_GccToolChain_PlatformCodeGenFlags = tuple(env.CXXFLAGS)
                 self.ProjectExplorer_GccToolChain_PlatformLinkerFlags = tuple(env.LINKFLAGS)
                 toolchain_id =  'ProjectExplorer.ToolChain.LinuxIcc:%s' % generateGUID('BugEngine:toolchain:%s'%env_name)
-            elif env.COMPILER_NAME == 'msvc':
+            elif 0 and env.COMPILER_NAME == 'msvc' and env.MSVC_COMPILER != 'intel':
                 self.ProjectExplorer_MsvcToolChain_VarsBat = env.MSVC_BATFILE[0].replace('\\', '/')
-                self.ProjectExplorer_MsvcToolChain_VarsBatArg = env.MSVC_BATFILE[1]
+                self.ProjectExplorer_MsvcToolChain_VarsBatArg = env.MSVC_BATFILE[1] or ''
                 self.ProjectExplorer_MsvcToolChain_SupportedAbi = abi
                 toolchain_id =  'ProjectExplorer.ToolChain.Msvc:%s' % generateGUID('BugEngine:toolchain:%s'%env_name)
             else:
