@@ -21,10 +21,10 @@ namespace BugEngine { namespace Plugin
 
 DynamicObject::Handle DynamicObject::load(const inamespace &pluginName, const ipath& pluginPath)
 {
-    const minitl::format<1024u>& plugingFile = minitl::format<1024u>(PLUGIN_PREFIX "%s" PLUGIN_EXT) | pluginName;
+    const minitl::format<1024u> pluginFile = minitl::format<1024u>(PLUGIN_PREFIX "%s" PLUGIN_EXT) | pluginName;
     const ipath& pluginDir = Environment::getEnvironment().getDataDirectory();
-    ifilename::Filename fullPath = (pluginDir + pluginPath + ifilename(plugingFile.c_str())).str();
-    be_info("loading dynamic object %s (%s)" | pluginName | fullPath.name);
+    ifilename::Filename fullPath = (pluginDir + pluginPath + ifilename(pluginFile.c_str())).str();
+    be_info("loading dynamic object %s (%s/%s)" | pluginName | pluginFile | fullPath.name);
     void* handle = dlopen(fullPath.name, RTLD_NOW|RTLD_LOCAL);
     if (!handle)
     {
