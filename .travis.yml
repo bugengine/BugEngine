@@ -56,5 +56,5 @@ env:
    VERSION=4.2.1
    VARIANT=final
    MASTER=
-script: CC= CXX= ./waf configure --platforms=$OS_NAME --compilers=$COMPILER $MASTER install:$OS_NAME-$ARCH-$COMPILER-$VERSION:$VARIANT
+script: CC= CXX= ./waf configure --platforms=$OS_NAME --compilers=$COMPILER $MASTER install:$OS_NAME_$ARCH-$COMPILER_$ARCH-$VERSION:$VARIANT
 
