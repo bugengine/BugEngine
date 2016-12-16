@@ -89,21 +89,25 @@ def detect_gcc_from_path(conf, path, seen):
                         if cxx:
                             break
                     if cc and cxx:
-                        c = cls(cc, cxx)
-                        if c.name() in seen:
-                            return
-                        if not c.is_valid(conf):
-                            return
-                        seen.add(c.name())
-                        conf.compilers.append(c)
-                        for multilib_compiler in c.get_multilib_compilers():
-                            if multilib_compiler.name() in seen:
-                                continue
-                            if not multilib_compiler.is_valid(conf):
-                                continue
-                            seen.add(multilib_compiler.name())
-                            conf.compilers.append(multilib_compiler)
-                        return c
+                        try:
+                            c = cls(cc, cxx)
+                        except Exception as e:
+                            Logs.pprint('YELLOW', '%s: %s' % (cc, e))
+                        else:
+                            if c.name() in seen:
+                                return
+                            if not c.is_valid(conf):
+                                return
+                            seen.add(c.name())
+                            conf.compilers.append(c)
+                            for multilib_compiler in c.get_multilib_compilers():
+                                if multilib_compiler.name() in seen:
+                                    continue
+                                if not multilib_compiler.is_valid(conf):
+                                    continue
+                                seen.add(multilib_compiler.name())
+                                conf.compilers.append(multilib_compiler)
+                            return c
                 c = find_target_gcc(target, GCC)
                 if c:
                     result, out, err = c.run_c(['-fplugin=dragonegg', '-E', '-'], '')

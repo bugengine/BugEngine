@@ -121,22 +121,24 @@ class GnuCompiler(Compiler):
         'mips64':   (['-m32'], 'mips'),
         'mips64el': (['-m32'], 'mipsel'),
     }
-    MACRO_ARCHS = {
-        ('__x86_64__',):                    'amd64',
-        ('__i386__',):                      'x86',
-        ('__i486__',):                      'x86',
-        ('__i586__',):                      'x86',
-        ('__i686__',):                      'x86',
-        ('__powerpc__',):                   'ppc',
-        ('__powerpc__', '__powerpc64__'):   'ppc64',
-        ('__mips64', '__mips', '_MIPSEL'):  'mips64el',
-        ('__mips', '_MIPSEL'):              'mipsel',
-        ('__mips64', '__mips'):             'mips64',
-        ('__mips__',):                      'mips',
-        ('__arm',):                         'arm',
-        ('__aarch64',):                     'aarch64',
-        ('__aarch32',):                     'aarch32',
-    }
+    MACRO_ARCHS = (
+        (('__x86_64__',),                    'amd64'),
+        (('__i386__',),                      'x86'),
+        (('__i486__',),                      'x86'),
+        (('__i586__',),                      'x86'),
+        (('__i686__',),                      'x86'),
+        (('__powerpc__',),                   'ppc'),
+        (('__powerpc__', '__powerpc64__'),   'ppc64'),
+        (('__mips64', '__mips', '_MIPSEL'),  'mips64el'),
+        (('__mips', '_MIPSEL'),              'mipsel'),
+        (('__mips64', '__mips'),             'mips64'),
+        (('__mips__',),                      'mips'),
+        (('__aarch64__',),                   'aarch64'),
+        (('__aarch64',),                     'aarch64'),
+        (('__aarch32__',),                   'aarch32'),
+        (('__arm__',),                       'arm'),
+        (('__arm',),                         'arm'),
+    )
 
     def __init__(self, compiler_c, compiler_cxx, extra_args = [], extra_env={}):
         extra_env = dict(extra_env)
@@ -189,7 +191,7 @@ class GnuCompiler(Compiler):
         if self.target.find('-') != -1:
             arch, platform = split_triple(self.target)
         best = 0
-        for values, a in self.MACRO_ARCHS.items():
+        for values, a in self.MACRO_ARCHS:
             for v in values:
                 if v not in macros:
                     break
