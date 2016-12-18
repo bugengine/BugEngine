@@ -482,6 +482,7 @@ def plugin(bld, name, depends=[], features=[], platforms=[], path='', use_master
 
 
 def build(bld):
+    bld.load('cpp_parser', tooldir=[os.path.join(bld.path.abspath(), 'tools')])
     bld.load('data', tooldir=[os.path.join(bld.path.abspath(), 'tools')])
     bld.load('kernel', tooldir=[os.path.join(bld.path.abspath(), 'tools')])
     bld.load('kernel_preprocess', tooldir=[os.path.join(bld.path.abspath(), 'tools')])
