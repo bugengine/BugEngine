@@ -15,4 +15,4 @@ def setup(conf):
             conf.env.SYSTEM_ZLIB = True
             pprint('GREEN', '+zlib', sep=' ')
     else:
-        pprint('GREEN', '+zlib', sep=' ')
+        pprint('BLUE', '=zlib', sep=' ')
