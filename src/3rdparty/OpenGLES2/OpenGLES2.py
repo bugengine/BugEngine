@@ -19,4 +19,3 @@ def setup(conf):
                        includepath=[os.path.join(conf.path.abspath(), 'api')],
                        includes=['EGL/egl.h'],
                        functions=['eglCreateContext(0, 0, 0, 0)'])
-
