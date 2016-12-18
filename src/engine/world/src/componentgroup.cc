@@ -110,7 +110,7 @@ struct ComponentGroup::OperationBuffer
     template< typename T >
     void forEach(T& transform)
     {
-        return forEach(begin(), transform);
+        return this->forEach(begin(), transform);
     }
 };
 

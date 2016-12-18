@@ -484,6 +484,7 @@ void EntityStorage::unspawn(Entity e)
 {
     EntityInfo& info = getEntityInfo(e);
     // TODO: unspawn components
+    be_assert(false, "TODO");
     info.next = m_freeEntityId;
     for (u32 i = 0; i < m_componentTypes.size(); ++i)
     {
