@@ -7,7 +7,8 @@
 namespace BugEngine { namespace FileSystem
 {
 
-ref<Folder::Watch> WatchPoint::addWatch(weak<DiskFolder> /*folder*/, const BugEngine::ipath& /*path*/)
+ref<Folder::Watch> WatchPoint::addWatch(weak<DiskFolder> /*folder*/,
+                                        const BugEngine::ipath& /*path*/)
 {
     return ref<Folder::Watch>();
 }
