@@ -24,7 +24,7 @@ DynamicObject::Handle DynamicObject::load(const inamespace &pluginName, const ip
     const minitl::format<1024u> pluginFile = minitl::format<1024u>(PLUGIN_PREFIX "%s" PLUGIN_EXT) | pluginName;
     const ipath& pluginDir = Environment::getEnvironment().getDataDirectory();
     ifilename::Filename fullPath = (pluginDir + pluginPath + ifilename(pluginFile.c_str())).str();
-    be_info("loading dynamic object %s (%s/%s)" | pluginName | pluginFile | fullPath.name);
+    be_info("loading dynamic object %s (from %s)" | pluginName | fullPath.name);
     void* handle = dlopen(fullPath.name, RTLD_NOW|RTLD_LOCAL);
     if (!handle)
     {
