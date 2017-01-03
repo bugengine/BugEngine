@@ -145,8 +145,12 @@ class Method(CppObject):
         if struct_owner:
             struct_owner.typedef(definition)
         if self.return_type != 'void':
-            definition.write('    return ::BugEngine::RTTI::Value(%s);\n'
-                             '}\n' % self.call(owner, struct_owner))
+            if self.return_type[-1] == '&':
+                definition.write('    return ::BugEngine::RTTI::Value(::BugEngine::RTTI::Value::ByRef(%s));\n'
+                                 '}\n' % self.call(owner, struct_owner))
+            else:
+                definition.write('    return ::BugEngine::RTTI::Value(%s);\n'
+                                 '}\n' % self.call(owner, struct_owner))
         else:
             definition.write('    %s;\n'
                              '    return ::BugEngine::RTTI::Value();\n'
@@ -600,7 +604,7 @@ class Class(Container):
             else:
                 classtype = '0'
         definition.write('    static ::BugEngine::RTTI::Class cls = {\n'
-                         '        ::BugEngine::istring("%s"),\n'
+                         '        ::BugEngine::be_typeid< %s >::name(),\n'
                          '        {%s.m_ptr},\n'
                          '        {%s.m_ptr},\n'
                          '        u32(sizeof(%s)),\n'
@@ -616,7 +620,7 @@ class Class(Container):
                          '        %s};\n'
                          '    raw< ::BugEngine::RTTI::Class > result = { &cls };\n'
                          '    return result;\n'
-                         '}\n'% (self.name[-1], owner.owner_name(), parent, self.cpp_name(),
+                         '}\n'% (self.cpp_name(), owner.owner_name(), parent, self.cpp_name(),
                                  offset, classtype, tag, copy, destructor))
         definition.write('raw< const ::BugEngine::RTTI::Class > properties_%s()\n'
                          '{\n' % self.name[-1])
@@ -672,6 +676,13 @@ class Class(Container):
                        '    return %s::properties_%s();\n'
                        '}\n'
                        '\n' % (self.cpp_name(), '::'.join(namespace), self.name[-1]))
+        instance.write('template< >\n'
+                       'BE_EXPORT istring be_typeid< %s >::name()\n'
+                       '{\n'
+                       '    static const istring s_name = "%s";\n'
+                       '    return s_name;\n'
+                       '}\n'
+                       '\n' % (self.cpp_name(), self.name[-1]))
 
     def write_object(self, owner, struct_owner, namespace, object_name, definition, instance):
         for alias, alias_cpp in self.all_names():
