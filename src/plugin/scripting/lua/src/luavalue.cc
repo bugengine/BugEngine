@@ -148,7 +148,8 @@ extern "C" int valueSet(lua_State *state)
                 ar.name = "?";
             }
         }
-        return luaL_error(state, LUA_QS ": object " LUA_QS " is const");
+        return luaL_error(state, LUA_QS ": object " LUA_QS " is const",
+                          ar.name,  userdata->type().name().c_str());
     }
     else if (p->type.constness == RTTI::Type::Const)
     {
