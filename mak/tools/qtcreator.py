@@ -304,6 +304,7 @@ class QtDebugger(QtObject):
         ('DisplayName', True),
         ('EngineType', True),
         ('Id', False),
+        ('Debugger_Information', ''),
     ]
     def __init__(self, env_name=None, env=None, toolchain=None):
         if env_name:
@@ -403,6 +404,8 @@ class QtCreator(Build.BuildContext):
         appname = getattr(Context.g_module, Context.APPNAME, self.srcnode.name)
         self.base_node = self.srcnode.make_node('%s.qtcreator'%appname)
         self.base_node.mkdir()
+        with open(os.path.join(HOME_DIRECTORY, 'codestyles', 'Cpp', 'bugengine.xml'), 'w') as codestyle:
+            self.write_codestyle(codestyle)
 
         projects = []
         for group in self.groups:
@@ -496,6 +499,7 @@ class QtCreator(Build.BuildContext):
         else:
             pass
 
+
     def load_platform_list(self):
         self.platforms = []
         self.platforms_to_remove = []
@@ -519,6 +523,7 @@ class QtCreator(Build.BuildContext):
                         self.platforms.append((platform.PE_Profile_Id, platform))
                         if platform.PE_Profile_Name.startswith('BugEngine:'):
                             self.platforms_to_remove.append(platform)
+
 
     def build_platform_list(self):
         self.load_toolchain_list()
@@ -633,7 +638,6 @@ class QtCreator(Build.BuildContext):
                     XmlNode(data, 'value', '1', [('type', 'int')])
 
 
-
     def gather_includes_defines(self, task_gen):
         def gather_includes_defines_recursive(task_gen):
             try:
@@ -659,10 +663,50 @@ class QtCreator(Build.BuildContext):
         defines = defines + getattr(task_gen, 'defines', [])
         return unique(includes), unique(defines)
 
+
+    def write_codestyle(self, file):
+        with XmlDocument(file, 'UTF-8', [('DOCTYPE', 'QtCreatorCodeStyle')]) as cs:
+            with XmlNode(cs, 'qtcreator') as qtcreator:
+                with XmlNode(qtcreator, 'data') as data:
+                    XmlNode(data, 'variable', 'CodeStyleData').close()
+                    write_value(data, [
+                            ("AlignAssignments", True),
+                            ("AutoSpacesForTabs", False),
+                            ("BindStarToIdentifier", False),
+                            ("BindStarToLeftSpecifier", True),
+                            ("BindStarToRightSpecifier", False),
+                            ("BindStarToTypeName", True),
+                            ("ExtraPaddingForConditionsIfConfusingAlign", False),
+                            ("IndentAccessSpecifiers", False),
+                            ("IndentBlockBody", True),
+                            ("IndentBlockBraces", False),
+                            ("IndentBlocksRelativeToSwitchLabels", True),
+                            ("IndentClassBraces", False),
+                            ("IndentControlFlowRelativeToSwitchLabels", True),
+                            ("IndentDeclarationsRelativeToAccessSpecifiers", True),
+                            ("IndentEnumBraces", False),
+                            ("IndentFunctionBody", True),
+                            ("IndentFunctionBraces", False),
+                            ("IndentNamespaceBody", False),
+                            ("IndentNamespaceBraces", False),
+                            ("IndentSize", 4),
+                            ("IndentStatementsRelativeToSwitchLabels", True),
+                            ("IndentSwitchLabels", False),
+                            ("PaddingMode", 2),
+                            ("ShortGetterName", True),
+                            ("SpacesForTabs", True),
+                            ("TabSize", 4),
+                        ])
+                with XmlNode(qtcreator, 'data') as data:
+                    XmlNode(data, 'variable', 'DisplayName').close()
+                    write_value(data, 'BugEngine')
+
+
     def write_project(self, task_gen):
         node = self.base_node.make_node('%s.creator'%task_gen.target)
         node.write('[General]')
         return node
+
 
     def write_files(self, task_gen):
         file_list = []
@@ -673,11 +717,14 @@ class QtCreator(Build.BuildContext):
                 pass
         self.base_node.make_node('%s.files'%task_gen.target).write('\n'.join(file_list))
 
+
     def write_includes(self, task_gen, includes):
         self.base_node.make_node('%s.includes'%task_gen.target).write('\n'.join(includes))
 
+
     def write_defines(self, task_gen, defines):
         self.base_node.make_node('%s.config'%task_gen.target).write('\n'.join(defines))
+
 
     def write_user(self, file, task_gens):
         with XmlDocument(file, 'UTF-8', [('DOCTYPE', 'QtCreatorProject')]) as project:
@@ -696,7 +743,7 @@ class QtCreator(Build.BuildContext):
                         ('EditorConfiguration.CamelCaseNavigation', True),
                         ('EditorConfiguration.CodeStyle.0', [
                             ('language', 'Cpp'),
-                            ('value', [('CurrentPreferences', bytearray(b'CppGlobal'))]),
+                            ('value', [('CurrentPreferences', bytearray(b'bugengine'))]),
                         ]),
                         ('EditorConfiguration.CodeStyle.1', [
                             ('language', 'QmlJS'),
@@ -707,14 +754,16 @@ class QtCreator(Build.BuildContext):
                         ('EditorConfiguration.ConstrainToolTips', False),
                         ('EditorConfiguration.IndentSize',  4),
                         ('EditorConfiguration.KeyboardTooltips', False),
+                        ('EditorConfiguration.MarginColumn', 100),
                         ('EditorConfiguration.MouseNavigation', True),
                         ('EditorConfiguration.PaddingMode', 1),
                         ('EditorConfiguration.ScrollWheelZooming', True),
+                        ('EditorConfiguration.ShowMargin', True),
                         ('EditorConfiguration.SmartBackspaceBehavior', 0),
                         ('EditorConfiguration.SpacesForTabs', True),
                         ('EditorConfiguration.TabKeyBehavior', 0),
                         ('EditorConfiguration.TabSize', 4),
-                        ('EditorConfiguration.UseGlobal', True),
+                        ('EditorConfiguration.UseGlobal', False),
                         ('EditorConfiguration.Utf8BomBehavior', 1),
                         ('EditorConfiguration.addFinalNewLine', True),
                         ('EditorConfiguration.cleanIndentation', False),
@@ -937,6 +986,7 @@ class QtCreator(Build.BuildContext):
                     XmlNode(data, 'variable', 'Version').close()
                     write_value(data, self.__class__.version[1])
 
+
     def write_workspace(self, projects, appname, launcher):
         workspace_file = os.path.join(HOME_DIRECTORY, '%s.qws'%appname)
         try:
@@ -1013,11 +1063,16 @@ class Qbs(QtCreator):
         self.base_node = self.srcnode
         qbs_project = self.base_node.make_node('%s.qbs'%appname)
         qbs_user = self.base_node.make_node('%s.qbs.user'%appname)
+        with open(os.path.join(HOME_DIRECTORY, 'codestyles', 'Cpp', 'bugengine.xml'), 'w') as codestyle:
+            self.write_codestyle(codestyle)
         projects = { }
         project_list = []
         for group in self.groups:
             for task_gen in group:
-                name = task_gen.name.split('.')
+                try:
+                    name = task_gen.module_path.split('.')
+                except AttributeError:
+                    name = task_gen.name.split('.')
                 p = projects
                 for c in name[:-1]:
                     try:
@@ -1115,3 +1170,4 @@ class Qbs4(Qbs):
     fun = 'build'
     optim = 'debug'
     version = (4, 18)
+
