@@ -187,6 +187,7 @@ class QtToolchain(QtObject):
         ('ProjectExplorer.CustomToolChain.OutputParser', False),
         ('ProjectExplorer.CustomToolChain.PredefinedMacros', False),
         ('ProjectExplorer.CustomToolChain.TargetAbi', False),
+        ('ProjectExplorer.ToolChain.Language', False),
         ('ProjectExplorer.ToolChain.Autodetect', False),
         ('ProjectExplorer.ToolChain.DisplayName', True),
         ('ProjectExplorer.ToolChain.Id', False),
@@ -206,15 +207,14 @@ class QtToolchain(QtObject):
         supported_platform = (
                 ('android', 'android'),
                 ('mingw', 'msys'),
-                ('windows-gnu', 'msys'),
-                ('msvc 7.0', 'msvc2002'),
-                ('msvc 7.1', 'msvc2003'),
-                ('msvc 8.0', 'msvc2005'),
-                ('msvc 9.0', 'msvc2008'),
-                ('msvc 10.0', 'msvc2010'),
-                ('msvc 11.0', 'msvc2012'),
-                ('msvc 12.0', 'msvc2013'),
-                ('msvc 14.0', 'msvc2015'),
+                ('msvc-7.0', 'msvc2002'),
+                ('msvc-7.1', 'msvc2003'),
+                ('msvc-8.0', 'msvc2005'),
+                ('msvc-9.0', 'msvc2008'),
+                ('msvc-10.0', 'msvc2010'),
+                ('msvc-11.0', 'msvc2012'),
+                ('msvc-12.0', 'msvc2013'),
+                ('msvc-14.0', 'msvc2015'),
             )
         for o, o_name in supported_os:
             if target.find(o) != -1:
@@ -222,63 +222,48 @@ class QtToolchain(QtObject):
                 break
         else:
             os='unknown'
-
         for p, p_name in supported_platform:
             if target.find(p) != -1:
                 platform=p_name
                 break
         else:
             platform='unknown'
-        return (target, os, platform)
+        return (os, platform)
 
-    def __init__(self, env_name=None, env=None):
+    def __init__(self, language=None, env_name=None, env=None):
         if env_name:
             assert(env)
-            arch, variant = self.get_architecture(env)
-            target, os, platform = self.get_platform(env)
+            arch,variant = self.get_architecture(env)
+            os,platform = self.get_platform(env)
             abi = '%s-%s-%s-%s-%s'%(
                 arch,
                 os,
                 platform,
-                env.ABI,
+                env.DEST_BINFMT,
                 variant
             )
-            if isinstance(env.CXX, list):
-                cxx = env.CXX[0]
-            else:
-                cxx = env.CXX
+            compiler = env.CC if language==1 else env.CXX
+            if isinstance(compiler, list):
+                compiler = compiler[0]
 
             if env.COMPILER_NAME == 'gcc':
-                self.ProjectExplorer_GccToolChain_Path = cxx
-                self.ProjectExplorer_GccToolChain_SupportedAbis = (abi,)
+                self.ProjectExplorer_GccToolChain_Path = compiler
                 self.ProjectExplorer_GccToolChain_TargetAbi = abi
-                self.ProjectExplorer_GccToolChain_OriginalTargetTriple = target
-                self.ProjectExplorer_GccToolChain_PlatformCodeGenFlags = tuple(env.CXXFLAGS)
-                self.ProjectExplorer_GccToolChain_PlatformLinkerFlags = tuple(env.LINKFLAGS)
-                toolchain_id =  'ProjectExplorer.ToolChain.Gcc:%s' % generateGUID('BugEngine:toolchain:%s'%env_name)
+                toolchain_id =  'ProjectExplorer.ToolChain.Gcc:%s' % generateGUID('BugEngine:toolchain:%s:%d'%(env_name, language))
             elif env.COMPILER_NAME in ('clang', 'llvm'):
-                self.ProjectExplorer_GccToolChain_Path = cxx
-                self.ProjectExplorer_GccToolChain_SupportedAbis = (abi,)
+                self.ProjectExplorer_GccToolChain_Path = compiler
                 self.ProjectExplorer_GccToolChain_TargetAbi = abi
-                self.ProjectExplorer_GccToolChain_OriginalTargetTriple = target
-                self.ProjectExplorer_GccToolChain_PlatformCodeGenFlags = tuple(env.CXXFLAGS)
-                self.ProjectExplorer_GccToolChain_PlatformLinkerFlags = tuple(env.LINKFLAGS)
-                toolchain_id =  'ProjectExplorer.ToolChain.Clang:%s' % generateGUID('BugEngine:toolchain:%s'%env_name)
+                toolchain_id =  'ProjectExplorer.ToolChain.Clang:%s' % generateGUID('BugEngine:toolchain:%s:%d'%(env_name, language))
             elif env.COMPILER_NAME == 'icc':
-                self.ProjectExplorer_GccToolChain_Path = cxx
-                self.ProjectExplorer_GccToolChain_SupportedAbis = (abi,)
+                self.ProjectExplorer_GccToolChain_Path = compiler
                 self.ProjectExplorer_GccToolChain_TargetAbi = abi
-                self.ProjectExplorer_GccToolChain_OriginalTargetTriple = target
-                self.ProjectExplorer_GccToolChain_PlatformCodeGenFlags = tuple(env.CXXFLAGS)
-                self.ProjectExplorer_GccToolChain_PlatformLinkerFlags = tuple(env.LINKFLAGS)
-                toolchain_id =  'ProjectExplorer.ToolChain.LinuxIcc:%s' % generateGUID('BugEngine:toolchain:%s'%env_name)
-            elif 0 and env.COMPILER_NAME == 'msvc' and env.MSVC_COMPILER != 'intel':
-                self.ProjectExplorer_MsvcToolChain_VarsBat = env.MSVC_BATFILE[0].replace('\\', '/')
-                self.ProjectExplorer_MsvcToolChain_VarsBatArg = env.MSVC_BATFILE[1] or ''
-                self.ProjectExplorer_MsvcToolChain_SupportedAbi = abi
-                toolchain_id =  'ProjectExplorer.ToolChain.Msvc:%s' % generateGUID('BugEngine:toolchain:%s'%env_name)
+                toolchain_id =  'ProjectExplorer.ToolChain.LinuxIcc:%s' % generateGUID('BugEngine:toolchain:%s:%d'%(env_name, language))
+            elif env.COMPILER_NAME in ('suncc', 'msvc'):
+                self.ProjectExplorer_GccToolChain_Path = compiler
+                self.ProjectExplorer_GccToolChain_TargetAbi = abi
+                toolchain_id =  'ProjectExplorer.ToolChain.Gcc:%s' % generateGUID('BugEngine:toolchain:%s:%d'%(env_name, language))
             else:
-                self.ProjectExplorer_CustomToolChain_CompilerPath = cxx
+                self.ProjectExplorer_CustomToolChain_CompilerPath = compiler
                 self.ProjectExplorer_CustomToolChain_Cxx11Flags = ()
                 self.ProjectExplorer_CustomToolChain_ErrorPattern = ''
                 self.ProjectExplorer_CustomToolChain_FileNameCap = 1
@@ -288,9 +273,10 @@ class QtToolchain(QtObject):
                 self.ProjectExplorer_CustomToolChain_MessageCap = 3
                 self.ProjectExplorer_CustomToolChain_Mkspecs = ''
                 self.ProjectExplorer_CustomToolChain_OutputParser = 0
+                toolchain_id =  'ProjectExplorer.ToolChain.Custom:%s' % generateGUID('BugEngine:toolchain:%s:%d'%(env_name, language))
                 self.ProjectExplorer_CustomToolChain_PredefinedMacros = tuple(env.DEFINES + env.SYSTEM_DEFINES)
                 self.ProjectExplorer_CustomToolChain_TargetAbi = abi
-                toolchain_id =  'ProjectExplorer.ToolChain.Custom:%s' % generateGUID('BugEngine:toolchain:%s'%env_name)
+            self.ProjectExplorer_ToolChain_Language = language
             self.ProjectExplorer_ToolChain_Autodetect = False
             self.ProjectExplorer_ToolChain_DisplayName = 'BugEngine:toolchain:'+env_name
             self.ProjectExplorer_ToolChain_Id = toolchain_id
@@ -342,7 +328,7 @@ class QtPlatform(QtObject):
         ('PE.Profile.Name', True),
         ('PE.Profile.SDK', False),
     ]
-    def __init__(self, bld, env_name=None, env=None, toolchain=None, debugger=None):
+    def __init__(self, bld, env_name=None, env=None, toolchain_c=None, toolchain_cxx=None, debugger=None):
         if env_name:
             assert(env)
             sysroot = env.SYSROOT or ''
@@ -354,7 +340,8 @@ class QtPlatform(QtObject):
                     ('PE.Profile.Device', device),
                     ('PE.Profile.DeviceType', device_type),
                     ('PE.Profile.SysRoot', sysroot),
-                    ('PE.Profile.ToolChain', toolchain),
+                    ('PE.Profile.ToolChain', toolchain_c),
+                    ('PE.Profile.ToolChains', [('C', toolchain_c), ('Cxx', toolchain_cxx)]),
                     ('QtPM4.mkSPecInformation', ''),
                     ('QtSupport.QtInformation', -1),
                 ]
@@ -532,15 +519,21 @@ class QtCreator(Build.BuildContext):
                 bld_env = self.all_envs[env.SUB_TOOLCHAINS[0]]
             else:
                 bld_env = env
-            toolchain = QtToolchain(env_name, bld_env)
-            for t_name, t in self.toolchains:
-                if t_name == toolchain.ProjectExplorer_ToolChain_Id:
-                    t.copy_from(toolchain)
-                    toolchain = t
-                    self.toolchains_to_remove.remove(t)
-                    break
-            else:
-                self.toolchains.append((toolchain.ProjectExplorer_ToolChain_Id, toolchain))
+            toolchains = [None, None]
+            for l in (1, 2):
+                toolchains[l-1] = QtToolchain(l, env_name, bld_env)
+
+                for t_name, t in self.toolchains:
+                    if t_name == toolchains[l-1].ProjectExplorer_ToolChain_Id:
+                        t.copy_from(toolchains[l-1])
+                        toolchains[l-1] = t
+                        try:
+                            self.toolchains_to_remove.remove(t)
+                        except ValueError:
+                            pass
+                        break
+                else:
+                    self.toolchains.append((toolchains[l-1].ProjectExplorer_ToolChain_Id, toolchains[l-1]))
             if self.__class__.version[0] == 2:
                 if env.LLDB:
                     debugger = [
@@ -558,7 +551,7 @@ class QtCreator(Build.BuildContext):
                         ('EngineType', 1),
                     ]
             else:
-                debugger = QtDebugger(env_name, env, toolchain)
+                debugger = QtDebugger(env_name, env, toolchains[1])
                 for d_name, d in self.debuggers:
                     if d_name == debugger.Id:
                         d.copy_from(debugger)
@@ -567,7 +560,10 @@ class QtCreator(Build.BuildContext):
                 else:
                     self.debuggers.append((debugger.Id, debugger))
                 debugger = debugger.Id
-            platform = QtPlatform(self, env_name, env, toolchain.ProjectExplorer_ToolChain_Id, debugger)
+            platform = QtPlatform(self, env_name, env,
+                                  toolchains[0].ProjectExplorer_ToolChain_Id,
+                                  toolchains[1].ProjectExplorer_ToolChain_Id,
+                                  debugger)
             for p_name, p in self.platforms:
                 if p_name == platform.PE_Profile_Id:
                     p.copy_from(platform)
