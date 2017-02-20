@@ -114,7 +114,7 @@ def read_value(node):
     elif type == 'double':
         value = float(node.childNodes[0].wholeText)
     elif type == 'int':
-        value = float(node.childNodes[0].wholeText)
+        value = int(node.childNodes[0].wholeText)
     elif type == 'QByteArray':
         if node.childNodes:
             value = bytearray(node.childNodes[0].wholeText, 'utf-8')
@@ -227,7 +227,7 @@ class QtToolchain(QtObject):
                 platform=p_name
                 break
         else:
-            platform='unknown'
+            platform='generic'
         return (os, platform)
 
     def __init__(self, language=None, env_name=None, env=None):
@@ -242,17 +242,22 @@ class QtToolchain(QtObject):
                 env.DEST_BINFMT,
                 variant
             )
-            compiler = env.CC if language==1 else env.CXX
+            compiler = env.CC if language == 1 else env.CXX
+            flags = env.CFLAGS if language == 1 else env.CXXFLAGS
             if isinstance(compiler, list):
                 compiler = compiler[0]
 
             if env.COMPILER_NAME == 'gcc':
                 self.ProjectExplorer_GccToolChain_Path = compiler
                 self.ProjectExplorer_GccToolChain_TargetAbi = abi
+                self.ProjectExplorer_GccToolChain_PlatformCodeGenFlags = tuple(flags)
+                self.ProjectExplorer_GccToolChain_PlatformLinkerFlags = tuple()
                 toolchain_id =  'ProjectExplorer.ToolChain.Gcc:%s' % generateGUID('BugEngine:toolchain:%s:%d'%(env_name, language))
             elif env.COMPILER_NAME in ('clang', 'llvm'):
                 self.ProjectExplorer_GccToolChain_Path = compiler
                 self.ProjectExplorer_GccToolChain_TargetAbi = abi
+                self.ProjectExplorer_GccToolChain_PlatformCodeGenFlags = tuple(flags)
+                self.ProjectExplorer_GccToolChain_PlatformLinkerFlags = tuple()
                 toolchain_id =  'ProjectExplorer.ToolChain.Clang:%s' % generateGUID('BugEngine:toolchain:%s:%d'%(env_name, language))
             elif env.COMPILER_NAME == 'icc':
                 self.ProjectExplorer_GccToolChain_Path = compiler
