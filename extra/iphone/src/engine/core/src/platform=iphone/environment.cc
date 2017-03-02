@@ -42,7 +42,7 @@ void Environment::init(int argc, const char *argv[])
     {
         if (argv[arg][0] == '-')
         {
-            continue; // TODO
+            continue;
         }
         m_game = argv[arg];
     }
