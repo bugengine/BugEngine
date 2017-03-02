@@ -404,6 +404,10 @@ class QtCreator(Build.BuildContext):
         appname = getattr(Context.g_module, Context.APPNAME, self.srcnode.name)
         self.base_node = self.srcnode.make_node('%s.qtcreator'%appname)
         self.base_node.mkdir()
+        try:
+            os.makedirs(os.path.join(HOME_DIRECTORY, 'codestyles', 'Cpp'))
+        except OSError:
+            pass
         with open(os.path.join(HOME_DIRECTORY, 'codestyles', 'Cpp', 'bugengine.xml'), 'w') as codestyle:
             self.write_codestyle(codestyle)
 
@@ -1063,6 +1067,10 @@ class Qbs(QtCreator):
         self.base_node = self.srcnode
         qbs_project = self.base_node.make_node('%s.qbs'%appname)
         qbs_user = self.base_node.make_node('%s.qbs.user'%appname)
+        try:
+            os.makedirs(os.path.join(HOME_DIRECTORY, 'codestyles', 'Cpp'))
+        except OSError:
+            pass
         with open(os.path.join(HOME_DIRECTORY, 'codestyles', 'Cpp', 'bugengine.xml'), 'w') as codestyle:
             self.write_codestyle(codestyle)
         projects = { }
