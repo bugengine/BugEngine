@@ -4,17 +4,22 @@
 #include    <bugengine/stdafx.h>
 #include    <bugengine/application.hh>
 #include    <bugengine/main.hh>
+#include    <rtti/engine/namespace.hh>
 
 #include    <core/environment.hh>
 #include    <filesystem/diskfolder.script.hh>
 #include    <scheduler/scheduler.hh>
 #include    <resource/resourcemanager.hh>
+#include    <settings/providers/commandline.hh>
+#include    <settings.script.hh>
 
 #include    <plugin/plugin.hh>
 
 #include    <cstdio>
 #include    <cstdlib>
 #include    <unistd.h>
+
+BE_REGISTER_NAMESPACE_2_NAMED(game, BugEngine, MainSettings);
 
 namespace
 {
@@ -129,6 +134,7 @@ int beMain(int argc, const char *argv[])
 #endif
     {
         ScopedLogListener console(scoped<ConsoleLogListener>::create(Arena::debug()));
+        Settings::CommandLineSettingsProvider settings(argc, argv);
         Plugin::Plugin<minitl::pointer> platformAssert(
                 inamespace("plugin.debug.assert"),
                 Plugin::Context(weak<Resource::ResourceManager>(), ref<Folder>(), weak<Scheduler>()));

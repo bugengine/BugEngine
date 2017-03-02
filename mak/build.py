@@ -165,6 +165,8 @@ def module(bld, name, module_path, depends,
             build = True
 
     source_node = bld.path.make_node(module_path.replace('.', '/'))
+    project_path = source_node.parent.path_from(bld.srcnode).replace('/', '.')
+    project_path = '%s.%s' % (project_path, name.split('.')[-1])
     if 'plugin' in features:
         plugin_name = name.replace('.', '_')
     else:
@@ -301,6 +303,7 @@ def module(bld, name, module_path, depends,
             env = env.derive(),
             target = target_prefix + name,
             target_name = name,
+            module_path = project_path,
             use = [target_prefix + d for d in depends],
             features = features,
             extra_use = extra_features,
@@ -365,7 +368,9 @@ def thirdparty(bld, name, path, env, libs=[], lib_paths=[], frameworks=[], inclu
     platforms = env.VALID_PLATFORMS
     platform_specific = platforms
     arch_specific = archs + ['%s.%s'%(p,a) for p in platforms for a in archs]
-    source_node = bld.path.make_node('%s' % path.replace('.', '/'))
+    source_node = bld.path.make_node(path.replace('.', '/'))
+    project_path = source_node.parent.path_from(bld.srcnode).replace('/', '.')
+    project_path = '%s.%s' % (project_path, name.split('.')[-1])
 
     lib_paths = lib_paths + [i.path_from(bld.bldnode) for i in [source_node.make_node('lib')] + [source_node.make_node('lib.%s'%platform) for platform in platform_specific + arch_specific] if os.path.isdir(i.abspath())]
     bin_paths = [i for i in [source_node.make_node('bin.%s'%arch) for arch in arch_specific] if os.path.isdir(i.abspath())]
@@ -376,6 +381,7 @@ def thirdparty(bld, name, path, env, libs=[], lib_paths=[], frameworks=[], inclu
     target_name = target_prefix + name
     install_tg = bld(target=target_name,
                      features=['cxx'],
+                     module_path=project_path,
                      export_includes=includes,
                      export_defines=defines,
                      export_libpath=lib_paths,

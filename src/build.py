@@ -13,10 +13,12 @@ def build(bld):
                 ['engine.core'])
     bld.library('engine.rtti',
                 ['engine.core', 'engine.network', '3rdparty.zlib'])
-    bld.library('engine.settings',
-                ['engine.rtti'])
     bld.library('engine.filesystem',
                 ['engine.core', 'engine.rtti', '3rdparty.minizip'])
+    bld.library('engine.rttiparse',
+                ['engine.core', 'engine.rtti', 'engine.filesystem'])
+    bld.library('engine.settings',
+                ['engine.rtti', 'engine.rttiparse'])
     bld.library('engine.resource',
                 ['engine.core', 'engine.rtti', 'engine.filesystem'])
     bld.library('engine.scheduler',
@@ -28,8 +30,8 @@ def build(bld):
                 ['engine.core', 'engine.rtti', 'engine.filesystem',
                  'engine.resource', 'engine.scheduler'])
     bld.shared_library('engine.bugengine',
-                       ['engine.core', 'engine.rtti', 'engine.settings',
-                        'engine.scheduler', 'engine.filesystem',
+                       ['engine.core', 'engine.rtti', 'engine.rttiparse',
+                        'engine.settings', 'engine.scheduler', 'engine.filesystem',
                         'engine.world', 'engine.plugin'])
 
     bld.engine('bugengine', ['engine.bugengine'], path='engine.main')

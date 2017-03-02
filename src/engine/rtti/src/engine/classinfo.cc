@@ -296,6 +296,20 @@ raw<const Method> Class::getMethod(istring methodName) const
     return m;
 }
 
+raw<const ObjectInfo> Class::getStaticProperty(istring propertyName) const
+{
+    raw<const ObjectInfo> o = objects;
+    while(o)
+    {
+        if (o->name == propertyName)
+        {
+            break;
+        }
+        o = o->next;
+    }
+    return o;
+}
+
 Value Class::get(Value& from, istring propname, bool& found) const
 {
     static raw<const Class> const s_metaClass = be_typeid<Class>::klass();

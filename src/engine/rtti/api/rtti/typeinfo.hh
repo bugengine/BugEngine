@@ -20,6 +20,7 @@ private:
     static raw<const RTTI::Class> registerProperties();
 public:
     static BE_EXPORT raw<RTTI::Class> preklass();
+    static BE_EXPORT istring name();
     static inline raw<const RTTI::Class> klass()
     {
         static raw<const RTTI::Class> cls = registerProperties();
