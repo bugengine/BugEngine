@@ -17,7 +17,7 @@ class Clang(Configure.ConfigurationContext.GnuCompiler):
 
     def set_warning_options(self, conf):
         Configure.ConfigurationContext.GnuCompiler.set_warning_options(self, conf)
-        if self.version_number >= 3.6:
+        if self.version_number >= (3, 6):
             conf.env.CXXFLAGS_warnall.append('-Wno-unused-local-typedefs')
 
     def get_multilib_compilers(self):
@@ -62,7 +62,7 @@ class Clang(Configure.ConfigurationContext.GnuCompiler):
 
     def load_in_env(self, conf, platform, sysroot=None):
         Configure.ConfigurationContext.GnuCompiler.load_in_env(self, conf, platform)
-        if self.version_number >= 3.1:
+        if self.version_number >= (3, 1):
             if platform.NAME != 'windows':
                 env = conf.env
                 env.append_unique('CFLAGS', ['-fvisibility=hidden'])

@@ -37,17 +37,16 @@ class Compiler:
                  extra_args = [], extra_env={}):
         def to_number(version_string):
              v = version_string.split('-')[0].split('.')
-             div = 1
-             result = 0
-             while v:
+             result = [0, 0, 0]
+             for i in (0, 1, 2):
+                 if not v:
+                     break
                  d = v.pop(0)
                  try:
-                     result += int(d) / div
+                     result[i] = int(d)
                  except ValueError:
-                     pass
-                 else:
-                    div = div * 10
-             return result
+                     result[i] = int(re.match('\\d+', d).group())
+             return tuple(result)
         self.compiler_c = compiler_c
         self.compiler_cxx = compiler_cxx
         self.defines = []
@@ -220,7 +219,8 @@ class GnuCompiler(Compiler):
         node.write('#include <cstdlib>\n#include <cstdio>\nint main() {}\n')
         try:
             result, out, err = self.run_cxx([node.abspath(), '-o', tgtnode.abspath()])
-        except Exception:
+        except Exception as e:
+            print(e)
             return False
         finally:
             node.delete()

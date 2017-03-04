@@ -13,7 +13,7 @@ class GCC(Configure.ConfigurationContext.GnuCompiler):
 
     def set_warning_options(self, conf):
         Configure.ConfigurationContext.GnuCompiler.set_warning_options(self, conf)
-        if self.version_number >= 4.8:
+        if self.version_number >= (4, 8):
             v.CXXFLAGS_warnall.append('-Wno-unused-local-typedefs')
 
     def set_optimisation_options(self, conf):
@@ -21,13 +21,13 @@ class GCC(Configure.ConfigurationContext.GnuCompiler):
 
     def set_warning_options(self, conf):
         Configure.ConfigurationContext.GnuCompiler.set_warning_options(self, conf)
-        if self.version_number >= 4.8:
+        if self.version_number >= (4, 8):
             v = conf.env
             v.CXXFLAGS_warnall.append('-Wno-unused-local-typedefs')
 
     def load_in_env(self, conf, platform, sysroot=None):
         Configure.ConfigurationContext.GnuCompiler.load_in_env(self, conf, platform, sysroot)
-        if self.version_number >= 4:
+        if self.version_number >= (4,):
             if platform.NAME != 'windows':
                 v = conf.env
                 v.append_unique('CFLAGS', ['-fvisibility=hidden'])
