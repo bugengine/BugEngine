@@ -46,7 +46,7 @@ class MSVC(Configure.ConfigurationContext.Compiler):
         conf.env.append_unique('CFLAGS_warnnone', ['/D_CRT_SECURE_NO_WARNINGS=1', '/W0'])
         conf.env.append_unique('CXXFLAGS_warnall', ['/D_CRT_SECURE_NO_WARNINGS=1', '/W4', '/WX'])
         conf.env.append_unique('CXXFLAGS_warnnone', ['/D_CRT_SECURE_NO_WARNINGS=1', '/W0'])
-        if self.NAMES[0] == 'msvc' and self.version_number >= 14:
+        if self.NAMES[0] == 'msvc' and self.version_number >= (14,):
             conf.env.append_unique('CFLAGS_warnall', ['/D_ALLOW_RTCc_IN_STL=1'])
             conf.env.append_unique('CXXFLAGS_warnall', ['/D_ALLOW_RTCc_IN_STL=1'])
             conf.env.append_unique('CFLAGS_warnnone', ['/D_ALLOW_RTCc_IN_STL=1'])

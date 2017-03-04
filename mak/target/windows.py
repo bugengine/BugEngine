@@ -83,7 +83,7 @@ class Windows_GCC(Windows):
         env.append_unique('CXXFLAGS', ['-static-libgcc'])
         env.append_unique('LINKFLAGS', ['-static-libgcc'])
         env.append_unique('CXXFLAGS_warnall', ['-Wno-unknown-pragmas', '-Wno-comment'])
-        if compiler.version_number >= 4.5:
+        if compiler.version_number >= (4, 5):
             env.append_unique('CFLAGS', ['-static-libstdc++'])
             env.append_unique('CXXFLAGS', ['-static-libstdc++'])
             env.append_unique('LINKFLAGS', ['-static-libstdc++'])
