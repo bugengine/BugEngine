@@ -5,6 +5,7 @@
 #include    <rttiparse/dbnamespace.hh>
 #include    <rttiparse/dbcontext.hh>
 #include    <rttiparse/valueparse.hh>
+#include    <rttiparse/object.hh>
 
 
 namespace BugEngine { namespace RTTI { namespace Parser
@@ -61,7 +62,7 @@ void Namespace::add(DbContext& context, const inamespace& name, ref<Namespace> n
     }
 }
 
-void Namespace::add(DbContext& context, const inamespace& name, ref<Node> node)
+void Namespace::add(DbContext& context, const inamespace& name, ref<Object> node)
 {
     be_forceuse(context);
     weak<Namespace> current = this;
@@ -91,16 +92,16 @@ ref<Namespace> Namespace::getChild(const istring name) const
     }
 }
 
-ref<Node> Namespace::getNode(const istring name) const
+ref<Object> Namespace::getNode(const istring name) const
 {
-    minitl::hashmap<istring, ref<Node> >::const_iterator it = m_nodes.find(name);
+    minitl::hashmap<istring, ref<Object> >::const_iterator it = m_nodes.find(name);
     if (it != m_nodes.end())
     {
         return it->second;
     }
     else
     {
-        return ref<Node>();
+        return ref<Object>();
     }
 }
 

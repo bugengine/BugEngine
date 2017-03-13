@@ -22,7 +22,7 @@ private:
     inamespace              m_properties;
     Type                    m_cachedType;
     weak<const Namespace>   m_cachedNamespace;
-    ref<const Node>         m_cachedNode;
+    ref<const Object>       m_cachedNode;
 protected:
     virtual bool resolve(DbContext& context) override;
     virtual bool isCompatible(const Type& expectedType) const override;

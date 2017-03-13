@@ -3,7 +3,7 @@
 %{
 #include    <rttiparse/stdafx.h>
 #include    <parsecontext.hh>
-#include    <nodes/object.hh>
+#include    <rttiparse/object.hh>
 #include    <nodes/reference.hh>
 #include    <nodes/bool.hh>
 #include    <nodes/integer.hh>
