@@ -11,7 +11,7 @@
 namespace BugEngine { namespace RTTI { namespace Parser
 {
 
-class Node;
+class Object;
 struct DbContext;
 
 class Namespace : public minitl::refcountable
@@ -19,7 +19,7 @@ class Namespace : public minitl::refcountable
 private:
     minitl::Allocator&                          m_allocator;
     minitl::hashmap<istring, ref<Namespace> >   m_children;
-    minitl::hashmap<istring, ref<Node> >        m_nodes;
+    minitl::hashmap<istring, ref<Object> >      m_nodes;
     Value                                       m_value;
 public:
     Namespace(minitl::Allocator& allocator);
@@ -28,9 +28,9 @@ public:
 
     void add(DbContext& context, const inamespace& name, const Value& value);
     void add(DbContext& context, const inamespace& name, ref<Namespace> ns);
-    void add(DbContext& context, const inamespace& name, ref<Node> node);
+    void add(DbContext& context, const inamespace& name, ref<Object> node);
     ref<Namespace> getChild(const istring name) const;
-    ref<Node> getNode(const istring name) const;
+    ref<Object> getNode(const istring name) const;
     const Value& getValue() const;
 };
 

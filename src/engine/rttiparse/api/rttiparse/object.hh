@@ -1,8 +1,8 @@
 /* BugEngine <bugengine.devel@gmail.com> / 2008-2014
    see LICENSE for detail */
 
-#ifndef BE_RTTIPARSE_NODES_OBJECT_HH_
-#define BE_RTTIPARSE_NODES_OBJECT_HH_
+#ifndef BE_RTTIPARSE_OBJECT_HH_
+#define BE_RTTIPARSE_OBJECT_HH_
 /**************************************************************************************************/
 #include    <rttiparse/stdafx.h>
 #include    <rttiparse/valueparse.hh>
@@ -27,6 +27,7 @@ public:
     Object(const ParseLocation& location,
            ref<Reference> className, const minitl::vector<Parameter>& parameters);
     ~Object();
+    Type getType() const;
 };
 
 }}}

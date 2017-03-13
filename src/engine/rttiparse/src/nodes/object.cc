@@ -2,7 +2,7 @@
    see LICENSE for detail */
 
 #include    <rttiparse/stdafx.h>
-#include    <nodes/object.hh>
+#include    <rttiparse/object.hh>
 #include    <rtti/value.hh>
 #include    <rtti/classinfo.script.hh>
 
@@ -81,6 +81,11 @@ void Object::doEval(const Type &expectedType, Value &result) const
 {
     be_forceuse(expectedType);
     be_forceuse(result);
+}
+
+Type Object::getType() const
+{
+    return be_typeid<void>::type();
 }
 
 }}}

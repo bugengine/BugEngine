@@ -31,7 +31,6 @@ protected:
     }
     virtual void doEval(const Type& expectedType, Value& result) const = 0;
 public:
-    virtual Type getType() const = 0;
     virtual bool isCompatible(const Type& expectedType) const = 0;
     virtual bool resolve(DbContext& context)
     {
