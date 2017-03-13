@@ -796,6 +796,8 @@ class Root(Container):
         definition.write('#include <rtti/engine/objectinfo.script.hh>\n')
         definition.write('#include <rtti/engine/propertyinfo.script.hh>\n')
         definition.write('#include <rtti/engine/array.hh>\n')
+        definition.write('#include <rtti/engine/map.hh>\n')
+        definition.write('#include <rtti/engine/tuple.hh>\n')
         definition.write('#include <rtti/engine/taginfo.script.hh>\n')
         definition.write('#include <rtti/engine/helper/method.hh>\n')
         definition.write('#include <rtti/engine/helper/get.hh>\n')
