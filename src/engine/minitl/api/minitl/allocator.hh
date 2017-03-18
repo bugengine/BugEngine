@@ -99,7 +99,8 @@ public:
     inline bool  resize(void* ptr, u64 size);
     inline void* realloc(void* ptr, u64 size, u64 alignment);
     inline void  free(const void* pointer);
-    inline const char* strdup(const char *src);
+    inline char* strdup(const char* src);
+    inline char* strdup(const char* begin, const char* end);
     template< typename T >
     inline T* alloc();
 };
@@ -124,11 +125,20 @@ void  Allocator::free(const void* pointer)
     internalFree(pointer);
 }
 
-const char*  Allocator::strdup(const char* src)
+char* Allocator::strdup(const char* src)
 {
     size_t s = std::strlen(src);
     char *result = static_cast<char*>(internalAlloc(s+1, 1));
     std::strcpy(result, src);
+    return result;
+}
+
+char* Allocator::strdup(const char* begin, const char* end)
+{
+    size_t s = end - begin;
+    char *result = static_cast<char*>(internalAlloc(s+1, 1));
+    std::strncpy(result, begin, s);
+    result[s] = '\0';
     return result;
 }
 

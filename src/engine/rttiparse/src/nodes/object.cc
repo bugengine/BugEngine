@@ -3,6 +3,7 @@
 
 #include    <rttiparse/stdafx.h>
 #include    <rttiparse/object.hh>
+#include    <nodes/reference.hh>
 #include    <rtti/value.hh>
 #include    <rtti/classinfo.script.hh>
 

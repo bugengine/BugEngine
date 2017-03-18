@@ -13,6 +13,7 @@
 #include    <rtti/classinfo.script.hh>
 #include    <rtti/engine/methodinfo.script.hh>
 #include    <rtti/engine/propertyinfo.script.hh>
+#include    <rtti/classinfo.script.hh>
 
 namespace BugEngine { namespace Python
 {
@@ -148,6 +149,63 @@ PyTypeObject PyBugObject::s_pyType =
 
 typedef PyObject* (*CreateMethod)(PyObject* owner, const RTTI::Value& value);
 
+template< typename T >
+PyObject* createPyNumeric(PyObject* owner, const RTTI::Value& value)
+{
+    be_forceuse(owner);
+    unsigned long long v = static_cast<unsigned long long>(value.as<T>());
+    return s_library->m_PyLong_FromUnsignedLongLong(v);
+}
+
+template< >
+PyObject* createPyNumeric<bool>(PyObject* owner, const RTTI::Value& value)
+{
+    be_forceuse(owner);
+    long v = static_cast<long>(value.as<bool>());
+    return s_library->m_PyBool_FromLong(v);
+}
+
+template< >
+PyObject* createPyNumeric<float>(PyObject* owner, const RTTI::Value& value)
+{
+    be_forceuse(owner);
+    double v = static_cast<double>(value.as<float>());
+    return s_library->m_PyFloat_FromDouble(v);
+}
+
+template< >
+PyObject* createPyNumeric<double>(PyObject* owner, const RTTI::Value& value)
+{
+    be_forceuse(owner);
+    double v = value.as<double>();
+    return s_library->m_PyFloat_FromDouble(v);
+}
+
+PyObject* createPyString(PyObject* owner, const RTTI::Value& value)
+{
+    be_forceuse(owner);
+    const text& t = static_cast<const text&>(value.as<const text&>());
+    typedef PyObject* (*toStringType)(const char* format);
+    toStringType toString = s_library->getVersion() >= 30
+            ?   s_library->m_PyUnicode_FromString
+            :   s_library->m_PyString_FromString;
+    return toString(t.begin());
+}
+
+static CreateMethod s_createPyNumber[] = {
+    &createPyNumeric<bool>,
+    &createPyNumeric<u8>,
+    &createPyNumeric<u16>,
+    &createPyNumeric<u32>,
+    &createPyNumeric<u64>,
+    &createPyNumeric<i8>,
+    &createPyNumeric<i16>,
+    &createPyNumeric<i32>,
+    &createPyNumeric<i64>,
+    &createPyNumeric<float>,
+    &createPyNumeric<double>
+};
+
 static CreateMethod s_createNumber[] = {
     &PyBugNumber<bool>::create,
     &PyBugNumber<u8>::create,
@@ -165,7 +223,8 @@ static CreateMethod s_createString[] = {
     &PyBugString<istring>::create,
     &PyBugString<inamespace>::create,
     &PyBugString<ifilename>::create,
-    &PyBugString<ipath>::create
+    &PyBugString<ipath>::create,
+    &PyBugString<text>::create
 };
 
 PyObject* PyBugObject::create(PyObject* owner, const RTTI::Value& value)
@@ -182,6 +241,16 @@ PyObject* PyBugObject::create(PyObject* owner, const RTTI::Value& value)
         PyObject* result = s_library->m__Py_NoneStruct;
         Py_INCREF(result);
         return result;
+    }
+    else if (t.indirection == RTTI::Type::Value && t.metaclass->type() == RTTI::ClassType_Number)
+    {
+        return s_createPyNumber[t.metaclass->index()](owner, value);
+    }
+    else if (t.indirection == RTTI::Type::Value
+          && t.metaclass->type() == RTTI::ClassType_String
+          && t.metaclass->index() == RTTI::ClassIndex_text)
+    {
+        return createPyString(owner, value);
     }
     else switch(t.metaclass->type())
     {
@@ -384,69 +453,69 @@ static inline void unpackNumber(PyObject* arg, const RTTI::Type& type, RTTI::Val
     unsigned long long value = arg->py_type->tp_flags & Py_TPFLAGS_INT_SUBCLASS
             ?   (unsigned long long) s_library->m_PyInt_AsUnsignedLongMask(arg)
             :   (unsigned long long) s_library->m_PyLong_AsUnsignedLongLongMask(arg);
-    switch(type.metaclass->index())
+    switch(RTTI::ClassIndex_Numeric(type.metaclass->index()))
     {
-    case 0:
+    case RTTI::ClassIndex_bool:
         {
             bool v = value ? true : false;
             new (buffer) RTTI::Value(type, &v);
             break;
         }
-    case 1:
+    case RTTI::ClassIndex_u8:
         {
             u8 v = (u8)value;
             new (buffer) RTTI::Value(type, &v);
             break;
         }
-    case 2:
+    case RTTI::ClassIndex_u16:
         {
             u16 v = (u16)value;
             new (buffer) RTTI::Value(type, &v);
             break;
         }
-    case 3:
+    case RTTI::ClassIndex_u32:
         {
             u32 v = (u32)value;
             new (buffer) RTTI::Value(type, &v);
             break;
         }
-    case 4:
+    case RTTI::ClassIndex_u64:
         {
             u64 v = (u64)value;
             new (buffer) RTTI::Value(type, &v);
             break;
         }
-    case 5:
+    case RTTI::ClassIndex_i8:
         {
             i8 v = (i8)value;
             new (buffer) RTTI::Value(type, &v);
             break;
         }
-    case 6:
+    case RTTI::ClassIndex_i16:
         {
             i16 v = (i16)value;
             new (buffer) RTTI::Value(type, &v);
             break;
         }
-    case 7:
+    case RTTI::ClassIndex_i32:
         {
             i32 v = (i32)value;
             new (buffer) RTTI::Value(type, &v);
             break;
         }
-    case 8:
+    case RTTI::ClassIndex_i64:
         {
             i64 v = (i64)value;
             new (buffer) RTTI::Value(type, &v);
             break;
         }
-    case 9:
+    case RTTI::ClassIndex_float:
         {
             float v = (float)value;
             new (buffer) RTTI::Value(type, &v);
             break;
         }
-    case 10:
+    case RTTI::ClassIndex_double:
         {
             double v = (double)value;
             new (buffer) RTTI::Value(type, &v);

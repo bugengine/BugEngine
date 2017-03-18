@@ -29,7 +29,9 @@ template< typename T >
 ref<T>::ref(T* value, Allocator& deleter)
 :   m_ptr(value)
 {
-    be_assert(value->pointer::m_allocator == 0, "value of type %s already has a deleter; being refcounting multiple times?" | typeid(T).name());
+    be_assert(value->pointer::m_allocator == 0,
+              "value of type %s already has a deleter; being refcounting multiple times?"
+            | typeid(T).name());
     value->pointer::m_allocator = &deleter;
     if (m_ptr) m_ptr->addref();
 }

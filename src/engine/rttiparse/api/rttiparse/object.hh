@@ -5,14 +5,21 @@
 #define BE_RTTIPARSE_OBJECT_HH_
 /**************************************************************************************************/
 #include    <rttiparse/stdafx.h>
-#include    <rttiparse/valueparse.hh>
+#include    <rttiparse/node.hh>
 #include    <rtti/engine/methodinfo.script.hh>
-#include    <nodes/reference.hh>
-#include    <nodes/parameter.hh>
 
 
 namespace BugEngine { namespace RTTI { namespace Parser
 {
+
+class Reference;
+
+struct Parameter
+{
+    ParseLocation   location;
+    istring         name;
+    ref<Node>       value;
+};
 
 class Object : public Node
 {
