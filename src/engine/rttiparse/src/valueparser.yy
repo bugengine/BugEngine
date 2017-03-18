@@ -73,7 +73,7 @@ static int yyerror(::BugEngine::RTTI::Parser::ParseContext* context, const char 
 %}
 
 %token VAL_BOOLEAN VAL_STRING VAL_INTEGER VAL_FLOAT VAL_FILENAME
-%token TOK_ID
+%token TOK_ID TOK_EXPECT_OBJECT TOK_EXPECT_ANY
 %token END 0 "end of file"
 %parse-param { BugEngine::RTTI::Parser::ParseContext* context }
 
@@ -106,11 +106,20 @@ using namespace BugEngine::RTTI::Parser;
 %%
 
 start:
+        TOK_EXPECT_OBJECT
+        object
+        {
+            context->result = *$2.value;
+            $2.value->~ref();
+            free($2.value);
+        }
+    |
+        TOK_EXPECT_ANY
         value
         {
-            context->result = *$1.value;
-            $1.value->~ref();
-            free($1.value);
+            context->result = *$2.value;
+            $2.value->~ref();
+            free($2.value);
         }
     ;
 

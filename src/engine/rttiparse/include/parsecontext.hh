@@ -5,8 +5,8 @@
 #define BE_RTTIPARSE_PARSECONTEXT_HH_
 /**************************************************************************************************/
 #include    <rttiparse/stdafx.h>
-#include    <rttiparse/valueparse.hh>
-#include    <nodes/parameter.hh>
+#include    <rttiparse/node.hh>
+#include    <rttiparse/object.hh>
 
 
 template< typename T >
@@ -38,6 +38,13 @@ namespace BugEngine { namespace RTTI { namespace Parser
 
 struct ParseContext
 {
+    enum Header
+    {
+        HeaderDone,
+        HeaderAnyValue,
+        HeaderObject
+    };
+
     minitl::Allocator*  arena;
     ref<Node>           result;
     const char*         bufferStart;
@@ -45,11 +52,13 @@ struct ParseContext
     const char*         buffer;
     ErrorList&          errors;
     ParseLocation       location;
+    Header              parseHeader;
 
     ParseContext(minitl::Allocator& arena,
                  const char*        bufferStart,
                  const char*        bufferEnd,
                  ErrorList&         errors,
+                 bool               expectObject = false,
                  u32                lineStart = 0,
                  u32                columnStart = 0);
     ~ParseContext();
