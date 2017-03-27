@@ -1,6 +1,8 @@
+import os
+import sys
+sys.path.append(os.path.dirname(os.path.realpath(__file__)))
 from cpp import parser
 from optparse import OptionParser
-import os
 import traceback
 try:
     from cStringIO import StringIO
@@ -21,10 +23,10 @@ if __name__ == '__main__':
     (options, args) = option_decl.parse_args()
     if not args:
         option_decl.print_help()
-        exit(1)
+        sys.exit(1)
     elif len(args) != 4:
         option_decl.print_help()
-        exit(1)
+        sys.exit(1)
     else:
         try:
             result = parser.parse(args[0], os.path.join(options.tmp_dir, 'cpp_grammar.pickle'),
@@ -44,9 +46,9 @@ if __name__ == '__main__':
                 i.write(instances.getvalue())
             with open(args[3], 'w') as d:
                 d.write(docs.getvalue())
-            exit(result.error_count)
+            sys.exit(result.error_count)
         except Exception as e:
             print(e)
             traceback.print_exc()
-            exit(1)
+            sys.exit(1)
 
