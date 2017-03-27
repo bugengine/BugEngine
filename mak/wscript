@@ -34,7 +34,6 @@ def configure(conf):
             conf.recurse(extra.make_node(e).abspath(), name='host_configure')
     conf.load('flex', tooldir=[os.path.join(conf.path.abspath(), 'tools')])
     conf.load('bison', tooldir=[os.path.join(conf.path.abspath(), 'tools')])
-    conf.load('kernel_preprocess', tooldir=[os.path.join(conf.path.abspath(), 'tools')])
     conf.recurse('compilers.py')
     conf.recurse('targets.py')
     conf.env.ALL_TOOLCHAINS.sort(key = lambda x: x.split('-'))

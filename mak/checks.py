@@ -242,12 +242,12 @@ def run_pkg_config(conf, name):
             if pos != -1:
                 var_name = line[:pos].strip()
                 value = line[pos+1:].strip()
-                value = value.replace('${', '{')
-                value = value.format(value, **expand)
                 if value[0] == '"' and value[-1] == '"':
                     value = value[1:-1]
-                if var_name == 'prefix':
+                if sysroot and value[0] == '/':
                     value = os.path.join(sysroot, value[1:])
+                value = value.replace('${', '{')
+                value = value.format(value, **expand)
                 expand[var_name] = value
                 continue
             pos = line.find(':')

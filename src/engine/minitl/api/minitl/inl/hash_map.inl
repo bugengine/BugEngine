@@ -119,10 +119,59 @@ hashmap<Key, Value, Hash>::hashmap(const hashmap& other)
     :   m_itemPool(other.m_index.arena(), other.m_index.count()-1)
     ,   m_items()
     ,   m_index(other.m_index.arena(), other.m_index.count())
-    ,   m_count(0)
+    ,   m_count(other.m_count)
 {
     buildIndex();
-    be_notreached();
+    if (m_count)
+    {
+        list_iterator myIt = m_items.begin();
+        for (const_list_iterator it = ++other.m_items.begin();
+             it != other.m_items.end();
+             ++it)
+        {
+            const u8* address = reinterpret_cast<const u8*>(it.operator->());
+            if (address >= reinterpret_cast<const u8*>(other.m_index.begin())
+             && address < reinterpret_cast<const u8*>(other.m_index.end()))
+            {
+                ++myIt;
+            }
+            else
+            {
+                item* i = m_itemPool.allocate(static_cast<const item*>(it.operator->())->value);
+                myIt = m_items.insert(myIt, *i);
+            }
+        }
+    }
+}
+
+template< typename Key, typename Value, typename Hash >
+hashmap<Key, Value, Hash>::hashmap(Allocator& allocator, const hashmap& other)
+    :   m_itemPool(allocator, other.m_index.count()-1)
+    ,   m_items()
+    ,   m_index(allocator, other.m_index.count())
+    ,   m_count(other.m_count)
+{
+    buildIndex();
+    if (m_count)
+    {
+        list_iterator myIt = m_items.begin();
+        for (const_list_iterator it = ++other.m_items.begin();
+             it != other.m_items.end();
+             ++it)
+        {
+            const u8* address = reinterpret_cast<const u8*>(it.operator->());
+            if (address >= reinterpret_cast<const u8*>(other.m_index.begin())
+             && address < reinterpret_cast<const u8*>(other.m_index.end()))
+            {
+                ++myIt;
+            }
+            else
+            {
+                item* i = m_itemPool.allocate(static_cast<const item*>(it.operator->())->value);
+                myIt = m_items.insert(myIt, *i);
+            }
+        }
+    }
 }
 
 template< typename Key, typename Value, typename Hash >
@@ -311,7 +360,6 @@ tuple<typename hashmap<Key, Value, Hash>::iterator, bool> hashmap<Key, Value, Ha
     {
         grow(m_count*2);
         it = m_index[hash % (m_index.count()-1)].second;
-        ++it;
     }
     m_count++;
     item* i = m_itemPool.allocate(make_tuple(key, value));

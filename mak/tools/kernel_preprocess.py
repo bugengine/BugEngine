@@ -18,6 +18,7 @@ ${TGT[0].abspath()}
 """ % sys.executable.replace('\\', '/')
 cls = Task.task_factory('kernel_preprocess', kernel_preprocess, [], 'PINK')
 
+
 @feature('kernel')
 @before_method('process_source')
 def kernel_build_preprocess(self):
