@@ -190,6 +190,8 @@ class GnuCompiler(Compiler):
         self.target = out.strip()
         if self.target.find('-') != -1:
             arch, platform = split_triple(self.target)
+        else:
+            platform = self.target
         best = 0
         for values, a in self.MACRO_ARCHS:
             for v in values:
