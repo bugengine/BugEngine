@@ -97,12 +97,14 @@ class XmlFile:
             xml = ''
         newxml = self.document.toxml()
         if xml != newxml:
-            Logs.pprint('NORMAL', 'writing %s' % node.abspath())
+            Logs.pprint('NORMAL', 'writing %s' % node.name)
             node.write(newxml)
 
 class Solution:
-    def __init__(self, bld, appname, version_number, version_name, use_folders):
-        self.header = 'Microsoft Visual Studio Solution File, Format Version %s\n# %s' % (version_number, version_name)
+    def __init__(self, bld, appname, version_number, version_name, use_folders, vstudio_ide_version):
+        self.header = '\xef\xbb\xbf\r\nMicrosoft Visual Studio Solution File, Format Version %s\r\n# %s' % (version_number, version_name)
+        if vstudio_ide_version:
+            self.header += '\r\nVisualStudioVersion = %s\r\nMinimumVIsualStudioVersion = %s' % (vstudio_ide_version, vstudio_ide_version)
         self.projects = []
         self.project_configs = []
         self.configs = ['\t\t%s|%s = %s|%s'%(v, t, v, t) for v in bld.env.ALL_VARIANTS for t in bld.env.ALL_TOOLCHAINS]
@@ -120,7 +122,7 @@ class Solution:
             except KeyError:
                 folder = generateGUID(folder_name)
                 self.folders_made[folder_name] = folder
-                self.projects.append('Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "%s", "%s", "%s"\nEndProject' % (names[-1], names[-1], folder))
+                self.projects.append('Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "%s", "%s", "%s"\r\nEndProject' % (names[-1], names[-1], folder))
                 parent = self.addFolder(folder_name)
                 if parent:
                     self.folders.append((folder, parent))
@@ -130,13 +132,13 @@ class Solution:
 
     def get_dependency(self):
         if self.master:
-            return "	ProjectSection(ProjectDependencies) = postProject\n		%s = %s\n	EndProjectSection\n" % (self.master, self.master)
+            return "	ProjectSection(ProjectDependencies) = postProject\r\n		%s = %s\r\n	EndProjectSection\r\n" % (self.master, self.master)
         else:
             return ''
 
 
     def add(self, task_gen, project, project_path, build = False):
-        self.projects.append('Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "%s", "%s", "%s"\n%sEndProject' % (project.name, project_path, project.guid, self.get_dependency()))
+        self.projects.append('Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "%s", "%s", "%s"\r\n%sEndProject' % (project.name, project_path, project.guid, self.get_dependency()))
         project_config = []
         for t in task_gen.bld.env.ALL_TOOLCHAINS:
             env = task_gen.bld.all_envs[t]
@@ -155,10 +157,10 @@ class Solution:
     def write(self, node):
         nested_projects = ''
         if self.use_folders:
-            nested_projects = '\tGlobalSection(NestedProjects) = preSolution\n%s\n\tEndGlobalSection\n' % '\n'.join(
+            nested_projects = '\tGlobalSection(NestedProjects) = preSolution\r\n%s\n\tEndGlobalSection\r\n' % '\r\n'.join(
                     ['\t\t%s = %s' % (project, parent) for project, parent in self.folders]
                 )
-        newsolution = '%s\n%s\nGlobal\n\tGlobalSection(SolutionConfigurationPlatforms) = preSolution\n%s\n\tEndGlobalSection\n\tGlobalSection(ProjectConfigurationPlatforms) = postSolution\n%s\n\tEndGlobalSection\n%sEndGlobal\n' % (self.header, '\n'.join(self.projects), '\n'.join(self.configs), '\n'.join(self.project_configs), nested_projects)
+        newsolution = '%s\r\n%s\r\nGlobal\r\n\tGlobalSection(SolutionConfigurationPlatforms) = preSolution\r\n%s\r\n\tEndGlobalSection\r\n\tGlobalSection(ProjectConfigurationPlatforms) = postSolution\r\n%s\r\n\tEndGlobalSection\r\n%sEndGlobal\r\n' % (self.header, '\n'.join(self.projects), '\n'.join(self.configs), '\r\n'.join(self.project_configs), nested_projects)
         try:
             solution = node.read()
         except IOError:
@@ -292,12 +294,12 @@ class VCxproj:
             self.name = task_gen.target.split('.')[-1]
         else:
             self.name = task_gen.target
-        project = self.vcxfilters._add(self.vcxfilters.document, 'Project', {'DefaultTargets':'Build', 'ToolsVersion':'4.0', 'xmlns':'http://schemas.microsoft.com/developer/msbuild/2003'})
+        project = self.vcxfilters._add(self.vcxfilters.document, 'Project', {'DefaultTargets':'Build', 'ToolsVersion':version_project[2], 'xmlns':'http://schemas.microsoft.com/developer/msbuild/2003'})
         self.filter_nodes = self.vcxfilters._add(project, 'ItemGroup')
         self.file_nodes = self.vcxfilters._add(project, 'ItemGroup')
 
         self.guid = generateGUID(task_gen.target)
-        project = self.vcxproj._add(self.vcxproj.document, 'Project', {'DefaultTargets':'Build', 'ToolsVersion':'4.0', 'xmlns':'http://schemas.microsoft.com/developer/msbuild/2003'})
+        project = self.vcxproj._add(self.vcxproj.document, 'Project', {'DefaultTargets':'Build', 'ToolsVersion':version_project[2], 'xmlns':'http://schemas.microsoft.com/developer/msbuild/2003'})
         configs = self.vcxproj._add(project, 'ItemGroup', {'Label': 'ProjectConfigurations'})
         for toolchain in task_gen.bld.env.ALL_TOOLCHAINS:
             env = task_gen.bld.all_envs[toolchain]
@@ -424,7 +426,7 @@ class vs2003(Build.BuildContext):
     cmd = 'vs2003'
     fun = 'build'
     optim = 'debug'
-    version = (('Visual Studio .NET 2003', '8.00', False), (VCproj, '7.10'))
+    version = (('Visual Studio .NET 2003', '8.00', False, None), (VCproj, '7.10'))
     platforms = ['Win32', 'x64']
 
     def get_platform(self, platform_name):
@@ -455,7 +457,7 @@ class vs2003(Build.BuildContext):
         self.recurse([self.run_dir])
 
         version = self.__class__.cmd
-        version_name, version_number, folders = self.__class__.version[0]
+        version_name, version_number, folders, ide_version = self.__class__.version[0]
         klass, version_project = self.__class__.version[1]
 
         appname = getattr(Context.g_module, Context.APPNAME, self.srcnode.name)
@@ -465,7 +467,7 @@ class vs2003(Build.BuildContext):
         projects.mkdir()
 
 
-        solution = Solution(self, appname, version_number, version_name, folders)
+        solution = Solution(self, appname, version_number, version_name, folders, ide_version)
 
         for target, command, do_build in [('build.reconfigure', 'reconfigure', False),
                                           ('build.%s'%version, version, False),
@@ -499,14 +501,14 @@ class vs2005(vs2003):
     "creates projects for Visual Studio 2005"
     cmd = 'vs2005'
     fun = 'build'
-    version =	(('Visual Studio 2005', '9.00', True),(VCproj, '8.00'))
+    version =	(('Visual Studio 2005', '9.00', True, None),(VCproj, '8.00'))
     platforms = ['Win32', 'x64']
 
 class vs2005e(vs2003):
     "creates projects for Visual Studio 2005 Express"
     cmd = 'vs2005e'
     fun = 'build'
-    version =	(('Visual C++ Express 2005', '9.00', False),(VCproj, '8.00'))
+    version =	(('Visual C++ Express 2005', '9.00', False, None),(VCproj, '8.00'))
     platforms = ['Win32', 'x64']
 
 
@@ -514,35 +516,35 @@ class vs2008(vs2003):
     "creates projects for Visual Studio 2008"
     cmd = 'vs2008'
     fun = 'build'
-    version =	(('Visual Studio 2008', '10.00', True),(VCproj, '9.00'))
+    version =	(('Visual Studio 2008', '10.00', True, None),(VCproj, '9.00'))
     platforms = ['Win32', 'x64', 'Itanium']
 
 class vs2008e(vs2003):
     "creates projects for Visual Studio 2008 Express"
     cmd = 'vs2008e'
     fun = 'build'
-    version =	(('Visual C++ Express 2008', '10.00', False),(VCproj, '9.00'))
+    version =	(('Visual C++ Express 2008', '10.00', False, None),(VCproj, '9.00'))
     platforms = ['Win32', 'x64', 'Itanium']
 
 class vs2010(vs2003):
     "creates projects for Visual Studio 2010"
     cmd = 'vs2010'
     fun = 'build'
-    version =	(('Visual Studio 2010', '11.00', True),(VCxproj, ('4.0','10.0')))
+    version =	(('Visual Studio 2010', '11.00', True, None),(VCxproj, ('4.0','10.0', '4.0')))
     platforms = ['Win32', 'x64', 'Itanium']
 
 class vs2010e(vs2003):
     "creates projects for Visual Studio 2010 Express"
     cmd = 'vs2010e'
     fun = 'build'
-    version =	(('Visual C++ Express 2010', '11.00', False),(VCxproj, ('4.0','10.0')))
+    version =	(('Visual C++ Express 2010', '11.00', False, None),(VCxproj, ('4.0','10.0', '4.0')))
     platforms = ['Win32', 'x64', 'Itanium']
 
 class vs11(vs2003):
     "creates projects for Visual Studio 2012"
     cmd = 'vs11'
     fun = 'build'
-    version =	(('Visual Studio 11', '12.00', True),(VCxproj, ('4.5','11.0')))
+    version =	(('Visual Studio 11', '12.00', True, None),(VCxproj, ('4.5','11.0', '4.0')))
     platforms = ['Win32', 'x64', 'ARM', 'Itanium']
 
 class vs2012(vs11):
@@ -555,7 +557,7 @@ class vs11e(vs2003):
     "creates projects for Visual Studio 2012 Express"
     cmd = 'vs11e'
     fun = 'build'
-    version =	(('Visual C++ Express 11', '12.00', False),(VCxproj, ('4.5','11.0')))
+    version =	(('Visual C++ Express 11', '12.00', False, '15.0.00000.0'),(VCxproj, ('4.5','11.0', '4.0')))
     platforms = ['Win32', 'x64', 'ARM', 'Itanium']
 
 class vs2012e(vs11e):
@@ -568,14 +570,15 @@ class vs2013e(vs2003):
     "creates projects for Visual Studio 2013 Express"
     cmd = 'vs2013e'
     fun = 'build'
-    version =	(('Visual C++ Express 12', '13.00', False),(VCxproj, ('4.5','12.0')))
+    version =	(('Visual C++ Express 12', '12.00', False, '15.0.00000.0'),(VCxproj, ('4.5','12.0', '12.0')))
     platforms = ['Win32', 'x64', 'ARM', 'Itanium']
+
 
 class vs2013(vs2003):
     "creates projects for Visual Studio 2013"
     cmd = 'vs2013'
     fun = 'build'
-    version =	(('Visual Studio 12', '13.00', True),(VCxproj, ('4.5','12.0')))
+    version =	(('Visual Studio 2013', '12.00', True, '12.0.00000.0'),(VCxproj, ('4.5','12.0', '12.0')))
     platforms = ['Win32', 'x64', 'ARM', 'Itanium']
 
 
@@ -583,13 +586,13 @@ class vs2015(vs2003):
     "creates projects for Visual Studio 2015"
     cmd = 'vs2015'
     fun = 'build'
-    version =	(('Visual Studio 13', '14.00', True),(VCxproj, ('4.5','13.0')))
+    version =	(('Visual Studio 14', '12.00', True, '14.0.00000.0'),(VCxproj, ('4.5','14.0', '14.0')))
     platforms = ['Win32', 'x64', 'ARM', 'Itanium']
 
-class vs2015(vs2003):
-    "creates projects for Visual Studio 2013"
-    cmd = 'vs2015'
+class vs2017(vs2003):
+    "creates projects for Visual Studio 2017"
+    cmd = 'vs2017'
     fun = 'build'
-    version =	(('Visual Studio 13', '14.00', True),(VCxproj, ('5.0','13.0')))
+    version =	(('Visual Studio 15', '12.00', True, '15.0.00000.0'),(VCxproj, ('6.0','15.0', '15.0')))
     platforms = ['Win32', 'x64', 'ARM', 'Itanium']
 
