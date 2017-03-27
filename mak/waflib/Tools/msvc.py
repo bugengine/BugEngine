@@ -307,7 +307,13 @@ def gather_msvc_detected_versions():
 def gather_msvc_targets(conf, versions, version, vc_path):
 	#Looking for normal MSVC compilers!
 	targets = []
-	if os.path.isfile(os.path.join(vc_path, 'vcvarsall.bat')):
+	if os.path.isfile(os.path.join(vc_path, 'VC', 'Auxiliary', 'Build', 'vcvarsall.bat')):
+		for target,realtarget in all_msvc_platforms[::-1]:
+			try:
+				targets.append((target, (realtarget, conf.get_msvc_version('msvc', version, target, os.path.join(vc_path, 'VC', 'Auxiliary', 'Build', 'vcvarsall.bat')))))
+			except conf.errors.ConfigurationError:
+				pass
+	elif os.path.isfile(os.path.join(vc_path, 'vcvarsall.bat')):
 		for target,realtarget in all_msvc_platforms[::-1]:
 			try:
 				targets.append((target, (realtarget, conf.get_msvc_version('msvc', version, target, os.path.join(vc_path, 'vcvarsall.bat')))))
@@ -371,7 +377,13 @@ def gather_msvc_versions(conf, versions):
 			path,type = Utils.winreg.QueryValueEx(msvc_version, 'ProductDir')
 			vc_paths.append((version, os.path.abspath(str(path))))
 		except WindowsError:
-			continue
+			try:
+				msvc_version = Utils.winreg.OpenKey(Utils.winreg.HKEY_LOCAL_MACHINE, "SOFTWARE\\Wow6432node\\Microsoft\\VisualStudio\\SxS\\VS7")
+				path,type = Utils.winreg.QueryValueEx(msvc_version, version)
+			except WindowsError:
+				continue
+			else:
+				vc_paths.append((version, os.path.abspath(str(path))))
 
 	wince_supported_platforms = gather_wince_supported_platforms()
 
