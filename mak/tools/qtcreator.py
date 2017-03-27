@@ -263,16 +263,23 @@ class QtToolchain(QtObject):
                 self.ProjectExplorer_GccToolChain_Path = compiler
                 self.ProjectExplorer_GccToolChain_TargetAbi = abi
                 toolchain_id =  'ProjectExplorer.ToolChain.LinuxIcc:%s' % generateGUID('BugEngine:toolchain:%s:%d'%(env_name, language))
-            elif env.COMPILER_NAME in ('suncc', 'msvc'):
+            elif env.COMPILER_NAME == 'suncc':
                 self.ProjectExplorer_GccToolChain_Path = compiler
                 self.ProjectExplorer_GccToolChain_TargetAbi = abi
+                self.ProjectExplorer_GccToolChain_PlatformCodeGenFlags = tuple(flags)
+                self.ProjectExplorer_GccToolChain_PlatformLinkerFlags = tuple()
                 toolchain_id =  'ProjectExplorer.ToolChain.Gcc:%s' % generateGUID('BugEngine:toolchain:%s:%d'%(env_name, language))
+            elif env.COMPILER_NAME == 'msvc' and env.MSVC_COMPILER != 'intel':
+                self.ProjectExplorer_MsvcToolChain_VarsBat = env.MSVC_BATFILE[0].replace('\\', '/')
+                self.ProjectExplorer_MsvcToolChain_VarsBatArg = env.MSVC_BATFILE[1] or ''
+                self.ProjectExplorer_MsvcToolChain_SupportedAbi = abi
+                toolchain_id =  'ProjectExplorer.ToolChain.Msvc:%s' % generateGUID('BugEngine:toolchain:%s'%env_name)
             else:
                 self.ProjectExplorer_CustomToolChain_CompilerPath = compiler
                 self.ProjectExplorer_CustomToolChain_Cxx11Flags = ()
                 self.ProjectExplorer_CustomToolChain_ErrorPattern = ''
                 self.ProjectExplorer_CustomToolChain_FileNameCap = 1
-                self.ProjectExplorer_CustomToolChain_HeaderPaths = tuple(env.INCLUDES + env.SYSTEM_INCLUDES)
+                self.ProjectExplorer_CustomToolChain_HeaderPaths = tuple(i.replace('\\', '/') for i in env.INCLUDES + env.SYSTEM_INCLUDES)
                 self.ProjectExplorer_CustomToolChain_LineNumberCap = 2
                 self.ProjectExplorer_CustomToolChain_MakePath = ''
                 self.ProjectExplorer_CustomToolChain_MessageCap = 3
