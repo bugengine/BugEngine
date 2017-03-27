@@ -121,22 +121,24 @@ class GnuCompiler(Compiler):
         'mips64':   (['-m32'], 'mips'),
         'mips64el': (['-m32'], 'mipsel'),
     }
-    MACRO_ARCHS = {
-        ('__x86_64__',):                    'amd64',
-        ('__i386__',):                      'x86',
-        ('__i486__',):                      'x86',
-        ('__i586__',):                      'x86',
-        ('__i686__',):                      'x86',
-        ('__powerpc__',):                   'ppc',
-        ('__powerpc__', '__powerpc64__'):   'ppc64',
-        ('__mips64', '__mips', '_MIPSEL'):  'mips64el',
-        ('__mips', '_MIPSEL'):              'mipsel',
-        ('__mips64', '__mips'):             'mips64',
-        ('__mips__',):                      'mips',
-        ('__arm',):                         'arm',
-        ('__aarch64',):                     'aarch64',
-        ('__aarch32',):                     'aarch32',
-    }
+    MACRO_ARCHS = (
+        (('__x86_64__',),                    'amd64'),
+        (('__i386__',),                      'x86'),
+        (('__i486__',),                      'x86'),
+        (('__i586__',),                      'x86'),
+        (('__i686__',),                      'x86'),
+        (('__powerpc__',),                   'ppc'),
+        (('__powerpc__', '__powerpc64__'),   'ppc64'),
+        (('__mips64', '__mips', '_MIPSEL'),  'mips64el'),
+        (('__mips', '_MIPSEL'),              'mipsel'),
+        (('__mips64', '__mips'),             'mips64'),
+        (('__mips__',),                      'mips'),
+        (('__aarch64__',),                   'aarch64'),
+        (('__aarch64',),                     'aarch64'),
+        (('__aarch32__',),                   'aarch32'),
+        (('__arm__',),                       'arm'),
+        (('__arm',),                         'arm'),
+    )
 
     def __init__(self, compiler_c, compiler_cxx, extra_args = [], extra_env={}):
         extra_env = dict(extra_env)
@@ -165,9 +167,6 @@ class GnuCompiler(Compiler):
             raise Exception('Error running %s: %s' % (compiler_c, err))
         out = out.split('\n') + err.split('\n')
         for line in out:
-            if line.startswith('Target:'):
-                self.target = line.split()[1]
-                arch, platform = split_triple(self.target)
             for name in self.NAMES:
                 if line.find('%s version ' % name.lower()) != -1:
                     words = line.split()
@@ -187,23 +186,21 @@ class GnuCompiler(Compiler):
             if sysroot != -1:
                 sysroot = shlex.split(line[sysroot:].replace('\\', '\\\\'))[1]
                 self.sysroot = os.path.normpath(sysroot)
-        if not platform:
-            result, out, err = self.run([compiler_c] + extra_args + ['-dumpmachine'], env=env)
-            platform = out.strip()
-            if platform.find('-') != -1:
-                arch, platform = split_triple(platform)
-            best = 0
-            for values, a in self.MACRO_ARCHS.items():
-                for v in values:
-                    if v not in macros:
-                        break
-                else:
-                    if len(values) > best:
-                        best = len(values)
-                        arch = a
-            if not best:
-                raise Exception('could not find architecture')
-            self.target = arch + '-' + platform
+        result, out, err = self.run([compiler_c] + extra_args + ['-dumpmachine'], env=env)
+        self.target = out.strip()
+        if self.target.find('-') != -1:
+            arch, platform = split_triple(self.target)
+        best = 0
+        for values, a in self.MACRO_ARCHS:
+            for v in values:
+                if v not in macros:
+                    break
+            else:
+                if len(values) > best:
+                    best = len(values)
+                    arch = a
+        if not best:
+            raise Exception('could not find architecture')
         return version, platform, arch
 
     def get_multilib_compilers(self):
@@ -223,8 +220,7 @@ class GnuCompiler(Compiler):
         node.write('#include <cstdlib>\n#include <cstdio>\nint main() {}\n')
         try:
             result, out, err = self.run_cxx([node.abspath(), '-o', tgtnode.abspath()])
-        except Exception as e:
-            print(e)
+        except Exception:
             return False
         finally:
             node.delete()
@@ -279,7 +275,7 @@ class GnuCompiler(Compiler):
             if not conf.find_program('gdb', var='GDB', path_list=sys_dirs, mandatory=False):
                 conf.find_program('gdb', var='GDB', mandatory=False)
         env.COMPILER_NAME = self.__class__.__name__.lower()
-        env.COMPILER_TARGET = self.target
+        env.COMPILER_TARGET = self.arch + '-' + self.platform
         conf.load(self.TOOLS)
         self.populate_useful_variables(conf)
 

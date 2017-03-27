@@ -399,9 +399,10 @@ def library(bld, name, depends=[], features=[], platforms=[],
         extra_public_includes=[], extra_public_defines=[],
         path='', use_master=True, warnings=True, export_all=False):
     if not path: path=name
-    for p in platforms:
-        if p not in bld.env.VALID_PLATFORMS:
-            return None
+    if not bld.env.PROJECTS:
+        for p in platforms:
+            if p not in bld.env.VALID_PLATFORMS:
+                return None
     module(bld, name, path, depends, platforms,
         ['cxx', 'cxxobjects'],
         features,
@@ -416,9 +417,10 @@ def static_library(bld, name, depends=[], features=[], platforms=[],
         extra_public_includes=[], extra_public_defines=[],
         path='', use_master=True, warnings=True):
     if not path: path=name
-    for p in platforms:
-        if p not in bld.env.VALID_PLATFORMS:
-            return None
+    if not bld.env.PROJECTS:
+        for p in platforms:
+            if p not in bld.env.VALID_PLATFORMS:
+                return None
     module(bld, name, path, depends, platforms,
         ['cxx', 'cxxstlib'],
         features,
@@ -433,9 +435,10 @@ def shared_library(bld, name, depends=[], features=[], platforms=[],
         extra_public_includes=[], extra_public_defines=[],
         path='', use_master=True, warnings=True, export_all=False):
     if not path: path=name
-    for p in platforms:
-        if p not in bld.env.VALID_PLATFORMS:
-            return None
+    if not bld.env.PROJECTS:
+        for p in platforms:
+            if p not in bld.env.VALID_PLATFORMS:
+                return None
     module(bld, name, path, depends, platforms,
         bld.env.STATIC and ['cxx', 'cxxobjects'] or ['cxx', 'cxxshlib', 'shared_lib'],
         features,
@@ -449,9 +452,10 @@ def engine(bld, name, depends=[], features=[], platforms=[], path='', use_master
     if getattr(bld, 'launcher', None) != None:
         raise Errors.WafError('Only one engine can be defined')
     if not path: path=name
-    for p in platforms:
-        if p not in bld.env.VALID_PLATFORMS:
-            return None
+    if not bld.env.PROJECTS:
+        for p in platforms:
+            if p not in bld.env.VALID_PLATFORMS:
+                return None
     bld.launcher = module(bld, name, path, depends + ['3rdparty.console'], platforms, ['cxx', 'cxxprogram', 'launcher'],
                           features, [], [], [], [], use_master, warnings, False)
     if 'windows' in bld.env.VALID_PLATFORMS:
@@ -462,9 +466,10 @@ def engine(bld, name, depends=[], features=[], platforms=[], path='', use_master
 @conf
 def game(bld, name, depends=[], features=[], platforms=[], path='', use_master=True, warnings=True):
     if not path: path=name
-    for p in platforms:
-        if p not in bld.env.VALID_PLATFORMS:
-            return None
+    if not bld.env.PROJECTS:
+        for p in platforms:
+            if p not in bld.env.VALID_PLATFORMS:
+                return None
     module(bld, name, path, depends, platforms,
         ['cxx', bld.env.STATIC and 'cxxobjects' or 'cxxshlib', 'plugin', 'game'],
         features, [], [], [], [], use_master, warnings, False)
@@ -482,6 +487,7 @@ def plugin(bld, name, depends=[], features=[], platforms=[], path='', use_master
 
 
 def build(bld):
+    bld.load('cpp_parser', tooldir=[os.path.join(bld.path.abspath(), 'tools')])
     bld.load('data', tooldir=[os.path.join(bld.path.abspath(), 'tools')])
     bld.load('kernel', tooldir=[os.path.join(bld.path.abspath(), 'tools')])
     bld.load('kernel_preprocess', tooldir=[os.path.join(bld.path.abspath(), 'tools')])

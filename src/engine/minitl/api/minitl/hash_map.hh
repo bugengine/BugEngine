@@ -58,6 +58,7 @@ public:
     hashmap(Allocator& allocator, u32 reserved = 0);
     ~hashmap();
     hashmap(const hashmap& other);
+    hashmap(Allocator& allocator, const hashmap& other);
     hashmap& operator=(const hashmap& other);
 
     void                    reserve(u32 size);

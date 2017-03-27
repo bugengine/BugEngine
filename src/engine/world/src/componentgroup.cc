@@ -30,8 +30,8 @@ static raw<const RTTI::Method::Overload> getMethodFromClass(raw<const RTTI::Clas
          overload;
          overload = overload->next)
     {
-        RTTI::Type componentType = RTTI::Type::makeType(type, RTTI::Type::Value, RTTI::Type::Mutable,
-                                            RTTI::Type::Mutable);
+        RTTI::Type componentType = RTTI::Type::makeType(type, RTTI::Type::Value,
+                                                        RTTI::Type::Mutable, RTTI::Type::Mutable);
         if (overload->parameterCount == 2
          && componentType.isA(overload->params->type)
          && be_typeid<World&>::type().isA(overload->params->next->type))
@@ -57,6 +57,10 @@ struct ComponentGroup::EntityOperation
         byte* buffer = reinterpret_cast<byte*>(this);
         return reinterpret_cast<EntityOperation*>(buffer + size);
     }
+    byte* components()
+    {
+        return reinterpret_cast<byte*>(this) + sizeof(EntityOperation);
+    }
 };
 
 struct ComponentGroup::EntityOperationRemove
@@ -79,6 +83,34 @@ struct ComponentGroup::OperationBuffer
         ,   m_used(i_u32::Zero)
         ,   m_data()
     {
+    }
+
+    EntityOperation* begin()    { return reinterpret_cast<EntityOperation*>(m_data); }
+    EntityOperation* end()      { return reinterpret_cast<EntityOperation*>(m_data + m_used); }
+
+    template< typename T >
+    void forEach(EntityOperation* first, T& transform)
+    {
+        for (EntityOperation* last = end(); first != last; first=first->next())
+        {
+            transform(this, first);
+        }
+        OperationBuffer* b = this;
+        for (OperationBuffer* next = b->m_next; next; next=next->m_next)
+        {
+            transform(b, next);
+            b = next;
+            for (EntityOperation* op = next->begin(), *last = next->end(); op != last; op = op->next())
+            {
+                transform(next, op);
+            }
+        }
+        transform(b, (OperationBuffer*)0);
+    }
+    template< typename T >
+    void forEach(T& transform)
+    {
+        return this->forEach(begin(), transform);
     }
 };
 
@@ -334,6 +366,178 @@ void ComponentGroup::copyComponents(weak<EntityStorage> storage, u32 owner, byte
     }
 }
 
+
+struct MergeOperation
+{
+    const ComponentGroup* owner;
+    ComponentGroup::EntityOperation* operation;
+    u32 maskBefore;
+    u32 maskAfter;
+    u32 maskChanged;
+    byte* componentBuffer;
+    u32* componentOffsets;
+
+    MergeOperation(const ComponentGroup* owner, ComponentGroup::EntityOperation* operation,
+                   byte* componentBuffer, u32* componentOffsets)
+        :   owner(owner)
+        ,   operation(operation)
+        ,   maskBefore(operation->maskBefore)
+        ,   maskAfter(operation->maskAfter)
+        ,   maskChanged(0)
+        ,   componentBuffer(componentBuffer)
+        ,   componentOffsets(componentOffsets)
+    {
+    }
+
+    void operator()(ComponentGroup::OperationBuffer* /*oldBuffer*/,
+                    ComponentGroup::OperationBuffer* /*newBuffer*/)
+    {
+    }
+
+    void operator()(ComponentGroup::OperationBuffer* /*buffer*/, ComponentGroup::EntityOperation* target)
+    {
+        if (target->owner == operation->owner)
+        {
+            be_assert(maskAfter == target->maskBefore,
+                      "incorrect sequence of operation");
+            u32 maskRemoved = maskBefore & ~maskAfter;
+            u32 maskAdded = target->maskAfter & ~maskAfter;
+            maskChanged &= ~(maskAfter & ~target->maskAfter);
+            maskChanged |= maskRemoved & maskAdded;
+            maskAfter = target->maskAfter;
+            target->owner = s_invalidEntity;
+            byte* componentsBuffer = target->components();
+            u32 maskComponents = target->maskAfter & ~target->maskBefore;
+            owner->unpackComponents(maskComponents, componentsBuffer,
+                                    componentBuffer, componentOffsets);
+        }
+    }
+};
+
+struct TryMergeOperation
+{
+    ComponentGroup* owner;
+    weak<EntityStorage> storage;
+    ComponentGroup::OperationDelta* deltas;
+    byte* componentBuffer;
+    u32* componentOffsets;
+    TryMergeOperation(ComponentGroup* owner, weak<EntityStorage> storage,
+                      ComponentGroup::OperationDelta deltas[],
+                      byte* componentBuffer, u32* componentOffsets)
+        :   owner(owner)
+        ,   storage(storage)
+        ,   deltas(deltas)
+        ,   componentBuffer(componentBuffer)
+        ,   componentOffsets(componentOffsets)
+    {
+    }
+
+    void operator()(ComponentGroup::OperationBuffer* oldBuffer,
+                    ComponentGroup::OperationBuffer* /*newBuffer*/)
+    {
+        oldBuffer->~OperationBuffer();
+        owner->m_allocator.free(oldBuffer);
+    }
+
+    void operator()(ComponentGroup::OperationBuffer* buffer,
+                    ComponentGroup::EntityOperation* operation)
+    {
+        if (operation->owner != s_invalidEntity)
+        {
+            typedef ComponentGroup::EntityOperation         EntityOperation;
+            typedef ComponentGroup::EntityOperationRemove   EntityOperationRemove;
+            Entity e = { operation->owner };
+            EntityInfo& info = storage->getEntityInfo(e);
+            owner->unpackComponents((operation->maskAfter & ~operation->maskBefore),
+                                    operation->components(),
+                                    componentBuffer, componentOffsets);
+            MergeOperation m(owner, operation, componentBuffer, componentOffsets);
+            buffer->forEach(operation->next(), m);
+
+            minitl::tuple<Bucket*, Bucket*> buckets = owner->findBuckets(m.maskBefore, m.maskAfter);
+            const u32 dummyOffset = be_checked_numcast<u32>(owner->m_buckets.end() - owner->m_buckets.begin());
+            if (buckets.first != buckets.second)
+            {
+                owner->copyComponents(storage, operation->owner, componentBuffer,
+                                      m.maskBefore & m.maskAfter & ~m.maskChanged,
+                                      componentOffsets);
+
+                if (buckets.first->acceptMask)
+                {
+                    void* memory = owner->allocOperation(sizeof(u32));
+                    EntityOperationRemove* removeOperation = new (memory) EntityOperationRemove;
+                    removeOperation->operation.owner = operation->owner;
+                    removeOperation->operation.maskBefore = be_checked_numcast<u32>(buckets.first - owner->m_buckets.begin());
+                    removeOperation->operation.maskAfter = dummyOffset;
+                    removeOperation->operation.size = sizeof(EntityOperationRemove);
+                    deltas[buckets.first - owner->m_buckets.begin()].removed++;
+                    u32 absoluteComponentIndex = owner->firstComponent + buckets.first->firstComponent;
+                    EntityInfo::BucketInfo& bucketInfo = info.buckets[absoluteComponentIndex];
+                    be_assert(bucketInfo.bucket == buckets.first - owner->m_buckets.begin(),
+                              "EntityInfo bucket does not match entity mask");
+                    removeOperation->componentIndex = bucketInfo.offset;
+                }
+
+                if (buckets.second->acceptMask)
+                {
+                    u32 extraSize = buckets.second->componentSize;
+                    EntityOperation* addOperation = new (owner->allocOperation(extraSize)) EntityOperation;
+                    addOperation->owner = operation->owner;
+                    addOperation->maskBefore = dummyOffset;
+                    addOperation->maskAfter = be_checked_numcast<u32>(buckets.second - owner->m_buckets.begin());
+                    addOperation->size = sizeof(EntityOperation) + extraSize;
+                    deltas[buckets.second - owner->m_buckets.begin()].added++;
+                    owner->packComponents(buckets.second->acceptMask, componentBuffer,
+                                          addOperation->components(), componentOffsets);
+                }
+            }
+
+            {
+                Bucket* componentBucket = owner->m_buckets.end() - owner->m_components.size() - 1;
+                u32 remainderMaskRemove = m.maskBefore & ~m.maskAfter & ~buckets.first->acceptMask;
+                u32 remainderMaskAdd = m.maskAfter & ~m.maskBefore & ~buckets.second->acceptMask;
+                u32 remainderMaskMoved = m.maskAfter & buckets.first->acceptMask & ~buckets.second->acceptMask;
+                for (u32 i = 0;
+                     remainderMaskRemove | remainderMaskAdd | remainderMaskMoved;
+                     remainderMaskRemove >>= 1, remainderMaskAdd >>= 1, remainderMaskMoved >>= 1,
+                     ++i, ++componentBucket)
+                {
+                    if (remainderMaskRemove & 1)
+                    {
+                        be_assert(componentBucket->acceptMask == (1u<<i),
+                                  "invalid component bucket for component %d" | i);
+                        void* memory = owner->allocOperation(sizeof(u32));
+                        EntityOperationRemove* removeOperation = new (memory) EntityOperationRemove;
+                        removeOperation->operation.owner = operation->owner;
+                        removeOperation->operation.maskBefore = be_checked_numcast<u32>(componentBucket - owner->m_buckets.begin());
+                        removeOperation->operation.maskAfter = dummyOffset;
+                        removeOperation->operation.size = sizeof(EntityOperation) + sizeof(u32);
+                        deltas[componentBucket - owner->m_buckets.begin()].removed++;
+                        u32 absoluteComponentIndex = owner->firstComponent + i;
+                        EntityInfo::BucketInfo& bucketInfo = info.buckets[absoluteComponentIndex];
+                        be_assert(bucketInfo.bucket == componentBucket - owner->m_buckets.begin(),
+                                  "EntityInfo bucket does not match entity mask");
+                        removeOperation->componentIndex = bucketInfo.offset;
+                    }
+                    if (remainderMaskAdd & 1 || remainderMaskMoved & 1)
+                    {
+                        be_assert(componentBucket->acceptMask == (1u<<i),
+                                  "invalid component bucket for component %d" | i);
+                        EntityOperation* addOperation = new (owner->allocOperation(owner->m_components[i].size)) EntityOperation;
+                        addOperation->owner = operation->owner;
+                        addOperation->maskBefore = dummyOffset;
+                        addOperation->maskAfter = be_checked_numcast<u32>(componentBucket - owner->m_buckets.begin());
+                        addOperation->size = sizeof(EntityOperation) + owner->m_components[i].size;
+                        owner->packComponents(componentBucket->acceptMask, componentBuffer,
+                                              addOperation->components(), componentOffsets);
+                        deltas[componentBucket - owner->m_buckets.begin()].added++;
+                    }
+                }
+            }
+        }
+    }
+};
+
 void ComponentGroup::groupEntityOperations(weak<EntityStorage> storage, OperationDelta deltas[])
 {
     OperationBuffer* oldBuffer = m_entityOperation;
@@ -345,159 +549,9 @@ void ComponentGroup::groupEntityOperations(weak<EntityStorage> storage, Operatio
     {
         componentOffsets[i] = o;
     }
-    for (OperationBuffer* buffer = oldBuffer; buffer; /* nothing */)
-    {
-        EntityOperation* last = (EntityOperation*)(buffer->m_data + buffer->m_used);
-        for (EntityOperation* operation = (EntityOperation*)buffer->m_data;
-             operation < last;
-             operation = operation->next())
-        {
-            if (operation->owner != s_invalidEntity)
-            {
-                Entity e = { operation->owner };
-                EntityInfo& info = storage->getEntityInfo(e);
-                u32 maskBefore = operation->maskBefore;
-                u32 maskAfter = operation->maskAfter;
-                u32 maskChanged = 0;
-                {
-                    byte* componentsBuffer = ((byte*)operation) + sizeof(EntityOperation);
-                    unpackComponents((maskAfter & ~maskBefore)|maskChanged, componentsBuffer,
-                                     componentBuffer.begin(), componentOffsets.begin());
-                }
-                for (EntityOperation* sibling = operation->next();
-                     sibling < last;
-                     sibling = sibling->next())
-                {
-                    if (sibling->owner == operation->owner)
-                    {
-                        be_assert(maskAfter == sibling->maskBefore,
-                                  "incorrect sequence of operation");
-                        u32 maskRemoved = maskBefore & ~maskAfter;
-                        u32 maskAdded = sibling->maskAfter & ~maskAfter;
-                        maskChanged &= ~(maskAfter & ~sibling->maskAfter);
-                        maskChanged |= maskRemoved & maskAdded;
-                        maskAfter = sibling->maskAfter;
-                        sibling->owner = s_invalidEntity;
-                        byte* componentsBuffer = (byte*)sibling + sizeof(EntityOperation);
-                        u32 maskComponents = sibling->maskAfter & ~sibling->maskBefore;
-                        unpackComponents(maskComponents, componentsBuffer,
-                                         componentBuffer.begin(), componentOffsets.begin());
-                    }
-                }
-                for (OperationBuffer* siblingBuffer = buffer->m_next;
-                     siblingBuffer;
-                     siblingBuffer = siblingBuffer->m_next)
-                {
-                    EntityOperation* lastOp = (EntityOperation*)(siblingBuffer->m_data + siblingBuffer->m_used);
-                    for (EntityOperation* sibling = (EntityOperation*)siblingBuffer->m_data;
-                         sibling < lastOp;
-                         sibling = sibling->next())
-                    {
-                        if (sibling->owner == operation->owner)
-                        {
-                            be_assert(maskAfter == sibling->maskBefore,
-                                      "incorrect sequence of operation");
-                            u32 maskRemoved = maskBefore & ~maskAfter;
-                            u32 maskAdded = sibling->maskAfter & ~maskAfter;
-                            maskChanged &= ~(maskAfter & ~sibling->maskAfter);
-                            maskChanged |= maskRemoved & maskAdded;
-                            maskAfter = sibling->maskAfter;
-                            sibling->owner = s_invalidEntity;
-                            byte* componentsBuffer = (byte*)sibling + sizeof(EntityOperation);
-                            u32 maskComponents = sibling->maskAfter & ~sibling->maskBefore;
-                            unpackComponents(maskComponents, componentsBuffer,
-                                             componentBuffer.begin(), componentOffsets.begin());
-                        }
-                    }
-                }
 
-                minitl::tuple<Bucket*, Bucket*> buckets = findBuckets(maskBefore, maskAfter);
-                const u32 dummyOffset = be_checked_numcast<u32>(m_buckets.end() - m_buckets.begin());
-                if (buckets.first != buckets.second)
-                {
-                    copyComponents(storage, operation->owner, componentBuffer.begin(),
-                                   maskBefore & maskAfter & ~maskChanged, componentOffsets.begin());
-
-                    if (buckets.first->acceptMask)
-                    {
-                        void* memory = allocOperation(sizeof(u32));
-                        EntityOperationRemove* removeOperation = new (memory) EntityOperationRemove;
-                        removeOperation->operation.owner = operation->owner;
-                        removeOperation->operation.maskBefore = be_checked_numcast<u32>(buckets.first - m_buckets.begin());
-                        removeOperation->operation.maskAfter = dummyOffset;
-                        removeOperation->operation.size = sizeof(EntityOperationRemove);
-                        deltas[buckets.first - m_buckets.begin()].removed++;
-                        u32 absoluteComponentIndex = firstComponent + buckets.first->firstComponent;
-                        EntityInfo::BucketInfo& bucketInfo = info.buckets[absoluteComponentIndex];
-                        be_assert(bucketInfo.bucket == buckets.first - m_buckets.begin(),
-                                  "EntityInfo bucket does not match entity mask");
-                        removeOperation->componentIndex = bucketInfo.offset;
-                    }
-
-                    if (buckets.second->acceptMask)
-                    {
-                        u32 extraSize = buckets.second->componentSize;
-                        EntityOperation* addOperation = new (allocOperation(extraSize)) EntityOperation;
-                        addOperation->owner = operation->owner;
-                        addOperation->maskBefore = dummyOffset;
-                        addOperation->maskAfter = be_checked_numcast<u32>(buckets.second - m_buckets.begin());
-                        addOperation->size = sizeof(EntityOperation) + extraSize;
-                        deltas[buckets.second - m_buckets.begin()].added++;
-                        packComponents(buckets.second->acceptMask, componentBuffer.begin(),
-                                       (byte*)addOperation + sizeof(EntityOperation), componentOffsets);
-                    }
-                }
-
-                {
-                    Bucket* componentBucket = m_buckets.end() - m_components.size() - 1;
-                    u32 remainderMaskRemove = maskBefore & ~maskAfter & ~buckets.first->acceptMask;
-                    u32 remainderMaskAdd = maskAfter & ~maskBefore & ~buckets.second->acceptMask;
-                    u32 remainderMaskMoved = maskAfter & buckets.first->acceptMask & ~buckets.second->acceptMask;
-                    for (u32 i = 0;
-                         remainderMaskRemove | remainderMaskAdd | remainderMaskMoved;
-                         remainderMaskRemove >>= 1, remainderMaskAdd >>= 1, remainderMaskMoved >>= 1,
-                         ++i, ++componentBucket)
-                    {
-                        if (remainderMaskRemove & 1)
-                        {
-                            be_assert(componentBucket->acceptMask == (1u<<i),
-                                      "invalid component bucket for component %d" | i);
-                            void* memory = allocOperation(sizeof(u32));
-                            EntityOperationRemove* removeOperation = new (memory) EntityOperationRemove;
-                            removeOperation->operation.owner = operation->owner;
-                            removeOperation->operation.maskBefore = be_checked_numcast<u32>(componentBucket - m_buckets.begin());
-                            removeOperation->operation.maskAfter = dummyOffset;
-                            removeOperation->operation.size = sizeof(EntityOperation) + sizeof(u32);
-                            deltas[componentBucket - m_buckets.begin()].removed++;
-                            u32 absoluteComponentIndex = firstComponent + i;
-                            EntityInfo::BucketInfo& bucketInfo = info.buckets[absoluteComponentIndex];
-                            be_assert(bucketInfo.bucket == componentBucket - m_buckets.begin(),
-                                      "EntityInfo bucket does not match entity mask");
-                            removeOperation->componentIndex = bucketInfo.offset;
-                        }
-                        if (remainderMaskAdd & 1 || remainderMaskMoved & 1)
-                        {
-                            be_assert(componentBucket->acceptMask == (1u<<i),
-                                      "invalid component bucket for component %d" | i);
-                            EntityOperation* addOperation = new (allocOperation(m_components[i].size)) EntityOperation;
-                            addOperation->owner = operation->owner;
-                            addOperation->maskBefore = dummyOffset;
-                            addOperation->maskAfter = be_checked_numcast<u32>(componentBucket - m_buckets.begin());
-                            addOperation->size = sizeof(EntityOperation) + m_components[i].size;
-                            packComponents(componentBucket->acceptMask, componentBuffer.begin(),
-                                           (byte*)addOperation + sizeof(EntityOperation),
-                                           componentOffsets);
-                            deltas[componentBucket - m_buckets.begin()].added++;
-                        }
-                    }
-                }
-            }
-        }
-        OperationBuffer* next = buffer->m_next;
-        buffer->~OperationBuffer();
-        m_allocator.free(buffer);
-        buffer = next;
-    }
+    TryMergeOperation merge(this, storage, deltas, componentBuffer.begin(), componentOffsets.begin());
+    oldBuffer->forEach(merge);
 }
 
 ComponentGroup::OperationBuffer* ComponentGroup::sortEntityOperations(OperationDelta deltas[])
@@ -1096,13 +1150,12 @@ void ComponentGroup::addComponent(Entity e, u32 originalMask,
 {
     const ComponentInfo& info = m_components[componentIndex];
     byte* operationBuffer = allocOperation(info.size);
-    byte* componentBuffer = operationBuffer + sizeof(EntityOperation);
     EntityOperation* operation = reinterpret_cast<EntityOperation*>(operationBuffer);
     operation->owner = e.id;
     operation->maskBefore = originalMask;
     operation->maskAfter = originalMask | (1 << componentIndex);
     operation->size = static_cast<u32>(sizeof(EntityOperation) + info.size);
-    memcpy(componentBuffer, &c, info.size);
+    memcpy(operation->components(), &c, info.size);
 }
 
 void ComponentGroup::removeComponent(Entity e, u32 originalMask, u32 componentIndex)
