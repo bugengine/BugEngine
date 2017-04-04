@@ -2,7 +2,7 @@ VERSION = "0.2.0"
 APPNAME = "BugEngine"
 
 top = '.'
-out = '.build/waf'
+out = 'bld/.waf'
 
 def options(opt):
     opt.recurse('mak')
