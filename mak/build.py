@@ -107,7 +107,7 @@ class install_task(Task.Task):
 
 
 
-for command in ['build', 'clean', 'install']:
+for command in ['build', 'clean']:
     class BuildWrapperAll(Build.BuildContext):
         cmd = '%s:all'%command
         def execute(self):

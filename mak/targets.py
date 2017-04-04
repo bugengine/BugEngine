@@ -56,7 +56,7 @@ class Platform:
             return None
         else:
             conf.end_msg(' ')
-            v.PREFIX = os.path.join('build', toolchain)
+            v.PREFIX = os.path.join('bld', toolchain)
             conf.variant = ''
             for c in sub_compilers:
                 t = self.add_toolchain(conf, c, add=False)
@@ -72,7 +72,7 @@ class Platform:
         e = self.env
         e.TOOLCHAIN=toolchain
         e.DEFINES.append('BE_PLATFORM=platform_%s'%e.VALID_PLATFORMS[0])
-        e.PREFIX = os.path.join('build', toolchain)
+        e.PREFIX = os.path.join('bld', toolchain)
         if e.STATIC:
             e.DEFINES.append('BE_STATIC=1')
         for optim in self.env.ALL_VARIANTS:
@@ -118,7 +118,7 @@ def configure(conf):
             pprint('BLUE', ' + configuring for platform %s' % p.NAME)
             for main_toolchain, sub_toolchains, platform in configuration_list:
                 platform.add_toolchain(conf, main_toolchain, sub_toolchains)
-    conf.env.store('.build/be_toolchains.py')
+    conf.env.store('.waf_toolchains.py')
 
 
 def build(bld):
@@ -138,7 +138,7 @@ def plugins(bld):
 
 from waflib import ConfigSet
 try:
-    env = ConfigSet.ConfigSet('.build/be_toolchains.py')
+    env = ConfigSet.ConfigSet('.waf_toolchains.py')
     for toolchain in env.ALL_TOOLCHAINS:
         for optim in env.ALL_VARIANTS:
             add_build_command(toolchain, optim)
