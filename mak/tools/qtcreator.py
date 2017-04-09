@@ -26,6 +26,11 @@ if sys.hexversion >= 0x3000000:
 
 VAR_PATTERN = '${%s}' if sys.platform != 'win32' else '%%%s%%'
 
+IGNORE_PATTERNS=[
+    re.compile('.*\.pyc'),
+    re.compile('.*__pycache__.*'),
+]
+
 
 def _hexdigest(s):
     """Return a string as a string of hex characters.
@@ -923,7 +928,7 @@ class QtCreator(Build.BuildContext):
                                     ('ProjectExplorer.CustomExecutableRunConfiguration.UseTerminal', False),
                                     ('ProjectExplorer.CustomExecutableRunConfiguration.WorkingDirectory', to_var('OUT_DIR')),
                                     ('ProjectExplorer.ProjectConfiguration.DefaultDisplayName', 'Run %s' % task_gen.target),
-                                    ('ProjectExplorer.ProjectConfiguration.DisplayName', task_gen.target),
+                                    ('ProjectExplorer.ProjectConfiguration.DisplayName', '%s:%s'%(self.launcher[0][0].target, task_gen.name)),
                                     ('ProjectExplorer.ProjectConfiguration.Id', 'ProjectExplorer.CustomExecutableRunConfiguration'),
                                     ('RunConfiguration.QmlDebugServerPort', 3768),
                                     ('RunConfiguration.UseCppDebugger', True),
@@ -960,7 +965,7 @@ class QtCreator(Build.BuildContext):
                                     ('ProjectExplorer.CustomExecutableRunConfiguration.Executable', sys.executable),
                                     ('ProjectExplorer.CustomExecutableRunConfiguration.UseTerminal', True),
                                     ('ProjectExplorer.CustomExecutableRunConfiguration.WorkingDirectory', to_var('RUNBIN_DIR')),
-                                    ('ProjectExplorer.ProjectConfiguration.DefaultDisplayName', 'Run %s' % task_gen.target),
+                                    ('ProjectExplorer.ProjectConfiguration.DefaultDisplayName', 'python:%s' % task_gen.target),
                                     ('ProjectExplorer.ProjectConfiguration.DisplayName', ''),
                                     ('ProjectExplorer.ProjectConfiguration.Id', 'ProjectExplorer.CustomExecutableRunConfiguration'),
                                     ('RunConfiguration.QmlDebugServerPort', 3768),
@@ -1133,8 +1138,12 @@ class Qbs(QtCreator):
                 project_file.write('%s    files: [\n' % indent)
                 for source_node in getattr(p, 'source_nodes', []):
                     for node in source_node.ant_glob('**'):
-                        node_path = node.path_from(self.srcnode).replace('\\', '/')
-                        project_file.write('%s        "%s",\n' % (indent, node_path))
+                        for r in IGNORE_PATTERNS:
+                            if r.match(node.abspath()):
+                                break
+                        else:
+                            node_path = node.path_from(self.srcnode).replace('\\', '/')
+                            project_file.write('%s        "%s",\n' % (indent, node_path))
                 project_file.write('%s    ]\n' % indent)
                 project_file.write('%s}\n' % indent)
 
