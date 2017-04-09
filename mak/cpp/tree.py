@@ -110,7 +110,10 @@ class Method(CppObject):
             return self.name
 
     def trampoline_name(self, owner):
-        return 'trampoline_%s_%s_%d' % (owner.name[-1], self.name, self.index)
+        if owner.name:
+            return 'trampoline_%s_%s_%d' % (owner.name[-1], self.name, self.index)
+        else:
+            return 'trampoline_%s_%d' % (self.name, self.index)
 
     def extra_params(self, owner, struct_owner):
         return []

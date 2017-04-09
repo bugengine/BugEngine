@@ -176,9 +176,10 @@ def build(bld):
     bld.plugin('tool.bugeditor.ui',
                ['engine.bugengine', '3rdparty.scintilla'],
                platforms=['pc'])
-    bld.game('tool.bugeditor.main',
-             ['engine.bugengine', 'game.bugeditor.ui',
+    bld.game('bugeditor',
+             ['engine.bugengine', 'tool.bugeditor.ui',
               'plugin.scripting.package'],
+             path='tool.bugeditor.main',
              platforms=['pc'])
 
     bld.game('sample.kernel',
