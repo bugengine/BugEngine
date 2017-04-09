@@ -22,7 +22,7 @@ static raw<const RTTI::Method::Overload> findMatch(DbContext& context,
                                                    const minitl::vector<Parameter>& parameters)
 {
     be_forceuse(context);
-    raw<const RTTI::Method::Overload> result;
+    raw<const RTTI::Method::Overload> result = {0};
     for (raw<const RTTI::Method::Overload> o = m->overloads; o; o = o->next)
     {
         ParameterMatch* matches = (ParameterMatch*)malloca(o->parameterCount * sizeof(ParameterMatch));
