@@ -145,3 +145,14 @@ def autoreconfigure(execute_method):
         return execute_method(self)
     return execute
 Build.BuildContext.execute = autoreconfigure(Build.BuildContext.execute)
+
+
+class ListToolchainsContext(Build.BuildContext):
+    cmd = 'list_toolchains'
+    def execute(self):
+        self.restore()
+        if not self.all_envs:
+            self.load_envs()
+        for t in self.env.ALL_TOOLCHAINS:
+            for v in self.env.ALL_VARIANTS:
+                print('%s:%s' % (t, v))
