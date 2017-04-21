@@ -110,7 +110,10 @@ class Method(CppObject):
             return self.name
 
     def trampoline_name(self, owner):
-        return 'trampoline_%s_%s_%d' % (owner.name[-1], self.name, self.index)
+        if owner.name:
+            return 'trampoline_%s_%s_%d' % (owner.name[-1], self.name, self.index)
+        else:
+            return 'trampoline_%s_%d' % (self.name, self.index)
 
     def extra_params(self, owner, struct_owner):
         return []
@@ -145,8 +148,12 @@ class Method(CppObject):
         if struct_owner:
             struct_owner.typedef(definition)
         if self.return_type != 'void':
-            definition.write('    return ::BugEngine::RTTI::Value(%s);\n'
-                             '}\n' % self.call(owner, struct_owner))
+            if self.return_type[-1] == '&':
+                definition.write('    return ::BugEngine::RTTI::Value(::BugEngine::RTTI::Value::ByRef(%s));\n'
+                                 '}\n' % self.call(owner, struct_owner))
+            else:
+                definition.write('    return ::BugEngine::RTTI::Value(%s);\n'
+                                 '}\n' % self.call(owner, struct_owner))
         else:
             definition.write('    %s;\n'
                              '    return ::BugEngine::RTTI::Value();\n'
@@ -600,7 +607,7 @@ class Class(Container):
             else:
                 classtype = '0'
         definition.write('    static ::BugEngine::RTTI::Class cls = {\n'
-                         '        ::BugEngine::istring("%s"),\n'
+                         '        ::BugEngine::be_typeid< %s >::name(),\n'
                          '        {%s.m_ptr},\n'
                          '        {%s.m_ptr},\n'
                          '        u32(sizeof(%s)),\n'
@@ -616,7 +623,7 @@ class Class(Container):
                          '        %s};\n'
                          '    raw< ::BugEngine::RTTI::Class > result = { &cls };\n'
                          '    return result;\n'
-                         '}\n'% (self.name[-1], owner.owner_name(), parent, self.cpp_name(),
+                         '}\n'% (self.cpp_name(), owner.owner_name(), parent, self.cpp_name(),
                                  offset, classtype, tag, copy, destructor))
         definition.write('raw< const ::BugEngine::RTTI::Class > properties_%s()\n'
                          '{\n' % self.name[-1])
@@ -672,6 +679,13 @@ class Class(Container):
                        '    return %s::properties_%s();\n'
                        '}\n'
                        '\n' % (self.cpp_name(), '::'.join(namespace), self.name[-1]))
+        instance.write('template< >\n'
+                       'BE_EXPORT istring be_typeid< %s >::name()\n'
+                       '{\n'
+                       '    static const istring s_name = "%s";\n'
+                       '    return s_name;\n'
+                       '}\n'
+                       '\n' % (self.cpp_name(), self.name[-1]))
 
     def write_object(self, owner, struct_owner, namespace, object_name, definition, instance):
         for alias, alias_cpp in self.all_names():
@@ -785,6 +799,8 @@ class Root(Container):
         definition.write('#include <rtti/engine/objectinfo.script.hh>\n')
         definition.write('#include <rtti/engine/propertyinfo.script.hh>\n')
         definition.write('#include <rtti/engine/array.hh>\n')
+        definition.write('#include <rtti/engine/map.hh>\n')
+        definition.write('#include <rtti/engine/tuple.hh>\n')
         definition.write('#include <rtti/engine/taginfo.script.hh>\n')
         definition.write('#include <rtti/engine/helper/method.hh>\n')
         definition.write('#include <rtti/engine/helper/get.hh>\n')

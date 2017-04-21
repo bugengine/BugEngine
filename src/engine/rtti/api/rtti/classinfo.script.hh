@@ -110,6 +110,7 @@ published:
 
     raw<const Property> getProperty(istring propertyName) const;
     raw<const Method> getMethod(istring methodName) const;
+    raw<const ObjectInfo> getStaticProperty(istring propertyName) const;
     static Value findClass(inamespace name);
 public:
     typedef void(*EnumerateCallback)(const Value& v);

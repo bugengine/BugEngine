@@ -35,7 +35,6 @@ def configure(conf):
             conf.recurse(extra.make_node(e).abspath(), name='host_configure')
     conf.load('flex', tooldir=[os.path.join(conf.path.abspath(), 'tools')])
     conf.load('bison', tooldir=[os.path.join(conf.path.abspath(), 'tools')])
-    conf.load('kernel_preprocess', tooldir=[os.path.join(conf.path.abspath(), 'tools')])
     conf.recurse('compilers.py')
     conf.recurse('targets.py')
     conf.env.ALL_TOOLCHAINS.sort(key = lambda x: x.split('-'))
@@ -152,3 +151,14 @@ def autoreconfigure(execute_method):
         return execute_method(self)
     return execute
 Build.BuildContext.execute = autoreconfigure(Build.BuildContext.execute)
+
+
+class ListToolchainsContext(Build.BuildContext):
+    cmd = 'list_toolchains'
+    def execute(self):
+        self.restore()
+        if not self.all_envs:
+            self.load_envs()
+        for t in self.env.ALL_TOOLCHAINS:
+            for v in self.env.ALL_VARIANTS:
+                print('%s:%s' % (t, v))

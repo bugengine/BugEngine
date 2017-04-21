@@ -54,6 +54,7 @@ struct be_typeid< minitl::array<T> >
 {
     static const RTTI::Type value_type;
     static inline raw<RTTI::Class> preklass();
+    static inline istring name();
     static inline raw<const RTTI::Class> klass();
     static inline RTTI::Type  type();
 private:
@@ -68,7 +69,7 @@ template< typename T >
 raw<RTTI::Class> be_typeid< minitl::array<T> >::preklass()
 {
     static RTTI::Class klass = {
-        istring(minitl::format<512u>("array<%s>") | be_typeid<T>::type().name()),
+        name(),
         {be_game_Namespace().m_ptr},
         {be_typeid< void >::preklass().m_ptr},
         0, 0, RTTI::ClassType_Array, {0}, {0},
@@ -190,12 +191,21 @@ raw<const RTTI::Class> be_typeid< minitl::array<T> >::registerProperties()
         1,
         {&index_overload1}
     };
-    result->constructor.set(&constructor);
-    result->objects.set(&valueTypeObject);
-    result->methods.set(&index_method);
+    static const RTTI::Method* constructors = result->constructor.set(&constructor);
+    be_forceuse(constructors);
+    static const RTTI::ObjectInfo* objects = result->objects.set(&valueTypeObject);
+    be_forceuse(objects);
+    static const RTTI::Method* methods = result->methods.set(&index_method);
+    be_forceuse(methods);
     return result;
 }
 
+template< typename T >
+istring be_typeid< minitl::array<T> >::name()
+{
+    static istring s_name(minitl::format<512u>("array<%s>") | be_typeid<T>::name());
+    return s_name;
+}
 template< typename T >
 raw<const RTTI::Class> be_typeid< minitl::array<T> >::klass()
 {

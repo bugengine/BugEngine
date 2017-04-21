@@ -90,7 +90,7 @@ def check_lib(self, libname, var='', libpath=[], includepath=[], includes=[], fu
             includepath=includepath,
             use=['debug'],
             envname=self.env.TOOLCHAIN)
-    except self.errors.ConfigurationError:
+    except self.errors.ConfigurationError as e:
         #Logs.pprint('YELLOW', '-%s' % var, sep=' ')
         pass
     else:
@@ -245,12 +245,12 @@ def run_pkg_config(conf, name):
             if pos != -1:
                 var_name = line[:pos].strip()
                 value = line[pos+1:].strip()
-                value = value.replace('${', '{')
-                value = value.format(value, **expand)
                 if value[0] == '"' and value[-1] == '"':
                     value = value[1:-1]
-                if var_name == 'prefix':
+                if sysroot and value[0] == '/':
                     value = os.path.join(sysroot, value[1:])
+                value = value.replace('${', '{')
+                value = value.format(value, **expand)
                 expand[var_name] = value
                 continue
             pos = line.find(':')
@@ -272,7 +272,8 @@ def pkg_config(conf, name, var=''):
     cflags, libs, ldflags = conf.run_pkg_config(name)
     conf.env['CFLAGS_%s'%var] = cflags
     conf.env['CXXFLAGS_%s'%var] = cflags
-    conf.env['LINKFLAGS_%s'%var] = [conf.env.LIB_ST % l for l in libs] + ldflags
+    conf.env['LINKFLAGS_%s'%var] = ldflags
+    conf.env['LIB_%s'%var] = libs
 
 
 def configure(conf):

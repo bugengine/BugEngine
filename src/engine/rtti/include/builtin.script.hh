@@ -6,6 +6,8 @@
 /**************************************************************************************************/
 #include    <rtti/stdafx.h>
 #include    <rtti/classinfo.script.hh>
+#include    <rtti/builtin.hh>
+
 
 #if 0
 
@@ -13,12 +15,14 @@ namespace BugEngine
 {
 
 
-be_tag(Index(BugEngine::RTTI::ClassType_String + (0 << 16)))
+be_tag(Index(BugEngine::RTTI::ClassType_String
+          + (BugEngine::RTTI::ClassIndex_istring << 16)))
 struct istring
 {
 };
 
-be_tag(Index(BugEngine::RTTI::ClassType_String + (1 << 16)))
+be_tag(Index(BugEngine::RTTI::ClassType_String
+          + (BugEngine::RTTI::ClassIndex_inamespace << 16)))
 struct inamespace
 {
 published:
@@ -30,7 +34,8 @@ published:
     istring pop_front();
 };
 
-be_tag(Index(BugEngine::RTTI::ClassType_String + (2 << 16)))
+be_tag(Index(BugEngine::RTTI::ClassType_String
+          + (BugEngine::RTTI::ClassIndex_ifilename << 16)))
 struct ifilename
 {
 published:
@@ -42,7 +47,8 @@ published:
     istring pop_front();
 };
 
-be_tag(Index(BugEngine::RTTI::ClassType_String + (3 << 16)))
+be_tag(Index(BugEngine::RTTI::ClassType_String
+          + (BugEngine::RTTI::ClassIndex_ipath << 16)))
 struct ipath
 {
 published:
@@ -52,6 +58,14 @@ published:
     void push_back(const istring& component);
     istring pop_back();
     istring pop_front();
+};
+
+be_tag(Index(BugEngine::RTTI::ClassType_String
+          + (BugEngine::RTTI::ClassIndex_text << 16)))
+struct text
+{
+published:
+    u32 length() const;
 };
 
 }
@@ -67,58 +81,69 @@ struct Value
 }}
 
 
-be_tag(Index(BugEngine::RTTI::ClassType_Number))
+be_tag(Index(BugEngine::RTTI::ClassType_Number
+          + (BugEngine::RTTI::ClassIndex_bool << 16)))
 be_pod bool
 {
 };
 
-be_tag(Index(BugEngine::RTTI::ClassType_Number + (1 << 16)))
+be_tag(Index(BugEngine::RTTI::ClassType_Number
+          + (BugEngine::RTTI::ClassIndex_u8 << 16)))
 be_pod u8
 {
 };
 
-be_tag(Index(BugEngine::RTTI::ClassType_Number + (2 << 16)))
+be_tag(Index(BugEngine::RTTI::ClassType_Number
+          + (BugEngine::RTTI::ClassIndex_u16 << 16)))
 be_pod u16
 {
 };
 
-be_tag(Index(BugEngine::RTTI::ClassType_Number + (3 << 16)))
+be_tag(Index(BugEngine::RTTI::ClassType_Number
+          + (BugEngine::RTTI::ClassIndex_u32 << 16)))
 be_pod u32
 {
 };
 
-be_tag(Index(BugEngine::RTTI::ClassType_Number + (4 << 16)))
+be_tag(Index(BugEngine::RTTI::ClassType_Number
+          + (BugEngine::RTTI::ClassIndex_u64 << 16)))
 be_pod u64
 {
 };
 
 
-be_tag(Index(BugEngine::RTTI::ClassType_Number + (5 << 16)))
+be_tag(Index(BugEngine::RTTI::ClassType_Number
+          + (BugEngine::RTTI::ClassIndex_i8 << 16)))
 be_pod i8
 {
 };
 
-be_tag(Index(BugEngine::RTTI::ClassType_Number + (6 << 16)))
+be_tag(Index(BugEngine::RTTI::ClassType_Number
+          + (BugEngine::RTTI::ClassIndex_i16 << 16)))
 be_pod i16
 {
 };
 
-be_tag(Index(BugEngine::RTTI::ClassType_Number + (7 << 16)))
+be_tag(Index(BugEngine::RTTI::ClassType_Number
+          + (BugEngine::RTTI::ClassIndex_i32 << 16)))
 be_pod i32
 {
 };
 
-be_tag(Index(BugEngine::RTTI::ClassType_Number + (8 << 16)))
+be_tag(Index(BugEngine::RTTI::ClassType_Number
+          + (BugEngine::RTTI::ClassIndex_i64 << 16)))
 be_pod i64
 {
 };
 
-be_tag(Index(BugEngine::RTTI::ClassType_Number + (9 << 16)))
+be_tag(Index(BugEngine::RTTI::ClassType_Number
+          + (BugEngine::RTTI::ClassIndex_float << 16)))
 be_pod float
 {
 };
 
-be_tag(Index(BugEngine::RTTI::ClassType_Number + (10 << 16)))
+be_tag(Index(BugEngine::RTTI::ClassType_Number
+          + (BugEngine::RTTI::ClassIndex_double << 16)))
 be_pod double
 {
 };

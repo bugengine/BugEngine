@@ -10,6 +10,7 @@
 namespace BugEngine { namespace Lua
 {
 
+int get(lua_State *state, int index, const RTTI::Type& type, RTTI::Value* value);
 int call(lua_State* state, raw<const RTTI::Method> method);
 
 }}

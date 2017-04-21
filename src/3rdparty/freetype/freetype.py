@@ -15,4 +15,4 @@ def setup(conf):
             conf.env.SYSTEM_FREETYPE = True
             pprint('GREEN', '+freetype', sep=' ')
     else:
-        pprint('GREEN', '+freetype', sep=' ')
+        pprint('BLUE', '=freetype', sep=' ')

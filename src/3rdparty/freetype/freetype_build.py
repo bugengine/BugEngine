@@ -1,5 +1,5 @@
 def build(bld):
-    if not bld.env.SYSTEM_FREETYPE:
+    if not bld.env.SYSTEM_FREETYPE or bld.env.PROJECTS:
         defines = ['FT2_BUILD_LIBRARY=1',
                    'FT_CONFIG_OPTION_SYSTEM_ZLIB=1',
                    'FT_CONFIG_OPTION_NO_ASSEMBLER']
