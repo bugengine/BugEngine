@@ -16,7 +16,7 @@ def check_python_test(self):
 @conf
 def python_config(conf, version, var=''):
     version_number = version.replace('.', '')
-    if not var: var = '3rdparty.python%s'%(version_number)
+    if not var: var = 'python%s'%(version_number)
     if 'posix' in conf.env.VALID_PLATFORMS:
         try:
             cflags, libs, ldflags = conf.run_pkg_config('python-%s'%version)
@@ -24,8 +24,6 @@ def python_config(conf, version, var=''):
             cflags = ['-I/usr/include/python%s'%version]
             ldflags=[]
             libs = ['python%s'%version]
-        conf.env['CFLAGS_%s'%var] = cflags
-        conf.env['CXXFLAGS_%s'%var] = cflags
         conf.check(
             compile_filename=[],
             features='check_python',
@@ -38,10 +36,15 @@ def python_config(conf, version, var=''):
                 #include <Python.h>
                 int main() { Py_Initialize(); return 0; }
             """)
+        conf.env['check_%s' % var] = True
+        conf.env.append_unique('check_%s_cflags' % var, cflags)
+        conf.env.append_unique('check_%s_cxxflags' % var, cflags)
+        conf.env.append_unique('check_%s_ldflags' % var, ldflags)
+        conf.env.append_unique('check_%s_libs' % var, libs)
         for lib in libs:
             if lib.startswith('python'):
                 lib_name = lib
-        conf.env['DEFINES_%s'%var] = ['PYTHON_LIBRARY="%s"'%lib_name]
+        conf.env.append_unique('check_%s_defines' % var, ['PYTHON_LIBRARY="%s"'%lib_name])
     elif 'macosx' in conf.env.VALID_PLATFORMS:
         conf.recurse('../python%s/python%s.py' % (version_number, version_number), name='setup_python', once=False)
     elif 'windows' in conf.env.VALID_PLATFORMS:
@@ -56,7 +59,7 @@ def options(opt):
                   action='store',
                   dest='python_versions',
                   help='List of Python version to support in plugins',
-                  default='2.5,2.6,2.7,3.0,3.1,3.2,3.3,3.4,3.5')
+                  default='2.6,2.7,3.0,3.1,3.2,3.3,3.4,3.5,3.6')
 
 
 def setup(conf):

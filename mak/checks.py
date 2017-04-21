@@ -14,8 +14,7 @@ __declspec(dllexport) int be_test()
 #endif
 int main(int argc, char *argv[])
 {
-    (void)%(function)s;
-    return 0;
+    return *(%(function)s);
 }
 """
 
@@ -70,14 +69,14 @@ def check_lib(self, libname, var='', libpath=[], includepath=[], includes=[], fu
         else:
             return string
     libname = Utils.to_list(libname)
-    if not var: var = libname[0]
-    if self.env[var]:
+    if not var: var = self.path.name
+    if self.env['%s_libs' % var]:
         return
     try:
         if functions:
-            functions =  '+'.join(['%s'%f for f in functions])
+            functions =  ' + '.join(['(int*)(&%s)'%f for f in functions])
         else:
-            functions = '0'
+            functions = '(int*)0'
         self.check(
             compile_filename=[],
             features='link_library',
@@ -95,10 +94,13 @@ def check_lib(self, libname, var='', libpath=[], includepath=[], includes=[], fu
         #Logs.pprint('YELLOW', '-%s' % var, sep=' ')
         pass
     else:
-        self.env[var] = libname
+        self.env['check_%s' % var] = True
+        self.env.append_unique('check_%s_libs' % var, libname)
+        self.env.append_unique('check_%s_libpath' % var, libpath)
+        self.env.append_unique('check_%s_includes' % var, includepath)
         Logs.pprint('GREEN', '+%s' % var, sep=' ')
 
-    return self.env[var]
+    return self.env['%s_libs' % var]
 
 
 @conf
@@ -109,9 +111,7 @@ def check_header(self, headername, var='', libpath=[], includepath=[], code=USE_
         else:
             return string
     headername = Utils.to_list(headername)
-    if not var: var = os.path.splitext(headername[0])[0]
-    if self.env[var]:
-        return
+    if not var: var = self.path.name
     try:
         self.check(
             compile_filename=[],
@@ -126,8 +126,10 @@ def check_header(self, headername, var='', libpath=[], includepath=[], code=USE_
     except self.errors.ConfigurationError as e:
         pass
     else:
-        self.env[var] = headername
-    return self.env[var]
+        self.env['check_%s' % var] = True
+        self.env.append_unique('check_%s_includes' % var, includepath)
+        self.env.append_unique('check_%s_libpath' % var, libpath)
+    return self.env['%s_includess' % var]
 
 
 @conf
@@ -138,14 +140,12 @@ def check_framework(self, frameworks, var='', libpath=[], includepath=[], includ
         else:
             return string
     frameworks = Utils.to_list(frameworks)
-    if not var: var = os.path.splitext(frameworks[0])[0]
-    if self.env[var]:
-        return
+    if not var: var = self.path.name
     try:
         if functions:
-            functions =  '+'.join(['(char*)&%s'%f for f in functions])
+            functions =  ' + '.join(['(int*)(&%s)'%f for f in functions])
         else:
-            functions = '0'
+            functions = '(int*)0'
         self.check(
             compile_filename=[],
             features='link_framework',
@@ -166,10 +166,13 @@ def check_framework(self, frameworks, var='', libpath=[], includepath=[], includ
         #Logs.pprint('YELLOW', '-%s' % var, sep=' ')
         pass
     else:
-        self.env[var] = frameworks
+        self.env['check_%s' % var] = True
+        self.env.append_unique('check_%s_frameworks' % var, frameworks)
+        self.env.append_unique('check_%s_includes' % var, includepath)
+        self.env.append_unique('check_%s_libpath' % var, libpath)
         self.env.append_unique('XCODE_FRAMEWORKS', frameworks)
         Logs.pprint('GREEN', '+%s' % var, sep=' ')
-    return self.env[var]
+    return self.env['%s_frameworks' % var]
 
 
 @conf
@@ -265,7 +268,7 @@ def run_pkg_config(conf, name):
 
 @conf
 def pkg_config(conf, name, var=''):
-    if not var: var = name
+    if not var: var = self.path.name
     cflags, libs, ldflags = conf.run_pkg_config(name)
     conf.env['CFLAGS_%s'%var] = cflags
     conf.env['CXXFLAGS_%s'%var] = cflags

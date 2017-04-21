@@ -83,7 +83,7 @@ def detect_clang(conf):
                         if os.path.isdir(b):
                             libdirs.append(b)
 
-    seen=set([])
+    seen = {}
     for path in libdirs+bindirs:
         clang =  conf.detect_executable('clang', path_list=[path])
         clangxx = conf.detect_executable('clang++', path_list=[path])
@@ -91,19 +91,21 @@ def detect_clang(conf):
             clang = os.path.normpath(clang)
             clangxx = os.path.normpath(clangxx)
             c = Clang(clang, clangxx)
-            if c.name() in seen:
-                continue
             if not c.is_valid(conf):
                 continue
-            seen.add(c.name())
-            conf.compilers.append(c)
+            try:
+                seen[c.name()].add_sibling(c)
+            except KeyError:
+                seen[c.name()] = c
+                conf.compilers.append(c)
             for multilib_compiler in c.get_multilib_compilers():
-                if multilib_compiler.name() in seen:
-                    continue
                 if not multilib_compiler.is_valid(conf):
                     continue
-                seen.add(multilib_compiler.name())
-                conf.compilers.append(multilib_compiler)
+                try:
+                    seen[multilib_compiler.name()].add_sibling(multilib_compiler)
+                except KeyError:
+                    seen[multilib_compiler.name()] = multilib_compiler
+                    conf.compilers.append(multilib_compiler)
 
 
 def options(opt):

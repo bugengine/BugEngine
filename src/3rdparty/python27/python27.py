@@ -9,9 +9,11 @@ def setup(conf):
 
 def setup_python(conf):
     if 'windows' in conf.env.VALID_PLATFORMS:
-        pass
+        conf.env.check_python27 = True
+        conf.env.check_python27_defines = ['PYTHON_LIBRARY="python27"']
     elif 'macosx' in conf.env.VALID_PLATFORMS:
-        pass
+        conf.env.check_python27 = True
+        conf.env.check_python27_defines = ['PYTHON_LIBRARY="python2.7"']
     else:
         raise Errors.WafError('python not available')
 

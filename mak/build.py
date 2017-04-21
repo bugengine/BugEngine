@@ -151,6 +151,15 @@ def options(opt):
 
 
 @conf
+def add_feature(self, feature, env = None):
+    if env:
+        env.append_unique('FEATURES', feature)
+    else:
+        for env in self.multiarch_envs:
+            env.append_unique('FEATURES', feature)
+
+
+@conf
 def module(bld, name, module_path, depends,
            valid_platforms, features,
            build_features,
@@ -170,8 +179,8 @@ def module(bld, name, module_path, depends,
     else:
         plugin_name = 'game'
 
-    compile_extensions = ['cxx', 'cpp', 'cc', 'c', 'rc', 'm', 'mm', 'plist']
-    preprocess_extensions = ['yy', 'll']
+    compile_extensions = ['cxx', 'cpp', 'cc', 'c', 'rc', 'm', 'mm']
+    preprocess_extensions = ['yy', 'll', 'plist']
     try:
         sources = source_node.ant_glob(['src/**/*.%s'%(ext) for ext in compile_extensions])
     except OSError:
@@ -286,7 +295,6 @@ def module(bld, name, module_path, depends,
                 n = extra_source_node.make_node('include')
                 if os.path.isdir(n.abspath()):
                     include += [n]
-
         target_prefix = (env.ENV_PREFIX + '/') if env.ENV_PREFIX else ''
 
         if not build:
@@ -360,21 +368,37 @@ def external(bld, name):
 
 
 @conf
-def thirdparty(bld, name, path, env, libs=[], lib_paths=[], frameworks=[], includes=[], defines=[]):
-    archs = env.VALID_ARCHITECTURES
-    platforms = env.VALID_PLATFORMS
+def thirdparty(bld, name, feature='', path='.', var=''):
+    archs = bld.env.VALID_ARCHITECTURES
+    platforms = bld.env.VALID_PLATFORMS
     platform_specific = platforms
     arch_specific = archs + ['%s.%s'%(p,a) for p in platforms for a in archs]
     source_node = bld.path.make_node('%s' % path.replace('.', '/'))
+    if not var: var = bld.path.name
 
-    lib_paths = lib_paths + [i.path_from(bld.bldnode) for i in [source_node.make_node('lib')] + [source_node.make_node('lib.%s'%platform) for platform in platform_specific + arch_specific] if os.path.isdir(i.abspath())]
+    lib_paths = [i.path_from(bld.bldnode) for i in [source_node.make_node('lib')] + [source_node.make_node('lib.%s'%platform) for platform in platform_specific + arch_specific] if os.path.isdir(i.abspath())]
     bin_paths = [i for i in [source_node.make_node('bin.%s'%arch) for arch in arch_specific] if os.path.isdir(i.abspath())]
     data_paths = [i for i in [source_node.make_node('data.%s'%arch) for arch in arch_specific] if os.path.isdir(i.abspath())]
-    includes = includes + [i for i in [source_node.make_node('api')] + [source_node.make_node('api.%s'%platform) for platform in platform_specific + arch_specific] if os.path.isdir(i.abspath())]
+    includes = [i for i in [source_node.make_node('api')] + [source_node.make_node('api.%s'%platform) for platform in platform_specific + arch_specific] if os.path.isdir(i.abspath())]
 
-    target_prefix = (env.ENV_PREFIX + '/') if env.ENV_PREFIX else ''
-    target_name = target_prefix + name
-    install_tg = bld(target=target_name,
+    internal_deps = []
+    supported = False
+    for env in bld.multiarch_envs:
+        target_prefix = (env.ENV_PREFIX + '/') if env.ENV_PREFIX else ''
+        target_name = target_prefix + name
+        if env['check_%s' % var] or env.PROJECTS:
+            if feature:
+                bld.add_feature(feature, env)
+            supported = True
+            includes = env['check_%s_includes' % var] + includes
+            lib_paths = env['check_%s_libpath' % var] + lib_paths
+            libs = env['check_%s_libs' % var]
+            frameworks = env['check_%s_frameworks' % var]
+            defines = env['check_%s_defines' % var]
+            env.append_unique('CFLAGS_%s'%name, env['check_%s_cflags' % var])
+            env.append_unique('CXXFLAGS_%s'%name, env['check_%s_cxxflags' % var])
+            env.append_unique('LINKFLAGS_%s'%name, env['check_%s_ldflags' % var])
+            tg = bld(target=target_name,
                      features=['cxx'],
                      export_includes=includes,
                      export_defines=defines,
@@ -382,15 +406,24 @@ def thirdparty(bld, name, path, env, libs=[], lib_paths=[], frameworks=[], inclu
                      export_lib=libs,
                      export_framework=frameworks,
                      source_nodes=[source_node])
-    for bin_path in bin_paths:
-        install_tg.deploy_directory(env, bin_path, '', 'DEPLOY_RUNBINDIR')
-    for data_path in data_paths:
-        install_tg.deploy_directory(env, data_path, '', 'DEPLOY_DATADIR')
-    if name not in bld.env.THIRDPARTIES_FIRST:
-        bin_paths = [i for i in [source_node.make_node('bin')] + [source_node.make_node('bin.%s'%platform) for platform in platform_specific] if os.path.isdir(i.abspath())]
+            if target_prefix:
+                internal_deps.append(tg.name)
+    if supported:
+        if internal_deps:
+            install_tg = bld(target=name, features=['multiarch'], use=internal_deps)
+        else:
+            install_tg = tg
+
         for bin_path in bin_paths:
-            install_tg.deploy_directory(env, bin_path, '', 'DEPLOY_RUNBINDIR')
-        bld.env.append_unique('THIRDPARTIES_FIRST', name)
+            install_tg.deploy_directory(bld.env, bin_path, '', 'DEPLOY_RUNBINDIR')
+        for data_path in data_paths:
+            install_tg.deploy_directory(bld.env, data_path, '', 'DEPLOY_DATADIR')
+        if name not in bld.env.THIRDPARTIES_FIRST:
+            bin_paths = [i for i in [source_node.make_node('bin')] + [source_node.make_node('bin.%s'%platform) for platform in platform_specific] if os.path.isdir(i.abspath())]
+            for bin_path in bin_paths:
+                install_tg.deploy_directory(bld.env, bin_path, '', 'DEPLOY_RUNBINDIR')
+            bld.env.append_unique('THIRDPARTIES_FIRST', name)
+    return supported
 
 
 @conf
@@ -679,6 +712,7 @@ def make_bld_node_common(self, node, path, name):
         node = node.make_node(name)
     elif path.is_child_of(self.bld.bldnode):
         out_dir = path.path_from(self.bld.bldnode)
+        out_dir = out_dir[out_dir.find(os.path.sep)+1:]
         if out_dir[0] == '.':
             out_dir = out_dir[out_dir.find(os.path.sep)+1:]
             node = node.make_node(out_dir)
@@ -698,13 +732,7 @@ def make_bld_node(self, category, path, name):
     try:
         node = self.bld.bldnode.make_node(self.bld.bugengine_variant).make_node(category)
     except AttributeError:
-        node = self.bld.bldnode.make_node(category)
-    return self.make_bld_node_common(node, path, name)
-
-
-@taskgen_method
-def make_preprocess_node(self, category, path, name):
-    node = self.bld.bldnode.make_node(category)
+        node = self.bld.bldnode.make_node('__all__').make_node(category)
     return self.make_bld_node_common(node, path, name)
 
 
@@ -796,7 +824,7 @@ def create_compiled_task(self, name, node):
 def create_kernel_namespace(self):
     kernels = getattr(self, 'kernels', [])
     if kernels:
-        out = self.make_preprocess_node('.src', None, 'namespace.cc')
+        out = self.make_bld_node('.src', None, 'namespace.cc')
         self.create_task('namespace', [], [out])
         try:
             self.out_sources.append(out)

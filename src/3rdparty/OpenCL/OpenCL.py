@@ -11,7 +11,7 @@ def setup(conf):
         include = 'CL/cl.h'
         libpath=[os.path.join(conf.path.abspath(), 'lib.%s.%s'%(conf.env.VALID_PLATFORMS[0], a))
                  for a in conf.env.VALID_ARCHITECTURES]
-    conf.check_lib('OpenCL', var='CL',
+    conf.check_lib('OpenCL',
                    includes=[include],
                    libpath=libpath,
                    includepath=[os.path.join(conf.path.abspath(), 'api')],

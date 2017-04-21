@@ -34,9 +34,9 @@ cls.exec_command = exec_command_flex
 def big_flex(self, node):
     outs = []
     if node.name.endswith('.ll'):
-        out_node = self.make_preprocess_node('.src', node.parent, node.name[:-2]+'cc')
+        out_node = self.make_bld_node('.src', node.parent, node.name[:-2]+'cc')
     else:
-        out_node = self.make_preprocess_node('.src', node.parent, node.name[:-1]+'c')
+        out_node = self.make_bld_node('.src', node.parent, node.name[:-1]+'c')
     outs.append(out_node)
 
     tsk = self.create_task('flex', node, outs)
