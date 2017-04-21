@@ -3,6 +3,7 @@
 
 #include    <stdafx.h>
 #include    <clglkernelscheduler.hh>
+#include    <dlfcn.h>
 
 namespace BugEngine
 {
@@ -10,7 +11,16 @@ namespace BugEngine
 minitl::array<cl_context_properties> OpenCLOpenGLKernelScheduler::createPlatformSpecificContextProperties()
 {
     CGLContextObj ctx = CGLGetCurrentContext();
-    CGLShareGroupObj group = CGLGetShareGroup(ctx);
+    typedef CGLShareGroupObj (*t_CGLGetShareGroup)(CGLContextObj obj);
+    t_CGLGetShareGroup b_CGLGetShareGroup = (t_CGLGetShareGroup)dlsym(RTLD_DEFAULT, "CGLGetShareGroup");
+    if (!b_CGLGetShareGroup)
+    {
+        be_warning("CGLGetShareGroup not found; OpenGL/OpenCL compatibility disabled");
+        minitl::array<cl_context_properties> properties(Arena::temporary(), 1);
+        properties[0] = 0;
+        return properties;
+    }
+    CGLShareGroupObj group = (*b_CGLGetShareGroup)(ctx);
     if (group)
     {
         minitl::array<cl_context_properties> properties(Arena::temporary(), 3);
@@ -19,13 +29,10 @@ minitl::array<cl_context_properties> OpenCLOpenGLKernelScheduler::createPlatform
         properties[2] = 0;
         return properties;
     }
-    else
-    {
-        be_info("no OpenGL context found; OpenGL/OpenCL compatibility disabled");
-        minitl::array<cl_context_properties> properties(Arena::temporary(), 1);
-        properties[0] = 0;
-        return properties;
-    }
+    be_info("no OpenGL context found; OpenGL/OpenCL compatibility disabled");
+    minitl::array<cl_context_properties> properties(Arena::temporary(), 1);
+    properties[0] = 0;
+    return properties;
 }
 
 }

@@ -1,4 +1,4 @@
-from waflib import Options, Utils
+from waflib import Options, Utils, Errors
 from waflib.Configure import conf
 from waflib.TaskGen import feature, before_method, after_method
 import os
@@ -41,7 +41,7 @@ def build(bld):
     for version in bld.env.PYTHON_VERSIONS:
         try:
             bld.recurse('../python%s/python%s_build.py' % (version.replace('.', ''), version.replace('.', '')))
-        except:
+        except Errors.WafError:
             pass
 
 

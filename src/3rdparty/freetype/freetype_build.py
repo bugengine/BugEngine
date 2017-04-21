@@ -13,3 +13,5 @@ def build(bld):
                            extra_defines=defines,
                            use_master=False,
                            warnings=False)
+    else:
+        bld.env.thirdparty('3rdparty.freetype')

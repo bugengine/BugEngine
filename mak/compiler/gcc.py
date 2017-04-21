@@ -90,19 +90,21 @@ def detect_gcc_from_path(conf, path, seen):
                             break
                     if cc and cxx:
                         c = cls(cc, cxx)
-                        if c.name() in seen:
-                            return
                         if not c.is_valid(conf):
                             return
-                        seen.add(c.name())
-                        conf.compilers.append(c)
+                        try:
+                            seen[c.name()].add_sibling(c)
+                        except KeyError:
+                            seen[c.name()] = c
+                            conf.compilers.append(c)
                         for multilib_compiler in c.get_multilib_compilers():
-                            if multilib_compiler.name() in seen:
-                                continue
                             if not multilib_compiler.is_valid(conf):
                                 continue
-                            seen.add(multilib_compiler.name())
-                            conf.compilers.append(multilib_compiler)
+                            try:
+                                seen[multilib_compiler.name()].add_sibling(c)
+                            except KeyError:
+                                seen[multilib_compiler.name()] = multilib_compiler
+                                conf.compilers.append(multilib_compiler)
                         return c
                 c = find_target_gcc(target, GCC)
                 if c:
@@ -115,15 +117,20 @@ def get_native_gcc(conf, seen):
     import platform
     if platform.uname()[0].lower() == 'freebsd':
         c = GCC('/usr/bin/gcc', '/usr/bin/g++')
-        if c.name() not in seen and c.is_valid(conf):
-            seen.add(c.name())
+        if c.is_valid(conf):
+            try:
+                seen[c.name()].add_sibling(c)
+            except KeyError:
+                seen[c.name()] = c
+                conf.compilers.append(c)
             for multilib_compiler in c.get_multilib_compilers():
-                if multilib_compiler.name() in seen:
-                    continue
                 if not multilib_compiler.is_valid(conf):
                     continue
-                seen.add(multilib_compiler.name())
-                conf.compilers.append(multilib_compiler)
+                try:
+                    seen[multilib_compiler.name()].add_sibling(c)
+                except KeyError:
+                    seen[multilib_compiler.name()] = multilib_compiler
+                    conf.compilers.append(multilib_compiler)
 
 
 def detect_gcc(conf):
@@ -144,7 +151,7 @@ def detect_gcc(conf):
         except OSError:
             pass
     paths = paths.union(conf.env.ALL_ARCH_LIBPATHS)
-    seen = set([])
+    seen = {}
     for path in paths:
         try:
             for lib in os.listdir(path):

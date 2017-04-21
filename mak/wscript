@@ -23,6 +23,7 @@ def options(opt):
         with open(option_file.abspath(), 'r') as f:
             opt.parse_args(f.readlines())
 
+
 def configure(conf):
     conf.bugenginenode = conf.path.parent
     conf.recurse('checks.py')
@@ -39,9 +40,11 @@ def configure(conf):
     conf.recurse('targets.py')
     conf.env.ALL_TOOLCHAINS.sort(key = lambda x: x.split('-'))
 
+
 def setup(conf):
     for third_party in conf.bugenginenode.make_node('src').make_node('3rdparty').listdir():
         conf.recurse('../src/3rdparty/%s/%s.py'%(third_party, third_party), name='setup', once=False)
+
 
 def build(bld):
     bld.bugenginenode = bld.path.parent
@@ -62,6 +65,7 @@ def build(bld):
         if not '.rc' in TaskGen.task_gen.mappings:
             TaskGen.task_gen.mappings['.rc'] = rc_hook
 
+
 def plugins(bld):
     bld.recurse('hosts.py', name='plugins')
     bld.recurse('targets.py', name='plugins')
@@ -72,6 +76,7 @@ try:
     import cPickle as pickle
 except:
     import pickle
+
 
 class ConfigurationContext(Configure.ConfigurationContext):
     cmd ='configure'
@@ -90,6 +95,7 @@ class ConfigurationContext(Configure.ConfigurationContext):
         Options.options.pwd = os.environ.get('PWD', '')
         node = self.bldnode.make_node('options.pickle')
         pickle.dump(Options.options, open(node.abspath(), 'wb'), protocol = 2)
+
 
 from waflib import Configure
 class ReconfigurationContext(Configure.ConfigurationContext):

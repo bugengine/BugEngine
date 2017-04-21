@@ -15,11 +15,12 @@ class Compiler:
         'amd64':    'amd64',
         'x86_64':   'amd64',
         'x64':      'amd64',
-        'arm':      'arm',
+        #'arm':      'armv6',
         'armv6':    'armv6',
         'armv7':    'armv7',
-        'arm64':    'aarch64',
-        'aarch64':  'aarch64',
+        'armv7s':   'armv7s',
+        'arm64':    'arm64',
+        'aarch64':  'arm64',
         'aarch32':  'aarch32',
         'ppc':      'ppc',
         'powerpc':  'ppc',
@@ -57,6 +58,7 @@ class Compiler:
         self.platform = platform
         self.arch = self.to_target_arch(arch)
         self.arch_name = self.arch
+        self.siblings = [self]
         self.env = os.environ.copy()
         for env_name, env_value in extra_env.items():
             self.env[env_name] = env_value
@@ -105,6 +107,9 @@ class Compiler:
         self.set_optimisation_options(conf)
         self.set_warning_options(conf)
 
+    def add_sibling(self, other_compiler):
+        self.siblings.append(other_compiler)
+
 
 class GnuCompiler(Compiler):
     MULTILIBS = {
@@ -117,6 +122,17 @@ class GnuCompiler(Compiler):
         'mips64':   (['-m32'], 'mips'),
         'mips64el': (['-m32'], 'mipsel'),
     }
+    MACROS_TO_ARCH = (
+        ('__x86_64', 'amd64'),
+        ('__x86_64__', 'amd64'),
+        ('__amd64', 'amd64'),
+        ('__amd64__', 'amd64'),
+        ('__i386', 'x86'),
+        ('__i386__', 'x86'),
+        ('__ppc64__', 'ppc64'),
+        ('__ppc__', 'ppc'),
+        ('__arm__', 'arm'),
+    )
 
     def __init__(self, compiler_c, compiler_cxx, extra_args = [], extra_env={}):
         extra_env = dict(extra_env)
@@ -137,11 +153,11 @@ class GnuCompiler(Compiler):
         def split_triple(t):
             t = t.split('-')
             return t[0], '-'.join(t[1:])
-        result, out, err = self.run([compiler_c] + extra_args + ['-v', '-E', '-'], '\n', env=env)
+        result, out, err = self.run([compiler_c] + extra_args + ['-v', '-dM', '-E', '-'], '\n', env=env)
         if result != 0:
             #print(result, out, err)
             raise Exception('Error running %s: %s' % (compiler_c, err))
-        out = out.split('\n') + err.split('\n')
+        out = err.split('\n') + out.split('\n')
         for line in out:
             if line.startswith('Target:'):
                 self.target = line.split()[1]
@@ -157,6 +173,12 @@ class GnuCompiler(Compiler):
                 while words[0] != 'Apple' and words[1] != 'LLVM' and words[2] != 'version':
                     words.pop(0)
                 version = words[3].split('-')[0]
+            if line.startswith('#define'):
+                words = line.split()
+                for arch_macro, arch_name in self.MACROS_TO_ARCH:
+                    if arch_macro == words[1]:
+                        arch = arch_name
+                        break
             sysroot = line.find('-isysroot')
             if sysroot != -1:
                 sysroot = shlex.split(line[sysroot:].replace('\\', '\\\\'))[1]
@@ -170,18 +192,18 @@ class GnuCompiler(Compiler):
             return []
         else:
             try:
-                return [self.__class__(self.compiler_c, self.compiler_cxx, multilib[0])]
+                c = self.__class__(self.compiler_c, self.compiler_cxx, multilib[0])
+                return [c]
             except Exception:
                 return []
 
     def is_valid(self, conf):
         node = conf.bldnode.make_node('main.cxx')
         tgtnode = node.change_ext('')
-        node.write('#include <cstdlib>\n#include <cstdio>\nint main() {}\n')
+        node.write('int main() {}\n')
         try:
-            result, out, err = self.run_cxx([node.abspath(), '-o', tgtnode.abspath()])
+            result, out, err = self.run_cxx([node.abspath(), '-c', '-o', tgtnode.abspath()])
         except Exception as e:
-            print(e)
             return False
         finally:
             node.delete()

@@ -51,6 +51,8 @@ class Platform:
 
     def add_toolchain(self, conf, compiler, sub_compilers=[], add=True):
         toolchain = '%s-%s-%s-%s' % (self.NAME.lower(), compiler.arch_name, compiler.NAMES[0].lower(), compiler.version)
+        if sub_compilers:
+            toolchain = '%s-%s-%s' % (self.NAME.lower(), compiler.NAMES[0].lower(), compiler.version)
         if add:
             conf.start_msg('  `- %s' % toolchain)
         else:
@@ -60,8 +62,11 @@ class Platform:
             compiler.load_in_env(conf, self)
             self.load_in_env(conf, compiler)
             v = conf.env
+            v.ARCH_NAME = compiler.arch
             v.TOOLCHAIN=toolchain
             v.DEFINES.append('BE_PLATFORM=platform_%s'%v.VALID_PLATFORMS[0])
+            if not add:
+                v.ENV_PREFIX = compiler.arch
             if not sub_compilers:
                 conf.recurse(conf.bugenginenode.abspath()+'/mak/arch/%s'%compiler.arch, once=False)
                 conf.recurse(conf.bugenginenode.abspath()+'/mak', name='setup', once=False)

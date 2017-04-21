@@ -2,4 +2,4 @@ def options(opt):
     pass
 
 def setup(conf):
-    pass
+    conf.env.check_tcltk = True

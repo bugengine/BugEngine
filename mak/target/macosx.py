@@ -1,243 +1,180 @@
 # set MacOS X specific options
 
-import os
-from waflib import Context, Errors, Utils, Task, Options
-from waflib.Logs import info,warn,pprint
-from waflib.TaskGen import feature, before_method, after_method, extension
+from waflib import Configure, Options, Task, Context, Errors, Utils
 from waflib.Configure import conf
-
-
-@conf
-def set_macosx_options(self):
-    self.env.ABI = 'mach_o'
-    self.env.VALID_PLATFORMS = ['macosx', 'darwin', 'pc']
-    self.env.XCODE_SDKROOT = 'macosx'
-    self.env.XCODE_ABI = 'mach_o'
-    self.env.XCODE_SUPPORTEDPLATFORMS = 'macosx'
-    self.env.pymodule_PATTERN = '%s.so'
-
-    appname = getattr(Context.g_module, Context.APPNAME, self.srcnode.name)
-    self.env.DEPLOY_ROOTDIR = os.path.join(appname + '.app', 'Contents')
-    self.env.DEPLOY_BINDIR = os.path.join(appname + '.app', 'Contents', 'MacOS')
-    self.env.DEPLOY_RUNBINDIR = os.path.join(appname + '.app', 'Contents', 'MacOS')
-    self.env.DEPLOY_LIBDIR = 'lib'
-    self.env.DEPLOY_INCLUDEDIR = 'include'
-    share = os.path.join(appname + '.app', 'Contents', 'share', 'bugengine')
-    self.env.DEPLOY_DATADIR = share
-    self.env.DEPLOY_PLUGINDIR = os.path.join(share, 'plugin')
-    self.env.DEPLOY_KERNELDIR = os.path.join(share, 'kernel')
-    self.env.append_unique('DEFINES', ['_BSD_SOURCE'])
-
+from waflib.TaskGen import feature, extension, before_method, after_method
+from waflib.Tools import gcc
+import os
+import re
 
 @conf
-def check_multilib_gcc(self, compiler):
-    flags = compiler[8]
-    arch = compiler[7]
-    if flags[0] == '-m64':
-        filename = os.path.join(self.bldnode.abspath(), 'main.c')
-        output = os.path.join(self.bldnode.abspath(), 'main.o')
-        with open(filename, 'w') as f:
-            f.write('int main(int, const char**) { return 0; }')
-            cmd = [os.path.join(compiler[0], compiler[3]), '-Wp,-imultilib,%s'%arch,
-                   '-c', filename, '-o', output]
+class Darwin(Configure.ConfigurationContext.Platform):
+    NAME = 'Darwin'
+    SDK_NAME = 'Darwin'
+    OS_NAME = 'darwin'
+    SUPPORTED_TARGETS = (re.compile('.*-apple-darwin.*'),)
+
+    def __init__(self, conf, sdk = None):
+        Configure.ConfigurationContext.Platform.__init__(self)
+        self.sdk = sdk
+        self.conf = conf
+        if sdk:
+            self.NAME = self.__class__.NAME + sdk[0]
+
+    def get_available_compilers(self, compiler_list):
+        result = []
+        compiler_sets = {}
+        for c in compiler_list:
+            for r in self.SUPPORTED_TARGETS:
+                if r.match(c.target):
+                    k = (c.__class__.__name__, c.platform, c.version)
+                    try:
+                        compiler_sets[k].append(c)
+                    except KeyError:
+                        compiler_sets[k] = [c]
+                    break
+        for k in sorted(compiler_sets.keys()):
+            compilers = compiler_sets[k]
             try:
-                p = Utils.subprocess.Popen(cmd, stdin=Utils.subprocess.PIPE,
-                                           stdout=Utils.subprocess.PIPE,
-                                           stderr=Utils.subprocess.PIPE)
-                out = p.communicate()[0]
+                compilers, sdk = self.get_best_compilers_sdk(compilers)
+            except Errors.WafError:
+                continue
+            else:
+                if len(compilers) > 1:
+                    result.append((compilers[0], compilers, self.__class__(self.conf, sdk)))
+                else:
+                    result.append((compilers[0], [], self.__class__(self.conf, sdk)))
+        return result
+
+    def load_in_env(self, conf, compiler):
+        self.CFLAGS_cshlib = ['-fPIC']
+        platform = self.SDK_NAME.lower()
+        conf.find_program('lipo')
+        conf.find_program('dsymutil')
+        conf.find_program('strip')
+        conf.env.ABI = 'mach_o'
+        conf.env.VALID_PLATFORMS = [platform, 'darwin', 'pc']
+        conf.env.XCODE_SDKROOT = platform
+        conf.env.XCODE_ABI = 'mach_o'
+        conf.env.XCODE_SUPPORTEDPLATFORMS = platform
+        conf.env.pymodule_PATTERN = '%s.so'
+
+        appname = getattr(Context.g_module, Context.APPNAME, conf.srcnode.name)
+        conf.env.DEPLOY_ROOTDIR = os.path.join(appname + '.app', 'Contents')
+        conf.env.DEPLOY_BINDIR = os.path.join(appname + '.app', 'Contents', 'MacOS')
+        conf.env.DEPLOY_RUNBINDIR = os.path.join(appname + '.app', 'Contents', 'MacOS')
+        conf.env.DEPLOY_LIBDIR = 'lib'
+        conf.env.DEPLOY_INCLUDEDIR = 'include'
+        share = os.path.join(appname + '.app', 'Contents', 'share', 'bugengine')
+        conf.env.DEPLOY_DATADIR = share
+        conf.env.DEPLOY_PLUGINDIR = os.path.join(share, 'plugin')
+        conf.env.DEPLOY_KERNELDIR = os.path.join(share, 'kernel')
+        conf.env.append_unique('DEFINES', ['_BSD_SOURCE'])
+
+        conf.env.MACOSX_SDK = os.path.splitext(os.path.basename(self.sdk[1]))[0]
+        conf.env.XCODE_SDK_PATH = self.sdk[1]
+        conf.env.SYSROOT = self.sdk[1]
+        conf.env.append_unique('CFLAGS', ['-m%s-version-min=%s'%(self.OS_NAME, self.sdk[0]), '-isysroot', self.sdk[1]])
+        conf.env.append_unique('CXXFLAGS', ['-m%s-version-min=%s'%(self.OS_NAME, self.sdk[0]),
+                                            '-isysroot', self.sdk[1]])
+        conf.env.append_unique('LINKFLAGS', ['-m%s-version-min=%s'%(self.OS_NAME, self.sdk[0]),
+                                             '-isysroot', self.sdk[1], '-L%s/usr/lib'%self.sdk[1]])
+
+    def get_best_compilers_sdk(self, compilers):
+        all_archs = []
+        all_paths = []
+        for compiler in compilers:
+            if compiler.arch not in all_archs: all_archs.append(compiler.arch)
+            for sibling in compiler.siblings:
+                dirname = os.path.dirname(sibling.compiler_c)
+                dirname = os.path.dirname(dirname)
+                dirname = os.path.dirname(dirname)
+                if dirname not in all_paths: all_paths.append(dirname)
+
+        sdk_number_min = getattr(Options.options, '%s_sdk_min' % self.OS_NAME)
+        sdk_number_max = getattr(Options.options, '%s_sdk_max' % self.OS_NAME)
+        sdks = []
+        relpath = os.path.join('Platforms', '%s.platform'%self.SDK_NAME, 'Developer', 'SDKs')
+
+        #for path in all_paths:
+        for path in Options.options.xcode_sdks.split(','):
+            for sdks_path in [os.path.join(path, relpath),
+                              os.path.join(path, 'SDKs'),]:
+                try:
+                    sdk_list = os.listdir(sdks_path)
+                except OSError:
+                    continue
+                else:
+                    for sdk in sdk_list:
+                        sdk_name,_ = os.path.splitext(sdk)
+                        if sdk_name.startswith(self.SDK_NAME) and len(sdk_name) > len(self.SDK_NAME):
+                            sdk_version = sdk_name[len(self.SDK_NAME):]
+                            if sdk_version[-1] == 'u':
+                                sdk_version = sdk_version[:-1]
+                            sdks.append((sdk_version, os.path.normpath(os.path.join(sdks_path, sdk))))
+
+        sdks.sort()
+        archs = {
+            '18':       { '10': 'ppc' },
+            '16777234': { '0':  'ppc64' },
+            '7':        { '3':  'x86' },
+            '16777223': { '3':  'amd64' },
+            '12':       { '6':  'armv6',
+                          '9':  'armv7',
+                          '11': 'armv7s' },
+            '16777228': { '0':  'arm64' }
+        }
+
+        best_sdk = (None, None, [])
+        for sdk, sdk_path in sdks:
+            if sdk_number_max and not sdk <= sdk_number_max:
+                continue
+            if sdk_number_min and not sdk >= sdk_number_min:
+                continue
+            sdk_compilers = []
+            dylib = os.path.join(sdk_path, 'usr', 'lib', 'crt1.10.5.o')
+            try:
+                r, out, err = compilers[0].run([self.conf.env.OTOOL, '-f', dylib])
             except Exception as e:
                 print(e)
             else:
-                if p.returncode == 0:
-                    flags.append('-Wp,-imultilib,%s'%arch)
+                for line in out.split('\n'):
+                    line = line.split()
+                    if not line:
+                        continue
+                    if line[0] == 'cputype':
+                        cputype = line[1]
+                    if line[0] == 'cpusubtype':
+                        cpusubtype = line[1]
+                        try:
+                            a = archs[cputype][cpusubtype]
+                        except KeyError:
+                            print('Unknown %s arch: %s/%s in %s' % (self.OS_NAME, cputype, cpusubtype, dylib))
+                        else:
+                            for c in compilers:
+                                if c.arch == a:
+                                    sdk_compilers.append(c)
+                                    break
+                            else:
+                                pass
+                                #print('no compiler for arch %s'%a)
+                if len(sdk_compilers) > len(best_sdk[2]):
+                    best_sdk = (sdk, sdk_path, sdk_compilers)
+                elif len(sdk_compilers) > len(best_sdk[2]) and sdk > best_sdk[0]:
+                    best_sdk = (sdk, sdk_path, sdk_compilers)
+        if best_sdk[2]:
+            return best_sdk[2], (best_sdk[0], best_sdk[1])
+        else:
+            raise Errors.WafError('No SDK for compiler %s' % compilers[0].compiler_c)
 
 
-@conf
-def check_multilib_other(self, compiler):
-    pass
+class MacOSX(Darwin):
+    NAME = 'MacOSX'
+    SDK_NAME = 'MacOSX'
+    OS_NAME = 'macosx'
 
-
-@conf
-def get_macosx_sdk_version(self, name, compiler_list):
-    sdk_number_min = Options.options.macosx_sdk_min
-    sdk_number_max = Options.options.macosx_sdk_max
-    sdks = []
-    paths = Options.options.xcode_sdks.split(',')
-    for path in paths:
-        for sdk_relative_path in [os.path.join('Platforms', 'MacOSX.platform', 'Developer', 'SDKs'),
-                                  'SDKs']:
-            sdks_path = os.path.join(path, sdk_relative_path)
-            try:
-                sdk_list = os.listdir(sdks_path)
-            except OSError:
-                continue
-            else:
-                for sdk in sdk_list:
-                    sdk_name,_ = os.path.splitext(sdk)
-                    if sdk.startswith('MacOSX'):
-                        sdk_version = sdk_name[6:]
-                        if sdk_version[-1] == 'u':
-                            sdk_version = sdk_version[:-1]
-                        sdks.append((sdk_version, os.path.join(sdks_path, sdk)))
-
-    sdks.sort()
-    self.start_msg('Looking for SDK for %s-%s'%name)
-    for sdk, sdk_path in sdks:
-        bin_paths = []
-        if sdk_number_max and not sdk <= sdk_number_max:
-            continue
-        if sdk_number_min and not sdk >= sdk_number_min:
-            continue
-        try:
-            for compiler in compiler_list:
-                self.check_sdk(os.path.join(compiler[1], compiler[3]), compiler[8], sdk_path,
-                               '-mmacosx-version-min=%s'%sdk, ['Cocoa'])
-                root_path = os.path.normpath(os.path.join(sdk_path, '..', '..'))
-                bin_paths.append(os.path.join(root_path, 'usr', 'bin'))
-                bin_paths.append(os.path.normpath(os.path.join(root_path, '..', 'usr', 'bin')))
-                bin_paths.append(os.path.normpath(os.path.join(root_path, '..', '..', '..',
-                                                               'usr', 'bin')))
-                bin_paths.append(os.path.normpath(os.path.join(root_path, '..', '..', '..',
-                                                               'Toolchains',
-                                                               'XcodeDefault.xctoolchain',
-                                                               'usr', 'bin')))
-                bin_paths.append(compiler[1])
-            break
-        except Errors.WafError:
-            continue
-    else:
-        self.end_msg('none', color='RED')
-        raise Errors.WafError('Could not find any suitable SDK')
-    self.end_msg(os.path.splitext(os.path.basename(sdk_path))[0])
-    return (sdk, sdk_path, list(set(bin_paths)))
-
-
-@conf
-def set_macosx_sdk_options(self, sdk_version, sdk_path):
-    self.env.MACOSX_SDK = os.path.splitext(os.path.basename(sdk_path))[0]
-    self.env.XCODE_SDK_PATH = sdk_path
-    self.env.SYSROOT = sdk_path
-    self.env.append_unique('CFLAGS', ['-mmacosx-version-min=%s'%sdk_version,
-                                      '-isysroot', sdk_path])
-    self.env.append_unique('CXXFLAGS', ['-mmacosx-version-min=%s'%sdk_version,
-                                        '-isysroot', sdk_path])
-    self.env.append_unique('LINKFLAGS', ['-mmacosx-version-min=%s'%sdk_version,
-                                         '-isysroot', sdk_path, '-L%s/usr/lib'%sdk_path])
-
-
-@conf
-def set_macosx_icc_options(self, flags, arch, version):
-    v = self.env
-    v.CFLAGS = flags + ['-fPIC', '-fvisibility=hidden']
-    v.CXXFLAGS = flags + ['-fPIC', '-fvisibility=hidden']
-    v.LINKFLAGS = flags + ['-lobjc']
-    v.CXXFLAGS_cxxshlib = []
-    v.CFLAGS_exportall = ['-fvisibility=default']
-    v.CXXFLAGS_exportall = ['-fvisibility=default']
-
-    v.CFLAGS_warnnone = ['-w']
-    v.CXXFLAGS_warnnone = ['-w']
-    v.CFLAGS_warnall = ['-std=c99', '-Wall', '-Wextra', '-pedantic', '-Winline', '-Werror']
-    v.CXXFLAGS_warnall = ['-Wall', '-Wextra', '-Werror', '-Wno-sign-compare',
-                          '-Woverloaded-virtual', '-Wno-invalid-offsetof']
-
-    v.CFLAGS_debug = ['-pipe', '-g', '-D_DEBUG']
-    v.CXXFLAGS_debug = ['-pipe', '-g', '-D_DEBUG']
-    v.ASFLAGS_debug = ['-pipe', '-g', '-D_DEBUG']
-    v.LINKFLAGS_debug = ['-pipe', '-g']
-
-    v.CFLAGS_profile = ['-pipe', '-g', '-DNDEBUG', '-O3']
-    v.ASFLAGS_profile = ['-pipe', '-g', '-DNDEBUG', '-O3']
-    v.LINKFLAGS_profile = ['-pipe', '-g']
-
-    v.CFLAGS_final = ['-pipe', '-g', '-DNDEBUG', '-O3']
-    v.CXXFLAGS_final = ['-pipe', '-Wno-unused-parameter', '-g', '-DNDEBUG', '-O3', '-fno-rtti',
-                        '-fno-exceptions']
-    v.ASFLAGS_final = ['-pipe', '-g', '-DNDEBUG', '-O3']
-    v.LINKFLAGS_final = ['-pipe', '-g']
-
-    self.env.append_unique('LINKFLAGS_cshlib', ['-undefined', 'dynamic_lookup', '-dynamiclib'])
-    self.env.append_unique('LINKFLAGS_cxxshlib', ['-undefined', 'dynamic_lookup', '-dynamiclib'])
-
-
-@conf
-def set_macosx_gcc_options(self, flags, arch, version):
-    v = self.env
-    v.CFLAGS = flags + ['-fPIC', '-fvisibility=hidden']
-    v.CXXFLAGS = flags + ['-fPIC', '-fvisibility=hidden']
-    v.LINKFLAGS = flags + ['-lobjc']
-    v.CXXFLAGS_cxxshlib = []
-    v.CFLAGS_exportall = ['-fvisibility=default']
-    v.CXXFLAGS_exportall = ['-fvisibility=default']
-
-    v.CFLAGS_warnnone = ['-w']
-    v.CXXFLAGS_warnnone = ['-w']
-    v.CFLAGS_warnall = ['-std=c99', '-Wall', '-Wextra', '-pedantic', '-Winline', '-Werror']
-    v.CXXFLAGS_warnall = ['-Wall', '-Wextra', '-Werror', '-Wno-sign-compare',
-                          '-Woverloaded-virtual', '-Wno-invalid-offsetof']
-
-    v.CFLAGS_debug = ['-pipe', '-g', '-D_DEBUG']
-    v.CXXFLAGS_debug = ['-pipe', '-g', '-D_DEBUG']
-    v.ASFLAGS_debug = ['-pipe', '-g', '-D_DEBUG']
-    v.LINKFLAGS_debug = ['-pipe', '-g']
-
-    v.CFLAGS_profile = ['-pipe', '-g', '-DNDEBUG', '-O3']
-    v.CXXFLAGS_profile = ['-pipe', '-Wno-unused-parameter', '-g', '-DNDEBUG', '-O3', '-fno-rtti',
-                          '-fno-exceptions']
-    v.ASFLAGS_profile = ['-pipe', '-g', '-DNDEBUG', '-O3']
-    v.LINKFLAGS_profile = ['-pipe', '-g']
-
-    v.CFLAGS_final = ['-pipe', '-g', '-DNDEBUG', '-O3']
-    v.CXXFLAGS_final = ['-pipe', '-Wno-unused-parameter', '-g', '-DNDEBUG', '-O3', '-fno-rtti',
-                        '-fno-exceptions']
-    v.ASFLAGS_final = ['-pipe', '-g', '-DNDEBUG', '-O3']
-    v.LINKFLAGS_final = ['-pipe', '-g']
-
-    self.env.append_unique('LINKFLAGS_cshlib', ['-undefined', 'dynamic_lookup', '-dynamiclib'])
-    self.env.append_unique('LINKFLAGS_cxxshlib', ['-undefined', 'dynamic_lookup', '-dynamiclib'])
-
-
-@conf
-def set_macosx_clang_options(self, flags, arch, version):
-    v = self.env
-    version = version.split('.')
-    version = float(version[0]) + float(version[1])/10
-    v.CFLAGS = flags + ['-fPIC', '-fvisibility=hidden']
-    v.CXXFLAGS = flags + ['-fPIC', '-fvisibility=hidden']
-    v.LINKFLAGS = flags + ['-lobjc']
-    v.CXXFLAGS_cxxshlib = []
-    v.CFLAGS_exportall = ['-fvisibility=default']
-    v.CXXFLAGS_exportall = ['-fvisibility=default']
-
-    v.CFLAGS_warnnone = ['-w']
-    v.CXXFLAGS_warnnone = ['-w']
-    v.CFLAGS_warnall = ['-std=c99', '-Wall', '-Wextra', '-pedantic', '-Winline', '-Werror']
-    v.CXXFLAGS_warnall = ['-Wall', '-Wextra', '-Werror', '-Wno-sign-compare',
-                          '-Woverloaded-virtual', '-Wno-invalid-offsetof']
-    if int(version) == 3 and version >= 3.6:
-        v.CXXFLAGS_warnall += ['-Wno-unused-local-typedef']
-    if version >= 6.3:
-        v.CXXFLAGS_warnall += ['-Wno-unused-local-typedef']
-
-    v.CFLAGS_debug = ['-pipe', '-g', '-D_DEBUG']
-    v.CXXFLAGS_debug = ['-pipe', '-g', '-D_DEBUG']
-    v.ASFLAGS_debug = ['-pipe', '-g', '-D_DEBUG']
-    v.LINKFLAGS_debug = ['-pipe', '-g']
-
-    v.CFLAGS_profile = ['-pipe', '-g', '-DNDEBUG', '-O3']
-    v.CXXFLAGS_profile = ['-pipe', '-Wno-unused-parameter', '-g', '-DNDEBUG', '-O3', '-fno-rtti',
-                          '-fno-exceptions']
-    v.ASFLAGS_profile = ['-pipe', '-g', '-DNDEBUG', '-O3']
-    v.LINKFLAGS_profile = ['-pipe', '-g']
-
-    v.CFLAGS_final = ['-pipe', '-g', '-DNDEBUG', '-O3']
-    v.CXXFLAGS_final = ['-pipe', '-Wno-unused-parameter', '-g', '-DNDEBUG', '-O3', '-fno-rtti',
-                        '-fno-exceptions']
-    v.ASFLAGS_final = ['-pipe', '-g', '-DNDEBUG', '-O3']
-    v.LINKFLAGS_final = ['-pipe', '-g']
-
-    self.env.append_unique('LINKFLAGS_cshlib', ['-undefined', 'dynamic_lookup', '-dynamiclib'])
-    self.env.append_unique('LINKFLAGS_cxxshlib', ['-undefined', 'dynamic_lookup', '-dynamiclib'])
+    def __init__(self, conf, sdk = None):
+        Darwin.__init__(self, conf, sdk)
 
 
 def options(opt):
@@ -254,148 +191,9 @@ def options(opt):
                     help='Maximum version of the MacOS X SDK to target')
 
 
+
 def configure(conf):
-    supported_architectures ={
-        'x86' : 'i686',
-        'i386' : 'i686',
-        'i686': 'i686',
-        'x86_64' : 'x86_64',
-        'x64' : 'x86_64',
-        'amd64' : 'x86_64',
-        'ppc' : 'ppc',
-        'powerpc' : 'ppc',
-        'ppc64' : 'ppc64',
-        'powerpc64' : 'ppc64'
-    }
-
-    def load_gcc(conf, compiler):
-        conf.load_gcc(compiler[1], compiler[2], compiler[3], compiler[4], compiler[5],
-                      compiler[6], compiler[8])
-    def load_icc(conf, compiler):
-        conf.load_icc(compiler[1], compiler[2], compiler[3], compiler[4], compiler[5],
-                      compiler[6], compiler[8])
-    def load_clang(conf, compiler):
-        conf.load_clang(compiler[1], compiler[5], compiler[8])
-
-    compiler_versions = {}
-    for name, bindir, icc, ixx, version, target, arch, options in conf.env.ICC_TARGETS:
-        position = target.find('darwin')
-        if position != -1 and arch in supported_architectures:
-            key = (name, version, check_multilib_other, load_icc, set_macosx_icc_options)
-            compiler = (name, bindir, icc, ixx, version, target, arch,
-                        supported_architectures[arch], options)
-            try:
-                compiler_versions[key].append(compiler)
-            except KeyError:
-                compiler_versions[key] = [compiler]
-    for name, bindir, gcc, gxx, version, target, arch, options in conf.env.GCC_TARGETS:
-        position = target.find('darwin')
-        if position != -1 and arch in supported_architectures:
-            if bindir.find('Platforms') != -1 and bindir.find('Platforms/MacOSX') == -1:
-                continue
-            version = target[position+6:].split('-')[0] + '_' + version
-            key = (name, version, check_multilib_gcc, load_gcc, set_macosx_gcc_options)
-            compiler = (name, bindir, gcc, gxx, version, target, arch,
-                        supported_architectures[arch], options)
-            try:
-                compiler_versions[key].append(compiler)
-            except KeyError:
-                compiler_versions[key] = [compiler]
-    for version, directory, target, arch in conf.env.CLANG_TARGETS:
-        real_arch, flags = arch
-        position = target.find('darwin')
-        if position != -1 and real_arch in supported_architectures:
-            if directory.find('Platforms') != -1 and directory.find('Platforms/MacOSX') == -1:
-                continue
-            key = ('clang', version, check_multilib_other, load_clang, set_macosx_clang_options)
-            compiler = ('clang', directory, 'clang', 'clang++', version, target, real_arch,
-                        supported_architectures[real_arch], flags)
-            try:
-                compiler_versions[key].append(compiler)
-            except KeyError:
-                compiler_versions[key] = [compiler]
-
-    seen = set([])
-    def get_version(x):
-        x = x.split('_')
-        key = 0.
-        div = 1.
-        for y in x[0].split('.'):
-            key += float(y) / div
-            div *= 100
-        if len(x) > 1:
-            return key, x[1]
-        else:
-            return key, ''
-    for key, compiler_list in sorted(compiler_versions.items(),
-                                     key=lambda x: (x[0][0], get_version(x[0][1]))):
-        macosx_toolchains = []
-        macosx_archs = []
-        name, version, check_multilib, load_compiler, set_macosx_compiler_options = key
-        if (name, version) in seen:
-            continue
-        seen.add((name, version))
-        for compiler in compiler_list:
-            check_multilib(conf, compiler)
-        try:
-            sdk_name, sdk_path, bin_paths = conf.get_macosx_sdk_version((key[0], key[1]),
-                                                                        compiler_list)
-        except Errors.WafError:
-            continue
-        for compiler in compiler_list:
-            name, bindir, gcc, gxx, version, target, arch, real_arch, options = compiler
-            os_name = 'macosx'
-            toolchain = '%s-%s-%s-%s'%(os_name, arch, name, version)
-            if toolchain in seen:
-                continue
-            seen.add(toolchain)
-            env = conf.env.derive()
-            conf.setenv(toolchain, env)
-            env.DEST_OS = 'darwin'
-            try:
-                conf.start_msg('Setting up compiler')
-                load_compiler(conf, compiler)
-                set_macosx_compiler_options(conf, options, real_arch, version)
-            except Exception as e:
-                conf.end_msg(e, color='RED')
-                raise
-            else:
-                conf.end_msg('done')
-                try:
-                    conf.set_macosx_options()
-                    conf.set_macosx_sdk_options(sdk_name, sdk_path)
-                    conf.env.KERNEL_TOOLCHAINS = [toolchain]
-                    conf.env.ENV_PREFIX = real_arch
-                    conf.add_toolchain(os_name+conf.env.MACOSX_SDK[6:], real_arch, name,
-                                       version, arch, False)
-                except Errors.WafError as e:
-                    conf.variant = ''
-                    pprint('YELLOW', '%s failed: %s' % (toolchain, e))
-                except Exception as e:
-                    conf.variant = ''
-                    pprint('RED', '%s failed: %s' % (toolchain, e))
-                    raise
-                else:
-                    macosx_toolchains.append(toolchain)
-                    macosx_archs.append(real_arch)
-                    conf.variant = ''
-        if macosx_toolchains:
-            toolchain = '%s%s-%s-%s-%s'%(os_name, sdk_name, ','.join(macosx_archs), name, version)
-            env = conf.env.derive()
-            conf.setenv(toolchain, env)
-            conf.set_macosx_options()
-            conf.env.SUB_TOOLCHAINS = macosx_toolchains
-            conf.env.VALID_ARCHITECTURES = [macosx_archs]
-            conf.find_program('dsymutil', path_list=bin_paths)
-            conf.find_program('strip', path_list=bin_paths)
-            if not conf.find_program('lipo', path_list=bin_paths, mandatory=False):
-                conf.find_program('lipo')
-            conf.find_program('lldb', path_list=bin_paths, mandatory=False)
-            if not conf.env.LLDB:
-                print(bin_paths)
-            conf.find_program('gdb', path_list=bin_paths, mandatory=False)
-            conf.add_multiarch_toolchain(toolchain)
-            pprint('GREEN', 'configured for toolchain %s' % (toolchain))
+    conf.platforms.append(MacOSX(conf))
 
 
 def build(bld):
@@ -429,6 +227,7 @@ def set_osx_shlib_name(self):
                     '-Wl,-rpath,@loader_path/',
                     '-install_name', os.path.join('@rpath', self.link_task.outputs[0].name)
                 ])
+
 
 @feature('cprogram', 'cxxprogram')
 @after_method('apply_link')
