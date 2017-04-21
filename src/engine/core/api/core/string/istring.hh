@@ -79,6 +79,7 @@ public:
     struct Path
     {
         char name[MaxPathLength];
+        operator const char*() const { return name; }
     };
     inamespace();
     explicit inamespace(const istring& onlycomponent);
@@ -104,6 +105,7 @@ public:
     struct Filename
     {
         char name[MaxFilenameLength];
+        operator const char*() const { return name; }
     };
     ifilename();
     explicit ifilename(const istring& onlycomponent);
@@ -121,6 +123,7 @@ public:
     struct Filename
     {
         char name[MaxFilenameLength];
+        operator const char*() const { return name; }
     };
     explicit ipath(const istring& onlycomponent);
     ipath();

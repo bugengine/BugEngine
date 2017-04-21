@@ -53,6 +53,8 @@ be_api(CORE) minitl::Allocator& general();
 #include    <minitl/cast.hh>
 
 #include    <core/logger.hh>
+#include    <core/string/istring.hh>
+#include    <core/string/text.hh>
 
 using minitl::raw;
 using minitl::ref;

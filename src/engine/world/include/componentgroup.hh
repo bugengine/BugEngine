@@ -21,6 +21,8 @@ namespace BugEngine { namespace World
 class ComponentGroup
 {
     friend class EntityStorage;
+    friend struct MergeOperation;
+    friend struct TryMergeOperation;
 private:
     struct EntityOperation;
     struct EntityOperationRemove;
@@ -50,10 +52,12 @@ public:
 private:
     void clearBuffers(OperationBuffer* head) const;
     byte* allocOperation(u32 componentSize);
+
     void packComponents(u32 mask, const byte source[], byte target[], const u32 offset[]) const;
     void unpackComponents(u32 mask, const byte source[], byte target[], const u32 offset[]) const;
     void copyComponents(weak<EntityStorage> storage, u32 owner, byte target[],
                         u32 mask, const u32 offset[]) const;
+
     void groupEntityOperations(weak<EntityStorage> storage, OperationDelta deltas[]);
     OperationBuffer* sortEntityOperations(OperationDelta deltas[]);
     void executeEntityOperations(weak<EntityStorage> storage, const OperationDelta deltas[]);

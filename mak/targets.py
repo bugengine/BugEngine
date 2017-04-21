@@ -16,25 +16,6 @@ def add_build_command(toolchain, optimisation):
             def get_variant_dir(self):
                 return os.path.join(self.out_dir, self.optim)
             variant_dir = property(get_variant_dir, None)
-        class Test(BuildContext):
-            optim = optimisation
-            cmd = 'test:' + toolchain + ':' + optimisation
-            bugengine_variant = toolchain
-
-            def get_variant_dir(self):
-                return os.path.join(self.out_dir, self.optim)
-            variant_dir = property(get_variant_dir, None)
-
-            def execute(self):
-                self.restore()
-                if not self.all_envs:
-                    self.load_envs()
-                env = self.all_envs[self.bugengine_variant]
-                print(env)
-                while env:
-                    print(env.TOOLCHAIN)
-                    env = getattr(env, 'parent', None)
-
 
 
 class Platform:
@@ -50,7 +31,8 @@ class Platform:
         return result
 
     def add_toolchain(self, conf, compiler, sub_compilers=[], add=True):
-        toolchain = '%s-%s-%s-%s' % (self.NAME.lower(), compiler.arch_name, compiler.NAMES[0].lower(), compiler.version)
+        toolchain = '%s_%s-%s_%s-%s' % (self.NAME.lower(), compiler.arch, compiler.NAMES[0].lower(),
+                                        compiler.arch_name, compiler.version)
         if sub_compilers:
             toolchain = '%s-%s-%s' % (self.NAME.lower(), compiler.NAMES[0].lower(), compiler.version)
         if add:
@@ -79,7 +61,7 @@ class Platform:
             return None
         else:
             conf.end_msg(' ')
-            v.PREFIX = os.path.join('build', toolchain)
+            v.PREFIX = os.path.join('bld', toolchain)
             conf.variant = ''
             for c in sub_compilers:
                 t = self.add_toolchain(conf, c, add=False)
@@ -95,7 +77,7 @@ class Platform:
         e = self.env
         e.TOOLCHAIN=toolchain
         e.DEFINES.append('BE_PLATFORM=platform_%s'%e.VALID_PLATFORMS[0])
-        e.PREFIX = os.path.join('build', toolchain)
+        e.PREFIX = os.path.join('bld', toolchain)
         if e.STATIC:
             e.DEFINES.append('BE_STATIC=1')
         for optim in self.env.ALL_VARIANTS:
@@ -141,7 +123,7 @@ def configure(conf):
             pprint('BLUE', ' + configuring for platform %s' % p.NAME)
             for main_toolchain, sub_toolchains, platform in configuration_list:
                 platform.add_toolchain(conf, main_toolchain, sub_toolchains)
-    conf.env.store('.build/be_toolchains.py')
+    conf.env.store('.waf_toolchains.py')
 
 
 def build(bld):
@@ -161,7 +143,7 @@ def plugins(bld):
 
 from waflib import ConfigSet
 try:
-    env = ConfigSet.ConfigSet('.build/be_toolchains.py')
+    env = ConfigSet.ConfigSet('.waf_toolchains.py')
     for toolchain in env.ALL_TOOLCHAINS:
         for optim in env.ALL_VARIANTS:
             add_build_command(toolchain, optim)

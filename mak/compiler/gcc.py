@@ -13,7 +13,7 @@ class GCC(Configure.ConfigurationContext.GnuCompiler):
 
     def set_warning_options(self, conf):
         Configure.ConfigurationContext.GnuCompiler.set_warning_options(self, conf)
-        if self.version_number >= 4.8:
+        if self.version_number >= (4, 8):
             v.CXXFLAGS_warnall.append('-Wno-unused-local-typedefs')
 
     def set_optimisation_options(self, conf):
@@ -21,13 +21,13 @@ class GCC(Configure.ConfigurationContext.GnuCompiler):
 
     def set_warning_options(self, conf):
         Configure.ConfigurationContext.GnuCompiler.set_warning_options(self, conf)
-        if self.version_number >= 4.8:
+        if self.version_number >= (4, 8):
             v = conf.env
             v.CXXFLAGS_warnall.append('-Wno-unused-local-typedefs')
 
     def load_in_env(self, conf, platform, sysroot=None):
         Configure.ConfigurationContext.GnuCompiler.load_in_env(self, conf, platform, sysroot)
-        if self.version_number >= 4:
+        if self.version_number >= (4,):
             if platform.NAME != 'windows':
                 v = conf.env
                 v.append_unique('CFLAGS', ['-fvisibility=hidden'])
@@ -89,23 +89,27 @@ def detect_gcc_from_path(conf, path, seen):
                         if cxx:
                             break
                     if cc and cxx:
-                        c = cls(cc, cxx)
-                        if not c.is_valid(conf):
-                            return
                         try:
-                            seen[c.name()].add_sibling(c)
-                        except KeyError:
-                            seen[c.name()] = c
-                            conf.compilers.append(c)
-                        for multilib_compiler in c.get_multilib_compilers():
-                            if not multilib_compiler.is_valid(conf):
-                                continue
+                            c = cls(cc, cxx)
+                        except Exception as e:
+                            Logs.pprint('YELLOW', '%s: %s' % (cc, e))
+                        else:
+                            if not c.is_valid(conf):
+                                return
                             try:
-                                seen[multilib_compiler.name()].add_sibling(c)
+                                seen[c.name()].add_sibling(c)
                             except KeyError:
-                                seen[multilib_compiler.name()] = multilib_compiler
-                                conf.compilers.append(multilib_compiler)
-                        return c
+                                seen[c.name()] = c
+                                conf.compilers.append(c)
+                            for multilib_compiler in c.get_multilib_compilers():
+                                if not multilib_compiler.is_valid(conf):
+                                    continue
+                                try:
+                                    seen[multilib_compiler.name()].add_sibling(c)
+                                except KeyError:
+                                    seen[multilib_compiler.name()] = multilib_compiler
+                                    conf.compilers.append(multilib_compiler)
+                            return c
                 c = find_target_gcc(target, GCC)
                 if c:
                     result, out, err = c.run_c(['-fplugin=dragonegg', '-E', '-'], '')

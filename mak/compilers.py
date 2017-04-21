@@ -38,17 +38,16 @@ class Compiler:
                  extra_args = [], extra_env={}):
         def to_number(version_string):
              v = version_string.split('-')[0].split('.')
-             div = 1
-             result = 0
-             while v:
+             result = [0, 0, 0]
+             for i in (0, 1, 2):
+                 if not v:
+                     break
                  d = v.pop(0)
                  try:
-                     result += int(d) / div
+                     result[i] = int(d)
                  except ValueError:
-                     pass
-                 else:
-                    div = div * 10
-             return result
+                     result[i] = int(re.match('\\d+', d).group())
+             return tuple(result)
         self.compiler_c = compiler_c
         self.compiler_cxx = compiler_cxx
         self.defines = []
@@ -93,6 +92,10 @@ class Compiler:
     def run_cxx(self, args, input=None):
         return self.run([self.compiler_cxx] + self.extra_args + args, input, self.env)
 
+    def sort_name(self):
+        compiler_name = self.__class__.__name__.lower()
+        return self.arch, compiler_name, self.platform, self.version_number, self.arch_name
+
     def name(self):
         compiler_name = self.__class__.__name__.lower()
         return '%s-%s-%s-%s' % (compiler_name, self.platform, self.arch_name, self.version)
@@ -122,16 +125,25 @@ class GnuCompiler(Compiler):
         'mips64':   (['-m32'], 'mips'),
         'mips64el': (['-m32'], 'mipsel'),
     }
-    MACROS_TO_ARCH = (
-        ('__x86_64', 'amd64'),
-        ('__x86_64__', 'amd64'),
-        ('__amd64', 'amd64'),
-        ('__amd64__', 'amd64'),
-        ('__i386', 'x86'),
-        ('__i386__', 'x86'),
-        ('__ppc64__', 'ppc64'),
-        ('__ppc__', 'ppc'),
-        ('__arm__', 'arm'),
+    MACRO_ARCHS = (
+        (('__x86_64__',),                    'amd64'),
+        (('__i386__',),                      'x86'),
+        (('__i486__',),                      'x86'),
+        (('__i586__',),                      'x86'),
+        (('__i686__',),                      'x86'),
+        (('__powerpc__',),                   'ppc'),
+        (('__POWERPC__',),                   'ppc'),
+        (('__powerpc__', '__powerpc64__'),   'ppc64'),
+        (('__POWERPC__', '__ppc64__'),       'ppc64'),
+        (('__mips64', '__mips', '_MIPSEL'),  'mips64el'),
+        (('__mips', '_MIPSEL'),              'mipsel'),
+        (('__mips64', '__mips'),             'mips64'),
+        (('__mips__',),                      'mips'),
+        (('__aarch64__',),                   'aarch64'),
+        (('__aarch64',),                     'aarch64'),
+        (('__aarch32__',),                   'aarch32'),
+        (('__arm__',),                       'arm'),
+        (('__arm',),                         'arm'),
     )
 
     def __init__(self, compiler_c, compiler_cxx, extra_args = [], extra_env={}):
@@ -154,14 +166,13 @@ class GnuCompiler(Compiler):
             t = t.split('-')
             return t[0], '-'.join(t[1:])
         result, out, err = self.run([compiler_c] + extra_args + ['-v', '-dM', '-E', '-'], '\n', env=env)
+        macros = set([])
+        platform = None
         if result != 0:
             #print(result, out, err)
             raise Exception('Error running %s: %s' % (compiler_c, err))
         out = err.split('\n') + out.split('\n')
         for line in out:
-            if line.startswith('Target:'):
-                self.target = line.split()[1]
-                arch, platform = split_triple(self.target)
             for name in self.NAMES:
                 if line.find('%s version ' % name.lower()) != -1:
                     words = line.split()
@@ -174,15 +185,29 @@ class GnuCompiler(Compiler):
                     words.pop(0)
                 version = words[3].split('-')[0]
             if line.startswith('#define'):
-                words = line.split()
-                for arch_macro, arch_name in self.MACROS_TO_ARCH:
-                    if arch_macro == words[1]:
-                        arch = arch_name
-                        break
+                macro = line.split()[1].strip()
+                macros.add(macro)
             sysroot = line.find('-isysroot')
             if sysroot != -1:
                 sysroot = shlex.split(line[sysroot:].replace('\\', '\\\\'))[1]
                 self.sysroot = os.path.normpath(sysroot)
+        result, out, err = self.run([compiler_c] + extra_args + ['-dumpmachine'], env=env)
+        self.target = out.strip()
+        if self.target.find('-') != -1:
+            arch, platform = split_triple(self.target)
+        else:
+            platform = self.target
+        best = 0
+        for values, a in self.MACRO_ARCHS:
+            for v in values:
+                if v not in macros:
+                    break
+            else:
+                if len(values) > best:
+                    best = len(values)
+                    arch = a
+        if not best:
+            raise Exception('could not find architecture')
         return version, platform, arch
 
     def get_multilib_compilers(self):
@@ -258,7 +283,7 @@ class GnuCompiler(Compiler):
             if not conf.find_program('gdb', var='GDB', path_list=sys_dirs, mandatory=False):
                 conf.find_program('gdb', var='GDB', mandatory=False)
         env.COMPILER_NAME = self.__class__.__name__.lower()
-        env.COMPILER_TARGET = self.target
+        env.COMPILER_TARGET = self.arch + '-' + self.platform
         conf.load(self.TOOLS)
         self.populate_useful_variables(conf)
 
@@ -297,19 +322,14 @@ class GnuCompiler(Compiler):
             while out:
                 line = out.pop(0)
                 if line and line.startswith('libraries:'):
-                    # clang uses ':' even on windows :-/
                     line = line[10:].strip()
-                    libs = []
-                    try:
-                        while True:
-                            index = line.index(':', 3)
-                            libs.append(line[:index])
-                            line = line[index+1:]
-                    except ValueError:
-                        pass
+                    libs = self.split_path_list(line)
             env.append_unique('SYSTEM_LIBPATHS', libs)
         self.set_warning_options(conf)
         self.set_optimisation_options(conf)
+
+    def split_path_list(self, line):
+        return line.split(os.pathsep)
 
 
 Configure.ConfigurationContext.Compiler = Compiler
@@ -343,7 +363,7 @@ def configure(conf):
         if path.endswith('.py'):
             if not compilers or path[:-3] in compilers:
                 conf.recurse('compiler/%s'%path)
-    conf.compilers.sort(key = lambda x: x.name())
+    conf.compilers.sort(key = lambda x: x.sort_name())
 
 
 def build(bld):

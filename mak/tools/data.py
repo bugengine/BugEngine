@@ -11,6 +11,7 @@ from waflib import Task
 def scan(self):
     return ([], [])
 
+
 ddf = """
 %s ${DDF}
 -d ${MACROS_IGNORE}
@@ -24,6 +25,7 @@ ${TGT[2].abspath()}
 """ % sys.executable.replace('\\', '/')
 cls = Task.task_factory('datagen', ddf, [], 'PINK', ext_in='.h .hh .hxx', ext_out='.cc')
 cls.scan = scan
+
 
 class docgen(Task.Task):
     def process_node_gcode(self, node):
@@ -59,6 +61,7 @@ class docgen(Task.Task):
         self.cleanup_github()
         return 0
 
+
 @extension('.h', '.hh', '.hxx')
 def datagen(self, node):
     outs = []
@@ -79,6 +82,7 @@ def datagen(self, node):
         self.out_sources += outs
     except:
         self.out_sources = outs[:]
+
 
 @extension('.doc')
 def docgen(self, node):

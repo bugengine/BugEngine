@@ -1,5 +1,5 @@
-.build/*
-build/*
+.waf_toolchains.py
+bld/*
 nbproject/*
 *.pyc
 .lock-*

@@ -106,6 +106,103 @@ extern "C" int valueGet(lua_State *state)
     return 1;
 }
 
+extern "C" int valueSet(lua_State *state)
+{
+    Context::checkArg(state, 1, "BugEngine.Object");
+    Context::checkArg(state, 2, LUA_TSTRING);
+
+    RTTI::Value* userdata = (RTTI::Value*)lua_touserdata(state, -3);
+    const istring name = istring(lua_tostring(state, -2));
+    raw<const RTTI::Property> p = userdata->type().metaclass->properties;
+    while (p && p->name != name) p = p->next;
+    if (!p)
+    {
+        lua_Debug ar;
+        if (!lua_getstack(state, 0, &ar))
+        {
+            ar.name = "?";
+        }
+        else
+        {
+            lua_getinfo(state, "n", &ar);
+            if (ar.name == NULL)
+            {
+                ar.name = "?";
+            }
+        }
+        return luaL_error(state, LUA_QS ": object " LUA_QS " has no property " LUA_QS,
+                                 ar.name,  userdata->type().name().c_str(), name.c_str());
+    }
+    else if (userdata->type().constness == RTTI::Type::Const)
+    {
+        lua_Debug ar;
+        if (!lua_getstack(state, 0, &ar))
+        {
+            ar.name = "?";
+        }
+        else
+        {
+            lua_getinfo(state, "n", &ar);
+            if (ar.name == NULL)
+            {
+                ar.name = "?";
+            }
+        }
+        return luaL_error(state, LUA_QS ": object " LUA_QS " is const",
+                          ar.name,  userdata->type().name().c_str());
+    }
+    else if (p->type.constness == RTTI::Type::Const)
+    {
+        lua_Debug ar;
+        if (!lua_getstack(state, 0, &ar))
+        {
+            ar.name = "?";
+        }
+        else
+        {
+            lua_getinfo(state, "n", &ar);
+            if (ar.name == NULL)
+            {
+                ar.name = "?";
+            }
+        }
+        return luaL_error(state, LUA_QS ": object " LUA_QS " property " LUA_QS " is const",
+                                 ar.name,  userdata->type().name().c_str(), name.c_str());
+    }
+    else
+    {
+        RTTI::Value* v = (RTTI::Value*)malloca(sizeof(RTTI::Value));
+        if (get(state, -1, p->type, v) != -1)
+        {
+            p->set(*userdata, *v);
+            v->~Value();
+        }
+        else
+        {
+            lua_Debug ar;
+            if (!lua_getstack(state, 0, &ar))
+            {
+                ar.name = "?";
+            }
+            else
+            {
+                lua_getinfo(state, "n", &ar);
+                if (ar.name == NULL)
+                {
+                    ar.name = "?";
+                }
+            }
+            return luaL_error(state, LUA_QS ": object " LUA_QS " property " LUA_QS
+                                            " has incompatible type " LUA_QS,
+                                     ar.name,  userdata->type().name().c_str(), name.c_str(),
+                              p->type.name().c_str());
+        }
+        freea(v);
+    }
+
+    return 0;
+}
+
 extern "C" int valueCall(lua_State* state)
 {
     Context::checkArg(state, 1, "BugEngine.Object");
@@ -156,6 +253,7 @@ const luaL_Reg s_valueMetaTable[] = {
     {"__gc", valueGC},
     {"__tostring", valueToString},
     {"__index", valueGet},
+    {"__newindex", valueSet},
     {"__call", valueCall},
     {0, 0}
 };

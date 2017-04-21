@@ -20,7 +20,8 @@ class SunCC(Configure.ConfigurationContext.GnuCompiler):
     def __init__(self, suncc, sunCC, extra_args = [], extra_env={}):
         Configure.ConfigurationContext.GnuCompiler.__init__(self, suncc, sunCC, extra_args, extra_env)
         if self.platform == 'linux-gnu':
-            self.extra_args.append('-library=Crun,stlport4')
+            if self.version_number < (5, 14):
+                self.extra_args.append('-library=Crun,stlport4')
             if self.arch == 'amd64':
                 if os.path.isdir('/usr/lib/x86_64-linux-gnu'):
                     self.extra_args.append('-L/usr/lib/x86_64-linux-gnu')
@@ -113,8 +114,11 @@ class SunCC(Configure.ConfigurationContext.GnuCompiler):
                                              '-include', 'cstdio'])
                 v.append_unique('LINKFLAGS', [])
             v.append_unique('CFLAGS', ['-mt', '-xldscope=hidden', '-Kpic', '-DPIC', '-D__PIC__'])
-            v.append_unique('CXXFLAGS', ['-mt', '-xldscope=hidden', '-Kpic', '-DPIC', '-D__PIC__', '-library=Crun,stlport4'])
-            v.append_unique('LINKFLAGS', ['-lrt', '-mt', '-znow', '-xldscope=hidden', '-z', 'absexec', '-Kpic', '-library=Crun,stlport4', '-staticlib=Crun,stlport4'])
+            v.append_unique('CXXFLAGS', ['-mt', '-xldscope=hidden', '-Kpic', '-DPIC', '-D__PIC__'])
+            v.append_unique('LINKFLAGS', ['-lrt', '-mt', '-znow', '-xldscope=hidden', '-z', 'absexec', '-Kpic'])
+            if self.version_number < (5, 14):
+                v.append_unique('CXXFLAGS', ['-library=Crun,stlport4'])
+                v.append_unique('LINKFLAGS', ['-library=Crun,stlport4', '-staticlib=Crun,stlport4'])
 
     def populate_useful_variables(self, conf):
         pass

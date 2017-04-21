@@ -60,7 +60,12 @@ class ICC(Configure.ConfigurationContext.GnuCompiler):
         v = conf.env
         v.append_unique('CFLAGS', ['-fPIC'])
         v.append_unique('CXXFLAGS', ['-fPIC'])
-        if self.version_number >= 11:
+        if platform.NAME != 'windows':
+            if self.version_number >= (10,):
+                v.append_unique('LINKFLAGS', ['-static-intel'])
+            else:
+                v.append_unique('LINKFLAGS', ['-i-static'])
+        if self.version_number >= (11,):
             v.append_unique('CFLAGS', ['-fvisibility=hidden'])
             v.append_unique('CXXFLAGS', ['-fvisibility=hidden'])
             v.CFLAGS_exportall = ['-fvisibility=default']

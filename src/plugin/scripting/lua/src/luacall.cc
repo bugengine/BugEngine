@@ -10,8 +10,6 @@
 namespace BugEngine { namespace Lua
 {
 
-static int get(lua_State *state, int index, const RTTI::Type& type, RTTI::Value* value);
-
 static int convertNilToValue(lua_State *state, int index, const RTTI::Type& type, RTTI::Value* value)
 {
     be_forceuse(state);
@@ -271,7 +269,7 @@ static int convertTableToValue(lua_State *state, int index, const RTTI::Type& ty
     }
 }
 
-static int get(lua_State *state, int index, const RTTI::Type& type, RTTI::Value* value)
+int get(lua_State *state, int index, const RTTI::Type& type, RTTI::Value* value)
 {
     int t = lua_type(state, index);
     switch (t)

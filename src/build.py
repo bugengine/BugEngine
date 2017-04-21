@@ -15,6 +15,10 @@ def build(bld):
                 ['engine.core', 'engine.network', '3rdparty.zlib'])
     bld.library('engine.filesystem',
                 ['engine.core', 'engine.rtti', '3rdparty.minizip'])
+    bld.library('engine.rttiparse',
+                ['engine.core', 'engine.rtti', 'engine.filesystem'])
+    bld.library('engine.settings',
+                ['engine.rtti', 'engine.rttiparse'])
     bld.library('engine.resource',
                 ['engine.core', 'engine.rtti', 'engine.filesystem'])
     bld.library('engine.scheduler',
@@ -26,8 +30,9 @@ def build(bld):
                 ['engine.core', 'engine.rtti', 'engine.filesystem',
                  'engine.resource', 'engine.scheduler'])
     bld.shared_library('engine.bugengine',
-                       ['engine.core', 'engine.rtti', 'engine.scheduler',
-                        'engine.filesystem', 'engine.world', 'engine.plugin'])
+                       ['engine.core', 'engine.rtti', 'engine.rttiparse',
+                        'engine.settings', 'engine.scheduler', 'engine.filesystem',
+                        'engine.world', 'engine.plugin'])
 
     bld.engine('bugengine', ['engine.bugengine'], path='engine.main')
 
@@ -108,7 +113,6 @@ def build(bld):
         bld.plugin('plugin.scripting.pythonbinding',
                    ['engine.bugengine', 'plugin.scripting.pythonlib'] + python_deps)
     else:
-
         for version in bld.env.PYTHON_VERSIONS:
             bld.plugin('plugin.scripting.python%s' % version.replace('.', ''),
                        ['engine.bugengine', 'plugin.scripting.python',
@@ -172,9 +176,10 @@ def build(bld):
     bld.plugin('tool.bugeditor.ui',
                ['engine.bugengine', '3rdparty.scintilla'],
                platforms=['pc'])
-    bld.game('tool.bugeditor.main',
-             ['engine.bugengine', 'game.bugeditor.ui',
+    bld.game('bugeditor',
+             ['engine.bugengine', 'tool.bugeditor.ui',
               'plugin.scripting.package'],
+             path='tool.bugeditor.main',
              platforms=['pc'])
 
     bld.game('sample.kernel',

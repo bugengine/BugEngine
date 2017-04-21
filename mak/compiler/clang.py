@@ -17,7 +17,7 @@ class Clang(Configure.ConfigurationContext.GnuCompiler):
 
     def set_warning_options(self, conf):
         Configure.ConfigurationContext.GnuCompiler.set_warning_options(self, conf)
-        if self.version_number >= 3.6:
+        if self.version_number >= (3, 6):
             conf.env.CXXFLAGS_warnall.append('-Wno-unused-local-typedefs')
 
     def get_multilib_compilers(self):
@@ -62,13 +62,25 @@ class Clang(Configure.ConfigurationContext.GnuCompiler):
 
     def load_in_env(self, conf, platform, sysroot=None):
         Configure.ConfigurationContext.GnuCompiler.load_in_env(self, conf, platform)
-        if self.version_number >= 3.1:
+        if self.version_number >= (3, 1):
             if platform.NAME != 'windows':
                 env = conf.env
                 env.append_unique('CFLAGS', ['-fvisibility=hidden'])
                 env.append_unique('CXXFLAGS', ['-fvisibility=hidden'])
                 env.CFLAGS_exportall = ['-fvisibility=default']
                 env.CXXFLAGS_exportall = ['-fvisibility=default']
+
+    def split_path_list(self, line):
+        result = []
+        try:
+            while True:
+                index = line.index(':', 3)
+                result.append(line[:index])
+                line = line[index+1:]
+        except ValueError:
+            pass
+        return result
+
 
 
 def detect_clang(conf):

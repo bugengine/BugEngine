@@ -220,6 +220,31 @@ PyObject* PyBugString<T>::repr(PyObject *self)
                                                          | v.as<const T&>());
 }
 
+const char* toCharPtr(const istring& t)
+{
+    return t.c_str();
+}
+
+const inamespace::Path toCharPtr(const inamespace& t)
+{
+    return t.str();
+}
+
+const ipath::Filename toCharPtr(const ipath& t)
+{
+    return t.str();
+}
+
+const ifilename::Filename toCharPtr(const ifilename& t)
+{
+    return t.str();
+}
+
+const char* toCharPtr(const text& t)
+{
+    return t.begin();
+}
+
 template< typename T >
 PyObject* PyBugString<T>::str(PyObject *self)
 {
@@ -229,7 +254,7 @@ PyObject* PyBugString<T>::str(PyObject *self)
     toStringType toString = s_library->getVersion() >= 30
             ?   s_library->m_PyUnicode_FromString
             :   s_library->m_PyString_FromString;
-    return toString(minitl::format<1024u>("%s") | v.as<const T&>());
+    return toString(static_cast<const char*>(toCharPtr(v.as<const T&>())));
 }
 
 template< typename T >

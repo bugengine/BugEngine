@@ -6,9 +6,10 @@ import os
 
 @conf
 def python_module(bld, name, depends, path, platforms=[]):
-    for p in platforms:
-        if p not in bld.env.VALID_PLATFORMS:
-            return
+    if not bld.env.PROJECTS:
+        for p in platforms:
+            if p not in bld.env.VALID_PLATFORMS:
+                return
     module_list, module_multiarch = bld.module(name, path, depends, platforms,
         features=['cxx', 'cxxshlib', 'python_module'],
         build_features=[],
@@ -26,14 +27,13 @@ def python_module(bld, name, depends, path, platforms=[]):
 @feature('python_module')
 @after_method('apply_link')
 def install_python_module(self):
-    if self.bld.is_install:
-        if not self.env.ENV_PREFIX: #no multiarch
+    if not self.env.ENV_PREFIX: #no multiarch
+        self.install_files(os.path.join(self.bld.env.PREFIX, self.bld.optim, self.bld.env.DEPLOY_RUNBINDIR),
+                           [self.link_task.outputs[0]],
+                           Utils.O755)
+        if self.env.CC_NAME == 'msvc':
             self.install_files(os.path.join(self.bld.env.PREFIX, self.bld.optim, self.bld.env.DEPLOY_RUNBINDIR),
-                               [self.link_task.outputs[0]],
-                               Utils.O755)
-            if self.env.CC_NAME == 'msvc':
-                self.install_files(os.path.join(self.bld.env.PREFIX, self.bld.optim, self.bld.env.DEPLOY_RUNBINDIR),
-                                   [self.link_task.outputs[1]])
+                               [self.link_task.outputs[1]])
 
 
 def build(bld):
