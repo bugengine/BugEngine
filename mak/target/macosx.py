@@ -7,12 +7,12 @@ from waflib.Tools import gcc
 import os
 import re
 
-@conf
+
 class Darwin(Configure.ConfigurationContext.Platform):
     NAME = 'Darwin'
     SDK_NAME = 'Darwin'
     OS_NAME = 'darwin'
-    SUPPORTED_TARGETS = (re.compile('.*-apple-darwin.*'),)
+    SUPPORTED_TARGETS = (re.compile('.*-darwin.*'),)
 
     def __init__(self, conf, sdk = None):
         Configure.ConfigurationContext.Platform.__init__(self)
@@ -27,7 +27,7 @@ class Darwin(Configure.ConfigurationContext.Platform):
         for c in compiler_list:
             for r in self.SUPPORTED_TARGETS:
                 if r.match(c.target):
-                    k = (c.__class__.__name__, c.platform, c.version)
+                    k = (c.__class__.__name__, c.version)
                     try:
                         compiler_sets[k].append(c)
                     except KeyError:
@@ -49,11 +49,14 @@ class Darwin(Configure.ConfigurationContext.Platform):
     def load_in_env(self, conf, compiler):
         self.CFLAGS_cshlib = ['-fPIC']
         platform = self.SDK_NAME.lower()
+        p1 = os.path.join(self.sdk[1], 'usr', 'bin')
+        p2 = os.path.dirname(compiler.compiler_c)
         conf.find_program('lipo')
-        conf.find_program('dsymutil')
-        conf.find_program('strip')
+        if not conf.find_program('dsymutil', path_list=[p1, p2], mandatory=False):
+            conf.find_program('dsymutil')
+        conf.find_program('strip', path_list = [p1, p2])
         conf.env.ABI = 'mach_o'
-        conf.env.VALID_PLATFORMS = [platform, 'darwin', 'pc']
+        conf.env.VALID_PLATFORMS = self.PLATFORMS + ['darwin']
         conf.env.XCODE_SDKROOT = platform
         conf.env.XCODE_ABI = 'mach_o'
         conf.env.XCODE_SUPPORTEDPLATFORMS = platform
@@ -79,11 +82,13 @@ class Darwin(Configure.ConfigurationContext.Platform):
                                             '-isysroot', self.sdk[1]])
         conf.env.append_unique('LINKFLAGS', ['-m%s-version-min=%s'%(self.OS_NAME, self.sdk[0]),
                                              '-isysroot', self.sdk[1], '-L%s/usr/lib'%self.sdk[1]])
+        conf.env.CFLAGS_cshlib = ['-fPIC']
+        conf.env.CXXFLAGS_cxxshlib = ['-fPIC']
 
     def get_best_compilers_sdk(self, compilers):
         all_archs = []
         all_paths = []
-        for compiler in compilers:
+        for compiler in sorted(compilers, key = lambda x: x.name()):
             if compiler.arch not in all_archs: all_archs.append(compiler.arch)
             for sibling in compiler.siblings:
                 dirname = os.path.dirname(sibling.compiler_c)
@@ -91,90 +96,66 @@ class Darwin(Configure.ConfigurationContext.Platform):
                 dirname = os.path.dirname(dirname)
                 if dirname not in all_paths: all_paths.append(dirname)
 
-        sdk_number_min = getattr(Options.options, '%s_sdk_min' % self.OS_NAME)
-        sdk_number_max = getattr(Options.options, '%s_sdk_max' % self.OS_NAME)
+        try:
+            sdk_number_min = getattr(Options.options, '%s_sdk_min' % self.OS_NAME)
+        except AttributeError:
+            sdk_number_min = ''
+        sdk_number_min = sdk_number_min and sdk_number_min.split('.') or []
+        try:
+            sdk_number_max = getattr(Options.options, '%s_sdk_max' % self.OS_NAME)
+        except AttributeError:
+            sdk_number_max = ''
+        sdk_number_max = sdk_number_max and sdk_number_max.split('.') or []
         sdks = []
         relpath = os.path.join('Platforms', '%s.platform'%self.SDK_NAME, 'Developer', 'SDKs')
 
-        #for path in all_paths:
-        for path in Options.options.xcode_sdks.split(','):
-            for sdks_path in [os.path.join(path, relpath),
-                              os.path.join(path, 'SDKs'),]:
-                try:
-                    sdk_list = os.listdir(sdks_path)
-                except OSError:
-                    continue
-                else:
-                    for sdk in sdk_list:
-                        sdk_name,_ = os.path.splitext(sdk)
-                        if sdk_name.startswith(self.SDK_NAME) and len(sdk_name) > len(self.SDK_NAME):
-                            sdk_version = sdk_name[len(self.SDK_NAME):]
-                            if sdk_version[-1] == 'u':
-                                sdk_version = sdk_version[:-1]
-                            sdks.append((sdk_version, os.path.normpath(os.path.join(sdks_path, sdk))))
-
-        sdks.sort()
-        archs = {
-            '18':       { '10': 'ppc' },
-            '16777234': { '0':  'ppc64' },
-            '7':        { '3':  'x86' },
-            '16777223': { '3':  'amd64' },
-            '12':       { '6':  'armv6',
-                          '9':  'armv7',
-                          '11': 'armv7s' },
-            '16777228': { '0':  'arm64' }
-        }
-
-        best_sdk = (None, None, [])
-        for sdk, sdk_path in sdks:
-            if sdk_number_max and not sdk <= sdk_number_max:
-                continue
-            if sdk_number_min and not sdk >= sdk_number_min:
-                continue
-            sdk_compilers = []
-            dylib = os.path.join(sdk_path, 'usr', 'lib', 'crt1.10.5.o')
-            try:
-                r, out, err = compilers[0].run([self.conf.env.OTOOL, '-f', dylib])
-            except Exception as e:
-                print(e)
-            else:
-                for line in out.split('\n'):
-                    line = line.split()
-                    if not line:
-                        continue
-                    if line[0] == 'cputype':
-                        cputype = line[1]
-                    if line[0] == 'cpusubtype':
-                        cpusubtype = line[1]
-                        try:
-                            a = archs[cputype][cpusubtype]
-                        except KeyError:
-                            print('Unknown %s arch: %s/%s in %s' % (self.OS_NAME, cputype, cpusubtype, dylib))
-                        else:
-                            for c in compilers:
-                                if c.arch == a:
-                                    sdk_compilers.append(c)
-                                    break
-                            else:
-                                pass
-                                #print('no compiler for arch %s'%a)
-                if len(sdk_compilers) > len(best_sdk[2]):
-                    best_sdk = (sdk, sdk_path, sdk_compilers)
-                elif len(sdk_compilers) > len(best_sdk[2]) and sdk > best_sdk[0]:
-                    best_sdk = (sdk, sdk_path, sdk_compilers)
-        if best_sdk[2]:
-            return best_sdk[2], (best_sdk[0], best_sdk[1])
+        try:
+            all_sdks = self.conf.darwin_sdks[self.SDK_NAME]
+        except KeyError:
+            raise Errors.WafError('No SDK detected for platform %s' % self.SDK_NAME)
         else:
-            raise Errors.WafError('No SDK for compiler %s' % compilers[0].compiler_c)
+            best_sdk = (None, None, [])
+            for sdk_version, sdk_archs, sdk_path in all_sdks:
+                sdk_option = '-m%s-version-min=%s'%(self.OS_NAME, '.'.join(sdk_version))
+                if sdk_number_max and sdk_version > sdk_number_max:
+                    continue
+                if sdk_number_min and sdk_version < sdk_number_min:
+                    continue
+                sdk_compilers = []
+                for a in sdk_archs:
+                    for c in compilers:
+                        if c.arch == a:
+                            r, out, err = c.run_cxx([sdk_option, '-Wl,-rpath,.', '-x', 'c++', '-isysroot', sdk_path, '-'],
+                                                    '#include <stdio.h>\nint main() { printf(0); return 0; }\n')
+                            if r == 0:
+                                sdk_compilers.append(c)
+                                break
+                            else:
+                                #print(err)
+                                pass
+                    else:
+                        #print('no compiler for arch %s'%a)
+                        pass
+                if len(sdk_compilers) > len(best_sdk[2]):
+                        best_sdk = ('.'.join(sdk_version), sdk_path, sdk_compilers)
+                elif len(sdk_compilers) > len(best_sdk[2]) and sdk > best_sdk[0]:
+                    best_sdk = ('.'.join(sdk_version), sdk_path, sdk_compilers)
+            if best_sdk[2]:
+                return best_sdk[2], (best_sdk[0], best_sdk[1])
+            else:
+                raise Errors.WafError('No SDK for compiler %s' % compilers[0].compiler_c)
 
+Configure.ConfigurationContext.Darwin = Darwin
 
 class MacOSX(Darwin):
     NAME = 'MacOSX'
+    PLATFORMS = ['macosx', 'pc']
     SDK_NAME = 'MacOSX'
     OS_NAME = 'macosx'
 
     def __init__(self, conf, sdk = None):
         Darwin.__init__(self, conf, sdk)
+
 
 
 def options(opt):
