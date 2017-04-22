@@ -13,4 +13,4 @@ def setup(conf):
                                 for a in conf.env.VALID_ARCHITECTURES],
                        includepath=[os.path.join(conf.path.abspath(), 'api')],
                        includes=['AL/alc.h', 'AL/al.h'],
-                       functions=['alcOpenDevice(0)'])
+                       functions=['alcOpenDevice'])

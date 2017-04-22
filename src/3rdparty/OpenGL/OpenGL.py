@@ -8,8 +8,8 @@ def setup(conf):
     elif 'windows' in conf.env.VALID_PLATFORMS:
         conf.check_lib(['opengl32', 'gdi32'],
                        includes=['GL/gl.h'],
-                       functions=['glBegin(GL_TRIANGLES)'])
+                       functions=['glBegin'])
     else:
         conf.check_lib('GL',
                        includes=['GL/gl.h'],
-                       functions=['glBegin(GL_TRIANGLES)'])
+                       functions=['glBegin'])

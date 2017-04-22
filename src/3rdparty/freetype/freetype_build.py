@@ -14,4 +14,4 @@ def build(bld):
                            use_master=False,
                            warnings=False)
     else:
-        bld.env.thirdparty('3rdparty.freetype')
+        bld.thirdparty('3rdparty.freetype')
