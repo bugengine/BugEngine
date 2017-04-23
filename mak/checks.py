@@ -70,8 +70,6 @@ def check_lib(self, libname, var='', libpath=[], includepath=[], includes=[], fu
             return string
     libname = Utils.to_list(libname)
     if not var: var = self.path.name
-    if self.env['%s_libs' % var]:
-        return
     try:
         if functions:
             functions =  ' + '.join(['(int*)(&%s)'%f for f in functions])

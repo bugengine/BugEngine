@@ -15,10 +15,14 @@ class Compiler:
         'amd64':    'amd64',
         'x86_64':   'amd64',
         'x64':      'amd64',
-        #'arm':      'armv6',
+        'arm':      'armv4',
+        'armv4':    'armv4',
+        'armv5':    'armv5',
         'armv6':    'armv6',
-        'armv7':    'armv7',
+        'armv7':    'armv7a',
+        'armv7a':   'armv7a',
         'armv7s':   'armv7s',
+        'armv7k':   'armv7k',
         'arm64':    'arm64',
         'aarch64':  'arm64',
         'aarch32':  'aarch32',
@@ -115,35 +119,49 @@ class Compiler:
 
 
 class GnuCompiler(Compiler):
+    ALL_ARM_ARCHS = ('armv5', 'armv6', 'armv7', 'armv7a', 'armv7k', 'armv7s')
     MULTILIBS = {
-        'x86':      (['-m64'], 'amd64'),
-        'amd64':    (['-m32'], 'x86'),
-        'ppc':      (['-m64'], 'ppc64'),
-        'ppc64':    (['-m32'], 'ppc'),
-        'mips':     (['-m64'], 'mips64'),
-        'mipsel':   (['-m64'], 'mips64el'),
-        'mips64':   (['-m32'], 'mips'),
-        'mips64el': (['-m32'], 'mipsel'),
+        'x86':      ((['-m64'], 'amd64'),),
+        'amd64':    ((['-m32'], 'x86'),),
+        'ppc':      ((['-m64'], 'ppc64'),),
+        'ppc64':    ((['-m32'], 'ppc'),),
+        'mips':     ((['-m64'], 'mips64'),),
+        'mipsel':   ((['-m64'], 'mips64el'),),
+        'mips64':   ((['-m32'], 'mips'),),
+        'mips64el': ((['-m32'], 'mipsel'),),
+        'arm':      [(['-march=%s'%a], a) for a in ALL_ARM_ARCHS],
+        'armv4':    [(['-march=%s'%a], a) for a in ALL_ARM_ARCHS],
+        'armv5':    [(['-march=%s'%a], a) for a in ALL_ARM_ARCHS],
+        'armv6':    [(['-march=%s'%a], a) for a in ALL_ARM_ARCHS],
+        'armv7':    [(['-march=%s'%a], a) for a in ALL_ARM_ARCHS],
+        'armv7a':   [(['-march=%s'%a], a) for a in ALL_ARM_ARCHS],
+        'armv7k':   [(['-march=%s'%a], a) for a in ALL_ARM_ARCHS],
+        'armv7l':   [(['-march=%s'%a], a) for a in ALL_ARM_ARCHS],
     }
     MACRO_ARCHS = (
-        (('__x86_64__',),                    'amd64'),
-        (('__i386__',),                      'x86'),
-        (('__i486__',),                      'x86'),
-        (('__i586__',),                      'x86'),
-        (('__i686__',),                      'x86'),
-        (('__powerpc__',),                   'ppc'),
-        (('__POWERPC__',),                   'ppc'),
-        (('__powerpc__', '__powerpc64__'),   'ppc64'),
-        (('__POWERPC__', '__ppc64__'),       'ppc64'),
-        (('__mips64', '__mips', '_MIPSEL'),  'mips64el'),
-        (('__mips', '_MIPSEL'),              'mipsel'),
-        (('__mips64', '__mips'),             'mips64'),
-        (('__mips__',),                      'mips'),
-        (('__aarch64__',),                   'aarch64'),
-        (('__aarch64',),                     'aarch64'),
-        (('__aarch32__',),                   'aarch32'),
-        (('__arm__',),                       'arm'),
-        (('__arm',),                         'arm'),
+        (('__x86_64__',),                                   'amd64'),
+        (('__i386__',),                                     'x86'),
+        (('__i486__',),                                     'x86'),
+        (('__i586__',),                                     'x86'),
+        (('__i686__',),                                     'x86'),
+        (('__powerpc__',),                                  'ppc'),
+        (('__POWERPC__',),                                  'ppc'),
+        (('__powerpc__', '__powerpc64__'),                  'ppc64'),
+        (('__POWERPC__', '__ppc64__'),                      'ppc64'),
+        (('__mips64', '__mips', '_MIPSEL'),                 'mips64el'),
+        (('__mips', '_MIPSEL'),                             'mipsel'),
+        (('__mips64', '__mips'),                            'mips64'),
+        (('__mips__',),                                     'mips'),
+        (('__aarch64__',),                                  'aarch64'),
+        (('__aarch64',),                                    'aarch64'),
+        (('__aarch32__',),                                  'aarch32'),
+        (('__arm__',),                                      'armv4'),
+        (('__arm__', '__ARM_ARCH_5__'),                     'armv5'),
+        (('__arm__', '__ARM_ARCH_6__'),                     'armv6'),
+        (('__arm__', '__ARM_ARCH_6K__'),                    'armv6'),
+        (('__arm__', '__ARM_ARCH_7A__'),                    'armv7a'),
+        (('__arm__', '__ARM_ARCH_7A__', '__ARM_ARCH_7K__'), 'armv7k'),
+        (('__arm__', '__ARM_ARCH_7S__'),                    'armv7s'),
     )
 
     def __init__(self, compiler_c, compiler_cxx, extra_args = [], extra_env={}):
@@ -212,15 +230,19 @@ class GnuCompiler(Compiler):
 
     def get_multilib_compilers(self):
         try:
-            multilib = self.MULTILIBS[self.arch]
+            multilibs = self.MULTILIBS[self.arch]
         except KeyError:
             return []
         else:
-            try:
-                c = self.__class__(self.compiler_c, self.compiler_cxx, multilib[0])
-                return [c]
-            except Exception:
-                return []
+            result = []
+            for multilib in multilibs:
+                try:
+                    c = self.__class__(self.compiler_c, self.compiler_cxx, multilib[0])
+                    result.append(c)
+                except Exception as e:
+                    #print(e)
+                    pass
+            return result
 
     def is_valid(self, conf):
         node = conf.bldnode.make_node('main.cxx')
