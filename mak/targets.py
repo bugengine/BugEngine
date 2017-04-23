@@ -18,6 +18,7 @@ def add_build_command(toolchain, optimisation):
             variant_dir = property(get_variant_dir, None)
 
 
+@conf
 class Platform:
     def __init__(self):
         pass
@@ -85,18 +86,16 @@ class Platform:
         self.variant = ''
         self.env.append_unique('ALL_TOOLCHAINS', toolchain)
 
-
 Configure.ConfigurationContext.Platform = Platform
-
 
 def options(opt):
     gr = opt.add_option_group('configure options')
-    for extra in opt.bugenginenode.make_node('extra').listdir():
-        if os.path.isfile(os.path.join(opt.bugenginenode.abspath(), 'extra', extra, 'wscript')):
-            opt.recurse(os.path.join(opt.bugenginenode.abspath(), 'extra', extra))
     for target in opt.path.make_node('target').listdir():
         if target.endswith('.py'):
             opt.recurse('target/%s'%target)
+    for extra in opt.bugenginenode.make_node('extra').listdir():
+        if os.path.isfile(os.path.join(opt.bugenginenode.abspath(), 'extra', extra, 'wscript')):
+            opt.recurse(os.path.join(opt.bugenginenode.abspath(), 'extra', extra))
     gr.add_option( '--platforms',
                     action='store',
                     default='',
@@ -110,13 +109,13 @@ def configure(conf):
     conf.platforms = []
     platforms = Options.options.platforms
     platforms = platforms.split(',') if platforms else []
+    for target in conf.path.make_node('target').listdir():
+        if not platforms or target[:-3] in platforms:
+            conf.recurse('target/%s'%target)
     for extra in conf.bugenginenode.make_node('extra').listdir():
         if not platforms or extra in platforms:
             if os.path.isfile(os.path.join(conf.bugenginenode.abspath(), 'extra', extra, 'wscript')):
                 conf.recurse(os.path.join(conf.bugenginenode.abspath(), 'extra', extra))
-    for target in conf.path.make_node('target').listdir():
-        if not platforms or target[:-3] in platforms:
-            conf.recurse('target/%s'%target)
     for p in conf.platforms:
         configuration_list = p.get_available_compilers(conf.compilers)
         if configuration_list:
