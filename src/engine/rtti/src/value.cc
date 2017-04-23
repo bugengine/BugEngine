@@ -125,8 +125,12 @@ Value Value::operator()(Value params[], u32 paramCount)
 {
     static const istring callName("?call");
     Value call = (*this)[callName];
-    be_assert_recover(call, "Not a callable object: %s" | m_type, return Value());
-    be_assert_recover(call.isA(be_typeid<const Method* const>::type()), "Not a callable object: %s" | m_type, return Value());
+    be_assert_recover(call,
+                      "Not a callable object: %s" | m_type,
+                      return Value());
+    be_assert_recover(call.isA(be_typeid<const Method* const>::type()),
+                      "Not a callable object: %s" | m_type,
+                      return Value());
     return call.as<const Method* const>()->doCall(params, paramCount);
 }
 

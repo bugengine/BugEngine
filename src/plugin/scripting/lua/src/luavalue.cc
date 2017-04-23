@@ -7,6 +7,7 @@
 #include    <luacall.hh>
 #include    <luacontext.hh>
 #include    <rtti/classinfo.script.hh>
+#include    <rtti/engine/propertyinfo.script.hh>
 
 
 namespace BugEngine { namespace Lua
