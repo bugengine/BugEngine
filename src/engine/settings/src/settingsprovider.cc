@@ -3,6 +3,7 @@
 
 #include    <settings/stdafx.h>
 #include    <settings/settingsprovider.hh>
+#include    <settings/settings.factory.hh>
 #include    <rtti/engine/namespace.hh>
 
 namespace BugEngine { namespace Settings
