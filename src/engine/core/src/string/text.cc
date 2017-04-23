@@ -41,4 +41,9 @@ u32 text::length() const
     return m_length;
 }
 
+u32 text::size() const
+{
+    return m_length;
+}
+
 }

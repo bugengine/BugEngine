@@ -24,6 +24,7 @@ public:
     const char* end() const;
 
     u32 length() const;
+    u32 size() const;
 
 private:
     text();

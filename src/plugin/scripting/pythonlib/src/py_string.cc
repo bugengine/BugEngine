@@ -308,6 +308,7 @@ template struct PyBugString<istring>;
 template struct PyBugString<inamespace>;
 template struct PyBugString<ifilename>;
 template struct PyBugString<ipath>;
+template struct PyBugString<text>;
 
 
 }}
