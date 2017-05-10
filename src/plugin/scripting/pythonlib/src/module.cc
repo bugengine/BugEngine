@@ -72,7 +72,7 @@ PyObject* init2_py_bugengine(bool registerLog)
         module = (*s_library->m_Py_InitModule4)("py_bugengine", s_methods, "",
                                                 NULL, s_library->getApi());
     }
-    if (s_library->m_Py_InitModule4_64)
+    else if (s_library->m_Py_InitModule4_64)
     {
         be_assert(sizeof(minitl::size_type) == 8, "Python is 64bits but BugEngine is 32bits");
         module = (*s_library->m_Py_InitModule4_64)("py_bugengine", s_methods, "",
