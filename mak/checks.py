@@ -14,7 +14,7 @@ __declspec(dllexport) int be_test()
 #endif
 int main(int argc, char *argv[])
 {
-    return *(%(function)s);
+    return %(function)s;
 }
 """
 
@@ -72,9 +72,9 @@ def check_lib(self, libname, var='', libpath=[], includepath=[], includes=[], fu
     if not var: var = self.path.name
     try:
         if functions:
-            functions =  ' + '.join(['(int*)(&%s)'%f for f in functions])
+            functions =  ' + '.join(['*(int*)(&%s)'%f for f in functions])
         else:
-            functions = '(int*)0'
+            functions = '*(int*)0'
         self.check(
             compile_filename=[],
             features='link_library',
@@ -141,9 +141,9 @@ def check_framework(self, frameworks, var='', libpath=[], includepath=[], includ
     if not var: var = self.path.name
     try:
         if functions:
-            functions =  ' + '.join(['(int*)(&%s)'%f for f in functions])
+            functions =  ' + '.join(['*(int*)(&%s)'%f for f in functions])
         else:
-            functions = '(int*)0'
+            functions = '*(int*)0'
         self.check(
             compile_filename=[],
             features='link_framework',
