@@ -5,8 +5,8 @@ import re
 
 class Linux(Configure.ConfigurationContext.Platform):
     NAME = 'Linux'
-    SUPPORTED_TARGETS = (re.compile('.*-linux-gnu$'),
-                         re.compile('^linux-gnu$'),
+    SUPPORTED_TARGETS = (re.compile('.*-linux-gnu.*'),
+                         re.compile('^linux-gnu.*'),
                          re.compile('.*-linux$'),
                          re.compile('^linux$'),)
 
