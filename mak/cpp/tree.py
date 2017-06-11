@@ -119,7 +119,7 @@ class Method(CppObject):
         return []
 
     def call(self, owner, struct_owner):
-        if struct_owner and not 'static' in self.attributes:
+        if struct_owner and not 'static' in self.attributes and not 'builtin' in self.attributes:
             params = ', '.join(self.extra_params(owner, struct_owner) +
                                ['parameters[%d].as< %s >()' % (i+1, p.type)
                                 for i, p in enumerate(self.parameters)])
@@ -162,7 +162,7 @@ class Method(CppObject):
     def write_parameters(self, owner, struct_owner, overload_index, definition):
         next_parameter = (0, '{0}', False)
         param_list = self.parameters
-        if struct_owner and not 'static' in self.attributes:
+        if struct_owner and not 'static' in self.attributes and not 'builtin' in self.attributes:
             if 'const' in self.attributes:
                 param_list.insert(0, Parameter('const %s&'%owner.cpp_name(), 'this', None))
             else:
@@ -186,6 +186,14 @@ class Method(CppObject):
                                        params[0], params[1], params[2] and 'true' or 'false',
                                        self.trampoline_name(owner)))
         return (overload[0]+1, '{&s_overload_%s_%d}' % (self.name, overload[0]))
+
+
+class BuiltinMethod(Method):
+    def __init__(self, name, return_type, parameters, attributes):
+        super(BuiltinMethod, self).__init__(name, return_type, parameters, attributes + ['builtin'])
+
+    def cpp_name(self, owner, struct_owner):
+        return self.name
 
 
 class Operator(Method):
@@ -432,12 +440,16 @@ class Typedef(CppObject):
 
 
 class EnumValue(Variable):
-    def __init__(self, name, type):
+    def __init__(self, name, value, type):
         super(EnumValue, self).__init__(name, type)
+        self.value = value
         self.add_attributes(['static'])
 
+    def cpp_name(self, owner):
+        return '%s::%s' % ('::'.join(owner.cpp_name().split('::')[:-1]), self.name)
+
     def write_object(self, owner, struct_owner, namespace, object_name, definition, instance):
-        n = '%s::%s' % ('::'.join(owner.cpp_name().split('::')[:-1]), self.name)
+        n = self.cpp_name(owner)
         tag = self.write_tags('s_object_%s' % self.id(), definition)
         for alias, alias_cpp in self.all_names():
             definition.write('    static ::BugEngine::RTTI::ObjectInfo s_object_%s = {\n'
@@ -564,6 +576,30 @@ class Class(Container):
             object.declare(definition, instance)
 
     def write_content(self, owner, struct_owner, namespace, definition, instance):
+        if self.type in ('enum'):
+            definition.write('    static ::BugEngine::istring toString(%s v)\n'
+                             '    {\n'
+                             '        %s\n'
+                             '        %s\n'
+                             '        return istring(minitl::format<64u>("Unknown(%%d)") | (u32)v);\n'
+                             '    }\n' % (self.cpp_name(),
+                                          '\n        '.join(('static const istring s_%s = "%s";' % (o.name, o.name) for o in self.objects[::-1])),
+                                          '\n        '.join(('if (v == %s) return s_%s;' % (o.cpp_name(self), o.name) for o in self.objects[::-1]))
+                                          )
+                            )
+            definition.write('    static u32 toInt(%s v)\n'
+                             '    {\n'
+                             '        return static_cast<u32>(v);\n'
+                             '    }\n' % (self.cpp_name())
+                            )
+            m = BuiltinMethod("toString", "::BugEngine::istring",
+                              [Parameter(self.cpp_name(), "this", None)], ['const'])
+            #m.add_tag(('Alias', '"toString"'))
+            self.add_method(m)
+            m = BuiltinMethod("toInt", "u32",
+                              [Parameter(self.cpp_name(), "this", None)], ['const'])
+            #m.add_tag(('Alias', '"toInt"'))
+            self.add_method(m)
         for object in self.objects:
             object.write_content(self, struct_owner or self, namespace, definition, instance)
         for method in self.methods:
