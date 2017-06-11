@@ -7,12 +7,12 @@ Supported platforms
 
 The following platforms are currently tested and known to build & work:
 
-#### Win32 (Windows 7 and Windows 8):
+#### Win32 (Windows 7 to Windows 10)
 You will need a properly configured compiler
-* Visual Studio: from 2003 to 2013
-* gcc: MingW32
-* clang: a properly cofigured CLang with MingW (3.2 and 3.4 tested)
-* Intel compiler: version 12 and 13 should work.
+* Visual Studio: from 2003 to 2017
+* gcc: MingW32, MSys2, version 3.4 to 6
+* gcc: MingW32, MSys2, version 3.4 minimum
+* Intel compiler: version 12 and 13
 
 #### Linux:
 * gcc
@@ -38,11 +38,11 @@ You will need a properly configured compiler
 ## Building
 
 You need one of the supported compilers installed and working
-You need python installed (tested with python 2.6 and above)
+You need python installed (tested with python 2.7 and above)
 You need Flex and Bison (for windows they are included in mak/win32)
 
 waf is the build system that is used for building.
-waf can also be used to generate projects for MSVC 2003 and above, including express versions, XCode, NetBeans
+waf can also be used to generate projects for MSVC 2003 and above, including express versions, XCode, NetBeans, QtCreator
 
 
 ### Configuring
@@ -65,13 +65,13 @@ to print a list of options.
 ### Building from the command line
 
 
-when you have decided which compiler to use, you can build & "install" by running
+when you have decided which compiler to use, you can build by running
 ```sh
-> python waf install:platform-architecture-compiler-version:variant
+> python waf build:platform-architecture-compiler-version:variant
 ```
 To list all supported combinations, run
 ```sh
-> python waf install
+> python waf build
 ```
 
 

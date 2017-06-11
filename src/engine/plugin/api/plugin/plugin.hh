@@ -7,6 +7,10 @@
 #include    <plugin/stdafx.h>
 #include    <plugin/dynobject.hh>
 
+#include    <resource/resourcemanager.hh>
+#include    <scheduler/scheduler.hh>
+#include    <filesystem/folder.script.hh>
+
 namespace BugEngine
 {
 

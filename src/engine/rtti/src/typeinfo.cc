@@ -90,14 +90,17 @@ void Type::destroy(void* ptr) const
 u32 Type::distance(const Type& other) const
 {
     u32 result = 0;
+
     if (other.indirection > 0 && access < other.access)
         return static_cast<u32>(MaxTypeDistance);
-    else
+    else if (other.indirection > 0)
         result += access - other.access;
+
     if (indirection < other.indirection)
         return static_cast<u32>(MaxTypeDistance);
     else
         result += indirection - other.indirection;
+
     return result + metaclass->distance(other.metaclass);
 }
 
@@ -134,7 +137,7 @@ bool operator==(Type t1, Type t2)
 
 bool operator<=(Type t1, Type t2)
 {
-    return     (t1.indirection <= t2.indirection)
+    return    (t1.indirection <= t2.indirection)
             && t1.access <= t2.access
             && t2.metaclass->isA(t1.metaclass);
 }

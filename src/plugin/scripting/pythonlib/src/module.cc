@@ -3,9 +3,11 @@
 
 #include    <pythonlib/stdafx.h>
 #include    <pythonlib/pythonlib.hh>
+#include    <plugin/plugin.hh>
 #include    <py_log.hh>
 #include    <py_object.hh>
 #include    <py_number.hh>
+#include    <py_enum.hh>
 #include    <py_string.hh>
 #include    <py_array.hh>
 #include    <py_namespace.hh>
@@ -43,6 +45,7 @@ static void setupModule(PyObject* module, bool registerLog)
     }
     PyBugPlugin::registerType(module);
     PyBugObject::registerType(module);
+    PyBugEnum::registerType(module);
     PyBugNumber<bool>::registerType(module);
     PyBugNumber<u8>::registerType(module);
     PyBugNumber<u16>::registerType(module);

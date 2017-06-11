@@ -368,6 +368,64 @@ Value Class::get(Value& from, istring propname, bool& found) const
     return Value();
 }
 
+Value Class::get(const Value& from, istring propname, bool& found) const
+{
+    static raw<const Class> const s_metaClass = be_typeid<Class>::klass();
+    if (from.type().metaclass == s_metaClass)
+    {
+        raw<const Class> cls = from.as< raw<const Class> >();
+        raw<const ObjectInfo> o = cls->objects;
+        while(o)
+        {
+            if (o->name == propname)
+            {
+                found = true;
+                return o->value;
+            }
+            o = o->next;
+        }
+        raw<const Method> m = cls->methods;
+        while(m)
+        {
+            if (m->name == propname)
+            {
+                found = true;
+                return Value(m);
+            }
+            m = m->next;
+        }
+    }
+
+    {
+        raw<const Property> p = properties;
+        while(p)
+        {
+            if (p->name == propname)
+            {
+                found = true;
+                return p->get(from);
+            }
+            p = p->next;
+        }
+    }
+
+    {
+        raw<const Method> m = methods;
+        while(m)
+        {
+            if (m->name == propname)
+            {
+                found = true;
+                return Value(m);
+            }
+            m = m->next;
+        }
+    }
+
+    found = false;
+    return Value();
+}
+
 bool Class::isA(raw<const Class> klass) const
 {
     raw<const Class> ci = {this};

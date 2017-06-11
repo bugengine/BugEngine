@@ -6,13 +6,27 @@
 
 class ConsoleLogListener : public BugEngine::ILogListener
 {
+private:
+    minitl::AssertionCallback_t m_previousCallback;
 public:
     ConsoleLogListener()
     {
+        m_previousCallback = minitl::setAssertionCallback(&onAssert);
     }
     ~ConsoleLogListener()
     {
+        minitl::setAssertionCallback(m_previousCallback);
     }
+private:
+    static minitl::AssertionResult onAssert(const char* file,
+                                            int         line,
+                                            const char* expr,
+                                            const char* message)
+    {
+        be_fatal("%s:%d Assertion failed: %s\n\t%s" | file | line | expr | message);
+        return minitl::Break;
+    }
+
 protected:
     virtual bool log(const BugEngine::istring& logname, BugEngine::LogLevel level,
                      const char *filename, int line,

@@ -5,6 +5,7 @@
 #include    <pythonlib/pythonlib.hh>
 #include    <py_object.hh>
 #include    <py_number.hh>
+#include    <py_enum.hh>
 #include    <py_string.hh>
 #include    <py_array.hh>
 #include    <py_namespace.hh>
@@ -256,6 +257,8 @@ PyObject* PyBugObject::create(PyObject* owner, const RTTI::Value& value)
     {
     case RTTI::ClassType_Number:
         return s_createNumber[t.metaclass->index()](owner, value);
+    case RTTI::ClassType_Enum:
+        return PyBugEnum::create(owner, value);
     case RTTI::ClassType_String:
         return s_createString[t.metaclass->index()](owner, value);
     case RTTI::ClassType_Array:
@@ -393,12 +396,19 @@ PyObject* PyBugObject::call(PyObject* self, PyObject* args, PyObject* kwds)
     {
         s_library->m_PyErr_Format(*s_library->m_PyExc_Exception,
                                   "%s object is not callable",
-                                  v.type().name().c_str());
+                                  self_->value.type().name().c_str());
         return 0;
     }
     else
     {
         raw<const RTTI::Method> method = v.as< raw<const RTTI::Method> >();
+        if (!method)
+        {
+            s_library->m_PyErr_Format(*s_library->m_PyExc_Exception,
+                                      "%s object is not callable",
+                                      self_->value.type().name().c_str());
+            return 0;
+        }
         return Python::call(method, NULL, args, kwds);
     }
 }
