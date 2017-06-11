@@ -86,7 +86,7 @@ def build(bld):
                 'plugin.graphics.shadermodel1',
                 'plugin.graphics.shadermodel2',
                 'plugin.graphics.shadermodel3'],
-             platforms=['pc'])
+               platforms=['pc'])
 
     #bld.plugin('plugin.audio.AL',
     #		   ['engine.bugengine', '3rdparty.OpenAL'])
@@ -98,8 +98,8 @@ def build(bld):
     bld.plugin('plugin.input.input',
                ['engine.bugengine'])
     bld.shared_library('plugin.scripting.pythonlib',
-               ['engine.bugengine'],
-               platforms=['pc'])
+                       ['engine.bugengine'],
+                       platforms=['pc'])
     bld.plugin('plugin.scripting.python',
                ['engine.bugengine', 'plugin.scripting.pythonlib'],
                platforms=['pc'])
@@ -109,7 +109,7 @@ def build(bld):
                       platforms=['pc'])
     if bld.env.PROJECTS:
         python_deps = ['3rdparty.python%s'%version.replace('.', '')
-                            for version in bld.env.PYTHON_VERSIONS]
+                       for version in bld.env.PYTHON_VERSIONS]
         bld.plugin('plugin.scripting.pythonbinding',
                    ['engine.bugengine', 'plugin.scripting.pythonlib'] + python_deps)
     else:
@@ -188,7 +188,9 @@ def build(bld):
              ['engine.bugengine', 'plugin.scripting.package', 'plugin.graphics.3d'])
     bld.game('sample.python',
              ['engine.bugengine', 'plugin.scripting.package'])
+    bld.game('sample.lua',
+             ['engine.bugengine', 'plugin.scripting.package', 'plugin.scripting.lua'])
     bld.game('help', ['engine.bugengine', 'plugin.ui.console',
-              'plugin.scripting.package'],
+                      'plugin.scripting.package'],
              path='tool.help', platforms=['pc'])
 

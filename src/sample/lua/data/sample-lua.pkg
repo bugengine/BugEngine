@@ -1,0 +1,6 @@
+load plugin.scripting.lua as lua;
+
+script = lua.LuaScript
+(
+    script = <sample.lua>;
+)
