@@ -3,5 +3,5 @@ load plugin.scripting.lua;
 
 luascript = plugin.scripting.lua.LuaScript
 (
-	script = <sample.lua>;
+	script = <kernel-sample.lua>;
 )

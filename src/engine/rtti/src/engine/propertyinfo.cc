@@ -18,6 +18,13 @@ Value Property::get(Value& from) const
     return (*getter)((void*)((char*)from.rawget() + offset), from.isConst());
 }
 
+Value Property::get(const Value& from) const
+{
+    be_assert(from.type().metaclass->isA(owner.metaclass), "getting property on object of type %s, while expecting type %s" | from.type() | owner);
+    i32 offset = from.type().metaclass->offset - owner.metaclass->offset;
+    return (*getter)((void*)((char*)from.rawget() + offset), true);
+}
+
 void Property::set(Value& from, const Value& value) const
 {
     get(from) = value;

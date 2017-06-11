@@ -79,6 +79,7 @@ public:
     inline bool operator!() const;
 
     Value operator[](const istring& name);
+    Value operator[](const istring& name) const;
     Value operator()(Value params[], u32 paramCount);
 
     inline bool isA(const Type& type) const

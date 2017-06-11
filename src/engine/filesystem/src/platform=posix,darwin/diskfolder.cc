@@ -114,16 +114,18 @@ weak<File> DiskFolder::createFile(const istring& name)
     ifilename::Filename path = (m_path+ifilename(name)).str();
     struct stat s;
     errno = 0;
-    FILE* f = fopen(path.name, "w");
+    char fullPathBuffer[PATH_MAX];
+    char* fullPath = realpath(path.name, fullPathBuffer);
+    FILE* f = fopen(fullPath, "w");
     if (f == 0)
     {
-        be_error("could not create file %s: %s(%d)" | path.name | strerror(errno) | errno);
+        be_error("could not create file %s: %s(%d)" | fullPath | strerror(errno) | errno);
         return ref<File>();
     }
     fclose(f);
     if (stat(path.name, &s) != 0)
     {
-        be_error("could not create file %s: %s(%d)" | path.name | strerror(errno) | errno);
+        be_error("could not create file %s: %s(%d)" | fullPath | strerror(errno) | errno);
         return ref<File>();
     }
 

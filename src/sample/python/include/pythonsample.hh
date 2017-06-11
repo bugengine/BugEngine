@@ -1,8 +1,8 @@
 /* BugEngine <bugengine.devel@gmail.com> / 2008-2014
    see LICENSE for detail */
 
-#ifndef BE_SAMPLE_PYTHONSAMPLE_HH_
-#define BE_SAMPLE_PYTHONSAMPLE_HH_
+#ifndef BE_SAMPLES_PYTHON_PYTHONSAMPLE_HH_
+#define BE_SAMPLES_PYTHON_PYTHONSAMPLE_HH_
 /**************************************************************************************************/
 #include    <stdafx.h>
 #include    <filesystem/folder.script.hh>

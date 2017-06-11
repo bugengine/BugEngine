@@ -149,7 +149,7 @@ PyObject* call(raw<const RTTI::Method> method, PyObject* self, PyObject* args, P
         }
         for (u32 i = 0; i < unnamedArgCount; ++argIndex, ++i)
         {
-            new (&argInfos[argIndex]) ArgInfo(s_library->m_PyTuple_GetItem(args, argIndex));
+            new (&argInfos[argIndex]) ArgInfo(s_library->m_PyTuple_GetItem(args, i));
         }
         if (kwargs)
         {

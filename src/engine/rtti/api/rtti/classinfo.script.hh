@@ -89,7 +89,6 @@ published:
     raw<const Method>           constructor;
     raw<const Method>           call;
 public:
-
     typedef void (*CopyConstructor)(const void* source, void* destination);
     typedef void (*Destructor)(void* object);
     const CopyConstructor   copyconstructor;
@@ -100,6 +99,7 @@ published:
     Value getTag(raw<const Class> type) const;
 
     Value get(Value& from, istring name, bool& found) const;
+    Value get(const Value& from, istring name, bool& found) const;
 
     bool isA(raw<const Class> klass) const;
 

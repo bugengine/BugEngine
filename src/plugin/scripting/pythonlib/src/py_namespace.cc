@@ -25,7 +25,7 @@ PyTypeObject PyBugNamespace::s_pyType =
     0,
     0,
     0,
-    0,
+    &PyBugObject::call,
     0,
     0,
     0,

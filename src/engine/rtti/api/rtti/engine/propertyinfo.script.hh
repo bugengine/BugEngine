@@ -24,6 +24,7 @@ published:
     Type                    type;
 
     Value get(Value& from) const;
+    Value get(const Value& from) const;
     void  set(Value& from, const Value& value) const;
 
     Value getTag(const Type& tagType) const;

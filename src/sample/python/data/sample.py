@@ -1,4 +1,5 @@
 from py_bugengine import *
+import ctypes
 
 def name(type):
     constness = int(type.constness) == 0 and 'const ' or ''
