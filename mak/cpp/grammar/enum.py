@@ -5,7 +5,7 @@ def p_enum_value(p):
         enum_value : ID
                    | ID ASSIGN value
     """
-    p[0] = p[1]
+    p[0] = (p[1], (p[3] if len(p) > 2 else None))
 
 
 def p_enum_values(p):
@@ -13,7 +13,7 @@ def p_enum_values(p):
         enum_values : tag_list enum_value doc_left COMMA doc_left enum_values
                     | tag_list enum_value doc_left
     """
-    v = EnumValue(p[2], p.parser.stack[-1].cpp_name())
+    v = EnumValue(p[2][0], p[2][1], p.parser.stack[-1].cpp_name())
     v.add_tags(p[1])
     v.add_attributes(['static'])
     p.parser.stack[-1].add_property(v)
