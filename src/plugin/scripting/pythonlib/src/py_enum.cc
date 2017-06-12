@@ -3,6 +3,7 @@
 
 #include    <pythonlib/stdafx.h>
 #include    <pythonlib/pythonlib.hh>
+#include    <rtti/engine/methodinfo.script.hh>
 #include    <py_enum.hh>
 
 namespace BugEngine { namespace Python
