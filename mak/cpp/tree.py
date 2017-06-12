@@ -47,7 +47,8 @@ class CppObject(object):
         for t in self.tags:
             if t[0] in ('Alias', 'Index'):
                 continue
-            definition.write('    static const ::BugEngine::RTTI::Tag s_tag_%s_%d be_section(rtti_tag) = {\n'
+            definition.write('    be_section(rtti_tag)\n'
+                             '    static const ::BugEngine::RTTI::Tag s_tag_%s_%d = {\n'
                              '        %s,\n'
                              '        ::BugEngine::RTTI::Value(%s(%s))\n'
                              '    };\n' % (prefix, index, tag, t[0], t[1]))
@@ -78,8 +79,9 @@ class Parameter(CppObject):
             tag = self.write_tags('parameter_%s_%d_%d' % (method_name, overload_index,
                                                           next_parameter[0]),
                                   definition)
-            definition.write('    static const ::BugEngine::RTTI::Method::Parameter '
-                             's_parameter_%s_%d_%d be_section(rtti_method) = {\n'
+            definition.write('    be_section(rtti_method)\n'
+                             '    static const ::BugEngine::RTTI::Method::Parameter '
+                             's_parameter_%s_%d_%d  = {\n'
                              '       %s,\n'
                              '       %s,\n'
                              '       ::BugEngine::istring("%s"),\n'
@@ -175,7 +177,8 @@ class Method(CppObject):
     def write(self, overload, owner, struct_owner, definition):
         tag = self.write_tags('overload_%s_%d' % (self.name, overload[0]), definition)
         params = self.write_parameters(owner, struct_owner, overload[0], definition)
-        definition.write('    static const ::BugEngine::RTTI::Method::Overload s_overload_%s_%d be_section(rtti_method) = {\n'
+        definition.write('    be_section(rtti_method)\n'
+                         '    static const ::BugEngine::RTTI::Method::Overload s_overload_%s_%d = {\n'
                          '       %s,\n'
                          '       %s,\n'
                          '       ::BugEngine::be_typeid< %s >::type(),\n'
@@ -332,14 +335,16 @@ class OverloadedMethod(CppObject):
         overload = (0, '{0}')
         for o in self.overloads[::-1]:
             overload = o.write(overload, owner, struct_owner, definition)
-        definition.write('    static const ::BugEngine::RTTI::Method s_method_%s be_section(rtti_method) = {\n'
+        definition.write('    be_section(rtti_method)\n'
+                         '    static const ::BugEngine::RTTI::Method s_method_%s  = {\n'
                          '       %s,\n'
                          '       {0},\n'
                          '       {&s_method_%s},\n'
                          '       %d,\n'
                          '       %s\n'
                          '    };\n'
-                         '    static const raw<const ::BugEngine::RTTI::Method> s_method_ptr_%s be_section(rtti_method) = '
+                         '    be_section(rtti_method_init)\n'
+                         '    static const raw<const ::BugEngine::RTTI::Method> s_method_ptr_%s = '
                          '{&s_method_%s};\n'
                          '    static ::BugEngine::RTTI::ObjectInfo s_object_%s = {\n'
                          '        %s,\n'
