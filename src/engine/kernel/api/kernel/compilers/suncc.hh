@@ -36,5 +36,7 @@ typedef u8                      byte;
 #undef __REDIRECT
 #include <cerrno>
 
+#define be_section(name)
+
 /**************************************************************************************************/
 #endif

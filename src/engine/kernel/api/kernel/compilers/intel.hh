@@ -56,6 +56,7 @@ typedef u8                      byte;
 # define BE_EXPORT
 # define BE_IMPORT
 #endif
+#define be_section(name) __attribute__((section("." #name)))
 
 #else
 
@@ -90,6 +91,8 @@ typedef u8                      byte;
 # ifndef _CRT_SECURE_NO_DEPRECATE
 #  define _CRT_SECURE_NO_DEPRECATE 1
 # endif
+
+#define be_section(name) __declspec(allocate("." #name))
 
 #endif
 

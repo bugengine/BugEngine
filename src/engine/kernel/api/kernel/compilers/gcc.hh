@@ -60,5 +60,7 @@ typedef u8                      byte;
 # define BE_IMPORT
 #endif
 
+#define be_section(name) __attribute__((section("." #name)))
+
 /**************************************************************************************************/
 #endif

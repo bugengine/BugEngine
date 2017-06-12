@@ -47,7 +47,7 @@ class CppObject(object):
         for t in self.tags:
             if t[0] in ('Alias', 'Index'):
                 continue
-            definition.write('    static const ::BugEngine::RTTI::Tag s_tag_%s_%d = {\n'
+            definition.write('    static const ::BugEngine::RTTI::Tag s_tag_%s_%d be_section(rtti_tag) = {\n'
                              '        %s,\n'
                              '        ::BugEngine::RTTI::Value(%s(%s))\n'
                              '    };\n' % (prefix, index, tag, t[0], t[1]))
@@ -79,7 +79,7 @@ class Parameter(CppObject):
                                                           next_parameter[0]),
                                   definition)
             definition.write('    static const ::BugEngine::RTTI::Method::Parameter '
-                             's_parameter_%s_%d_%d = {\n'
+                             's_parameter_%s_%d_%d be_section(rtti_method) = {\n'
                              '       %s,\n'
                              '       %s,\n'
                              '       ::BugEngine::istring("%s"),\n'
@@ -139,7 +139,8 @@ class Method(CppObject):
             return '%s(%s)' % (self.cpp_name(owner, struct_owner), params)
 
     def write_content(self, owner, struct_owner, namespace, definition, instance):
-        definition.write('static ::BugEngine::RTTI::Value %s'
+        definition.write('be_section(rtti_text_trampoline)\n'
+                         'static ::BugEngine::RTTI::Value %s'
                          '(::BugEngine::RTTI::Value* parameters, u32 parameterCount)\n'
                          '{\n'
                          '    be_forceuse(parameters);\n'
@@ -174,7 +175,7 @@ class Method(CppObject):
     def write(self, overload, owner, struct_owner, definition):
         tag = self.write_tags('overload_%s_%d' % (self.name, overload[0]), definition)
         params = self.write_parameters(owner, struct_owner, overload[0], definition)
-        definition.write('    static const ::BugEngine::RTTI::Method::Overload s_overload_%s_%d = {\n'
+        definition.write('    static const ::BugEngine::RTTI::Method::Overload s_overload_%s_%d be_section(rtti_method) = {\n'
                          '       %s,\n'
                          '       %s,\n'
                          '       ::BugEngine::be_typeid< %s >::type(),\n'
@@ -331,14 +332,14 @@ class OverloadedMethod(CppObject):
         overload = (0, '{0}')
         for o in self.overloads[::-1]:
             overload = o.write(overload, owner, struct_owner, definition)
-        definition.write('    static const ::BugEngine::RTTI::Method s_method_%s = {\n'
+        definition.write('    static const ::BugEngine::RTTI::Method s_method_%s be_section(rtti_method) = {\n'
                          '       %s,\n'
                          '       {0},\n'
                          '       {&s_method_%s},\n'
                          '       %d,\n'
                          '       %s\n'
                          '    };\n'
-                         '    static const raw<const ::BugEngine::RTTI::Method> s_method_ptr_%s = '
+                         '    static const raw<const ::BugEngine::RTTI::Method> s_method_ptr_%s be_section(rtti_method) = '
                          '{&s_method_%s};\n'
                          '    static ::BugEngine::RTTI::ObjectInfo s_object_%s = {\n'
                          '        %s,\n'
@@ -382,7 +383,7 @@ class Variable(CppObject):
     def write_object(self, owner, struct_owner, namespace, object_name, definition, instance):
         tag = self.write_tags('s_object_%s' % self.id(), definition)
         for alias, alias_cpp in self.all_names():
-            definition.write('    static ::BugEngine::RTTI::ObjectInfo s_object_%s = {\n'
+            definition.write('    static ::BugEngine::RTTI::ObjectInfo s_object_%s be_section(rtti_objects) = {\n'
                              '        %s,\n'
                              '        %s,\n'
                              '        ::BugEngine::istring(%s),\n'
@@ -396,7 +397,7 @@ class Variable(CppObject):
     def write_property(self, owner, property_name, definition):
         tag = self.write_tags('s_property_%s' % self.id(), definition)
         for alias, alias_cpp in self.all_names():
-            definition.write('    static ::BugEngine::RTTI::Property s_property_%s = {\n'
+            definition.write('    static ::BugEngine::RTTI::Property s_property_%s be_section(rtti_prop) = {\n'
                              '        %s,\n'
                              '        %s,\n'
                              '        ::BugEngine::istring(%s),\n'
@@ -427,7 +428,7 @@ class Typedef(CppObject):
     def write_object(self, owner, struct_owner, namespace, object_name, definition, instance):
         tag = self.write_tags('s_object_%s' % self.id(), definition)
         for alias, alias_cpp in self.all_names():
-            definition.write('    static ::BugEngine::RTTI::ObjectInfo s_object_td_%s = {\n'
+            definition.write('    static ::BugEngine::RTTI::ObjectInfo s_object_td_%s be_section(rtti_objects) = {\n'
                              '        %s,\n'
                              '        %s,\n'
                              '        ::BugEngine::istring(%s),\n'
@@ -452,10 +453,10 @@ class EnumValue(Variable):
         n = self.cpp_name(owner)
         tag = self.write_tags('s_object_%s' % self.id(), definition)
         for alias, alias_cpp in self.all_names():
-            definition.write('    static ::BugEngine::RTTI::ObjectInfo s_object_%s = {\n'
+            definition.write('    static ::BugEngine::RTTI::ObjectInfo s_object_%s be_section(rtti_objects) = {\n'
                              '        %s,\n'
                              '        %s,\n'
-                             '        ::BugEngine::istring(%s),\n'
+                             '        %s,\n'
                              '        ::BugEngine::RTTI::Value(\n'
                              '            ::BugEngine::RTTI::Value::ByRef(%s))\n'
                              '    };\n' % (alias_cpp, object_name, tag,
@@ -577,7 +578,8 @@ class Class(Container):
 
     def write_content(self, owner, struct_owner, namespace, definition, instance):
         if self.type in ('enum'):
-            definition.write('    static ::BugEngine::istring toString(%s v)\n'
+            definition.write('    be_section(rtti_text_enum)\n'
+                             '    static ::BugEngine::istring toString(%s v)\n'
                              '    {\n'
                              '        %s\n'
                              '        %s\n'
@@ -587,7 +589,8 @@ class Class(Container):
                                           '\n        '.join(('if (v == %s) return s_%s;' % (o.cpp_name(self), o.name) for o in self.objects[::-1]))
                                           )
                             )
-            definition.write('    static u32 toInt(%s v)\n'
+            definition.write('    be_section(rtti_text_enum)\n'
+                             '    static u32 toInt(%s v)\n'
                              '    {\n'
                              '        return static_cast<u32>(v);\n'
                              '    }\n' % (self.cpp_name())
@@ -622,7 +625,8 @@ class Class(Container):
             offset = '0'
             methods = '{0}'
             properties = '{0}'
-        definition.write('raw< ::BugEngine::RTTI::Class > preklass_%s()\n'
+        definition.write('be_section(rtti_text_cls)\n'
+                         'raw< ::BugEngine::RTTI::Class > preklass_%s()\n'
                          '{\n' % self.name[-1])
         if struct_owner:
             struct_owner.typedef(definition)
@@ -642,7 +646,8 @@ class Class(Container):
                 classtype = '::BugEngine::RTTI::ClassType_Pod'
             else:
                 classtype = '0'
-        definition.write('    static ::BugEngine::RTTI::Class cls = {\n'
+        definition.write('    be_section(rtti_cls)\n'
+                         '    static ::BugEngine::RTTI::Class cls = {\n'
                          '        ::BugEngine::be_typeid< %s >::name(),\n'
                          '        {%s.m_ptr},\n'
                          '        {%s.m_ptr},\n'
@@ -661,7 +666,7 @@ class Class(Container):
                          '    return result;\n'
                          '}\n'% (self.cpp_name(), owner.owner_name(), parent, self.cpp_name(),
                                  offset, classtype, tag, copy, destructor))
-        definition.write('raw< const ::BugEngine::RTTI::Class > properties_%s()\n'
+        definition.write('be_section(rtti_text_cls_props)\nraw< const ::BugEngine::RTTI::Class > properties_%s() \n'
                          '{\n' % self.name[-1])
         if struct_owner:
             struct_owner.typedef(definition)
@@ -700,22 +705,27 @@ class Class(Container):
                          '    result->properties.set(properties.operator->());\n'
                          '    return result;\n'
                          '}\n' % (next_object, next_method, constructor, next_property))
-        definition.write('BE_EXPORT raw<const ::BugEngine::RTTI::Class> s_create_%s = '
+        definition.write('be_section(rtti_cls)\n'
+                         'BE_EXPORT\n'
+                         'raw<const ::BugEngine::RTTI::Class> s_create_%s = '
                          '::BugEngine::be_typeid< %s >::klass();\n' % (self.name[-1],
                                                                        self.cpp_name()))
         instance.write('template< >\n'
+                       'be_section(rtti_text_cls)\n'
                        'BE_EXPORT raw< RTTI::Class > be_typeid< %s >::preklass()\n'
                        '{\n'
                        '    return %s::preklass_%s();\n'
                        '}\n'
                        '\n' % (self.cpp_name(), '::'.join(namespace), self.name[-1]))
         instance.write('template< >\n'
+                       'be_section(rtti_text_cls)\n'
                        'BE_EXPORT raw< const RTTI::Class > be_typeid< %s >::registerProperties()\n'
                        '{\n'
                        '    return %s::properties_%s();\n'
                        '}\n'
                        '\n' % (self.cpp_name(), '::'.join(namespace), self.name[-1]))
         instance.write('template< >\n'
+                       'be_section(rtti_text_cls)\n'
                        'BE_EXPORT istring be_typeid< %s >::name()\n'
                        '{\n'
                        '    static const istring s_name = "%s";\n'
@@ -725,7 +735,8 @@ class Class(Container):
 
     def write_object(self, owner, struct_owner, namespace, object_name, definition, instance):
         for alias, alias_cpp in self.all_names():
-            definition.write('    static ::BugEngine::RTTI::ObjectInfo s_object_%s = {\n'
+            definition.write('    be_section(rtti_objects)\n'
+                             '    static ::BugEngine::RTTI::ObjectInfo s_object_%s = {\n'
                              '        %s,\n'
                              '        {0},\n'
                              '        ::BugEngine::istring(%s),\n'
@@ -768,8 +779,10 @@ class Namespace(Container):
                 next_object = object.write_object(self, None, namespace + [self.name[-1]],
                                                   next_object, definition, instance)
             if next_object != first_object:
-                definition.write('static raw<const ::BugEngine::RTTI::ObjectInfo> s_object_ptr_%s ='
+                definition.write('be_section(rtti_objects)\n'
+                                 'static raw<const ::BugEngine::RTTI::ObjectInfo> s_object_ptr_%s ='
                                  ' %s;\n'
+                                 'be_section(rtti_objects)\n'
                                  'BE_EXPORT const ::BugEngine::RTTI::ObjectInfo* s_object_set_%s ='
                                  ' %s->objects.set(s_object_ptr_%s.operator->());\n'
                                  '\n' % (object.id(), next_object, object.id(),
