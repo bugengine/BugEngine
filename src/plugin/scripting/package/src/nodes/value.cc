@@ -458,7 +458,7 @@ RTTI::Value ArrayValue::as(const RTTI::Type& type) const
     {
         v[i] = m_values[i]->as(valueType);
     }
-    return type.metaclass->constructor->doCall(v.begin(), be_checked_numcast<u32>(m_values.size()));
+    return type.metaclass->getConstructor()->doCall(v.begin(), be_checked_numcast<u32>(m_values.size()));
 }
 
 }}}

@@ -16,12 +16,10 @@ static const u32 s_overloadVarargDistance = s_overloadMaxDistance-1;
 
 Value Method::Parameter::getTag(const Type& tagType) const
 {
-    raw<const Tag> tag = tags;
-    while(tag)
+    for (const Tag* tag = tags->begin(); tag != tags->end(); ++tag)
     {
         if (tagType <= tag->tag.type())
             return Value(Value::ByRef(tag->tag));
-        tag = tag->next;
     }
     return Value();
 }
@@ -40,11 +38,11 @@ u32 Method::Overload::distance(Value* p, u32 nparams) const
     else
     {
         u32 distance = 0;
-        raw<const Parameter> selfp = params;
-        while(nparams && selfp)
+        const Parameter* selfp = params->begin();
+        while(nparams && selfp != params->end())
         {
             distance += p->type().distance(selfp->type);
-            selfp = selfp->next;
+            selfp++;
             nparams--;
             p++;
         }
@@ -57,12 +55,10 @@ u32 Method::Overload::distance(Value* p, u32 nparams) const
 
 Value Method::Overload::getTag(const Type& type) const
 {
-    raw<const Tag> tag = tags;
-    while(tag)
+    for (const Tag* tag = tags->begin(); tag != tags->end(); ++tag)
     {
         if (type <= tag->tag.type())
             return Value(Value::ByRef(tag->tag));
-        tag = tag->next;
     }
     return Value();
 }
@@ -76,13 +72,13 @@ Value Method::doCall(Value* params, u32 nparams) const
 {
     u32 bestDistance = s_overloadMaxDistance;
     raw<const Overload> overload = {0};
-    for (raw<const Overload> it = overloads; it; it = it->next)
+    for (const Overload* it = overloads->begin(); it != overloads->end(); ++it)
     {
         u32 distance = it->distance(params, nparams);
         if (distance < bestDistance)
         {
             bestDistance = distance;
-            overload = it;
+            overload.set(it);
         }
     }
     if (overload)

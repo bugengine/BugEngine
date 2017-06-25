@@ -92,7 +92,7 @@ typedef u8                      byte;
 #  define _CRT_SECURE_NO_DEPRECATE 1
 # endif
 
-#define be_section(name) __declspec(allocate("." #name))
+#define be_section(name)
 
 #endif
 

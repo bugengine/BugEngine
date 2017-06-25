@@ -6,7 +6,6 @@
 /**************************************************************************************************/
 #include    <rtti/stdafx.h>
 #include    <rtti/classinfo.script.hh>
-#include    <rtti/builtin.hh>
 
 namespace BugEngine { namespace RTTI
 {

@@ -23,9 +23,9 @@ static raw<const RTTI::Method::Overload> findMatch(DbContext& context,
 {
     be_forceuse(context);
     raw<const RTTI::Method::Overload> result = {0};
-    for (raw<const RTTI::Method::Overload> o = m->overloads; o; o = o->next)
+    for (raw<const RTTI::Method::Overload> o = m->overloads->begin(); o!= m->overloads->end(); ++o)
     {
-        ParameterMatch* matches = (ParameterMatch*)malloca(o->parameterCount * sizeof(ParameterMatch));
+        ParameterMatch* matches = (ParameterMatch*)malloca(o->parameters->count * sizeof(ParameterMatch));
         u32 i = 0;
         //u32 unused = parameters.size();
         for (raw<const RTTI::Method::Parameter> p = o->params; p; p = p->next, ++i)

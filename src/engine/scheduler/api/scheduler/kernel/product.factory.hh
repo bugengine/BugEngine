@@ -51,7 +51,6 @@ struct BE_EXPORT be_typeid< Kernel::Product<T> >
             {0},
             {0},
             {0},
-            {0},
             0,
             0
         };

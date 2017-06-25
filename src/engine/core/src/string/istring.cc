@@ -4,6 +4,7 @@
 #include    <core/stdafx.h>
 #include    <core/string/istring.hh>
 #include    <core/threads/criticalsection.hh>
+#include    <core/memory/allocators/system.hh>
 #include    <minitl/algorithm.hh>
 #include    <minitl/hash_map.hh>
 #include    <cstring>
@@ -13,49 +14,67 @@ namespace BugEngine
 
 namespace Arena
 {
-static inline minitl::Allocator& string()
+static inline SystemAllocator& string()
 {
-    return general();
+    static SystemAllocator allocator(SystemAllocator::BlockSize_256k, 5);
+    return allocator;
 }
 }
 
-class StringCache
+class StringInfo
 {
 private:
-    class Buffer
+    typedef minitl::hashmap< const char *, u32 > StringIndex;
+
+    class StringInfoBufferCache;
+    class StringInfoBuffer
+    {
+        friend class StringInfoBufferCache;
+    private:
+        static const u32    s_capacity;
+        i_u32               m_used;
+        byte                m_data[1];
+    public:
+        StringInfoBuffer();
+        ~StringInfoBuffer();
+
+        byte* reserve(u32 size);
+    };
+
+    class StringInfoBufferCache
     {
     private:
-        Buffer*                         m_next;
-        minitl::Allocator::Block<byte>  m_buffer;
-        i_size_t                        m_used;
-        static const size_t             s_capacity = 1024*200;
+        iptr<StringInfoBuffer>* m_buffers;
+        i_u32                   m_bufferCount;
     private:
-        StringCache*    reserveNext(size_t size);
+        StringInfoBuffer* allocate(u32 place);
     public:
-        Buffer();
-        ~Buffer();
+        StringInfoBufferCache();
+        ~StringInfoBufferCache();
+        StringInfo* resolve(u32 index);
+        StringInfoBuffer* get(u32 index);
 
-        StringCache*        reserve(size_t size);
+        u32 allocateStringInfo(u32 size);
     };
-private:
-    typedef minitl::hashmap< const char *, StringCache* > StringIndex;
-private:
-    static Buffer*  getBuffer();
+
 public:
-    static StringCache* unique(const char *val);
-    static StringCache* unique(const char *begin, const char *end);
+    static StringInfoBufferCache& getCache();
+    static u32 unique(const char *val);
+    static u32 unique(const char *begin, const char *end);
+
 private:
     mutable i_u32   m_refCount;
     u32             m_length;
     char            m_text[1];
+
 private:
-    StringCache(u32 len)
+    StringInfo(u32 len)
         :   m_refCount(i_u32::Zero)
         ,   m_length(len)
         ,   m_text()
     {
     }
-    StringCache();
+    StringInfo();
 public:
     void retain(void) const     { m_refCount++; }
     void release(void) const    { be_assert(m_refCount, "string's refcount already 0"); m_refCount--; }
@@ -63,68 +82,116 @@ public:
     const char *str() const     { return m_text; }
 };
 
-StringCache::Buffer* StringCache::getBuffer()
-{
-    static Buffer s_root;
-    return &s_root;
-}
+const u32 StringInfo::StringInfoBuffer::s_capacity = Arena::string().blockSize() - sizeof(StringInfoBuffer) + sizeof(byte[1]);
 
-StringCache::Buffer::Buffer()
-:   m_next(0)
-,   m_buffer(Arena::string(), s_capacity)
-,   m_used(i_size_t::Zero)
+StringInfo::StringInfoBuffer::StringInfoBuffer()
+    :   m_used(i_u32::Zero)
 {
 }
 
-StringCache::Buffer::~Buffer()
+StringInfo::StringInfoBuffer::~StringInfoBuffer()
 {
-    delete m_next;
 }
 
-StringCache* StringCache::Buffer::reserve(size_t size)
+byte* StringInfo::StringInfoBuffer::reserve(u32 size)
 {
-    size_t allsize = minitl::align(size + sizeof(StringCache), be_alignof(StringCache));
-    be_assert(allsize < s_capacity, "string size is bigger than pool size");
-    if (m_used > s_capacity)
+    u32 allocated = (m_used += size);
+    if (allocated + size < s_capacity)
     {
-        return reserveNext(size);
-    }
-    size_t offset = m_used.addExchange(allsize);
-    if (offset+allsize < s_capacity)
-    {
-        return (StringCache*)(m_buffer+offset);
+        return m_data + allocated;
     }
     else
     {
-        return reserveNext(size);
+        return 0;
     }
 }
 
-StringCache* StringCache::Buffer::reserveNext(size_t size)
+StringInfo::StringInfoBufferCache& StringInfo::getCache()
 {
-    if (!m_next)
-    {
-        m_next = new Buffer;
-    }
-    return m_next->reserve(size);
+    static StringInfoBufferCache s_cache;
+    return s_cache;
 }
 
-StringCache* StringCache::unique(const char *begin, const char *end)
+StringInfo::StringInfoBufferCache::StringInfoBufferCache()
+    :   m_buffers(reinterpret_cast< iptr<StringInfo::StringInfoBuffer>* >(Arena::string().allocate()))
+    ,   m_bufferCount(i_u32::Zero)
+{
+    allocate(0);
+}
+
+StringInfo::StringInfoBufferCache::~StringInfoBufferCache()
+{
+    for (u32 i = 0; i < m_bufferCount; ++i)
+    {
+        m_buffers[m_bufferCount - i - 1]->~StringInfoBuffer();
+        Arena::string().free(m_buffers[m_bufferCount - i - 1]);
+    }
+    Arena::string().free(m_buffers);
+}
+
+StringInfo::StringInfoBuffer* StringInfo::StringInfoBufferCache::get(u32 index)
+{
+    if (index < m_bufferCount)
+    {
+        return m_buffers[index];
+    }
+    else
+    {
+        be_assert(false, "Asking for a buffer out of range; current buffer count: %d, requested buffer: %d" | m_bufferCount | index);
+        return 0;
+    }
+}
+
+StringInfo::StringInfoBuffer* StringInfo::StringInfoBufferCache::allocate(u32 place)
+{
+    StringInfoBuffer* buffer = reinterpret_cast< StringInfoBuffer* >(Arena::string().allocate());
+    if (m_buffers[place].setConditional(buffer, 0) == 0)
+    {
+        new (buffer) StringInfoBuffer;
+        m_bufferCount++;
+        return buffer;
+    }
+    else
+    {
+        Arena::string().free(buffer);
+        return m_buffers[place];
+    }
+}
+
+u32 StringInfo::StringInfoBufferCache::allocateStringInfo(u32 size)
+{
+    StringInfo::StringInfoBuffer* buffer;
+    byte* info;
+    u32 place;
+    do
+    {
+        place = m_bufferCount - 1;
+        buffer = m_buffers[place];
+        info = buffer->reserve(sizeof(StringInfo) + size - 1);
+        if (!info)
+        {
+            allocate(place);
+        }
+    } while (!info);
+    return place << 16 | be_checked_numcast<u16>(reinterpret_cast<byte*>(info) - buffer->m_data);
+}
+
+u32 StringInfo::unique(const char *begin, const char *end)
 {
     size_t _size = 1+size_t(end)-size_t(begin);
     char *val = static_cast<char*>(malloca(_size));
     strncpy(val,begin,_size-1);
     val[end-begin] = 0;
-    StringCache* result = unique(val);
+    u32 result = unique(val);
     freea(val);
     return result;
 }
 
-StringCache* StringCache::unique(const char *val)
+u32 StringInfo::unique(const char *val)
 {
     static CriticalSection s_lock;
     ScopedCriticalSection scope(s_lock);
-    static StringIndex g_strings(Arena::string(), 65536);
+    static StringIndex g_strings(Arena::general(), 65536);
     StringIndex::iterator it = g_strings.find(val);
     if (it != g_strings.end())
     {
@@ -133,29 +200,30 @@ StringCache* StringCache::unique(const char *val)
     else
     {
         u32 len = be_checked_numcast<u32>(strlen(val));
-        StringCache* cache = getBuffer()->reserve(len);
-        (void)(new(cache) StringCache(len));
+        u32 result = getCache().allocateStringInfo(len);
+        StringInfo* cache = getCache().resolve(result);
+        (void)(new(cache) StringInfo(len+1));
         strcpy(cache->m_text, val);
 
-        minitl::tuple<StringIndex::iterator,bool> insertresult = g_strings.insert(cache->m_text, cache);
+        minitl::tuple<StringIndex::iterator,bool> insertresult = g_strings.insert(cache->m_text, result);
         be_forceuse(insertresult);
-        return cache;
+        return result;
     }
 }
 
 //-----------------------------------------------------------------------------
 
-const StringCache* istring::init(const char *str)
+u32 istring::init(const char *str)
 {
-    StringCache* result = StringCache::unique(str);
-    result->retain();
+    u32 result = StringInfo::unique(str);
+    StringInfo::getCache().resolve(result)->retain();
     return result;
 }
 
-const StringCache* istring::init(const char *begin, const char *end)
+u32 istring::init(const char *begin, const char *end)
 {
-    StringCache* result = StringCache::unique(begin, end);
-    result->retain();
+    u32 result = StringInfo::unique(begin, end);
+    StringInfo::getCache().resolve(result)->retain();
     return result;
 }
 
@@ -177,20 +245,20 @@ istring::istring(const char *begin, const char *end)
 istring::istring(const istring& other)
 :   m_index(other.m_index)
 {
-    m_index->retain();
+    StringInfo::getCache().resolve(m_index)->retain();
 }
 
 istring::~istring()
 {
-    m_index->release();
+    StringInfo::getCache().resolve(m_index)->release();
 }
 
 istring& istring::operator=(const istring& other)
 {
     if (&other == this)
         return *this;
-    other.m_index->retain();
-    m_index->release();
+    StringInfo::getCache().resolve(other.m_index)->retain();
+    StringInfo::getCache().resolve(m_index)->release();
     m_index = other.m_index;
     return *this;
 }
@@ -202,12 +270,12 @@ u32 istring::hash() const
 
 size_t istring::size() const
 {
-    return m_index->size();
+    return StringInfo::getCache().resolve(m_index)->size();
 }
 
 const char *istring::c_str() const
 {
-    return m_index->str();
+    return StringInfo::getCache().resolve(m_index)->str();
 }
 
 bool istring::operator==(const istring& other) const
@@ -266,7 +334,7 @@ igenericnamespace::igenericnamespace()
 
 igenericnamespace::igenericnamespace(const igenericnamespace& other)
     :   m_namespace(other.m_capacity > MaxNamespaceSize
-                        ?   (istring*)Arena::string().alloc(other.m_capacity * sizeof(istring))
+                        ?   (istring*)Arena::general().alloc(other.m_capacity * sizeof(istring))
                         :   (istring*)(m_buffer))
     ,   m_size(other.m_size)
     ,   m_capacity(other.m_capacity)
@@ -334,7 +402,7 @@ igenericnamespace::~igenericnamespace()
     }
     if (m_capacity > MaxNamespaceSize)
     {
-        Arena::string().free(m_namespace);
+        Arena::general().free(m_namespace);
     }
 }
 
@@ -436,18 +504,18 @@ void igenericnamespace::str(char* buffer, char separator, u32 size) const
 
 void igenericnamespace::grow(u16 newCapacity)
 {
-    istring* newStrings = (istring*)Arena::string().alloc(newCapacity * sizeof(istring));
+    istring* newStrings = (istring*)Arena::general().alloc(newCapacity * sizeof(istring));
     for (u16 i = 0; i < m_size; ++i)
-		new (&newStrings[i]) istring(m_namespace[i]);
-	for (u16 i = m_size; i < newCapacity; ++i)
-		new (&newStrings[i]) istring;
+        new (&newStrings[i]) istring(m_namespace[i]);
+    for (u16 i = m_size; i < newCapacity; ++i)
+        new (&newStrings[i]) istring;
     for (u16 i = 0; i < m_size; ++i)
     {
         m_namespace[m_size-i-1].~istring();
     }
     if (m_capacity > MaxNamespaceSize)
     {
-        Arena::string().free(m_namespace);
+        Arena::general().free(m_namespace);
     }
     minitl::swap(newStrings, m_namespace);
     m_capacity = newCapacity;

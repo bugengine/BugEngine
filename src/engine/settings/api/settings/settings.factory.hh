@@ -100,7 +100,6 @@ struct BE_EXPORT be_typeid< Settings::Settings<T> >
             {0},
             {0},
             {0},
-            {0},
             0,
             0
         };
