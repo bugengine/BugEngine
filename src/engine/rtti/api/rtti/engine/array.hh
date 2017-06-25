@@ -16,6 +16,7 @@ namespace BugEngine
 {
 
 template< typename T >
+be_section(rtti_text_trampoline)
 static RTTI::Value make_array(RTTI::Value* v, u32 count)
 {
     T* t = (T*)malloca(sizeof(T)*count);
@@ -29,21 +30,24 @@ static RTTI::Value make_array(RTTI::Value* v, u32 count)
 }
 
 template< typename T >
-RTTI::Value callSize(RTTI::Value* params, u32 paramCount)
+be_section(rtti_text_trampoline)
+static RTTI::Value callSize(RTTI::Value* params, u32 paramCount)
 {
     be_assert(paramCount == 1, "expected 1 parameter; received %d" | paramCount);
     return RTTI::Value(params[0].as< const minitl::array<T>& >().size());
 }
 
 template< typename T >
-RTTI::Value callOperatorIndex(RTTI::Value* params, u32 paramCount)
+be_section(rtti_text_trampoline)
+static RTTI::Value callOperatorIndex(RTTI::Value* params, u32 paramCount)
 {
     be_assert(paramCount == 1, "expected 1 parameter; received %d" | paramCount);
     return RTTI::Value(params[0].as< minitl::array<T>& >().operator[](params[1].as<u32>()));
 }
 
 template< typename T >
-RTTI::Value callOperatorIndexConst(RTTI::Value* params, u32 paramCount)
+be_section(rtti_text_trampoline)
+static RTTI::Value callOperatorIndexConst(RTTI::Value* params, u32 paramCount)
 {
     be_assert(paramCount == 1, "expected 1 parameter; received %d" | paramCount);
     return RTTI::Value(params[0].as< const minitl::array<T>& >().operator[](params[1].as<u32>()));
@@ -66,21 +70,25 @@ template< typename T >
 raw<const RTTI::Class> be_typeid< minitl::array<T> >::initialisation = be_typeid< minitl::array<T> >::klass();
 
 template< typename T >
+be_section(rtti_text_cls)
 raw<RTTI::Class> be_typeid< minitl::array<T> >::preklass()
 {
-    static RTTI::Class klass = {
-        name(),
+    be_section(rtti_cls)
+    static RTTI::Class cls = {
+        be_typeid< minitl::array<T> >::name(),
+        u32(sizeof(minitl::array<T>)),
+        0,
+        RTTI::ClassType_Struct,
         {be_game_Namespace().m_ptr},
         {be_typeid< void >::preklass().m_ptr},
-        0, 0, RTTI::ClassType_Array, {0}, {0},
+        {0},
         {0},
         {0},
         {0},
         {0},
         &RTTI::wrapCopy< minitl::array<T> >,
-        &RTTI::wrapDestroy< minitl::array<T> >
-    };
-    raw<RTTI::Class> result = {&klass};
+        &RTTI::wrapDestroy< minitl::array<T> >};
+    raw< RTTI::Class > result = { &cls };
     return result;
 }
 
@@ -88,115 +96,100 @@ template< typename T >
 const RTTI::Type be_typeid< minitl::array<T> >::value_type = be_typeid<T>::type();
 template< typename T >
 raw<const RTTI::Class> be_typeid< minitl::array<T> >::registerProperties()
-{
-    static raw<RTTI::Class> result = preklass();
-    static RTTI::Method::Overload constructor_overload = {
-        {0},
-        {0},
-        { {result.m_ptr}, RTTI::Type::Value, RTTI::Type::Mutable, RTTI::Type::Mutable},
-        0,
-        {0},
-        true,
-        &make_array<T>
-    };
-    static RTTI::Method constructor = {
-        "?new",
-        {0},
-        {&constructor},
+{    raw< RTTI::Class > result = preklass();
+    be_section(rtti_method)
+    be_section(rtti_method)
+    static RTTI::staticarray_n< 1, const RTTI::Method::Overload > s_method_array_overloads = {
         1,
-        {&constructor_overload}
+        {
+            {
+                {0},
+                {0},
+                be_typeid< minitl::array<T> >::type(),
+                true,
+                &make_array<T>
+            }
+        }
     };
-    static RTTI::ObjectInfo valueConstructor = {
-        {0},
-        {0},
-        constructor.name,
-        RTTI::Value(constructor)
-    };
-    static RTTI::ObjectInfo valueTypeObject = {
-        {&valueConstructor},
-        {0},
-        "value_type",
-        RTTI::Value(RTTI::Value::ByRef(value_type))
-    };
-    static RTTI::Method::Parameter size_overload_this = {
-        {0},
-        {0},
-        "this",
-        be_typeid<const minitl::array<T>&>::type()
-    };
-    static RTTI::Method::Overload size_overload = {
-        {0},
-        {0},
-        be_typeid<u32>::type(),
+    be_section(rtti_method)
+    static RTTI::staticarray_n< 1, const RTTI::Method::Parameter > s_Index_0_params = {
         1,
-        {&size_overload_this},
-        false,
-        &callSize<T>
+        {
+            {
+                {0},
+                istring("index"),
+                be_typeid< u32  >::type()
+            }
+        }
     };
-    static RTTI::Method size_method = {
-        "size",
-        {0},
-        {&size_method},
+    be_section(rtti_method)
+    static RTTI::staticarray_n< 1, const RTTI::Method::Parameter > s_Index_1_params = {
         1,
-        {&size_overload}
+        {
+            {
+                {0},
+                istring("index"),
+                be_typeid< u32  >::type()
+            }
+        }
     };
-
-
-    static RTTI::Method::Parameter index_overload0_this = {
-        {0},
-        {0},
-        "this",
-        be_typeid<minitl::array<T>&>::type()
+    be_section(rtti_method)
+    static RTTI::staticarray_n< 2, const RTTI::Method::Overload > s_method_Index_overloads = {
+        2,
+        {
+            {
+                {0},
+                {reinterpret_cast< RTTI::staticarray< const RTTI::Method::Parameter >* >(&s_Index_0_params)},
+                be_typeid< const T & >::type(),
+                false,
+                &callOperatorIndexConst<T>
+            },
+            {
+                {0},
+                {reinterpret_cast< RTTI::staticarray< const RTTI::Method::Parameter >* >(&s_Index_1_params)},
+                be_typeid< T & >::type(),
+                false,
+                &callOperatorIndex<T>
+            }
+        }
     };
-    static RTTI::Method::Parameter index_overload0_index = {
-        {0},
-        {&index_overload0_this},
-        "index",
-        be_typeid<minitl::array<T>&>::type()
-    };
-    static RTTI::Method::Overload index_overload0 = {
-        {0},
-        {0},
-        be_typeid<T&>::type(),
+    be_section(rtti_method)
+    static RTTI::staticarray_n< 1, const RTTI::Method::Overload > s_method_size_overloads = {
         1,
-        {&index_overload0_index},
-        false,
-        &callOperatorIndex<T>
+        {
+            {
+                {0},
+                {0},
+                be_typeid< u32 >::type(),
+                false,
+                &callSize<T>
+            }
+        }
     };
-    static RTTI::Method::Parameter index_overload1_this = {
-        {0},
-        {0},
-        "this",
-        be_typeid<const minitl::array<T>&>::type()
+    be_section(rtti_method)
+    static RTTI::staticarray_n< 3, const RTTI::Method > s_methods = {
+        3,
+        {
+            {
+                istring("array"),
+                {reinterpret_cast< RTTI::staticarray< const RTTI::Method::Overload >* >(&s_method_array_overloads)},
+                {&s_methods.elements[0]}
+            },
+            {
+                istring("Index"),
+                {reinterpret_cast< RTTI::staticarray< const RTTI::Method::Overload >* >(&s_method_Index_overloads)},
+                {&s_methods.elements[1]}
+            },
+            {
+                istring("size"),
+                {reinterpret_cast< RTTI::staticarray< const RTTI::Method::Overload >* >(&s_method_size_overloads)},
+                {&s_methods.elements[2]}
+            }
+        }
     };
-    static RTTI::Method::Parameter index_overload1_index = {
-        {0},
-        {&index_overload1_this},
-        "index",
-        be_typeid<minitl::array<T>&>::type()
-    };
-    static RTTI::Method::Overload index_overload1 = {
-        {0},
-        {&index_overload0},
-        be_typeid<const T&>::type(),
-        1,
-        {&index_overload1_index},
-        false,
-        &callOperatorIndexConst<T>
-    };
-    static RTTI::Method index_method = {
-        "?index",
-        {&size_method},
-        {&index_method},
-        1,
-        {&index_overload1}
-    };
-    static const RTTI::Method* constructors = result->constructor.set(&constructor);
-    be_forceuse(constructors);
-    static const RTTI::ObjectInfo* objects = result->objects.set(&valueTypeObject);
-    be_forceuse(objects);
-    static const RTTI::Method* methods = result->methods.set(&index_method);
-    be_forceuse(methods);
+    result->methods.set(reinterpret_cast< RTTI::staticarray< const RTTI::Method >* >(&s_methods));
+    raw<const RTTI::ObjectInfo> objects = {0};
+    result->objects.set(objects.operator->());
     return result;
 }
 

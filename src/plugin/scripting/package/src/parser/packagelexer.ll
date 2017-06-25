@@ -32,6 +32,9 @@ using namespace BugEngine::PackageBuilder::Nodes;
 # undef strdup
 #endif
 #define strdup(x)    be_strdup(x)
+
+static int yyinput();
+
 static char *be_strdup(const char *src)
 {
     size_t x = strlen(src);
@@ -77,6 +80,7 @@ static void newline()
 
 extern "C" int be_package_wrap()
 {
+    (void)yyinput;
     return 1;
 }
 

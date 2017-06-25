@@ -27,7 +27,7 @@ def python_module(bld, name, depends, path, platforms=[]):
 @feature('python_module')
 @after_method('apply_link')
 def install_python_module(self):
-    if not self.env.ENV_PREFIX: #no multiarch
+    if not self.env.PROJECTS and not self.env.ENV_PREFIX: #no multiarch
         self.install_files(os.path.join(self.bld.env.PREFIX, self.bld.optim, self.bld.env.DEPLOY_RUNBINDIR),
                            [self.link_task.outputs[0]],
                            Utils.O755)

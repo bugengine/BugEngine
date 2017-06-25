@@ -6,6 +6,7 @@
 /**************************************************************************************************/
 #include    <rtti/stdafx.h>
 #include    <rtti/value.hh>
+#include    <rtti/engine/helper/staticarray.hh>
 
 namespace BugEngine { namespace RTTI
 {
@@ -15,7 +16,7 @@ struct Tag;
 struct be_api(RTTI) ObjectInfo
 {
     raw<const ObjectInfo> const     next;
-    raw<Tag>                        tags;
+    raw< staticarray<const Tag> >   tags;
     istring const                   name;
     mutable Value                   value;
 };

@@ -5,6 +5,7 @@
 #define BE_RTTI_CLASSINFO_SCRIPT_HH_
 /**************************************************************************************************/
 #include    <rtti/stdafx.h>
+#include    <rtti/engine/helper/staticarray.hh>
 #include    <core/md5.hh>
 
 namespace BugEngine { namespace RTTI
@@ -75,24 +76,23 @@ published:
     static const istring nameOperatorDecrement();
     static const istring nameOperatorGet();
 published:
-    istring const               name;
-    raw<const Class> const      owner;
-    raw<const Class> const      parent;
-    u32 const                   size;
-    i32 const                   offset;
-    u32 const                   id;
-    raw<const Tag>              tags;
-    raw<const Property>         properties;
-    raw<const Method>           methods;
-    raw<const ObjectInfo>       objects;
+    istring const                       name;
+    u32 const                           size;
+    i32 const                           offset;
+    u32 const                           id;
+    raw<const Class> const              owner;
+    raw<const Class> const              parent;
+    raw<const ObjectInfo>               objects;
+    raw< staticarray<const Tag> >       tags;
+    raw< staticarray<const Property> >  properties;
+    raw< staticarray<const Method> >    methods;
     be_tag(Alias("?call"))
-    raw<const Method>           constructor;
-    raw<const Method>           call;
+    raw<const Method>                   call;
 public:
     typedef void (*CopyConstructor)(const void* source, void* destination);
     typedef void (*Destructor)(void* object);
-    const CopyConstructor   copyconstructor;
-    const Destructor        destructor;
+    const CopyConstructor               copyconstructor;
+    const Destructor                    destructor;
 published:
     typedef enum ClassType ClassType;
     Value getTag(const Type& type) const;
@@ -122,6 +122,7 @@ public:
     void enumerateObjects(EnumerateRecursion recursion, EnumerateCallback callback) const;
     u32 distance(raw<const Class> other) const;
     const ObjectInfo* addObject(const istring& s, const ObjectInfo* ob);
+    raw<const Method> getConstructor() const;
 private: // friend Value
     void copy(const void* src, void* dst) const;
     void destroy(void* src) const;

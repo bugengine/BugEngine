@@ -270,30 +270,44 @@ void Class::enumerateObjects(EnumerateRecursion recursion, EnumerateCallback cal
 
 raw<const Property> Class::getProperty(istring propertyName) const
 {
-    raw<const Property> p = properties;
-    while(p)
+    for (raw< const Class > cls = { this }; cls; cls = cls->parent)
     {
-        if (p->name == propertyName)
+        if (cls->properties)
         {
-            break;
+            for (const Property* p = cls->properties->begin();
+                 p != cls->properties->end();
+                 ++p)
+            {
+                if (p->name == propertyName)
+                {
+                    raw<const Property> pptr = {p};
+                    return pptr;
+                }
+            }
         }
-        p = p->next;
     }
-    return p;
+    return raw<const Property>();
 }
 
 raw<const Method> Class::getMethod(istring methodName) const
 {
-    raw<const Method> m = methods;
-    while(m)
+    for (raw< const Class > cls = { this }; cls; cls = cls->parent)
     {
-        if (m->name == methodName)
+        if (cls->methods)
         {
-            break;
+            for (const Method* m = cls->methods->begin();
+                 m != cls->methods->end();
+                 ++m)
+            {
+                if (m->name == methodName)
+                {
+                    raw< const Method > mptr = { m };
+                    return mptr;
+                }
+            }
         }
-        m = m->next;
     }
-    return m;
+    return raw<const Method>();
 }
 
 raw<const ObjectInfo> Class::getStaticProperty(istring propertyName) const
@@ -316,52 +330,31 @@ Value Class::get(Value& from, istring propname, bool& found) const
     if (from.type().metaclass == s_metaClass)
     {
         raw<const Class> cls = from.as< raw<const Class> >();
-        raw<const ObjectInfo> o = cls->objects;
-        while(o)
+        raw<const ObjectInfo> o = cls->getStaticProperty(propname);
+        if (o)
         {
-            if (o->name == propname)
-            {
-                found = true;
-                return o->value;
-            }
-            o = o->next;
+            found = true;
+            return o->value;
         }
-        raw<const Method> m = cls->methods;
-        while(m)
+        raw<const Method> m = cls->getMethod(propname);
+        if (m)
         {
-            if (m->name == propname)
-            {
-                found = true;
-                return Value(m);
-            }
-            m = m->next;
+            found = true;
+            return Value(m);
         }
     }
 
+    raw<const Property> p = getProperty(propname);
+    if (p)
     {
-        raw<const Property> p = properties;
-        while(p)
-        {
-            if (p->name == propname)
-            {
-                found = true;
-                return p->get(from);
-            }
-            p = p->next;
-        }
+        found = true;
+        return p->get(from);
     }
-
+    raw<const Method> m = getMethod(propname);
+    if (m)
     {
-        raw<const Method> m = methods;
-        while(m)
-        {
-            if (m->name == propname)
-            {
-                found = true;
-                return Value(m);
-            }
-            m = m->next;
-        }
+        found = true;
+        return Value(m);
     }
 
     found = false;
@@ -374,52 +367,31 @@ Value Class::get(const Value& from, istring propname, bool& found) const
     if (from.type().metaclass == s_metaClass)
     {
         raw<const Class> cls = from.as< raw<const Class> >();
-        raw<const ObjectInfo> o = cls->objects;
-        while(o)
+        raw<const ObjectInfo> o = cls->getStaticProperty(propname);
+        if (o)
         {
-            if (o->name == propname)
-            {
-                found = true;
-                return o->value;
-            }
-            o = o->next;
+            found = true;
+            return o->value;
         }
-        raw<const Method> m = cls->methods;
-        while(m)
+        raw<const Method> m = cls->getMethod(propname);
+        if (m)
         {
-            if (m->name == propname)
-            {
-                found = true;
-                return Value(m);
-            }
-            m = m->next;
+            found = true;
+            return Value(m);
         }
     }
 
+    raw<const Property> p = getProperty(propname);
+    if (p)
     {
-        raw<const Property> p = properties;
-        while(p)
-        {
-            if (p->name == propname)
-            {
-                found = true;
-                return p->get(from);
-            }
-            p = p->next;
-        }
+        found = true;
+        return p->get(from);
     }
-
+    raw<const Method> m = getMethod(propname);
+    if (m)
     {
-        raw<const Method> m = methods;
-        while(m)
-        {
-            if (m->name == propname)
-            {
-                found = true;
-                return Value(m);
-            }
-            m = m->next;
-        }
+        found = true;
+        return Value(m);
     }
 
     found = false;
@@ -440,12 +412,18 @@ bool Class::isA(raw<const Class> klass) const
 
 Value Class::getTag(const Type& type) const
 {
-    raw<const Tag> tag = tags;
-    while(tag)
+    for (raw< const Class > cls = { this }; cls; cls = cls->parent)
     {
-        if (type <= tag->tag.type())
-            return Value(Value::ByRef(tag->tag));
-        tag = tag->next;
+        if (cls->tags)
+        {
+            for (const Tag* tag = cls->tags->begin();
+                 tag != cls->tags->end();
+                 ++tag)
+            {
+                if (type <= tag->tag.type())
+                    return Value(Value::ByRef(tag->tag));
+            }
+        }
     }
     return Value();
 }
@@ -495,7 +473,7 @@ Value Class::findClass(inamespace name)
 
 raw<RTTI::Class> be_game_Namespace()
 {
-    static RTTI::Class ci = { "BugEngine", {0}, {0}, 0, 0, RTTI::ClassType_Namespace, {0}, {0}, {0}, {0}, {0}, {0}, 0, 0 };
+    static RTTI::Class ci = { "BugEngine", 0, 0, RTTI::ClassType_Namespace, {0}, {0}, {0}, {0}, {0}, {0}, {0}, 0, 0 };
     raw<RTTI::Class> result = {&ci};
     return result;
 }

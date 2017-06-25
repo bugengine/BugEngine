@@ -46,7 +46,9 @@ void Object::setMethod(ref<Reference> reference)
                 if (m_method)
                 {
                     m_overloads.clear();
-                    for (raw<const RTTI::Method::Overload> overload = m_method->overloads; overload; overload = overload->next)
+                    for (const RTTI::Method::Overload* overload = m_method->overloads->begin();
+                         overload != m_method->overloads->end();
+                         ++overload)
                     {
                         m_overloads.push_back(OverloadMatch(overload));
                         OverloadMatch& match = m_overloads.back();

@@ -216,7 +216,7 @@ static int convertTableToValue(lua_State *state, int index, const RTTI::Type& ty
         }
         if (score >= 0)
         {
-            RTTI::Value array = type.metaclass->constructor->doCall(parameters, count);
+            RTTI::Value array = type.metaclass->getConstructor()->doCall(parameters, count);
             new (value) RTTI::Value(array);
         }
         for (int j = count-1; j >= 0; --j)

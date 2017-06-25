@@ -18,7 +18,7 @@ namespace BugEngine { namespace Plugin
         {                                                                                           \
             static RTTI::ObjectInfo ob = { {0}, {0}, "BugEngine", RTTI::Value() };                  \
             static RTTI::Class ci = { "BugEngine", {0}, {0}, 0, 0, RTTI::ClassType_Namespace,       \
-                                      {0}, {0}, {0}, {&ob}, {0}, {0}, 0, 0 };                       \
+                                      {&ob}, {0}, {0}, {0}, {0}, 0, 0 };                            \
             static raw<const RTTI::ObjectInfo> obptr = {((ob.value = RTTI::Value(&ci)), &ob)};      \
             be_forceuse(obptr);                                                                     \
             raw<RTTI::Class> ptr = {&ci};                                                           \

@@ -26,14 +26,14 @@ static raw<const RTTI::Method::Overload> getMethodFromClass(raw<const RTTI::Clas
     be_assert_recover(method,
                       "could not locate method \"%s\" for component %s" | name | type->fullname(),
                       return raw<const RTTI::Method::Overload>());
-    for (raw<const RTTI::Method::Overload> overload = method->overloads;
-         overload;
-         overload = overload->next)
+    for (const RTTI::Method::Overload* overload = method->overloads->begin();
+         overload != method->overloads->end();
+         ++overload)
     {
         RTTI::Type componentType = RTTI::Type::makeType(type, RTTI::Type::Value,
                                                         RTTI::Type::Mutable, RTTI::Type::Mutable);
-        if (overload->parameterCount == 2
-         && componentType.isA(overload->params->type)
+        if (overload->parameterCount() == 2
+         && componentType.isA(overload->params[0].type)
          && be_typeid<World&>::type().isA(overload->params->next->type))
         {
             return overload;
