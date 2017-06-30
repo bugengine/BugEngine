@@ -337,6 +337,10 @@ CallInfo::~CallInfo()
 CallInfo* CallInfo::findOverload(lua_State *state, CallInfo *overloads, u32 overloadCount)
 {
     u32 nargs = lua_gettop(state) - 1;
+    if (nargs == 1 && lua_type(state, 2) == LUA_TTABLE)
+    {
+        /* named parameter call */
+    }
     for (u32 arg = 0; arg < nargs; ++arg)
     {
         for (u32 overload = 0; overload < overloadCount; )

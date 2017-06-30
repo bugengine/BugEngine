@@ -41,11 +41,11 @@ struct BE_EXPORT be_typeid< Kernel::Product<T> >
         static RTTI::Class s_class =
         {
             istring(minitl::format<1024u>("Product<%s>") | be_typeid<T>::klass()->name),
-            {0},
-            be_typeid<Kernel::IProduct>::klass(),
             0,
             0,
             RTTI::ClassType_Object,
+            {0},
+            be_typeid<Kernel::IProduct>::klass(),
             {0},
             {0},
             {0},
