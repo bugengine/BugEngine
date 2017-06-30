@@ -11,41 +11,6 @@
 namespace BugEngine { namespace RTTI { namespace Parser
 {
 
-struct ParameterMatch
-{
-    raw<const RTTI::Method::Parameter>  param;
-    Parameter*                          match;
-};
-
-static raw<const RTTI::Method::Overload> findMatch(DbContext& context,
-                                                   raw<const Method> m,
-                                                   const minitl::vector<Parameter>& parameters)
-{
-    be_forceuse(context);
-    raw<const RTTI::Method::Overload> result = {0};
-    for (raw<const RTTI::Method::Overload> o = m->overloads->begin(); o!= m->overloads->end(); ++o)
-    {
-        ParameterMatch* matches = (ParameterMatch*)malloca(o->parameters->count * sizeof(ParameterMatch));
-        u32 i = 0;
-        //u32 unused = parameters.size();
-        for (raw<const RTTI::Method::Parameter> p = o->params; p; p = p->next, ++i)
-        {
-            for (minitl::vector<Parameter>::const_iterator it = parameters.begin();
-                 it != parameters.end();
-                 ++it)
-            {
-                if (it->name == p->name)
-                {
-
-                    break;
-                }
-            }
-        }
-        freea(matches);
-    }
-    return result;
-}
-
 Object::Object(const ParseLocation& location, ref<Reference> className,
                const minitl::vector<Parameter>& parameters)
     :   Node(location)
@@ -53,7 +18,6 @@ Object::Object(const ParseLocation& location, ref<Reference> className,
     ,   m_parameters(parameters)
 
 {
-    be_forceuse(findMatch);
 }
 
 Object::~Object()
@@ -75,6 +39,7 @@ bool Object::resolve(DbContext& context)
 bool Object::isCompatible(const Type &expectedType) const
 {
     be_forceuse(expectedType);
+    be_unimplemented();
     return true;
 }
 
@@ -82,6 +47,7 @@ void Object::doEval(const Type &expectedType, Value &result) const
 {
     be_forceuse(expectedType);
     be_forceuse(result);
+    be_unimplemented();
 }
 
 Type Object::getType() const
