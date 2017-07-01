@@ -58,7 +58,7 @@ typedef u8                      byte;
 #endif
 
 #ifdef __MACH__
-# define be_section(name) __attribute__((section("." #name, #name)))
+# define be_section(name) __attribute__((section("." #name "," #name)))
 #else
 # define be_section(name) __attribute__((section("." #name)))
 #endif
