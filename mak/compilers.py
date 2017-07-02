@@ -1,6 +1,7 @@
 from waflib import Options, Utils, Configure
 from waflib.Configure import conf
 import os
+import re
 import sys
 import shlex
 
