@@ -14,6 +14,7 @@ class MSVC(Configure.ConfigurationContext.Compiler):
         self.arch_name = target_arch
         self.includes = includes
         self.libdirs = libdirs
+        self.target = self.platform
 
     def set_optimisation_options(self, conf):
         conf.env.append_unique('CFLAGS_debug', ['/Od', '/Ob1', '/EHsc', '/RTC1', '/RTCc', '/Zi',
