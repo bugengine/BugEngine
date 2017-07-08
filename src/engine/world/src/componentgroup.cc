@@ -6,6 +6,7 @@
 #include    <world/entitystorage.script.hh>
 #include    <world/component.script.hh>
 #include    <rtti/classinfo.script.hh>
+#include    <rtti/engine/call.hh>
 #include    <rtti/value.hh>
 #include    <rtti/typeinfo.hh>
 #include    <minitl/algorithm.hh>
@@ -26,21 +27,23 @@ static raw<const RTTI::Method::Overload> getMethodFromClass(raw<const RTTI::Clas
     be_assert_recover(method,
                       "could not locate method \"%s\" for component %s" | name | type->fullname(),
                       return raw<const RTTI::Method::Overload>());
-    for (const RTTI::Method::Overload* overload = method->overloads->begin();
-         overload != method->overloads->end();
-         ++overload)
+    RTTI::ArgInfo<RTTI::Type> args[2] = {
+        RTTI::ArgInfo<RTTI::Type>(RTTI::Type::makeType(type,
+                                                       RTTI::Type::RawPtr,
+                                                       RTTI::Type::Const,
+                                                       RTTI::Type::Mutable)),
+        RTTI::ArgInfo<RTTI::Type>(be_typeid<World&>::type())
+    };
+    RTTI::CallInfo info = RTTI::resolve(method, args, 2);
+    if (info.conversion < RTTI::Type::s_incompatible)
     {
-        RTTI::Type componentType = RTTI::Type::makeType(type, RTTI::Type::Value,
-                                                        RTTI::Type::Mutable, RTTI::Type::Mutable);
-        if (overload->parameterCount() == 2
-         && componentType.isA(overload->params[0].type)
-         && be_typeid<World&>::type().isA(overload->params->next->type))
-        {
-            return overload;
-        }
+        return info.overload;
     }
-    be_error("%s::%s() overloaded: will not be called by entity manager" | type->fullname() | name);
-    return raw<const RTTI::Method::Overload>();
+    else
+    {
+        be_error("%s::%s() overloaded: will not be called by entity manager" | type->fullname() | name);
+        return raw<const RTTI::Method::Overload>();
+    }
 }
 
 }

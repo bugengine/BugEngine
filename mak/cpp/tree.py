@@ -863,6 +863,7 @@ class Root(Container):
         definition.write('#include <rtti/engine/taginfo.script.hh>\n')
         definition.write('#include <rtti/engine/helper/method.hh>\n')
         definition.write('#include <rtti/engine/helper/get.hh>\n')
+        definition.write('#include <rtti/engine/helper/staticarray.factory.hh>\n')
 
         if self.objects:
             definition.write('\nnamespace BugEngine\n{\n')

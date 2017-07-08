@@ -4,6 +4,7 @@ see LICENSE for detail */
 #ifndef BE_RTTI_ENGINE_HELPER_STATICARRAY_HH_
 #define BE_RTTI_ENGINE_HELPER_STATICARRAY_HH_
 /**************************************************************************************************/
+#include    <rtti/stdafx.h>
 
 namespace BugEngine { namespace RTTI
 {

@@ -3,10 +3,10 @@
 
 #include    <stdafx.h>
 
-#include    <luacontext.hh>
-#include    <luaplugin.hh>
-#include    <luavalue.hh>
-#include    <luaresource.hh>
+#include    <context.hh>
+#include    <runtime/plugin.hh>
+#include    <runtime/object.hh>
+#include    <runtime/resource.hh>
 
 
 namespace BugEngine

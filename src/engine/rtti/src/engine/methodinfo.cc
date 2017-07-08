@@ -4,14 +4,12 @@
 #include    <rtti/stdafx.h>
 #include    <rtti/engine/methodinfo.script.hh>
 #include    <rtti/engine/taginfo.script.hh>
+#include    <rtti/engine/call.hh>
 #include    <rtti/classinfo.script.hh>
 #include    <rtti/value.hh>
 
 namespace BugEngine { namespace RTTI
 {
-
-static const u32 s_overloadMaxDistance = 1000000;
-static const u32 s_overloadVarargDistance = s_overloadMaxDistance-1;
 
 
 Value Method::Parameter::getTag(const Type& tagType) const
@@ -27,30 +25,6 @@ Value Method::Parameter::getTag(const Type& tagType) const
 Value Method::Parameter::getTag(raw<const Class> tagType) const
 {
     return getTag(Type::makeType(tagType, Type::Value, Type::Const, Type::Const));
-}
-
-u32 Method::Overload::distance(Value* p, u32 nparams) const
-{
-    if (vararg)
-    {
-        return s_overloadVarargDistance;
-    }
-    else
-    {
-        u32 distance = 0;
-        const Parameter* selfp = params->begin();
-        while(nparams && selfp != params->end())
-        {
-            distance += p->type().distance(selfp->type);
-            selfp++;
-            nparams--;
-            p++;
-        }
-        if (nparams || selfp)
-            return s_overloadMaxDistance;
-        else
-            return distance;
-    }
 }
 
 Value Method::Overload::getTag(const Type& type) const
@@ -70,20 +44,16 @@ Value Method::Overload::getTag(raw<const Class> type) const
 
 Value Method::doCall(Value* params, u32 nparams) const
 {
-    u32 bestDistance = s_overloadMaxDistance;
-    raw<const Overload> overload = {0};
-    for (const Overload* it = overloads->begin(); it != overloads->end(); ++it)
+    ArgInfo<Type>* args = static_cast<ArgInfo<Type>*>(malloca(sizeof(ArgInfo<Type>) * nparams));
+    for (u32 i = 0; i < nparams; ++i)
     {
-        u32 distance = it->distance(params, nparams);
-        if (distance < bestDistance)
-        {
-            bestDistance = distance;
-            overload.set(it);
-        }
+        new(&args[i]) ArgInfo<Type>(params[i].type());
     }
-    if (overload)
+    raw<const Method> thisPtr = { this };
+    CallInfo c = resolve(thisPtr, args, nparams);
+    if (c.conversion < Type::s_incompatible)
     {
-        return overload->call(params, nparams);
+        return c.overload->call(params, nparams);
     }
     else
     {

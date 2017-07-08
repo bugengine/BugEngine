@@ -32,50 +32,8 @@ void Object::addedParameter(ref<Parameter> parameter)
 
 void Object::setMethod(ref<Reference> reference)
 {
-    m_methodReference = reference;
-    RTTI::Value v(RTTI::Value::ByRef(m_methodReference->getValue()));
-    if (v)
-    {
-        static const istring callName("?call");
-        RTTI::Value call = v[callName];
-        if (call)
-        {
-            if (call.isA(be_typeid<raw<const RTTI::Method> const>::type()))
-            {
-                m_method = call.as<raw<const RTTI::Method> const>();
-                if (m_method)
-                {
-                    m_overloads.clear();
-                    for (const RTTI::Method::Overload* overload = m_method->overloads->begin();
-                         overload != m_method->overloads->end();
-                         ++overload)
-                    {
-                        m_overloads.push_back(OverloadMatch(overload));
-                        OverloadMatch& match = m_overloads.back();
-                        for(minitl::vector< ref<Parameter> >::const_iterator it = m_parameters.begin(); it != m_parameters.end(); ++it)
-                        {
-                            match.addParameter(*it);
-                        }
-                    }
-                    minitl::sort(m_overloads.begin(), m_overloads.end(), minitl::less<OverloadMatch>());
-                }
-                else
-                {
-                    be_unimplemented();
-                }
-            }
-            else
-            {
-                // error
-                be_unimplemented();
-            }
-        }
-        else
-        {
-            // error
-            be_unimplemented();
-        }
-    }
+    be_unimplemented();
+    be_forceuse(reference);
 }
 
 RTTI::Type Object::getType() const

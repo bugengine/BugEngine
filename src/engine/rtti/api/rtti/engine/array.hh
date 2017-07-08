@@ -96,8 +96,8 @@ template< typename T >
 const RTTI::Type be_typeid< minitl::array<T> >::value_type = be_typeid<T>::type();
 template< typename T >
 raw<const RTTI::Class> be_typeid< minitl::array<T> >::registerProperties()
-{    raw< RTTI::Class > result = preklass();
-    be_section(rtti_method)
+{
+    raw< RTTI::Class > result = preklass();
     be_section(rtti_method)
     static RTTI::staticarray_n< 1, const RTTI::Method::Overload > s_method_array_overloads = {
         1,
@@ -209,7 +209,7 @@ raw<const RTTI::Class> be_typeid< minitl::array<T> >::klass()
 template< typename T >
 RTTI::Type be_typeid< minitl::array<T> >::type()
 {
-    return RTTI::Type::makeType(klass(), RTTI::Type::Value, RTTI::Type::Mutable, RTTI::Type::Mutable);
+    return RTTI::Type::makeType(preklass(), RTTI::Type::Value, RTTI::Type::Mutable, RTTI::Type::Mutable);
 }
 
 }

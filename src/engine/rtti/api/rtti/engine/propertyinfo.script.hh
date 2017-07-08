@@ -31,8 +31,6 @@ published:
     Value getTag(raw<const Class> tagType) const;
 public:
     Value (*getter)(void* data, bool isConst);
-private:
-    Property& operator=(const Property&);
 };
 
 }}

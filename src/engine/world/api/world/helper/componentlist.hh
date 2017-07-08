@@ -90,38 +90,41 @@ struct ProductGetter<T, T, STORAGE, TAIL>
 
 
 
-template< typename LIST, typename T, StorageSize STORAGE, typename TAIL >
-struct ComponentListPropertyInfo
+template< typename LIST, u32 INDEX,  typename T, StorageSize STORAGE, typename TAIL >
+struct Property
 {
-    static const RTTI::Property s_property;
+    static inline bool fillProperty(RTTI::Property properties[])
+    {
+        typedef Property<LIST, INDEX-1, typename TAIL::Type,
+                         (StorageSize)TAIL::Storage, typename TAIL::Tail> PropertyParent;
+        PropertyParent::fillProperty(properties);
+        RTTI::Property property = {
+            {0},
+            be_typeid<T>::klass()->name,
+            be_typeid<LIST>::type(),
+            be_typeid< const Kernel::Product<T>& >::type(),
+            &LIST::template getProduct<T>
+        };
+        properties[INDEX] = property;
+        return true;
+    }
 };
 
 template< typename LIST, typename T, StorageSize STORAGE >
-struct ComponentListPropertyInfo<LIST, T, STORAGE, void>
+struct Property<LIST, 0, T, STORAGE, void>
 {
-    static const RTTI::Property s_property;
-};
-
-template< typename LIST, typename T, StorageSize STORAGE, typename TAIL >
-const RTTI::Property ComponentListPropertyInfo<LIST, T, STORAGE, TAIL>::s_property =
-{
-    {0},
-    {&ComponentListPropertyInfo<LIST, typename TAIL::Type, (StorageSize)TAIL::Storage, typename TAIL::Tail>::s_property},
-    be_typeid<T>::klass()->name,
-    be_typeid<LIST>::type(),
-    be_typeid< const Kernel::Product<T>& >::type(),
-    &LIST::template getProduct<T>
-};
-
-template< typename LIST, typename T, StorageSize STORAGE >
-const RTTI::Property ComponentListPropertyInfo<LIST, T, STORAGE, void>::s_property =
-{
-    {0},
-    {&PartitionListPropertyInfo<LIST, typename LIST::FactoryPartitionList::Type, typename LIST::FactoryPartitionList::Tail>::s_property},
-    be_typeid<T>::klass()->name,
-    be_typeid<LIST>::type(),
-    be_typeid< const Kernel::Product<T>& >::type(),
-    &LIST::template getProduct<T>
+    static inline bool fillProperty(RTTI::Property properties[])
+    {
+        RTTI::Property property = {
+            {0},
+            be_typeid<T>::klass()->name,
+            be_typeid<LIST>::type(),
+            be_typeid< const Kernel::Product<T>& >::type(),
+            &LIST::template getProduct<T>
+        };
+        properties[0] = property;
+        return true;
+    }
 };
 
 }}}

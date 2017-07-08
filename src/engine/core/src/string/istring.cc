@@ -9,6 +9,72 @@
 #include    <minitl/hash_map.hh>
 #include    <cstring>
 
+namespace minitl
+{
+
+template< >
+struct hash<const char*>
+{
+    static inline u32 get16bits(const u8 d[])
+    {
+        return (static_cast<u32>((d)[1]) << 8) | (static_cast<u32>((d)[0]));
+    }
+    u32 operator()(const char *str) const
+    {
+        const u8 *data = reinterpret_cast<const u8 *>(str);
+        u32 len = str ? (u32)strlen(str) : 0;
+        u32 hashvalue = len, tmp;
+        u32 rem;
+        if (len == 0 || data == NULL) return 0;
+
+        rem = len & 3;
+        len >>= 2;
+
+        for (;len > 0; len--)
+        {
+            hashvalue  += get16bits (data);
+            tmp         = (get16bits (data+2) << 11) ^ hashvalue;
+            hashvalue   = (hashvalue << 16) ^ tmp;
+            data       += 2*sizeof (u16);
+            hashvalue  += hashvalue >> 11;
+        }
+
+        switch (rem) {
+            case 3: hashvalue += get16bits (data);
+                    hashvalue ^= hashvalue << 16;
+                    hashvalue ^= static_cast<u32>(data[sizeof (u16)]) << 18;
+                    hashvalue += hashvalue >> 11;
+                    break;
+            case 2: hashvalue += get16bits (data);
+                    hashvalue ^= hashvalue << 11;
+                    hashvalue += hashvalue >> 17;
+                    break;
+            case 1: hashvalue += *data;
+                    hashvalue ^= hashvalue << 10;
+                    hashvalue += hashvalue >> 1;
+                    break;
+            case 0:
+            default:
+                    break;
+        }
+
+        hashvalue ^= hashvalue << 3;
+        hashvalue += hashvalue >> 5;
+        hashvalue ^= hashvalue << 4;
+        hashvalue += hashvalue >> 17;
+        hashvalue ^= hashvalue << 25;
+        hashvalue += hashvalue >> 6;
+
+        return hashvalue;
+    }
+    bool operator()(const char *str1, const char *str2) const
+    {
+        return strcmp(str1, str2) == 0;
+    }
+};
+
+}
+
 namespace BugEngine
 {
 
@@ -31,9 +97,10 @@ private:
     {
         friend class StringInfoBufferCache;
     private:
-        static const u32    s_capacity;
         i_u32               m_used;
         byte                m_data[1];
+    private:
+        static u32 capacity();
     public:
         StringInfoBuffer();
         ~StringInfoBuffer();
@@ -82,8 +149,6 @@ public:
     const char *str() const     { return m_text; }
 };
 
-const u32 StringInfo::StringInfoBuffer::s_capacity = Arena::string().blockSize() - sizeof(StringInfoBuffer) + sizeof(byte[1]);
-
 StringInfo::StringInfoBuffer::StringInfoBuffer()
     :   m_used(i_u32::Zero)
 {
@@ -93,10 +158,15 @@ StringInfo::StringInfoBuffer::~StringInfoBuffer()
 {
 }
 
+u32 StringInfo::StringInfoBuffer::capacity()
+{
+    return Arena::string().blockSize() - sizeof(StringInfoBuffer) + sizeof(byte[1]);
+}
+
 byte* StringInfo::StringInfoBuffer::reserve(u32 size)
 {
-    u32 allocated = (m_used += size);
-    if (allocated + size < s_capacity)
+    u32 allocated = (m_used += size) - size;
+    if (allocated + size < capacity())
     {
         return m_data + allocated;
     }
@@ -127,6 +197,13 @@ StringInfo::StringInfoBufferCache::~StringInfoBufferCache()
         Arena::string().free(m_buffers[m_bufferCount - i - 1]);
     }
     Arena::string().free(m_buffers);
+}
+
+StringInfo* StringInfo::StringInfoBufferCache::resolve(u32 index)
+{
+    StringInfo::StringInfoBuffer* buffer = get(index >> 16);
+    byte* address = &buffer->m_data[index & 0xffff];
+    return reinterpret_cast<StringInfo*>(address);
 }
 
 StringInfo::StringInfoBuffer* StringInfo::StringInfoBufferCache::get(u32 index)
@@ -167,10 +244,10 @@ u32 StringInfo::StringInfoBufferCache::allocateStringInfo(u32 size)
     {
         place = m_bufferCount - 1;
         buffer = m_buffers[place];
-        info = buffer->reserve(sizeof(StringInfo) + size - 1);
+        info = buffer->reserve(minitl::align(sizeof(StringInfo) + size, be_alignof(StringInfo)));
         if (!info)
         {
-            allocate(place);
+            allocate(place+1);
         }
     } while (!info);
     return place << 16 | be_checked_numcast<u16>(reinterpret_cast<byte*>(info) - buffer->m_data);
@@ -202,8 +279,9 @@ u32 StringInfo::unique(const char *val)
         u32 len = be_checked_numcast<u32>(strlen(val));
         u32 result = getCache().allocateStringInfo(len);
         StringInfo* cache = getCache().resolve(result);
-        (void)(new(cache) StringInfo(len+1));
-        strcpy(cache->m_text, val);
+        (void)(new(cache) StringInfo(len));
+        strncpy(cache->m_text, val, len);
+        cache->m_text[len] = 0;
 
         minitl::tuple<StringIndex::iterator,bool> insertresult = g_strings.insert(cache->m_text, result);
         be_forceuse(insertresult);
