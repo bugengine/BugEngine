@@ -42,7 +42,6 @@ published:
         u32 parameterCount() const { return params ? params->count : 0; }
     public:
         Value (*call)(Value* params, u32 nparams);
-        u32 distance(Value* p, u32 paramCount) const;
     private:
         Overload& operator=(const Overload&);
     };

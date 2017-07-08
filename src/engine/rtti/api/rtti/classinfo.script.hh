@@ -109,6 +109,7 @@ published:
     inline u32 index() const            { return id >> 16; }
 
     raw<const Property> getProperty(istring propertyName) const;
+    raw<const Method> getConstructor() const;
     raw<const Method> getMethod(istring methodName) const;
     raw<const ObjectInfo> getStaticProperty(istring propertyName) const;
     static Value findClass(inamespace name);
@@ -120,9 +121,8 @@ public:
         EnumerateRecursive
     };
     void enumerateObjects(EnumerateRecursion recursion, EnumerateCallback callback) const;
-    u32 distance(raw<const Class> other) const;
+    bool distance(raw<const Class> other, u16& result) const;
     const ObjectInfo* addObject(const istring& s, const ObjectInfo* ob);
-    raw<const Method> getConstructor() const;
 private: // friend Value
     void copy(const void* src, void* dst) const;
     void destroy(void* src) const;

@@ -112,11 +112,17 @@ void DiskFolder::doRefresh(Folder::ScanPolicy scanPolicy)
 
 weak<File> DiskFolder::createFile(const istring& name)
 {
-    ifilename::Filename path = (m_path+ifilename(name)).str();
     struct stat s;
     errno = 0;
     char fullPathBuffer[PATH_MAX];
-    char* fullPath = realpath(path.name, fullPathBuffer);
+    char* fullPath = realpath(m_path.str().name, fullPathBuffer);
+    if (! fullPath)
+    {
+        be_error("could not get real path of %s: %s(%d)" | m_path | strerror(errno) | errno);
+        return ref<File>();
+    }
+    strcat(fullPath, "/");
+    strcat(fullPath, name.c_str());
     FILE* f = fopen(fullPath, "w");
     if (f == 0)
     {
@@ -124,7 +130,7 @@ weak<File> DiskFolder::createFile(const istring& name)
         return ref<File>();
     }
     fclose(f);
-    if (stat(path.name, &s) != 0)
+    if (stat(fullPath, &s) != 0)
     {
         be_error("could not create file %s: %s(%d)" | fullPath | strerror(errno) | errno);
         return ref<File>();

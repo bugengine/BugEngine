@@ -60,16 +60,24 @@ public:
                                                 typename PARTITION_LIST::Type,
                                                 typename PARTITION_LIST::Tail>::getPartition(factory->m_partitions)));
     }
-    static raw<const RTTI::Property> s_properties;
-};
-
-template< typename COMPONENT_LIST, typename PARTITION_LIST >
-raw<const RTTI::Property> EntityStorageFactory<COMPONENT_LIST, PARTITION_LIST>::s_properties =
-{
-    &Helper::ComponentListPropertyInfo<EntityStorageFactory<COMPONENT_LIST, PARTITION_LIST>,
-                                       typename COMPONENT_LIST::Type,
-                                       (StorageSize)COMPONENT_LIST::Storage,
-                                       typename COMPONENT_LIST::Tail>::s_property
+    static raw< RTTI::staticarray<const RTTI::Property> > getProperties()
+    {
+        static RTTI::staticarray_n< 1+COMPONENT_LIST::Index, RTTI::Property> s_properties =
+        {
+            1+COMPONENT_LIST::Index,
+            {}
+        };
+        static bool initialized = Helper::Property<EntityStorageFactory<COMPONENT_LIST, PARTITION_LIST>,
+                                                   COMPONENT_LIST::Index,
+                                                   typename COMPONENT_LIST::Type,
+                                                   (StorageSize)COMPONENT_LIST::Storage,
+                                                   typename COMPONENT_LIST::Tail>::fillProperty(s_properties.elements);
+        be_forceuse(initialized);
+        raw< RTTI::staticarray<const RTTI::Property> > result = {
+                reinterpret_cast< RTTI::staticarray<const RTTI::Property>* >(&s_properties)
+            };
+        return result;
+    }
 };
 
 }}
@@ -90,14 +98,14 @@ struct be_typeid< World::EntityStorageFactory<COMPONENT_LIST, PARTITION_LIST> >
         static RTTI::Class s_class =
         {
             istring("EntityStorageFactory"),
-            {0},
-            be_typeid<World::EntityStorage>::klass(),
             0,
             0,
             RTTI::ClassType_Object,
             {0},
-            World::EntityStorageFactory<COMPONENT_LIST, PARTITION_LIST>::s_properties,
+            be_typeid<World::EntityStorage>::klass(),
             {0},
+            {0},
+            World::EntityStorageFactory<COMPONENT_LIST, PARTITION_LIST>::getProperties(),
             {0},
             {0},
             0,

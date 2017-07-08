@@ -10,7 +10,7 @@
 #include    <rtti/value.hh>
 #include    <filesystem/file.script.hh>
 #include    <plugin/plugin.hh>
-#include    <luascript.script.hh>
+#include    <lua.script.hh>
 
 namespace BugEngine { namespace Lua
 {

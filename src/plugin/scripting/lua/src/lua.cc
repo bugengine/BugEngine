@@ -3,7 +3,7 @@
 
 #include    <stdafx.h>
 
-#include    <luascript.script.hh>
+#include    <lua.script.hh>
 
 namespace BugEngine
 {

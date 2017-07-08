@@ -252,7 +252,7 @@ def p_method_prototype_destructor(p):
 
 def p_method_prototype(p):
     """
-        method_prototype : method_return_type ID LEFT_PARENTHESIS method_args RIGHT_PARENTHESIS method_attribute_right_list
+        method_prototype : method_return_type name LEFT_PARENTHESIS method_args RIGHT_PARENTHESIS method_attribute_right_list
     """
     p[0] = Method(p[2], p[1], p[4], p[6])
 

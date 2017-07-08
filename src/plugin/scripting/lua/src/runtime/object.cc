@@ -3,9 +3,10 @@
 
 #include    <stdafx.h>
 
-#include    <luavalue.hh>
-#include    <luacall.hh>
-#include    <luacontext.hh>
+#include    <runtime/object.hh>
+#include    <runtime/call.hh>
+#include    <runtime/value.hh>
+#include    <context.hh>
 #include    <rtti/classinfo.script.hh>
 #include    <rtti/engine/propertyinfo.script.hh>
 
@@ -173,32 +174,23 @@ extern "C" int valueSet(lua_State *state)
     else
     {
         RTTI::Value* v = (RTTI::Value*)malloca(sizeof(RTTI::Value));
-        if (get(state, -1, p->type, v) != -1)
+        bool result = createValue(state, -1, p->type, v);
+
+        if (result)
         {
             p->set(*userdata, *v);
             v->~Value();
         }
-        else
-        {
-            lua_Debug ar;
-            if (!lua_getstack(state, 0, &ar))
-            {
-                ar.name = "?";
-            }
-            else
-            {
-                lua_getinfo(state, "n", &ar);
-                if (ar.name == NULL)
-                {
-                    ar.name = "?";
-                }
-            }
-            return luaL_error(state, LUA_QS ": object " LUA_QS " property " LUA_QS
-                                            " has incompatible type " LUA_QS,
-                                     ar.name,  userdata->type().name().c_str(), name.c_str(),
-                              p->type.name().c_str());
-        }
         freea(v);
+
+        if (!result)
+        {
+            return error(minitl::format<4096u>("object " LUA_QS " property " LUA_QS
+                                               " has incompatible type " LUA_QS")"
+                                               | userdata->type().name().c_str()
+                                               | name.c_str()
+                                               | p->type.name().c_str()));
+        }
     }
 
     return 0;

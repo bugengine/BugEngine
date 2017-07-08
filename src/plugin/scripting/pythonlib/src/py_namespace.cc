@@ -110,8 +110,8 @@ int PyBugNamespace::setattr(PyObject* self, const char* name, PyObject* value)
         {
             if (ob->value.type().access != RTTI::Type::Const)
             {
-                u32 d = distance(value, ob->value.type());
-                if (d < RTTI::Type::MaxTypeDistance)
+                u64 d = distance(value, ob->value.type()).value;
+                if (d < RTTI::Type::s_incompatible.value)
                 {
                     RTTI::Value* v = (RTTI::Value*)malloca(sizeof(RTTI::Value));
                     unpack(value, ob->value.type(), v);

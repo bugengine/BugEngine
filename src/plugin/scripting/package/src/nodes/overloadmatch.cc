@@ -9,10 +9,6 @@
 namespace BugEngine { namespace PackageBuilder { namespace Nodes
 {
 
-static const u32 s_parameterTooMany = 1000000;
-static const u32 s_parameterBadType = 10000;
-static const u32 s_parameterMissing = 100;
-
 OverloadMatch::OverloadMatch(raw<const RTTI::Method::Overload> overload)
     :   m_overload(overload)
     ,   m_params(Arena::packageBuilder())
