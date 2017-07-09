@@ -23,7 +23,7 @@ private:
     minitl::vector< OverloadMatch >     m_overloads;
 private:
     void resolveOverload();
-    void addedParameter(ref<Parameter> parameter) override;
+    void addedParameter(ref<const Parameter> parameter) override;
 public:
     Object(weak<Package> owner, u32 line, u32 begin, u32 end);
     ~Object();

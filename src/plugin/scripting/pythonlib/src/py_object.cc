@@ -294,20 +294,16 @@ PyObject* PyBugObject::getattr(PyObject* self, const char* name)
     PyBugObject* self_ = static_cast<PyBugObject*>(self);
     raw<const RTTI::Class> metaclass = self_->value.type().metaclass;
     istring name_(name);
-    for (raw<const RTTI::Property> p = metaclass->properties; p; p = p->next)
+    raw<const RTTI::Property> p = metaclass->getProperty(name_);
+    if (p)
     {
-        if (p->name == name_)
-        {
-            return create(self, p->get(self_->value));
-        }
+        return create(self, p->get(self_->value));
     }
-    for (raw<const RTTI::Method> m = metaclass->methods; m; m = m->next)
+    raw<const RTTI::Method> m = metaclass->getMethod(name_);
+    if (m)
     {
-        if (m->name == name_)
-        {
-            PyObject* result = PyBoundMethod::create(m, self_);
-            return result;
-        }
+        PyObject* result = PyBoundMethod::create(m, self_);
+        return result;
     }
     s_library->m_PyErr_Format(*s_library->m_PyExc_AttributeError,
                               "%s object has no attribute %s",
@@ -341,8 +337,8 @@ int PyBugObject::setattr(PyObject* self, const char* name, PyObject* value)
                                   name);
         return -1;
     }
-    u32 d = distance(value, prop->type);
-    if (d == RTTI::Type::MaxTypeDistance)
+    RTTI::Type::ConversionCost c = distance(value, prop->type);
+    if (c == RTTI::Type::s_incompatible)
     {
         s_library->m_PyErr_Format(*s_library->m_PyExc_TypeError,
                                   "%s.%s is of type %s",
@@ -669,25 +665,32 @@ static inline void unpackString(PyObject* arg, const RTTI::Type& type, RTTI::Val
 
 static inline void unpackPod(PyObject* arg, const RTTI::Type& type, RTTI::Value* buffer)
 {
-    be_assert(type.metaclass->type() == RTTI::ClassType_Pod
-           || type.metaclass->type() == RTTI::ClassType_Variant,
+    be_assert(type.metaclass->type() == RTTI::ClassType_Pod,
               "expected to unpack Python Dict into RTTI::ClassType_Pod, got %s"
               | type.metaclass->name);
 
     new (buffer) RTTI::Value(type, RTTI::Value::Reserve);
-    for (raw<const RTTI::Property> p = type.metaclass->properties; p; p = p->next)
+    RTTI::Value* v = (RTTI::Value*)malloca(sizeof(RTTI::Value));
+    for (raw<const RTTI::Class> c = type.metaclass; c; c = c->parent)
     {
-        PyObject* value = s_library->m_PyDict_GetItemString(arg, p->name.c_str());
+        if (c->properties)
+        {
+            for (const RTTI::Property* p = c->properties->begin();
+                 p != c->properties->end();
+                 ++p)
+            {
+                PyObject* value = s_library->m_PyDict_GetItemString(arg, p->name.c_str());
 
-        RTTI::Value* v = (RTTI::Value*)malloca(sizeof(RTTI::Value));
-        PyBugObject::unpack(value, p->type, v);
-        p->set(*buffer, *v);
-        v->~Value();
-        freea(v);
+                PyBugObject::unpack(value, p->type, v);
+                p->set(*buffer, *v);
+                v->~Value();
+            }
+        }
     }
+    freea(v);
 }
 
-u32 PyBugObject::distance(PyObject* object, const RTTI::Type& desiredType)
+RTTI::Type::ConversionCost PyBugObject::distance(PyObject* object, const RTTI::Type& desiredType)
 {
     if (desiredType.metaclass->type() == RTTI::ClassType_Variant)
     {
@@ -696,46 +699,48 @@ u32 PyBugObject::distance(PyObject* object, const RTTI::Type& desiredType)
          || object->py_type->tp_flags & (Py_TPFLAGS_INT_SUBCLASS|Py_TPFLAGS_LONG_SUBCLASS)
          || object->py_type == s_library->m_PyFloat_Type)
         {
-            return 1000;
+            return RTTI::Type::s_variant;
         }
         else
         {
-            return (u32)RTTI::Type::MaxTypeDistance;
+            return RTTI::Type::s_incompatible;
         }
     }
     else if (object->py_type == &PyBugObject::s_pyType
           || object->py_type->tp_base == &PyBugObject::s_pyType)
     {
         PyBugObject* object_ = static_cast<PyBugObject*>(object);
-        return object_->value.type().distance(desiredType);
+        return object_->value.type().calculateConversion(desiredType);
     }
     else if (object->py_type->tp_flags & (Py_TPFLAGS_INT_SUBCLASS|Py_TPFLAGS_LONG_SUBCLASS))
     {
         if (desiredType.metaclass->type() == RTTI::ClassType_Number)
         {
+            RTTI::Type::ConversionCost cost;
             switch (desiredType.metaclass->index())
             {
-            case 0: //bool
-            case 1: //u8
-            case 5: //i8
-            case 2: //u16
-            case 6: //i16
-            case 3: //u32
-            case 7: //i32
-                return 1;
-            case 4: //u64
-            case 8: //i64
-                return 0;
-            case 9:
-            case 10:
-                return 2;
+            case RTTI::ClassIndex_float:
+            case RTTI::ClassIndex_double:
+                cost.promotion += 2;
+            case RTTI::ClassIndex_bool:
+            case RTTI::ClassIndex_u8:
+            case RTTI::ClassIndex_i8:
+            case RTTI::ClassIndex_u16:
+            case RTTI::ClassIndex_i16:
+            case RTTI::ClassIndex_u32:
+            case RTTI::ClassIndex_i32:
+                cost.promotion += 1;
+            case RTTI::ClassIndex_u64:
+            case RTTI::ClassIndex_i64:
+                break;
             default:
-                return (u32)RTTI::Type::MaxTypeDistance;
+                return RTTI::Type::s_incompatible;
             }
+            return cost;
         }
         else
         {
-            return (u32)RTTI::Type::MaxTypeDistance;
+            return RTTI::Type::s_incompatible;
         }
     }
     else if (object->py_type->tp_flags & (Py_TPFLAGS_LIST_SUBCLASS|Py_TPFLAGS_TUPLE_SUBCLASS))
@@ -748,84 +753,98 @@ u32 PyBugObject::distance(PyObject* object, const RTTI::Type& desiredType)
                       "Array class %s needs to specify value type" | desiredType.metaclass->name);
             const RTTI::Type& subType = valueType->value.as<const RTTI::Type&>();
             be_forceuse(subType);
-            return 0;
+            be_unimplemented();
+            return RTTI::Type::ConversionCost();
         }
         else
         {
-            return (u32)RTTI::Type::MaxTypeDistance;
+            return RTTI::Type::s_incompatible;
         }
     }
     else if (object->py_type->tp_flags & (Py_TPFLAGS_STRING_SUBCLASS|Py_TPFLAGS_UNICODE_SUBCLASS))
     {
         return desiredType.metaclass->type() == RTTI::ClassType_String
-                ?   0
-                :   (u32)RTTI::Type::MaxTypeDistance;
+                ?   RTTI::Type::ConversionCost()
+                :   RTTI::Type::s_incompatible;
     }
     else if (object->py_type->tp_flags & Py_TPFLAGS_DICT_SUBCLASS)
     {
         if (desiredType.metaclass->type() == RTTI::ClassType_Pod)
         {
             u32 i = 0;
-            for (raw<const RTTI::Property> p = desiredType.metaclass->properties;
-                 p;
-                 p = p->next, ++i)
+            for (raw<const RTTI::Class> c = desiredType.metaclass; c; c = c->parent)
             {
-                PyObject* value = s_library->m_PyDict_GetItemString(object, p->name.c_str());
-                if (!value)
+                if (c->properties)
                 {
-                    return (u32)RTTI::Type::MaxTypeDistance;
-                }
-                if (distance(value, p->type) == RTTI::Type::MaxTypeDistance)
-                {
-                    return (u32)RTTI::Type::MaxTypeDistance;
+                    for (const RTTI::Property* p = c->properties->begin();
+                         p != c->properties->end();
+                         ++p)
+                    {
+                        PyObject* value = s_library->m_PyDict_GetItemString(object, p->name.c_str());
+                        if (!value)
+                        {
+                            return RTTI::Type::s_incompatible;
+                        }
+                        if (distance(value, p->type) >= RTTI::Type::s_incompatible)
+                        {
+                            return RTTI::Type::s_incompatible;
+                        }
+                    }
                 }
             }
             return i == (u32)s_library->m_PyDict_Size(object)
-                    ?   0
-                    :   (u32)RTTI::Type::MaxTypeDistance;
+                    ?   RTTI::Type::ConversionCost()
+                    :   RTTI::Type::s_incompatible;
         }
-        else //todo
+        else
         {
-            return (u32)RTTI::Type::MaxTypeDistance;
+            be_unimplemented();
+            return RTTI::Type::s_incompatible;
         }
     }
     else if (object == s_library->m__Py_NoneStruct)
     {
-        return desiredType.indirection >= RTTI::Type::RawPtr ? 0 : (u32)RTTI::Type::MaxTypeDistance;
+        return desiredType.indirection >= RTTI::Type::RawPtr
+            ?   RTTI::Type::ConversionCost()
+            :   RTTI::Type::s_incompatible;
     }
     else if (object->py_type == s_library->m_PyFloat_Type)
     {
         if (desiredType.metaclass->type() == RTTI::ClassType_Number)
         {
+            RTTI::Type::ConversionCost cost;
             switch (desiredType.metaclass->index())
             {
-            case 0: //bool
-                return 3;
-            case 1: //u8
-            case 5: //i8
-            case 2: //u16
-            case 6: //i16
-            case 3: //u32
-            case 7: //i32
-            case 4: //u64
-            case 8: //i64
-                return 2;
-            case 9:
-                return 1;
-            case 10:
-                return 0;
+            case RTTI::ClassIndex_bool:
+                cost.promotion += 3;
+            case RTTI::ClassIndex_u8:
+            case RTTI::ClassIndex_i8:
+            case RTTI::ClassIndex_u16:
+            case RTTI::ClassIndex_i16:
+            case RTTI::ClassIndex_u32:
+            case RTTI::ClassIndex_i32:
+            case RTTI::ClassIndex_u64:
+            case RTTI::ClassIndex_i64:
+                cost.promotion += 2;
+                break;
+            case RTTI::ClassIndex_float:
+                cost.promotion += 1;
+                break;
+            case RTTI::ClassIndex_double:
+                break;
             default:
-                return (u32)RTTI::Type::MaxTypeDistance;
+                return RTTI::Type::s_incompatible;
             }
+            return cost;
         }
         else
         {
-            return (u32)RTTI::Type::MaxTypeDistance;
+            return RTTI::Type::s_incompatible;
         }
     }
     else
     {
-        return (u32)RTTI::Type::MaxTypeDistance;
+        return RTTI::Type::s_incompatible;
     }
 }
 

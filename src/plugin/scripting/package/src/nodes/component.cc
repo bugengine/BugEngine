@@ -18,7 +18,7 @@ Component::~Component()
 {
 }
 
-void Component::addedParameter(ref<Parameter> /*parameter*/)
+void Component::addedParameter(ref<const Parameter> /*parameter*/)
 {
 }
 

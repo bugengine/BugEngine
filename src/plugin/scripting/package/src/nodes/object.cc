@@ -21,19 +21,51 @@ Object::~Object()
 {
 }
 
-void Object::addedParameter(ref<Parameter> parameter)
+void Object::addedParameter(ref<const Parameter> parameter)
 {
+    be_forceuse(parameter);
     for (minitl::vector< OverloadMatch >::iterator it = m_overloads.begin(); it != m_overloads.end(); ++it)
     {
-        it->addParameter(parameter);
+        it->update(m_parameters);
     }
     minitl::sort(m_overloads.begin(), m_overloads.end(), minitl::less<OverloadMatch>());
 }
 
 void Object::setMethod(ref<Reference> reference)
 {
-    be_unimplemented();
-    be_forceuse(reference);
+    m_methodReference = reference;
+    RTTI::Value v(RTTI::Value::ByRef(m_methodReference->getValue()));
+    if (v)
+    {
+        static const istring callName("?call");
+        RTTI::Value call = v[callName];
+        if (call)
+        {
+            if (call.isA(be_typeid<raw<const RTTI::Method> const>::type()))
+            {
+                m_method = call.as<raw<const RTTI::Method> const>();
+                m_overloads.clear();
+                m_overloads.reserve(m_method->overloads->count);
+                for (u32 i = 0; i < m_method->overloads->count; ++i)
+                {
+                    raw<const RTTI::Method::Overload> overload = { m_method->overloads->elements + i };
+                    m_overloads.push_back(OverloadMatch(overload));
+                    m_overloads.back().update(m_parameters);
+                }
+                minitl::sort(m_overloads.begin(), m_overloads.end(), minitl::less<OverloadMatch>());
+            }
+            else
+            {
+                // error: call is not a method
+                be_unimplemented();
+            }
+        }
+        else
+        {
+            // error: no call
+            be_unimplemented();
+        }
+    }
 }
 
 RTTI::Type Object::getType() const
@@ -51,7 +83,7 @@ RTTI::Type Object::getType() const
 
 RTTI::Value Object::create() const
 {
-    return m_overloads.empty() ? RTTI::Value() : m_overloads[0].create(m_name);
+    return m_overloads.empty() ? RTTI::Value() : m_overloads[0].create(m_name, m_parameters);
 }
 
 }}}
