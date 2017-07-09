@@ -119,7 +119,7 @@ public:
     static const ConversionCost s_incompatible;
     static const ConversionCost s_variant;
 
-    ConversionCost          calculateCOnversion(const Type& other) const;
+    ConversionCost          calculateConversion(const Type& other) const;
     template< typename T >
     bool                    isA() const;
     minitl::format<1024u>   name() const;

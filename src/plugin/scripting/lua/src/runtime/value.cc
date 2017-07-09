@@ -134,8 +134,8 @@ static bool convertUserdataToValue(lua_State *state, int index, const RTTI::Type
     {
         lua_pop(state, 2);
         RTTI::Value* userdata = (RTTI::Value*)lua_touserdata(state, index);
-        RTTI::Type::Distance distance = userdata->type().distance(type);
-        if (distance.value >= RTTI::Type::s_incompatible.value)
+        RTTI::Type::ConversionCost conversion = userdata->type().calculateConversion(type);
+        if (conversion >= RTTI::Type::s_incompatible)
         {
             return false;
         }
@@ -162,33 +162,32 @@ static bool convertTableToValue(lua_State *state, int index, const RTTI::Type& t
 
         lua_pushnil(state);
         int i = 0;
-        int score = 0;
+        bool result = true;
         while (lua_next(state, index) != 0)
         {
             if (lua_type(state, -2) != LUA_TNUMBER)
             {
                 lua_pop(state, 2);
-                score = -1;
+                result = false;
                 count = i;
                 break;
             }
             be_assert(lua_tonumber(state, -2) == i+1, "inconsistent LUA table");
-            int elementScore = get(state, -1, arrayType, &parameters[i]);
-            if (elementScore < 0)
+            result |= createValue(state, -1, arrayType, &parameters[i]);
+            if (!result)
             {
                 lua_pop(state, 2);
-                score = -1;
+                result = false;
                 count = i;
                 break;
             }
             else
             {
-                score += elementScore;
                 i++;
                 lua_pop(state, 1);
             }
         }
-        if (score >= 0)
+        if (result)
         {
             RTTI::Value array = type.metaclass->getConstructor()->doCall(parameters, count);
             new (buffer) RTTI::Value(array);
@@ -198,7 +197,7 @@ static bool convertTableToValue(lua_State *state, int index, const RTTI::Type& t
             parameters[j].~Value();
         }
         freea(parameters);
-        return score >= 0;
+        return result;
     }
     else if (type.metaclass->type() == RTTI::ClassType_Pod)
     {
@@ -224,8 +223,8 @@ static bool convertTableToValue(lua_State *state, int index, const RTTI::Type& t
                 return false;
             }
             RTTI::Value* v = (RTTI::Value*)malloca(sizeof(RTTI::Value));
-            int score = get(state, -1, property->type, v);
-            if (score < 0)
+            bool result = createValue(state, -1, property->type, v);
+            if (!result)
             {
                 lua_pop(state, 2);
                 value->~Value();

@@ -6,7 +6,6 @@
 /**************************************************************************************************/
 #include    <package/stdafx.h>
 #include    <package/nodes/node.hh>
-#include    <package/nodes/overloadmatch.hh>
 
 
 namespace BugEngine { namespace PackageBuilder { namespace Nodes
@@ -18,18 +17,21 @@ class Parameter;
 class Instance : public Node
 {
 protected:
-    istring                             m_name;
-    minitl::vector< ref<Parameter> >    m_parameters;
+    istring                                 m_name;
+    minitl::vector< ref<const Parameter> >  m_parameters;
 protected:
     Instance(weak<Package> owner, u32 line, u32 begin, u32 end);
     ~Instance();
 
-    virtual void addedParameter(ref<Parameter> parameter) = 0;
+    virtual void addedParameter(ref<const Parameter> parameter) = 0;
 public:
-    istring name() const                                        { return m_name; }
+    istring name() const
+    {
+        return m_name;
+    }
 
     void setName(istring name);
-    void addParameter(ref<Parameter> param);
+    void addParameter(ref<const Parameter> param);
 };
 
 }}}

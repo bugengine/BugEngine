@@ -6,6 +6,7 @@
 /**************************************************************************************************/
 #include    <rtti/stdafx.h>
 #include    <rtti/engine/methodinfo.script.hh>
+#include    <rtti/value.hh>
 
 namespace BugEngine { namespace RTTI
 {
@@ -69,6 +70,17 @@ CallInfo resolve(raw<const Method> method,
         }
     }
     return best;
+}
+
+template< typename T >
+RTTI::Value call(CallInfo callInfo,
+                 ArgInfo<T> arguments[], u32 argumentCount)
+{
+    be_forceuse(callInfo);
+    be_forceuse(arguments);
+    be_forceuse(argumentCount);
+    be_unimplemented();
+    return RTTI::Value();
 }
 
 }}
