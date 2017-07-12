@@ -87,7 +87,7 @@ published:
     raw< staticarray<const Property> >  properties;
     raw< staticarray<const Method> >    methods;
     be_tag(Alias("?call"))
-    raw<const Method>                   call;
+    raw<const Method>                   constructor;
 public:
     typedef void (*CopyConstructor)(const void* source, void* destination);
     typedef void (*Destructor)(void* object);
@@ -109,7 +109,6 @@ published:
     inline u32 index() const            { return id >> 16; }
 
     raw<const Property> getProperty(istring propertyName) const;
-    raw<const Method> getConstructor() const;
     raw<const Method> getMethod(istring methodName) const;
     raw<const ObjectInfo> getStaticProperty(istring propertyName) const;
     static Value findClass(inamespace name);
