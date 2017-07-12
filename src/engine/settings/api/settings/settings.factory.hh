@@ -69,7 +69,7 @@ raw<RTTI::Class> be_game_Namespace_BugEngine_Settings();
 template< typename T >
 struct BE_EXPORT be_typeid< Settings::Settings<T> >
 {
-    be_section(rtti_text_trampoline)
+    be_section(rtti_text_trampoline_factory)
     static RTTI::Value callGet(RTTI::Value* params, u32 paramCount)
     {
         be_assert(paramCount == 0, "expected no parameter; received %d" | paramCount);
@@ -88,10 +88,10 @@ struct BE_EXPORT be_typeid< Settings::Settings<T> >
         return s_name;
     }
 
-    be_section(rtti_text_cls)
+    be_section(rtti_text_cls_factory)
     static inline raw<RTTI::Class> preklass()
     {
-        be_section(rtti_cls)
+        be_section(rtti_cls_factory)
         static RTTI::Class s_class =
         {
             name(),
@@ -118,11 +118,11 @@ struct BE_EXPORT be_typeid< Settings::Settings<T> >
         return result;
     }
 
-    be_section(rtti_text_cls_props)
+    be_section(rtti_text_cls_props_factory)
     static raw<const RTTI::Class> registerProperties()
     {
         static raw<RTTI::Class> result = preklass();
-        be_section(rtti_method)
+        be_section(rtti_method_factory)
         static RTTI::staticarray_n< 1, const RTTI::Method::Overload > s_method_get_overloads = {
             1,
             {
@@ -135,13 +135,13 @@ struct BE_EXPORT be_typeid< Settings::Settings<T> >
                 },
             }
         };
-        be_section(rtti_method)
+        be_section(rtti_method_factory)
         static RTTI::Method s_get_method = {
             istring("get"),
             {reinterpret_cast< RTTI::staticarray< const RTTI::Method::Overload >* >(&s_method_get_overloads)},
             {&s_get_method}
         };
-        be_section(rtti_object)
+        be_section(rtti_object_factory)
         static RTTI::ObjectInfo valueGet = {
             {0},
             {0},
@@ -149,7 +149,7 @@ struct BE_EXPORT be_typeid< Settings::Settings<T> >
             RTTI::Value(s_get_method)
         };
         result->objects.set(&valueGet);
-        be_section(rtti_object)
+        be_section(rtti_object_factory)
         static RTTI::ObjectInfo s_object = {
             ::BugEngine::be_game_Namespace_BugEngine_Settings()->objects,
             {0},
