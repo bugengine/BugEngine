@@ -102,10 +102,10 @@ struct be_typeid< World::EntityStorageFactory<COMPONENT_LIST, PARTITION_LIST> >
             0,
             RTTI::ClassType_Object,
             {0},
-            be_typeid<World::EntityStorage>::klass(),
+            be_typeid<World::EntityStorage>::preklass(),
             {0},
             {0},
-            World::EntityStorageFactory<COMPONENT_LIST, PARTITION_LIST>::getProperties(),
+            {0},
             {0},
             {0},
             0,
@@ -114,9 +114,17 @@ struct be_typeid< World::EntityStorageFactory<COMPONENT_LIST, PARTITION_LIST> >
         raw<RTTI::Class> result = { &s_class };
         return result;
     }
+    static inline raw<const RTTI::Class> registerProperties()
+    {
+        raw<RTTI::Class> cls = preklass();
+        cls->properties = World::EntityStorageFactory<COMPONENT_LIST, PARTITION_LIST>::getProperties();
+        return cls;
+    }
+
     static inline raw<const RTTI::Class> klass()
     {
-        return preklass();
+        static raw<const RTTI::Class> cls = registerProperties();
+        return cls;
     }
 };
 

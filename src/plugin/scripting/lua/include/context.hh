@@ -26,7 +26,7 @@ public:
     static minitl::format<1024u> tostring(lua_State* state, int element);
     static void printStack(lua_State* l);
     static void typeError(lua_State* state, int narg, const char* expected, const char* got);
-    static void push(lua_State* state, const RTTI::Value& v);
+    static int push(lua_State* state, const RTTI::Value& v);
     static void checkArg(lua_State* state, int narg, int type);
     static void checkArg(lua_State* state, int narg, const char* userDataType);
     static void checkArg(lua_State* state, int narg, const RTTI::Type& type);

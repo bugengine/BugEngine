@@ -30,7 +30,7 @@ void Instance::setName(istring name)
     m_name = name;
 }
 
-void Instance::addParameter(ref<Parameter> param)
+void Instance::addParameter(ref<const Parameter> param)
 {
     m_parameters.push_back(param);
     addedParameter(param);
