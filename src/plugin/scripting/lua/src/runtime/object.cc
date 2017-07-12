@@ -6,6 +6,7 @@
 #include    <runtime/object.hh>
 #include    <runtime/call.hh>
 #include    <runtime/value.hh>
+#include    <runtime/error.hh>
 #include    <context.hh>
 #include    <rtti/classinfo.script.hh>
 #include    <rtti/engine/propertyinfo.script.hh>
@@ -115,61 +116,23 @@ extern "C" int valueSet(lua_State *state)
 
     RTTI::Value* userdata = (RTTI::Value*)lua_touserdata(state, -3);
     const istring name = istring(lua_tostring(state, -2));
-    raw<const RTTI::Property> p = userdata->type().metaclass->properties;
-    while (p && p->name != name) p = p->next;
+    raw<const RTTI::Property> p = userdata->type().metaclass->getProperty(name);
     if (!p)
     {
-        lua_Debug ar;
-        if (!lua_getstack(state, 0, &ar))
-        {
-            ar.name = "?";
-        }
-        else
-        {
-            lua_getinfo(state, "n", &ar);
-            if (ar.name == NULL)
-            {
-                ar.name = "?";
-            }
-        }
-        return luaL_error(state, LUA_QS ": object " LUA_QS " has no property " LUA_QS,
-                                 ar.name,  userdata->type().name().c_str(), name.c_str());
+        return error(state, minitl::format<4096u>("object of type %s has no property %s")
+                                                | userdata->type().name().c_str()
+                                                | name.c_str());
     }
     else if (userdata->type().constness == RTTI::Type::Const)
     {
-        lua_Debug ar;
-        if (!lua_getstack(state, 0, &ar))
-        {
-            ar.name = "?";
-        }
-        else
-        {
-            lua_getinfo(state, "n", &ar);
-            if (ar.name == NULL)
-            {
-                ar.name = "?";
-            }
-        }
-        return luaL_error(state, LUA_QS ": object " LUA_QS " is const",
-                          ar.name,  userdata->type().name().c_str());
+        return error(state, minitl::format<4096u>("object %s is const")
+                                                | userdata->type().name().c_str());
     }
     else if (p->type.constness == RTTI::Type::Const)
     {
-        lua_Debug ar;
-        if (!lua_getstack(state, 0, &ar))
-        {
-            ar.name = "?";
-        }
-        else
-        {
-            lua_getinfo(state, "n", &ar);
-            if (ar.name == NULL)
-            {
-                ar.name = "?";
-            }
-        }
-        return luaL_error(state, LUA_QS ": object " LUA_QS " property " LUA_QS " is const",
-                                 ar.name,  userdata->type().name().c_str(), name.c_str());
+        return error(state, minitl::format<4096u>("property %s.%s is const")
+                                                | userdata->type().name().c_str()
+                                                | name.c_str());
     }
     else
     {
@@ -185,11 +148,10 @@ extern "C" int valueSet(lua_State *state)
 
         if (!result)
         {
-            return error(minitl::format<4096u>("object " LUA_QS " property " LUA_QS
-                                               " has incompatible type " LUA_QS")"
-                                               | userdata->type().name().c_str()
-                                               | name.c_str()
-                                               | p->type.name().c_str()));
+            return error(state, minitl::format<4096u>("property %s.%s has incompatible type %s")
+                                                    | userdata->type().name().c_str()
+                                                    | name.c_str()
+                                                    | p->type.name().c_str());
         }
     }
 
@@ -203,20 +165,8 @@ extern "C" int valueCall(lua_State* state)
     RTTI::Value value = (*userdata)["?call"];
     if (!value)
     {
-        lua_Debug ar;
-        if (!lua_getstack(state, 0, &ar))
-        {
-            ar.name = "?";
-        }
-        else
-        {
-            lua_getinfo(state, "n", &ar);
-            if (ar.name == NULL)
-            {
-                ar.name = "?";
-            }
-        }
-        return luaL_error(state, LUA_QS ": object is not callable", ar.name);
+        return error(state, minitl::format<4096u>("object %s is not callable")
+                                                | userdata->type().name());
     }
     raw<const RTTI::Method> method = value.as< raw<const RTTI::Method> >();
     if (method)
@@ -225,20 +175,9 @@ extern "C" int valueCall(lua_State* state)
     }
     else
     {
-        lua_Debug ar;
-        if (!lua_getstack(state, 0, &ar))
-        {
-            ar.name = "?";
-        }
-        else
-        {
-            lua_getinfo(state, "n", &ar);
-            if (ar.name == NULL)
-            {
-                ar.name = "?";
-            }
-        }
-        return luaL_error(state, LUA_QS ": method is not implemented", ar.name);
+        return error(state, minitl::format<4096u>("%s.?call is of type &s; expected a Method")
+                                                | userdata->type().name()
+                                                | value.type().name());
     }
 }
 

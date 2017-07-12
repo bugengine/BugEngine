@@ -117,7 +117,7 @@ struct Property<LIST, 0, T, STORAGE, void>
     {
         RTTI::Property property = {
             {0},
-            be_typeid<T>::klass()->name,
+            be_typeid<T>::preklass()->name,
             be_typeid<LIST>::type(),
             be_typeid< const Kernel::Product<T>& >::type(),
             &LIST::template getProduct<T>

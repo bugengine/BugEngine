@@ -20,7 +20,7 @@ struct PyBugObject : public PyObject
 
     static PyObject* create(PyObject* owner, const RTTI::Value& value);
     static PyObject* newinst(PyTypeObject* type, PyObject* args, PyObject* kwargs);
-    static u32 distance(PyObject* object, const RTTI::Type& desiredType);
+    static RTTI::Type::ConversionCost distance(PyObject* object, const RTTI::Type& desiredType);
     static void unpack(PyObject* object, const RTTI::Type& desiredType, RTTI::Value* buffer);
     static void unpackAny(PyObject* object, RTTI::Value* buffer);
     static PyObject* getattr(PyObject* self, const char* name);

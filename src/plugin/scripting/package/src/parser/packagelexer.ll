@@ -33,8 +33,6 @@ using namespace BugEngine::PackageBuilder::Nodes;
 #endif
 #define strdup(x)    be_strdup(x)
 
-static int yyinput();
-
 static char *be_strdup(const char *src)
 {
     size_t x = strlen(src);
@@ -80,7 +78,6 @@ static void newline()
 
 extern "C" int be_package_wrap()
 {
-    (void)yyinput;
     return 1;
 }
 
@@ -133,7 +130,7 @@ as                                                      { update(be_package_leng
 #pragma warning(pop)
 #endif
 
-#ifndef FLEX_BETA
+#if YY_FLEX_MINOR_VERSION < 6 || YY_FLEX_SUBMINOR_VERSION·< 5
 int be_package_lex_destroy()
 {
     return 0;

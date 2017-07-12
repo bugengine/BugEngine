@@ -7,6 +7,7 @@
 #include    <package/stdafx.h>
 #include    <rtti/classinfo.script.hh>
 #include    <rtti/engine/methodinfo.script.hh>
+#include    <rtti/engine/call.hh>
 
 namespace BugEngine { namespace PackageBuilder { namespace Nodes
 {
@@ -19,20 +20,14 @@ struct OverloadMatch
     friend class Object;
 public:
     typedef BugEngine::RTTI::Method::Parameter RTTIParameter;
-    struct ParameterMatch
-    {
-        weak<const Parameter>       parameter;
-        raw<const RTTIParameter>    match;
-    };
 private:
     raw<const RTTI::Method::Overload>   m_overload;
-    minitl::vector<ParameterMatch>      m_params;
-    u32                                 m_score;
+    RTTI::Type::ConversionCost          m_cost;
 public:
     OverloadMatch(raw<const RTTI::Method::Overload> overload);
-    void addParameter(weak<const Parameter> param);
+    void update(const minitl::vector< ref<const Parameter> >& parameters);
     bool operator<(const OverloadMatch& other) const;
-    RTTI::Value create(istring name) const;
+    RTTI::Value create(istring name, const minitl::vector<ref<const Parameter> >& parameters) const;
 };
 
 }}}

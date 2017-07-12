@@ -14,7 +14,7 @@ namespace BugEngine { namespace PackageBuilder { namespace Nodes
 class Component : public Instance
 {
 private:
-    void addedParameter(ref<Parameter> parameter) override;
+    void addedParameter(ref<const Parameter> parameter) override;
 public:
     Component(weak<Package> owner, u32 line, u32 begin, u32 end);
     ~Component();
