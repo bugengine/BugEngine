@@ -692,7 +692,8 @@ class Class(Container):
                                          '            }' % (name, o, i) for m, name, o, i in methods]))
             definition.write('\n        }\n    };\n'
                              '    result->methods.set(reinterpret_cast< ::BugEngine::RTTI::staticarray< const ::BugEngine::RTTI::Method >* >(&s_methods));\n')
-
+        if self.constructor:
+            definition.write('    result->constructor.set(result->methods->elements);\n')
         props = []
         for p in self.properties[::-1]:
             tags = p.write_tags(struct_owner, definition)
