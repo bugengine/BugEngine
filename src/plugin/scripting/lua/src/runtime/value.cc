@@ -189,7 +189,7 @@ static bool convertTableToValue(lua_State *state, int index, const RTTI::Type& t
         }
         if (result)
         {
-            RTTI::Value array = type.metaclass->getConstructor()->doCall(parameters, count);
+            RTTI::Value array = type.metaclass->constructor->doCall(parameters, count);
             new (buffer) RTTI::Value(array);
         }
         for (int j = count-1; j >= 0; --j)
