@@ -161,7 +161,7 @@ false                                           { update(be_value_leng);
 #pragma warning(pop)
 #endif
 
-#ifndef FLEX_BETA
+#if YY_FLEX_MINOR_VERSION < 6 || YY_FLEX_SUBMINOR_VERSION·< 5
 int be_value_lex_destroy()
 {
     return 0;
