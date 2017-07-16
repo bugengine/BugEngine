@@ -13,7 +13,8 @@ class Clang(Configure.ConfigurationContext.GnuCompiler):
 
     def has_arch_flag(self):
         # if clang manages to compile, then the -arch keyword was ignored
-        return self.run(['-arch', 'no arch of that name', '-E', '-'], '\n')[0] != 0
+        returncode = self.run_c(['-arch', 'no arch of that name', '-E', '-'], '\n')[0]
+        return returncode != 0
 
     def set_warning_options(self, conf):
         Configure.ConfigurationContext.GnuCompiler.set_warning_options(self, conf)
@@ -22,7 +23,7 @@ class Clang(Configure.ConfigurationContext.GnuCompiler):
 
     def get_multilib_compilers(self):
         result = []
-        seen = set([])
+        seen = set([self.arch])
         if self.has_arch_flag():
             for arch_target, arch_name in sorted(self.ARCHS.items()):
                 if arch_name in seen:
@@ -30,44 +31,49 @@ class Clang(Configure.ConfigurationContext.GnuCompiler):
                 try:
                     c = self.__class__(self.compiler_c, self.compiler_cxx,
                                        self.extra_args + ['-arch', arch_target])
-                    result.append(c)
-                    seen.add(arch_name)
                 except Exception:
                     pass
-        else:
-            target_tuple = self.target.split('-')
-            arch = target_tuple[0]
-            r, out, err = self.run_cxx(['-x', 'c++', '-v', '-E', '-'], '\n')
+                else:
+                    if c.arch in seen:
+                        continue
+                    result.append(c)
+                    seen.add(c.arch)
+        target_tuple = self.target.split('-')
+        arch = target_tuple[0]
+        r, out, err = self.run_cxx(['-x', 'c++', '-v', '-E', '-'], '\n')
 
-            out = out.split('\n') + err.split('\n')
-            while out:
-                line = out.pop(0)
-                if line.startswith('#include <...>'):
-                    while out:
-                        path = out.pop(0)
-                        if path[0] != ' ':
-                            break
-                        path = path.strip()
-                        if os.path.isdir(path):
-                            if os.path.split(path)[1].startswith(arch):
-                                path = os.path.dirname(path)
-                                for x in os.listdir(path):
-                                    c = x.split('-')
-                                    if len(c) < 2:
+        out = out.split('\n') + err.split('\n')
+        while out:
+            line = out.pop(0)
+            if line.startswith('#include <...>'):
+                while out:
+                    path = out.pop(0)
+                    if path[0] != ' ':
+                        break
+                    path = path.strip()
+                    if os.path.isdir(path):
+                        if os.path.split(path)[1].startswith(arch):
+                            path = os.path.dirname(path)
+                            for x in os.listdir(path):
+                                c = x.split('-')
+                                if len(c) < 2:
+                                    continue
+                                if c[0] not in self.ARCHS:
+                                    continue
+                                if os.path.isdir(os.path.join(path, x)) and not x.startswith(arch):
+                                    a = self.to_target_arch(c[0])
+                                    if a in seen:
                                         continue
-                                    if c[0] not in self.ARCHS:
-                                        continue
-                                    if os.path.isdir(os.path.join(path, x)) and not x.startswith(arch):
-                                        a = self.to_target_arch(c[0])
-                                        if a in seen:
+                                    try:
+                                        c = self.__class__(self.compiler_c, self.compiler_cxx,
+                                                           self.extra_args + ['-target', x, '-I/usr/%s/include' %x])
+                                    except Exception:
+                                        pass
+                                    else:
+                                        if c.arch in seen:
                                             continue
-                                        try:
-                                            c = self.__class__(self.compiler_c, self.compiler_cxx,
-                                                               self.extra_args + ['-target', x])
-                                            result.append(c)
-                                            seen.add(a)
-                                        except Exception:
-                                            pass
+                                        result.append(c)
+                                        seen.add(c.arch)
         if not result:
             result = Configure.ConfigurationContext.GnuCompiler.get_multilib_compilers(self)
         return result

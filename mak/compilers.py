@@ -15,10 +15,11 @@ class Compiler:
         'amd64':    'amd64',
         'x86_64':   'amd64',
         'x64':      'amd64',
-        'arm':      'armv4',
-        'armv4':    'armv4',
-        'armv5':    'armv5',
-        'armv6':    'armv6',
+        'arm':      'armv7a',
+        #'armv4':    'armv4',
+        #'armv5':    'armv5',
+        #'armv6':    'armv6',
+        'armv6k':   'armv6k',
         'armv7':    'armv7a',
         'armv7a':   'armv7a',
         'armv7s':   'armv7s',
@@ -119,7 +120,10 @@ class Compiler:
 
 
 class GnuCompiler(Compiler):
-    ALL_ARM_ARCHS = ('armv5', 'armv6', 'armv7', 'armv7a', 'armv7k', 'armv7s')
+    ALL_ARM_ARCHS = ('armv7a', 'armv7k', 'armv7s')
+    ARCH_FLAGS = {
+            'arm':   ['-march=armv7-a'],
+        }
     MULTILIBS = {
         'x86':      ((['-m64'], 'amd64'),),
         'amd64':    ((['-m32'], 'x86'),),
@@ -130,10 +134,10 @@ class GnuCompiler(Compiler):
         'mips64':   ((['-m32'], 'mips'),),
         'mips64el': ((['-m32'], 'mipsel'),),
         'arm':      [(['-march=%s'%a], a) for a in ALL_ARM_ARCHS],
-        'armv4':    [(['-march=%s'%a], a) for a in ALL_ARM_ARCHS],
-        'armv5':    [(['-march=%s'%a], a) for a in ALL_ARM_ARCHS],
-        'armv6':    [(['-march=%s'%a], a) for a in ALL_ARM_ARCHS],
-        'armv7':    [(['-march=%s'%a], a) for a in ALL_ARM_ARCHS],
+        #'armv4':    [(['-march=%s'%a], a) for a in ALL_ARM_ARCHS],
+        #'armv5':    [(['-march=%s'%a], a) for a in ALL_ARM_ARCHS],
+        'armv6k':    [(['-march=%s'%a], a) for a in ALL_ARM_ARCHS],
+        #'armv7':    [(['-march=%s'%a], a) for a in ALL_ARM_ARCHS],
         'armv7a':   [(['-march=%s'%a], a) for a in ALL_ARM_ARCHS],
         'armv7k':   [(['-march=%s'%a], a) for a in ALL_ARM_ARCHS],
         'armv7l':   [(['-march=%s'%a], a) for a in ALL_ARM_ARCHS],
@@ -158,7 +162,7 @@ class GnuCompiler(Compiler):
         (('__arm__',),                                      'armv4'),
         (('__arm__', '__ARM_ARCH_5__'),                     'armv5'),
         (('__arm__', '__ARM_ARCH_6__'),                     'armv6'),
-        (('__arm__', '__ARM_ARCH_6K__'),                    'armv6'),
+        (('__arm__', '__ARM_ARCH_6K__'),                    'armv6k'),
         (('__arm__', '__ARM_ARCH_7A__'),                    'armv7a'),
         (('__arm__', '__ARM_ARCH_7A__', '__ARM_ARCH_7K__'), 'armv7k'),
         (('__arm__', '__ARM_ARCH_7S__'),                    'armv7s'),
@@ -169,6 +173,7 @@ class GnuCompiler(Compiler):
         extra_env['LC_ALL'] = 'C'
         extra_env['LANG'] = 'C'
         self.sysroot = None
+        extra_args = extra_args[:]
         version, platform, arch = self.get_version(compiler_cxx, extra_args, extra_env)
         Compiler.__init__(self, compiler_c, compiler_cxx, version,
                           platform, arch, extra_args, extra_env)
@@ -183,11 +188,19 @@ class GnuCompiler(Compiler):
         def split_triple(t):
             t = t.split('-')
             return t[0], '-'.join(t[1:])
+        arch = None
+        platform = None
+        result, out, err = self.run([compiler_c] + extra_args + ['-dumpmachine'], env=env)
+        self.target = out.strip()
+        if self.target.find('-') != -1:
+            arch, platform = split_triple(self.target)
+        else:
+            platform = self.target
+        if arch:
+            extra_args += self.ARCH_FLAGS.get(arch, [])
         result, out, err = self.run([compiler_c] + extra_args + ['-v', '-dM', '-E', '-'], '\n', env=env)
         macros = set([])
-        platform = None
         if result != 0:
-            #print(result, out, err)
             raise Exception('Error running %s: %s' % (compiler_c, err))
         out = err.split('\n') + out.split('\n')
         for line in out:
@@ -209,12 +222,7 @@ class GnuCompiler(Compiler):
             if sysroot != -1:
                 sysroot = shlex.split(line[sysroot:].replace('\\', '\\\\'))[1]
                 self.sysroot = os.path.normpath(sysroot)
-        result, out, err = self.run([compiler_c] + extra_args + ['-dumpmachine'], env=env)
-        self.target = out.strip()
-        if self.target.find('-') != -1:
-            arch, platform = split_triple(self.target)
-        else:
-            platform = self.target
+
         best = 0
         for values, a in self.MACRO_ARCHS:
             for v in values:
@@ -240,7 +248,6 @@ class GnuCompiler(Compiler):
                     c = self.__class__(self.compiler_c, self.compiler_cxx, multilib[0])
                     result.append(c)
                 except Exception as e:
-                    #print(e)
                     pass
             return result
 
