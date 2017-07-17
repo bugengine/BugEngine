@@ -160,5 +160,13 @@ class ListToolchainsContext(Build.BuildContext):
         if not self.all_envs:
             self.load_envs()
         for t in self.env.ALL_TOOLCHAINS:
-            for v in self.env.ALL_VARIANTS:
-                print('%s:%s' % (t, v))
+            print(t)
+
+class ListVariantsContext(Build.BuildContext):
+    cmd = 'list_variants'
+    def execute(self):
+        self.restore()
+        if not self.all_envs:
+            self.load_envs()
+        for v in self.env.ALL_VARIANTS:
+            print(v)
