@@ -186,7 +186,9 @@ StringInfo::StringInfoBufferCache::StringInfoBufferCache()
     :   m_buffers(reinterpret_cast< iptr<StringInfo::StringInfoBuffer>* >(Arena::string().allocate()))
     ,   m_bufferCount(i_u32::Zero)
 {
+    m_buffers[0] = 0;
     allocate(0);
+    be_assert(m_bufferCount == 1, "unable to allocate initial buffer");
 }
 
 StringInfo::StringInfoBufferCache::~StringInfoBufferCache()
@@ -214,7 +216,8 @@ StringInfo::StringInfoBuffer* StringInfo::StringInfoBufferCache::get(u32 index)
     }
     else
     {
-        be_assert(false, "Asking for a buffer out of range; current buffer count: %d, requested buffer: %d" | m_bufferCount | index);
+        be_assert(false, "Asking for a buffer out of range; current buffer count: %d, requested buffer: %d"
+                         | m_bufferCount | index);
         return 0;
     }
 }
@@ -224,6 +227,7 @@ StringInfo::StringInfoBuffer* StringInfo::StringInfoBufferCache::allocate(u32 pl
     StringInfoBuffer* buffer = reinterpret_cast< StringInfoBuffer* >(Arena::string().allocate());
     if (m_buffers[place].setConditional(buffer, 0) == 0)
     {
+        m_buffers[place + 1] = 0;
         new (buffer) StringInfoBuffer;
         m_bufferCount++;
         return buffer;

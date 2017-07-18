@@ -13,7 +13,7 @@ namespace BugEngine
 {
 
 template< typename T >
-be_section(rtti_text_trampoline)
+be_section(rtti_text_trampoline_factory)
 static RTTI::Value callStaticArrayOperatorIndex(RTTI::Value* params, u32 paramCount)
 {
     be_assert(paramCount == 1, "expected 1 parameter; received %d" | paramCount);
@@ -21,7 +21,7 @@ static RTTI::Value callStaticArrayOperatorIndex(RTTI::Value* params, u32 paramCo
 }
 
 template< typename T >
-be_section(rtti_text_trampoline)
+be_section(rtti_text_trampoline_factory)
 static RTTI::Value callStaticArrayOperatorIndexConst(RTTI::Value* params, u32 paramCount)
 {
     be_assert(paramCount == 1, "expected 1 parameter; received %d" | paramCount);
@@ -45,11 +45,11 @@ template< typename T >
 raw<const RTTI::Class> be_typeid< RTTI::staticarray<T> >::initialisation = be_typeid< RTTI::staticarray<T> >::klass();
 
 template< typename T >
-be_section(rtti_text_cls)
+be_section(rtti_text_cls_factory)
 raw<RTTI::Class> be_typeid< RTTI::staticarray<T> >::preklass()
 {
-    be_section(rtti_cls)
-    static RTTI::Class cls = {
+    be_section(rtti_cls_factory)
+    static ::BugEngine::RTTI::Class cls = {
         be_typeid< RTTI::staticarray<T> >::name(),
         u32(sizeof(RTTI::staticarray<T>)),
         0,
@@ -73,7 +73,7 @@ template< typename T >
 raw<const RTTI::Class> be_typeid< RTTI::staticarray<T> >::registerProperties()
 {
     raw< RTTI::Class > result = preklass();
-    be_section(rtti_method)
+    be_section(rtti_method_factory)
     static RTTI::staticarray_n< 1, const RTTI::Method::Parameter > s_Index_0_params = {
         1,
         {
@@ -84,7 +84,7 @@ raw<const RTTI::Class> be_typeid< RTTI::staticarray<T> >::registerProperties()
             }
         }
     };
-    be_section(rtti_method)
+    be_section(rtti_method_factory)
     static RTTI::staticarray_n< 2, const RTTI::Method::Overload > s_method_Index_overloads = {
         2,
         {
@@ -104,7 +104,7 @@ raw<const RTTI::Class> be_typeid< RTTI::staticarray<T> >::registerProperties()
             }
         }
     };
-    be_section(rtti_method)
+    be_section(rtti_method_factory)
     static RTTI::staticarray_n< 1, const RTTI::Method > s_methods = {
         1,
         {

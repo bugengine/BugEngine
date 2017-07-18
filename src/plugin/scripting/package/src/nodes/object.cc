@@ -44,15 +44,27 @@ void Object::setMethod(ref<Reference> reference)
             if (call.isA(be_typeid<raw<const RTTI::Method> const>::type()))
             {
                 m_method = call.as<raw<const RTTI::Method> const>();
-                m_overloads.clear();
-                m_overloads.reserve(m_method->overloads->count);
-                for (u32 i = 0; i < m_method->overloads->count; ++i)
+                if (m_method)
                 {
-                    raw<const RTTI::Method::Overload> overload = { m_method->overloads->elements + i };
-                    m_overloads.push_back(OverloadMatch(overload));
-                    m_overloads.back().update(m_parameters);
+                    m_overloads.clear();
+                    m_overloads.reserve(m_method->overloads->count);
+                    for (const RTTI::Method::Overload* o = m_method->overloads->begin();
+                         o != m_method->overloads->end();
+                         ++o)
+                    {
+                        raw<const RTTI::Method::Overload> overload = { o };
+                        m_overloads.push_back(OverloadMatch(overload));
+                        m_overloads.back().update(m_parameters);
+                    }
+                    minitl::sort(m_overloads.begin(),
+                                 m_overloads.end(),
+                                 minitl::less<OverloadMatch>());
                 }
-                minitl::sort(m_overloads.begin(), m_overloads.end(), minitl::less<OverloadMatch>());
+                else
+                {
+                    // error: call method is null
+                    be_unimplemented();
+                }
             }
             else
             {

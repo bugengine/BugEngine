@@ -16,8 +16,12 @@
 # define be_break()              __asm("trap")
 #elif defined(_MIPS)
 # define be_break()              __asm("break")
+#elif defined(_ARM) && !defined(__thumb__)
+# define be_break()             __asm__ volatile(".inst 0xe7f001f0");
 #elif defined(_ARM)
-# define be_break()
+# define be_break()             __asm__ volatile(".inst 0xde01");
+#elif defined(_ARM64)
+# define be_break()             __asm__ volatile(".inst 0xd4200000");
 #else
 # error "Breakpoint not supported on this platform"
 # define be_break()

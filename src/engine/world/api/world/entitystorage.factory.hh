@@ -19,6 +19,7 @@ class EntityStorageFactory : public EntityStorage
 public:
     typedef COMPONENT_LIST FactoryComponentList;
     typedef PARTITION_LIST FactoryPartitionList;
+    friend struct BugEngine::be_typeid< EntityStorageFactory<COMPONENT_LIST, PARTITION_LIST> >;
 private:
     COMPONENT_LIST m_list;
     PARTITION_LIST m_partitions;
@@ -60,21 +61,20 @@ public:
                                                 typename PARTITION_LIST::Type,
                                                 typename PARTITION_LIST::Tail>::getPartition(factory->m_partitions)));
     }
+private:
     static raw< RTTI::staticarray<const RTTI::Property> > getProperties()
     {
-        static RTTI::staticarray_n< 1+COMPONENT_LIST::Index, RTTI::Property> s_properties =
-        {
-            1+COMPONENT_LIST::Index,
-            {}
-        };
-        static bool initialized = Helper::Property<EntityStorageFactory<COMPONENT_LIST, PARTITION_LIST>,
-                                                   COMPONENT_LIST::Index,
-                                                   typename COMPONENT_LIST::Type,
-                                                   (StorageSize)COMPONENT_LIST::Storage,
-                                                   typename COMPONENT_LIST::Tail>::fillProperty(s_properties.elements);
-        be_forceuse(initialized);
+        static byte s_buffer[sizeof(RTTI::staticarray_n< 1+COMPONENT_LIST::Index, RTTI::Property>)];
+        RTTI::staticarray_n< 1+COMPONENT_LIST::Index, RTTI::Property>* properties =
+            reinterpret_cast<RTTI::staticarray_n< 1+COMPONENT_LIST::Index, RTTI::Property>* >(s_buffer);
+        new (&properties) u32(1+COMPONENT_LIST::Index);
+        Helper::Property<EntityStorageFactory<COMPONENT_LIST, PARTITION_LIST>,
+                         COMPONENT_LIST::Index,
+                         typename COMPONENT_LIST::Type,
+                         (StorageSize)COMPONENT_LIST::Storage,
+                         typename COMPONENT_LIST::Tail>::fillProperty(properties->elements);
         raw< RTTI::staticarray<const RTTI::Property> > result = {
-                reinterpret_cast< RTTI::staticarray<const RTTI::Property>* >(&s_properties)
+                reinterpret_cast< RTTI::staticarray<const RTTI::Property>* >(properties)
             };
         return result;
     }
@@ -114,19 +114,20 @@ struct be_typeid< World::EntityStorageFactory<COMPONENT_LIST, PARTITION_LIST> >
         raw<RTTI::Class> result = { &s_class };
         return result;
     }
+    static inline raw<const RTTI::Class> klass()
+    {
+        static raw<const RTTI::Class> cls = registerProperties();
+        return cls;
+    }
+private:
     static inline raw<const RTTI::Class> registerProperties()
     {
         raw<RTTI::Class> cls = preklass();
         cls->properties = World::EntityStorageFactory<COMPONENT_LIST, PARTITION_LIST>::getProperties();
         return cls;
     }
-
-    static inline raw<const RTTI::Class> klass()
-    {
-        static raw<const RTTI::Class> cls = registerProperties();
-        return cls;
-    }
 };
+
 
 }
 
