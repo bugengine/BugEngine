@@ -81,8 +81,8 @@ void Array::doEval(const RTTI::Type& expectedType, Value& result) const
     {
          m_value[i]->doEval(valueType, v[i]);
     }
-    result = expectedType.metaclass->getConstructor()->doCall(v.begin(),
-                                                              be_checked_numcast<u32>(m_value.size()));
+    result = expectedType.metaclass->constructor->doCall(v.begin(),
+                                                         be_checked_numcast<u32>(m_value.size()));
 }
 
 

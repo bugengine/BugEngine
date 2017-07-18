@@ -288,17 +288,6 @@ raw<const Property> Class::getProperty(istring propertyName) const
     return raw<const Property>();
 }
 
-raw<const Method> Class::getConstructor() const
-{
-    if (methods && methods->begin()->name == name)
-    {
-        raw<const RTTI::Method> m = { methods->begin() };
-        return m;
-    }
-    else
-        return raw<const Method>();
-}
-
 raw<const Method> Class::getMethod(istring methodName) const
 {
     for (raw< const Class > cls = { this }; cls; cls = cls->parent)

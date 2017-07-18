@@ -16,7 +16,7 @@ namespace BugEngine
 {
 
 template< typename T >
-be_section(rtti_text_trampoline)
+be_section(rtti_text_trampoline_factory)
 static RTTI::Value make_array(RTTI::Value* v, u32 count)
 {
     T* t = (T*)malloca(sizeof(T)*count);
@@ -30,7 +30,7 @@ static RTTI::Value make_array(RTTI::Value* v, u32 count)
 }
 
 template< typename T >
-be_section(rtti_text_trampoline)
+be_section(rtti_text_trampoline_factory)
 static RTTI::Value callSize(RTTI::Value* params, u32 paramCount)
 {
     be_assert(paramCount == 1, "expected 1 parameter; received %d" | paramCount);
@@ -38,7 +38,7 @@ static RTTI::Value callSize(RTTI::Value* params, u32 paramCount)
 }
 
 template< typename T >
-be_section(rtti_text_trampoline)
+be_section(rtti_text_trampoline_factory)
 static RTTI::Value callOperatorIndex(RTTI::Value* params, u32 paramCount)
 {
     be_assert(paramCount == 1, "expected 1 parameter; received %d" | paramCount);
@@ -46,7 +46,7 @@ static RTTI::Value callOperatorIndex(RTTI::Value* params, u32 paramCount)
 }
 
 template< typename T >
-be_section(rtti_text_trampoline)
+be_section(rtti_text_trampoline_factory)
 static RTTI::Value callOperatorIndexConst(RTTI::Value* params, u32 paramCount)
 {
     be_assert(paramCount == 1, "expected 1 parameter; received %d" | paramCount);
@@ -70,11 +70,11 @@ template< typename T >
 raw<const RTTI::Class> be_typeid< minitl::array<T> >::initialisation = be_typeid< minitl::array<T> >::klass();
 
 template< typename T >
-be_section(rtti_text_cls)
+be_section(rtti_text_cls_factory)
 raw<RTTI::Class> be_typeid< minitl::array<T> >::preklass()
 {
-    be_section(rtti_cls)
-    static RTTI::Class cls = {
+    be_section(rtti_cls_factory)
+    static ::BugEngine::RTTI::Class cls = {
         be_typeid< minitl::array<T> >::name(),
         u32(sizeof(minitl::array<T>)),
         0,
@@ -98,7 +98,7 @@ template< typename T >
 raw<const RTTI::Class> be_typeid< minitl::array<T> >::registerProperties()
 {
     raw< RTTI::Class > result = preklass();
-    be_section(rtti_method)
+    be_section(rtti_method_factory)
     static RTTI::staticarray_n< 1, const RTTI::Method::Overload > s_method_array_overloads = {
         1,
         {
@@ -111,7 +111,7 @@ raw<const RTTI::Class> be_typeid< minitl::array<T> >::registerProperties()
             }
         }
     };
-    be_section(rtti_method)
+    be_section(rtti_method_factory)
     static RTTI::staticarray_n< 1, const RTTI::Method::Parameter > s_Index_0_params = {
         1,
         {
@@ -122,7 +122,7 @@ raw<const RTTI::Class> be_typeid< minitl::array<T> >::registerProperties()
             }
         }
     };
-    be_section(rtti_method)
+    be_section(rtti_method_factory)
     static RTTI::staticarray_n< 1, const RTTI::Method::Parameter > s_Index_1_params = {
         1,
         {
@@ -133,7 +133,7 @@ raw<const RTTI::Class> be_typeid< minitl::array<T> >::registerProperties()
             }
         }
     };
-    be_section(rtti_method)
+    be_section(rtti_method_factory)
     static RTTI::staticarray_n< 2, const RTTI::Method::Overload > s_method_Index_overloads = {
         2,
         {
@@ -153,7 +153,7 @@ raw<const RTTI::Class> be_typeid< minitl::array<T> >::registerProperties()
             }
         }
     };
-    be_section(rtti_method)
+    be_section(rtti_method_factory)
     static RTTI::staticarray_n< 1, const RTTI::Method::Overload > s_method_size_overloads = {
         1,
         {
@@ -166,7 +166,7 @@ raw<const RTTI::Class> be_typeid< minitl::array<T> >::registerProperties()
             }
         }
     };
-    be_section(rtti_method)
+    be_section(rtti_method_factory)
     static RTTI::staticarray_n< 3, const RTTI::Method > s_methods = {
         3,
         {

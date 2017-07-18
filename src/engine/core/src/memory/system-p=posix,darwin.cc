@@ -23,7 +23,7 @@ static inline u32 cacheAhead()
     #if BE_ENABLE_MEMORY_DEBUGGING
             0;
     #else
-            s_pageSize;
+            SystemAllocator::platformPageSize();
     #endif
     return s_cacheAhead;
 }
