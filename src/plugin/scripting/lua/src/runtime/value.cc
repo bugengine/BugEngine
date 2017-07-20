@@ -261,7 +261,7 @@ bool createValue(lua_State *state, int index, const RTTI::Type& type, void* valu
     case LUA_TTABLE:
         return convertTableToValue(state, index, type, value);
     default:
-        return -1;
+        return false;
     }
 }
 

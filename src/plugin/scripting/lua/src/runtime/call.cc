@@ -103,7 +103,6 @@ int call(lua_State *state, raw<const RTTI::Method> method)
         freea(parameters);
         return error(state, "no overload can convert all parameters");
     }
-    return 0;
 }
 
 
