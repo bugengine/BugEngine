@@ -244,11 +244,12 @@ u32 StringInfo::StringInfoBufferCache::allocateStringInfo(u32 size)
     StringInfo::StringInfoBuffer* buffer;
     byte* info;
     u32 place;
+    size = minitl::align(be_checked_numcast<u32>(sizeof(StringInfo)) + size, be_alignof(StringInfo));
     do
     {
         place = m_bufferCount - 1;
         buffer = m_buffers[place];
-        info = buffer->reserve(minitl::align(sizeof(StringInfo) + size, be_alignof(StringInfo)));
+        info = buffer->reserve(size);
         if (!info)
         {
             allocate(place+1);

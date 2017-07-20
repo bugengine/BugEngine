@@ -62,6 +62,7 @@ class Platform:
             return None
         else:
             conf.end_msg(' ')
+            v.TMPDIR = os.path.join(conf.bldnode.abspath(), toolchain)
             v.PREFIX = os.path.join('bld', toolchain)
             conf.variant = ''
             for c in sub_compilers:
