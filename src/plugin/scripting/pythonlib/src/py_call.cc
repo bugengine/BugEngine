@@ -125,7 +125,7 @@ PyObject* call(raw<const RTTI::Method> method, PyObject* self, PyObject* args, P
         RTTI::Value result = RTTI::call(info, argInfos, argCount);
         for (u32 i = argCount; i > 0; --i)
         {
-            argInfos[i-1].~ArgInfo();
+            argInfos[i-1].~PythonArgInfo();
         }
         freea(argInfos);
         return PyBugObject::create(0, result);
@@ -134,7 +134,7 @@ PyObject* call(raw<const RTTI::Method> method, PyObject* self, PyObject* args, P
     {
         for (u32 i = argCount; i > 0; --i)
         {
-            argInfos[i-1].~ArgInfo();
+            argInfos[i-1].~PythonArgInfo();
         }
         freea(argInfos);
         s_library->m_PyErr_Format(*s_library->m_PyExc_TypeError,

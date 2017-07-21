@@ -16,14 +16,14 @@ class ICC(Configure.ConfigurationContext.GnuCompiler):
     }
     TOOLS = 'icc icpc'
 
-    def __init__(self, icc, icpc, extra_args = [], extra_env={}):
+    def __init__(self, icc, icpc, extra_args={}, extra_env={}):
         Configure.ConfigurationContext.GnuCompiler.__init__(self, icc, icpc, extra_args, extra_env)
 
     def get_version(self, icc, extra_args, extra_env):
         env = os.environ.copy()
         for env_name, env_value in extra_env.items():
             env[env_name] = env_value
-        result, out, err = self.run([icc] + extra_args + ['-dM', '-E', '-'], '', env=env)
+        result, out, err = self.run([icc] + extra_args.get('c', []) + ['-dM', '-E', '-'], '', env=env)
         if result != 0:
             raise Exception('could not run ICC %s (%s)' % (icc, err))
         for l in out.split('\n'):

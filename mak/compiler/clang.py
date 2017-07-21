@@ -8,7 +8,7 @@ class Clang(Configure.ConfigurationContext.GnuCompiler):
     NAMES = ('Clang',)
     TOOLS = 'gcc gxx'
 
-    def __init__(self, clang, clangxx, extra_args = []):
+    def __init__(self, clang, clangxx, extra_args = {}):
         Configure.ConfigurationContext.GnuCompiler.__init__(self, clang, clangxx, extra_args)
 
     def has_arch_flag(self):
@@ -30,7 +30,7 @@ class Clang(Configure.ConfigurationContext.GnuCompiler):
                     continue
                 try:
                     c = self.__class__(self.compiler_c, self.compiler_cxx,
-                                       self.extra_args + ['-arch', arch_target])
+                                       self.extra_args.get('c', []) + ['-arch', arch_target])
                 except Exception:
                     pass
                 else:
@@ -66,7 +66,11 @@ class Clang(Configure.ConfigurationContext.GnuCompiler):
                                         continue
                                     try:
                                         c = self.__class__(self.compiler_c, self.compiler_cxx,
-                                                           self.extra_args + ['-target', x, '-I/usr/%s/include' %x])
+                                                           {
+                                                               'c': self.extra_args.get('c', []) + ['-target', x],
+                                                               'cxx': self.extra_args.get('cxx', []) + ['-target', x],
+                                                               'link': self.extra_args.get('link', []) + ['-target', x],
+                                                           })
                                     except Exception:
                                         pass
                                     else:

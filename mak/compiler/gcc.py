@@ -8,7 +8,7 @@ class GCC(Configure.ConfigurationContext.GnuCompiler):
     NAMES = ('GCC',)
     TOOLS = 'gcc gxx'
 
-    def __init__(self, gcc, gxx, extra_args = []):
+    def __init__(self, gcc, gxx, extra_args = {}):
         Configure.ConfigurationContext.GnuCompiler.__init__(self, gcc, gxx, extra_args)
 
     def set_warning_options(self, conf):
@@ -40,7 +40,7 @@ class LLVM(GCC):
     DEFINES = ['__GNUC__', '__GNUG__']
     NAMES = ('LLVM', 'GCC')
 
-    def __init__(self, gcc, gxx, extra_args = []):
+    def __init__(self, gcc, gxx, extra_args = {}):
         GCC.__init__(self, gcc, gxx, extra_args)
 
 
@@ -105,7 +105,7 @@ def detect_gcc_from_path(conf, path, seen):
                                 if not multilib_compiler.is_valid(conf):
                                     continue
                                 try:
-                                    seen[multilib_compiler.name()].add_sibling(c)
+                                    seen[multilib_compiler.name()].add_sibling(multilib_compiler)
                                 except KeyError:
                                     seen[multilib_compiler.name()] = multilib_compiler
                                     conf.compilers.append(multilib_compiler)
