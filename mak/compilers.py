@@ -4,6 +4,7 @@ import os
 import re
 import sys
 import shlex
+from copy import deepcopy
 
 
 class Compiler:
@@ -41,7 +42,7 @@ class Compiler:
     }
 
     def __init__(self, compiler_c, compiler_cxx, version, platform, arch,
-                 extra_args = [], extra_env={}):
+                 extra_args = {}, extra_env={}):
         def to_number(version_string):
              v = version_string.split('-')[0].split('.')
              result = [0, 0, 0]
@@ -57,7 +58,7 @@ class Compiler:
         self.compiler_c = compiler_c
         self.compiler_cxx = compiler_cxx
         self.defines = []
-        self.extra_args = extra_args[:]
+        self.extra_args = deepcopy(extra_args)
         self.version = version
         self.version_number = to_number(version)
         self.platform = platform
@@ -68,6 +69,12 @@ class Compiler:
         for env_name, env_value in extra_env.items():
             self.env[env_name] = env_value
         self.directories = [os.path.dirname(compiler_c)]
+
+    def add_flags(self, compiler, flags):
+        try:
+            self.extra_args[compiler] += Utils.to_list(flags)[:]
+        except KeyError:
+            self.extra_args[compiler] = Utils.to_list(flags)[:]
 
     @classmethod
     def to_target_arch(self, arch):
@@ -93,10 +100,10 @@ class Compiler:
             return (p.returncode, out, err)
 
     def run_c(self, args, input=None):
-        return self.run([self.compiler_c] + self.extra_args + args, input, self.env)
+        return self.run([self.compiler_c] + self.extra_args.get('c', []) + args, input, self.env)
 
     def run_cxx(self, args, input=None):
-        return self.run([self.compiler_cxx] + self.extra_args + args, input, self.env)
+        return self.run([self.compiler_cxx] + self.extra_args.get('cxx', []) + args, input, self.env)
 
     def sort_name(self):
         compiler_name = self.__class__.__name__.lower()
@@ -110,9 +117,9 @@ class Compiler:
         return []
 
     def load_in_env(self, conf, platform):
-        conf.env.append_unique('CFLAGS', self.extra_args)
-        conf.env.append_unique('CXXFLAGS', self.extra_args)
-        conf.env.append_unique('LINKFLAGS', self.extra_args)
+        conf.env.append_unique('CFLAGS', self.extra_args.get('c', []))
+        conf.env.append_unique('CXXFLAGS', self.extra_args.get('cxx', []))
+        conf.env.append_unique('LINKFLAGS', self.extra_args.get('link', []))
         self.set_optimisation_options(conf)
         self.set_warning_options(conf)
 
@@ -169,12 +176,12 @@ class GnuCompiler(Compiler):
         (('__arm__', '__ARM_ARCH_7S__'),                    'armv7s'),
     )
 
-    def __init__(self, compiler_c, compiler_cxx, extra_args = [], extra_env={}):
+    def __init__(self, compiler_c, compiler_cxx, extra_args={}, extra_env={}):
         extra_env = dict(extra_env)
         extra_env['LC_ALL'] = 'C'
         extra_env['LANG'] = 'C'
         self.sysroot = None
-        extra_args = extra_args[:]
+        extra_args = deepcopy(extra_args)
         version, platform, arch = self.get_version(compiler_cxx, extra_args, extra_env)
         Compiler.__init__(self, compiler_c, compiler_cxx, version,
                           platform, arch, extra_args, extra_env)
@@ -191,15 +198,26 @@ class GnuCompiler(Compiler):
             return t[0], '-'.join(t[1:])
         arch = None
         platform = None
-        result, out, err = self.run([compiler_c] + extra_args + ['-dumpmachine'], env=env)
+        result, out, err = self.run([compiler_c] + extra_args.get('c', []) + ['-dumpmachine'], env=env)
         self.target = out.strip()
         if self.target.find('-') != -1:
             arch, platform = split_triple(self.target)
         else:
             platform = self.target
         if arch:
-            extra_args += self.ARCH_FLAGS.get(arch, [])
-        result, out, err = self.run([compiler_c] + extra_args + ['-v', '-dM', '-E', '-'], '\n', env=env)
+            try:
+                extra_args['c'] += self.ARCH_FLAGS.get(arch, [])
+            except KeyError:
+                extra_args['c'] = self.ARCH_FLAGS.get(arch, [])
+            try:
+                extra_args['cxx'] += self.ARCH_FLAGS.get(arch, [])
+            except KeyError:
+                extra_args['cxx'] = self.ARCH_FLAGS.get(arch, [])
+            try:
+                extra_args['link'] += self.ARCH_FLAGS.get(arch, [])
+            except KeyError:
+                extra_args['link'] = self.ARCH_FLAGS.get(arch, [])
+        result, out, err = self.run([compiler_c] + extra_args.get('c', []) + ['-v', '-dM', '-E', '-'], '\n', env=env)
         macros = set([])
         if result != 0:
             raise Exception('Error running %s: %s' % (compiler_c, err))
@@ -246,7 +264,10 @@ class GnuCompiler(Compiler):
             result = []
             for multilib in multilibs:
                 try:
-                    c = self.__class__(self.compiler_c, self.compiler_cxx, multilib[0])
+                    c = self.__class__(self.compiler_c, self.compiler_cxx,
+                                       { 'c': multilib[0][:],
+                                         'cxx': multilib[0][:],
+                                         'link': multilib[0][:],})
                     result.append(c)
                 except Exception as e:
                     pass

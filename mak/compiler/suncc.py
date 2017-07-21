@@ -17,26 +17,27 @@ class SunCC(Configure.ConfigurationContext.GnuCompiler):
     }
     TOOLS = 'suncc suncxx'
 
-    def __init__(self, suncc, sunCC, extra_args = [], extra_env={}):
+    def __init__(self, suncc, sunCC, extra_args={}, extra_env={}):
         Configure.ConfigurationContext.GnuCompiler.__init__(self, suncc, sunCC, extra_args, extra_env)
         if self.platform == 'linux-gnu':
             if self.version_number < (5, 14):
-                self.extra_args.append('-library=Crun,stlport4')
+                self.add_flags('cxx', ['-library=Crun,stlport4'])
+                self.add_flags('link', ['-library=Crun,stlport4'])
             if self.arch == 'amd64':
                 if os.path.isdir('/usr/lib/x86_64-linux-gnu'):
-                    self.extra_args.append('-L/usr/lib/x86_64-linux-gnu')
+                    self.add_flags('link', ['-L/usr/lib/x86_64-linux-gnu'])
             elif self.arch == 'x86':
                 if os.path.isdir('/usr/lib/i386-linux-gnu'):
-                    self.extra_args.append('-L/usr/lib/i386-linux-gnu')
+                    self.add_flags('link', ['-L/usr/lib/i386-linux-gnu'])
                 if os.path.isdir('/usr/lib/i486-linux-gnu'):
-                    self.extra_args.append('-L/usr/lib/i486-linux-gnu')
+                    self.add_flags('link', ['-L/usr/lib/i486-linux-gnu'])
                 if os.path.isdir('/usr/lib/i586-linux-gnu'):
-                    self.extra_args.append('-L/usr/lib/i586-linux-gnu')
+                    self.add_flags('link', ['-L/usr/lib/i586-linux-gnu'])
                 if os.path.isdir('/usr/lib/i686-linux-gnu'):
-                    self.extra_args.append('-L/usr/lib/i686-linux-gnu')
+                    self.add_flags('link', ['-L/usr/lib/i686-linux-gnu'])
 
     def get_version(self, sunCC, extra_args, extra_env):
-        result, out, err = self.run([sunCC] + extra_args + ['-xdumpmacros', '-E', '/dev/null'])
+        result, out, err = self.run([sunCC] + extra_args.get('cxx', []) + ['-xdumpmacros', '-E', '/dev/null'])
         if result != 0:
             raise Exception('could not run SunCC %s (%s)' % (sunCC, err))
         for l in out.split('\n') + err.split('\n'):
