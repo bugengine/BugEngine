@@ -11,10 +11,15 @@
 namespace BugEngine
 {
 
-u32 SystemAllocator::platformPageSize()
+static u32 pageSize()
 {
     static const u32 s_pageSize = sysconf(_SC_PAGE_SIZE);
     return s_pageSize;
+}
+
+u32 SystemAllocator::platformPageSize()
+{
+    return pageSize();
 }
 
 static inline u32 cacheAhead()
@@ -23,7 +28,7 @@ static inline u32 cacheAhead()
     #if BE_ENABLE_MEMORY_DEBUGGING
             0;
     #else
-            SystemAllocator::platformPageSize();
+            pageSize();
     #endif
     return s_cacheAhead;
 }
