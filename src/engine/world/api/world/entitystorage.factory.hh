@@ -67,7 +67,7 @@ private:
         static byte s_buffer[sizeof(RTTI::staticarray_n< 1+COMPONENT_LIST::Index, RTTI::Property>)];
         RTTI::staticarray_n< 1+COMPONENT_LIST::Index, RTTI::Property>* properties =
             reinterpret_cast<RTTI::staticarray_n< 1+COMPONENT_LIST::Index, RTTI::Property>* >(s_buffer);
-        new (&properties) u32(1+COMPONENT_LIST::Index);
+        new (properties) u32(1+COMPONENT_LIST::Index);
         Helper::Property<EntityStorageFactory<COMPONENT_LIST, PARTITION_LIST>,
                          COMPONENT_LIST::Index,
                          typename COMPONENT_LIST::Type,

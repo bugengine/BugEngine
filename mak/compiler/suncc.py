@@ -24,17 +24,16 @@ class SunCC(Configure.ConfigurationContext.GnuCompiler):
                 self.add_flags('cxx', ['-library=Crun,stlport4'])
                 self.add_flags('link', ['-library=Crun,stlport4'])
             if self.arch == 'amd64':
+                if os.path.isdir('/lib/x86_64-linux-gnu'):
+                    self.add_flags('link', ['-L/lib/x86_64-linux-gnu'])
                 if os.path.isdir('/usr/lib/x86_64-linux-gnu'):
                     self.add_flags('link', ['-L/usr/lib/x86_64-linux-gnu'])
             elif self.arch == 'x86':
-                if os.path.isdir('/usr/lib/i386-linux-gnu'):
-                    self.add_flags('link', ['-L/usr/lib/i386-linux-gnu'])
-                if os.path.isdir('/usr/lib/i486-linux-gnu'):
-                    self.add_flags('link', ['-L/usr/lib/i486-linux-gnu'])
-                if os.path.isdir('/usr/lib/i586-linux-gnu'):
-                    self.add_flags('link', ['-L/usr/lib/i586-linux-gnu'])
-                if os.path.isdir('/usr/lib/i686-linux-gnu'):
-                    self.add_flags('link', ['-L/usr/lib/i686-linux-gnu'])
+                for arch in ('i386', 'i486', 'i586', 'i686'):
+                    if os.path.isdir('/lib/%s-linux-gnu' % arch):
+                        self.add_flags('link', ['-L/lib/%s-linux-gnu' % arch])
+                    if os.path.isdir('/usr/lib/%s-linux-gnu' % arch):
+                        self.add_flags('link', ['-L/usr/lib/%s-linux-gnu' % arch])
 
     def get_version(self, sunCC, extra_args, extra_env):
         result, out, err = self.run([sunCC] + extra_args.get('cxx', []) + ['-xdumpmacros', '-E', '/dev/null'])
@@ -82,8 +81,6 @@ class SunCC(Configure.ConfigurationContext.GnuCompiler):
 
     def set_warning_options(self, conf):
         v = conf.env
-        v['RPATH_ST'] = '-R%s'
-
         v['CFLAGS_warnnone'] = ['-w', '-errtags=yes', '-erroff=%all']
         v['CXXFLAGS_warnnone'] = ['-w', '-errtags=yes', '-erroff=%all']
         v['CFLAGS_warnall'] = ['+w2', '-errtags=yes']
@@ -96,8 +93,9 @@ class SunCC(Configure.ConfigurationContext.GnuCompiler):
     def load_in_env(self, conf, platform):
         Configure.ConfigurationContext.GnuCompiler.load_in_env(self, conf, platform)
         v = conf.env
+        v['RPATH_ST'] = '-R%s'
         if platform.NAME == 'Linux':
-            v.STATIC = 1
+            #v.STATIC = 1
             if self.arch == 'x86':
                 v.append_unique('SYSTEM_LIBPATHS', ['=/usr/lib/i386-linux-gnu'])
                 v.append_unique('CFLAGS', ['-xarch=sse2', '-I/usr/include/i386-linux-gnu'])
@@ -116,13 +114,16 @@ class SunCC(Configure.ConfigurationContext.GnuCompiler):
                 v.append_unique('LINKFLAGS', [])
             v.append_unique('CFLAGS', ['-mt', '-xldscope=hidden', '-Kpic', '-DPIC', '-D__PIC__'])
             v.append_unique('CXXFLAGS', ['-mt', '-xldscope=hidden', '-Kpic', '-DPIC', '-D__PIC__'])
-            v.append_unique('LINKFLAGS', ['-lrt', '-mt', '-znow', '-xldscope=hidden', '-z', 'absexec', '-Kpic'])
+            v.append_unique('LINKFLAGS', ['-lrt', '-mt', '-znow', '-xldscope=hidden']) #, '-z', 'absexec', '-Kpic'])
+            v.SHLIB_MARKER = '-Bdynamic'
+            v.STLIB_MARKER = '-Bstatic'
             if self.version_number < (5, 14):
                 v.append_unique('CXXFLAGS', ['-library=Crun,stlport4'])
                 v.append_unique('LINKFLAGS', ['-library=Crun,stlport4', '-staticlib=Crun,stlport4'])
 
     def populate_useful_variables(self, conf):
         pass
+
 
 def detect_suncc(conf):
     seen = set([])
