@@ -12,7 +12,6 @@
 
 #include    <strings.h>
 #include    <stdlib.h>
-#include    <malloc.h>
 #include    <alloca.h>
 #define     stricmp     strcasecmp
 #define     strnicmp    strncasecmp
