@@ -483,6 +483,6 @@ raw<RTTI::Class> be_game_Namespace_BugEngine()
 }
 
 static RTTI::ObjectInfo ob = { be_game_Namespace_BugEngine()->objects, {0}, "BugEngine", RTTI::Value(be_game_Namespace()) };
-static const RTTI::ObjectInfo* obptr = (be_game_Namespace_BugEngine()->objects.m_ptr = &ob);
+BE_EXPORT const RTTI::ObjectInfo* obptr = (be_game_Namespace_BugEngine()->objects.m_ptr = &ob);
 
 }
