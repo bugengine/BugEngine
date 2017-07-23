@@ -108,6 +108,7 @@ class Clang(Configure.ConfigurationContext.GnuCompiler):
 def detect_clang(conf):
     bindirs = os.environ['PATH'].split(os.pathsep) + conf.env.EXTRA_PATH
     libdirs = []
+    clangs = []
     for bindir in bindirs:
         for libdir in (os.path.join(bindir, '..', 'lib'), os.path.join(bindir, '..')):
             if os.path.isdir(libdir):
@@ -132,14 +133,16 @@ def detect_clang(conf):
             except KeyError:
                 seen[c.name()] = c
                 conf.compilers.append(c)
-            for multilib_compiler in c.get_multilib_compilers():
-                if not multilib_compiler.is_valid(conf):
-                    continue
-                try:
-                    seen[multilib_compiler.name()].add_sibling(multilib_compiler)
-                except KeyError:
-                    seen[multilib_compiler.name()] = multilib_compiler
-                    conf.compilers.append(multilib_compiler)
+                clangs.append(c)
+    for c in clangs:
+        for multilib_compiler in c.get_multilib_compilers():
+            if not multilib_compiler.is_valid(conf):
+                continue
+            try:
+                seen[multilib_compiler.name()].add_sibling(multilib_compiler)
+            except KeyError:
+                seen[multilib_compiler.name()] = multilib_compiler
+                conf.compilers.append(multilib_compiler)
 
 
 def options(opt):
