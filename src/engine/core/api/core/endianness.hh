@@ -22,7 +22,7 @@ enum Endianness
 };
 
 
-template< typename T, Endianness from, Endianness to >
+template< typename T, Endianness from, Endianness to = Endianness_Self>
 struct ByteSwap;
 
 template< typename T >
