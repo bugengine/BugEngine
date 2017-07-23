@@ -171,15 +171,11 @@ bool DwarfModule::Buffer<endianness>::operator !() const
 template< Endianness endianness >
 DwarfModule::Buffer<endianness>& DwarfModule::Buffer<endianness>::operator>>(Dwarf::size_t& value)
 {
-    Integer<u32,endianness> m;
-    memcpy(&m, m_buffer+m_position, 4);
-    value.value = m;
+    value.value = ByteSwap<u32, endianness>::byteswap(*reinterpret_cast<u32*>(m_buffer+m_position));
     m_position += 4;
     if (value.value == 0xffffffff)
     {
-        Integer<u64,endianness> m2;
-        memcpy(&m2, m_buffer+m_position, 8);
-        value.value = m2;
+        value.value = ByteSwap<u64, endianness>::byteswap(*reinterpret_cast<u64*>(m_buffer+m_position));
         m_position += 8;
         m_64 = true;
     }
@@ -191,16 +187,12 @@ DwarfModule::Buffer<endianness>& DwarfModule::Buffer<endianness>::operator>>(Dwa
 {
     if (m_64)
     {
-        Integer<u64,endianness> m;
-        memcpy(&m, m_buffer+m_position, 8);
-        value.value = m;
+        value.value = ByteSwap<u64, endianness>::byteswap(*reinterpret_cast<u64*>(m_buffer+m_position));
         m_position += 8;
     }
     else
     {
-        Integer<u32,endianness> m;
-        memcpy(&m, m_buffer+m_position, 4);
-        value.value = m;
+        value.value = ByteSwap<u32, endianness>::byteswap(*reinterpret_cast<u32*>(m_buffer+m_position));
         m_position += 4;
     }
     return *this;
@@ -223,9 +215,7 @@ DwarfModule::Buffer<endianness>& DwarfModule::Buffer<endianness>::operator>>(Dwa
 template< Endianness endianness >
 DwarfModule::Buffer<endianness>& DwarfModule::Buffer<endianness>::operator>>(u32& value)
 {
-    Integer<u32,endianness> m;
-    memcpy(&m, m_buffer+m_position, 4);
-    value = m;
+    value = ByteSwap<u32, endianness>::byteswap(*reinterpret_cast<u32*>(m_buffer+m_position));
     m_position += 4;
     return *this;
 }
@@ -233,9 +223,7 @@ DwarfModule::Buffer<endianness>& DwarfModule::Buffer<endianness>::operator>>(u32
 template< Endianness endianness >
 DwarfModule::Buffer<endianness>& DwarfModule::Buffer<endianness>::operator>>(u16& value)
 {
-    Integer<u16,endianness> m;
-    memcpy(&m, m_buffer+m_position, 2);
-    value = m;
+    value = ByteSwap<u16, endianness>::byteswap(*reinterpret_cast<u16*>(m_buffer+m_position));
     m_position += 2;
     return *this;
 }
@@ -243,7 +231,7 @@ DwarfModule::Buffer<endianness>& DwarfModule::Buffer<endianness>::operator>>(u16
 template< Endianness endianness >
 DwarfModule::Buffer<endianness>& DwarfModule::Buffer<endianness>::operator>>(u8& value)
 {
-    value = *(u8*)(m_buffer+m_position);
+    value = *(m_buffer+m_position);
     m_position++;
     return *this;
 }
