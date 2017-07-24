@@ -20,8 +20,7 @@ class Compiler:
         'arm':      'armv7a',
         #'armv4':    'armv4',
         #'armv5':    'armv5',
-        #'armv6':    'armv6',
-        'armv6k':   'armv6k',
+        'armv6':    'armv6',
         'armv7':    'armv7a',
         'armv7a':   'armv7a',
         'armv7s':   'armv7s',
@@ -157,14 +156,12 @@ class GnuCompiler(Compiler):
         'ppc':      (('.altivec', ['-maltivec']),),
         'ppc64':    (('.altivec', ['-maltivec']),),
 
-        'armv6k':   (('.neon', ['-mfpu=neon']),),
+        'armv6' :   (('.neon', ['-mfpu=neon']),),
         'armv7a':   (('.neon', ['-mfpu=neon']),),
         'armv7s':   (('.neon', ['-mfpu=neon']),),
         'armv7k':   (('.neon', ['-mfpu=neon']),),
         'armv7l':   (('.neon', ['-mfpu=neon']),),
         'arm64':    (('.neon', []),),
-
-
     }
     MULTILIBS = {
         'x86':      ((['-m64'], 'amd64'),),
@@ -178,7 +175,6 @@ class GnuCompiler(Compiler):
         'arm':      [(['-march=%s'%a], a) for a in ALL_ARM_ARCHS],
         #'armv4':    [(['-march=%s'%a], a) for a in ALL_ARM_ARCHS],
         #'armv5':    [(['-march=%s'%a], a) for a in ALL_ARM_ARCHS],
-        'armv6k':    [(['-march=%s'%a], a) for a in ALL_ARM_ARCHS],
         #'armv7':    [(['-march=%s'%a], a) for a in ALL_ARM_ARCHS],
         'armv7a':   [(['-march=%s'%a], a) for a in ALL_ARM_ARCHS],
         'armv7k':   [(['-march=%s'%a], a) for a in ALL_ARM_ARCHS],
@@ -204,7 +200,9 @@ class GnuCompiler(Compiler):
         (('__arm__',),                                      'armv4'),
         (('__arm__', '__ARM_ARCH_5__'),                     'armv5'),
         (('__arm__', '__ARM_ARCH_6__'),                     'armv6'),
-        (('__arm__', '__ARM_ARCH_6K__'),                    'armv6k'),
+        (('__arm__', '__ARM_ARCH_6K__'),                    'armv6'),
+        (('__arm__', '__ARM_ARCH_6Z__'),                    'armv6'),
+        (('__arm__', '__ARM_ARCH_6KZ__'),                   'armv6'),
         (('__arm__', '__ARM_ARCH_7A__'),                    'armv7a'),
         (('__arm__', '__ARM_ARCH_7A__', '__ARM_ARCH_7K__'), 'armv7k'),
         (('__arm__', '__ARM_ARCH_7S__'),                    'armv7s'),
