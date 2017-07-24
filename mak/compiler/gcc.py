@@ -130,21 +130,25 @@ def detect_multilib_compilers(conf, gcc_compilers, seen):
 def get_native_gcc(conf, seen):
     import platform
     if platform.uname()[0].lower() == 'freebsd':
-        c = GCC('/usr/bin/gcc', '/usr/bin/g++')
-        if c.is_valid(conf):
-            try:
-                seen[c.name()].add_sibling(c)
-            except KeyError:
-                seen[c.name()] = c
-                conf.compilers.append(c)
-            for multilib_compiler in c.get_multilib_compilers():
-                if not multilib_compiler.is_valid(conf):
-                    continue
+        try:
+            c = GCC('/usr/bin/gcc', '/usr/bin/g++')
+        except BaseException:
+            pass
+        else:
+            if c.is_valid(conf):
                 try:
-                    seen[multilib_compiler.name()].add_sibling(c)
+                    seen[c.name()].add_sibling(c)
                 except KeyError:
-                    seen[multilib_compiler.name()] = multilib_compiler
-                    conf.compilers.append(multilib_compiler)
+                    seen[c.name()] = c
+                    conf.compilers.append(c)
+                for multilib_compiler in c.get_multilib_compilers():
+                    if not multilib_compiler.is_valid(conf):
+                        continue
+                    try:
+                        seen[multilib_compiler.name()].add_sibling(c)
+                    except KeyError:
+                        seen[multilib_compiler.name()] = multilib_compiler
+                        conf.compilers.append(multilib_compiler)
 
 
 def detect_gcc(conf):
