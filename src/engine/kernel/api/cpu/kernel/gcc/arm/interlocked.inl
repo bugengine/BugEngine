@@ -6,7 +6,7 @@
 /**************************************************************************************************/
 #include    <kernel/stdafx.h>
 
-#if __ARM_ARCH >= 7
+#if defined(__ARM_ARCH_V7__) || defined(__ARM_ARCH_V7A__) || (__ARM_ARCH >= 7)
 # define    DMB(x)             "       dmb\n"
 #elif __ARM_ARCH >= 6
 # define    DMB(x)             "       mcr p15, 0, %" #x ", c7, c10, 5\n"
