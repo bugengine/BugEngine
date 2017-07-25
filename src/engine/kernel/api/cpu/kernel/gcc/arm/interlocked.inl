@@ -6,9 +6,9 @@
 /**************************************************************************************************/
 #include    <kernel/stdafx.h>
 
-#if defined(__ARM_ARCH_V7__) || defined(__ARM_ARCH_V7A__) || (__ARM_ARCH >= 7)
+#if defined(_ARM_V7)
 # define    DMB(x)             "       dmb\n"
-#elif __ARM_ARCH >= 6
+#elif defined(_ARM_V6)
 # define    DMB(x)             "       mcr p15, 0, %" #x ", c7, c10, 5\n"
 #else
 # error Unsupported ARM architecture;interlocked operations supported on ARM6 and above

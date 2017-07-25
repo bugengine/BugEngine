@@ -202,7 +202,7 @@ class GnuCompiler(Compiler):
         (('__arm__', '__ARM_ARCH_6__'),                     'armv6'),
         (('__arm__', '__ARM_ARCH_6K__'),                    'armv6'),
         (('__arm__', '__ARM_ARCH_6Z__'),                    'armv6'),
-        (('__arm__', '__ARM_ARCH_6KZ__'),                   'armv6'),
+        (('__arm__', '__ARM_ARCH_6ZK__'),                   'armv6'),
         (('__arm__', '__ARM_ARCH_7A__'),                    'armv7a'),
         (('__arm__', '__ARM_ARCH_7A__', '__ARM_ARCH_7K__'), 'armv7k'),
         (('__arm__', '__ARM_ARCH_7S__'),                    'armv7s'),
