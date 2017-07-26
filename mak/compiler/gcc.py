@@ -45,6 +45,7 @@ class LLVM(GCC):
 
 
 def detect_gcc_from_path(conf, path, seen):
+    gcc_compilers = []
     for subdir, relative in [('', '../..'), ('lib/gcc', '../../../..'), ('gcc', '../../..'),
                              ('llvm', '../../..')]:
         libdir = os.path.join(path, subdir)
@@ -101,21 +102,25 @@ def detect_gcc_from_path(conf, path, seen):
                             except KeyError:
                                 seen[c.name()] = c
                                 conf.compilers.append(c)
-                            for multilib_compiler in c.get_multilib_compilers():
-                                if not multilib_compiler.is_valid(conf):
-                                    continue
-                                try:
-                                    seen[multilib_compiler.name()].add_sibling(multilib_compiler)
-                                except KeyError:
-                                    seen[multilib_compiler.name()] = multilib_compiler
-                                    conf.compilers.append(multilib_compiler)
+
                             return c
                 c = find_target_gcc(target, GCC)
                 if c:
+                    gcc_compilers.append(c)
                     result, out, err = c.run_c(['-fplugin=dragonegg', '-E', '-'], '')
                     if result == 0:
-                        find_target_gcc('llvm', LLVM)
-
+                        c = find_target_gcc('llvm', LLVM)
+                        if c:
+                            gcc_compilers.append(c)
+    for c in gcc_compilers:
+        for multilib_compiler in c.get_multilib_compilers():
+            if not multilib_compiler.is_valid(conf):
+                continue
+            try:
+                seen[multilib_compiler.name()].add_sibling(multilib_compiler)
+            except KeyError:
+                seen[multilib_compiler.name()] = multilib_compiler
+                conf.compilers.append(multilib_compiler)
 
 def get_native_gcc(conf, seen):
     import platform
