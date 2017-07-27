@@ -89,6 +89,18 @@ class SunCC(Configure.ConfigurationContext.GnuCompiler):
                                  'reftotemp,truncwarn,badargtype2w,hidef,wemptydecl,notemsource,'
                                  'nonewline,inllargeuse']
 
+    def is_valid(self, conf):
+        node = conf.bldnode.make_node('main.cxx')
+        tgtnode = node.change_ext('')
+        node.write('#include <cstdlib>\n#include <iostream>\nint main() {}\n')
+        try:
+            result, out, err = self.run_cxx([node.abspath(), '-c', '-o', tgtnode.abspath()])
+        except Exception as e:
+            return False
+        finally:
+            node.delete()
+            tgtnode.delete()
+        return result == 0
 
     def load_in_env(self, conf, platform):
         Configure.ConfigurationContext.GnuCompiler.load_in_env(self, conf, platform)

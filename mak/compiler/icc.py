@@ -71,6 +71,18 @@ class ICC(Configure.ConfigurationContext.GnuCompiler):
             v.CFLAGS_exportall = ['-fvisibility=default']
             v.CXXFLAGS_exportall = ['-fvisibility=default']
 
+    def is_valid(self, conf):
+        node = conf.bldnode.make_node('main.cxx')
+        tgtnode = node.change_ext('')
+        node.write('#include <iostream>\nint main() {}\n')
+        try:
+            result, out, err = self.run_cxx([node.abspath(), '-c', '-o', tgtnode.abspath()])
+        except Exception as e:
+            return False
+        finally:
+            node.delete()
+            tgtnode.delete()
+        return result == 0
 
 def detect_icc(conf):
     bindirs = os.environ['PATH'].split(os.pathsep) + conf.env.EXTRA_PATH
