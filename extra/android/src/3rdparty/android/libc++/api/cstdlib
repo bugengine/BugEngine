@@ -52,7 +52,7 @@ void* realloc(void* ptr, size_t size);
 void abort(void);
 int atexit(void (*func)(void));
 void exit(int status);
-//void _Exit(int status);
+void _Exit(int status);
 char* getenv(const char* name);
 int system(const char* string);
 void* bsearch(const void* key, const void* base, size_t nmemb, size_t size,
@@ -129,7 +129,7 @@ using ::realloc;
 using ::abort;
 using ::atexit;
 using ::exit;
-using ::_Exit;
+//using ::_Exit;
 #ifndef _LIBCPP_WINDOWS_STORE_APP
 using ::getenv;
 using ::system;
