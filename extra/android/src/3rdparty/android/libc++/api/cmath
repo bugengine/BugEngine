@@ -324,8 +324,8 @@ using ::islessgreater;
 using ::isunordered;
 using ::isunordered;
 
-using ::float_t;
-using ::double_t;
+//using ::float_t;
+//using ::double_t;
 
 #ifndef _AIX
 using ::abs;
@@ -461,71 +461,71 @@ using ::tgammaf;
 using ::trunc;
 using ::truncf;
 
-using ::acosl;
-using ::asinl;
-using ::atanl;
-using ::atan2l;
-using ::ceill;
-using ::cosl;
-using ::coshl;
-using ::expl;
-using ::fabsl;
-using ::floorl;
-using ::fmodl;
-using ::frexpl;
-using ::ldexpl;
-using ::logl;
-using ::log10l;
-using ::modfl;
-using ::powl;
-using ::sinl;
-using ::sinhl;
-using ::sqrtl;
-using ::tanl;
+//using ::acosl;
+//using ::asinl;
+//using ::atanl;
+//using ::atan2l;
+//using ::ceill;
+//using ::cosl;
+//using ::coshl;
+//using ::expl;
+//using ::fabsl;
+//using ::floorl;
+//using ::fmodl;
+//using ::frexpl;
+//using ::ldexpl;
+//using ::logl;
+//using ::log10l;
+//using ::modfl;
+//using ::powl;
+//using ::sinl;
+//using ::sinhl;
+//using ::sqrtl;
+//using ::tanl;
 
-using ::tanhl;
-using ::acoshl;
-using ::asinhl;
-using ::atanhl;
-using ::cbrtl;
+//using ::tanhl;
+//using ::acoshl;
+//using ::asinhl;
+//using ::atanhl;
+//using ::cbrtl;
 
-using ::copysignl;
+//using ::copysignl;
 
-using ::erfl;
-using ::erfcl;
-using ::exp2l;
-using ::expm1l;
-using ::fdiml;
-using ::fmal;
-using ::fmaxl;
-using ::fminl;
-using ::hypotl;
-using ::ilogbl;
-using ::lgammal;
-using ::llrintl;
-using ::llroundl;
-using ::log1pl;
+//using ::erfl;
+//using ::erfcl;
+//using ::exp2l;
+//using ::expm1l;
+//using ::fdiml;
+//using ::fmal;
+//using ::fmaxl;
+//using ::fminl;
+//using ::hypotl;
+//using ::ilogbl;
+//using ::lgammal;
+//using ::llrintl;
+//using ::llroundl;
+//using ::log1pl;
 //using ::log2l;
-using ::logbl;
-using ::lrintl;
-using ::lroundl;
-using ::nanl;
-using ::nearbyintl;
-using ::nextafterl;
-using ::nexttowardl;
-using ::remainderl;
-using ::remquol;
-using ::rintl;
-using ::roundl;
-using ::scalblnl;
-using ::scalbnl;
-using ::tgammal;
-using ::truncl;
+//using ::logbl;
+//using ::lrintl;
+//using ::lroundl;
+//using ::nanl;
+//using ::nearbyintl;
+//using ::nextafterl;
+//using ::nexttowardl;
+//using ::remainderl;
+//using ::remquol;
+//using ::rintl;
+//using ::roundl;
+//using ::scalblnl;
+//using ::scalbnl;
+//using ::tgammal;
+//using ::truncl;
 
 #if _LIBCPP_STD_VER > 14
 inline _LIBCPP_INLINE_VISIBILITY float       hypot(       float x,       float y,       float z ) { return sqrt(x*x + y*y + z*z); }
 inline _LIBCPP_INLINE_VISIBILITY double      hypot(      double x,      double y,      double z ) { return sqrt(x*x + y*y + z*z); }
-inline _LIBCPP_INLINE_VISIBILITY long double hypot( long double x, long double y, long double z ) { return sqrt(x*x + y*y + z*z); }
+//inline _LIBCPP_INLINE_VISIBILITY long double hypot( long double x, long double y, long double z ) { return sqrt(x*x + y*y + z*z); }
 
 template <class _A1, class _A2, class _A3>
 inline _LIBCPP_INLINE_VISIBILITY
