@@ -717,6 +717,7 @@ def gather_extra_source(self):
         preprocess.post()
         self.source += getattr(preprocess, 'out_sources', [])
 
+
 @taskgen_method
 def make_bld_node_common(self, node, path, name):
     if not path:
@@ -893,6 +894,7 @@ def cc_hook(self, node):
     else:
         self.create_compiled_task('cxx', node)
 
+
 @feature('c', 'cxx')
 @after_method('process_source')
 def apply_link(self):
@@ -916,6 +918,7 @@ def apply_link(self):
     path, name = os.path.split(self.target)
     out_node = self.make_bld_node('.bin', None, os.path.join(path, pattern%name))
     self.link_task.set_outputs(out_node)
+
 
 @feature('cshlib', 'cxxshlib')
 @after_method('apply_link')
