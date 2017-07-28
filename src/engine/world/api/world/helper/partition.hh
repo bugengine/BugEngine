@@ -131,7 +131,6 @@ template< typename PARTITION, typename T, typename TAIL >
 const RTTI::Property PartitionPropertyInfo<PARTITION, T, TAIL>::s_property =
 {
     {0},
-    {&PartitionPropertyInfo<PARTITION, typename TAIL::Type, typename TAIL::Tail>::s_property},
     be_typeid<T>::klass()->name,
     be_typeid<PARTITION>::type(),
     be_typeid< const Kernel::Product<T>& >::type(),
@@ -141,7 +140,6 @@ const RTTI::Property PartitionPropertyInfo<PARTITION, T, TAIL>::s_property =
 template< typename PARTITION, typename T >
 const RTTI::Property PartitionPropertyInfo<PARTITION, T, void>::s_property =
 {
-    {0},
     {0},
     be_typeid<T>::klass()->name,
     be_typeid<PARTITION>::type(),

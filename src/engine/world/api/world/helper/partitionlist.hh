@@ -96,7 +96,6 @@ template< typename LIST, typename T, typename TAIL >
 const RTTI::Property PartitionListPropertyInfo<LIST, T, TAIL>::s_property =
 {
     {0},
-    {&PartitionListPropertyInfo<LIST, typename TAIL::Type, typename TAIL::Tail>::s_property},
     T::name(),
     be_typeid<LIST>::type(),
     be_typeid< const T& >::type(),
@@ -107,7 +106,6 @@ template< typename LIST, typename T >
 const RTTI::Property PartitionListPropertyInfo<LIST, T, void>::s_property =
 {
     {0},
-    be_typeid<EntityStorage>::klass()->properties,
     T::name(),
     be_typeid<LIST>::type(),
     be_typeid< const T& >::type(),

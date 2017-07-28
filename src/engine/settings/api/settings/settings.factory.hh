@@ -98,7 +98,7 @@ struct BE_EXPORT be_typeid< Settings::Settings<T> >
             0,
             0,
             RTTI::ClassType_Struct,
-            be_game_Namespace_BugEngine_Settings(),
+            {be_game_Namespace_BugEngine_Settings().m_ptr},
             be_typeid<void>::klass(),
             {0},
             {0},
