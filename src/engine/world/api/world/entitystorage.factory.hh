@@ -102,7 +102,7 @@ struct be_typeid< World::EntityStorageFactory<COMPONENT_LIST, PARTITION_LIST> >
             0,
             RTTI::ClassType_Object,
             {0},
-            be_typeid<World::EntityStorage>::preklass(),
+            {be_typeid<World::EntityStorage>::preklass().m_ptr},
             {0},
             {0},
             {0},

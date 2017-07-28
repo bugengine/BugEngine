@@ -29,8 +29,9 @@ class Linux(Configure.ConfigurationContext.Platform):
         env.DEPLOY_KERNELDIR = os.path.join('share', 'bugengine', 'kernel')
         env.pymodule_PATTERN = '%s.so'
 
-        env.append_unique('CFLAGS', ['-fPIC'])
-        env.append_unique('CXXFLAGS', ['-fPIC'])
+        if 'SunCC' not in compiler.NAMES:
+            env.append_unique('CFLAGS', ['-fPIC'])
+            env.append_unique('CXXFLAGS', ['-fPIC'])
         env.append_unique('DEFINES', ['_GNU_SOURCE'])
         env.RPATH = '$ORIGIN/../share/bugengine/plugin:$ORIGIN/../lib:$ORIGIN:$ORIGIN/../plugin:$ORIGIN/../../../lib'
         env.append_unique('LIB', ['dl', 'rt', 'pthread', 'm'])

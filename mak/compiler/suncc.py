@@ -20,9 +20,9 @@ class SunCC(Configure.ConfigurationContext.GnuCompiler):
     def __init__(self, suncc, sunCC, extra_args={}, extra_env={}):
         Configure.ConfigurationContext.GnuCompiler.__init__(self, suncc, sunCC, extra_args, extra_env)
         if self.platform == 'linux-gnu':
-            if self.version_number < (5, 14):
+            if self.version_number <= (5, 12, 0):
                 self.add_flags('cxx', ['-library=Crun,stlport4'])
-                self.add_flags('link', ['-library=Crun,stlport4'])
+                self.add_flags('link', ['-library=Crun,stlport4', '-staticlib=Crun,stlport4'])
             if self.arch == 'amd64':
                 if os.path.isdir('/lib/x86_64-linux-gnu'):
                     self.add_flags('link', ['-L/lib/x86_64-linux-gnu'])
@@ -92,7 +92,7 @@ class SunCC(Configure.ConfigurationContext.GnuCompiler):
     def is_valid(self, conf):
         node = conf.bldnode.make_node('main.cxx')
         tgtnode = node.change_ext('')
-        node.write('#include <cstdlib>\n#include <iostream>\nint main() {}\n')
+        node.write('#define _GNU_SOURCE\n#include <cstdlib>\n#include <iostream>\nint main() {}\n')
         try:
             result, out, err = self.run_cxx([node.abspath(), '-c', '-o', tgtnode.abspath()])
         except Exception as e:
@@ -110,28 +110,25 @@ class SunCC(Configure.ConfigurationContext.GnuCompiler):
             #v.STATIC = 1
             if self.arch == 'x86':
                 v.append_unique('SYSTEM_LIBPATHS', ['=/usr/lib/i386-linux-gnu'])
-                v.append_unique('CFLAGS', ['-xarch=sse2', '-I/usr/include/i386-linux-gnu'])
-                v.append_unique('CXXFLAGS', [os.path.join(conf.bugenginenode.abspath(),
-                                                          'mak/compiler/suncc/interlocked-a=x86.il'),
-                                             '-xarch=sse2', '-I/usr/include/i386-linux-gnu',
-                                             '-include', 'cstdio'])
-                v.append_unique('LINKFLAGS', [])
+                v.CFLAGS += ['-xarch=sse2', '-I/usr/include', '-I/usr/include/i386-linux-gnu',
+                             '-include', 'stdlib.h', '-include', 'stdio.h']
+                v.CXXFLAGS += [os.path.join(conf.bugenginenode.abspath(),
+                                            'mak/compiler/suncc/interlocked-a=x86.il'),
+                               '-xarch=sse2', '-I/usr/include/i386-linux-gnu',
+                               '-include', 'cstdio', '-include', 'cstdlib', '-include', 'math.h']
             elif self.arch == 'amd64':
                 v.append_unique('SYSTEM_LIBPATHS', ['=/usr/lib/x86_64-linux-gnu'])
-                v.append_unique('CFLAGS', ['-I/usr/include/x86_64-linux-gnu'])
-                v.append_unique('CXXFLAGS', [os.path.join(conf.bugenginenode.abspath(),
-                                                          'mak/compiler/suncc/interlocked-a=amd64.il'),
-                                             '-I/usr/include/x86_64-linux-gnu',
-                                             '-include', 'cstdio'])
-                v.append_unique('LINKFLAGS', [])
+                v.CFLAGS += ['-I/usr/include', '-I/usr/include/x86_64-linux-gnu',
+                             '-include', 'stdlib.h', '-include', 'stdio.h']
+                v.CXXFLAGS += [os.path.join(conf.bugenginenode.abspath(),
+                                            'mak/compiler/suncc/interlocked-a=amd64.il'),
+                               '-I/usr/include/x86_64-linux-gnu',
+                               '-include', 'cstdio', '-include', 'cstdlib', '-include', 'math.h']
             v.append_unique('CFLAGS', ['-mt', '-xldscope=hidden', '-Kpic', '-DPIC', '-D__PIC__'])
             v.append_unique('CXXFLAGS', ['-mt', '-xldscope=hidden', '-Kpic', '-DPIC', '-D__PIC__'])
             v.append_unique('LINKFLAGS', ['-lrt', '-mt', '-znow', '-xldscope=hidden']) #, '-z', 'absexec', '-Kpic'])
             v.SHLIB_MARKER = '-Bdynamic'
             v.STLIB_MARKER = '-Bstatic'
-            if self.version_number < (5, 14):
-                v.append_unique('CXXFLAGS', ['-library=Crun,stlport4'])
-                v.append_unique('LINKFLAGS', ['-library=Crun,stlport4', '-staticlib=Crun,stlport4'])
 
     def populate_useful_variables(self, conf):
         pass
