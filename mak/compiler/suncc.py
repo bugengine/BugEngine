@@ -20,7 +20,7 @@ class SunCC(Configure.ConfigurationContext.GnuCompiler):
     def __init__(self, suncc, sunCC, extra_args={}, extra_env={}):
         Configure.ConfigurationContext.GnuCompiler.__init__(self, suncc, sunCC, extra_args, extra_env)
         if self.platform == 'linux-gnu':
-            if self.version_number <= (5, 12, 0):
+            if self.version_number <= (5, 13, 0):
                 self.add_flags('cxx', ['-library=Crun,stlport4'])
                 self.add_flags('link', ['-library=Crun,stlport4', '-staticlib=Crun,stlport4'])
             if self.arch == 'amd64':
