@@ -47,7 +47,6 @@ typedef u8                      byte;
 #pragma warning(disable:4359)   // Alignment specifier is less than actual alignment (X) and will be ignored
 #define BE_NOINLINE             __declspec(noinline)
 #define BE_ALWAYSINLINE         __forceinline
-#define BE_SELECTOVERLOAD(o)    (o)
 #define BE_SUPPORTS_EXCEPTIONS  1
 
 #ifndef BE_STATIC

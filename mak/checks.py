@@ -14,7 +14,9 @@ __declspec(dllexport) int be_test()
 #endif
 int main(int argc, char *argv[])
 {
-    return %(function)s;
+    int i;
+    %(function)s;
+    return i;
 }
 """
 
@@ -72,9 +74,9 @@ def check_lib(self, libname, var='', libpath=[], includepath=[], includes=[], fu
     if not var: var = self.path.name
     try:
         if functions:
-            functions =  ' + '.join(['*(int*)(&%s)'%f for f in functions])
+            functions =  '\n'.join(['i = *(int*)(&%s);'%f for f in functions])
         else:
-            functions = '*(int*)0'
+            functions = 'i = *(int*)0;'
         self.check(
             compile_filename=[],
             features='link_library',
