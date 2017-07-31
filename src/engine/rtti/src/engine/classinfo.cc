@@ -269,7 +269,8 @@ void Class::enumerateObjects(EnumerateRecursion recursion, EnumerateCallback cal
 
 raw<const Property> Class::getProperty(istring propertyName) const
 {
-    for (raw< const Class > cls = { this }; cls; cls = cls->parent)
+    raw<const Class> thisCls = { this };
+    for (raw< const Class > cls = thisCls; cls; cls = cls->parent)
     {
         if (cls->properties)
         {
@@ -290,7 +291,8 @@ raw<const Property> Class::getProperty(istring propertyName) const
 
 raw<const Method> Class::getMethod(istring methodName) const
 {
-    for (raw< const Class > cls = { this }; cls; cls = cls->parent)
+    raw<const Class> thisCls = { this };
+    for (raw< const Class > cls = thisCls; cls; cls = cls->parent)
     {
         if (cls->methods)
         {
@@ -411,7 +413,8 @@ bool Class::isA(raw<const Class> klass) const
 
 Value Class::getTag(const Type& type) const
 {
-    for (raw< const Class > cls = { this }; cls; cls = cls->parent)
+    raw<const Class> thisCls = { this };
+    for (raw< const Class > cls = thisCls; cls; cls = cls->parent)
     {
         if (cls->tags)
         {

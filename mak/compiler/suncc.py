@@ -110,23 +110,22 @@ class SunCC(Configure.ConfigurationContext.GnuCompiler):
             #v.STATIC = 1
             if self.arch == 'x86':
                 v.append_unique('SYSTEM_LIBPATHS', ['=/usr/lib/i386-linux-gnu'])
-                v.CFLAGS += ['-xarch=sse2', '-I/usr/include', '-I/usr/include/i386-linux-gnu',
-                             '-include', 'stdlib.h', '-include', 'stdio.h']
+                v.CFLAGS += ['-xarch=sse2']
                 v.CXXFLAGS += [os.path.join(conf.bugenginenode.abspath(),
                                             'mak/compiler/suncc/interlocked-a=x86.il'),
-                               '-xarch=sse2', '-I/usr/include/i386-linux-gnu',
-                               '-include', 'cstdio', '-include', 'cstdlib', '-include', 'math.h']
+                               '-xarch=sse2',
+                               '-include', 'math.h']
             elif self.arch == 'amd64':
                 v.append_unique('SYSTEM_LIBPATHS', ['=/usr/lib/x86_64-linux-gnu'])
-                v.CFLAGS += ['-I/usr/include', '-I/usr/include/x86_64-linux-gnu',
-                             '-include', 'stdlib.h', '-include', 'stdio.h']
+                v.CFLAGS += []
                 v.CXXFLAGS += [os.path.join(conf.bugenginenode.abspath(),
                                             'mak/compiler/suncc/interlocked-a=amd64.il'),
-                               '-I/usr/include/x86_64-linux-gnu',
-                               '-include', 'cstdio', '-include', 'cstdlib', '-include', 'math.h']
+                               '-include', 'math.h']
             v.append_unique('CFLAGS', ['-mt', '-xldscope=hidden', '-Kpic', '-DPIC', '-D__PIC__'])
             v.append_unique('CXXFLAGS', ['-mt', '-xldscope=hidden', '-Kpic', '-DPIC', '-D__PIC__'])
             v.append_unique('LINKFLAGS', ['-lrt', '-mt', '-znow', '-xldscope=hidden']) #, '-z', 'absexec', '-Kpic'])
+            v.CFLAGS_exportall = ['-xldscope=symbolic']
+            v.CXXFLAGS_exportall = ['-xldscope=symbolic']
             v.SHLIB_MARKER = '-Bdynamic'
             v.STLIB_MARKER = '-Bstatic'
 
