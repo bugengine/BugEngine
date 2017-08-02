@@ -7,6 +7,12 @@
 #include    <darwin/platformrenderer.hh>
 #include    <3d/rendertarget/rendertarget.script.hh>
 
+
+#if __MAC_OS_X_VERSION_MIN_REQUIRED < __MAC_10_12
+# define NSWindowStyleMaskTitled NSTitledWindowMask
+# define NSWindowStyleMaskResizable NSResizableWindowMask
+#endif
+
 namespace BugEngine { namespace Windowing
 {
 
@@ -22,7 +28,7 @@ public:
 
 Window::PlatformWindow::PlatformWindow(u32 w, u32 h)
     :   m_window([[NSWindow alloc] initWithContentRect:NSMakeRect(0, 0, w, h)
-                                             styleMask:NSTitledWindowMask | NSResizableWindowMask
+                                             styleMask:NSWindowStyleMaskTitled | NSWindowStyleMaskResizable
                                                backing:NSBackingStoreBuffered
                                                  defer:NO])
 {
