@@ -53,7 +53,8 @@ private:
     int                                     m_version;
     PyThreadState*                          m_mainThread;
 private: // friend ThreadLock
-    Py_SetPythonHomeType                    m_Py_SetPythonHome;
+    Py_SetPythonHome2Type                   m_Py_SetPythonHome2;
+    Py_SetPythonHome3Type                   m_Py_SetPythonHome3;
     Py_InitializeExType                     m_Py_InitializeEx;
     Py_FinalizeType                         m_Py_Finalize;
     Py_NewInterpreterType                   m_Py_NewInterpreter;
