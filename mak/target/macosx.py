@@ -126,7 +126,7 @@ class Darwin(Configure.ConfigurationContext.Platform):
                     for c in compilers:
                         if c.arch == a:
                             r, out, err = c.run_cxx([sdk_option, '-Wl,-rpath,.', '-x', 'c++', '-isysroot', sdk_path, '-'],
-                                                    '#include <stdio.h>\nint main() { printf(0); return 0; }\n')
+                                                    '#include <stdio.h>\n#include <iostream>\nint main() { printf(0); return 0; }\n')
                             if r == 0:
                                 sdk_compilers.append(c)
                                 break

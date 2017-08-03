@@ -114,7 +114,6 @@ PythonLibrary::PythonLibrary(const char* pythonLibraryName)
 #   define be_get_func(f)                                                       \
         be_get_func_name(f, f)
 
-        be_get_func(Py_SetPythonHome);
         be_get_func(Py_InitializeEx);
         be_get_func(Py_Finalize);
         be_get_func(Py_NewInterpreter);
@@ -127,6 +126,7 @@ PythonLibrary::PythonLibrary(const char* pythonLibraryName)
         {
             be_get_func(PyModule_Create2);
             be_get_func_name(PyImport_AppendInittab, PyImport_AppendInittab3);
+            be_get_func_name(Py_SetPythonHome, Py_SetPythonHome3);
         }
         else
         {
@@ -135,6 +135,7 @@ PythonLibrary::PythonLibrary(const char* pythonLibraryName)
             be_get_func_opt(Py_InitModule4);
             be_get_func_opt(Py_InitModule4_64);
             be_get_func_name(PyImport_AppendInittab, PyImport_AppendInittab2);
+            be_get_func_name(Py_SetPythonHome, Py_SetPythonHome2);
         }
         if (m_version >= 32)
         {

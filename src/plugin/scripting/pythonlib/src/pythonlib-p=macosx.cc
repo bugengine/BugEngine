@@ -48,7 +48,6 @@ PythonLibrary::PythonLibrary(const char* pythonLibraryName)
             } while(0)
 #       define be_get_func(f)                                                       \
             be_get_func_name(f, f)
-        be_get_func(Py_SetPythonHome);
         be_get_func(Py_InitializeEx);
         be_get_func(Py_Finalize);
         be_get_func(Py_NewInterpreter);
@@ -61,6 +60,7 @@ PythonLibrary::PythonLibrary(const char* pythonLibraryName)
         {
             be_get_func(PyModule_Create2);
             be_get_func_name(PyImport_AppendInittab, PyImport_AppendInittab3);
+            be_get_func_name(Py_SetPythonHome, Py_SetPythonHome3);
         }
         else
         {
@@ -69,6 +69,7 @@ PythonLibrary::PythonLibrary(const char* pythonLibraryName)
             be_get_func_opt(Py_InitModule4);
             be_get_func_opt(Py_InitModule4_64);
             be_get_func_name(PyImport_AppendInittab, PyImport_AppendInittab2);
+            be_get_func_name(Py_SetPythonHome, Py_SetPythonHome2);
         }
         if (m_version >= 32)
         {
@@ -194,8 +195,17 @@ void PythonLibrary::platformInitialize()
 {
     ifilename programPath = Environment::getEnvironment().getProgramPath();
     programPath.pop_back();
-    static ifilename::Filename f = programPath.str();
-    (*m_Py_SetPythonHome)(f.name);
+    if (m_version < 30)
+    {
+        static ifilename::Filename f = programPath.str();
+        (*m_Py_SetPythonHome2)(f.name);
+    }
+    else
+    {
+        static wchar_t s_programPath[1024];
+        mbstowcs(s_programPath, programPath.str(), sizeof(s_programPath));
+        (*m_Py_SetPythonHome3)(s_programPath);
+    }
 }
 
 void PythonLibrary::setupPath()

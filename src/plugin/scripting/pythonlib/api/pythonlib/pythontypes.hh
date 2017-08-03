@@ -26,7 +26,8 @@ struct PyMemberDef;
 struct PyGetSetDef;
 
 
-typedef void (*Py_SetPythonHomeType)(const char* home);
+typedef void (*Py_SetPythonHome2Type)(const char* home);
+typedef void (*Py_SetPythonHome3Type)(const wchar_t* home);
 typedef void (*Py_InitializeExType)(int initsigs);
 typedef void (*Py_FinalizeType)();
 typedef PyThreadState* (*Py_NewInterpreterType)();
