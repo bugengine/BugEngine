@@ -76,6 +76,7 @@ extern "C" int be_value_wrap()
     return 1;
 }
 
+static inline int yyinput();
 #define YY_NO_INPUT
 #define YY_INPUT(buf,result,max_size)                                               \
         {                                                                           \
