@@ -8,7 +8,11 @@
 
 #include    <darwin/platformrenderer.hh>
 
-#if __MAC_OS_X_VERSION_MAX_ALLOWED < __MAC_10_12
+#ifndef MAC_OS_X_VERSION_10_12
+# define MAC_OS_X_VERSION_10_12 101200
+#endif
+
+#if __MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_12
 # define NSEventMaskAny NSAnyEventMask
 #endif
 
