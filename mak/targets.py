@@ -21,7 +21,7 @@ def add_build_command(toolchain, optimisation):
 @conf
 class Platform:
     def __init__(self):
-        pass
+        self.directories = []
 
     def get_available_compilers(self, compiler_list):
         result = []
