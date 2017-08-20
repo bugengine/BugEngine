@@ -17,7 +17,10 @@
 namespace BugEngine
 {
 
+#if !USE_DISPATCH_SEMAPHORE
 static int x;
+#endif
+
 Semaphore::Semaphore(int initialCount)
 #if USE_DISPATCH_SEMAPHORE
 :   m_data(dispatch_semaphore_create(initialCount))
