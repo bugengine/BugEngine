@@ -66,7 +66,7 @@ class Windows_Clang(Windows):
     def load_in_env(self, conf, compiler):
         Windows.load_in_env(self, conf, compiler)
         env = conf.env
-        env.append_unique('LINKFLAGS', ['-static-libgcc', '-static-libstdc++', '-pthread'])
+        env.append_unique('LINKFLAGS', ['-static-libgcc', '-static-libstdc++'])
         env.append_unique('STLIB', ['pthread'])
         env.append_unique('CXXFLAGS_warnall', ['-Wno-unknown-pragmas', '-Wno-comment'])
         self.find_winres(conf, compiler)
