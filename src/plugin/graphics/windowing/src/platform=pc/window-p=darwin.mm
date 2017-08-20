@@ -7,8 +7,11 @@
 #include    <darwin/platformrenderer.hh>
 #include    <3d/rendertarget/rendertarget.script.hh>
 
+#ifndef MAC_OS_X_VERSION_10_12
+# define MAC_OS_X_VERSION_10_12 101200
+#endif
 
-#if __MAC_OS_X_VERSION_MAX_ALLOWED < __MAC_10_12
+#if __MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_12
 # define NSWindowStyleMaskTitled NSTitledWindowMask
 # define NSWindowStyleMaskResizable NSResizableWindowMask
 #endif
