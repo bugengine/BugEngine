@@ -8,7 +8,7 @@
 #include    <3d/rendertarget/rendertarget.script.hh>
 
 
-#if __MAC_OS_X_VERSION_MIN_REQUIRED < __MAC_10_12
+#if __MAC_OS_X_VERSION_MAX_ALLOWED < __MAC_10_12
 # define NSWindowStyleMaskTitled NSTitledWindowMask
 # define NSWindowStyleMaskResizable NSResizableWindowMask
 #endif
