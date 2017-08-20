@@ -72,12 +72,9 @@ static void newline()
 
 extern "C" int be_value_wrap()
 {
-    //(void)&yyinput;
     return 1;
 }
 
-static inline int yyinput();
-#define YY_NO_INPUT
 #define YY_INPUT(buf,result,max_size)                                               \
         {                                                                           \
             using namespace ::BugEngine::RTTI::Parser;                              \
@@ -148,7 +145,7 @@ false                                           { update(be_value_leng);
                                                   yylval.fValue.value = strToDouble(be_value_text, be_value_leng);
                                                   yylval.fValue.location = ::BugEngine::RTTI::Parser::g_parseContext->location;
                                                   return VAL_FLOAT; }
-"\n"                                            { newline(); }
+"\n"                                            { (void)&yyinput; newline(); }
 [ \r\t]+                                        { update(be_value_leng); }
 \#[^\n]*\n                                      { update(be_value_leng); }
 .                                               { update(be_value_leng);

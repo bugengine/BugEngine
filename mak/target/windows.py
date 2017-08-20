@@ -49,7 +49,7 @@ class Windows(Configure.ConfigurationContext.Platform):
         else:
             env.MS_PROJECT_PLATFORM = 'Win32'
 
-        env.append_unique('DEFINES', ['_WIN32_WINNT=0x0502', 'WINVER=0x0502'])
+        env.append_unique('DEFINES', ['_WIN32_WINNT=0x0502', 'WINVER=0x0502', '_CRT_SECURE_NO_DEPRECATE=1', '_CRT_SECURE_NO_WARNINGS=1'])
 
     def find_winres(self, conf, compiler):
         winres = conf.find_program(compiler.target + '-windres', var='WINRC',
