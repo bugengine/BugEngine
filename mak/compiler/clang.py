@@ -18,8 +18,12 @@ class Clang(Configure.ConfigurationContext.GnuCompiler):
 
     def set_warning_options(self, conf):
         Configure.ConfigurationContext.GnuCompiler.set_warning_options(self, conf)
-        if self.version_number >= (3, 6):
-            conf.env.CXXFLAGS_warnall.append('-Wno-unused-local-typedefs')
+        if 'AppleClang' in self.NAMES:
+            if self.version_number >= (6, 1):
+                conf.env.CXXFLAGS_warnall.append('-Wno-unused-local-typedefs')
+        else:
+            if self.version_number >= (3, 6):
+                conf.env.CXXFLAGS_warnall.append('-Wno-unused-local-typedefs')
 
     def get_multilib_compilers(self):
         result = []
