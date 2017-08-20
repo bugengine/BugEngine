@@ -128,6 +128,8 @@ def configure(conf):
                     conf.darwin_sdks[sdk_os].sort()
                 except KeyError:
                     conf.darwin_sdks[sdk_os] = [(sdk_version, sdk_archs, sdk_path)]
+    for sdk_os in conf.darwin_sdks.keys():
+        conf.darwin_sdks[sdk_os] = sorted(conf.darwin_sdks[sdk_os], key = lambda x: (-len(x[1]), x[0]))
 
 
 def build(bld):

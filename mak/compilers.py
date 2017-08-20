@@ -110,7 +110,7 @@ class Compiler:
         return self.arch, compiler_name, self.platform, self.version_number, self.arch_name
 
     def name(self):
-        compiler_name = self.__class__.__name__.lower()
+        compiler_name = self.NAMES[0]
         return '%s-%s-%s-%s' % (compiler_name, self.platform, self.arch_name, self.version)
 
     def get_multilib_compilers(self):
@@ -226,6 +226,8 @@ class GnuCompiler(Compiler):
             for name in self.NAMES:
                 if line.find('%s version ' % name.lower()) != -1:
                     words = line.split()
+                    if 'Apple' in words:
+                        self.NAMES = ['Apple'+self.NAMES[0]] + list(self.NAMES)
                     while words[0] != name.lower() and words[1] != 'version':
                         words.pop(0)
                     version = words[2].split('-')[0]
@@ -234,6 +236,7 @@ class GnuCompiler(Compiler):
                 while words[0] != 'Apple' and words[1] != 'LLVM' and words[2] != 'version':
                     words.pop(0)
                 version = words[3].split('-')[0]
+                self.NAMES = ['Apple'+self.NAMES[0]] + list(self.NAMES)
             if line.startswith('#define'):
                 macro = line.split()[1].strip()
                 macros.add(macro)
@@ -280,6 +283,7 @@ class GnuCompiler(Compiler):
         try:
             result, out, err = self.run_cxx([node.abspath(), '-c', '-o', tgtnode.abspath()])
         except Exception as e:
+            print(e)
             return False
         finally:
             node.delete()
@@ -319,7 +323,7 @@ class GnuCompiler(Compiler):
         Compiler.load_in_env(self, conf, platform)
 
 
-        sys_dirs = self.directories[:]
+        sys_dirs = self.directories + platform.directories
         d, a = os.path.split(self.directories[0])
         while a:
             pd = os.path.join(d, 'bin')
