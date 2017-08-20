@@ -49,7 +49,6 @@ static inline void displayError()
 # include   <malloc.h>
 # define    malloca _alloca
 # define    freea(p)    (void)p
-# endif
 #else
 # include   <malloc.h>
 # define    malloca alloca
