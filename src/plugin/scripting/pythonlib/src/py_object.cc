@@ -439,7 +439,7 @@ void PyBugObject::registerType(PyObject* module)
     PyBoundMethod::registerType(module);
 }
 
-static inline void unpackArray(PyObject* arg, const RTTI::Type& type, RTTI::Value* buffer)
+static inline void unpackArray(PyObject* arg, const RTTI::Type& type, void* buffer)
 {
     be_assert(type.metaclass->type() == RTTI::ClassType_Array
            || type.metaclass->type() == RTTI::ClassType_Variant,
@@ -450,7 +450,7 @@ static inline void unpackArray(PyObject* arg, const RTTI::Type& type, RTTI::Valu
     be_forceuse(buffer);
 }
 
-static inline void unpackNumber(PyObject* arg, const RTTI::Type& type, RTTI::Value* buffer)
+static inline void unpackNumber(PyObject* arg, const RTTI::Type& type, void* buffer)
 {
     be_assert(type.metaclass->type() == RTTI::ClassType_Number
            || type.metaclass->type() == RTTI::ClassType_Variant,
@@ -533,7 +533,7 @@ static inline void unpackNumber(PyObject* arg, const RTTI::Type& type, RTTI::Val
     }
 }
 
-static inline void unpackFloat(PyObject* arg, const RTTI::Type& type, RTTI::Value* buffer)
+static inline void unpackFloat(PyObject* arg, const RTTI::Type& type, void* buffer)
 {
     be_assert(type.metaclass->type() == RTTI::ClassType_Number
            || type.metaclass->type() == RTTI::ClassType_Variant,
@@ -614,7 +614,7 @@ static inline void unpackFloat(PyObject* arg, const RTTI::Type& type, RTTI::Valu
     }
 }
 
-static inline void unpackString(PyObject* arg, const RTTI::Type& type, RTTI::Value* buffer)
+static inline void unpackString(PyObject* arg, const RTTI::Type& type, void* buffer)
 {
     be_assert(type.metaclass->type() == RTTI::ClassType_String
            || type.metaclass->type() == RTTI::ClassType_Variant,
@@ -663,13 +663,13 @@ static inline void unpackString(PyObject* arg, const RTTI::Type& type, RTTI::Val
     }
 }
 
-static inline void unpackPod(PyObject* arg, const RTTI::Type& type, RTTI::Value* buffer)
+static inline void unpackPod(PyObject* arg, const RTTI::Type& type, void* buffer)
 {
     be_assert(type.metaclass->type() == RTTI::ClassType_Pod,
               "expected to unpack Python Dict into RTTI::ClassType_Pod, got %s"
               | type.metaclass->name);
 
-    new (buffer) RTTI::Value(type, RTTI::Value::Reserve);
+    RTTI::Value* result = new (buffer) RTTI::Value(type, RTTI::Value::Reserve);
     RTTI::Value* v = (RTTI::Value*)malloca(sizeof(RTTI::Value));
     for (raw<const RTTI::Class> c = type.metaclass; c; c = c->parent)
     {
@@ -682,7 +682,7 @@ static inline void unpackPod(PyObject* arg, const RTTI::Type& type, RTTI::Value*
                 PyObject* value = s_library->m_PyDict_GetItemString(arg, p->name.c_str());
 
                 PyBugObject::unpack(value, p->type, v);
-                p->set(*buffer, *v);
+                p->set(*result, *v);
                 v->~Value();
             }
         }
@@ -848,7 +848,7 @@ RTTI::Type::ConversionCost PyBugObject::distance(PyObject* object, const RTTI::T
     }
 }
 
-void PyBugObject::unpack(PyObject* object, const RTTI::Type& desiredType, RTTI::Value* buffer)
+void PyBugObject::unpack(PyObject* object, const RTTI::Type& desiredType, void* buffer)
 {
     if (desiredType.metaclass->type() == RTTI::ClassType_Variant)
     {
@@ -899,7 +899,7 @@ void PyBugObject::unpack(PyObject* object, const RTTI::Type& desiredType, RTTI::
     }
 }
 
-void PyBugObject::unpackAny(PyObject* object, RTTI::Value* buffer)
+void PyBugObject::unpackAny(PyObject* object, void* buffer)
 {
     if (object->py_type == &PyBugObject::s_pyType
      || object->py_type->tp_base == &PyBugObject::s_pyType)

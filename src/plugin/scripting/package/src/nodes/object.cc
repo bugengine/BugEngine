@@ -78,24 +78,29 @@ void Object::setMethod(ref<Reference> reference)
             be_unimplemented();
         }
     }
+    else
+    {
+        // error: no value?
+        be_unimplemented();
+    }
 }
 
 RTTI::Type Object::getType() const
 {
     if (m_overloads.empty())
     {
-        be_notreached();
         return be_typeid<void>::type();
     }
     else
     {
-        return m_overloads[0].m_overload->returnType;
+        return m_overloads[0].m_callInfo.overload->returnType;
     }
 }
 
 RTTI::Value Object::create() const
 {
-    return m_overloads.empty() ? RTTI::Value() : m_overloads[0].create(m_name, m_parameters);
+    return m_overloads.empty() ? RTTI::Value()
+                               : m_overloads[0].create(m_name);
 }
 
 }}}

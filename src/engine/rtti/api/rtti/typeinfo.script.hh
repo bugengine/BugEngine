@@ -55,7 +55,6 @@ struct be_api(RTTI) Type
     u32                     size() const;
     bool                    isA(const Type& other) const;
 
-public:
     struct ConversionCost
     {
     public:
@@ -114,12 +113,21 @@ public:
         {
             return value() >= other.value();
         }
+        ConversionCost operator+=(ConversionCost other)
+        {
+            incompatible += other.incompatible;
+            conversion += other.conversion;
+            promotion += other.promotion;
+            qualification += other.qualification;
+            return *this;
+        }
     };
 
     static const ConversionCost s_incompatible;
     static const ConversionCost s_variant;
 
     ConversionCost          calculateConversion(const Type& other) const;
+public:
     template< typename T >
     bool                    isA() const;
     minitl::format<1024u>   name() const;
@@ -132,6 +140,11 @@ private:
 
 be_api(RTTI) bool operator==(Type t1, Type t2);
 be_api(RTTI) bool operator<=(Type t1, Type t2);
+static inline Type::ConversionCost calculateConversion(const Type& type,
+                                                       const Type& target)
+{
+    return type.calculateConversion(target);
+}
 
 }}
 

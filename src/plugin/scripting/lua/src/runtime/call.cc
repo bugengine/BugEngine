@@ -20,7 +20,8 @@ struct LuaParameterType
     int         key;
 };
 
-static RTTI::Type::ConversionCost distance(const LuaParameterType& type, const RTTI::Type& target)
+static RTTI::Type::ConversionCost calculateConversion(const LuaParameterType& type,
+                                                      const RTTI::Type& target)
 {
     RTTI::Type::ConversionCost result;
     be_forceuse(type);
@@ -29,11 +30,17 @@ static RTTI::Type::ConversionCost distance(const LuaParameterType& type, const R
     return result;
 }
 
+static void convert(const LuaParameterType& type, void* buffer, const RTTI::Type& target)
+{
+    be_forceuse(type);
+    be_forceuse(target);
+    new (buffer) RTTI::Value();
+}
+
 typedef RTTI::ArgInfo<LuaParameterType> LuaArgInfo;
 
 int call(lua_State *state, raw<const RTTI::Method> method)
 {
-    be_forceuse(distance);
     u32 nargs = lua_gettop(state) - 1;
     if (nargs == 1 && lua_type(state, 2) == LUA_TTABLE)
     {
