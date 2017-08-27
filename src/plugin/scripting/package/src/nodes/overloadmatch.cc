@@ -9,30 +9,46 @@
 namespace BugEngine { namespace PackageBuilder { namespace Nodes
 {
 
-OverloadMatch::OverloadMatch(raw<const RTTI::Method::Overload> overload)
-    :   m_overload(overload)
-    ,   m_cost()
+static RTTI::Type::ConversionCost calculateConversion(ref<const Parameter> parameter,
+                                                      const RTTI::Type& target)
 {
-}
-
-void OverloadMatch::update(const minitl::vector<ref<const Parameter> >& parameters)
-{
-    be_forceuse(parameters);
+    RTTI::Type::ConversionCost result;
+    be_forceuse(parameter);
+    be_forceuse(target);
     be_unimplemented();
+    return result;
 }
 
-bool OverloadMatch::operator<(const OverloadMatch& other) const
+static void convert(ref<const Parameter> parameter, void* buffer, const RTTI::Type& target)
 {
-    return m_cost < other.m_cost;
+    new(buffer) RTTI::Value(parameter->as(target));
 }
 
-RTTI::Value OverloadMatch::create(istring name,
-                                  const minitl::vector<ref<const Parameter> >& parameters) const
+OverloadMatch::OverloadMatch(raw<const RTTI::Method::Overload> overload)
+    :   m_args(Arena::packageBuilder(), overload->params ? overload->params->count : 0)
+    ,   m_callInfo()
+{
+    m_callInfo.overload = overload;
+}
+
+void OverloadMatch::update(const minitl::vector< ref<const Parameter> >& parameters)
+{
+    m_args.clear();
+    m_args.reserve(parameters.size());
+    for (minitl::vector< ref<const Parameter> >::const_iterator it = parameters.begin();
+         it != parameters.end();
+         ++it)
+    {
+        m_args.push_back(ArgInfo((*it)->name(),
+                                 (*it)));
+    }
+    m_callInfo.conversion = RTTI::getCost(m_callInfo.overload, &m_args[0], m_args.size());
+}
+
+RTTI::Value OverloadMatch::create(istring name) const
 {
     be_forceuse(name);
-    be_forceuse(parameters);
-    be_unimplemented();
-    return RTTI::Value();
+    return RTTI::call(m_callInfo, &m_args[0], m_args.size());
 }
 
 }}}

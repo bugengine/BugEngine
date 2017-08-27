@@ -21,8 +21,8 @@ struct PyBugObject : public PyObject
     static PyObject* create(PyObject* owner, const RTTI::Value& value);
     static PyObject* newinst(PyTypeObject* type, PyObject* args, PyObject* kwargs);
     static RTTI::Type::ConversionCost distance(PyObject* object, const RTTI::Type& desiredType);
-    static void unpack(PyObject* object, const RTTI::Type& desiredType, RTTI::Value* buffer);
-    static void unpackAny(PyObject* object, RTTI::Value* buffer);
+    static void unpack(PyObject* object, const RTTI::Type& desiredType, void* buffer);
+    static void unpackAny(PyObject* object, void* buffer);
     static PyObject* getattr(PyObject* self, const char* name);
     static int setattr(PyObject* self, const char* name, PyObject* value);
     static PyObject* repr(PyObject* self);

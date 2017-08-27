@@ -28,6 +28,17 @@ struct PythonTypeInfo
     PythonTypeInfo(PyObject* object);
 };
 
+static RTTI::Type::ConversionCost calculateConversion(const PythonTypeInfo& typeInfo,
+                                                      const RTTI::Type& other)
+{
+    return PyBugObject::distance(typeInfo.arg, other);
+}
+
+static void convert(const PythonTypeInfo& typeInfo, void* buffer, RTTI::Type type)
+{
+    PyBugObject::unpack(typeInfo.arg, type, buffer);
+}
+
 PythonTypeInfo::PythonTypeInfo(PyObject* object)
     :   arg(object)
     ,   pythonType(getPyTypeFromPyObject(object))

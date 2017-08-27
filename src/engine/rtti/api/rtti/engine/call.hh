@@ -15,6 +15,11 @@ struct CallInfo
 {
     RTTI::Type::ConversionCost      conversion;
     raw<const Method::Overload>     overload;
+
+    bool operator<(const CallInfo& other)
+    {
+        return conversion < other.conversion;
+    }
 };
 
 template< typename T >
@@ -38,14 +43,15 @@ struct ArgInfo
 };
 
 template< typename T >
-RTTI::Type::ConversionCost getCost(raw<const Method::Overload> overload,
-                                   ArgInfo<T> arguments[], u32 argumentCount)
+Type::ConversionCost getCost(raw<const Method::Overload> overload,
+                             ArgInfo<T> arguments[], u32 argumentCount)
 {
-    RTTI::Type::ConversionCost cost;
-    be_forceuse(overload);
-    be_forceuse(arguments);
-    be_forceuse(argumentCount);
-    be_unimplemented();
+    Type::ConversionCost cost;
+    const Method::Parameter* p = overload->params->begin();
+    for (u32 i = 0; i < argumentCount && p != overload->params->end(); ++i, ++p)
+    {
+        cost += calculateConversion(arguments[i].type, p->type);
+    }
     return cost;
 }
 
@@ -73,14 +79,24 @@ CallInfo resolve(raw<const Method> method,
 }
 
 template< typename T >
-RTTI::Value call(CallInfo callInfo,
-                 ArgInfo<T> arguments[], u32 argumentCount)
+Value call(CallInfo callInfo,
+           const ArgInfo<T> arguments[], u32 argumentCount)
 {
-    be_forceuse(callInfo);
-    be_forceuse(arguments);
-    be_forceuse(argumentCount);
-    be_unimplemented();
-    return RTTI::Value();
+    Value* v = (Value*)malloca(sizeof(Value) * argumentCount);
+    const Method::Parameter* p = callInfo.overload->params->begin();
+    for (u32 i = 0; i < argumentCount; ++i, ++p)
+    {
+        be_assert(p != callInfo.overload->params->end(),
+                  "too few arguments passed to call");
+        convert(arguments[i].type, static_cast<void*>(&v[i]), p->type);
+    }
+    Value result = callInfo.overload->call(v, argumentCount);
+    for (u32 i = argumentCount; i > 0; --i)
+    {
+        v[i-1].~Value();
+    }
+    freea(v);
+    return result;
 }
 
 }}

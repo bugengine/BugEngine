@@ -19,15 +19,19 @@ struct OverloadMatch
 {
     friend class Object;
 public:
-    typedef BugEngine::RTTI::Method::Parameter RTTIParameter;
+    typedef RTTI::ArgInfo< ref<const Parameter> > ArgInfo;
 private:
-    raw<const RTTI::Method::Overload>   m_overload;
-    RTTI::Type::ConversionCost          m_cost;
+    minitl::vector<ArgInfo>             m_args;
+    RTTI::CallInfo                      m_callInfo;
 public:
     OverloadMatch(raw<const RTTI::Method::Overload> overload);
     void update(const minitl::vector< ref<const Parameter> >& parameters);
-    bool operator<(const OverloadMatch& other) const;
-    RTTI::Value create(istring name, const minitl::vector<ref<const Parameter> >& parameters) const;
+    RTTI::Value create(istring name) const;
+
+    inline bool operator<(const OverloadMatch& other) const
+    {
+        return m_callInfo.conversion < other.m_callInfo.conversion;
+    }
 };
 
 }}}
