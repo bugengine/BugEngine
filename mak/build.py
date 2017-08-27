@@ -586,6 +586,11 @@ def check_use_taskgens(self):
                 self.uselib = [name]
 
 
+@feature('c', 'cxx')
+def set_optim_define(self):
+    self.env.append_unique('DEFINES', ['BE_%s' % self.bld.optim.upper()])
+
+
 @feature('cxx')
 def set_building_name_inherits(self):
     seen = set([])
