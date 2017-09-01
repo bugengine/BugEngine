@@ -588,7 +588,9 @@ def check_use_taskgens(self):
 
 @feature('c', 'cxx')
 def set_optim_define(self):
-    self.env.append_unique('DEFINES', ['BE_%s' % self.bld.optim.upper()])
+    o = getattr(self.bld, 'optim', None)
+    if o:
+        self.env.append_unique('DEFINES', ['BE_%s' % o.upper()])
 
 
 @feature('cxx')
