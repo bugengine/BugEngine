@@ -88,7 +88,6 @@ class Clang(Configure.ConfigurationContext.GnuCompiler):
 
     def load_in_env(self, conf, platform, sysroot=None):
         Configure.ConfigurationContext.GnuCompiler.load_in_env(self, conf, platform)
-        print(self.version_number)
         # Template export was fixed in Clang 3.2
         if self.version_number >= (3, 2):
             if platform.NAME != 'windows':
