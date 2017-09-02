@@ -25,9 +25,9 @@ istring Parameter::name() const
     return m_name;
 }
 
-bool Parameter::isCompatible(const RTTI::Type& type) const
+RTTI::Type::ConversionCost Parameter::calculateConversion(const RTTI::Type& type) const
 {
-    return m_value->isCompatible(type);
+    return m_value->calculateConversion(type);
 }
 
 RTTI::Value Parameter::as(const RTTI::Type& type) const

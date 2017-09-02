@@ -19,15 +19,19 @@ struct Tag;
 
 enum ClassType
 {
-    ClassType_Object    = 0,
-    ClassType_Struct    = 1,
-    ClassType_Pod       = 2,
-    ClassType_Namespace = 3,
-    ClassType_Array     = 4,
-    ClassType_Enum      = 5,
-    ClassType_String    = 6,
-    ClassType_Number    = 7,
-    ClassType_Variant   = 8
+    ClassType_Object,
+    ClassType_Struct,
+    ClassType_Pod,
+    ClassType_Namespace,
+    ClassType_Array,
+    ClassType_Enum,
+    ClassType_String,
+    ClassType_Number,
+    ClassType_Vector2,
+    ClassType_Vector3,
+    ClassType_Vector4,
+    ClassType_Matrix,
+    ClassType_Variant
 };
 
 

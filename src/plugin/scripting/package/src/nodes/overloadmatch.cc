@@ -12,11 +12,7 @@ namespace BugEngine { namespace PackageBuilder { namespace Nodes
 static RTTI::Type::ConversionCost calculateConversion(ref<const Parameter> parameter,
                                                       const RTTI::Type& target)
 {
-    RTTI::Type::ConversionCost result;
-    be_forceuse(parameter);
-    be_forceuse(target);
-    be_unimplemented();
-    return result;
+    return parameter->calculateConversion(target);
 }
 
 static void convert(ref<const Parameter> parameter, void* buffer, const RTTI::Type& target)

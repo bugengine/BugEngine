@@ -148,6 +148,7 @@ be_pod double
 {
 };
 
+
 be_pod byte1x2
 {
     u8 operator[](u32) const;
@@ -164,6 +165,8 @@ be_pod byte1x4
     u8& operator[](u32);
 };
 
+be_tag(Index(BugEngine::RTTI::ClassType_Vector2
+          + (BugEngine::RTTI::ClassIndex_u8 << 16)))
 be_pod byte2
 {
     u8 operator[](u32) const;
@@ -185,6 +188,8 @@ be_pod byte2x4
     byte2& operator[](u32);
 };
 
+be_tag(Index(BugEngine::RTTI::ClassType_Vector3
+          + (BugEngine::RTTI::ClassIndex_u8 << 16)))
 be_pod byte3
 {
     u8 operator[](u32) const;
@@ -206,6 +211,8 @@ be_pod byte3x4
     byte3& operator[](u32);
 };
 
+be_tag(Index(BugEngine::RTTI::ClassType_Vector4
+          + (BugEngine::RTTI::ClassIndex_u8 << 16)))
 be_pod byte4
 {
     u8 operator[](u32) const;
@@ -221,10 +228,100 @@ be_pod byte4x3
     const byte4& operator[](u32) const;
     byte4& operator[](u32);
 };
+be_tag(Index(BugEngine::RTTI::ClassType_Matrix
+          + (BugEngine::RTTI::ClassIndex_u8 << 16)))
 be_pod byte4x4
 {
     const byte4& operator[](u32) const;
     byte4& operator[](u32);
+};
+
+
+be_pod sbyte1x2
+{
+    i8 operator[](u32) const;
+    i8& operator[](u32);
+};
+be_pod sbyte1x3
+{
+    i8 operator[](u32) const;
+    i8& operator[](u32);
+};
+be_pod sbyte1x4
+{
+    i8 operator[](u32) const;
+    i8& operator[](u32);
+};
+
+be_tag(Index(BugEngine::RTTI::ClassType_Vector2
+          + (BugEngine::RTTI::ClassIndex_i8 << 16)))
+be_pod sbyte2
+{
+    i8 operator[](u32) const;
+    i8& operator[](u32);
+};
+be_pod sbyte2x2
+{
+    const sbyte2& operator[](u32) const;
+    sbyte2& operator[](u32);
+};
+be_pod sbyte2x3
+{
+    const sbyte2& operator[](u32) const;
+    sbyte2& operator[](u32);
+};
+be_pod sbyte2x4
+{
+    const sbyte2& operator[](u32) const;
+    sbyte2& operator[](u32);
+};
+
+be_tag(Index(BugEngine::RTTI::ClassType_Vector3
+          + (BugEngine::RTTI::ClassIndex_i8 << 16)))
+be_pod sbyte3
+{
+    i8 operator[](u32) const;
+    i8& operator[](u32);
+};
+be_pod sbyte3x2
+{
+    const sbyte3& operator[](u32) const;
+    sbyte3& operator[](u32);
+};
+be_pod sbyte3x3
+{
+    const sbyte3& operator[](u32) const;
+    sbyte3& operator[](u32);
+};
+be_pod sbyte3x4
+{
+    const sbyte3& operator[](u32) const;
+    sbyte3& operator[](u32);
+};
+
+be_tag(Index(BugEngine::RTTI::ClassType_Vector4
+          + (BugEngine::RTTI::ClassIndex_i8 << 16)))
+be_pod sbyte4
+{
+    i8 operator[](u32) const;
+    i8& operator[](u32);
+};
+be_pod sbyte4x2
+{
+    const sbyte4& operator[](u32) const;
+    sbyte4& operator[](u32);
+};
+be_pod sbyte4x3
+{
+    const sbyte4& operator[](u32) const;
+    sbyte4& operator[](u32);
+};
+be_tag(Index(BugEngine::RTTI::ClassType_Matrix
+          + (BugEngine::RTTI::ClassIndex_i8 << 16)))
+be_pod sbyte4x4
+{
+    const sbyte4& operator[](u32) const;
+    sbyte4& operator[](u32);
 };
 
 
@@ -244,6 +341,8 @@ be_pod short1x4
     i16& operator[](u32);
 };
 
+be_tag(Index(BugEngine::RTTI::ClassType_Vector2
+          + (BugEngine::RTTI::ClassIndex_i16 << 16)))
 be_pod short2
 {
     i16 operator[](u32) const;
@@ -265,6 +364,8 @@ be_pod short2x4
     short2& operator[](u32);
 };
 
+be_tag(Index(BugEngine::RTTI::ClassType_Vector3
+          + (BugEngine::RTTI::ClassIndex_i16 << 16)))
 be_pod short3
 {
     i16 operator[](u32) const;
@@ -286,6 +387,8 @@ be_pod short3x4
     short3& operator[](u32);
 };
 
+be_tag(Index(BugEngine::RTTI::ClassType_Vector4
+          + (BugEngine::RTTI::ClassIndex_i16 << 16)))
 be_pod short4
 {
     i16 operator[](u32) const;
@@ -301,6 +404,8 @@ be_pod short4x3
     const short4& operator[](u32) const;
     short4& operator[](u32);
 };
+be_tag(Index(BugEngine::RTTI::ClassType_Matrix
+          + (BugEngine::RTTI::ClassIndex_i16 << 16)))
 be_pod short4x4
 {
     const short4& operator[](u32) const;
@@ -324,6 +429,8 @@ be_pod ushort1x4
     u16& operator[](u32);
 };
 
+be_tag(Index(BugEngine::RTTI::ClassType_Vector2
+          + (BugEngine::RTTI::ClassIndex_u16 << 16)))
 be_pod ushort2
 {
     u16 operator[](u32) const;
@@ -345,6 +452,8 @@ be_pod ushort2x4
     ushort2& operator[](u32);
 };
 
+be_tag(Index(BugEngine::RTTI::ClassType_Vector3
+          + (BugEngine::RTTI::ClassIndex_u16 << 16)))
 be_pod ushort3
 {
     u16 operator[](u32) const;
@@ -366,6 +475,8 @@ be_pod ushort3x4
     ushort3& operator[](u32);
 };
 
+be_tag(Index(BugEngine::RTTI::ClassType_Vector4
+          + (BugEngine::RTTI::ClassIndex_u16 << 16)))
 be_pod ushort4
 {
     u16 operator[](u32) const;
@@ -381,6 +492,8 @@ be_pod ushort4x3
     const ushort4& operator[](u32) const;
     ushort4& operator[](u32);
 };
+be_tag(Index(BugEngine::RTTI::ClassType_Matrix
+          + (BugEngine::RTTI::ClassIndex_u16 << 16)))
 be_pod ushort4x4
 {
     const ushort4& operator[](u32) const;
@@ -404,6 +517,8 @@ be_pod int1x4
     i32& operator[](u32);
 };
 
+be_tag(Index(BugEngine::RTTI::ClassType_Vector2
+          + (BugEngine::RTTI::ClassIndex_i32 << 16)))
 be_pod int2
 {
     i32 operator[](u32) const;
@@ -425,6 +540,8 @@ be_pod int2x4
     int2& operator[](u32);
 };
 
+be_tag(Index(BugEngine::RTTI::ClassType_Vector3
+          + (BugEngine::RTTI::ClassIndex_i32 << 16)))
 be_pod int3
 {
     i32 operator[](u32) const;
@@ -446,6 +563,8 @@ be_pod int3x4
     int3& operator[](u32);
 };
 
+be_tag(Index(BugEngine::RTTI::ClassType_Vector4
+          + (BugEngine::RTTI::ClassIndex_i32 << 16)))
 be_pod int4
 {
     i32 operator[](u32) const;
@@ -461,6 +580,8 @@ be_pod int4x3
     const int4& operator[](u32) const;
     int4& operator[](u32);
 };
+be_tag(Index(BugEngine::RTTI::ClassType_Matrix
+          + (BugEngine::RTTI::ClassIndex_i32 << 16)))
 be_pod int4x4
 {
     const int4& operator[](u32) const;
@@ -484,6 +605,8 @@ be_pod uint1x4
     u32& operator[](u32);
 };
 
+be_tag(Index(BugEngine::RTTI::ClassType_Vector2
+          + (BugEngine::RTTI::ClassIndex_u32 << 16)))
 be_pod uint2
 {
     u32 operator[](u32) const;
@@ -505,6 +628,8 @@ be_pod uint2x4
     uint2& operator[](u32);
 };
 
+be_tag(Index(BugEngine::RTTI::ClassType_Vector3
+          + (BugEngine::RTTI::ClassIndex_u32 << 16)))
 be_pod uint3
 {
     u32 operator[](u32) const;
@@ -526,6 +651,8 @@ be_pod uint3x4
     uint3& operator[](u32);
 };
 
+be_tag(Index(BugEngine::RTTI::ClassType_Vector4
+          + (BugEngine::RTTI::ClassIndex_u32 << 16)))
 be_pod uint4
 {
     u32 operator[](u32) const;
@@ -541,6 +668,8 @@ be_pod uint4x3
     const uint4& operator[](u32) const;
     uint4& operator[](u32);
 };
+be_tag(Index(BugEngine::RTTI::ClassType_Matrix
+          + (BugEngine::RTTI::ClassIndex_u32 << 16)))
 be_pod uint4x4
 {
     const uint4& operator[](u32) const;
@@ -564,6 +693,8 @@ be_pod bigint1x4
     i64& operator[](u32);
 };
 
+be_tag(Index(BugEngine::RTTI::ClassType_Vector2
+          + (BugEngine::RTTI::ClassIndex_i64 << 16)))
 be_pod bigint2
 {
     i64 operator[](u32) const;
@@ -585,6 +716,8 @@ be_pod bigint2x4
     bigint2& operator[](u32);
 };
 
+be_tag(Index(BugEngine::RTTI::ClassType_Vector3
+          + (BugEngine::RTTI::ClassIndex_i64 << 16)))
 be_pod bigint3
 {
     i64 operator[](u32) const;
@@ -606,6 +739,8 @@ be_pod bigint3x4
     bigint3& operator[](u32);
 };
 
+be_tag(Index(BugEngine::RTTI::ClassType_Vector4
+          + (BugEngine::RTTI::ClassIndex_i64 << 16)))
 be_pod bigint4
 {
     i64 operator[](u32) const;
@@ -621,6 +756,8 @@ be_pod bigint4x3
     const bigint4& operator[](u32) const;
     bigint4& operator[](u32);
 };
+be_tag(Index(BugEngine::RTTI::ClassType_Matrix
+          + (BugEngine::RTTI::ClassIndex_i64 << 16)))
 be_pod bigint4x4
 {
     const bigint4& operator[](u32) const;
@@ -644,6 +781,8 @@ be_pod biguint1x4
     u64& operator[](u32);
 };
 
+be_tag(Index(BugEngine::RTTI::ClassType_Vector2
+          + (BugEngine::RTTI::ClassIndex_u64 << 16)))
 be_pod biguint2
 {
     u64 operator[](u32) const;
@@ -665,6 +804,8 @@ be_pod biguint2x4
     biguint2& operator[](u32);
 };
 
+be_tag(Index(BugEngine::RTTI::ClassType_Vector3
+          + (BugEngine::RTTI::ClassIndex_u64 << 16)))
 be_pod biguint3
 {
     u64 operator[](u32) const;
@@ -686,6 +827,8 @@ be_pod biguint3x4
     biguint3& operator[](u32);
 };
 
+be_tag(Index(BugEngine::RTTI::ClassType_Vector4
+          + (BugEngine::RTTI::ClassIndex_u64 << 16)))
 be_pod biguint4
 {
     u64 operator[](u32) const;
@@ -701,6 +844,8 @@ be_pod biguint4x3
     const biguint4& operator[](u32) const;
     biguint4& operator[](u32);
 };
+be_tag(Index(BugEngine::RTTI::ClassType_Matrix
+          + (BugEngine::RTTI::ClassIndex_u64 << 16)))
 be_pod biguint4x4
 {
     const biguint4& operator[](u32) const;
@@ -724,6 +869,8 @@ be_pod float1x4
     float& operator[](u32);
 };
 
+be_tag(Index(BugEngine::RTTI::ClassType_Vector2
+          + (BugEngine::RTTI::ClassIndex_float << 16)))
 be_pod float2
 {
     float operator[](u32) const;
@@ -745,6 +892,8 @@ be_pod float2x4
     float2& operator[](u32);
 };
 
+be_tag(Index(BugEngine::RTTI::ClassType_Vector3
+          + (BugEngine::RTTI::ClassIndex_float << 16)))
 be_pod float3
 {
     float operator[](u32) const;
@@ -766,6 +915,8 @@ be_pod float3x4
     float3& operator[](u32);
 };
 
+be_tag(Index(BugEngine::RTTI::ClassType_Vector4
+          + (BugEngine::RTTI::ClassIndex_float << 16)))
 be_pod float4
 {
     float operator[](u32) const;
@@ -781,10 +932,100 @@ be_pod float4x3
     const float4& operator[](u32) const;
     float4& operator[](u32);
 };
+be_tag(Index(BugEngine::RTTI::ClassType_Matrix
+          + (BugEngine::RTTI::ClassIndex_float << 16)))
 be_pod float4x4
 {
     const float4& operator[](u32) const;
     float4& operator[](u32);
+};
+
+
+be_pod double1x2
+{
+    double operator[](u32) const;
+    double& operator[](u32);
+};
+be_pod double1x3
+{
+    double operator[](u32) const;
+    double& operator[](u32);
+};
+be_pod double1x4
+{
+    double operator[](u32) const;
+    double& operator[](u32);
+};
+
+be_tag(Index(BugEngine::RTTI::ClassType_Vector2
+          + (BugEngine::RTTI::ClassIndex_double << 16)))
+be_pod double2
+{
+    double operator[](u32) const;
+    double& operator[](u32);
+};
+be_pod double2x2
+{
+    const double2& operator[](u32) const;
+    double2& operator[](u32);
+};
+be_pod double2x3
+{
+    const double2& operator[](u32) const;
+    double2& operator[](u32);
+};
+be_pod double2x4
+{
+    const double2& operator[](u32) const;
+    double2& operator[](u32);
+};
+
+be_tag(Index(BugEngine::RTTI::ClassType_Vector3
+          + (BugEngine::RTTI::ClassIndex_double << 16)))
+be_pod double3
+{
+    double operator[](u32) const;
+    double& operator[](u32);
+};
+be_pod double3x2
+{
+    const double3& operator[](u32) const;
+    double3& operator[](u32);
+};
+be_pod double3x3
+{
+    const double3& operator[](u32) const;
+    double3& operator[](u32);
+};
+be_pod double3x4
+{
+    const double3& operator[](u32) const;
+    double3& operator[](u32);
+};
+
+be_tag(Index(BugEngine::RTTI::ClassType_Vector4
+          + (BugEngine::RTTI::ClassIndex_double << 16)))
+be_pod double4
+{
+    double operator[](u32) const;
+    double& operator[](u32);
+};
+be_pod double4x2
+{
+    const double4& operator[](u32) const;
+    double4& operator[](u32);
+};
+be_pod double4x3
+{
+    const double4& operator[](u32) const;
+    double4& operator[](u32);
+};
+be_tag(Index(BugEngine::RTTI::ClassType_Matrix
+          + (BugEngine::RTTI::ClassIndex_double << 16)))
+be_pod double4x4
+{
+    const double4& operator[](u32) const;
+    double4& operator[](u32);
 };
 
 #endif
