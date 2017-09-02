@@ -42,13 +42,15 @@ void OverloadMatch::update(const minitl::vector< ref<const Parameter> >& paramet
         m_args.push_back(ArgInfo((*it)->name(),
                                  (*it)));
     }
-    m_callInfo.conversion = RTTI::getCost(m_callInfo.overload, &m_args[0], m_args.size());
+    m_callInfo.conversion = RTTI::getCost(m_callInfo.overload,
+                                          &m_args[0],
+                                          be_checked_numcast<u32>(m_args.size()));
 }
 
 RTTI::Value OverloadMatch::create(istring name) const
 {
     be_forceuse(name);
-    return RTTI::call(m_callInfo, &m_args[0], m_args.size());
+    return RTTI::call(m_callInfo, &m_args[0], be_checked_numcast<u32>(m_args.size()));
 }
 
 }}}
