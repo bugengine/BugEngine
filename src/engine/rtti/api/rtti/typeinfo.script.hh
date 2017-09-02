@@ -115,10 +115,10 @@ struct be_api(RTTI) Type
         }
         ConversionCost operator+=(ConversionCost other)
         {
-            incompatible += u16(other.incompatible);
-            conversion += u16(other.conversion);
-            promotion += u16(other.promotion);
-            qualification += u16(other.qualification);
+            incompatible = be_checked_numcast<u16>(incompatible + other.incompatible);
+            conversion = be_checked_numcast<u16>(conversion + other.conversion);
+            promotion = be_checked_numcast<u16>(promotion + other.promotion);
+            qualification = be_checked_numcast<u16>(qualification + other.qualification);
             return *this;
         }
     };
