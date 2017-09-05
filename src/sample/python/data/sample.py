@@ -23,30 +23,22 @@ def name(type):
 
 def help(klass):
     def print_method(method):
-        overload = method.overloads
-        while overload:
+        for overload in method.overloads:
             param_list = []
-            param = overload.params
-            while param:
+            for param in overload.params:
                 param_list.append((name(param.type), param.name))
-                param = param.next
             print('  %s %s (%s)'%(name(overload.returnType), method.name, ', '.join(('%s %s'%p for p in param_list))))
-            overload = overload.next
 
     print('class %s' % klass.name)
     if klass.constructor:
         print('List of constructors:')
         print_method(klass.constructor)
     print('List of methods:')
-    method = klass.methods
-    while method:
+    for method in klass.methods:
         print_method(method)
-        method = method.next
     print('List of properties:')
-    property = klass.properties
-    while property:
+    for property in klass.properties:
         print(' ', name(property.type), property.name)
-        property = property.next
     print('List of objects:')
     object = klass.objects
     while object:
@@ -55,6 +47,7 @@ def help(klass):
 
 if __name__ == '__main__':
     help(BugEngine.RTTI.Class.ClassType.metaclass)
+    help(BugEngine.RTTI.Class)
     help(BugEngine.text)
     help(BugEngine.DiskFolder)
 

@@ -138,6 +138,11 @@ raw<RTTI::Class> be_game_Namespace_BugEngine();
 
 }
 
+#include    <rtti/engine/taginfo.script.hh>
+#include    <rtti/engine/propertyinfo.script.hh>
+#include    <rtti/engine/methodinfo.script.hh>
+#include    <rtti/engine/objectinfo.script.hh>
+
 /**************************************************************************************************/
 #endif
 

@@ -99,7 +99,7 @@ struct Property
                          (StorageSize)TAIL::Storage, typename TAIL::Tail> PropertyParent;
         PropertyParent::fillProperty(properties);
         RTTI::Property property = {
-            {0},
+            {&RTTI::staticarray<const RTTI::Tag>::s_null},
             be_typeid<T>::preklass()->name,
             be_typeid<LIST>::type(),
             be_typeid< const Kernel::Product<T>& >::type(),
@@ -116,7 +116,7 @@ struct Property<LIST, 0, T, STORAGE, void>
     static inline bool fillProperty(RTTI::Property properties[])
     {
         RTTI::Property property = {
-            {0},
+            {&RTTI::staticarray<const RTTI::Tag>::s_null},
             be_typeid<T>::preklass()->name,
             be_typeid<LIST>::type(),
             be_typeid< const Kernel::Product<T>& >::type(),

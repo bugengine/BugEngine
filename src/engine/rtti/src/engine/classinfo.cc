@@ -272,17 +272,14 @@ raw<const Property> Class::getProperty(istring propertyName) const
     raw<const Class> thisCls = { this };
     for (raw< const Class > cls = thisCls; cls; cls = cls->parent)
     {
-        if (cls->properties)
+        for (const Property* p = cls->properties->begin();
+             p != cls->properties->end();
+             ++p)
         {
-            for (const Property* p = cls->properties->begin();
-                 p != cls->properties->end();
-                 ++p)
+            if (p->name == propertyName)
             {
-                if (p->name == propertyName)
-                {
-                    raw<const Property> pptr = {p};
-                    return pptr;
-                }
+                raw<const Property> pptr = {p};
+                return pptr;
             }
         }
     }
@@ -294,17 +291,14 @@ raw<const Method> Class::getMethod(istring methodName) const
     raw<const Class> thisCls = { this };
     for (raw< const Class > cls = thisCls; cls; cls = cls->parent)
     {
-        if (cls->methods)
+        for (const Method* m = cls->methods->begin();
+             m != cls->methods->end();
+             ++m)
         {
-            for (const Method* m = cls->methods->begin();
-                 m != cls->methods->end();
-                 ++m)
+            if (m->name == methodName)
             {
-                if (m->name == methodName)
-                {
-                    raw< const Method > mptr = { m };
-                    return mptr;
-                }
+                raw< const Method > mptr = { m };
+                return mptr;
             }
         }
     }
@@ -475,7 +469,11 @@ Value Class::findClass(inamespace name)
 
 raw<RTTI::Class> be_game_Namespace()
 {
-    static RTTI::Class ci = { "BugEngine", 0, 0, RTTI::ClassType_Namespace, {0}, {0}, {0}, {0}, {0}, {0}, {0}, 0, 0 };
+    static RTTI::Class ci = { "BugEngine", 0, 0, RTTI::ClassType_Namespace, {0}, {0}, {0},
+                              {&RTTI::staticarray<const RTTI::Tag>::s_null},
+                              {&RTTI::staticarray<const RTTI::Property>::s_null},
+                              {&RTTI::staticarray<const RTTI::Method>::s_null},
+                              {0}, 0, 0 };
     raw<RTTI::Class> result = {&ci};
     return result;
 }

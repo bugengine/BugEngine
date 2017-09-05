@@ -52,7 +52,7 @@ class CppObject(object):
             definition.write('\n        }\n    };\n')
             return 'reinterpret_cast< ::BugEngine::RTTI::staticarray<const ::BugEngine::RTTI::Tag>* >(&s_tags_%s)' % prefix
         else:
-            return '0'
+            return '&::BugEngine::RTTI::staticarray<const ::BugEngine::RTTI::Tag>::s_null'
 
     def write_content(self, owner, struct_owner, namespace, definition, instance):
         pass
@@ -171,7 +171,7 @@ class Method(CppObject):
             definition.write('\n        }\n    };\n')
             return 'reinterpret_cast< ::BugEngine::RTTI::staticarray< const ::BugEngine::RTTI::Method::Parameter >* >(&s_%s_%d_params)' % (self.name, overload_index)
         else:
-            return '0'
+            return '&::BugEngine::RTTI::staticarray<const ::BugEngine::RTTI::Method::Parameter>::s_null'
 
 
 class BuiltinMethod(Method):
@@ -343,7 +343,7 @@ class OverloadedMethod(CppObject):
                          '    be_section(rtti_object)\n'
                          '    static ::BugEngine::RTTI::ObjectInfo s_object_%s = {\n'
                          '        %s,\n'
-                         '        {0},\n'
+                         '        {&::BugEngine::RTTI::staticarray<const ::BugEngine::RTTI::Tag>::s_null},\n'
                          '        s_method_%s.name,\n'
                          '        ::BugEngine::RTTI::Value(s_method_ptr_%s)\n'
                          '    };\n' % (self.name_cpp, method_ptr,
@@ -587,7 +587,7 @@ class Class(Container):
         for object in self.objects:
             object.write_content(self, struct_owner or self, namespace, definition, instance)
         for method in self.methods:
-            method.write_content(self, struct_owner or self, namespace, definition, instance)
+            method.write_content(self, self, namespace, definition, instance)
         if self.constructor:
             self.constructor.write_content(self, struct_owner or self, namespace, definition, instance)
         if self.type in ('struct', 'be_pod', 'enum', 'union'):
@@ -599,13 +599,9 @@ class Class(Container):
         if self.parent:
             parent = '::BugEngine::be_typeid< %s >::preklass()' % self.parent
             offset = 'i32(ptrdiff_t(static_cast< %s* >((%s*)4))) - 4' % (self.name[-1], self.parent)
-            methods = '::BugEngine::be_typeid< %s >::klass()->methods'
-            properties = '::BugEngine::be_typeid< %s >::klass()->properties'
         else:
             parent = '::BugEngine::be_typeid< void >::preklass()'
             offset = '0'
-            methods = '{0}'
-            properties = '{0}'
         definition.write('be_section(rtti_text_cls)\n'
                          'raw< ::BugEngine::RTTI::Class > preklass_%s()\n'
                          '{\n' % self.name[-1])
@@ -635,9 +631,9 @@ class Class(Container):
                          '        {%s.m_ptr},\n'
                          '        {%s.m_ptr},\n'
                          '        {0},\n'
-                         '        {0},\n'
-                         '        {0},\n'
-                         '        {0},\n'
+                         '        {&::BugEngine::RTTI::staticarray<const ::BugEngine::RTTI::Tag>::s_null},\n'
+                         '        {&::BugEngine::RTTI::staticarray<const ::BugEngine::RTTI::Property>::s_null},\n'
+                         '        {&::BugEngine::RTTI::staticarray<const ::BugEngine::RTTI::Method>::s_null},\n'
                          '        {0},\n'
                          '        %s,\n'
                          '        %s};\n'
@@ -671,12 +667,12 @@ class Class(Container):
         method_index = 0
         methods = []
         if self.constructor:
-            overloads = self.constructor.write_overloads(self, struct_owner, definition)
+            overloads = self.constructor.write_overloads(self, struct_owner or self, definition)
             for name in self.constructor.all_names():
                 methods.append((self.constructor, name[0], overloads, method_index))
                 method_index += 1
         for m in self.methods[::-1]:
-            overloads = m.write_overloads(self, struct_owner, definition)
+            overloads = m.write_overloads(self, struct_owner or self, definition)
             for name in m.all_names():
                 methods.append((m, name[0], overloads, method_index))
                 method_index += 1
@@ -696,7 +692,7 @@ class Class(Container):
             definition.write('    result->constructor.set(result->methods->elements);\n')
         props = []
         for p in self.properties[::-1]:
-            tags = p.write_tags(struct_owner, definition)
+            tags = p.write_tags(struct_owner or self, definition)
             for name in p.all_names():
                 props.append((p, name[0], tags))
         if props:

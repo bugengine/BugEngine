@@ -21,7 +21,7 @@ static RTTI::Value make_array(RTTI::Value* v, u32 count)
 {
     T* t = (T*)malloca(sizeof(T)*count);
     for (u32 i = 0; i < count; ++i)
-        new (&t[i]) T(v[i].as<T>());
+        new ((void*)&t[i]) T(v[i].as<T>());
     minitl::array<T> result(Arena::script(), t, t+count);
     for (u32 i = 0; i < count; ++i)
         result[count-i-1].~T();
@@ -73,18 +73,19 @@ template< typename T >
 be_section(rtti_text_cls_factory)
 raw<RTTI::Class> be_typeid< minitl::array<T> >::preklass()
 {
+    be_forceuse(initialisation);
     be_section(rtti_cls_factory)
     static ::BugEngine::RTTI::Class cls = {
         be_typeid< minitl::array<T> >::name(),
         u32(sizeof(minitl::array<T>)),
         0,
-        RTTI::ClassType_Struct,
+        RTTI::ClassType_Array,
         {be_game_Namespace().m_ptr},
         {be_typeid< void >::preklass().m_ptr},
         {0},
-        {0},
-        {0},
-        {0},
+        {&RTTI::staticarray<const RTTI::Tag>::s_null},
+        {&RTTI::staticarray<const RTTI::Property>::s_null},
+        {&RTTI::staticarray<const RTTI::Method>::s_null},
         {0},
         &RTTI::wrapCopy< minitl::array<T> >,
         &RTTI::wrapDestroy< minitl::array<T> >};
@@ -103,8 +104,8 @@ raw<const RTTI::Class> be_typeid< minitl::array<T> >::registerProperties()
         1,
         {
             {
-                {0},
-                {0},
+                {&RTTI::staticarray<const RTTI::Tag>::s_null},
+                {&RTTI::staticarray<const RTTI::Method::Parameter>::s_null},
                 be_typeid< minitl::array<T> >::type(),
                 true,
                 &make_array<T>
@@ -112,22 +113,32 @@ raw<const RTTI::Class> be_typeid< minitl::array<T> >::registerProperties()
         }
     };
     be_section(rtti_method_factory)
-    static RTTI::staticarray_n< 1, const RTTI::Method::Parameter > s_Index_0_params = {
-        1,
+    static RTTI::staticarray_n< 2, const RTTI::Method::Parameter > s_Index_0_params = {
+        2,
         {
             {
-                {0},
+                {&RTTI::staticarray<const RTTI::Tag>::s_null},
+                istring("this"),
+                be_typeid< minitl::array<T>& >::type()
+            },
+            {
+                {&RTTI::staticarray<const RTTI::Tag>::s_null},
                 istring("index"),
                 be_typeid< u32  >::type()
             }
         }
     };
     be_section(rtti_method_factory)
-    static RTTI::staticarray_n< 1, const RTTI::Method::Parameter > s_Index_1_params = {
-        1,
+    static RTTI::staticarray_n< 2, const RTTI::Method::Parameter > s_Index_1_params = {
+        2,
         {
             {
-                {0},
+                {&RTTI::staticarray<const RTTI::Tag>::s_null},
+                istring("this"),
+                be_typeid< const minitl::array<T>& >::type()
+            },
+            {
+                {&RTTI::staticarray<const RTTI::Tag>::s_null},
                 istring("index"),
                 be_typeid< u32  >::type()
             }
@@ -138,14 +149,14 @@ raw<const RTTI::Class> be_typeid< minitl::array<T> >::registerProperties()
         2,
         {
             {
-                {0},
+                {&RTTI::staticarray<const RTTI::Tag>::s_null},
                 {reinterpret_cast< RTTI::staticarray< const RTTI::Method::Parameter >* >(&s_Index_0_params)},
                 be_typeid< const T & >::type(),
                 false,
                 &callOperatorIndexConst<T>
             },
             {
-                {0},
+                {&RTTI::staticarray<const RTTI::Tag>::s_null},
                 {reinterpret_cast< RTTI::staticarray< const RTTI::Method::Parameter >* >(&s_Index_1_params)},
                 be_typeid< T & >::type(),
                 false,
@@ -154,12 +165,23 @@ raw<const RTTI::Class> be_typeid< minitl::array<T> >::registerProperties()
         }
     };
     be_section(rtti_method_factory)
-    static RTTI::staticarray_n< 1, const RTTI::Method::Overload > s_method_size_overloads = {
+    static RTTI::staticarray_n< 1, const RTTI::Method::Parameter > s_size_params = {
         1,
         {
             {
-                {0},
-                {0},
+                {&RTTI::staticarray<const RTTI::Tag>::s_null},
+                istring("this"),
+                be_typeid< const minitl::array<T>& >::type()
+            }
+        }
+    };
+    be_section(rtti_method_factory)
+    static RTTI::staticarray_n< 2, const RTTI::Method::Overload > s_method_size_overloads = {
+        2,
+        {
+            {
+                {&RTTI::staticarray<const RTTI::Tag>::s_null},
+                {reinterpret_cast< RTTI::staticarray< const RTTI::Method::Parameter >* >(&s_size_params)},
                 be_typeid< u32 >::type(),
                 false,
                 &callSize<T>
@@ -176,7 +198,7 @@ raw<const RTTI::Class> be_typeid< minitl::array<T> >::registerProperties()
                 {&s_methods.elements[0]}
             },
             {
-                istring("Index"),
+                RTTI::Class::nameOperatorIndex(),
                 {reinterpret_cast< RTTI::staticarray< const RTTI::Method::Overload >* >(&s_method_Index_overloads)},
                 {&s_methods.elements[1]}
             },
@@ -188,7 +210,13 @@ raw<const RTTI::Class> be_typeid< minitl::array<T> >::registerProperties()
         }
     };
     result->methods.set(reinterpret_cast< RTTI::staticarray< const RTTI::Method >* >(&s_methods));
-    raw<const RTTI::ObjectInfo> objects = {0};
+    static RTTI::ObjectInfo valueType = {
+        {0},
+        {&RTTI::staticarray<const RTTI::Tag>::s_null},
+        "value_type",
+        RTTI::Value(RTTI::Value::ByRef(value_type))
+    };
+    raw<const RTTI::ObjectInfo> objects = {&valueType};
     result->objects.set(objects.operator->());
     return result;
 }

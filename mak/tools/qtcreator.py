@@ -990,7 +990,7 @@ class QtCreator(Build.BuildContext):
                                     ('Analyzer.Valgrind.VisibleErrorKinds', (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14)),
                                     ('PE.EnvironmentAspect.Base', 2),
                                     ('PE.EnvironmentAspect.Changes', ()),
-                                    ('ProjectExplorer.CustomExecutableRunConfiguration.Arguments', '-c "import %s; import code; code.InteractiveConsole(globals()).interact()"' % task_gen.target),
+                                    ('ProjectExplorer.CustomExecutableRunConfiguration.Arguments', '-c "import %s; import readline; import code; code.InteractiveConsole(globals()).interact()"' % task_gen.target),
                                     ('ProjectExplorer.CustomExecutableRunConfiguration.Executable', sys.executable),
                                     ('ProjectExplorer.CustomExecutableRunConfiguration.UseTerminal', True),
                                     ('ProjectExplorer.CustomExecutableRunConfiguration.WorkingDirectory', to_var('RUNBIN_DIR')),
