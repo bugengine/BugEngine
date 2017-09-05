@@ -29,7 +29,12 @@ struct staticarray
     const T* begin() const  { return &elements[0]; }
     T* end()                { return &elements[count]; }
     const T* end() const    { return &elements[count]; }
+
+    static staticarray<T> s_null;
 };
+
+template< typename T >
+staticarray<T>  staticarray<T>::s_null = { 0, {} };
 
 template< u32 COUNT, typename T >
 struct staticarray_n

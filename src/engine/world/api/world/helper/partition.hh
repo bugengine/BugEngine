@@ -130,7 +130,7 @@ struct PartitionPropertyInfo<PARTITION, T, void>
 template< typename PARTITION, typename T, typename TAIL >
 const RTTI::Property PartitionPropertyInfo<PARTITION, T, TAIL>::s_property =
 {
-    {0},
+    {&RTTI::staticarray<const RTTI::Tag>::s_null},
     be_typeid<T>::klass()->name,
     be_typeid<PARTITION>::type(),
     be_typeid< const Kernel::Product<T>& >::type(),
@@ -140,7 +140,7 @@ const RTTI::Property PartitionPropertyInfo<PARTITION, T, TAIL>::s_property =
 template< typename PARTITION, typename T >
 const RTTI::Property PartitionPropertyInfo<PARTITION, T, void>::s_property =
 {
-    {0},
+    {&RTTI::staticarray<const RTTI::Tag>::s_null},
     be_typeid<T>::klass()->name,
     be_typeid<PARTITION>::type(),
     be_typeid< const Kernel::Product<T>& >::type(),
@@ -189,7 +189,7 @@ struct be_typeid< World::Partition<T, TAIL> >
             0,
             0,
             RTTI::ClassType_Object,
-            {0},
+            {0}, 0, 0,
             {&World::Helper::PartitionPropertyInfo< World::Partition<T, TAIL>, T, TAIL >::s_property},
             be_typeid<void>::klass()->methods,
             be_typeid<void>::klass()->objects,

@@ -9,8 +9,13 @@ see LICENSE for detail */
 #include    <rtti/value.hh>
 #include    <rtti/typeinfo.hh>
 
+
 namespace BugEngine
 {
+
+namespace
+{
+
 
 template< typename T >
 be_section(rtti_text_trampoline_factory)
@@ -22,10 +27,20 @@ static RTTI::Value callStaticArrayOperatorIndex(RTTI::Value* params, u32 paramCo
 
 template< typename T >
 be_section(rtti_text_trampoline_factory)
-static RTTI::Value callStaticArrayOperatorIndexConst(RTTI::Value* params, u32 paramCount)
+static RTTI::Value callStaticArraySize(RTTI::Value* params, u32 paramCount)
 {
     be_assert(paramCount == 1, "expected 1 parameter; received %d" | paramCount);
+    return RTTI::Value(params[0].as< const RTTI::staticarray<T>& >().count);
+}
+
+template< typename T >
+be_section(rtti_text_trampoline_factory)
+static RTTI::Value callStaticArrayOperatorIndexConst(RTTI::Value* params, u32 paramCount)
+{
+    be_assert(paramCount == 2, "expected 2 parameter; received %d" | paramCount);
     return RTTI::Value(params[0].as< const RTTI::staticarray<T>& >().operator[](params[1].as<u32>()));
+}
+
 }
 
 template< typename T >
@@ -42,24 +57,26 @@ private:
 };
 
 template< typename T >
+BE_EXPORT
 raw<const RTTI::Class> be_typeid< RTTI::staticarray<T> >::initialisation = be_typeid< RTTI::staticarray<T> >::klass();
 
 template< typename T >
 be_section(rtti_text_cls_factory)
 raw<RTTI::Class> be_typeid< RTTI::staticarray<T> >::preklass()
 {
+    be_forceuse(initialisation);
     be_section(rtti_cls_factory)
     static ::BugEngine::RTTI::Class cls = {
         be_typeid< RTTI::staticarray<T> >::name(),
         u32(sizeof(RTTI::staticarray<T>)),
         0,
-        RTTI::ClassType_Struct,
+        RTTI::ClassType_Array,
         {be_game_Namespace().m_ptr},
         {be_typeid< void >::preklass().m_ptr},
         {0},
-        {0},
-        {0},
-        {0},
+        {&RTTI::staticarray<const RTTI::Tag>::s_null},
+        {&RTTI::staticarray<const RTTI::Property>::s_null},
+        {&RTTI::staticarray<const RTTI::Method>::s_null},
         {0},
         &RTTI::wrapCopy< RTTI::staticarray<T> >,
         &RTTI::wrapDestroy< RTTI::staticarray<T> >};
@@ -74,11 +91,32 @@ raw<const RTTI::Class> be_typeid< RTTI::staticarray<T> >::registerProperties()
 {
     raw< RTTI::Class > result = preklass();
     be_section(rtti_method_factory)
-    static RTTI::staticarray_n< 1, const RTTI::Method::Parameter > s_Index_0_params = {
-        1,
+    static RTTI::staticarray_n< 2, const RTTI::Method::Parameter > s_Index_0_params = {
+        2,
         {
             {
-                {0},
+                {&RTTI::staticarray<const RTTI::Tag>::s_null},
+                istring("this"),
+                be_typeid< RTTI::staticarray<T>& >::type()
+            },
+            {
+                {&RTTI::staticarray<const RTTI::Tag>::s_null},
+                istring("index"),
+                be_typeid< u32  >::type()
+            }
+        }
+    };
+    be_section(rtti_method_factory)
+    static RTTI::staticarray_n< 2, const RTTI::Method::Parameter > s_Index_1_params = {
+        2,
+        {
+            {
+                {&RTTI::staticarray<const RTTI::Tag>::s_null},
+                istring("this"),
+                be_typeid< const RTTI::staticarray<T>& >::type()
+            },
+            {
+                {&RTTI::staticarray<const RTTI::Tag>::s_null},
                 istring("index"),
                 be_typeid< u32  >::type()
             }
@@ -89,15 +127,15 @@ raw<const RTTI::Class> be_typeid< RTTI::staticarray<T> >::registerProperties()
         2,
         {
             {
-                {0},
+                {&RTTI::staticarray<const RTTI::Tag>::s_null},
                 {reinterpret_cast< RTTI::staticarray< const RTTI::Method::Parameter >* >(&s_Index_0_params)},
                 be_typeid< const T & >::type(),
                 false,
                 &callStaticArrayOperatorIndexConst<T>
             },
             {
-                {0},
-                {reinterpret_cast< RTTI::staticarray< const RTTI::Method::Parameter >* >(&s_Index_0_params)},
+                {&RTTI::staticarray<const RTTI::Tag>::s_null},
+                {reinterpret_cast< RTTI::staticarray< const RTTI::Method::Parameter >* >(&s_Index_1_params)},
                 be_typeid< T & >::type(),
                 false,
                 &callStaticArrayOperatorIndex<T>
@@ -105,18 +143,53 @@ raw<const RTTI::Class> be_typeid< RTTI::staticarray<T> >::registerProperties()
         }
     };
     be_section(rtti_method_factory)
-    static RTTI::staticarray_n< 1, const RTTI::Method > s_methods = {
+    static RTTI::staticarray_n< 1, const RTTI::Method::Parameter > s_size_params = {
         1,
         {
             {
-                istring("Index"),
+                {&RTTI::staticarray<const RTTI::Tag>::s_null},
+                istring("this"),
+                be_typeid< const RTTI::staticarray<T>& >::type()
+            }
+        }
+    };
+    be_section(rtti_method_factory)
+    static RTTI::staticarray_n< 1, const RTTI::Method::Overload > s_method_size_overloads = {
+        1,
+        {
+            {
+                {&RTTI::staticarray<const RTTI::Tag>::s_null},
+                {reinterpret_cast< RTTI::staticarray< const RTTI::Method::Parameter >* >(&s_size_params)},
+                be_typeid< u32 >::type(),
+                false,
+                &callStaticArraySize<T>
+            }
+        }
+    };
+    be_section(rtti_method_factory)
+    static RTTI::staticarray_n< 2, const RTTI::Method > s_methods = {
+        2,
+        {
+            {
+                RTTI::Class::nameOperatorIndex(),
                 {reinterpret_cast< RTTI::staticarray< const RTTI::Method::Overload >* >(&s_method_Index_overloads)},
+                {&s_methods.elements[0]}
+            },
+            {
+                istring("size"),
+                {reinterpret_cast< RTTI::staticarray< const RTTI::Method::Overload >* >(&s_method_size_overloads)},
                 {&s_methods.elements[1]}
             }
         }
     };
     result->methods.set(reinterpret_cast< RTTI::staticarray< const RTTI::Method >* >(&s_methods));
-    raw<const RTTI::ObjectInfo> objects = {0};
+    static RTTI::ObjectInfo valueType = {
+        {0},
+        {&RTTI::staticarray<const RTTI::Tag>::s_null},
+        "value_type",
+        RTTI::Value(RTTI::Value::ByRef(value_type))
+    };
+    raw<const RTTI::ObjectInfo> objects = {&valueType};
     result->objects.set(objects.operator->());
     return result;
 }
