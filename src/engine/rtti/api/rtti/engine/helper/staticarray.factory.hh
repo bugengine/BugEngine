@@ -51,19 +51,20 @@ struct be_typeid< RTTI::staticarray<T> >
     static inline istring name();
     static inline raw<const RTTI::Class> klass();
     static inline RTTI::Type  type();
+    static BE_EXPORT raw<const RTTI::Class> s_initialisation;
 private:
-    static bool initialisation;
     static raw<const RTTI::Class> registerProperties();
 };
 
 template< typename T >
-be_section(rtti_text_cls_factory)
-bool be_typeid< RTTI::staticarray<T> >::initialisation = be_typeid< RTTI::staticarray<T> >::klass()->size != 0;
+BE_EXPORT
+raw<const RTTI::Class> be_typeid< RTTI::staticarray<T> >::s_initialisation = be_typeid< RTTI::staticarray<T> >::klass();
 
 template< typename T >
 be_section(rtti_text_cls_factory)
 raw<RTTI::Class> be_typeid< RTTI::staticarray<T> >::preklass()
 {
+    be_forceuse(be_typeid< RTTI::staticarray<T> >::s_initialisation);
     be_section(rtti_cls_factory)
     static ::BugEngine::RTTI::Class cls = {
         be_typeid< RTTI::staticarray<T> >::name(),
@@ -85,7 +86,9 @@ raw<RTTI::Class> be_typeid< RTTI::staticarray<T> >::preklass()
 
 template< typename T >
 const RTTI::Type be_typeid< RTTI::staticarray<T> >::value_type = be_typeid<T>::type();
+
 template< typename T >
+be_section(rtti_text_cls_factory)
 raw<const RTTI::Class> be_typeid< RTTI::staticarray<T> >::registerProperties()
 {
     raw< RTTI::Class > result = preklass();
@@ -209,7 +212,6 @@ raw<const RTTI::Class> be_typeid< RTTI::staticarray<T> >::klass()
 template< typename T >
 RTTI::Type be_typeid< RTTI::staticarray<T> >::type()
 {
-    be_forceuse(initialisation);
     return RTTI::Type::makeType(preklass(), RTTI::Type::Value, RTTI::Type::Mutable, RTTI::Type::Mutable);
 }
 
