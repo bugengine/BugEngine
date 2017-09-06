@@ -72,7 +72,8 @@ public:
     template< typename T > inline typename minitl::remove_const<T>::type as();
 
     template< typename T > static inline ByRefType<T> ByRef(T& t) { return ByRefType<T>(t); }
-    template< typename T > static inline ByRefType<const T> ByRef(const T& t) { return ByRefType<const T>(t); }
+    static inline ByRefType<const Value> ByRef(const Value& t) { return ByRefType<const Value>(t); }
+    //template< typename T > static inline ByRefType<const T> ByRef(const T& t) { return ByRefType<const T>(t); }
     inline bool isConst() const;
 
     inline operator const void*() const;
