@@ -17,12 +17,12 @@ struct staticarray
 
     T& operator[](const u32 index)
     {
-        be_assert(index < count, "index %d out of range (0, %d)" | index | count-1);
+        be_assert(index < count, "index %d out of range (0, %d)" | index | (count-1));
         return elements[index];
     }
     const T& operator[](const u32 index) const
     {
-        be_assert(index < count, "index %d out of range (0, %d)" | index | count - 1);
+        be_assert(index < count, "index %d out of range (0, %d)" | index | (count-1));
         return elements[index];
     }
     T* begin()              { return &elements[0]; }
@@ -34,7 +34,7 @@ struct staticarray
 };
 
 template< typename T >
-staticarray<T>  staticarray<T>::s_null = { 0, {} };
+staticarray<T>  staticarray<T>::s_null = { 0, { T() } };
 
 template< u32 COUNT, typename T >
 struct staticarray_n

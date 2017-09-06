@@ -722,6 +722,7 @@ RTTI::Type::ConversionCost PyBugObject::distance(PyObject* object, const RTTI::T
             case RTTI::ClassIndex_float:
             case RTTI::ClassIndex_double:
                 cost.promotion += 2;
+                break;
             case RTTI::ClassIndex_bool:
             case RTTI::ClassIndex_u8:
             case RTTI::ClassIndex_i8:
@@ -730,6 +731,7 @@ RTTI::Type::ConversionCost PyBugObject::distance(PyObject* object, const RTTI::T
             case RTTI::ClassIndex_u32:
             case RTTI::ClassIndex_i32:
                 cost.promotion += 1;
+                break;
             case RTTI::ClassIndex_u64:
             case RTTI::ClassIndex_i64:
                 break;
@@ -817,6 +819,7 @@ RTTI::Type::ConversionCost PyBugObject::distance(PyObject* object, const RTTI::T
             {
             case RTTI::ClassIndex_bool:
                 cost.promotion += 3;
+                break;
             case RTTI::ClassIndex_u8:
             case RTTI::ClassIndex_i8:
             case RTTI::ClassIndex_u16:

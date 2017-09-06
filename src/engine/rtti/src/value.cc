@@ -92,16 +92,19 @@ void* Value::unpackAs(const Type& ti,
         rptr = *(ref<minitl::refcountable>*)mem;
         wptr = rptr;
         mem = (void*)&wptr;
+        /* falls through */
     case Type::WeakPtr:
         if (ti.indirection == Type::WeakPtr)
             break;
         wptr = *(weak<minitl::refcountable>*)mem;
         obj = wptr.operator->();
         mem = (void*)&obj;
+        /* falls through */
     case Type::RawPtr:
         if (ti.indirection == Type::RawPtr)
             break;
         mem = *(void**)mem;
+        /* falls through */
     default:
         break;
     }
