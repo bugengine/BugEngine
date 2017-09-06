@@ -57,7 +57,6 @@ private:
 };
 
 template< typename T >
-BE_EXPORT
 raw<const RTTI::Class> be_typeid< RTTI::staticarray<T> >::initialisation = be_typeid< RTTI::staticarray<T> >::klass();
 
 template< typename T >
