@@ -1,6 +1,11 @@
 from py_bugengine import *
 import ctypes
 
+p=Plugin("sample.python")
+print(p.BugEngine.TestCases.Enum.Value1)
+print(p.BugEngine.TestCases.Enum.Value2)
+print(p.BugEngine.TestCases.Enum.Value3)
+
 def name(type):
     constness = int(type.constness) == 0 and 'const ' or ''
     access = int(type.access) == 0 and 'const ' or ''
