@@ -438,8 +438,7 @@ class EnumValue(Variable):
                              '        %s,\n'
                              '        {%s},\n'
                              '        %s,\n'
-                             '        ::BugEngine::RTTI::Value(\n'
-                             '            ::BugEngine::RTTI::Value::ByRef(%s))\n'
+                             '        ::BugEngine::RTTI::Value(%s, ::BugEngine::RTTI::Value::MakeConst)\n'
                              '    };\n' % (alias_cpp, object_name, tag,
                                            alias, n))
             object_name = '{&s_object_%s}' % alias_cpp
