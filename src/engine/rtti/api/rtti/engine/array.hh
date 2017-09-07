@@ -72,7 +72,6 @@ raw<const RTTI::Class> be_typeid< minitl::array<T> >::s_initialisation = be_type
 
 template< typename T >
 be_section(rtti_text_cls_factory)
-BE_EXPORT
 raw<RTTI::Class> be_typeid< minitl::array<T> >::preklass()
 {
     be_forceuse(s_initialisation);
@@ -97,6 +96,7 @@ raw<RTTI::Class> be_typeid< minitl::array<T> >::preklass()
 
 template< typename T >
 const RTTI::Type be_typeid< minitl::array<T> >::value_type = be_typeid<T>::type();
+
 template< typename T >
 be_section(rtti_text_cls_factory)
 raw<const RTTI::Class> be_typeid< minitl::array<T> >::registerProperties()
