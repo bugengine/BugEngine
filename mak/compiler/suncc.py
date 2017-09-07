@@ -69,14 +69,17 @@ class SunCC(Configure.ConfigurationContext.GnuCompiler):
 
         v['CFLAGS_profile'] = ['-g', '-DNDEBUG', '-fast']
         v['CXXFLAGS_profile'] = ['-g', '-DNDEBUG', '-fast',
-                                '-features=no%except', '-features=mutable',
+                                '-features=mutable',
                                 '-features=localfor', '-features=bool', '-features=no%split_init']
         v['LINKFLAGS_profile'] = ['-g']
 
         v['CFLAGS_final'] = ['-g', '-DNDEBUG', '-fast']
         v['CXXFLAGS_final'] = ['-g', '-DNDEBUG', '-fast',
-                                '-features=no%except', '-features=mutable',
+                                '-features=mutable',
                                 '-features=localfor', '-features=bool', '-features=no%split_init']
+        if self.version_number[0:2] != (5,13):
+            v['CXXFLAGS_profile'] += ['-features=no%except']
+            v['CXXFLAGS_final'] += ['-features=no%except']
         v['LINKFLAGS_final'] = ['-g']
 
     def set_warning_options(self, conf):
@@ -110,16 +113,17 @@ class SunCC(Configure.ConfigurationContext.GnuCompiler):
             #v.STATIC = 1
             if self.arch == 'x86':
                 v.append_unique('SYSTEM_LIBPATHS', ['=/usr/lib/i386-linux-gnu'])
-                v.CFLAGS += ['-xarch=sse2']
+                v.CFLAGS += ['-xtarget=opteron']
                 v.CXXFLAGS += [os.path.join(conf.bugenginenode.abspath(),
                                             'mak/compiler/suncc/interlocked-a=x86.il'),
-                               '-xarch=sse2',
+                               '-xarch=sse2', '-xchip=generic', '-xcache=64/64/2:1024/64/16',
                                '-include', 'math.h']
             elif self.arch == 'amd64':
                 v.append_unique('SYSTEM_LIBPATHS', ['=/usr/lib/x86_64-linux-gnu'])
-                v.CFLAGS += []
+                v.CFLAGS += ['-xtarget=opteron']
                 v.CXXFLAGS += [os.path.join(conf.bugenginenode.abspath(),
                                             'mak/compiler/suncc/interlocked-a=amd64.il'),
+                               '-xarch=sse2', '-xchip=generic', '-xcache=64/64/2:1024/64/16',
                                '-include', 'math.h']
             v.append_unique('CFLAGS', ['-mt', '-xldscope=hidden', '-Kpic', '-DPIC', '-D__PIC__'])
             v.append_unique('CXXFLAGS', ['-mt', '-xldscope=hidden', '-Kpic', '-DPIC', '-D__PIC__'])
