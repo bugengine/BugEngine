@@ -104,9 +104,9 @@ struct be_typeid< World::EntityStorageFactory<COMPONENT_LIST, PARTITION_LIST> >
             {0},
             {be_typeid<World::EntityStorage>::preklass().m_ptr},
             {0},
-            {&RTTI::staticarray<const RTTI::Tag>::s_null},
-            {&RTTI::staticarray<const RTTI::Property>::s_null},
-            {&RTTI::staticarray<const RTTI::Method>::s_null},
+            {RTTI::staticarray<const RTTI::Tag>::s_null},
+            {RTTI::staticarray<const RTTI::Property>::s_null},
+            {RTTI::staticarray<const RTTI::Method>::s_null},
             {0},
             0,
             0

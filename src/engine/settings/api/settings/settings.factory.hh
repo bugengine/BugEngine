@@ -101,9 +101,9 @@ struct BE_EXPORT be_typeid< Settings::Settings<T> >
             {be_game_Namespace_BugEngine_Settings().m_ptr},
             be_typeid<void>::klass(),
             {0},
-            {&RTTI::staticarray<const RTTI::Tag>::s_null},
-            {&RTTI::staticarray<const RTTI::Property>::s_null},
-            {&RTTI::staticarray<const RTTI::Method>::s_null},
+            {RTTI::staticarray<const RTTI::Tag>::s_null},
+            {RTTI::staticarray<const RTTI::Property>::s_null},
+            {RTTI::staticarray<const RTTI::Method>::s_null},
             {0},
             0,
             0
@@ -127,8 +127,8 @@ struct BE_EXPORT be_typeid< Settings::Settings<T> >
             1,
             {
                 {
-                    {&RTTI::staticarray<const RTTI::Tag>::s_null},
-                    {&RTTI::staticarray<const RTTI::Method::Parameter>::s_null},
+                    {RTTI::staticarray<const RTTI::Tag>::s_null},
+                    {RTTI::staticarray<const RTTI::Method::Parameter>::s_null},
                     be_typeid<T&>::type(),
                     false,
                     &callGet
@@ -144,7 +144,7 @@ struct BE_EXPORT be_typeid< Settings::Settings<T> >
         be_section(rtti_object_factory)
         static RTTI::ObjectInfo valueGet = {
             {0},
-            {&RTTI::staticarray<const RTTI::Tag>::s_null},
+            {RTTI::staticarray<const RTTI::Tag>::s_null},
             s_get_method.name,
             RTTI::Value(s_get_method)
         };
@@ -152,7 +152,7 @@ struct BE_EXPORT be_typeid< Settings::Settings<T> >
         be_section(rtti_object_factory)
         static RTTI::ObjectInfo s_object = {
             ::BugEngine::be_game_Namespace_BugEngine_Settings()->objects,
-            {&RTTI::staticarray<const RTTI::Tag>::s_null},
+            {RTTI::staticarray<const RTTI::Tag>::s_null},
             name(),
             RTTI::Value(result)
         };

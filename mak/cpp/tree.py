@@ -52,7 +52,7 @@ class CppObject(object):
             definition.write('\n        }\n    };\n')
             return 'reinterpret_cast< ::BugEngine::RTTI::staticarray<const ::BugEngine::RTTI::Tag>* >(&s_tags_%s)' % prefix
         else:
-            return '&::BugEngine::RTTI::staticarray<const ::BugEngine::RTTI::Tag>::s_null'
+            return '::BugEngine::RTTI::staticarray<const ::BugEngine::RTTI::Tag>::s_null'
 
     def write_content(self, owner, struct_owner, namespace, definition, instance):
         pass
@@ -173,7 +173,7 @@ class Method(CppObject):
             definition.write('\n        }\n    };\n')
             return 'reinterpret_cast< ::BugEngine::RTTI::staticarray< const ::BugEngine::RTTI::Method::Parameter >* >(&s_%s_%d_params)' % (self.name, overload_index)
         else:
-            return '&::BugEngine::RTTI::staticarray<const ::BugEngine::RTTI::Method::Parameter>::s_null'
+            return '::BugEngine::RTTI::staticarray<const ::BugEngine::RTTI::Method::Parameter>::s_null'
 
 
 class BuiltinMethod(Method):
@@ -345,7 +345,7 @@ class OverloadedMethod(CppObject):
                          '    be_section(rtti_object)\n'
                          '    static ::BugEngine::RTTI::ObjectInfo s_object_%s = {\n'
                          '        %s,\n'
-                         '        {&::BugEngine::RTTI::staticarray<const ::BugEngine::RTTI::Tag>::s_null},\n'
+                         '        {::BugEngine::RTTI::staticarray<const ::BugEngine::RTTI::Tag>::s_null},\n'
                          '        s_method_%s.name,\n'
                          '        ::BugEngine::RTTI::Value(s_method_ptr_%s)\n'
                          '    };\n' % (self.name_cpp, method_ptr,
@@ -632,9 +632,9 @@ class Class(Container):
                          '        {%s.m_ptr},\n'
                          '        {%s.m_ptr},\n'
                          '        {0},\n'
-                         '        {&::BugEngine::RTTI::staticarray<const ::BugEngine::RTTI::Tag>::s_null},\n'
-                         '        {&::BugEngine::RTTI::staticarray<const ::BugEngine::RTTI::Property>::s_null},\n'
-                         '        {&::BugEngine::RTTI::staticarray<const ::BugEngine::RTTI::Method>::s_null},\n'
+                         '        {::BugEngine::RTTI::staticarray<const ::BugEngine::RTTI::Tag>::s_null},\n'
+                         '        {::BugEngine::RTTI::staticarray<const ::BugEngine::RTTI::Property>::s_null},\n'
+                         '        {::BugEngine::RTTI::staticarray<const ::BugEngine::RTTI::Method>::s_null},\n'
                          '        {0},\n'
                          '        %s,\n'
                          '        %s};\n'
