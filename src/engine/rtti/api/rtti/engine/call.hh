@@ -134,8 +134,8 @@ CallInfo resolve(raw<const Method> method,
                  ArgInfo<T> namedArguments[] = 0, u32 namedArgumentCount = 0)
 {
     u32* indices[2] = {
-        (u32*)malloca(sizeof(u32) * (namedArgumentCount)),
-        (u32*)malloca(sizeof(u32) * (namedArgumentCount))
+        (u32*)malloca(sizeof(u32) * (namedArgumentCount + 1)),
+        (u32*)malloca(sizeof(u32) * (namedArgumentCount + 1))
     };
     u32 indexTmp = 0;
     u32 indexBest = 1;
