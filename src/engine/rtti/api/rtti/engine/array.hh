@@ -84,9 +84,9 @@ raw<RTTI::Class> be_typeid< minitl::array<T> >::preklass()
         {be_game_Namespace().m_ptr},
         {be_typeid< void >::preklass().m_ptr},
         {0},
-        {&RTTI::staticarray<const RTTI::Tag>::s_null},
-        {&RTTI::staticarray<const RTTI::Property>::s_null},
-        {&RTTI::staticarray<const RTTI::Method>::s_null},
+        {RTTI::staticarray<const RTTI::Tag>::s_null},
+        {RTTI::staticarray<const RTTI::Property>::s_null},
+        {RTTI::staticarray<const RTTI::Method>::s_null},
         {0},
         &RTTI::wrapCopy< minitl::array<T> >,
         &RTTI::wrapDestroy< minitl::array<T> >};
@@ -107,8 +107,8 @@ raw<const RTTI::Class> be_typeid< minitl::array<T> >::registerProperties()
         1,
         {
             {
-                {&RTTI::staticarray<const RTTI::Tag>::s_null},
-                {&RTTI::staticarray<const RTTI::Method::Parameter>::s_null},
+                {RTTI::staticarray<const RTTI::Tag>::s_null},
+                {RTTI::staticarray<const RTTI::Method::Parameter>::s_null},
                 be_typeid< minitl::array<T> >::type(),
                 true,
                 &make_array<T>
@@ -120,13 +120,13 @@ raw<const RTTI::Class> be_typeid< minitl::array<T> >::registerProperties()
         2,
         {
             {
-                {&RTTI::staticarray<const RTTI::Tag>::s_null},
+                {RTTI::staticarray<const RTTI::Tag>::s_null},
                 istring("this"),
                 be_typeid< minitl::array<T>& >::type(),
                 RTTI::Value()
             },
             {
-                {&RTTI::staticarray<const RTTI::Tag>::s_null},
+                {RTTI::staticarray<const RTTI::Tag>::s_null},
                 istring("index"),
                 be_typeid< u32  >::type(),
                 RTTI::Value()
@@ -138,13 +138,13 @@ raw<const RTTI::Class> be_typeid< minitl::array<T> >::registerProperties()
         2,
         {
             {
-                {&RTTI::staticarray<const RTTI::Tag>::s_null},
+                {RTTI::staticarray<const RTTI::Tag>::s_null},
                 istring("this"),
                 be_typeid< const minitl::array<T>& >::type(),
                 RTTI::Value()
             },
             {
-                {&RTTI::staticarray<const RTTI::Tag>::s_null},
+                {RTTI::staticarray<const RTTI::Tag>::s_null},
                 istring("index"),
                 be_typeid< u32  >::type(),
                 RTTI::Value()
@@ -156,14 +156,14 @@ raw<const RTTI::Class> be_typeid< minitl::array<T> >::registerProperties()
         2,
         {
             {
-                {&RTTI::staticarray<const RTTI::Tag>::s_null},
+                {RTTI::staticarray<const RTTI::Tag>::s_null},
                 {reinterpret_cast< RTTI::staticarray< const RTTI::Method::Parameter >* >(&s_Index_0_params)},
                 be_typeid< const T & >::type(),
                 false,
                 &callOperatorIndexConst<T>
             },
             {
-                {&RTTI::staticarray<const RTTI::Tag>::s_null},
+                {RTTI::staticarray<const RTTI::Tag>::s_null},
                 {reinterpret_cast< RTTI::staticarray< const RTTI::Method::Parameter >* >(&s_Index_1_params)},
                 be_typeid< T & >::type(),
                 false,
@@ -176,7 +176,7 @@ raw<const RTTI::Class> be_typeid< minitl::array<T> >::registerProperties()
         1,
         {
             {
-                {&RTTI::staticarray<const RTTI::Tag>::s_null},
+                {RTTI::staticarray<const RTTI::Tag>::s_null},
                 istring("this"),
                 be_typeid< const minitl::array<T>& >::type(),
                 RTTI::Value()
@@ -188,7 +188,7 @@ raw<const RTTI::Class> be_typeid< minitl::array<T> >::registerProperties()
         2,
         {
             {
-                {&RTTI::staticarray<const RTTI::Tag>::s_null},
+                {RTTI::staticarray<const RTTI::Tag>::s_null},
                 {reinterpret_cast< RTTI::staticarray< const RTTI::Method::Parameter >* >(&s_size_params)},
                 be_typeid< u32 >::type(),
                 false,
@@ -220,7 +220,7 @@ raw<const RTTI::Class> be_typeid< minitl::array<T> >::registerProperties()
     result->methods.set(reinterpret_cast< RTTI::staticarray< const RTTI::Method >* >(&s_methods));
     static RTTI::ObjectInfo valueType = {
         {0},
-        {&RTTI::staticarray<const RTTI::Tag>::s_null},
+        {RTTI::staticarray<const RTTI::Tag>::s_null},
         "value_type",
         RTTI::Value(RTTI::Value::ByRef(value_type))
     };

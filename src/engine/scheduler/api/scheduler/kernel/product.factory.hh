@@ -47,9 +47,9 @@ struct BE_EXPORT be_typeid< Kernel::Product<T> >
             {0},
             be_typeid<Kernel::IProduct>::klass(),
             {0},
-            {&RTTI::staticarray<const RTTI::Tag>::s_null},
-            {&RTTI::staticarray<const RTTI::Property>::s_null},
-            {&RTTI::staticarray<const RTTI::Method>::s_null},
+            {RTTI::staticarray<const RTTI::Tag>::s_null},
+            {RTTI::staticarray<const RTTI::Property>::s_null},
+            {RTTI::staticarray<const RTTI::Method>::s_null},
             {0},
             0,
             0

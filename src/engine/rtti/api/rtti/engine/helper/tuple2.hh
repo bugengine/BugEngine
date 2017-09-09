@@ -81,9 +81,9 @@ raw<RTTI::Class> be_typeid< minitl::tuple<T1, T2> >::preklass()
         {be_game_Namespace().m_ptr},
         {be_typeid< void >::preklass().m_ptr},
         {0},
-        {&RTTI::staticarray<const RTTI::Tag>::s_null},
-        {&RTTI::staticarray<const RTTI::Property>::s_null},
-        {&RTTI::staticarray<const RTTI::Method>::s_null},
+        {RTTI::staticarray<const RTTI::Tag>::s_null},
+        {RTTI::staticarray<const RTTI::Property>::s_null},
+        {RTTI::staticarray<const RTTI::Method>::s_null},
         {0},
         &RTTI::wrapCopy< minitl::tuple<T1, T2> >,
         &RTTI::wrapDestroy< minitl::tuple<T1, T2> >};
@@ -106,8 +106,8 @@ raw<const RTTI::Class> be_typeid< minitl::tuple<T1, T2> >::registerProperties()
     static RTTI::staticarray_n< 2, const RTTI::Method::Parameter > s_tuple_0_params = {
         2,
         {
-            { {&RTTI::staticarray<const RTTI::Tag>::s_null}, istring("first"), be_typeid< T1  >::type() },
-            { {&RTTI::staticarray<const RTTI::Tag>::s_null}, istring("second"), be_typeid< T2  >::type() }
+            { {RTTI::staticarray<const RTTI::Tag>::s_null}, istring("first"), be_typeid< T1  >::type() },
+            { {RTTI::staticarray<const RTTI::Tag>::s_null}, istring("second"), be_typeid< T2  >::type() }
         }
     };
     be_section(rtti_method)
@@ -115,15 +115,15 @@ raw<const RTTI::Class> be_typeid< minitl::tuple<T1, T2> >::registerProperties()
         2,
         {
             {
-                {&RTTI::staticarray<const RTTI::Tag>::s_null},
+                {RTTI::staticarray<const RTTI::Tag>::s_null},
                 {reinterpret_cast< RTTI::staticarray< const RTTI::Method::Parameter >* >(&s_tuple_0_params)},
                 be_typeid< minitl::tuple<T1, T2> >::type(),
                 false,
                 &make_tuple
             },
             {
-                {&RTTI::staticarray<const RTTI::Tag>::s_null},
-                {&RTTI::staticarray<const RTTI::Method::Parameter>::s_null},
+                {RTTI::staticarray<const RTTI::Tag>::s_null},
+                {RTTI::staticarray<const RTTI::Method::Parameter>::s_null},
                 be_typeid< minitl::tuple<T1, T2> >::type(),
                 false,
                 &make_default_tuple
@@ -147,14 +147,14 @@ raw<const RTTI::Class> be_typeid< minitl::tuple<T1, T2> >::registerProperties()
         2,
         {
             {
-                {&RTTI::staticarray<const RTTI::Tag>::s_null},
+                {RTTI::staticarray<const RTTI::Tag>::s_null},
                 istring("second"),
                 be_typeid< minitl::tuple<T1, T2> >::type(),
                 be_typeid< T2  >::type(),
                 &RTTI::PropertyHelper< T2 , minitl::tuple<T1, T2>, &minitl::tuple<T1, T2>::second >::get
             },
             {
-                {&RTTI::staticarray<const RTTI::Tag>::s_null},
+                {RTTI::staticarray<const RTTI::Tag>::s_null},
                 istring("first"),
                 be_typeid< minitl::tuple<T1, T2> >::type(),
                 be_typeid< T1  >::type(),

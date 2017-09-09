@@ -30,11 +30,9 @@ struct staticarray
     T* end()                { return &elements[count]; }
     const T* end() const    { return &elements[count]; }
 
-    static staticarray<T> s_null;
+    static staticarray<T>* s_null;
 };
 
-template< typename T >
-staticarray<T>  staticarray<T>::s_null = { 0, { T() } };
 
 template< u32 COUNT, typename T >
 struct staticarray_n
@@ -42,6 +40,18 @@ struct staticarray_n
     u32 const   count;
     T           elements[COUNT];
 };
+
+template< typename T >
+struct staticarray_n<0, T>
+{
+    u32 const   count;
+    static staticarray_n<0, T> s_null;
+};
+
+template< typename T >
+staticarray<T>* staticarray<T>::s_null = reinterpret_cast< staticarray<T>* >(&staticarray_n<0, T>::s_null);
+template< typename T >
+staticarray_n<0, T>  staticarray_n<0, T>::s_null = {0};
 
 }}
 

@@ -470,9 +470,9 @@ Value Class::findClass(inamespace name)
 raw<RTTI::Class> be_game_Namespace()
 {
     static RTTI::Class ci = { "BugEngine", 0, 0, RTTI::ClassType_Namespace, {0}, {0}, {0},
-                              {&RTTI::staticarray<const RTTI::Tag>::s_null},
-                              {&RTTI::staticarray<const RTTI::Property>::s_null},
-                              {&RTTI::staticarray<const RTTI::Method>::s_null},
+                              {RTTI::staticarray<const RTTI::Tag>::s_null},
+                              {RTTI::staticarray<const RTTI::Property>::s_null},
+                              {RTTI::staticarray<const RTTI::Method>::s_null},
                               {0}, 0, 0 };
     raw<RTTI::Class> result = {&ci};
     return result;
