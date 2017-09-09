@@ -22,6 +22,7 @@ public:
     typedef RTTI::ArgInfo< ref<const Parameter> > ArgInfo;
 private:
     minitl::vector<ArgInfo>             m_args;
+    minitl::vector<u32>                 m_indices;
     RTTI::CallInfo                      m_callInfo;
 public:
     OverloadMatch(raw<const RTTI::Method::Overload> overload);

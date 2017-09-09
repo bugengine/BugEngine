@@ -18,9 +18,9 @@ namespace
 
 struct PythonTypeInfo
 {
-    PyObject* const     arg;
-    PyTypeObject* const pythonType;
-    RTTI::Type const    bugengineType;
+    PyObject*       arg;
+    PyTypeObject*   pythonType;
+    RTTI::Type      bugengineType;
 
     static RTTI::Type getTypeFromPyObject(PyObject* object);
     static PyTypeObject* getPyTypeFromPyObject(PyObject* object);
@@ -28,8 +28,8 @@ struct PythonTypeInfo
     PythonTypeInfo(PyObject* object);
 };
 
-static RTTI::Type::ConversionCost calculateConversion(const PythonTypeInfo& typeInfo,
-                                                      const RTTI::Type& other)
+static RTTI::ConversionCost calculateConversion(const PythonTypeInfo& typeInfo,
+                                                const RTTI::Type& other)
 {
     return PyBugObject::distance(typeInfo.arg, other);
 }
@@ -77,13 +77,14 @@ typedef RTTI::ArgInfo<PythonTypeInfo> PythonArgInfo;
 
 PyObject* call(raw<const RTTI::Method> method, PyObject* self, PyObject* args, PyObject* kwargs)
 {
-    const u32 unnamedArgCount = args
-                                 ? be_checked_numcast<u32>(s_library->m_PyTuple_Size(args))
-                                 : 0;
+    const u32 selfArgCount = self ? 1 : 0;
+    const u32 unnamedArgCount =  args
+                                   ? be_checked_numcast<u32>(s_library->m_PyTuple_Size(args))
+                                   : 0;
     const u32 namedArgCount = kwargs
                                ? be_checked_numcast<u32>(s_library->m_PyDict_Size(kwargs))
                                : 0;
-    const u32 argCount = unnamedArgCount + namedArgCount + (self ? 1 : 0);
+    const u32 argCount = selfArgCount + unnamedArgCount + namedArgCount;
     PythonArgInfo* argInfos = reinterpret_cast<PythonArgInfo*>(malloca(argCount * sizeof(PythonArgInfo)));
 
     {
@@ -130,10 +131,12 @@ PyObject* call(raw<const RTTI::Method> method, PyObject* self, PyObject* args, P
         }
     }
 
-    RTTI::CallInfo info = RTTI::resolve(method, argInfos, argCount);
-    if (info.conversion < RTTI::Type::s_incompatible)
+    RTTI::CallInfo info = RTTI::resolve(method, argInfos, selfArgCount + unnamedArgCount,
+                                        argInfos + selfArgCount + unnamedArgCount, namedArgCount);
+    if (info.conversion < RTTI::ConversionCost::s_incompatible)
     {
-        RTTI::Value result = RTTI::call(info, argInfos, argCount);
+        RTTI::Value result = RTTI::call(info, argInfos, selfArgCount + unnamedArgCount,
+                                        argInfos + selfArgCount + unnamedArgCount, namedArgCount);
         for (u32 i = argCount; i > 0; --i)
         {
             argInfos[i-1].~PythonArgInfo();
@@ -150,7 +153,7 @@ PyObject* call(raw<const RTTI::Method> method, PyObject* self, PyObject* args, P
         freea(argInfos);
         s_library->m_PyErr_Format(*s_library->m_PyExc_TypeError,
                                   "Could not call method %s: "
-                                  "no overlaod could convert all parameters",
+                                  "no overload could convert all parameters",
                                   method->name.c_str());
         return 0;
     }

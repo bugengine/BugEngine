@@ -42,11 +42,11 @@ BoolValue::~BoolValue()
 {
 }
 
-RTTI::Type::ConversionCost BoolValue::calculateConversion(const RTTI::Type& type) const
+RTTI::ConversionCost BoolValue::calculateConversion(const RTTI::Type& type) const
 {
     if (type.metaclass->type() == RTTI::ClassType_Number)
     {
-        RTTI::Type::ConversionCost cost;
+        RTTI::ConversionCost cost;
         switch (type.metaclass->index())
         {
         case RTTI::ClassIndex_bool:
@@ -63,24 +63,24 @@ RTTI::Type::ConversionCost BoolValue::calculateConversion(const RTTI::Type& type
             break;
         case RTTI::ClassIndex_float:
         case RTTI::ClassIndex_double:
-            cost = RTTI::Type::s_incompatible;
+            cost = RTTI::ConversionCost::s_incompatible;
             break;
         }
         return cost;
     }
     else if (type.metaclass->type() == RTTI::ClassType_Variant)
     {
-        return RTTI::Type::s_variant;
+        return RTTI::ConversionCost::s_variant;
     }
     else
     {
-        return RTTI::Type::s_incompatible;
+        return RTTI::ConversionCost::s_incompatible;
     }
 }
 
 RTTI::Value BoolValue::as(const RTTI::Type& type) const
 {
-    be_assert(calculateConversion(type) < RTTI::Type::s_incompatible,
+    be_assert(calculateConversion(type) < RTTI::ConversionCost::s_incompatible,
               "invalid conversion from bool to %s" | type);
     if (type.metaclass->type() == RTTI::ClassType_Variant)
     {
@@ -113,11 +113,11 @@ IntValue::~IntValue()
 {
 }
 
-RTTI::Type::ConversionCost IntValue::calculateConversion(const RTTI::Type& type) const
+RTTI::ConversionCost IntValue::calculateConversion(const RTTI::Type& type) const
 {
     if (type.metaclass->type() == RTTI::ClassType_Number)
     {
-        RTTI::Type::ConversionCost cost;
+        RTTI::ConversionCost cost;
         switch(type.metaclass->index())
         {
         case RTTI::ClassIndex_float:
@@ -140,23 +140,23 @@ RTTI::Type::ConversionCost IntValue::calculateConversion(const RTTI::Type& type)
             break;
         default:
             be_notreached();
-            cost = RTTI::Type::s_incompatible;
+            cost = RTTI::ConversionCost::s_incompatible;
         }
         return cost;
     }
     else if (type.metaclass->type() == RTTI::ClassType_Variant)
     {
-        return RTTI::Type::s_variant;
+        return RTTI::ConversionCost::s_variant;
     }
     else
     {
-        return RTTI::Type::s_incompatible;
+        return RTTI::ConversionCost::s_incompatible;
     }
 }
 
 RTTI::Value IntValue::as(const RTTI::Type& type) const
 {
-    be_assert(calculateConversion(type) < RTTI::Type::s_incompatible,
+    be_assert(calculateConversion(type) < RTTI::ConversionCost::s_incompatible,
               "invalid conversion from int to %s" | type);
     if (type.metaclass->type() == RTTI::ClassType_Variant)
     {
@@ -189,11 +189,11 @@ Int2Value::~Int2Value()
 {
 }
 
-RTTI::Type::ConversionCost Int2Value::calculateConversion(const RTTI::Type& type) const
+RTTI::ConversionCost Int2Value::calculateConversion(const RTTI::Type& type) const
 {
     if (type.metaclass->type() == RTTI::ClassType_Vector2)
     {
-        RTTI::Type::ConversionCost cost;
+        RTTI::ConversionCost cost;
         switch(type.metaclass->index())
         {
         case RTTI::ClassIndex_float:
@@ -215,23 +215,23 @@ RTTI::Type::ConversionCost Int2Value::calculateConversion(const RTTI::Type& type
             break;
         default:
             be_notreached();
-            cost = RTTI::Type::s_incompatible;
+            cost = RTTI::ConversionCost::s_incompatible;
         }
         return cost;
     }
     else if (type.metaclass->type() == RTTI::ClassType_Variant)
     {
-        return RTTI::Type::s_variant;
+        return RTTI::ConversionCost::s_variant;
     }
     else
     {
-        return RTTI::Type::s_incompatible;
+        return RTTI::ConversionCost::s_incompatible;
     }
 }
 
 RTTI::Value Int2Value::as(const RTTI::Type& type) const
 {
-    be_assert(calculateConversion(type) < RTTI::Type::s_incompatible,
+    be_assert(calculateConversion(type) < RTTI::ConversionCost::s_incompatible,
               "invalid conversion from int2 to %s" | type);
     if (type.metaclass->type() == RTTI::ClassType_Variant)
     {
@@ -262,11 +262,11 @@ Int3Value::~Int3Value()
 {
 }
 
-RTTI::Type::ConversionCost Int3Value::calculateConversion(const RTTI::Type& type) const
+RTTI::ConversionCost Int3Value::calculateConversion(const RTTI::Type& type) const
 {
     if (type.metaclass->type() == RTTI::ClassType_Vector3)
     {
-        RTTI::Type::ConversionCost cost;
+        RTTI::ConversionCost cost;
         switch(type.metaclass->index())
         {
         case RTTI::ClassIndex_float:
@@ -289,23 +289,23 @@ RTTI::Type::ConversionCost Int3Value::calculateConversion(const RTTI::Type& type
             break;
         default:
             be_notreached();
-            cost = RTTI::Type::s_incompatible;
+            cost = RTTI::ConversionCost::s_incompatible;
         }
         return cost;
     }
     else if (type.metaclass->type() == RTTI::ClassType_Variant)
     {
-        return RTTI::Type::s_variant;
+        return RTTI::ConversionCost::s_variant;
     }
     else
     {
-        return RTTI::Type::s_incompatible;
+        return RTTI::ConversionCost::s_incompatible;
     }
 }
 
 RTTI::Value Int3Value::as(const RTTI::Type& type) const
 {
-    be_assert(calculateConversion(type) < RTTI::Type::s_incompatible,
+    be_assert(calculateConversion(type) < RTTI::ConversionCost::s_incompatible,
               "invalid conversion from int3 to %s" | type);
     if (type.metaclass->type() == RTTI::ClassType_Variant)
     {
@@ -336,11 +336,11 @@ Int4Value::~Int4Value()
 {
 }
 
-RTTI::Type::ConversionCost Int4Value::calculateConversion(const RTTI::Type& type) const
+RTTI::ConversionCost Int4Value::calculateConversion(const RTTI::Type& type) const
 {
     if (type.metaclass->type() == RTTI::ClassType_Vector4)
     {
-        RTTI::Type::ConversionCost cost;
+        RTTI::ConversionCost cost;
         switch(type.metaclass->index())
         {
         case RTTI::ClassIndex_float:
@@ -363,23 +363,23 @@ RTTI::Type::ConversionCost Int4Value::calculateConversion(const RTTI::Type& type
             break;
         default:
             be_notreached();
-            cost = RTTI::Type::s_incompatible;
+            cost = RTTI::ConversionCost::s_incompatible;
         }
         return cost;
     }
     else if (type.metaclass->type() == RTTI::ClassType_Variant)
     {
-        return RTTI::Type::s_variant;
+        return RTTI::ConversionCost::s_variant;
     }
     else
     {
-        return RTTI::Type::s_incompatible;
+        return RTTI::ConversionCost::s_incompatible;
     }
 }
 
 RTTI::Value Int4Value::as(const RTTI::Type& type) const
 {
-    be_assert(calculateConversion(type) < RTTI::Type::s_incompatible,
+    be_assert(calculateConversion(type) < RTTI::ConversionCost::s_incompatible,
               "invalid conversion from int4 to %s" | type);
     if (type.metaclass->type() == RTTI::ClassType_Variant)
     {
@@ -411,11 +411,11 @@ FloatValue::~FloatValue()
 {
 }
 
-RTTI::Type::ConversionCost FloatValue::calculateConversion(const RTTI::Type& type) const
+RTTI::ConversionCost FloatValue::calculateConversion(const RTTI::Type& type) const
 {
     if (type.metaclass->type() == RTTI::ClassType_Number)
     {
-        RTTI::Type::ConversionCost cost;
+        RTTI::ConversionCost cost;
         switch(type.metaclass->index())
         {
         case RTTI::ClassIndex_float:
@@ -436,23 +436,23 @@ RTTI::Type::ConversionCost FloatValue::calculateConversion(const RTTI::Type& typ
             break;
         default:
             be_notreached();
-            cost = RTTI::Type::s_incompatible;
+            cost = RTTI::ConversionCost::s_incompatible;
         }
         return cost;
     }
     else if (type.metaclass->type() == RTTI::ClassType_Variant)
     {
-        return RTTI::Type::s_variant;
+        return RTTI::ConversionCost::s_variant;
     }
     else
     {
-        return RTTI::Type::s_incompatible;
+        return RTTI::ConversionCost::s_incompatible;
     }
 }
 
 RTTI::Value FloatValue::as(const RTTI::Type& type) const
 {
-    be_assert(calculateConversion(type) < RTTI::Type::s_incompatible,
+    be_assert(calculateConversion(type) < RTTI::ConversionCost::s_incompatible,
               "invalid conversion from float to %s" | type);
     if (type.metaclass->type() == RTTI::ClassType_Variant)
     {
@@ -485,11 +485,11 @@ Float2Value::~Float2Value()
 {
 }
 
-RTTI::Type::ConversionCost Float2Value::calculateConversion(const RTTI::Type& type) const
+RTTI::ConversionCost Float2Value::calculateConversion(const RTTI::Type& type) const
 {
     if (type.metaclass->type() == RTTI::ClassType_Vector2)
     {
-        RTTI::Type::ConversionCost cost;
+        RTTI::ConversionCost cost;
         switch(type.metaclass->index())
         {
         case RTTI::ClassIndex_float:
@@ -510,23 +510,23 @@ RTTI::Type::ConversionCost Float2Value::calculateConversion(const RTTI::Type& ty
             break;
         default:
             be_notreached();
-            cost = RTTI::Type::s_incompatible;
+            cost = RTTI::ConversionCost::s_incompatible;
         }
         return cost;
     }
     else if (type.metaclass->type() == RTTI::ClassType_Variant)
     {
-        return RTTI::Type::s_variant;
+        return RTTI::ConversionCost::s_variant;
     }
     else
     {
-        return RTTI::Type::s_incompatible;
+        return RTTI::ConversionCost::s_incompatible;
     }
 }
 
 RTTI::Value Float2Value::as(const RTTI::Type& type) const
 {
-    be_assert(calculateConversion(type) < RTTI::Type::s_incompatible,
+    be_assert(calculateConversion(type) < RTTI::ConversionCost::s_incompatible,
               "invalid conversion from float2 to %s" | type);
     if (type.metaclass->type() == RTTI::ClassType_Variant)
     {
@@ -559,11 +559,11 @@ Float3Value::~Float3Value()
 {
 }
 
-RTTI::Type::ConversionCost Float3Value::calculateConversion(const RTTI::Type& type) const
+RTTI::ConversionCost Float3Value::calculateConversion(const RTTI::Type& type) const
 {
     if (type.metaclass->type() == RTTI::ClassType_Vector3)
     {
-        RTTI::Type::ConversionCost cost;
+        RTTI::ConversionCost cost;
         switch(type.metaclass->index())
         {
         case RTTI::ClassIndex_float:
@@ -584,24 +584,24 @@ RTTI::Type::ConversionCost Float3Value::calculateConversion(const RTTI::Type& ty
             break;
         default:
             be_notreached();
-            cost = RTTI::Type::s_incompatible;
+            cost = RTTI::ConversionCost::s_incompatible;
         }
         return cost;
     }
     else if (type.metaclass->type() == RTTI::ClassType_Variant)
     {
-        return RTTI::Type::s_variant;
+        return RTTI::ConversionCost::s_variant;
     }
     else
     {
-        return RTTI::Type::s_incompatible;
+        return RTTI::ConversionCost::s_incompatible;
     }
 }
 
 RTTI::Value Float3Value::as(const RTTI::Type& type) const
 {
 
-    be_assert(calculateConversion(type) < RTTI::Type::s_incompatible,
+    be_assert(calculateConversion(type) < RTTI::ConversionCost::s_incompatible,
               "invalid conversion from float3 to %s" | type);
     if (type.metaclass->type() == RTTI::ClassType_Variant)
     {
@@ -634,11 +634,11 @@ Float4Value::~Float4Value()
 {
 }
 
-RTTI::Type::ConversionCost Float4Value::calculateConversion(const RTTI::Type& type) const
+RTTI::ConversionCost Float4Value::calculateConversion(const RTTI::Type& type) const
 {
     if (type.metaclass->type() == RTTI::ClassType_Vector4)
     {
-        RTTI::Type::ConversionCost cost;
+        RTTI::ConversionCost cost;
         switch(type.metaclass->index())
         {
         case RTTI::ClassIndex_float:
@@ -659,23 +659,23 @@ RTTI::Type::ConversionCost Float4Value::calculateConversion(const RTTI::Type& ty
             break;
         default:
             be_notreached();
-            cost = RTTI::Type::s_incompatible;
+            cost = RTTI::ConversionCost::s_incompatible;
         }
         return cost;
     }
     else if (type.metaclass->type() == RTTI::ClassType_Variant)
     {
-        return RTTI::Type::s_variant;
+        return RTTI::ConversionCost::s_variant;
     }
     else
     {
-        return RTTI::Type::s_incompatible;
+        return RTTI::ConversionCost::s_incompatible;
     }
 }
 
 RTTI::Value Float4Value::as(const RTTI::Type& type) const
 {
-    be_assert(calculateConversion(type) < RTTI::Type::s_incompatible,
+    be_assert(calculateConversion(type) < RTTI::ConversionCost::s_incompatible,
               "invalid conversion from float4 to %s" | type);
     if (type.metaclass->type() == RTTI::ClassType_Variant)
     {
@@ -710,26 +710,26 @@ StringValue::~StringValue()
     Arena::packageBuilder().free(m_value);
 }
 
-RTTI::Type::ConversionCost StringValue::calculateConversion(const RTTI::Type& type) const
+RTTI::ConversionCost StringValue::calculateConversion(const RTTI::Type& type) const
 {
     if (type.metaclass->type() == RTTI::ClassType_String)
     {
-        RTTI::Type::ConversionCost cost;
+        RTTI::ConversionCost cost;
         return cost;
     }
     else if (type.metaclass->type() == RTTI::ClassType_Variant)
     {
-        return RTTI::Type::s_variant;
+        return RTTI::ConversionCost::s_variant;
     }
     else
     {
-        return RTTI::Type::s_incompatible;
+        return RTTI::ConversionCost::s_incompatible;
     }
 }
 
 RTTI::Value StringValue::as(const RTTI::Type& type) const
 {
-    be_assert(calculateConversion(type) < RTTI::Type::s_incompatible,
+    be_assert(calculateConversion(type) < RTTI::ConversionCost::s_incompatible,
               "invalid conversion from float4 to %s" | type);
     if (type.metaclass->type() == RTTI::ClassType_Variant)
     {
@@ -757,14 +757,14 @@ ReferenceValue::~ReferenceValue()
 {
 }
 
-RTTI::Type::ConversionCost ReferenceValue::calculateConversion(const RTTI::Type& type) const
+RTTI::ConversionCost ReferenceValue::calculateConversion(const RTTI::Type& type) const
 {
     return m_value->getType().calculateConversion(type);
 }
 
 RTTI::Value ReferenceValue::as(const RTTI::Type& type) const
 {
-    be_assert(calculateConversion(type) < RTTI::Type::s_incompatible,
+    be_assert(calculateConversion(type) < RTTI::ConversionCost::s_incompatible,
               "invalid conversion from %s to %s" | m_value->getType() | type);
     be_forceuse(type);
     return m_value->getValue();
@@ -780,14 +780,14 @@ ObjectValue::~ObjectValue()
 {
 }
 
-RTTI::Type::ConversionCost ObjectValue::calculateConversion(const RTTI::Type& type) const
+RTTI::ConversionCost ObjectValue::calculateConversion(const RTTI::Type& type) const
 {
     return m_value->getType().calculateConversion(type);
 }
 
 RTTI::Value ObjectValue::as(const RTTI::Type& type) const
 {
-    be_assert(calculateConversion(type) < RTTI::Type::s_incompatible,
+    be_assert(calculateConversion(type) < RTTI::ConversionCost::s_incompatible,
               "invalid conversion from %s to %s" | m_value->getType() | type);
     be_forceuse(type);
     return m_value->create();
@@ -806,14 +806,14 @@ FileValue::~FileValue()
 {
 }
 
-RTTI::Type::ConversionCost FileValue::calculateConversion(const RTTI::Type& type) const
+RTTI::ConversionCost FileValue::calculateConversion(const RTTI::Type& type) const
 {
     return be_typeid< weak<const File> >::type().calculateConversion(type);
 }
 
 RTTI::Value FileValue::as(const RTTI::Type& type) const
 {
-    be_assert(calculateConversion(type) < RTTI::Type::s_incompatible,
+    be_assert(calculateConversion(type) < RTTI::ConversionCost::s_incompatible,
               "invalid conversion from %s to %s" | be_typeid< weak<const File> >::type() | type);
     be_forceuse(type);
     return RTTI::Value(m_value);
@@ -830,7 +830,7 @@ ArrayValue::~ArrayValue()
 {
 }
 
-RTTI::Type::ConversionCost ArrayValue::calculateConversion(const RTTI::Type& type) const
+RTTI::ConversionCost ArrayValue::calculateConversion(const RTTI::Type& type) const
 {
     if (type.metaclass->type() == RTTI::ClassType_Array)
     {
@@ -839,7 +839,7 @@ RTTI::Type::ConversionCost ArrayValue::calculateConversion(const RTTI::Type& typ
         {
             if (prop->value.type().isA(be_typeid<const RTTI::Type>::type()))
             {
-                RTTI::Type::ConversionCost c;
+                RTTI::ConversionCost c;
                 RTTI::Type valueType = prop->value.as<const RTTI::Type>();
                 for (minitl::vector< ref<Value> >::const_iterator it = m_values.begin();
                      it != m_values.end();
@@ -851,12 +851,12 @@ RTTI::Type::ConversionCost ArrayValue::calculateConversion(const RTTI::Type& typ
             }
         }
     }
-    return RTTI::Type::s_incompatible;
+    return RTTI::ConversionCost::s_incompatible;
 }
 
 RTTI::Value ArrayValue::as(const RTTI::Type& type) const
 {
-    be_assert(calculateConversion(type) < RTTI::Type::s_incompatible,
+    be_assert(calculateConversion(type) < RTTI::ConversionCost::s_incompatible,
               "invalid conversion from array to %s" | type);
     raw<const RTTI::ObjectInfo> prop = type.metaclass->getStaticProperty(istring("value_type"));
     be_assert(prop, "unable to find the array value type");

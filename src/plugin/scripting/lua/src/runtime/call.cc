@@ -20,10 +20,10 @@ struct LuaParameterType
     int         key;
 };
 
-static RTTI::Type::ConversionCost calculateConversion(const LuaParameterType& type,
-                                                      const RTTI::Type& target)
+static RTTI::ConversionCost calculateConversion(const LuaParameterType& type,
+                                                const RTTI::Type& target)
 {
-    RTTI::Type::ConversionCost result;
+    RTTI::ConversionCost result;
     be_forceuse(type);
     be_forceuse(target);
     be_unimplemented();
@@ -49,7 +49,7 @@ int call(lua_State *state, raw<const RTTI::Method> method)
 
         be_unimplemented();
         RTTI::CallInfo result = RTTI::resolve(method, parameters, parameterCount);
-        if (result.conversion < RTTI::Type::s_incompatible)
+        if (result.conversion < RTTI::ConversionCost::s_incompatible)
         {
             RTTI::Value v = RTTI::call(result, parameters, parameterCount);
             freea(parameters);
@@ -65,7 +65,7 @@ int call(lua_State *state, raw<const RTTI::Method> method)
     be_unimplemented();
 
     RTTI::CallInfo result = RTTI::resolve(method, parameters, nargs);
-    if (result.conversion < RTTI::Type::s_incompatible)
+    if (result.conversion < RTTI::ConversionCost::s_incompatible)
     {
         RTTI::Value v = RTTI::call(result, parameters, nargs);
         freea(parameters);

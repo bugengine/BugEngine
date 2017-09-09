@@ -134,8 +134,8 @@ static bool convertUserdataToValue(lua_State *state, int index, const RTTI::Type
     {
         lua_pop(state, 2);
         RTTI::Value* userdata = (RTTI::Value*)lua_touserdata(state, index);
-        RTTI::Type::ConversionCost conversion = userdata->type().calculateConversion(type);
-        if (conversion >= RTTI::Type::s_incompatible)
+        RTTI::ConversionCost conversion = userdata->type().calculateConversion(type);
+        if (conversion >= RTTI::ConversionCost::s_incompatible)
         {
             return false;
         }

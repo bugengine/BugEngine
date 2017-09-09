@@ -143,6 +143,7 @@ public:
     PyErr_FormatType                        m_PyErr_Format;
     PyErr_BadArgumentType                   m_PyErr_BadArgument;
 
+    PyBool_TypeType                         m_PyBool_Type;
     PyFloat_TypeType                        m_PyFloat_Type;
     PyExc_ExceptionType                     m_PyExc_Exception;
     PyExc_AttributeErrorType                m_PyExc_AttributeError;

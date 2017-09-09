@@ -25,7 +25,7 @@ istring Parameter::name() const
     return m_name;
 }
 
-RTTI::Type::ConversionCost Parameter::calculateConversion(const RTTI::Type& type) const
+RTTI::ConversionCost Parameter::calculateConversion(const RTTI::Type& type) const
 {
     return m_value->calculateConversion(type);
 }

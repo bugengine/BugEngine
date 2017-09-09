@@ -5,6 +5,7 @@
 #define BE_RTTI_TYPEINFO_SCRIPT_HH_
 /**************************************************************************************************/
 #include    <rtti/stdafx.h>
+#include    <rtti/conversion.script.hh>
 
 namespace BugEngine { namespace RTTI
 {
@@ -54,78 +55,6 @@ struct be_api(RTTI) Type
     }
     u32                     size() const;
     bool                    isA(const Type& other) const;
-
-    struct ConversionCost
-    {
-    public:
-        u16     incompatible;
-        u16     conversion;
-        u16     promotion;
-        u16     qualification;
-
-        ConversionCost()
-            :   incompatible()
-            ,   conversion()
-            ,   promotion()
-            ,   qualification()
-        {
-        }
-        ConversionCost(u16 qualification,
-                       u16 promotion,
-                       u16 conversion,
-                       u16 incompatible)
-            :   incompatible(incompatible)
-            ,   conversion(conversion)
-            ,   promotion(promotion)
-            ,   qualification(qualification)
-        {
-        }
-
-        u64 value() const
-        {
-            return (u64(qualification))
-                 | (u64(promotion) << 16 )
-                 | (u64(conversion) << 32)
-                 | (u64(incompatible) << 48);
-        }
-
-        bool operator ==(ConversionCost other) const
-        {
-            return value() == other.value();
-        }
-        bool operator!=(ConversionCost other) const
-        {
-            return value() != other.value();
-        }
-        bool operator <(ConversionCost other) const
-        {
-            return value() < other.value();
-        }
-        bool operator <=(ConversionCost other) const
-        {
-            return value() <= other.value();
-        }
-        bool operator >(ConversionCost other) const
-        {
-            return value() > other.value();
-        }
-        bool operator >=(ConversionCost other) const
-        {
-            return value() >= other.value();
-        }
-        ConversionCost operator+=(ConversionCost other)
-        {
-            incompatible = be_checked_numcast<u16>(incompatible + other.incompatible);
-            conversion = be_checked_numcast<u16>(conversion + other.conversion);
-            promotion = be_checked_numcast<u16>(promotion + other.promotion);
-            qualification = be_checked_numcast<u16>(qualification + other.qualification);
-            return *this;
-        }
-    };
-
-    static const ConversionCost s_incompatible;
-    static const ConversionCost s_variant;
-
     ConversionCost          calculateConversion(const Type& other) const;
 public:
     template< typename T >
@@ -140,8 +69,8 @@ private:
 
 be_api(RTTI) bool operator==(Type t1, Type t2);
 be_api(RTTI) bool operator<=(Type t1, Type t2);
-static inline Type::ConversionCost calculateConversion(const Type& type,
-                                                       const Type& target)
+static inline ConversionCost calculateConversion(const Type& type,
+                                                 const Type& target)
 {
     return type.calculateConversion(target);
 }

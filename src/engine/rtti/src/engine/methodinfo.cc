@@ -51,7 +51,7 @@ Value Method::doCall(Value* params, u32 nparams) const
     }
     raw<const Method> thisPtr = { this };
     CallInfo c = resolve(thisPtr, args, nparams);
-    if (c.conversion < Type::s_incompatible)
+    if (c.conversion < ConversionCost::s_incompatible)
     {
         return c.overload->call(params, nparams);
     }
