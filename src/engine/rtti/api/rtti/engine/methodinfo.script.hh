@@ -23,7 +23,7 @@ published:
         raw< staticarray<const Tag> >   tags;
         istring                         name;
         Type                            type;
-        const Value                     defaultValue;
+        Value                           defaultValue;
     published:
         Value getTag(const Type& type) const;
         Value getTag(raw<const Class> type) const;
