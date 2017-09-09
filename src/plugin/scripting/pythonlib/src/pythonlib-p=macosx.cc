@@ -166,6 +166,7 @@ PythonLibrary::PythonLibrary(const char* pythonLibraryName)
         be_get_func(PyErr_SetString);
         be_get_func(PyErr_Format);
         be_get_func(PyErr_BadArgument);
+        be_get_func(PyBool_Type);
         be_get_func(PyFloat_Type);
         be_get_func(PyExc_Exception);
         be_get_func(PyExc_AttributeError);

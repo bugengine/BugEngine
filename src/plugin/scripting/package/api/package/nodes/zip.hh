@@ -30,7 +30,7 @@ public:
     void addEntity(ref<Entity> entity);
     void addEvent(ref<Event> event);
 
-    virtual RTTI::Type::ConversionCost calculateConversion(const RTTI::Type& type) const override;
+    virtual RTTI::ConversionCost calculateConversion(const RTTI::Type& type) const override;
     virtual RTTI::Value as(const RTTI::Type& type) const override;
 
 };

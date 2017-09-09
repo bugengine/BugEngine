@@ -10,9 +10,6 @@
 namespace BugEngine { namespace RTTI
 {
 
-const Type::ConversionCost Type::s_incompatible(0, 0, 0, 1);
-const Type::ConversionCost Type::s_variant(65535, 65535, 65535, 0);
-
 u32 Type::size() const
 {
     switch(indirection)
@@ -90,24 +87,24 @@ void Type::destroy(void* ptr) const
     }
 }
 
-Type::ConversionCost Type::calculateConversion(const Type& other) const
+ConversionCost Type::calculateConversion(const Type& other) const
 {
     ConversionCost result;
 
     if (other.indirection > 0 && access < other.access)
-        return s_incompatible;
+        return ConversionCost::s_incompatible;
     else if (other.indirection > 0)
         result.qualification += access - other.access;
 
     if (indirection < other.indirection)
-        return s_incompatible;
+        return ConversionCost::s_incompatible;
     else
         result.qualification  += indirection - other.indirection;
 
     if (metaclass->distance(other.metaclass, result.promotion))
         return result;
     else
-        return s_incompatible;
+        return ConversionCost::s_incompatible;
 }
 
 minitl::format<1024u> Type::name() const

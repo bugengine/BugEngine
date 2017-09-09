@@ -9,8 +9,8 @@
 namespace BugEngine { namespace PackageBuilder { namespace Nodes
 {
 
-static RTTI::Type::ConversionCost calculateConversion(ref<const Parameter> parameter,
-                                                      const RTTI::Type& target)
+static RTTI::ConversionCost calculateConversion(ref<const Parameter> parameter,
+                                                const RTTI::Type& target)
 {
     return parameter->calculateConversion(target);
 }
@@ -21,7 +21,8 @@ static void convert(ref<const Parameter> parameter, void* buffer, const RTTI::Ty
 }
 
 OverloadMatch::OverloadMatch(raw<const RTTI::Method::Overload> overload)
-    :   m_args(Arena::packageBuilder(), overload->params ? overload->params->count : 0)
+    :   m_args(Arena::packageBuilder(), overload->params->count)
+    ,   m_indices(Arena::packageBuilder(), overload->params->count)
     ,   m_callInfo()
 {
     m_callInfo.overload = overload;
@@ -31,6 +32,8 @@ void OverloadMatch::update(const minitl::vector< ref<const Parameter> >& paramet
 {
     m_args.clear();
     m_args.reserve(parameters.size());
+    m_indices.clear();
+    m_indices.reserve(parameters.size());
     for (minitl::vector< ref<const Parameter> >::const_iterator it = parameters.begin();
          it != parameters.end();
          ++it)
@@ -38,15 +41,19 @@ void OverloadMatch::update(const minitl::vector< ref<const Parameter> >& paramet
         m_args.push_back(ArgInfo((*it)->name(),
                                  (*it)));
     }
-    m_callInfo.conversion = RTTI::getCost(m_callInfo.overload,
-                                          &m_args[0],
-                                          be_checked_numcast<u32>(m_args.size()));
+    m_callInfo = RTTI::getCost(m_callInfo.overload,
+                               &m_indices[0],
+                               static_cast<const ArgInfo*>(0), 0,
+                               &m_args[0],
+                               be_checked_numcast<u32>(m_args.size()));
 }
 
 RTTI::Value OverloadMatch::create(istring name) const
 {
     be_forceuse(name);
-    return RTTI::call(m_callInfo, &m_args[0], be_checked_numcast<u32>(m_args.size()));
+    return RTTI::call(m_callInfo,
+                      static_cast<const ArgInfo*>(0), 0,
+                      &m_args[0], be_checked_numcast<u32>(m_args.size()));
 }
 
 }}}

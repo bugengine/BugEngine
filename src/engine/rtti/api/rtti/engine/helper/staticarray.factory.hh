@@ -99,12 +99,14 @@ raw<const RTTI::Class> be_typeid< RTTI::staticarray<T> >::registerProperties()
             {
                 {&RTTI::staticarray<const RTTI::Tag>::s_null},
                 istring("this"),
-                be_typeid< RTTI::staticarray<T>& >::type()
+                be_typeid< RTTI::staticarray<T>& >::type(),
+                RTTI::Value()
             },
             {
                 {&RTTI::staticarray<const RTTI::Tag>::s_null},
                 istring("index"),
-                be_typeid< u32  >::type()
+                be_typeid< u32  >::type(),
+                RTTI::Value()
             }
         }
     };
@@ -115,12 +117,14 @@ raw<const RTTI::Class> be_typeid< RTTI::staticarray<T> >::registerProperties()
             {
                 {&RTTI::staticarray<const RTTI::Tag>::s_null},
                 istring("this"),
-                be_typeid< const RTTI::staticarray<T>& >::type()
+                be_typeid< const RTTI::staticarray<T>& >::type(),
+                RTTI::Value()
             },
             {
                 {&RTTI::staticarray<const RTTI::Tag>::s_null},
                 istring("index"),
-                be_typeid< u32  >::type()
+                be_typeid< u32  >::type(),
+                RTTI::Value()
             }
         }
     };
@@ -151,7 +155,8 @@ raw<const RTTI::Class> be_typeid< RTTI::staticarray<T> >::registerProperties()
             {
                 {&RTTI::staticarray<const RTTI::Tag>::s_null},
                 istring("this"),
-                be_typeid< const RTTI::staticarray<T>& >::type()
+                be_typeid< const RTTI::staticarray<T>& >::type(),
+                RTTI::Value()
             }
         }
     };

@@ -166,8 +166,10 @@ class Method(CppObject):
             definition.write(',\n'.join(['            {\n'
                                          '                {%s},\n'
                                          '                ::BugEngine::istring("%s"),\n'
-                                         '                ::BugEngine::be_typeid< %s >::type()\n'
-                                         '            }' % (t, p.name, p.type) for p, t in params]))
+                                         '                ::BugEngine::be_typeid< %s >::type(),\n'
+                                         '                ::BugEngine::RTTI::Value(%s)\n'
+                                         '            }' % (t, p.name, p.type,
+                                                            p.default_value and ('%s(%s)'%(p.type, p.default_value)) or '') for p, t in params]))
             definition.write('\n        }\n    };\n')
             return 'reinterpret_cast< ::BugEngine::RTTI::staticarray< const ::BugEngine::RTTI::Method::Parameter >* >(&s_%s_%d_params)' % (self.name, overload_index)
         else:

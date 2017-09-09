@@ -28,7 +28,7 @@ protected:
 public:
     ~Value();
 
-    virtual RTTI::Type::ConversionCost calculateConversion(const RTTI::Type& type) const = 0;
+    virtual RTTI::ConversionCost calculateConversion(const RTTI::Type& type) const = 0;
     virtual RTTI::Value as(const RTTI::Type& type) const = 0;
 };
 
@@ -41,7 +41,7 @@ public:
     ReferenceValue(ref<const Reference> value);
     ~ReferenceValue();
 
-    virtual RTTI::Type::ConversionCost calculateConversion(const RTTI::Type& type) const override;
+    virtual RTTI::ConversionCost calculateConversion(const RTTI::Type& type) const override;
     virtual RTTI::Value as(const RTTI::Type& type) const override;
 };
 
@@ -54,7 +54,7 @@ public:
     ObjectValue(ref<Object> value);
     ~ObjectValue();
 
-    virtual RTTI::Type::ConversionCost calculateConversion(const RTTI::Type& type) const override;
+    virtual RTTI::ConversionCost calculateConversion(const RTTI::Type& type) const override;
     virtual RTTI::Value as(const RTTI::Type& type) const override;
 };
 
@@ -67,7 +67,7 @@ public:
     BoolValue(bool value);
     ~BoolValue();
 
-    virtual RTTI::Type::ConversionCost calculateConversion(const RTTI::Type& type) const override;
+    virtual RTTI::ConversionCost calculateConversion(const RTTI::Type& type) const override;
     virtual RTTI::Value as(const RTTI::Type& type) const override;
 };
 
@@ -80,7 +80,7 @@ public:
     IntValue(i64 param);
     ~IntValue();
 
-    virtual RTTI::Type::ConversionCost calculateConversion(const RTTI::Type& type) const override;
+    virtual RTTI::ConversionCost calculateConversion(const RTTI::Type& type) const override;
     virtual RTTI::Value as(const RTTI::Type& type) const override;
 };
 
@@ -93,7 +93,7 @@ public:
     Int2Value(i64 x, i64 y);
     ~Int2Value();
 
-    virtual RTTI::Type::ConversionCost calculateConversion(const RTTI::Type& type) const override;
+    virtual RTTI::ConversionCost calculateConversion(const RTTI::Type& type) const override;
     virtual RTTI::Value as(const RTTI::Type& type) const override;
 };
 
@@ -106,7 +106,7 @@ public:
     Int3Value(i64 x, i64 y, i64 z);
     ~Int3Value();
 
-    virtual RTTI::Type::ConversionCost calculateConversion(const RTTI::Type& type) const override;
+    virtual RTTI::ConversionCost calculateConversion(const RTTI::Type& type) const override;
     virtual RTTI::Value as(const RTTI::Type& type) const override;
 };
 
@@ -119,7 +119,7 @@ public:
     Int4Value(i64 x, i64 y, i64 z, i64 w);
     ~Int4Value();
 
-    virtual RTTI::Type::ConversionCost calculateConversion(const RTTI::Type& type) const override;
+    virtual RTTI::ConversionCost calculateConversion(const RTTI::Type& type) const override;
     virtual RTTI::Value as(const RTTI::Type& type) const override;
 };
 
@@ -132,7 +132,7 @@ public:
     FloatValue(double value);
     ~FloatValue();
 
-    virtual RTTI::Type::ConversionCost calculateConversion(const RTTI::Type& type) const override;
+    virtual RTTI::ConversionCost calculateConversion(const RTTI::Type& type) const override;
     virtual RTTI::Value as(const RTTI::Type& type) const override;
 };
 
@@ -145,7 +145,7 @@ public:
     Float2Value(double x, double y);
     ~Float2Value();
 
-    virtual RTTI::Type::ConversionCost calculateConversion(const RTTI::Type& type) const override;
+    virtual RTTI::ConversionCost calculateConversion(const RTTI::Type& type) const override;
     virtual RTTI::Value as(const RTTI::Type& type) const override;
 };
 
@@ -158,7 +158,7 @@ public:
     Float3Value(double x, double y, double z);
     ~Float3Value();
 
-    virtual RTTI::Type::ConversionCost calculateConversion(const RTTI::Type& type) const override;
+    virtual RTTI::ConversionCost calculateConversion(const RTTI::Type& type) const override;
     virtual RTTI::Value as(const RTTI::Type& type) const override;
 };
 
@@ -171,7 +171,7 @@ public:
     Float4Value(double x, double y, double z, double w);
     ~Float4Value();
 
-    virtual RTTI::Type::ConversionCost calculateConversion(const RTTI::Type& type) const override;
+    virtual RTTI::ConversionCost calculateConversion(const RTTI::Type& type) const override;
     virtual RTTI::Value as(const RTTI::Type& type) const override;
 };
 
@@ -184,7 +184,7 @@ public:
     StringValue(const char* value);
     ~StringValue();
 
-    virtual RTTI::Type::ConversionCost calculateConversion(const RTTI::Type& type) const override;
+    virtual RTTI::ConversionCost calculateConversion(const RTTI::Type& type) const override;
     virtual RTTI::Value as(const RTTI::Type& type) const override;
 };
 
@@ -197,7 +197,7 @@ public:
     FileValue(weak<Folder> folder, const char* value);
     ~FileValue();
 
-    virtual RTTI::Type::ConversionCost calculateConversion(const RTTI::Type& type) const override;
+    virtual RTTI::ConversionCost calculateConversion(const RTTI::Type& type) const override;
     virtual RTTI::Value as(const RTTI::Type& type) const override;
 };
 
@@ -210,7 +210,7 @@ public:
     ArrayValue(const minitl::vector< ref<Value> >& values);
     ~ArrayValue();
 
-    virtual RTTI::Type::ConversionCost calculateConversion(const RTTI::Type& type) const override;
+    virtual RTTI::ConversionCost calculateConversion(const RTTI::Type& type) const override;
     virtual RTTI::Value as(const RTTI::Type& type) const override;
 };
 

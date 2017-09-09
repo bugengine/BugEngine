@@ -21,7 +21,7 @@ public:
     ~Parameter();
 
     istring name() const;
-    RTTI::Type::ConversionCost calculateConversion(const RTTI::Type& type) const;
+    RTTI::ConversionCost calculateConversion(const RTTI::Type& type) const;
     RTTI::Value as(const RTTI::Type& type) const;
 };
 

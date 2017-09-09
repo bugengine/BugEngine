@@ -149,6 +149,7 @@ typedef PyObject* (*PyUnicode_AsASCIIStringType)(PyObject* unicode);
 typedef PyObject* (*PyUnicode_AsUTF8StringType)(PyObject* unicode);
 typedef char* (*PyBytes_AsStringType)(PyObject* bytes);
 
+typedef int (*PyBool_CheckType)(PyObject* boolobject);
 typedef PyObject* (*PyBool_FromLongType)(long value);
 typedef PyObject* (*PyInt_FromLongType)(long value);
 typedef unsigned long (*PyInt_AsUnsignedLongMaskType)(PyObject* intobject);
@@ -163,6 +164,7 @@ typedef void (*PyErr_SetStringType)(PyTypeObject* errorType, const char* message
 typedef PyObject* (*PyErr_FormatType)(PyTypeObject* errorType, const char* format, ...);
 typedef int (*PyErr_BadArgumentType)();
 
+typedef PyTypeObject* PyBool_TypeType;
 typedef PyTypeObject* PyFloat_TypeType;
 typedef PyTypeObject** PyExc_ExceptionType;
 typedef PyTypeObject** PyExc_AttributeErrorType;
