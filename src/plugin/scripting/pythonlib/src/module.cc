@@ -17,7 +17,8 @@
 namespace BugEngine { namespace Python
 {
 
-tls<PythonLibrary> s_library;
+tls<PythonLibrary>  s_library;
+PyObject*           s_moduleObject;
 
 static PyMethodDef s_methods[] =
 {
@@ -63,6 +64,7 @@ static void setupModule(PyObject* module, bool registerLog)
     PyBugString<ifilename>::registerType(module);
     PyBugArray::registerType(module);
     PyBugNamespace::registerType(module);
+    s_moduleObject = module;
 }
 
 PyObject* init2_py_bugengine(bool registerLog)

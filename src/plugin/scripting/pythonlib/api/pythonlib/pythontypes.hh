@@ -110,6 +110,7 @@ typedef int (*PyType_ReadyType)(PyTypeObject* type);
 typedef PyObject* (*PyType_GenericAllocType)(PyTypeObject* type, Py_ssize_t size);
 typedef PyObject* (*PyType_GenericNewType)(PyTypeObject* type, PyObject* args, PyObject* kwargs);
 typedef int (*PyObject_IsTrueType)(PyObject* arg);
+typedef PyObject* (*PyCFunction_NewExType)(PyMethodDef* method, PyObject* self, PyObject* module);
 
 typedef PyObject* (*PyList_NewType)(Py_ssize_t len);
 typedef Py_ssize_t (*PyList_SizeType)(PyObject* list);

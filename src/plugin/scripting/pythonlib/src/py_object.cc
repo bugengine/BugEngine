@@ -19,6 +19,12 @@
 namespace BugEngine { namespace Python
 {
 
+PyMethodDef PyBugObject::s_methods[] =
+{
+    {"__dir__", &PyBugObject::dir, METH_NOARGS, NULL},
+    {NULL, NULL, 0, NULL}
+};
+
 static PyTypeObject::Py2NumberMethods s_py2ObjectNumber =
 {
     { 0, 0, 0 },
@@ -125,7 +131,7 @@ PyTypeObject PyBugObject::s_pyType =
     0,
     0,
     0,
-    0,
+    PyBugObject::s_methods,
     0,
     0,
     0,
@@ -220,6 +226,7 @@ static CreateMethod s_createNumber[] = {
     &PyBugNumber<float>::create,
     &PyBugNumber<double>::create
 };
+
 static CreateMethod s_createString[] = {
     &PyBugString<istring>::create,
     &PyBugString<inamespace>::create,
@@ -291,6 +298,8 @@ PyObject* PyBugObject::newinst(PyTypeObject* type, PyObject* args, PyObject* kwd
 
 PyObject* PyBugObject::getattr(PyObject* self, const char* name)
 {
+    //if (strcmp(name, "__dir__") == 0)
+    //    return s_library->m_PyCFunction_NewEx(&s_pyBugObjectMethods[0], self, s_moduleObject);
     PyBugObject* self_ = static_cast<PyBugObject*>(self);
     raw<const RTTI::Class> metaclass = self_->value.type().metaclass;
     istring name_(name);
@@ -848,6 +857,75 @@ void PyBugObject::unpack(PyObject* object, const RTTI::Type& desiredType, void* 
         be_notreached();
         new (buffer) RTTI::Value();
     }
+}
+
+PyObject* PyBugObject::dir(raw<const RTTI::Class> metaclass)
+{
+    PyObject* result = s_library->m_PyList_New(0);
+    if (!result)
+        return NULL;
+    PyString_FromStringAndSizeType fromString = s_library->getVersion() >= 30
+            ?   s_library->m_PyUnicode_FromStringAndSize
+            :   s_library->m_PyString_FromStringAndSize;
+
+    for (raw<const RTTI::ObjectInfo> o = metaclass->objects; o; o = o->next)
+    {
+        PyObject* str = fromString(o->name.c_str(), o->name.size());
+        if (!str)
+        {
+            Py_DECREF(result);
+            return NULL;
+        }
+        if (s_library->m_PyList_Append(result, str) == -1)
+        {
+            Py_DECREF(str);
+            Py_DECREF(result);
+            return NULL;
+        }
+        Py_DECREF(str);
+    }
+    for (raw<const RTTI::Class> cls = metaclass; cls; cls = cls->parent)
+    {
+        for (const RTTI::Property* p = cls->properties->begin(); p != cls->properties->end(); ++p)
+        {
+            PyObject* str = fromString(p->name.c_str(), p->name.size());
+            if (!str)
+            {
+                Py_DECREF(result);
+                return NULL;
+            }
+            if (s_library->m_PyList_Append(result, str) == -1)
+            {
+                Py_DECREF(str);
+                Py_DECREF(result);
+                return NULL;
+            }
+            Py_DECREF(str);
+        }
+        for (const RTTI::Method* m = cls->methods->begin(); m != cls->methods->end(); ++m)
+        {
+            PyObject* str = fromString(m->name.c_str(), m->name.size());
+            if (!str)
+            {
+                Py_DECREF(result);
+                return NULL;
+            }
+            if (s_library->m_PyList_Append(result, str) == -1)
+            {
+                Py_DECREF(str);
+                Py_DECREF(result);
+                return NULL;
+            }
+            Py_DECREF(str);
+        }
+    }
+    return result;
+}
+
+PyObject* PyBugObject::dir(PyObject* self, PyObject* args)
+{
+    be_forceuse(args);
+    return dir(static_cast<PyBugObject*>(self)->value.type().metaclass);
 }
 
 void PyBugObject::unpackAny(PyObject* object, void* buffer)

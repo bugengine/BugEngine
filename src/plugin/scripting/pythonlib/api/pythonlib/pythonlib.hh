@@ -90,6 +90,7 @@ public:
     PyType_GenericAllocType                 m_PyType_GenericAlloc;
     PyType_GenericNewType                   m_PyType_GenericNew;
     PyType_ReadyType                        m_PyType_Ready;
+    PyCFunction_NewExType                   m_PyCFunction_NewEx;
 
     PyList_NewType                          m_PyList_New;
     PyList_SizeType                         m_PyList_Size;
@@ -156,6 +157,7 @@ public:
 };
 
 extern tls<PythonLibrary> s_library;
+extern PyObject* s_moduleObject;
 
 be_api(PYTHONLIB) PyObject* init2_py_bugengine(bool registerLog);
 be_api(PYTHONLIB) PyObject* init3_py_bugengine(bool registerLog);
