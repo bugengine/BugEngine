@@ -115,7 +115,7 @@ PyTypeObject PyBugEnum::s_pyType =
     0,
     0,
     0,
-    0,
+    PyBugObject::s_methods,
     0,
     0,
     &PyBugObject::s_pyType,

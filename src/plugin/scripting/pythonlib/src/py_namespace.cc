@@ -9,6 +9,12 @@
 namespace BugEngine { namespace Python
 {
 
+PyMethodDef PyBugNamespace::s_methods[] =
+{
+    {"__dir__", &PyBugNamespace::dir, METH_NOARGS, NULL},
+    {NULL, NULL, 0, NULL}
+};
+
 PyTypeObject PyBugNamespace::s_pyType =
 {
     { { 0, 0 }, 0 },
@@ -38,7 +44,7 @@ PyTypeObject PyBugNamespace::s_pyType =
     0,
     0,
     0,
-    0,
+    PyBugNamespace::s_methods,
     0,
     0,
     0,
@@ -144,6 +150,39 @@ int PyBugNamespace::setattr(PyObject* self, const char* name, PyObject* value)
                               self_->value.type().name().c_str(), name);
     return -1;
 }
+
+
+PyObject* PyBugNamespace::dir(PyObject* self, PyObject* args)
+{
+    PyBugObject* self_ = static_cast<PyBugObject*>(self);
+    be_forceuse(args);
+    PyObject* result = s_library->m_PyList_New(0);
+    if (!result)
+        return NULL;
+    const RTTI::Class& klass = self_->value.as<const RTTI::Class&>();
+    PyString_FromStringAndSizeType fromString = s_library->getVersion() >= 30
+            ?   s_library->m_PyUnicode_FromStringAndSize
+            :   s_library->m_PyString_FromStringAndSize;
+
+    for (raw<const RTTI::ObjectInfo> o = klass.objects; o; o = o->next)
+    {
+        PyObject* str = fromString(o->name.c_str(), o->name.size());
+        if (!str)
+        {
+            Py_DECREF(result);
+            return NULL;
+        }
+        if (s_library->m_PyList_Append(result, str) == -1)
+        {
+            Py_DECREF(str);
+            Py_DECREF(result);
+            return NULL;
+        }
+        Py_DECREF(str);
+    }
+    return result;
+}
+
 
 PyObject* PyBugNamespace::repr(PyObject *self)
 {
