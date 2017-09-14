@@ -96,7 +96,7 @@ extern "C" int valueGet(lua_State *state)
     if (userdata->type().metaclass->type() == RTTI::ClassType_Array
      && lua_type(state, 2) == LUA_TNUMBER)
     {
-        const u32 i = lua_tonumber(state, 2);
+        const u32 i = be_checked_numcast<u32>(lua_tonumber(state, 2));
         if (userdata->type().isConst())
         {
             return Context::push(state, userdata->type().metaclass->apiMethods->arrayScripting->indexConst(*userdata, u32(i-1)));
@@ -123,7 +123,7 @@ extern "C" int valueSet(lua_State *state)
     if (userdata->type().metaclass->type() == RTTI::ClassType_Array
      && lua_type(state, 2) == LUA_TNUMBER)
     {
-        const u32 i = lua_tonumber(state, 2);
+        const u32 i = be_checked_numcast<u32>(lua_tonumber(state, 2));
         if (userdata->type().isConst())
         {
             return Context::push(state, userdata->type().metaclass->apiMethods->arrayScripting->indexConst(*userdata, u32(i-1)));

@@ -86,7 +86,6 @@ static RTTI::ConversionCost calculateConversion(const LuaParameterType& type,
             lua_pop(type.state, 2);
             return RTTI::ConversionCost::s_incompatible;
         }
-        break;
     case LUA_TTABLE:
         return RTTI::ConversionCost::s_incompatible;
     default:
