@@ -23,18 +23,16 @@ end
 
 function help(klass)
     function print_method(method)
-        local overload = method.overloads
-        while overload do
+        for i=1, method.overloads:size(), 1 do
+            local overload = method.overloads[i]
             local param_list = {}
-            local param = overload.params
-            while param do
+            for j=1, overload.params:size(), 1 do
+                local param = overload.params[j]
                 param_list[#param_list+1] = tostring('%s %s'):format(name(param.type), param.name)
-                param = param.next
             end
             print(tostring('  %s %s (%s)'):format(name(overload.returnType),
                                                   method.name,
                                                   table.concat(param_list, ', ')))
-            overload = overload.next
         end
     end
 
@@ -44,16 +42,14 @@ function help(klass)
         print_method(klass.constructor)
     end
     print('List of methods:')
-    local method = klass.methods
-    while method do
+    for i=1, klass.methods:size(), 1 do
+        local method = klass.methods[i]
         print_method(method)
-        method = method.next
     end
     print('List of properties:')
-    local property = klass.properties
-    while property do
+    for i=1, klass.properties:size(), 1 do
+        local property = klass.properties[i]
         print(tostring(' %s %s'):format(name(property.type), property.name))
-        property = property.next
     end
     print('List of objects:')
     local object = klass.objects
@@ -62,6 +58,10 @@ function help(klass)
         object = object.next
     end
 end
+
+p = plugin('sample.python')
+c = p.BugEngine.TestCases.Class(1.0, 2.0)
+c:doStuff(4.0, 8.0, false)
 
 help(BugEngine.RTTI.Class.ClassType.metaclass)
 help(BugEngine.text)

@@ -105,6 +105,7 @@ struct BE_EXPORT be_typeid< Settings::Settings<T> >
             {RTTI::staticarray<const RTTI::Property>::s_null},
             {RTTI::staticarray<const RTTI::Method>::s_null},
             {0},
+            {0},
             0,
             0
         };

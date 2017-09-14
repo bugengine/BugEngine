@@ -473,7 +473,7 @@ raw<RTTI::Class> be_game_Namespace()
                               {RTTI::staticarray<const RTTI::Tag>::s_null},
                               {RTTI::staticarray<const RTTI::Property>::s_null},
                               {RTTI::staticarray<const RTTI::Method>::s_null},
-                              {0}, 0, 0 };
+                              {0}, {0}, 0, 0 };
     raw<RTTI::Class> result = {&ci};
     return result;
 }

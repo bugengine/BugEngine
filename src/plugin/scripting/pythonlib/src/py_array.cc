@@ -4,6 +4,7 @@
 #include    <pythonlib/stdafx.h>
 #include    <pythonlib/pythonlib.hh>
 #include    <rtti/engine/call.hh>
+#include    <rtti/engine/scriptingapi.hh>
 #include    <py_array.hh>
 
 namespace BugEngine { namespace Python
@@ -163,31 +164,11 @@ PyObject* PyBugArray::create(PyObject* owner, const RTTI::Value& value)
         Py_INCREF(owner);
     }
     new(&(result)->value) RTTI::Value(value);
-    {
-        raw<const RTTI::Method> m = value.type().metaclass->getMethod("size");
-        if (m)
-        {
-            RTTI::ArgInfo<RTTI::Type> t(value.type());
-            RTTI::CallInfo c = RTTI::resolve(m, &t, 1);
-            result->m_size = c.overload;
-        }
-    }
-    {
-        raw<const RTTI::Method> m = value.type().metaclass->getMethod(RTTI::Class::nameOperatorIndex());
-        if (m)
-        {
-            RTTI::ArgInfo<RTTI::Type> t[2] = {
-                RTTI::ArgInfo<RTTI::Type>(value.type()),
-                RTTI::ArgInfo<RTTI::Type>(be_typeid<u32>::type())
-            };
-            RTTI::CallInfo c = RTTI::resolve(m, t, 2);
-            result->m_get = c.overload;
-        }
-    }
-    if (!result->m_get)
-        be_warning("%s: could not retrieve array index method" | value.type().name());
-    if (!result->m_size)
-        be_warning("%s: could not retrieve size() method" | value.type().name());
+    raw<const RTTI::Class> arrayClass = value.type().metaclass;
+    be_assert(arrayClass->apiMethods,
+              "Array type %s does not implement API methods" | arrayClass->fullname());
+    be_assert(arrayClass->apiMethods->arrayScripting,
+              "Array type %s does not implement Array API methods" | arrayClass->fullname());
     return result;
 }
 
@@ -244,75 +225,65 @@ PyObject* PyBugArray::repr(PyObject *self)
 
 int PyBugArray::nonZero(PyObject *self)
 {
-    PyBugArray* self_ = static_cast<PyBugArray*>(self);
-    const RTTI::Type t = self_->value.type();
-    be_assert(t.metaclass->type() == RTTI::ClassType_Array,
-              "PyBugArray expected array value");
-    if (t.indirection == RTTI::Type::Value)
-    {
-        be_unimplemented();
-        return 1;
-    }
-    else
-    {
-        return self_->value.as<const void* const>() != 0;
-    }
+    return length(self) > 0;
 }
 
 
 Py_ssize_t PyBugArray::length(PyObject *self)
 {
     PyBugArray* self_ = static_cast<PyBugArray*>(self);
-    if (self_->m_size)
-    {
-        return be_checked_numcast<Py_ssize_t>(self_->m_size->call(&self_->value, 1).as<u32>());
-    }
-    else
-    {
-        s_library->m_PyErr_Format(*s_library->m_PyExc_TypeError,
-                                  "Type %s does not implement method size()",
-                                  self_->value.type().name().c_str());
-        return 0;
-    }
+    const RTTI::Type t = self_->value.type();
+    be_assert(t.metaclass->type() == RTTI::ClassType_Array,
+              "PyBugArray expected array value");
+    return Py_ssize_t(t.metaclass->apiMethods->arrayScripting->size(self_->value));
 }
 
 PyObject* PyBugArray::item(PyObject *self, Py_ssize_t index)
 {
     PyBugArray* self_ = static_cast<PyBugArray*>(self);
-    if (self_->m_get)
+    if (index >= 0 && index < length(self))
     {
-        if (index < length(self))
-        {
-            RTTI::Value params[2] = {
-                RTTI::Value(RTTI::Value::ByRef(self_->value)),
-                RTTI::Value(be_checked_numcast<u32>(index))
-            };
-            RTTI::Value result = self_->m_get->call(params, 2);
-            return PyBugObject::create(0, result);
-        }
-        else
-        {
-            s_library->m_PyErr_Format(*s_library->m_PyExc_IndexError,
-                                      "list index out of range",
-                                      self_->value.type().name().c_str());
-            return 0;
-        }
+        const RTTI::Type t = self_->value.type();
+        return PyBugObject::create(0, t.isConst()
+                                        ? t.metaclass->apiMethods->arrayScripting->indexConst(self_->value, index)
+                                        : t.metaclass->apiMethods->arrayScripting->index(self_->value, index));
     }
     else
     {
-        s_library->m_PyErr_Format(*s_library->m_PyExc_TypeError,
-                                  "Type %s does not implement operator[]",
-                                  self_->value.type().name().c_str());
+        s_library->m_PyErr_Format(*s_library->m_PyExc_IndexError,
+                                  "Index out of range");
         return 0;
     }
 }
 
 int PyBugArray::setItem(PyObject *self, Py_ssize_t index, PyObject *value)
 {
-    be_forceuse(self);
-    be_forceuse(index);
-    be_forceuse(value);
-    return 0;
+    PyBugArray* self_ = static_cast<PyBugArray*>(self);
+    const RTTI::Type t = self_->value.type();
+    raw<const RTTI::ScriptingArrayAPI> arrayApi = t.metaclass->apiMethods->arrayScripting;
+    if (t.isConst())
+    {
+        s_library->m_PyErr_Format(*s_library->m_PyExc_TypeError,
+                                  "instance of %s is const",
+                                  self_->value.type().name().c_str());
+        return -1;
+    }
+    else if (distance(value, arrayApi->value_type) >= RTTI::ConversionCost::s_incompatible)
+    {
+        s_library->m_PyErr_Format(*s_library->m_PyExc_TypeError,
+                                  "Cannot convert to array value_type %s",
+                                  arrayApi->value_type.name().c_str());
+        return -1;
+    }
+    else
+    {
+        RTTI::Value* v = (RTTI::Value*)malloca(sizeof(RTTI::Value));
+        PyBugObject::unpack(value, arrayApi->value_type, v);
+        arrayApi->index(self_->value, index) = *v;
+        v->~Value();
+        freea(v);
+        return 0;
+    }
 }
 
 

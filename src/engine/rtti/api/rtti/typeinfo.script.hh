@@ -60,6 +60,10 @@ public:
     template< typename T >
     bool                    isA() const;
     minitl::format<1024u>   name() const;
+    bool                    isConst() const
+    {
+        return indirection == Value ? (constness == 0) : (access == 0);
+    }
 private:
     void*                   rawget(const void*) const;
     void                    copy(const void* source, void* dest) const;

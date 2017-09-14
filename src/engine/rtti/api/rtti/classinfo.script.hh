@@ -16,6 +16,7 @@ struct ObjectInfo;
 struct Property;
 struct Method;
 struct Tag;
+struct ScriptingAPI;
 
 enum ClassType
 {
@@ -93,6 +94,7 @@ published:
     be_tag(Alias("?call"))
     raw<const Method>                   constructor;
 public:
+    raw<const ScriptingAPI>             apiMethods;
     typedef void (*CopyConstructor)(const void* source, void* destination);
     typedef void (*Destructor)(void* object);
     const CopyConstructor               copyconstructor;

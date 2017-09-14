@@ -11,6 +11,7 @@
 #include    <py_string.hh>
 #include    <py_array.hh>
 #include    <py_namespace.hh>
+#include    <py_class.hh>
 #include    <py_plugin.hh>
 
 
@@ -64,6 +65,7 @@ static void setupModule(PyObject* module, bool registerLog)
     PyBugString<ifilename>::registerType(module);
     PyBugArray::registerType(module);
     PyBugNamespace::registerType(module);
+    PyBugClass::registerType(module);
     s_moduleObject = module;
 }
 

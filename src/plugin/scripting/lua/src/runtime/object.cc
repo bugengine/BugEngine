@@ -10,6 +10,8 @@
 #include    <context.hh>
 #include    <rtti/classinfo.script.hh>
 #include    <rtti/engine/propertyinfo.script.hh>
+#include    <rtti/engine/scriptingapi.hh>
+
 
 
 namespace BugEngine { namespace Lua
@@ -89,72 +91,92 @@ extern "C" int valueToString(lua_State *state)
 extern "C" int valueGet(lua_State *state)
 {
     Context::checkArg(state, 1, "BugEngine.Object");
-    Context::checkArg(state, 2, LUA_TSTRING);
-
     RTTI::Value* userdata = (RTTI::Value*)lua_touserdata(state, -2);
-    const char *name = lua_tostring(state, -1);
-    RTTI::Value v = (*userdata)[name];
-    if (!v)
+
+    if (userdata->type().metaclass->type() == RTTI::ClassType_Array
+     && lua_type(state, 2) == LUA_TNUMBER)
     {
-        lua_pushnil(state);
-    }
-    else if (v.type().indirection >= RTTI::Type::RawPtr && v.as<const void* const>() == 0)
-    {
-        lua_pushnil(state);
+        const u32 i = lua_tonumber(state, 2);
+        if (userdata->type().isConst())
+        {
+            return Context::push(state, userdata->type().metaclass->apiMethods->arrayScripting->indexConst(*userdata, u32(i-1)));
+        }
+        else
+        {
+            return Context::push(state, userdata->type().metaclass->apiMethods->arrayScripting->index(*userdata, u32(i-1)));
+        }
     }
     else
     {
-        Context::push(state, v);
+        Context::checkArg(state, 2, LUA_TSTRING);
+
+        const char *name = lua_tostring(state, -1);
+        RTTI::Value v = (*userdata)[name];
+        return Context::push(state, v);
     }
-    return 1;
 }
 
 extern "C" int valueSet(lua_State *state)
 {
     Context::checkArg(state, 1, "BugEngine.Object");
-    Context::checkArg(state, 2, LUA_TSTRING);
-
-    RTTI::Value* userdata = (RTTI::Value*)lua_touserdata(state, -3);
-    const istring name = istring(lua_tostring(state, -2));
-    raw<const RTTI::Property> p = userdata->type().metaclass->getProperty(name);
-    if (!p)
+    RTTI::Value* userdata = (RTTI::Value*)lua_touserdata(state, 1);
+    if (userdata->type().metaclass->type() == RTTI::ClassType_Array
+     && lua_type(state, 2) == LUA_TNUMBER)
     {
-        return error(state, minitl::format<4096u>("object of type %s has no property %s")
-                                                | userdata->type().name().c_str()
-                                                | name.c_str());
-    }
-    else if (userdata->type().constness == RTTI::Type::Const)
-    {
-        return error(state, minitl::format<4096u>("object %s is const")
-                                                | userdata->type().name().c_str());
-    }
-    else if (p->type.constness == RTTI::Type::Const)
-    {
-        return error(state, minitl::format<4096u>("property %s.%s is const")
-                                                | userdata->type().name().c_str()
-                                                | name.c_str());
+        const u32 i = lua_tonumber(state, 2);
+        if (userdata->type().isConst())
+        {
+            return Context::push(state, userdata->type().metaclass->apiMethods->arrayScripting->indexConst(*userdata, u32(i-1)));
+        }
+        else
+        {
+            return Context::push(state, userdata->type().metaclass->apiMethods->arrayScripting->index(*userdata, u32(i-1)));
+        }
     }
     else
     {
-        RTTI::Value* v = (RTTI::Value*)malloca(sizeof(RTTI::Value));
-        bool result = createValue(state, -1, p->type, v);
+        Context::checkArg(state, 2, LUA_TSTRING);
 
-        if (result)
+        const istring name = istring(lua_tostring(state, -2));
+        raw<const RTTI::Property> p = userdata->type().metaclass->getProperty(name);
+        if (!p)
         {
-            p->set(*userdata, *v);
-            v->~Value();
-        }
-        freea(v);
-
-        if (!result)
-        {
-            return error(state, minitl::format<4096u>("property %s.%s has incompatible type %s")
+            return error(state, minitl::format<4096u>("object of type %s has no property %s")
                                                     | userdata->type().name().c_str()
-                                                    | name.c_str()
-                                                    | p->type.name().c_str());
+                                                    | name.c_str());
+        }
+        else if (userdata->type().constness == RTTI::Type::Const)
+        {
+            return error(state, minitl::format<4096u>("object %s is const")
+                                                    | userdata->type().name().c_str());
+        }
+        else if (p->type.constness == RTTI::Type::Const)
+        {
+            return error(state, minitl::format<4096u>("property %s.%s is const")
+                                                    | userdata->type().name().c_str()
+                                                    | name.c_str());
+        }
+        else
+        {
+            RTTI::Value* v = (RTTI::Value*)malloca(sizeof(RTTI::Value));
+            bool result = createValue(state, -1, p->type, v);
+
+            if (result)
+            {
+                p->set(*userdata, *v);
+                v->~Value();
+            }
+            freea(v);
+
+            if (!result)
+            {
+                return error(state, minitl::format<4096u>("property %s.%s has incompatible type %s")
+                                                        | userdata->type().name().c_str()
+                                                        | name.c_str()
+                                                        | p->type.name().c_str());
+            }
         }
     }
-
     return 0;
 }
 

@@ -13,9 +13,6 @@ namespace BugEngine { namespace Python
 
 struct PyBugArray : public PyBugObject
 {
-    raw<const RTTI::Method::Overload> m_size;
-    raw<const RTTI::Method::Overload> m_get;
-
     static void registerType(PyObject* module);
     
     static PyObject* create(PyObject* owner, const RTTI::Value &value);

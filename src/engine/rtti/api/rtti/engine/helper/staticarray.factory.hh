@@ -13,36 +13,6 @@ see LICENSE for detail */
 namespace BugEngine
 {
 
-namespace
-{
-
-
-template< typename T >
-be_section(rtti_text_trampoline_factory)
-static RTTI::Value callStaticArrayOperatorIndex(RTTI::Value* params, u32 paramCount)
-{
-    be_assert(paramCount == 1, "expected 1 parameter; received %d" | paramCount);
-    return RTTI::Value(params[0].as< RTTI::staticarray<T>& >().operator[](params[1].as<u32>()));
-}
-
-template< typename T >
-be_section(rtti_text_trampoline_factory)
-static RTTI::Value callStaticArraySize(RTTI::Value* params, u32 paramCount)
-{
-    be_assert(paramCount == 1, "expected 1 parameter; received %d" | paramCount);
-    return RTTI::Value(params[0].as< const RTTI::staticarray<T>& >().count);
-}
-
-template< typename T >
-be_section(rtti_text_trampoline_factory)
-static RTTI::Value callStaticArrayOperatorIndexConst(RTTI::Value* params, u32 paramCount)
-{
-    be_assert(paramCount == 2, "expected 2 parameter; received %d" | paramCount);
-    return RTTI::Value(params[0].as< const RTTI::staticarray<T>& >().operator[](params[1].as<u32>()));
-}
-
-}
-
 template< typename T >
 struct be_typeid< RTTI::staticarray<T> >
 {
@@ -53,8 +23,61 @@ struct be_typeid< RTTI::staticarray<T> >
     static inline RTTI::Type  type();
     static BE_EXPORT raw<const RTTI::Class> s_initialisation;
 private:
+    static u32 array_size(const RTTI::Value& v);
+    static RTTI::Value index(RTTI::Value& v, u32 i);
+    static RTTI::Value indexConst(const RTTI::Value& v, u32 i);
+    static RTTI::Value callStaticArrayOperatorIndex(RTTI::Value* params, u32 paramCount);
+    static RTTI::Value callStaticArraySize(RTTI::Value* params, u32 paramCount);
+    static RTTI::Value callStaticArrayOperatorIndexConst(RTTI::Value* params, u32 paramCount);
     static raw<const RTTI::Class> registerProperties();
 };
+
+
+template< typename T >
+be_section(rtti_text_trampoline_factory)
+u32 be_typeid< RTTI::staticarray<T> >::array_size(const RTTI::Value& v)
+{
+    return v.as< const RTTI::staticarray<T>& >().count;
+}
+
+template< typename T >
+be_section(rtti_text_trampoline_factory)
+RTTI::Value be_typeid< RTTI::staticarray<T> >::index(RTTI::Value& v, u32 i)
+{
+    return RTTI::Value(RTTI::Value::ByRef(v.as< RTTI::staticarray<T>& >().operator[](i)));
+}
+
+template< typename T >
+be_section(rtti_text_trampoline_factory)
+RTTI::Value be_typeid< RTTI::staticarray<T> >::indexConst(const RTTI::Value& v, u32 i)
+{
+    return RTTI::Value(RTTI::Value::ByRef(v.as< const RTTI::staticarray<T>& >().operator[](i)));
+}
+
+template< typename T >
+be_section(rtti_text_trampoline_factory)
+RTTI::Value be_typeid< RTTI::staticarray<T> >::callStaticArrayOperatorIndex(RTTI::Value* params, u32 paramCount)
+{
+    be_assert(paramCount == 1, "expected 1 parameter; received %d" | paramCount);
+    return RTTI::Value(params[0].as< RTTI::staticarray<T>& >().operator[](params[1].as<u32>()));
+}
+
+template< typename T >
+be_section(rtti_text_trampoline_factory)
+RTTI::Value be_typeid< RTTI::staticarray<T> >::callStaticArraySize(RTTI::Value* params, u32 paramCount)
+{
+    be_assert(paramCount == 1, "expected 1 parameter; received %d" | paramCount);
+    return RTTI::Value(params[0].as< const RTTI::staticarray<T>& >().count);
+}
+
+template< typename T >
+be_section(rtti_text_trampoline_factory)
+RTTI::Value be_typeid< RTTI::staticarray<T> >::callStaticArrayOperatorIndexConst(RTTI::Value* params, u32 paramCount)
+{
+    be_assert(paramCount == 2, "expected 2 parameter; received %d" | paramCount);
+    return RTTI::Value(params[0].as< const RTTI::staticarray<T>& >().operator[](params[1].as<u32>()));
+}
+
 
 template< typename T >
 BE_EXPORT
@@ -77,6 +100,7 @@ raw<RTTI::Class> be_typeid< RTTI::staticarray<T> >::preklass()
         {RTTI::staticarray<const RTTI::Tag>::s_null},
         {RTTI::staticarray<const RTTI::Property>::s_null},
         {RTTI::staticarray<const RTTI::Method>::s_null},
+        {0},
         {0},
         &RTTI::wrapCopy< RTTI::staticarray<T> >,
         &RTTI::wrapDestroy< RTTI::staticarray<T> >};
@@ -137,14 +161,14 @@ raw<const RTTI::Class> be_typeid< RTTI::staticarray<T> >::registerProperties()
                 {reinterpret_cast< RTTI::staticarray< const RTTI::Method::Parameter >* >(&s_Index_0_params)},
                 be_typeid< const T & >::type(),
                 false,
-                &callStaticArrayOperatorIndexConst<T>
+                &callStaticArrayOperatorIndexConst
             },
             {
                 {RTTI::staticarray<const RTTI::Tag>::s_null},
                 {reinterpret_cast< RTTI::staticarray< const RTTI::Method::Parameter >* >(&s_Index_1_params)},
                 be_typeid< T & >::type(),
                 false,
-                &callStaticArrayOperatorIndex<T>
+                &callStaticArrayOperatorIndex
             }
         }
     };
@@ -169,7 +193,7 @@ raw<const RTTI::Class> be_typeid< RTTI::staticarray<T> >::registerProperties()
                 {reinterpret_cast< RTTI::staticarray< const RTTI::Method::Parameter >* >(&s_size_params)},
                 be_typeid< u32 >::type(),
                 false,
-                &callStaticArraySize<T>
+                &callStaticArraySize
             }
         }
     };
@@ -198,6 +222,16 @@ raw<const RTTI::Class> be_typeid< RTTI::staticarray<T> >::registerProperties()
     };
     raw<const RTTI::ObjectInfo> objects = {&valueType};
     result->objects.set(objects.operator->());
+    static RTTI::ScriptingArrayAPI scriptingArrayAPI = {
+        value_type,
+        &array_size,
+        &index,
+        &indexConst
+    };
+    static RTTI::ScriptingAPI scriptingAPI = {
+        {&scriptingArrayAPI}
+    };
+    result->apiMethods.set(&scriptingAPI);
     return result;
 }
 

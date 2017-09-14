@@ -128,6 +128,11 @@ int Context::push(lua_State* state, const RTTI::Value& v)
     {
         return 0;
     }
+    else if (v.type().indirection >= RTTI::Type::RawPtr && v.as<const void* const>() == 0)
+    {
+        lua_pushnil(state);
+        return 1;
+    }
     else if (t.metaclass->type() == RTTI::ClassType_Number)
     {
         switch(t.metaclass->index())
