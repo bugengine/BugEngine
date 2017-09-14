@@ -155,7 +155,6 @@ static RTTI::ConversionCost calculateConversion(const LuaTableType& type,
             lua_pop(type.state, 3);
             return RTTI::ConversionCost::s_incompatible;
         }
-        break;
     case LUA_TTABLE:
         lua_pop(type.state, 1);
         return RTTI::ConversionCost::s_incompatible;

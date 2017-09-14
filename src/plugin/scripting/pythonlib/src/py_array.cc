@@ -244,10 +244,11 @@ PyObject* PyBugArray::item(PyObject *self, Py_ssize_t index)
     PyBugArray* self_ = static_cast<PyBugArray*>(self);
     if (index >= 0 && index < length(self))
     {
+        u32 index_ = be_checked_numcast<u32>(index);
         const RTTI::Type t = self_->value.type();
         return PyBugObject::create(0, t.isConst()
-                                        ? t.metaclass->apiMethods->arrayScripting->indexConst(self_->value, index)
-                                        : t.metaclass->apiMethods->arrayScripting->index(self_->value, index));
+                                        ? t.metaclass->apiMethods->arrayScripting->indexConst(self_->value, index_)
+                                        : t.metaclass->apiMethods->arrayScripting->index(self_->value, index_));
     }
     else
     {
@@ -278,9 +279,10 @@ int PyBugArray::setItem(PyObject *self, Py_ssize_t index, PyObject *value)
     }
     else
     {
+        u32 index_ = be_checked_numcast<u32>(index);
         RTTI::Value* v = (RTTI::Value*)malloca(sizeof(RTTI::Value));
         PyBugObject::unpack(value, arrayApi->value_type, v);
-        arrayApi->index(self_->value, index) = *v;
+        arrayApi->index(self_->value, index_) = *v;
         v->~Value();
         freea(v);
         return 0;
