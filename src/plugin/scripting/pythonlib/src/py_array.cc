@@ -169,6 +169,7 @@ PyObject* PyBugArray::create(PyObject* owner, const RTTI::Value& value)
               "Array type %s does not implement API methods" | arrayClass->fullname());
     be_assert(arrayClass->apiMethods->arrayScripting,
               "Array type %s does not implement Array API methods" | arrayClass->fullname());
+    be_forceuse(arrayClass);
     return result;
 }
 
