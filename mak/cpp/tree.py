@@ -636,6 +636,7 @@ class Class(Container):
                          '        {::BugEngine::RTTI::staticarray<const ::BugEngine::RTTI::Property>::s_null},\n'
                          '        {::BugEngine::RTTI::staticarray<const ::BugEngine::RTTI::Method>::s_null},\n'
                          '        {0},\n'
+                         '        {0},\n'
                          '        %s,\n'
                          '        %s};\n'
                          '    raw< ::BugEngine::RTTI::Class > result = { &cls };\n'
@@ -855,9 +856,9 @@ class Root(Container):
         definition.write('#include <rtti/engine/methodinfo.script.hh>\n')
         definition.write('#include <rtti/engine/objectinfo.script.hh>\n')
         definition.write('#include <rtti/engine/propertyinfo.script.hh>\n')
-        definition.write('#include <rtti/engine/array.hh>\n')
-        definition.write('#include <rtti/engine/map.hh>\n')
-        definition.write('#include <rtti/engine/tuple.hh>\n')
+        definition.write('#include <rtti/engine/array.factory.hh>\n')
+        definition.write('#include <rtti/engine/map.factory.hh>\n')
+        definition.write('#include <rtti/engine/tuple.factory.hh>\n')
         definition.write('#include <rtti/engine/taginfo.script.hh>\n')
         definition.write('#include <rtti/engine/helper/method.hh>\n')
         definition.write('#include <rtti/engine/helper/get.hh>\n')

@@ -85,6 +85,7 @@ raw<RTTI::Class> be_typeid< minitl::tuple<T1, T2> >::preklass()
         {RTTI::staticarray<const RTTI::Property>::s_null},
         {RTTI::staticarray<const RTTI::Method>::s_null},
         {0},
+        {0},
         &RTTI::wrapCopy< minitl::tuple<T1, T2> >,
         &RTTI::wrapDestroy< minitl::tuple<T1, T2> >};
     raw< RTTI::Class > result = { &cls };

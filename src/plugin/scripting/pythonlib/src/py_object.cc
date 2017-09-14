@@ -14,6 +14,7 @@
 #include    <rtti/classinfo.script.hh>
 #include    <rtti/engine/methodinfo.script.hh>
 #include    <rtti/engine/propertyinfo.script.hh>
+#include    <rtti/engine/scriptingapi.hh>
 #include    <rtti/classinfo.script.hh>
 
 namespace BugEngine { namespace Python
@@ -271,7 +272,17 @@ PyObject* PyBugObject::create(PyObject* owner, const RTTI::Value& value)
     case RTTI::ClassType_Array:
         return PyBugArray::create(owner, value);
     case RTTI::ClassType_Namespace:
-        return PyBugNamespace::create(owner, value);
+        {
+            const RTTI::Class& cls = value.as<const RTTI::Class&>();
+            if (cls.constructor)
+            {
+                return PyBugClass::create(owner, value);
+            }
+            else
+            {
+                return PyBugNamespace::create(owner, value);
+            }
+        }
     default:
         {
             PyObject* result = s_pyType.tp_alloc(&s_pyType, 0);
@@ -298,8 +309,6 @@ PyObject* PyBugObject::newinst(PyTypeObject* type, PyObject* args, PyObject* kwd
 
 PyObject* PyBugObject::getattr(PyObject* self, const char* name)
 {
-    //if (strcmp(name, "__dir__") == 0)
-    //    return s_library->m_PyCFunction_NewEx(&s_pyBugObjectMethods[0], self, s_moduleObject);
     PyBugObject* self_ = static_cast<PyBugObject*>(self);
     raw<const RTTI::Class> metaclass = self_->value.type().metaclass;
     istring name_(name);
@@ -716,7 +725,8 @@ RTTI::ConversionCost PyBugObject::distance(PyObject* object, const RTTI::Type& d
         }
     }
     else if (object->py_type == &PyBugObject::s_pyType
-          || object->py_type->tp_base == &PyBugObject::s_pyType)
+          || object->py_type->tp_base == &PyBugObject::s_pyType
+          || object->py_type->tp_base->tp_base == &PyBugObject::s_pyType)
     {
         PyBugObject* object_ = static_cast<PyBugObject*>(object);
         return object_->value.type().calculateConversion(desiredType);
@@ -737,14 +747,23 @@ RTTI::ConversionCost PyBugObject::distance(PyObject* object, const RTTI::Type& d
     {
         if (desiredType.metaclass->type() == RTTI::ClassType_Array)
         {
-            static const istring s_valueTypeName = "value_type";
-            raw<const RTTI::ObjectInfo> valueType = desiredType.metaclass->objects;
-            be_assert(valueType->name ==  "value_type",
-                      "Array class %s needs to specify value type" | desiredType.metaclass->name);
-            const RTTI::Type& subType = valueType->value.as<const RTTI::Type&>();
-            be_forceuse(subType);
-            be_unimplemented();
-            return RTTI::ConversionCost();
+            PyTuple_SizeType size = object->py_type->tp_flags & (Py_TPFLAGS_LIST_SUBCLASS)
+                                        ?   s_library->m_PyList_Size
+                                        :   s_library->m_PyTuple_Size;
+            PyTuple_GetItemType get = object->py_type->tp_flags & (Py_TPFLAGS_LIST_SUBCLASS)
+                                         ?   s_library->m_PyList_GetItem
+                                         :   s_library->m_PyTuple_GetItem;
+            if (size(object) != 0)
+            {
+                raw<const RTTI::ScriptingArrayAPI> api = desiredType.metaclass->apiMethods->arrayScripting;
+                const RTTI::Type& subType = api->value_type;
+                PyObject* firstObject = get(object, 0);
+                return distance(firstObject, subType);
+            }
+            else
+            {
+                return RTTI::ConversionCost();
+            }
         }
         else
         {

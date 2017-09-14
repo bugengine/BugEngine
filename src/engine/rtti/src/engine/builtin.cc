@@ -4,7 +4,7 @@
 #include    <rtti/stdafx.h>
 #include    <rtti/classinfo.script.hh>
 #include    <rtti/engine/namespace.hh>
-#include    <rtti/engine/array.hh>
+#include    <rtti/engine/array.factory.hh>
 #include    <rtti/engine/helper/method.hh>
 
 BE_REGISTER_NAMESPACE_2_(game, BugEngine, RTTI);
@@ -20,7 +20,7 @@ template< > BE_EXPORT raw<RTTI::Class> be_typeid< void >::preklass()
                                   {RTTI::staticarray<const RTTI::Tag>::s_null},
                                   {RTTI::staticarray<const RTTI::Property>::s_null},
                                   {RTTI::staticarray<const RTTI::Method>::s_null},
-                                  {0}, &RTTI::nullconstructor<0>, &RTTI::nulldestructor };
+                                  {0}, {0}, &RTTI::nullconstructor<0>, &RTTI::nulldestructor };
     raw<RTTI::Class> ci = {&s_void};
     return ci;
 }
@@ -37,7 +37,7 @@ template< > BE_EXPORT raw<RTTI::Class> be_typeid< minitl::pointer >::preklass()
                                      {RTTI::staticarray<const RTTI::Tag>::s_null},
                                      {RTTI::staticarray<const RTTI::Property>::s_null},
                                      {RTTI::staticarray<const RTTI::Method>::s_null},
-                                     {0}, &RTTI::nullconstructor<0>, &RTTI::nulldestructor };
+                                     {0}, {0}, &RTTI::nullconstructor<0>, &RTTI::nulldestructor };
     raw<RTTI::Class> ci = {&s_pointer};
     return ci;
 }
@@ -54,7 +54,7 @@ template< > BE_EXPORT raw<RTTI::Class> be_typeid< minitl::refcountable >::prekla
                                           {RTTI::staticarray<const RTTI::Tag>::s_null},
                                           {RTTI::staticarray<const RTTI::Property>::s_null},
                                           {RTTI::staticarray<const RTTI::Method>::s_null},
-                                          {0}, &RTTI::nullconstructor<0>, &RTTI::nulldestructor };
+                                          {0}, {0}, &RTTI::nullconstructor<0>, &RTTI::nulldestructor };
     raw<RTTI::Class> ci = {&s_refcountable};
     return ci;
 }

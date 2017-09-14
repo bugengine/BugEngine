@@ -31,7 +31,7 @@ PyTypeObject PyBugNamespace::s_pyType =
     0,
     0,
     0,
-    &PyBugObject::call,
+    0,
     0,
     0,
     0,
@@ -205,7 +205,7 @@ void PyBugNamespace::registerType(PyObject* module)
     int result = s_library->m_PyType_Ready(&s_pyType);
     be_assert(result >= 0, "unable to register type");
     Py_INCREF(&s_pyType);
-    result = (*s_library->m_PyModule_AddObject)(module, "Array", (PyObject*)&s_pyType);
+    result = (*s_library->m_PyModule_AddObject)(module, "Namespace", (PyObject*)&s_pyType);
     be_assert(result >= 0, "unable to register type");
     result = (*s_library->m_PyModule_AddObject)(module, "BugEngine",
                                                 create(0, RTTI::Value(be_game_Namespace())));

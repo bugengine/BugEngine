@@ -108,6 +108,7 @@ struct be_typeid< World::EntityStorageFactory<COMPONENT_LIST, PARTITION_LIST> >
             {RTTI::staticarray<const RTTI::Property>::s_null},
             {RTTI::staticarray<const RTTI::Method>::s_null},
             {0},
+            {0},
             0,
             0
         };

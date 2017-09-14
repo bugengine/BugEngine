@@ -9,7 +9,7 @@
 #include    <filesystem/folder.script.hh>
 #include    <rtti/engine/objectinfo.script.hh>
 #include    <rtti/value.hh>
-#include    <rtti/engine/array.hh>
+#include    <rtti/engine/array.factory.hh>
 
 namespace BugEngine { namespace PackageBuilder { namespace Nodes
 {
@@ -834,22 +834,17 @@ RTTI::ConversionCost ArrayValue::calculateConversion(const RTTI::Type& type) con
 {
     if (type.metaclass->type() == RTTI::ClassType_Array)
     {
-        raw<const RTTI::ObjectInfo> prop = type.metaclass->getStaticProperty(istring("value_type"));
-        if (prop)
+        raw<const RTTI::ScriptingArrayAPI> api = type.metaclass->apiMethods->arrayScripting;
+        const RTTI::Type& valueType = api->value_type;
+        RTTI::ConversionCost c;
+        for (minitl::vector< ref<Value> >::const_iterator it = m_values.begin();
+             it != m_values.end();
+             ++it)
         {
-            if (prop->value.type().isA(be_typeid<const RTTI::Type>::type()))
-            {
-                RTTI::ConversionCost c;
-                RTTI::Type valueType = prop->value.as<const RTTI::Type>();
-                for (minitl::vector< ref<Value> >::const_iterator it = m_values.begin();
-                     it != m_values.end();
-                     ++it)
-                {
-                    c += (*it)->calculateConversion(valueType);
-                }
-                return c;
-            }
+            c += (*it)->calculateConversion(valueType);
         }
+        return c;
+
     }
     return RTTI::ConversionCost::s_incompatible;
 }
@@ -858,9 +853,8 @@ RTTI::Value ArrayValue::as(const RTTI::Type& type) const
 {
     be_assert(calculateConversion(type) < RTTI::ConversionCost::s_incompatible,
               "invalid conversion from array to %s" | type);
-    raw<const RTTI::ObjectInfo> prop = type.metaclass->getStaticProperty(istring("value_type"));
-    be_assert(prop, "unable to find the array value type");
-    RTTI::Type valueType = prop->value.as<const RTTI::Type>();
+    raw<const RTTI::ScriptingArrayAPI> api = type.metaclass->apiMethods->arrayScripting;
+    const RTTI::Type& valueType = api->value_type;
     minitl::array<RTTI::Value> v(Arena::temporary(), be_checked_numcast<u32>(m_values.size()));
     for (u32 i = 0; i < m_values.size(); ++i)
     {
