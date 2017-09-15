@@ -61,7 +61,7 @@ end
 
 p = plugin('sample.python')
 c = p.BugEngine.TestCases.Class(1.0, 2.0)
-c:doStuff(4.0, 8.0, false)
+c:doStuff{4.0, v2=8.0, v3=false}
 
 help(BugEngine.RTTI.Class.ClassType.metaclass)
 help(BugEngine.text)

@@ -18,97 +18,70 @@ struct LuaParameterType
 {
     lua_State*  state;
     int         index;
+    istring     name;
+    int         key;
 
     LuaParameterType(lua_State* state, int index)
         :   state(state)
         ,   index(index)
+        ,   name("")
+        ,   key(-1)
     {
     }
-};
-
-struct LuaTableType
-{
-    lua_State*  state;
-    istring     name;
-    int         key;
-
-    LuaTableType(lua_State* state, istring name, int key)
+    LuaParameterType(lua_State* state, int index, istring name, int key)
         :   state(state)
+        ,   index(index)
         ,   name(name)
         ,   key(key)
     {
     }
 };
 
+struct LuaPop
+{
+    lua_State* state;
+    int index;
+
+    LuaPop(lua_State* state, int index)
+        :   state(state)
+        ,   index(index)
+    {
+    }
+    ~LuaPop()
+    {
+        if (index < 0)
+        {
+            lua_pop(state, -index);
+        }
+    }
+};
+
 static RTTI::ConversionCost calculateConversion(const LuaParameterType& type,
                                                 const RTTI::Type& target)
 {
-    if (target.metaclass->type() == RTTI::ClassType_Variant)
+    int index;
+    if (type.key != -1)
     {
-        switch (lua_type(type.state, type.index))
+        if (type.name.size() > 0)
         {
-        case LUA_TNIL:
-        case LUA_TSTRING:
-        case LUA_TBOOLEAN:
-        case LUA_TNUMBER:
-        case LUA_TUSERDATA:
-        case LUA_TTABLE:
-            return RTTI::ConversionCost::s_variant;
-        default:
-            return RTTI::ConversionCost::s_incompatible;
-        }
-    }
-    else switch (lua_type(type.state, type.index))
-    {
-    case LUA_TNIL:
-        return target.indirection >= RTTI::Type::RawPtr
-                ?   RTTI::ConversionCost()
-                :   RTTI::ConversionCost::s_incompatible;
-    case LUA_TSTRING:
-        return target.metaclass->type() == RTTI::ClassType_String
-                ?   RTTI::ConversionCost()
-                :   RTTI::ConversionCost::s_incompatible;
-    case LUA_TBOOLEAN:
-        return RTTI::calculateConversion<bool>(target);
-    case LUA_TNUMBER:
-        return RTTI::calculateConversion<LUA_NUMBER>(target);
-    case LUA_TUSERDATA:
-        lua_getmetatable(type.state, type.index);
-        luaL_getmetatable(type.state, "BugEngine.Object");
-        if (lua_rawequal(type.state, -1, -2))
-        {
-            lua_pop(type.state, 2);
-            RTTI::Value* userdata = (RTTI::Value*)lua_touserdata(type.state, type.index);
-            return RTTI::calculateConversion(userdata->type(), target);
+            lua_pushstring(type.state, type.name.c_str());
+            lua_rawget(type.state, type.index);
         }
         else
         {
-            lua_pop(type.state, 2);
-            return RTTI::ConversionCost::s_incompatible;
+            lua_rawgeti(type.state, type.index, type.key);
         }
-    case LUA_TTABLE:
-        return RTTI::ConversionCost::s_incompatible;
-    default:
-        return RTTI::ConversionCost::s_incompatible;
-    }
-}
-
-static RTTI::ConversionCost calculateConversion(const LuaTableType& type,
-                                                const RTTI::Type& target)
-{
-    if (type.name.size() > 0)
-    {
-        lua_pushstring(type.state, type.name.c_str());
-        lua_rawget(type.state, 1);
+        index = -1;
     }
     else
     {
-        lua_rawgeti(type.state, 1, type.key);
+        index = type.index;
     }
+
+    LuaPop p(type.state, index);
     if (target.metaclass->type() == RTTI::ClassType_Variant)
     {
-        lua_pop(type.state, 1);
-        switch (lua_type(type.state, -1))
+        switch (lua_type(type.state, index))
         {
         case LUA_TNIL:
         case LUA_TSTRING:
@@ -121,90 +94,93 @@ static RTTI::ConversionCost calculateConversion(const LuaTableType& type,
             return RTTI::ConversionCost::s_incompatible;
         }
     }
-    else switch (lua_type(type.state, -1))
+    else switch (lua_type(type.state, index))
     {
     case LUA_TNIL:
-        lua_pop(type.state, 1);
         return target.indirection >= RTTI::Type::RawPtr
                 ?   RTTI::ConversionCost()
                 :   RTTI::ConversionCost::s_incompatible;
     case LUA_TSTRING:
-        lua_pop(type.state, 1);
         return target.metaclass->type() == RTTI::ClassType_String
                 ?   RTTI::ConversionCost()
                 :   RTTI::ConversionCost::s_incompatible;
     case LUA_TBOOLEAN:
-        lua_pop(type.state, 1);
         return RTTI::calculateConversion<bool>(target);
     case LUA_TNUMBER:
-        lua_pop(type.state, 1);
         return RTTI::calculateConversion<LUA_NUMBER>(target);
     case LUA_TUSERDATA:
-        lua_getmetatable(type.state, -1);
+        lua_getmetatable(type.state, index);
         luaL_getmetatable(type.state, "BugEngine.Object");
         if (lua_rawequal(type.state, -1, -2))
         {
             lua_pop(type.state, 2);
-            RTTI::Value* userdata = (RTTI::Value*)lua_touserdata(type.state, -1);
-            lua_pop(type.state, 1);
+            RTTI::Value* userdata = (RTTI::Value*)lua_touserdata(type.state, index);
             return RTTI::calculateConversion(userdata->type(), target);
         }
         else
         {
-            lua_pop(type.state, 3);
+            lua_pop(type.state, 2);
             return RTTI::ConversionCost::s_incompatible;
         }
     case LUA_TTABLE:
-        lua_pop(type.state, 1);
         return RTTI::ConversionCost::s_incompatible;
     default:
-        lua_pop(type.state, 1);
         return RTTI::ConversionCost::s_incompatible;
     }
 }
 
 static void convert(const LuaParameterType& type, void* buffer, const RTTI::Type& target)
 {
-    bool result = createValue(type.state, type.index, target, buffer);
-    be_assert(result, "could not convert lua value %s to %s"
-                     | Context::tostring(type.state, type.index)
-                     | target.name());
-    be_forceuse(result);
-}
-
-static void convert(const LuaTableType& type, void* buffer, const RTTI::Type& target)
-{
-    if (type.name.size() > 0)
+    int index;
+    if (type.key != -1)
     {
-        lua_pushstring(type.state, type.name.c_str());
-        lua_rawget(type.state, 1);
+        if (type.name.size() > 0)
+        {
+            lua_pushstring(type.state, type.name.c_str());
+            lua_rawget(type.state, type.index);
+        }
+        else
+        {
+            lua_rawgeti(type.state, type.index, type.key);
+        }
+        index = -1;
     }
     else
     {
-        lua_rawgeti(type.state, 1, type.key);
+        index = type.index;
     }
-    bool result = createValue(type.state, -1, target, buffer);
-    lua_pop(type.state, 1);
+    LuaPop p(type.state, index);
+    bool result = createValue(type.state, index, target, buffer);
     be_assert(result, "could not convert lua value %s to %s"
-                     | Context::tostring(type.state, -1)
+                     | Context::tostring(type.state, index)
                      | target.name());
     be_forceuse(result);
 }
 
 typedef RTTI::ArgInfo<LuaParameterType> LuaParameterInfo;
-typedef RTTI::ArgInfo<LuaTableType> LuaTableInfo;
 
 int call(lua_State *state, raw<const RTTI::Method> method)
 {
     u32 nargs = lua_gettop(state) - 1;
-    if (nargs == 1 && lua_type(state, 2) == LUA_TTABLE)
+    if ( (nargs == 1 && lua_type(state, 2) == LUA_TTABLE)
+      || (nargs == 2 && lua_type(state, 3) == LUA_TTABLE))
     {
         bool error = false;
-        u32 parameterCount = luaL_len(state, 2);
-        LuaTableInfo* parameters = (LuaTableInfo*)malloca(sizeof(LuaTableInfo) * (parameterCount + 1));
-
+        u32 parameterCount = 0;
         lua_pushnil(state);
-        for (u32 i = 0; !error && lua_next(state, 2); ++i)
+        for (; lua_next(state, nargs+1); ++parameterCount) { lua_pop(state, 1); }
+        u32 positionParameterCount = 0;
+        u32 keywordParameterCount = 0;
+        LuaParameterInfo* parameters = (LuaParameterInfo*)malloca(sizeof(LuaParameterInfo) * (parameterCount + 1));
+
+        if (nargs == 2)
+        {
+            new (&parameters[positionParameterCount++]) LuaParameterInfo(LuaParameterType(state, nargs));
+            parameterCount++;
+
+        }
+        lua_pushnil(state);
+        for (u32 i = 0; !error && lua_next(state, nargs+1); ++i)
         {
             /* removes value */
             lua_pop(state, 1);
@@ -213,13 +189,16 @@ int call(lua_State *state, raw<const RTTI::Method> method)
             case LUA_TNUMBER:
                 {
                     u32 j = (u32)lua_tonumber(state, -1);
-                    new (&parameters[i]) LuaTableInfo(LuaTableType(state, istring(), j));
+                    new (&parameters[positionParameterCount]) LuaParameterInfo(LuaParameterType(state, nargs+1, istring(), j));
+                    positionParameterCount++;
                 }
                 break;
             case LUA_TSTRING:
                 {
-                    istring key = istring(lua_tostring(state, -1));
-                    new (&parameters[i]) LuaTableInfo(LuaTableType(state, key, 0));
+                    const char* keyStr = lua_tostring(state, -1);
+                    istring key = istring(keyStr);
+                    keywordParameterCount++;
+                    new (&parameters[parameterCount-keywordParameterCount]) LuaParameterInfo(key, LuaParameterType(state, nargs+1, key, 0));
                 }
                 break;
             default:
@@ -229,10 +208,14 @@ int call(lua_State *state, raw<const RTTI::Method> method)
         }
         if (!error)
         {
-            RTTI::CallInfo result = RTTI::resolve(method, parameters, parameterCount);
+            RTTI::CallInfo result = RTTI::resolve(method, parameters, positionParameterCount,
+                                                  parameters + positionParameterCount,
+                                                  keywordParameterCount);
             if (result.conversion < RTTI::ConversionCost::s_incompatible)
             {
-                RTTI::Value v = RTTI::call(result, parameters, parameterCount);
+                RTTI::Value v = RTTI::call(result, parameters, positionParameterCount,
+                                           parameters + positionParameterCount,
+                                           keywordParameterCount);
                 freea(parameters);
                 return Context::push(state, v);
             }

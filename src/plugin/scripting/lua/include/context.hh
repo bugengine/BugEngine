@@ -30,6 +30,7 @@ public:
     static void checkArg(lua_State* state, int narg, int type);
     static void checkArg(lua_State* state, int narg, const char* userDataType);
     static void checkArg(lua_State* state, int narg, const RTTI::Type& type);
+    static minitl::format<1024u> getCallInfo(lua_State* state);
 
 private:
     virtual void unload(Resource::Resource& handle) override;

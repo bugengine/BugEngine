@@ -391,6 +391,24 @@ void* Context::luaAlloc(void* /*ud*/, void* ptr, size_t osize, size_t nsize)
     }
 }
 
+minitl::format<1024u> Context::getCallInfo(lua_State *state)
+{
+    lua_Debug ar0, ar1;
+    const char* source = "unknown source";
+    const char* name = "unknown method";
+    int line = -1;
+    if (lua_getstack(state, 0, &ar0) && lua_getinfo(state, "n", &ar0))
+    {
+        name = ar0.name;
+    }
+    if (lua_getstack(state, 1, &ar1) && lua_getinfo(state, "Sl", &ar1))
+    {
+        source = ar1.source;
+        line = ar1.currentline;
+    }
+    return minitl::format<1024u>("%s:%d (%s)") | source | line | name;
+}
+
 Context::Context(const Plugin::Context& context)
     :   ScriptEngine<LuaScript>(Arena::lua(), context.resourceManager)
     ,   m_state(lua_newstate(&Context::luaAlloc, 0))
