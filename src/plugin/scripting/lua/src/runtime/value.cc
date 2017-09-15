@@ -66,6 +66,46 @@ static bool convertBooleanToValue(lua_State *state, int index, const RTTI::Type&
                                   : false);
         return true;
     }
+    else if (type.metaclass->type() == RTTI::ClassType_Number)
+    {
+        be_warning("%s: - dubious cast: Lua bool to %s" | Context::getCallInfo(state) | type.metaclass->name);
+        switch(type.metaclass->index())
+        {
+        case RTTI::ClassIndex_u8:
+            new (buffer) RTTI::Value(static_cast<u8>(lua_toboolean(state, index)));
+            return true;
+        case RTTI::ClassIndex_u16:
+            new (buffer) RTTI::Value(static_cast<u16>(lua_toboolean(state, index)));
+            return true;
+        case RTTI::ClassIndex_u32:
+            new (buffer) RTTI::Value(static_cast<u32>(lua_toboolean(state, index)));
+            return true;
+        case RTTI::ClassIndex_u64:
+            new (buffer) RTTI::Value(static_cast<u64>(lua_toboolean(state, index)));
+            return true;
+        case RTTI::ClassIndex_i8:
+            new (buffer) RTTI::Value(static_cast<i8>(lua_toboolean(state, index)));
+            return true;
+        case RTTI::ClassIndex_i16:
+            new (buffer) RTTI::Value(static_cast<i16>(lua_toboolean(state, index)));
+            return true;
+        case RTTI::ClassIndex_i32:
+            new (buffer) RTTI::Value(static_cast<i32>(lua_toboolean(state, index)));
+            return true;
+        case RTTI::ClassIndex_i64:
+            new (buffer) RTTI::Value(static_cast<i64>(lua_toboolean(state, index)));
+            return true;
+        case RTTI::ClassIndex_float:
+            new (buffer) RTTI::Value(static_cast<float>(lua_toboolean(state, index)));
+            return true;
+        case RTTI::ClassIndex_double:
+            new (buffer) RTTI::Value(static_cast<double>(lua_toboolean(state, index)));
+            return true;
+        default:
+            be_notreached();
+            return false;
+        }
+    }
     else
     {
         return false;

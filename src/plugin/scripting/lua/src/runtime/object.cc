@@ -19,7 +19,9 @@ namespace BugEngine { namespace Lua
 
 static int pushUserdataString(lua_State* L, RTTI::Value* userdata)
 {
-    const char* constness = (userdata->type().constness == RTTI::Type::Const) ? "const " : "mutable ";
+    const char* constness = (userdata->type().constness == RTTI::Type::Const)
+                            ? "const "
+                            : "mutable ";
     const char* reference;
     const char* closing;
     switch(userdata->type().indirection)
@@ -48,7 +50,9 @@ static int pushUserdataString(lua_State* L, RTTI::Value* userdata)
             break;
     }
     const char* access = (userdata->type().access == RTTI::Type::Const) ? "const " : "";
-    lua_pushfstring(L, "[%s%s%s%s%s object @0x%p]", constness, reference, access, userdata->type().metaclass->name.c_str(), closing, userdata);
+    lua_pushfstring(L, "[%s%s%s%s%s object @0x%p]",
+                    constness, reference, access,
+                    userdata->type().metaclass->name.c_str(), closing, userdata);
     return 1;
 }
 
@@ -92,18 +96,20 @@ extern "C" int valueGet(lua_State *state)
 {
     Context::checkArg(state, 1, "BugEngine.Object");
     RTTI::Value* userdata = (RTTI::Value*)lua_touserdata(state, -2);
+    raw<const RTTI::Class> cls = userdata->type().metaclass;
 
-    if (userdata->type().metaclass->type() == RTTI::ClassType_Array
-     && lua_type(state, 2) == LUA_TNUMBER)
+    if (cls->type() == RTTI::ClassType_Array && lua_type(state, 2) == LUA_TNUMBER)
     {
         const u32 i = be_checked_numcast<u32>(lua_tonumber(state, 2));
         if (userdata->type().isConst())
         {
-            return Context::push(state, userdata->type().metaclass->apiMethods->arrayScripting->indexConst(*userdata, u32(i-1)));
+            return Context::push(state,
+                                 cls->apiMethods->arrayScripting->indexConst(*userdata, u32(i-1)));
         }
         else
         {
-            return Context::push(state, userdata->type().metaclass->apiMethods->arrayScripting->index(*userdata, u32(i-1)));
+            return Context::push(state,
+                                 cls->apiMethods->arrayScripting->index(*userdata, u32(i-1)));
         }
     }
     else
@@ -120,17 +126,19 @@ extern "C" int valueSet(lua_State *state)
 {
     Context::checkArg(state, 1, "BugEngine.Object");
     RTTI::Value* userdata = (RTTI::Value*)lua_touserdata(state, 1);
-    if (userdata->type().metaclass->type() == RTTI::ClassType_Array
-     && lua_type(state, 2) == LUA_TNUMBER)
+    raw<const RTTI::Class> cls = userdata->type().metaclass;
+    if (cls->type() == RTTI::ClassType_Array && lua_type(state, 2) == LUA_TNUMBER)
     {
         const u32 i = be_checked_numcast<u32>(lua_tonumber(state, 2));
         if (userdata->type().isConst())
         {
-            return Context::push(state, userdata->type().metaclass->apiMethods->arrayScripting->indexConst(*userdata, u32(i-1)));
+            return Context::push(state,
+                                 cls->apiMethods->arrayScripting->indexConst(*userdata, u32(i-1)));
         }
         else
         {
-            return Context::push(state, userdata->type().metaclass->apiMethods->arrayScripting->index(*userdata, u32(i-1)));
+            return Context::push(state,
+                                 cls->apiMethods->arrayScripting->index(*userdata, u32(i-1)));
         }
     }
     else
