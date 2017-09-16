@@ -9,6 +9,7 @@
 #include    <rtti/engine/methodinfo.script.hh>
 #include    <rtti/engine/propertyinfo.script.hh>
 #include    <rtti/engine/call.hh>
+#include    <rtti/engine/scriptingapi.hh>
 #include    <rtti/conversion.script.hh>
 
 namespace BugEngine { namespace Lua
@@ -39,19 +40,21 @@ struct LuaParameterType
 
 struct LuaPop
 {
-    lua_State* state;
-    int index;
+    lua_State*  state;
+    int         index;
+    bool        autoPop;
 
-    LuaPop(lua_State* state, int index)
+    LuaPop(lua_State* state, int index, bool autoPop)
         :   state(state)
         ,   index(index)
+        ,   autoPop(autoPop)
     {
     }
     ~LuaPop()
     {
-        if (index < 0)
+        if (autoPop)
         {
-            lua_pop(state, -index);
+            lua_pop(state, 1);
         }
     }
 };
@@ -78,7 +81,7 @@ static RTTI::ConversionCost calculateConversion(const LuaParameterType& type,
         index = type.index;
     }
 
-    LuaPop p(type.state, index);
+    LuaPop p(type.state, index, type.key != -1);
     if (target.metaclass->type() == RTTI::ClassType_Variant)
     {
         switch (lua_type(type.state, index))
@@ -123,7 +126,70 @@ static RTTI::ConversionCost calculateConversion(const LuaParameterType& type,
             return RTTI::ConversionCost::s_incompatible;
         }
     case LUA_TTABLE:
-        return RTTI::ConversionCost::s_incompatible;
+        if (target.metaclass->type() == RTTI::ClassType_Array)
+        {
+            const RTTI::Type& valueType = target.metaclass->apiMethods->arrayScripting->value_type;
+            RTTI::ConversionCost c;
+            lua_pushnil(type.state);
+            while (lua_next(type.state, index < 0 ? index-1 : index))
+            {
+                int keyType = lua_type(type.state, -2);
+                if (keyType != LUA_TNUMBER)
+                {
+                    lua_pop(type.state, 2);
+                    return RTTI::ConversionCost::s_incompatible;
+                }
+                else
+                {
+                    c += calculateConversion(LuaParameterType(type.state, -1),
+                                                              valueType);
+                    lua_pop(type.state, 1);
+                    if (c >= RTTI::ConversionCost::s_incompatible)
+                        return c;
+                }
+            }
+            return c;
+        }
+        else if (target.metaclass->type() == RTTI::ClassType_Pod)
+        {
+            if (target.metaclass->constructor)
+            {
+                RTTI::ConversionCost c;
+                lua_pushnil(type.state);
+                while (lua_next(type.state, index < 0 ? index-1 : index))
+                {
+                    if (lua_type(type.state, -2) != LUA_TSTRING)
+                    {
+                        lua_pop(type.state, 2);
+                        return RTTI::ConversionCost::s_incompatible;
+                    }
+                    const char *str = lua_tostring(type.state, -2);
+                    raw<const RTTI::Property> property = target.metaclass->getProperty(str);
+                    if (!property)
+                    {
+                        lua_pop(type.state, 2);
+                        return RTTI::ConversionCost::s_incompatible;
+                    }
+                    else
+                    {
+                        c += calculateConversion(LuaParameterType(type.state, -1),
+                                                 property->type);
+                        lua_pop(type.state, 1);
+                        if (c >= RTTI::ConversionCost::s_incompatible)
+                            return c;
+                    }
+                }
+                return c;
+            }
+            else
+            {
+                return RTTI::ConversionCost::s_incompatible;
+            }
+        }
+        else
+        {
+            return RTTI::ConversionCost::s_incompatible;
+        }
     default:
         return RTTI::ConversionCost::s_incompatible;
     }
@@ -149,7 +215,7 @@ static void convert(const LuaParameterType& type, void* buffer, const RTTI::Type
     {
         index = type.index;
     }
-    LuaPop p(type.state, index);
+    LuaPop p(type.state, index, type.key != -1);
     bool result = createValue(type.state, index, target, buffer);
     be_assert(result, "could not convert lua value %s to %s"
                      | Context::tostring(type.state, index)
@@ -243,40 +309,6 @@ int call(lua_State *state, raw<const RTTI::Method> method)
     }
     else
     {
-        /*minitl::format<4096u> errorMessage("no overload can convert all parameters\n");
-        if (nargs != 0)
-        {
-            errorMessage.put( "parameters:\n\t");
-            for (u32 i = 0; i < nargs; ++i)
-            {
-                strcat(errorMessage, Context::tostring(state, i+2).c_str());
-                if (i != nargs-1)
-                {
-                    strcat(errorMessage, ", ");
-                }
-            }
-            strcat(errorMessage, "\n");
-        }
-        strcat(errorMessage, "candidates:\n");
-        raw<const RTTI::Method::Overload> overload = method->overloads;
-        while (overload)
-        {
-            strcat(errorMessage, "\t");
-            strcat(errorMessage, method->name.c_str());
-            strcat(errorMessage, "(");
-            raw<const RTTI::Method::Parameter> parameter = overload->params;
-            while(parameter)
-            {
-                strcat(errorMessage, parameter->type.name().c_str());
-                if (parameter->next)
-                {
-                    strcat(errorMessage, ", ");
-                }
-                parameter = parameter->next;
-            }
-            overload = overload->next;
-            strcat(errorMessage, ")\n");
-        }*/
         freea(parameters);
         return error(state, "no overload can convert all parameters");
     }

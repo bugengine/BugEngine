@@ -255,6 +255,7 @@ raw<const RTTI::Class> be_typeid< minitl::array<T> >::registerProperties()
         }
     };
     result->methods.set(reinterpret_cast< RTTI::staticarray< const RTTI::Method >* >(&s_methods));
+    result->constructor.set(&s_methods.elements[0]);
     static RTTI::ObjectInfo valueType = {
         {0},
         {RTTI::staticarray<const RTTI::Tag>::s_null},

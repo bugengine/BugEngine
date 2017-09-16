@@ -215,6 +215,7 @@ struct be_typeid< World::Partition<T, TAIL> >
     static inline RTTI::Type  type()  { return RTTI::Type::makeType(preklass(), RTTI::Type::Value, RTTI::Type::Mutable, RTTI::Type::Mutable); }
     static inline raw<RTTI::Class> preklass()
     {
+        be_forceuse(s_initialisation);
         static RTTI::Class s_class =
         {
             istring("Partition"),
@@ -238,10 +239,15 @@ struct be_typeid< World::Partition<T, TAIL> >
     static inline raw<const RTTI::Class> klass()
     {
         raw<RTTI::Class> cls = preklass();
-        cls->properties = World::Helper::PartitionPropertyBuilder<T, TAIL>::getProperties();
+        cls->properties = World::Helper::PartitionPropertyBuilder<T, TAIL>::getPartitionProperties();
         return cls;
     }
+    BE_EXPORT static raw<const RTTI::Class> s_initialisation;
 };
+template< typename T, typename TAIL >
+BE_EXPORT
+raw<const RTTI::Class> be_typeid< World::Partition<T, TAIL> >::s_initialisation = klass();
+
 
 }
 
