@@ -673,7 +673,7 @@ class Class(Container):
             for name in self.constructor.all_names():
                 methods.append((self.constructor, name[0], overloads, method_index))
                 method_index += 1
-        for m in self.methods[::-1]:
+        for m in self.methods:
             overloads = m.write_overloads(self, struct_owner or self, definition)
             for name in m.all_names():
                 methods.append((m, name[0], overloads, method_index))
@@ -693,7 +693,7 @@ class Class(Container):
         if self.constructor:
             definition.write('    result->constructor.set(result->methods->elements);\n')
         props = []
-        for p in self.properties[::-1]:
+        for p in self.properties:
             tags = p.write_tags(struct_owner or self, definition)
             for name in p.all_names():
                 props.append((p, name[0], tags))

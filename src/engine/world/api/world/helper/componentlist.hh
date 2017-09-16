@@ -93,11 +93,10 @@ struct ProductGetter<T, T, STORAGE, TAIL>
 template< typename LIST, u32 INDEX,  typename T, StorageSize STORAGE, typename TAIL >
 struct Property
 {
-    static inline bool fillProperty(RTTI::Property properties[])
+    static inline void fillProperty(RTTI::Property properties[])
     {
-        typedef Property<LIST, INDEX-1, typename TAIL::Type,
+        typedef Property<LIST, INDEX+1, typename TAIL::Type,
                          (StorageSize)TAIL::Storage, typename TAIL::Tail> PropertyParent;
-        PropertyParent::fillProperty(properties);
         RTTI::Property property = {
             {RTTI::staticarray<const RTTI::Tag>::s_null},
             be_typeid<T>::preklass()->name,
@@ -106,14 +105,14 @@ struct Property
             &LIST::template getProduct<T>
         };
         new (&properties[INDEX]) RTTI::Property(property);
-        return true;
+        PropertyParent::fillProperty(properties);
     }
 };
 
-template< typename LIST, typename T, StorageSize STORAGE >
-struct Property<LIST, 0, T, STORAGE, void>
+template< typename LIST, u32 INDEX,typename T, StorageSize STORAGE >
+struct Property<LIST, INDEX, T, STORAGE, void>
 {
-    static inline bool fillProperty(RTTI::Property properties[])
+    static inline void fillProperty(RTTI::Property properties[])
     {
         RTTI::Property property = {
             {RTTI::staticarray<const RTTI::Tag>::s_null},
@@ -122,8 +121,7 @@ struct Property<LIST, 0, T, STORAGE, void>
             be_typeid< const Kernel::Product<T>& >::type(),
             &LIST::template getProduct<T>
         };
-        new (&properties[0]) RTTI::Property(property);
-        return true;
+        new (&properties[INDEX]) RTTI::Property(property);
     }
 };
 

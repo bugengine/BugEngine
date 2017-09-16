@@ -79,37 +79,66 @@ struct PartitionGetter<T, T, TAIL>
     }
 };
 
-
-template< typename LIST, typename T, typename TAIL >
+template< typename PARTITIONLIST, u32 INDEX, typename T, typename TAIL >
 struct PartitionListPropertyInfo
 {
-    static const RTTI::Property s_property;
+    static inline void fillProperty(RTTI::Property properties[])
+    {
+        typedef PartitionListPropertyInfo<PARTITIONLIST,
+                                          INDEX+1,
+                                          typename TAIL::Type,
+                                          typename TAIL::Tail> PropertyParent;
+        RTTI::Property property = {
+            {RTTI::staticarray<const RTTI::Tag>::s_null},
+            T::name(),
+            be_typeid<PARTITIONLIST>::type(),
+            be_typeid< const T& >::type(),
+            &PARTITIONLIST::template getPartition<T>
+        };
+        new (&properties[INDEX]) RTTI::Property(property);
+        PropertyParent::fillProperty(properties);
+    }
 };
 
-template< typename LIST, typename T >
-struct PartitionListPropertyInfo<LIST, T, void>
+template< typename PARTITIONLIST, u32 INDEX, typename T >
+struct PartitionListPropertyInfo<PARTITIONLIST, INDEX, T, void>
 {
-    static const RTTI::Property s_property;
+    static inline void fillProperty(RTTI::Property properties[])
+    {
+        RTTI::Property property = {
+            {RTTI::staticarray<const RTTI::Tag>::s_null},
+            T::name(),
+            be_typeid<PARTITIONLIST>::type(),
+            be_typeid< const T& >::type(),
+            &PARTITIONLIST::template getPartition<T>
+        };
+        new (&properties[INDEX]) RTTI::Property(property);
+    }
 };
 
-template< typename LIST, typename T, typename TAIL >
-const RTTI::Property PartitionListPropertyInfo<LIST, T, TAIL>::s_property =
+template< typename T, typename TAIL>
+struct PartitionListPropertyBuilder
 {
-    {0},
-    T::name(),
-    be_typeid<LIST>::type(),
-    be_typeid< const T& >::type(),
-    &LIST::template getPartition<T>
-};
+    enum
+    {
+        PropertyCount = 1 + Partition<T, TAIL>::Index
+    };
+    static raw< RTTI::staticarray<const RTTI::Property> > getPartitionProperties()
+    {
+        typedef RTTI::staticarray_n< PropertyCount, RTTI::Property> PropertyArray;
 
-template< typename LIST, typename T >
-const RTTI::Property PartitionListPropertyInfo<LIST, T, void>::s_property =
-{
-    {0},
-    T::name(),
-    be_typeid<LIST>::type(),
-    be_typeid< const T& >::type(),
-    &LIST::template getPartition<T>
+        static byte s_buffer[sizeof(PropertyArray)];
+        PropertyArray* properties = reinterpret_cast<PropertyArray* >(s_buffer);
+        new (properties) u32(PropertyCount);
+        PartitionPropertyInfo<Partition<T, TAIL>,
+                              Partition<T, TAIL>::Index,
+                              typename Partition<T, TAIL>::Type,
+                              typename Partition<T, TAIL>::Tail>::fillProperty(properties->elements);
+        raw< RTTI::staticarray<const RTTI::Property> > result = {
+                reinterpret_cast< RTTI::staticarray<const RTTI::Property>* >(properties)
+            };
+        return result;
+    }
 };
 
 }

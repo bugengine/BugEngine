@@ -12,7 +12,7 @@ namespace BugEngine { namespace Python
 
 struct PyBugClass : public PyBugNamespace
 {
-    static PyObject* create(PyObject* owner, const RTTI::Value& value);
+    static PyObject* stealValue(PyObject* owner, RTTI::Value& value);
 
     static void registerType(PyObject* module);
     static PyTypeObject s_pyType;

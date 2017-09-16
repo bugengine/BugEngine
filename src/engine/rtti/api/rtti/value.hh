@@ -82,6 +82,8 @@ public:
     Value operator[](const istring& name) const;
     Value operator()(Value params[], u32 paramCount);
 
+    void swap(Value& other);
+
     inline bool isA(const Type& type) const
     {
         return m_type.isA(type);

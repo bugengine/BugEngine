@@ -142,7 +142,7 @@ PyObject* call(raw<const RTTI::Method> method, PyObject* self, PyObject* args, P
             argInfos[i-1].~PythonArgInfo();
         }
         freea(argInfos);
-        return PyBugObject::create(0, result);
+        return PyBugObject::stealValue(0, result);
     }
     else
     {

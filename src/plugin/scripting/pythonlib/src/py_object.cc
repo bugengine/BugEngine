@@ -155,10 +155,10 @@ PyTypeObject PyBugObject::s_pyType =
     0
 };
 
-typedef PyObject* (*CreateMethod)(PyObject* owner, const RTTI::Value& value);
+typedef PyObject* (*CreateMethod)(PyObject* owner, RTTI::Value& value);
 
 template< typename T >
-PyObject* createPyNumeric(PyObject* owner, const RTTI::Value& value)
+PyObject* createPyNumeric(PyObject* owner, RTTI::Value& value)
 {
     be_forceuse(owner);
     unsigned long long v = static_cast<unsigned long long>(value.as<T>());
@@ -166,7 +166,7 @@ PyObject* createPyNumeric(PyObject* owner, const RTTI::Value& value)
 }
 
 template< >
-PyObject* createPyNumeric<bool>(PyObject* owner, const RTTI::Value& value)
+PyObject* createPyNumeric<bool>(PyObject* owner, RTTI::Value& value)
 {
     be_forceuse(owner);
     long v = static_cast<long>(value.as<bool>());
@@ -174,7 +174,7 @@ PyObject* createPyNumeric<bool>(PyObject* owner, const RTTI::Value& value)
 }
 
 template< >
-PyObject* createPyNumeric<float>(PyObject* owner, const RTTI::Value& value)
+PyObject* createPyNumeric<float>(PyObject* owner, RTTI::Value& value)
 {
     be_forceuse(owner);
     double v = static_cast<double>(value.as<float>());
@@ -182,14 +182,14 @@ PyObject* createPyNumeric<float>(PyObject* owner, const RTTI::Value& value)
 }
 
 template< >
-PyObject* createPyNumeric<double>(PyObject* owner, const RTTI::Value& value)
+PyObject* createPyNumeric<double>(PyObject* owner, RTTI::Value& value)
 {
     be_forceuse(owner);
     double v = value.as<double>();
     return s_library->m_PyFloat_FromDouble(v);
 }
 
-PyObject* createPyString(PyObject* owner, const RTTI::Value& value)
+PyObject* createPyString(PyObject* owner, RTTI::Value& value)
 {
     be_forceuse(owner);
     const text& t = static_cast<const text&>(value.as<const text&>());
@@ -215,28 +215,28 @@ static CreateMethod s_createPyNumber[] = {
 };
 
 static CreateMethod s_createNumber[] = {
-    &PyBugNumber<bool>::create,
-    &PyBugNumber<u8>::create,
-    &PyBugNumber<u16>::create,
-    &PyBugNumber<u32>::create,
-    &PyBugNumber<u64>::create,
-    &PyBugNumber<i8>::create,
-    &PyBugNumber<i16>::create,
-    &PyBugNumber<i32>::create,
-    &PyBugNumber<i64>::create,
-    &PyBugNumber<float>::create,
-    &PyBugNumber<double>::create
+    &PyBugNumber<bool>::stealValue,
+    &PyBugNumber<u8>::stealValue,
+    &PyBugNumber<u16>::stealValue,
+    &PyBugNumber<u32>::stealValue,
+    &PyBugNumber<u64>::stealValue,
+    &PyBugNumber<i8>::stealValue,
+    &PyBugNumber<i16>::stealValue,
+    &PyBugNumber<i32>::stealValue,
+    &PyBugNumber<i64>::stealValue,
+    &PyBugNumber<float>::stealValue,
+    &PyBugNumber<double>::stealValue
 };
 
 static CreateMethod s_createString[] = {
-    &PyBugString<istring>::create,
-    &PyBugString<inamespace>::create,
-    &PyBugString<ifilename>::create,
-    &PyBugString<ipath>::create,
-    &PyBugString<text>::create
+    &PyBugString<istring>::stealValue,
+    &PyBugString<inamespace>::stealValue,
+    &PyBugString<ifilename>::stealValue,
+    &PyBugString<ipath>::stealValue,
+    &PyBugString<text>::stealValue
 };
 
-PyObject* PyBugObject::create(PyObject* owner, const RTTI::Value& value)
+PyObject* PyBugObject::stealValue(PyObject* owner, RTTI::Value& value)
 {
     const RTTI::Type& t = value.type();
     if (!value)
@@ -266,21 +266,21 @@ PyObject* PyBugObject::create(PyObject* owner, const RTTI::Value& value)
     case RTTI::ClassType_Number:
         return s_createNumber[t.metaclass->index()](owner, value);
     case RTTI::ClassType_Enum:
-        return PyBugEnum::create(owner, value);
+        return PyBugEnum::stealValue(owner, value);
     case RTTI::ClassType_String:
         return s_createString[t.metaclass->index()](owner, value);
     case RTTI::ClassType_Array:
-        return PyBugArray::create(owner, value);
+        return PyBugArray::stealValue(owner, value);
     case RTTI::ClassType_Namespace:
         {
             const RTTI::Class& cls = value.as<const RTTI::Class&>();
             if (cls.constructor)
             {
-                return PyBugClass::create(owner, value);
+                return PyBugClass::stealValue(owner, value);
             }
             else
             {
-                return PyBugNamespace::create(owner, value);
+                return PyBugNamespace::stealValue(owner, value);
             }
         }
     default:
@@ -290,8 +290,12 @@ PyObject* PyBugObject::create(PyObject* owner, const RTTI::Value& value)
             if (owner)
             {
                 Py_INCREF(owner);
+                new(&((PyBugObject*)result)->value) RTTI::Value(RTTI::Value::ByRef(value));
             }
-            new(&((PyBugObject*)result)->value) RTTI::Value(value);
+            else
+            {
+                new(&((PyBugObject*)result)->value) RTTI::Value(value);
+            }
             return result;
         }
     }
@@ -315,7 +319,8 @@ PyObject* PyBugObject::getattr(PyObject* self, const char* name)
     raw<const RTTI::Property> p = metaclass->getProperty(name_);
     if (p)
     {
-        return create(self, p->get(self_->value));
+        RTTI::Value v = p->get(self_->value);
+        return stealValue(self, v);
     }
     raw<const RTTI::Method> m = metaclass->getMethod(name_);
     if (m)

@@ -14,7 +14,7 @@ struct PyBugEnum : public PyBugObject
 {
     static void registerType(PyObject* module);
 
-    static PyObject* create(PyObject* owner, const RTTI::Value &value);
+    static PyObject* stealValue(PyObject* owner, RTTI::Value &value);
     static PyObject* repr(PyObject* self);
     static PyObject* str(PyObject* self);
     static PyObject* toint(PyObject* self);

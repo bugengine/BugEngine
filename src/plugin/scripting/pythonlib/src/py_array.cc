@@ -153,18 +153,21 @@ PyTypeObject PyBugArray::s_pyType =
     0
 };
 
-PyObject* PyBugArray::create(PyObject* owner, const RTTI::Value& value)
+PyObject* PyBugArray::stealValue(PyObject* owner, RTTI::Value& value)
 {
     be_assert(value.type().metaclass->type() == RTTI::ClassType_Array,
               "PyBugArray only accepts Array types");
     PyBugArray* result = static_cast<PyBugArray*>(s_pyType.tp_alloc(&s_pyType, 0));
     (result)->owner = owner;
+
     if (owner)
     {
         Py_INCREF(owner);
     }
-    new(&(result)->value) RTTI::Value(value);
+
     raw<const RTTI::Class> arrayClass = value.type().metaclass;
+    new(&(static_cast<PyBugArray*>(result))->value) RTTI::Value();
+    (static_cast<PyBugArray*>(result))->value.swap(value);
     be_assert(arrayClass->apiMethods,
               "Array type %s does not implement API methods" | arrayClass->fullname());
     be_assert(arrayClass->apiMethods->arrayScripting,
@@ -246,9 +249,10 @@ PyObject* PyBugArray::item(PyObject *self, Py_ssize_t index)
     {
         u32 index_ = be_checked_numcast<u32>(index);
         const RTTI::Type t = self_->value.type();
-        return PyBugObject::create(0, t.isConst()
-                                        ? t.metaclass->apiMethods->arrayScripting->indexConst(self_->value, index_)
-                                        : t.metaclass->apiMethods->arrayScripting->index(self_->value, index_));
+        RTTI::Value v = t.isConst()
+                        ? t.metaclass->apiMethods->arrayScripting->indexConst(self_->value, index_)
+                        : t.metaclass->apiMethods->arrayScripting->index(self_->value, index_);
+        return PyBugObject::stealValue(0, v);
     }
     else
     {

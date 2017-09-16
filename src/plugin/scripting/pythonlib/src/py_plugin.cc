@@ -89,7 +89,8 @@ PyObject* PyBugPlugin::getattr(PyObject* self, const char* name)
     if (self_->value)
     {
         RTTI::Value v(self_->value.pluginNamespace());
-        return PyBugObject::create(self, v[name]);
+        RTTI::Value result = v[name];
+        return PyBugObject::stealValue(self, result);
     }
     else
     {

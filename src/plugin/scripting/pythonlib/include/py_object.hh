@@ -18,7 +18,7 @@ struct PyBugObject : public PyObject
 
     static void registerType(PyObject* module);
 
-    static PyObject* create(PyObject* owner, const RTTI::Value& value);
+    static PyObject* stealValue(PyObject* owner, RTTI::Value& value);
     static PyObject* newinst(PyTypeObject* type, PyObject* args, PyObject* kwargs);
     static PyObject* dir(raw<const RTTI::Class> metaclass);
     static PyObject* dir(PyObject* self, PyObject* args);
