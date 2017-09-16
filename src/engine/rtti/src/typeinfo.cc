@@ -91,6 +91,8 @@ ConversionCost Type::calculateConversion(const Type& other) const
 {
     ConversionCost result;
 
+    if (other.metaclass->type() == ClassType_Variant)
+        return ConversionCost::s_variant;
     if (other.indirection > 0 && access < other.access)
         return ConversionCost::s_incompatible;
     else if (other.indirection > 0)

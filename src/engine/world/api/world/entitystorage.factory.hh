@@ -131,6 +131,7 @@ struct be_typeid< World::EntityStorageFactory<COMPONENT_LIST, PARTITION_LIST> >
         static raw<const RTTI::Class> cls = registerProperties();
         return cls;
     }
+    BE_EXPORT static raw<const RTTI::Class> s_initialisation;
 private:
     static inline raw<const RTTI::Class> registerProperties()
     {
@@ -139,6 +140,10 @@ private:
         return cls;
     }
 };
+
+template< typename COMPONENT_LIST, typename PARTITION_LIST >
+BE_EXPORT
+raw<const RTTI::Class> be_typeid< World::EntityStorageFactory<COMPONENT_LIST, PARTITION_LIST> >::s_initialisation = klass();
 
 
 }
