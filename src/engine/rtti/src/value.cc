@@ -143,4 +143,40 @@ Value Value::operator()(Value params[], u32 paramCount)
     return call.as<const Method* const>()->doCall(params, paramCount);
 }
 
+void Value::swap(Value& other)
+{
+    if (&other != this)
+    {
+        if (m_reference && other.m_reference)
+        {
+            minitl::swap(m_type, other.m_type);
+            minitl::swap(m_ref, other.m_ref);
+        }
+        else if (m_reference)
+        {
+            minitl::swap(m_type, other.m_type);
+            minitl::swap(m_reference, other.m_reference);
+            Reference r = m_ref;
+            m_type.copy(other.m_buffer, m_buffer);
+            m_type.destroy(other.m_buffer);
+            other.m_ref = r;
+        }
+        else if (other.m_reference)
+        {
+            Reference r = other.m_ref;
+            m_type.copy(m_buffer, other.m_buffer);
+            m_type.destroy(m_buffer);
+            m_ref = r;
+            minitl::swap(m_type, other.m_type);
+            minitl::swap(m_reference, other.m_reference);
+        }
+        else
+        {
+            Value v(*this);
+            *this = other;
+            other = v;
+        }
+    }
+}
+
 }}

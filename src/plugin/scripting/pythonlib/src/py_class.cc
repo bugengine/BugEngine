@@ -40,7 +40,7 @@ PyTypeObject PyBugClass::s_pyType =
     PyBugNamespace::s_methods,
     0,
     0,
-    0,
+    &PyBugObject::s_pyType,
     0,
     0,
     0,
@@ -60,17 +60,19 @@ PyTypeObject PyBugClass::s_pyType =
     0
 };
 
-PyObject* PyBugClass::create(PyObject* owner, const RTTI::Value& value)
+PyObject* PyBugClass::stealValue(PyObject* owner, RTTI::Value& value)
 {
     be_assert(value.type().metaclass->type() == RTTI::ClassType_Namespace,
               "PyBugClass only accepts Namespace types");
     PyObject* result = s_pyType.tp_alloc(&s_pyType, 0);
-    ((PyBugClass*)result)->owner = owner;
+    static_cast<PyBugClass*>(result)->owner = owner;
+
     if (owner)
     {
         Py_INCREF(owner);
     }
-    new(&((PyBugClass*)result)->value) RTTI::Value(value);
+    new(&(static_cast<PyBugClass*>(result))->value) RTTI::Value();
+    (static_cast<PyBugClass*>(result))->value.swap(value);
     return result;
 }
 

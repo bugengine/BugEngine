@@ -14,7 +14,7 @@ struct PyBugNamespace : public PyBugObject
 {
     static void registerType(PyObject* module);
 
-    static PyObject* create(PyObject* owner, const RTTI::Value &value);
+    static PyObject* stealValue(PyObject* owner, RTTI::Value &value);
     static int init(PyObject* self, PyObject* args, PyObject* kwds);
     static PyObject* getattr(PyObject* self, const char* name);
     static int setattr(PyObject* self, const char* name, PyObject* value);

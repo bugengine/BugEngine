@@ -47,7 +47,7 @@ PyTypeObject PyBugNamespace::s_pyType =
     PyBugNamespace::s_methods,
     0,
     0,
-    0,
+    &PyBugObject::s_pyType,
     0,
     0,
     0,
@@ -67,17 +67,19 @@ PyTypeObject PyBugNamespace::s_pyType =
     0
 };
 
-PyObject* PyBugNamespace::create(PyObject* owner, const RTTI::Value& value)
+PyObject* PyBugNamespace::stealValue(PyObject* owner, RTTI::Value& value)
 {
     be_assert(value.type().metaclass->type() == RTTI::ClassType_Namespace,
               "PyBugNamespace only accepts Namespace types");
     PyObject* result = s_pyType.tp_alloc(&s_pyType, 0);
-    ((PyBugNamespace*)result)->owner = owner;
+    static_cast<PyBugNamespace*>(result)->owner = owner;
+
     if (owner)
     {
         Py_INCREF(owner);
     }
-    new(&((PyBugNamespace*)result)->value) RTTI::Value(value);
+    new(&(static_cast<PyBugNamespace*>(result))->value) RTTI::Value();
+    (static_cast<PyBugNamespace*>(result))->value.swap(value);
     return result;
 }
 
@@ -99,7 +101,8 @@ PyObject* PyBugNamespace::getattr(PyObject* self, const char* name)
     {
         if (o->name == name_)
         {
-            return PyBugObject::create(self, o->value);
+            RTTI::Value v = o->value;
+            return PyBugObject::stealValue(self, v);
         }
     }
     return PyBugObject::getattr(self, name);
@@ -207,8 +210,8 @@ void PyBugNamespace::registerType(PyObject* module)
     Py_INCREF(&s_pyType);
     result = (*s_library->m_PyModule_AddObject)(module, "Namespace", (PyObject*)&s_pyType);
     be_assert(result >= 0, "unable to register type");
-    result = (*s_library->m_PyModule_AddObject)(module, "BugEngine",
-                                                create(0, RTTI::Value(be_game_Namespace())));
+    RTTI::Value v = RTTI::Value(be_game_Namespace());
+    result = (*s_library->m_PyModule_AddObject)(module, "BugEngine", stealValue(0, v));
     be_assert(result >= 0, "unable to register type");
     be_forceuse(result);
 }

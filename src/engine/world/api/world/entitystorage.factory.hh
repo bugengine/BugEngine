@@ -46,10 +46,10 @@ public:
         be_forceuse(isConst);
         const EntityStorageFactory* factory = static_cast<const EntityStorageFactory*>(from);
         return RTTI::Value(RTTI::Value::ByRef(Helper::ProductGetter<
-                                                T,
-                                                typename COMPONENT_LIST::Type,
-                                                (StorageSize)COMPONENT_LIST::Storage,
-                                                typename COMPONENT_LIST::Tail>::getProduct(factory->m_list)));
+                                              T,
+                                              typename COMPONENT_LIST::Type,
+                                              (StorageSize)COMPONENT_LIST::Storage,
+                                              typename COMPONENT_LIST::Tail>::getProduct(factory->m_list)));
     }
     template< typename T >
     static RTTI::Value getPartition(void* from, bool isConst)
@@ -57,22 +57,33 @@ public:
         be_forceuse(isConst);
         const EntityStorageFactory* factory = static_cast<const EntityStorageFactory*>(from);
         return RTTI::Value(RTTI::Value::ByRef(Helper::PartitionGetter<
-                                                T,
-                                                typename PARTITION_LIST::Type,
-                                                typename PARTITION_LIST::Tail>::getPartition(factory->m_partitions)));
+                                              T,
+                                              typename PARTITION_LIST::Type,
+                                              typename PARTITION_LIST::Tail>::getPartition(factory->m_partitions)));
     }
 private:
+    enum
+    {
+        ComponentCount = 1 + COMPONENT_LIST::Index,
+        PartitionCount = 1 + PARTITION_LIST::Index,
+        PropertyCount = ComponentCount+PartitionCount
+    };
     static raw< RTTI::staticarray<const RTTI::Property> > getProperties()
     {
-        static byte s_buffer[sizeof(RTTI::staticarray_n< 1+COMPONENT_LIST::Index, RTTI::Property>)];
-        RTTI::staticarray_n< 1+COMPONENT_LIST::Index, RTTI::Property>* properties =
-            reinterpret_cast<RTTI::staticarray_n< 1+COMPONENT_LIST::Index, RTTI::Property>* >(s_buffer);
-        new (properties) u32(1+COMPONENT_LIST::Index);
+        typedef RTTI::staticarray_n< PropertyCount, RTTI::Property> PropertyArray;
+
+        static byte s_buffer[sizeof(PropertyArray)];
+        PropertyArray* properties = reinterpret_cast<PropertyArray* >(s_buffer);
+        new (properties) u32(PropertyCount);
         Helper::Property<EntityStorageFactory<COMPONENT_LIST, PARTITION_LIST>,
-                         COMPONENT_LIST::Index,
+                         0,
                          typename COMPONENT_LIST::Type,
                          (StorageSize)COMPONENT_LIST::Storage,
                          typename COMPONENT_LIST::Tail>::fillProperty(properties->elements);
+        Helper::PartitionListPropertyInfo<EntityStorageFactory<COMPONENT_LIST, PARTITION_LIST>,
+                                          0,
+                                          typename PARTITION_LIST::Type,
+                                          typename PARTITION_LIST::Tail>::fillProperty(properties->elements + ComponentCount);
         raw< RTTI::staticarray<const RTTI::Property> > result = {
                 reinterpret_cast< RTTI::staticarray<const RTTI::Property>* >(properties)
             };
