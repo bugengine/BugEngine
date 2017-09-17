@@ -98,7 +98,7 @@ struct Property
         typedef Property<LIST, INDEX+1, typename TAIL::Type,
                          (StorageSize)TAIL::Storage, typename TAIL::Tail> PropertyParent;
         RTTI::Property property = {
-            {RTTI::staticarray<const RTTI::Tag>::s_null},
+            {&RTTI::staticarray<const RTTI::Tag>::s_null},
             be_typeid<T>::preklass()->name,
             be_typeid<LIST>::type(),
             be_typeid< const Kernel::Product<T>& >::type(),
@@ -115,7 +115,7 @@ struct Property<LIST, INDEX, T, STORAGE, void>
     static inline void fillProperty(RTTI::Property properties[])
     {
         RTTI::Property property = {
-            {RTTI::staticarray<const RTTI::Tag>::s_null},
+            {&RTTI::staticarray<const RTTI::Tag>::s_null},
             be_typeid<T>::preklass()->name,
             be_typeid<LIST>::type(),
             be_typeid< const Kernel::Product<T>& >::type(),

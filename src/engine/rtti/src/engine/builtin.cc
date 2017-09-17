@@ -17,9 +17,9 @@ namespace BugEngine
 template< > BE_EXPORT raw<RTTI::Class> be_typeid< void >::preklass()
 {
     static RTTI::Class s_void = { "void", 0, 0, 0, { 0 },{ 0 }, { 0 },
-                                  {RTTI::staticarray<const RTTI::Tag>::s_null},
-                                  {RTTI::staticarray<const RTTI::Property>::s_null},
-                                  {RTTI::staticarray<const RTTI::Method>::s_null},
+                                  {&RTTI::staticarray<const RTTI::Tag>::s_null},
+                                  {&RTTI::staticarray<const RTTI::Property>::s_null},
+                                  {&RTTI::staticarray<const RTTI::Method>::s_null},
                                   {0}, {0}, &RTTI::nullconstructor<0>, &RTTI::nulldestructor };
     raw<RTTI::Class> ci = {&s_void};
     return ci;
@@ -34,9 +34,9 @@ template< > BE_EXPORT raw<RTTI::Class> be_typeid< minitl::pointer >::preklass()
 {
     static RTTI::Class s_pointer = { "pointer", 0, 0, 0, { 0 },
                                      {be_typeid< void >::preklass().m_ptr}, { 0 },
-                                     {RTTI::staticarray<const RTTI::Tag>::s_null},
-                                     {RTTI::staticarray<const RTTI::Property>::s_null},
-                                     {RTTI::staticarray<const RTTI::Method>::s_null},
+                                     {&RTTI::staticarray<const RTTI::Tag>::s_null},
+                                     {&RTTI::staticarray<const RTTI::Property>::s_null},
+                                     {&RTTI::staticarray<const RTTI::Method>::s_null},
                                      {0}, {0}, &RTTI::nullconstructor<0>, &RTTI::nulldestructor };
     raw<RTTI::Class> ci = {&s_pointer};
     return ci;
@@ -51,9 +51,9 @@ template< > BE_EXPORT raw<RTTI::Class> be_typeid< minitl::refcountable >::prekla
 {
     static RTTI::Class s_refcountable = { "refcountable", 0, 0, 0, { 0 },
                                           {be_typeid< minitl::pointer >::preklass().m_ptr}, { 0 },
-                                          {RTTI::staticarray<const RTTI::Tag>::s_null},
-                                          {RTTI::staticarray<const RTTI::Property>::s_null},
-                                          {RTTI::staticarray<const RTTI::Method>::s_null},
+                                          {&RTTI::staticarray<const RTTI::Tag>::s_null},
+                                          {&RTTI::staticarray<const RTTI::Property>::s_null},
+                                          {&RTTI::staticarray<const RTTI::Method>::s_null},
                                           {0}, {0}, &RTTI::nullconstructor<0>, &RTTI::nulldestructor };
     raw<RTTI::Class> ci = {&s_refcountable};
     return ci;

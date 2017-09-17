@@ -70,23 +70,23 @@ private:
     };
     static raw< RTTI::staticarray<const RTTI::Property> > getProperties()
     {
-        typedef RTTI::staticarray_n< PropertyCount, RTTI::Property> PropertyArray;
+        typedef RTTI::staticarray_n< PropertyCount, const RTTI::Property> PropertyArray;
 
         static byte s_buffer[sizeof(PropertyArray)];
-        PropertyArray* properties = reinterpret_cast<PropertyArray* >(s_buffer);
-        new (properties) u32(PropertyCount);
+        new (s_buffer) u64(PropertyCount);
+        RTTI::Property* componentProps = reinterpret_cast<RTTI::Property*>(s_buffer + sizeof(u64));
+        RTTI::Property* partitionProps = componentProps + ComponentCount;
         Helper::Property<EntityStorageFactory<COMPONENT_LIST, PARTITION_LIST>,
                          0,
                          typename COMPONENT_LIST::Type,
                          (StorageSize)COMPONENT_LIST::Storage,
-                         typename COMPONENT_LIST::Tail>::fillProperty(properties->elements);
+                         typename COMPONENT_LIST::Tail>::fillProperty(componentProps);
         Helper::PartitionListPropertyInfo<EntityStorageFactory<COMPONENT_LIST, PARTITION_LIST>,
                                           0,
                                           typename PARTITION_LIST::Type,
-                                          typename PARTITION_LIST::Tail>::fillProperty(properties->elements + ComponentCount);
-        raw< RTTI::staticarray<const RTTI::Property> > result = {
-                reinterpret_cast< RTTI::staticarray<const RTTI::Property>* >(properties)
-            };
+                                          typename PARTITION_LIST::Tail>::fillProperty(partitionProps);
+        PropertyArray* properties = reinterpret_cast<PropertyArray* >(s_buffer);
+        raw< RTTI::staticarray<const RTTI::Property> > result = { &properties->array };
         return result;
     }
 };
@@ -115,9 +115,9 @@ struct be_typeid< World::EntityStorageFactory<COMPONENT_LIST, PARTITION_LIST> >
             {0},
             {be_typeid<World::EntityStorage>::preklass().m_ptr},
             {0},
-            {RTTI::staticarray<const RTTI::Tag>::s_null},
-            {RTTI::staticarray<const RTTI::Property>::s_null},
-            {RTTI::staticarray<const RTTI::Method>::s_null},
+            {&RTTI::staticarray<const RTTI::Tag>::s_null},
+            {&RTTI::staticarray<const RTTI::Property>::s_null},
+            {&RTTI::staticarray<const RTTI::Method>::s_null},
             {0},
             {0},
             0,

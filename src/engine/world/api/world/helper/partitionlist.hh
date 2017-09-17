@@ -89,7 +89,7 @@ struct PartitionListPropertyInfo
                                           typename TAIL::Type,
                                           typename TAIL::Tail> PropertyParent;
         RTTI::Property property = {
-            {RTTI::staticarray<const RTTI::Tag>::s_null},
+            {&RTTI::staticarray<const RTTI::Tag>::s_null},
             T::name(),
             be_typeid<PARTITIONLIST>::type(),
             be_typeid< const T& >::type(),
@@ -106,7 +106,7 @@ struct PartitionListPropertyInfo<PARTITIONLIST, INDEX, T, void>
     static inline void fillProperty(RTTI::Property properties[])
     {
         RTTI::Property property = {
-            {RTTI::staticarray<const RTTI::Tag>::s_null},
+            {&RTTI::staticarray<const RTTI::Tag>::s_null},
             T::name(),
             be_typeid<PARTITIONLIST>::type(),
             be_typeid< const T& >::type(),
@@ -134,9 +134,7 @@ struct PartitionListPropertyBuilder
                               Partition<T, TAIL>::Index,
                               typename Partition<T, TAIL>::Type,
                               typename Partition<T, TAIL>::Tail>::fillProperty(properties->elements);
-        raw< RTTI::staticarray<const RTTI::Property> > result = {
-                reinterpret_cast< RTTI::staticarray<const RTTI::Property>* >(properties)
-            };
+        raw< RTTI::staticarray<const RTTI::Property> > result = { &properties->array };
         return result;
     }
 };

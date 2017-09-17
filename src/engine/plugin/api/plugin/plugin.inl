@@ -16,12 +16,12 @@ namespace BugEngine { namespace Plugin
     {                                                                                               \
         BE_EXPORT raw<RTTI::Class> be_##name##_Namespace()                                          \
         {                                                                                           \
-            static RTTI::ObjectInfo ob = { {0}, {RTTI::staticarray<const RTTI::Tag>::s_null},       \
+            static RTTI::ObjectInfo ob = { {0}, {&RTTI::staticarray<const RTTI::Tag>::s_null},      \
                                           "BugEngine", RTTI::Value() };                             \
             static RTTI::Class ci = { "BugEngine", 0, 0, RTTI::ClassType_Namespace, {0}, {0},       \
-                                      {&ob}, {RTTI::staticarray<const RTTI::Tag>::s_null},          \
-                                      {RTTI::staticarray<const RTTI::Property>::s_null},            \
-                                      {RTTI::staticarray<const RTTI::Method>::s_null},              \
+                                      {&ob}, {&RTTI::staticarray<const RTTI::Tag>::s_null},         \
+                                      {&RTTI::staticarray<const RTTI::Property>::s_null},           \
+                                      {&RTTI::staticarray<const RTTI::Method>::s_null},             \
                                       {0}, {0}, 0, 0 };                                             \
             static raw<const RTTI::ObjectInfo> obptr = {((ob.value = RTTI::Value(&ci)), &ob)};      \
             be_forceuse(obptr);                                                                     \
