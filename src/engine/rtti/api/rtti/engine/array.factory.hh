@@ -160,13 +160,13 @@ raw<const RTTI::Class> be_typeid< minitl::array<T> >::registerProperties()
                 {&RTTI::staticarray<const RTTI::Tag>::s_null},
                 istring("this"),
                 be_typeid< minitl::array<T>& >::type(),
-                RTTI::Value()
+                {&::BugEngine::RTTI::Method::Parameter::s_noDefaultValue}
             },
             {
                 {&RTTI::staticarray<const RTTI::Tag>::s_null},
                 istring("index"),
                 be_typeid< u32  >::type(),
-                RTTI::Value()
+                {&::BugEngine::RTTI::Method::Parameter::s_noDefaultValue}
             }
         }
     };
@@ -178,13 +178,13 @@ raw<const RTTI::Class> be_typeid< minitl::array<T> >::registerProperties()
                 {&RTTI::staticarray<const RTTI::Tag>::s_null},
                 istring("this"),
                 be_typeid< const minitl::array<T>& >::type(),
-                RTTI::Value()
+                {&::BugEngine::RTTI::Method::Parameter::s_noDefaultValue}
             },
             {
                 {&RTTI::staticarray<const RTTI::Tag>::s_null},
                 istring("index"),
                 be_typeid< u32  >::type(),
-                RTTI::Value()
+                {&::BugEngine::RTTI::Method::Parameter::s_noDefaultValue}
             }
         }
     };
@@ -216,7 +216,7 @@ raw<const RTTI::Class> be_typeid< minitl::array<T> >::registerProperties()
                 {&RTTI::staticarray<const RTTI::Tag>::s_null},
                 istring("this"),
                 be_typeid< const minitl::array<T>& >::type(),
-                RTTI::Value()
+                {&::BugEngine::RTTI::Method::Parameter::s_noDefaultValue}
             }
         }
     };

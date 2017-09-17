@@ -24,6 +24,7 @@ public:
     inline operator const void*() const;
     inline bool operator!() const;
     inline T& operator*();
+    inline const T& operator*() const;
 
     template< typename U >
     operator raw<U>() const { raw<U> result = {m_ptr}; return result; }
