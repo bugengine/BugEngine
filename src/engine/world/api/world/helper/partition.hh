@@ -129,7 +129,7 @@ struct PartitionPropertyInfo
                                       typename TAIL::Type,
                                       typename TAIL::Tail> PropertyParent;
         RTTI::Property property = {
-            {RTTI::staticarray<const RTTI::Tag>::s_null},
+            {&RTTI::staticarray<const RTTI::Tag>::s_null},
             be_typeid<T>::preklass()->name,
             be_typeid<PARTITION>::type(),
             be_typeid< const Kernel::Product<T>& >::type(),
@@ -146,7 +146,7 @@ struct PartitionPropertyInfo<PARTITION, INDEX, T, void>
     static inline void fillProperty(RTTI::Property properties[])
     {
         RTTI::Property property = {
-            {RTTI::staticarray<const RTTI::Tag>::s_null},
+            {&RTTI::staticarray<const RTTI::Tag>::s_null},
             be_typeid<T>::preklass()->name,
             be_typeid<PARTITION>::type(),
             be_typeid< const Kernel::Product<T>& >::type(),
@@ -165,18 +165,17 @@ struct PartitionPropertyBuilder
     };
     static raw< RTTI::staticarray<const RTTI::Property> > getPartitionProperties()
     {
-        typedef RTTI::staticarray_n< PropertyCount, RTTI::Property> PropertyArray;
+        typedef RTTI::staticarray_n< PropertyCount, const RTTI::Property> PropertyArray;
 
         static byte s_buffer[sizeof(PropertyArray)];
-        PropertyArray* properties = reinterpret_cast<PropertyArray* >(s_buffer);
-        new (properties) u32(PropertyCount);
+        RTTI::Property* propertyBuffer = reinterpret_cast<RTTI::Property*>(s_buffer + sizeof(u64));
+        new (s_buffer) u64(PropertyCount);
         PartitionPropertyInfo<Partition<T, TAIL>,
                               0,
                               typename Partition<T, TAIL>::Type,
-                              typename Partition<T, TAIL>::Tail>::fillProperty(properties->elements);
-        raw< RTTI::staticarray<const RTTI::Property> > result = {
-                reinterpret_cast< RTTI::staticarray<const RTTI::Property>* >(properties)
-            };
+                              typename Partition<T, TAIL>::Tail>::fillProperty(propertyBuffer);
+        PropertyArray* properties = reinterpret_cast<PropertyArray* >(s_buffer);
+        raw< RTTI::staticarray<const RTTI::Property> > result = { &properties->array };
         return result;
     }
 };
@@ -225,9 +224,9 @@ struct be_typeid< World::Partition<T, TAIL> >
             {0},
             be_typeid<void>::klass(),
             {0},
-            {RTTI::staticarray<const RTTI::Tag>::s_null},
-            {RTTI::staticarray<const RTTI::Property>::s_null},
-            {RTTI::staticarray<const RTTI::Method>::s_null},
+            {&RTTI::staticarray<const RTTI::Tag>::s_null},
+            {&RTTI::staticarray<const RTTI::Property>::s_null},
+            {&RTTI::staticarray<const RTTI::Method>::s_null},
             {0},
             {0},
             0,

@@ -46,13 +46,13 @@ class CppObject(object):
         if self.tags:
             definition.write('    be_section(rtti_tag)\n'
                              '    static ::BugEngine::RTTI::staticarray_n< %d, const ::BugEngine::RTTI::Tag > s_tags_%s = {\n'
-                             '        %d,\n'
+                             '        {%d},\n'
                              '        {\n'  % (len(self.tags), prefix, len(self.tags)))
             definition.write(',\n'.join(['            { ::BugEngine::RTTI::Value(%s(%s)) }' % (t[0], t[1]) for t in self.tags]))
             definition.write('\n        }\n    };\n')
-            return 'reinterpret_cast< ::BugEngine::RTTI::staticarray<const ::BugEngine::RTTI::Tag>* >(&s_tags_%s)' % prefix
+            return '&s_tags_%s.array' % prefix
         else:
-            return '::BugEngine::RTTI::staticarray<const ::BugEngine::RTTI::Tag>::s_null'
+            return '&::BugEngine::RTTI::staticarray<const ::BugEngine::RTTI::Tag>::s_null'
 
     def write_content(self, owner, struct_owner, namespace, definition, instance):
         pass
@@ -161,7 +161,7 @@ class Method(CppObject):
         if params:
             definition.write('    be_section(rtti_method)\n'
                              '    static ::BugEngine::RTTI::staticarray_n< %d, const ::BugEngine::RTTI::Method::Parameter > s_%s_%d_params = {\n'
-                             '        %d,\n'
+                             '        {%d},\n'
                              '        {\n'  % (len(params), self.name, overload_index, len(params)))
             definition.write(',\n'.join(['            {\n'
                                          '                {%s},\n'
@@ -171,9 +171,9 @@ class Method(CppObject):
                                          '            }' % (t, p.name, p.type,
                                                             p.default_value and ('%s(%s)'%(p.type, p.default_value)) or '') for p, t in params]))
             definition.write('\n        }\n    };\n')
-            return 'reinterpret_cast< ::BugEngine::RTTI::staticarray< const ::BugEngine::RTTI::Method::Parameter >* >(&s_%s_%d_params)' % (self.name, overload_index)
+            return '&s_%s_%d_params.array' % (self.name, overload_index)
         else:
-            return '::BugEngine::RTTI::staticarray<const ::BugEngine::RTTI::Method::Parameter>::s_null'
+            return '&::BugEngine::RTTI::staticarray<const ::BugEngine::RTTI::Method::Parameter>::s_null'
 
 
 class BuiltinMethod(Method):
@@ -325,7 +325,7 @@ class OverloadedMethod(CppObject):
             overload_index += 1
         definition.write('    be_section(rtti_method)\n'
                          '    static ::BugEngine::RTTI::staticarray_n< %d, const ::BugEngine::RTTI::Method::Overload > s_method_%s_overloads = {\n'
-                         '        %d,\n'
+                         '        {%d},\n'
                          '        {\n' %(len(overloads), self.name_cpp, len(overloads)))
         definition.write(',\n'.join(['            {\n'
                                      '                {%s},\n'
@@ -335,7 +335,7 @@ class OverloadedMethod(CppObject):
                                      '                &%s\n'
                                      '            }' % (t, p, o.return_type, o.vararg and "true" or "false", o.trampoline_name(owner)) for o, t, p in overloads]))
         definition.write('\n        }\n    };\n')
-        return 'reinterpret_cast< ::BugEngine::RTTI::staticarray< const ::BugEngine::RTTI::Method::Overload >* >(&s_method_%s_overloads)' % (self.name_cpp)
+        return '&s_method_%s_overloads.array' % (self.name_cpp)
 
     def write_object(self, owner, struct_owner, namespace, object_name, definition, instance):
         method_ptr = self.write_method(owner, struct_owner, definition)
@@ -345,7 +345,7 @@ class OverloadedMethod(CppObject):
                          '    be_section(rtti_object)\n'
                          '    static ::BugEngine::RTTI::ObjectInfo s_object_%s = {\n'
                          '        %s,\n'
-                         '        {::BugEngine::RTTI::staticarray<const ::BugEngine::RTTI::Tag>::s_null},\n'
+                         '        {&::BugEngine::RTTI::staticarray<const ::BugEngine::RTTI::Tag>::s_null},\n'
                          '        s_method_%s.name,\n'
                          '        ::BugEngine::RTTI::Value(s_method_ptr_%s)\n'
                          '    };\n' % (self.name_cpp, method_ptr,
@@ -632,9 +632,9 @@ class Class(Container):
                          '        {%s.m_ptr},\n'
                          '        {%s.m_ptr},\n'
                          '        {0},\n'
-                         '        {::BugEngine::RTTI::staticarray<const ::BugEngine::RTTI::Tag>::s_null},\n'
-                         '        {::BugEngine::RTTI::staticarray<const ::BugEngine::RTTI::Property>::s_null},\n'
-                         '        {::BugEngine::RTTI::staticarray<const ::BugEngine::RTTI::Method>::s_null},\n'
+                         '        {&::BugEngine::RTTI::staticarray<const ::BugEngine::RTTI::Tag>::s_null},\n'
+                         '        {&::BugEngine::RTTI::staticarray<const ::BugEngine::RTTI::Property>::s_null},\n'
+                         '        {&::BugEngine::RTTI::staticarray<const ::BugEngine::RTTI::Method>::s_null},\n'
                          '        {0},\n'
                          '        {0},\n'
                          '        %s,\n'
@@ -681,7 +681,7 @@ class Class(Container):
         if methods:
             definition.write('    be_section(rtti_method)\n'
                              '    static ::BugEngine::RTTI::staticarray_n< %d, const ::BugEngine::RTTI::Method > s_methods = {\n'
-                             '        %d,\n'
+                             '        {%d},\n'
                              '        {\n'  % (len(methods), len(methods)))
             definition.write(',\n'.join(['            {\n'
                                          '                %s,\n'
@@ -689,9 +689,9 @@ class Class(Container):
                                          '                {&s_methods.elements[%d]}\n'
                                          '            }' % (name, o, i) for m, name, o, i in methods]))
             definition.write('\n        }\n    };\n'
-                             '    result->methods.set(reinterpret_cast< ::BugEngine::RTTI::staticarray< const ::BugEngine::RTTI::Method >* >(&s_methods));\n')
+                             '    result->methods.set(&s_methods.array);\n')
         if self.constructor:
-            definition.write('    result->constructor.set(result->methods->elements);\n')
+            definition.write('    result->constructor.set(s_methods.elements);\n')
         props = []
         for p in self.properties:
             tags = p.write_tags(struct_owner or self, definition)
@@ -700,7 +700,7 @@ class Class(Container):
         if props:
             definition.write('    be_section(rtti_prop)\n'
                              '    static ::BugEngine::RTTI::staticarray_n< %d, const ::BugEngine::RTTI::Property > s_properties = {\n'
-                             '        %d,\n'
+                             '        {%d},\n'
                              '        {\n' % (len(props), len(props)))
             definition.write(',\n'.join(['            {\n'
                                          '                {%s},\n'
@@ -711,7 +711,7 @@ class Class(Container):
                                          '            }' % (t, name, self.cpp_name(), p.type,
                                                             p.type, self.cpp_name(), self.cpp_name(), p.name) for p, name, t in props]))
             definition.write('\n        }\n    };\n'
-                             '    result->properties.set(reinterpret_cast< ::BugEngine::RTTI::staticarray< const ::BugEngine::RTTI::Property >* >(&s_properties));\n')
+                             '    result->properties.set(&s_properties.array);\n')
 
         definition.write('    raw<const ::BugEngine::RTTI::ObjectInfo> objects = %s;\n'
                          '    result->objects.set(objects.operator->());\n'

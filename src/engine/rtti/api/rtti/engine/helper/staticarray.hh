@@ -9,49 +9,45 @@ see LICENSE for detail */
 namespace BugEngine { namespace RTTI
 {
 
-be_api(RTTI)
-extern char s_zero[];
-
 template< typename T >
 struct staticarray
 {
-    u32 const   count;
-    T           elements[1];
+    u64 const   count;
 
     T& operator[](const u32 index)
     {
         be_assert(index < count, "index %d out of range (0, %d)" | index | (count-1));
-        return elements[index];
+        return *(begin()+index);
     }
     const T& operator[](const u32 index) const
     {
         be_assert(index < count, "index %d out of range (0, %d)" | index | (count-1));
-        return elements[index];
+        return *(begin()+index);
     }
-    T* begin()              { return &elements[0]; }
-    const T* begin() const  { return &elements[0]; }
-    T* end()                { return &elements[count]; }
-    const T* end() const    { return &elements[count]; }
+    T* begin()              { return reinterpret_cast<T*>(reinterpret_cast<char*>(this) + sizeof(u64)); }
+    const T* begin() const  { return reinterpret_cast<const T*>(reinterpret_cast<const char*>(this) + sizeof(u64)); }
+    T* end()                { return begin() + count; }
+    const T* end() const    { return begin() + count; }
 
-    static staticarray<T>* s_null;
+    static staticarray<T> s_null;
 };
 
 
 template< u32 COUNT, typename T >
 struct staticarray_n
 {
-    u32 const   count;
-    T           elements[COUNT];
+    staticarray<T>  array;
+    T               elements[COUNT];
 };
 
 template< typename T >
 struct staticarray_n<0, T>
 {
-    u32 const   count;
+    staticarray<T>  array;
 };
 
 template< typename T >
-staticarray<T>* staticarray<T>::s_null = reinterpret_cast< staticarray<T>* >(s_zero);
+staticarray<T> staticarray<T>::s_null = {0};
 
 }}
 
