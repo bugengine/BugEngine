@@ -12,6 +12,9 @@
 namespace BugEngine { namespace RTTI
 {
 
+be_api(RTTI)
+char s_zero[] = { 0, 0, 0, 0 };
+
 const istring Class::nameConstructor()
 {
     static const istring result = "?new";
