@@ -33,6 +33,12 @@ T& raw<T>::operator*()
 }
 
 template< typename T >
+const T& raw<T>::operator*() const
+{
+    return *m_ptr;
+}
+
+template< typename T >
 raw<T> raw<T>::null()
 {
     raw<T> result = { 0 };

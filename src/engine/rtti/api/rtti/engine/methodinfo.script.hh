@@ -23,10 +23,12 @@ published:
         raw< staticarray<const Tag> >   tags;
         istring                         name;
         Type                            type;
-        const Value                     defaultValue;
+        raw<const Value>                defaultValue;
     published:
         Value getTag(const Type& type) const;
         Value getTag(raw<const Class> type) const;
+    public:
+        static const Value s_noDefaultValue;
     private:
         Parameter& operator=(const Parameter&);
     };

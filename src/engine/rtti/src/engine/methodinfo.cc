@@ -11,6 +11,7 @@
 namespace BugEngine { namespace RTTI
 {
 
+const Value Method::Parameter::s_noDefaultValue;
 
 Value Method::Parameter::getTag(const Type& tagType) const
 {

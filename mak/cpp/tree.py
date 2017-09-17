@@ -159,6 +159,10 @@ class Method(CppObject):
             params.append((p, p.write_tags(self.name, overload_index, param_index, definition)))
 
         if params:
+            for i, p in enumerate(params):
+                p, t = p
+                if p.default_value:
+                    definition.write('    static ::BugEngine::RTTI::Value s_%s_%d_%d_default ((%s)%s);\n' % (self.name, overload_index, i, p.type, p.default_value))
             definition.write('    be_section(rtti_method)\n'
                              '    static ::BugEngine::RTTI::staticarray_n< %d, const ::BugEngine::RTTI::Method::Parameter > s_%s_%d_params = {\n'
                              '        {%d},\n'
@@ -167,9 +171,9 @@ class Method(CppObject):
                                          '                {%s},\n'
                                          '                ::BugEngine::istring("%s"),\n'
                                          '                ::BugEngine::be_typeid< %s >::type(),\n'
-                                         '                ::BugEngine::RTTI::Value(%s)\n'
-                                         '            }' % (t, p.name, p.type,
-                                                            p.default_value and ('%s(%s)'%(p.type, p.default_value)) or '') for p, t in params]))
+                                         '                {%s}\n'
+                                         '            }' % (t, p[0].name, p[0].type,
+                                                            p[0].default_value and ('&s_%s_%d_%d_default'%(self.name, overload_index, i)) or '&::BugEngine::RTTI::Method::Parameter::s_noDefaultValue') for i, p in enumerate(params)]))
             definition.write('\n        }\n    };\n')
             return '&s_%s_%d_params.array' % (self.name, overload_index)
         else:

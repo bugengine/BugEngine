@@ -109,7 +109,7 @@ CallInfo getCost(raw<const Method::Overload> overload,
     result.defaultValuesCount = overload->params->count - placedArgumentCount - namedArgumentCount;
     for (u32 i = 0; i < remainingParamCount - namedArgumentCount; ++i)
     {
-        if (!namedParams[namedArgumentCount+i]->defaultValue)
+        if (!namedParams[namedArgumentCount+i]->defaultValue.operator *())
             /* named param not in list */
             return result;
     }
@@ -188,8 +188,8 @@ Value call(CallInfo callInfo,
         {
             be_assert(p != callInfo.overload->params->end(),
                       "too many arguments passed to call");
-            be_assert(p->defaultValue, "Parameter does not have a default value");
-            new (static_cast<void*>(&v[index])) Value(Value::ByRef(p->defaultValue));
+            be_assert(*(p->defaultValue), "Parameter does not have a default value");
+            new (static_cast<void*>(&v[index])) Value(Value::ByRef(*(p->defaultValue)));
         }
         be_assert(p != callInfo.overload->params->end(),
                   "too many arguments passed to call");
