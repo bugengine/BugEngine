@@ -68,11 +68,7 @@ RTTI::Type Reference::getType() const
         RTTI::Type t = m_object->getType();
         for (u32 i = 1; i < m_name.size(); ++i)
         {
-            raw<const RTTI::Property> p = t.metaclass->properties;
-            while (p && p->name != m_name[i])
-            {
-                p = p->next;
-            }
+            raw<const RTTI::Property> p = t.metaclass->getProperty(m_name[i]);
             if (!p)
             {
                 be_notreached();

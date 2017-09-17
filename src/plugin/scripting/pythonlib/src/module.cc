@@ -11,13 +11,15 @@
 #include    <py_string.hh>
 #include    <py_array.hh>
 #include    <py_namespace.hh>
+#include    <py_class.hh>
 #include    <py_plugin.hh>
 
 
 namespace BugEngine { namespace Python
 {
 
-tls<PythonLibrary> s_library;
+tls<PythonLibrary>  s_library;
+PyObject*           s_moduleObject;
 
 static PyMethodDef s_methods[] =
 {
@@ -63,6 +65,8 @@ static void setupModule(PyObject* module, bool registerLog)
     PyBugString<ifilename>::registerType(module);
     PyBugArray::registerType(module);
     PyBugNamespace::registerType(module);
+    PyBugClass::registerType(module);
+    s_moduleObject = module;
 }
 
 PyObject* init2_py_bugengine(bool registerLog)

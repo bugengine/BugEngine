@@ -5,6 +5,7 @@
 #define BE_RTTI_CLASSINFO_SCRIPT_HH_
 /**************************************************************************************************/
 #include    <rtti/stdafx.h>
+#include    <rtti/engine/helper/staticarray.hh>
 #include    <core/md5.hh>
 
 namespace BugEngine { namespace RTTI
@@ -15,18 +16,23 @@ struct ObjectInfo;
 struct Property;
 struct Method;
 struct Tag;
+struct ScriptingAPI;
 
 enum ClassType
 {
-    ClassType_Object    = 0,
-    ClassType_Struct    = 1,
-    ClassType_Pod       = 2,
-    ClassType_Namespace = 3,
-    ClassType_Array     = 4,
-    ClassType_Enum      = 5,
-    ClassType_String    = 6,
-    ClassType_Number    = 7,
-    ClassType_Variant   = 8
+    ClassType_Object,
+    ClassType_Struct,
+    ClassType_Pod,
+    ClassType_Namespace,
+    ClassType_Array,
+    ClassType_Enum,
+    ClassType_String,
+    ClassType_Number,
+    ClassType_Vector2,
+    ClassType_Vector3,
+    ClassType_Vector4,
+    ClassType_Matrix,
+    ClassType_Variant
 };
 
 
@@ -75,24 +81,24 @@ published:
     static const istring nameOperatorDecrement();
     static const istring nameOperatorGet();
 published:
-    istring const               name;
-    raw<const Class> const      owner;
-    raw<const Class> const      parent;
-    u32 const                   size;
-    i32 const                   offset;
-    u32 const                   id;
-    raw<const Tag>              tags;
-    raw<const Property>         properties;
-    raw<const Method>           methods;
-    raw<const ObjectInfo>       objects;
+    istring const                       name;
+    u32 const                           size;
+    i32 const                           offset;
+    u32 const                           id;
+    raw<const Class> const              owner;
+    raw<const Class> const              parent;
+    raw<const ObjectInfo>               objects;
+    raw< staticarray<const Tag> >       tags;
+    raw< staticarray<const Property> >  properties;
+    raw< staticarray<const Method> >    methods;
     be_tag(Alias("?call"))
-    raw<const Method>           constructor;
-    raw<const Method>           call;
+    raw<const Method>                   constructor;
 public:
+    raw<const ScriptingAPI>             apiMethods;
     typedef void (*CopyConstructor)(const void* source, void* destination);
     typedef void (*Destructor)(void* object);
-    const CopyConstructor   copyconstructor;
-    const Destructor        destructor;
+    const CopyConstructor               copyconstructor;
+    const Destructor                    destructor;
 published:
     typedef enum ClassType ClassType;
     Value getTag(const Type& type) const;
@@ -120,7 +126,7 @@ public:
         EnumerateRecursive
     };
     void enumerateObjects(EnumerateRecursion recursion, EnumerateCallback callback) const;
-    u32 distance(raw<const Class> other) const;
+    bool distance(raw<const Class> other, u16& result) const;
     const ObjectInfo* addObject(const istring& s, const ObjectInfo* ob);
 private: // friend Value
     void copy(const void* src, void* dst) const;
@@ -133,6 +139,11 @@ be_api(RTTI) raw<RTTI::Class> be_game_Namespace();
 raw<RTTI::Class> be_game_Namespace_BugEngine();
 
 }
+
+#include    <rtti/engine/taginfo.script.hh>
+#include    <rtti/engine/propertyinfo.script.hh>
+#include    <rtti/engine/methodinfo.script.hh>
+#include    <rtti/engine/objectinfo.script.hh>
 
 /**************************************************************************************************/
 #endif

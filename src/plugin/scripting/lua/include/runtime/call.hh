@@ -1,15 +1,16 @@
 /* BugEngine <bugengine.devel@gmail.com> / 2008-2014
  see LICENSE for detail */
 
-#ifndef BE_LUA_LUAVALUE_HH_
-#define BE_LUA_LUAVALUE_HH_
+#ifndef BE_LUA_RUNTIME_CALL_HH_
+#define BE_LUA_RUNTIME_CALL_HH_
 /**************************************************************************************************/
 #include    <stdafx.h>
+#include    <rtti/engine/methodinfo.script.hh>
 
 namespace BugEngine { namespace Lua
 {
 
-extern const luaL_Reg s_valueMetaTable[];
+int call(lua_State* state, raw<const RTTI::Method> method);
 
 }}
 

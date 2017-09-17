@@ -267,33 +267,42 @@ void Class::enumerateObjects(EnumerateRecursion recursion, EnumerateCallback cal
     }
 }
 
-
 raw<const Property> Class::getProperty(istring propertyName) const
 {
-    raw<const Property> p = properties;
-    while(p)
+    raw<const Class> thisCls = { this };
+    for (raw< const Class > cls = thisCls; cls; cls = cls->parent)
     {
-        if (p->name == propertyName)
+        for (const Property* p = cls->properties->begin();
+             p != cls->properties->end();
+             ++p)
         {
-            break;
+            if (p->name == propertyName)
+            {
+                raw<const Property> pptr = {p};
+                return pptr;
+            }
         }
-        p = p->next;
     }
-    return p;
+    return raw<const Property>();
 }
 
 raw<const Method> Class::getMethod(istring methodName) const
 {
-    raw<const Method> m = methods;
-    while(m)
+    raw<const Class> thisCls = { this };
+    for (raw< const Class > cls = thisCls; cls; cls = cls->parent)
     {
-        if (m->name == methodName)
+        for (const Method* m = cls->methods->begin();
+             m != cls->methods->end();
+             ++m)
         {
-            break;
+            if (m->name == methodName)
+            {
+                raw< const Method > mptr = { m };
+                return mptr;
+            }
         }
-        m = m->next;
     }
-    return m;
+    return raw<const Method>();
 }
 
 raw<const ObjectInfo> Class::getStaticProperty(istring propertyName) const
@@ -316,52 +325,31 @@ Value Class::get(Value& from, istring propname, bool& found) const
     if (from.type().metaclass == s_metaClass)
     {
         raw<const Class> cls = from.as< raw<const Class> >();
-        raw<const ObjectInfo> o = cls->objects;
-        while(o)
+        raw<const ObjectInfo> o = cls->getStaticProperty(propname);
+        if (o)
         {
-            if (o->name == propname)
-            {
-                found = true;
-                return o->value;
-            }
-            o = o->next;
+            found = true;
+            return o->value;
         }
-        raw<const Method> m = cls->methods;
-        while(m)
+        raw<const Method> m = cls->getMethod(propname);
+        if (m)
         {
-            if (m->name == propname)
-            {
-                found = true;
-                return Value(m);
-            }
-            m = m->next;
+            found = true;
+            return Value(m);
         }
     }
 
+    raw<const Property> p = getProperty(propname);
+    if (p)
     {
-        raw<const Property> p = properties;
-        while(p)
-        {
-            if (p->name == propname)
-            {
-                found = true;
-                return p->get(from);
-            }
-            p = p->next;
-        }
+        found = true;
+        return p->get(from);
     }
-
+    raw<const Method> m = getMethod(propname);
+    if (m)
     {
-        raw<const Method> m = methods;
-        while(m)
-        {
-            if (m->name == propname)
-            {
-                found = true;
-                return Value(m);
-            }
-            m = m->next;
-        }
+        found = true;
+        return Value(m);
     }
 
     found = false;
@@ -374,52 +362,31 @@ Value Class::get(const Value& from, istring propname, bool& found) const
     if (from.type().metaclass == s_metaClass)
     {
         raw<const Class> cls = from.as< raw<const Class> >();
-        raw<const ObjectInfo> o = cls->objects;
-        while(o)
+        raw<const ObjectInfo> o = cls->getStaticProperty(propname);
+        if (o)
         {
-            if (o->name == propname)
-            {
-                found = true;
-                return o->value;
-            }
-            o = o->next;
+            found = true;
+            return o->value;
         }
-        raw<const Method> m = cls->methods;
-        while(m)
+        raw<const Method> m = cls->getMethod(propname);
+        if (m)
         {
-            if (m->name == propname)
-            {
-                found = true;
-                return Value(m);
-            }
-            m = m->next;
+            found = true;
+            return Value(m);
         }
     }
 
+    raw<const Property> p = getProperty(propname);
+    if (p)
     {
-        raw<const Property> p = properties;
-        while(p)
-        {
-            if (p->name == propname)
-            {
-                found = true;
-                return p->get(from);
-            }
-            p = p->next;
-        }
+        found = true;
+        return p->get(from);
     }
-
+    raw<const Method> m = getMethod(propname);
+    if (m)
     {
-        raw<const Method> m = methods;
-        while(m)
-        {
-            if (m->name == propname)
-            {
-                found = true;
-                return Value(m);
-            }
-            m = m->next;
-        }
+        found = true;
+        return Value(m);
     }
 
     found = false;
@@ -440,12 +407,19 @@ bool Class::isA(raw<const Class> klass) const
 
 Value Class::getTag(const Type& type) const
 {
-    raw<const Tag> tag = tags;
-    while(tag)
+    raw<const Class> thisCls = { this };
+    for (raw< const Class > cls = thisCls; cls; cls = cls->parent)
     {
-        if (type <= tag->tag.type())
-            return Value(Value::ByRef(tag->tag));
-        tag = tag->next;
+        if (cls->tags)
+        {
+            for (const Tag* tag = cls->tags->begin();
+                 tag != cls->tags->end();
+                 ++tag)
+            {
+                if (type <= tag->tag.type())
+                    return Value(Value::ByRef(tag->tag));
+            }
+        }
     }
     return Value();
 }
@@ -455,18 +429,18 @@ Value Class::getTag(raw<const Class> type) const
     return getTag(Type::makeType(type, Type::Value, Type::Const, Type::Const));
 }
 
-u32 Class::distance(raw<const Class> other) const
+bool Class::distance(raw<const Class> other, u16& result) const
 {
     raw<const Class> ci = {this};
-    u32 result = 0;
+    result = 0;
     while (ci)
     {
         if (ci == other)
-            return result;
+            return true;
         ci = ci->parent;
-        result++;
+        ++result;
     }
-    return static_cast<u32>(Type::MaxTypeDistance);
+    return false;
 }
 
 inamespace Class::fullname() const
@@ -495,7 +469,11 @@ Value Class::findClass(inamespace name)
 
 raw<RTTI::Class> be_game_Namespace()
 {
-    static RTTI::Class ci = { "BugEngine", {0}, {0}, 0, 0, RTTI::ClassType_Namespace, {0}, {0}, {0}, {0}, {0}, {0}, 0, 0 };
+    static RTTI::Class ci = { "BugEngine", 0, 0, RTTI::ClassType_Namespace, {0}, {0}, {0},
+                              {RTTI::staticarray<const RTTI::Tag>::s_null},
+                              {RTTI::staticarray<const RTTI::Property>::s_null},
+                              {RTTI::staticarray<const RTTI::Method>::s_null},
+                              {0}, {0}, 0, 0 };
     raw<RTTI::Class> result = {&ci};
     return result;
 }
@@ -506,6 +484,6 @@ raw<RTTI::Class> be_game_Namespace_BugEngine()
 }
 
 static RTTI::ObjectInfo ob = { be_game_Namespace_BugEngine()->objects, {0}, "BugEngine", RTTI::Value(be_game_Namespace()) };
-static const RTTI::ObjectInfo* obptr = (be_game_Namespace_BugEngine()->objects.m_ptr = &ob);
+BE_EXPORT const RTTI::ObjectInfo* obptr = (be_game_Namespace_BugEngine()->objects.m_ptr = &ob);
 
 }

@@ -21,11 +21,12 @@ Object::~Object()
 {
 }
 
-void Object::addedParameter(ref<Parameter> parameter)
+void Object::addedParameter(ref<const Parameter> parameter)
 {
+    be_forceuse(parameter);
     for (minitl::vector< OverloadMatch >::iterator it = m_overloads.begin(); it != m_overloads.end(); ++it)
     {
-        it->addParameter(parameter);
+        it->update(m_parameters);
     }
     minitl::sort(m_overloads.begin(), m_overloads.end(), minitl::less<OverloadMatch>());
 }
@@ -46,33 +47,41 @@ void Object::setMethod(ref<Reference> reference)
                 if (m_method)
                 {
                     m_overloads.clear();
-                    for (raw<const RTTI::Method::Overload> overload = m_method->overloads; overload; overload = overload->next)
+                    m_overloads.reserve(m_method->overloads->count);
+                    for (const RTTI::Method::Overload* o = m_method->overloads->begin();
+                         o != m_method->overloads->end();
+                         ++o)
                     {
+                        raw<const RTTI::Method::Overload> overload = { o };
                         m_overloads.push_back(OverloadMatch(overload));
-                        OverloadMatch& match = m_overloads.back();
-                        for(minitl::vector< ref<Parameter> >::const_iterator it = m_parameters.begin(); it != m_parameters.end(); ++it)
-                        {
-                            match.addParameter(*it);
-                        }
+                        m_overloads.back().update(m_parameters);
                     }
-                    minitl::sort(m_overloads.begin(), m_overloads.end(), minitl::less<OverloadMatch>());
+                    minitl::sort(m_overloads.begin(),
+                                 m_overloads.end(),
+                                 minitl::less<OverloadMatch>());
                 }
                 else
                 {
+                    // error: call method is null
                     be_unimplemented();
                 }
             }
             else
             {
-                // error
+                // error: call is not a method
                 be_unimplemented();
             }
         }
         else
         {
-            // error
+            // error: no call
             be_unimplemented();
         }
+    }
+    else
+    {
+        // error: no value?
+        be_unimplemented();
     }
 }
 
@@ -80,18 +89,18 @@ RTTI::Type Object::getType() const
 {
     if (m_overloads.empty())
     {
-        be_notreached();
         return be_typeid<void>::type();
     }
     else
     {
-        return m_overloads[0].m_overload->returnType;
+        return m_overloads[0].m_callInfo.overload->returnType;
     }
 }
 
 RTTI::Value Object::create() const
 {
-    return m_overloads.empty() ? RTTI::Value() : m_overloads[0].create(m_name);
+    return m_overloads.empty() ? RTTI::Value()
+                               : m_overloads[0].create(m_name);
 }
 
 }}}

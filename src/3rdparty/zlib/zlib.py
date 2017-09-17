@@ -6,7 +6,7 @@ def options(opt):
 
 
 def setup(conf):
-    if 'posix' in conf.env.VALID_PLATFORMS:
+    if 'posix' in conf.env.VALID_PLATFORMS and conf.env.CXX_NAME != 'sun':
         try:
             conf.pkg_config('zlib', var='3rdparty.zlib')
         except Exception as e:

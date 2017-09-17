@@ -4,24 +4,20 @@
 #include    <rtti/stdafx.h>
 #include    <rtti/engine/methodinfo.script.hh>
 #include    <rtti/engine/taginfo.script.hh>
+#include    <rtti/engine/call.hh>
 #include    <rtti/classinfo.script.hh>
 #include    <rtti/value.hh>
 
 namespace BugEngine { namespace RTTI
 {
 
-static const u32 s_overloadMaxDistance = 1000000;
-static const u32 s_overloadVarargDistance = s_overloadMaxDistance-1;
-
 
 Value Method::Parameter::getTag(const Type& tagType) const
 {
-    raw<const Tag> tag = tags;
-    while(tag)
+    for (const Tag* tag = tags->begin(); tag != tags->end(); ++tag)
     {
         if (tagType <= tag->tag.type())
             return Value(Value::ByRef(tag->tag));
-        tag = tag->next;
     }
     return Value();
 }
@@ -31,38 +27,12 @@ Value Method::Parameter::getTag(raw<const Class> tagType) const
     return getTag(Type::makeType(tagType, Type::Value, Type::Const, Type::Const));
 }
 
-u32 Method::Overload::distance(Value* p, u32 nparams) const
-{
-    if (vararg)
-    {
-        return s_overloadVarargDistance;
-    }
-    else
-    {
-        u32 distance = 0;
-        raw<const Parameter> selfp = params;
-        while(nparams && selfp)
-        {
-            distance += p->type().distance(selfp->type);
-            selfp = selfp->next;
-            nparams--;
-            p++;
-        }
-        if (nparams || selfp)
-            return s_overloadMaxDistance;
-        else
-            return distance;
-    }
-}
-
 Value Method::Overload::getTag(const Type& type) const
 {
-    raw<const Tag> tag = tags;
-    while(tag)
+    for (const Tag* tag = tags->begin(); tag != tags->end(); ++tag)
     {
         if (type <= tag->tag.type())
             return Value(Value::ByRef(tag->tag));
-        tag = tag->next;
     }
     return Value();
 }
@@ -74,20 +44,16 @@ Value Method::Overload::getTag(raw<const Class> type) const
 
 Value Method::doCall(Value* params, u32 nparams) const
 {
-    u32 bestDistance = s_overloadMaxDistance;
-    raw<const Overload> overload = {0};
-    for (raw<const Overload> it = overloads; it; it = it->next)
+    ArgInfo<Type>* args = static_cast<ArgInfo<Type>*>(malloca(sizeof(ArgInfo<Type>) * nparams));
+    for (u32 i = 0; i < nparams; ++i)
     {
-        u32 distance = it->distance(params, nparams);
-        if (distance < bestDistance)
-        {
-            bestDistance = distance;
-            overload = it;
-        }
+        new(&args[i]) ArgInfo<Type>(params[i].type());
     }
-    if (overload)
+    raw<const Method> thisPtr = { this };
+    CallInfo c = resolve(thisPtr, args, nparams);
+    if (c.conversion < ConversionCost::s_incompatible)
     {
-        return overload->call(params, nparams);
+        return c.overload->call(params, nparams);
     }
     else
     {

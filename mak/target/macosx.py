@@ -20,6 +20,8 @@ class Darwin(Configure.ConfigurationContext.Platform):
         self.conf = conf
         if sdk:
             self.NAME = self.__class__.NAME + sdk[0]
+            self.directories += sdk[2]
+
 
     def get_available_compilers(self, compiler_list):
         result = []
@@ -27,7 +29,7 @@ class Darwin(Configure.ConfigurationContext.Platform):
         for c in compiler_list:
             for r in self.SUPPORTED_TARGETS:
                 if r.match(c.target):
-                    k = (c.__class__.__name__, c.version)
+                    k = (c.NAMES[0], c.version)
                     try:
                         compiler_sets[k].append(c)
                     except KeyError:
@@ -37,7 +39,7 @@ class Darwin(Configure.ConfigurationContext.Platform):
             compilers = compiler_sets[k]
             try:
                 compilers, sdk = self.get_best_compilers_sdk(compilers)
-            except Errors.WafError:
+            except Errors.WafError as e:
                 continue
             else:
                 if len(compilers) > 1:
@@ -54,7 +56,8 @@ class Darwin(Configure.ConfigurationContext.Platform):
         conf.find_program('lipo')
         if not conf.find_program('dsymutil', path_list=[p1, p2], mandatory=False):
             conf.find_program('dsymutil')
-        conf.find_program('strip', path_list = [p1, p2])
+        if not conf.find_program('strip', path_list = [p1, p2], mandatory=False):
+            conf.find_program('strip')
         conf.env.ABI = 'mach_o'
         conf.env.VALID_PLATFORMS = self.PLATFORMS + ['darwin']
         conf.env.XCODE_SDKROOT = platform
@@ -85,16 +88,49 @@ class Darwin(Configure.ConfigurationContext.Platform):
         conf.env.CFLAGS_cshlib = ['-fPIC']
         conf.env.CXXFLAGS_cxxshlib = ['-fPIC']
 
+    platform_sdk_re = re.compile('.*/Platforms/\w*\.platform/Developer/SDKs/[\.\w]*\.sdk')
+    old_sdk_re = re.compile('.*/SDKs/[\.\w]*\.sdk')
+    def match(self, compiler, sdk_path, all_sdks):
+        def get_paths(sdk_path):
+            if self.platform_sdk_re.match(sdk_path):
+                platform_path = os.path.normpath(os.path.dirname(os.path.dirname(os.path.dirname(sdk_path))))
+                developer_path, d = os.path.split(platform_path)
+                while d and not d.startswith('Developer'):
+                    developer_path, d = os.path.split(developer_path)
+            elif self.old_sdk_re.match(sdk_path):
+                platform_path = os.path.normpath(os.path.dirname(os.path.dirname(sdk_path)))
+                developer_path, d = os.path.split(platform_path)
+            else:
+                platform_path = os.path.normpath(os.path.dirname(os.path.dirname(sdk_path)))
+                developer_path, d = os.path.split(platform_path)
+            developer_path = os.path.join(developer_path, d)
+            if platform_path[-1] != '/':
+                platform_path += '/'
+            if developer_path[-1] != '/':
+                developer_path += '/'
+            return platform_path, developer_path
+        compiler_path = os.path.normpath(compiler.compiler_c)
+        platform_path, developer_path = get_paths(sdk_path)
+        if compiler_path.startswith(platform_path):
+            return True
+        for sdk_version, sdk_archs, sdk_path in all_sdks:
+            ppath, dpath = get_paths(sdk_path)
+            if compiler_path.startswith(ppath):
+                return False
+        if compiler_path.startswith(developer_path):
+            return True
+        for sdk_version, sdk_archs, sdk_path in all_sdks:
+            ppath, dpath = get_paths(sdk_path)
+            if compiler_path.startswith(dpath):
+                return False
+        return True
+
+
     def get_best_compilers_sdk(self, compilers):
         all_archs = []
-        all_paths = []
         for compiler in sorted(compilers, key = lambda x: x.name()):
-            if compiler.arch not in all_archs: all_archs.append(compiler.arch)
-            for sibling in compiler.siblings:
-                dirname = os.path.dirname(sibling.compiler_c)
-                dirname = os.path.dirname(dirname)
-                dirname = os.path.dirname(dirname)
-                if dirname not in all_paths: all_paths.append(dirname)
+            if compiler.arch not in all_archs:
+                all_archs.append(compiler.arch)
 
         try:
             sdk_number_min = getattr(Options.options, '%s_sdk_min' % self.OS_NAME)
@@ -114,19 +150,26 @@ class Darwin(Configure.ConfigurationContext.Platform):
         except KeyError:
             raise Errors.WafError('No SDK detected for platform %s' % self.SDK_NAME)
         else:
-            best_sdk = (None, None, [])
+            best_sdk = (None, None, [], [])
             for sdk_version, sdk_archs, sdk_path in all_sdks:
+                if len(best_sdk[2]) >= len(sdk_archs):
+                    break
                 sdk_option = '-m%s-version-min=%s'%(self.OS_NAME, '.'.join(sdk_version))
                 if sdk_number_max and sdk_version > sdk_number_max:
                     continue
                 if sdk_number_min and sdk_version < sdk_number_min:
                     continue
                 sdk_compilers = []
+                sdk_bin_paths = [i for i in [
+                        os.path.normpath(os.path.join(sdk_path, 'usr', 'bin')),
+                        os.path.normpath(os.path.join(sdk_path, '..', '..', 'usr', 'bin')),
+                        os.path.normpath(os.path.join(sdk_path, '..', '..', '..', '..', '..', 'usr', 'bin')),
+                    ] if os.path.isdir(i) and i != '/usr/bin']
                 for a in sdk_archs:
                     for c in compilers:
-                        if c.arch == a:
+                        if self.match(c, sdk_path, all_sdks) and c.arch == a:
                             r, out, err = c.run_cxx([sdk_option, '-Wl,-rpath,.', '-x', 'c++', '-isysroot', sdk_path, '-'],
-                                                    '#include <stdio.h>\nint main() { printf(0); return 0; }\n')
+                                                    '#include <stdio.h>\n#include <iostream>\nint main() { printf(0); return 0; }\n')
                             if r == 0:
                                 sdk_compilers.append(c)
                                 break
@@ -137,11 +180,9 @@ class Darwin(Configure.ConfigurationContext.Platform):
                         #print('no compiler for arch %s'%a)
                         pass
                 if len(sdk_compilers) > len(best_sdk[2]):
-                        best_sdk = ('.'.join(sdk_version), sdk_path, sdk_compilers)
-                elif len(sdk_compilers) > len(best_sdk[2]) and sdk > best_sdk[0]:
-                    best_sdk = ('.'.join(sdk_version), sdk_path, sdk_compilers)
+                    best_sdk = ('.'.join(sdk_version), sdk_path, sdk_compilers, sdk_bin_paths)
             if best_sdk[2]:
-                return best_sdk[2], (best_sdk[0], best_sdk[1])
+                return best_sdk[2], (best_sdk[0], best_sdk[1], best_sdk[3])
             else:
                 raise Errors.WafError('No SDK for compiler %s' % compilers[0].compiler_c)
 

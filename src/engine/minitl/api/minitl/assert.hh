@@ -39,7 +39,7 @@ be_api(MINITL) AssertionCallback_t getAssertionCallback();
             be_r_ = minitl::getAssertionCallback()(__FILE__,__LINE__,#cond,(minitl::format<4096>)message);  \
             switch(be_r_)                                                                                   \
             {                                                                                               \
-            case minitl::Abort:         std::abort(); break;                                                \
+            case minitl::Abort:         ::abort(); break;                                                \
             case minitl::IgnoreAll:     be_ignore_ = true; break;                                           \
             case minitl::Break:         be_break(); break;                                                  \
             default:;                                                                                       \

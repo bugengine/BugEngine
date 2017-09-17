@@ -115,7 +115,7 @@ PyTypeObject PyBugEnum::s_pyType =
     0,
     0,
     0,
-    0,
+    PyBugObject::s_methods,
     0,
     0,
     &PyBugObject::s_pyType,
@@ -138,17 +138,20 @@ PyTypeObject PyBugEnum::s_pyType =
     0
 };
 
-PyObject* PyBugEnum::create(PyObject* owner, const RTTI::Value& value)
+PyObject* PyBugEnum::stealValue(PyObject* owner, RTTI::Value& value)
 {
     be_assert(value.type().metaclass->type() == RTTI::ClassType_Enum,
               "PyBugNumber only accepts Enum types");
     PyObject* result = s_pyType.tp_alloc(&s_pyType, 0);
     static_cast<PyBugEnum*>(result)->owner = owner;
+
+
     if (owner)
     {
         Py_INCREF(owner);
     }
-    new(&(static_cast<PyBugEnum*>(result))->value) RTTI::Value(value);
+    new(&(static_cast<PyBugEnum*>(result))->value) RTTI::Value();
+    (static_cast<PyBugEnum*>(result))->value.swap(value);
     return result;
 }
 
@@ -157,7 +160,7 @@ static istring s_toInt = istring("toInt");
 
 PyObject* PyBugEnum::str(PyObject *self)
 {
-    PyBugObject* self_ = static_cast<PyBugObject*>(self);
+    PyBugEnum* self_ = static_cast<PyBugEnum*>(self);
     const RTTI::Value& v = self_->value;
     raw<const RTTI::Method> toString = self_->value[s_toString].as< raw<const RTTI::Method> >();
     minitl::format<1024u> format = minitl::format<1024u>("%s.%s")

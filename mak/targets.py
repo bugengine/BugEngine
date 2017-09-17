@@ -21,7 +21,7 @@ def add_build_command(toolchain, optimisation):
 @conf
 class Platform:
     def __init__(self):
-        pass
+        self.directories = []
 
     def get_available_compilers(self, compiler_list):
         result = []
@@ -47,14 +47,14 @@ class Platform:
             v = conf.env
             v.ARCH_NAME = compiler.arch
             v.TOOLCHAIN=toolchain
-            v.DEFINES.append('BE_PLATFORM=platform_%s'%v.VALID_PLATFORMS[0])
+            v.append_unique('DEFINES', ['BE_PLATFORM=platform_%s'%v.VALID_PLATFORMS[0]])
             if not add:
                 v.ENV_PREFIX = compiler.arch
             if not sub_compilers:
                 conf.recurse(conf.bugenginenode.abspath()+'/mak/arch/%s'%compiler.arch, once=False)
                 conf.recurse(conf.bugenginenode.abspath()+'/mak', name='setup', once=False)
             if v.STATIC:
-                v.DEFINES.append('BE_STATIC=1')
+                v.append_unique('DEFINES', ['BE_STATIC=1'])
             conf.variant = ''
         except Exception as e:
             conf.end_msg(e, color='RED')
@@ -62,6 +62,7 @@ class Platform:
             return None
         else:
             conf.end_msg(' ')
+            v.TMPDIR = os.path.join(conf.bldnode.abspath(), toolchain)
             v.PREFIX = os.path.join('bld', toolchain)
             conf.variant = ''
             for c in sub_compilers:
@@ -77,10 +78,10 @@ class Platform:
     def add_multiarch_toolchain(self, toolchain):
         e = self.env
         e.TOOLCHAIN=toolchain
-        e.DEFINES.append('BE_PLATFORM=platform_%s'%e.VALID_PLATFORMS[0])
+        e.append_unique('DEFINES', ['BE_PLATFORM=platform_%s'%e.VALID_PLATFORMS[0]])
         e.PREFIX = os.path.join('bld', toolchain)
         if e.STATIC:
-            e.DEFINES.append('BE_STATIC=1')
+            e.append_unique('DEFINES', ['BE_STATIC=1'])
         for optim in self.env.ALL_VARIANTS:
             add_build_command(toolchain, optim)
         self.variant = ''

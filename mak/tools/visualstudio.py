@@ -316,7 +316,7 @@ class VCxproj:
 
         globals = self.vcxproj._add(project, 'PropertyGroup', {'Label': 'Globals'})
         self.vcxproj._add(globals, 'ProjectGUID', self.guid)
-        self.vcxproj._add(globals, 'TargetFrameworkVersion', 'v'+version_project[0])
+        #self.vcxproj._add(globals, 'TargetFrameworkVersion', 'v'+version_project[0])
         self.vcxproj._add(globals, 'RootNamespace', task_gen.target)
         self.vcxproj._add(globals, 'ProjectName', self.name)
         self.vcxproj._add(project, 'Import', {'Project': '$(VCTargetsPath)\\Microsoft.Cpp.Default.props'})
@@ -335,16 +335,16 @@ class VCxproj:
             env = task_gen.bld.all_envs[toolchain]
             for variant in task_gen.bld.env.ALL_VARIANTS:
                 properties = self.vcxproj._add(project, 'PropertyGroup', {'Condition': "'$(Configuration)'=='%s-%s'" % (toolchain, variant)})
-                for var in ['Prefix', 'Toolchain', 'Deploy_BinDir', 'Deploy_RunBinDir', 'Deploy_LibDir',
+                for var in ['Prefix', 'TmpDir', 'Toolchain', 'Deploy_BinDir', 'Deploy_RunBinDir', 'Deploy_LibDir',
                             'Deploy_IncludeDir', 'Deploy_DataDir', 'Deploy_PluginDir', 'Deploy_KernelDir', 'Deploy_RootDir']:
                     self.vcxproj._add(properties, var, env[var.upper()])
                 self.vcxproj._add(properties, 'Variant', variant)
 
         configuration = self.vcxproj._add(project, 'PropertyGroup', {'Label': 'Configuration'})
         self.vcxproj._add(configuration, 'ConfigurationType', 'Makefile')
-        self.vcxproj._add(configuration, 'PlatformToolset', 'v%d'% (float(version_project[1])*10))
-        self.vcxproj._add(configuration, 'OutDir', '$(SolutionDir)build\\$(Toolchain)\\$(Variant)\\')
-        self.vcxproj._add(configuration, 'IntDir', '$(SolutionDir).build\\')
+        #self.vcxproj._add(configuration, 'PlatformToolset', 'v%d'% (float(version_project[1])*10))
+        self.vcxproj._add(configuration, 'OutDir', '$(SolutionDir)$(Prefix)\\$(Variant)\\')
+        self.vcxproj._add(configuration, 'IntDir', '$(TmpDir)\\$(Variant)\\')
 
         for toolchain in task_gen.bld.env.ALL_TOOLCHAINS:
             env = task_gen.bld.all_envs[toolchain]
@@ -380,7 +380,8 @@ class VCxproj:
                         self.vcxproj._add(properties, 'LocalDebuggerCommand', '$(NMakeOutput)')
                         self.vcxproj._add(properties, 'LocalDebuggerCommandArguments', task_gen.target)
                     self.vcxproj._add(properties, 'NMakePreprocessorDefinitions', ';'.join(defines + sub_env.DEFINES + sub_env.SYSTEM_DEFINES))
-                    includes += ['%s/usr/include' % sub_env.SYSROOT]
+                    if sub_env.SYS_ROOT:
+                        includes.append('%s/usr/include' % sub_env.SYSROOT)
                     self.vcxproj._add(properties, 'NMakeIncludeSearchPath', ';'.join([path_from(i, task_gen.bld) for i in includes] + sub_env.INCLUDES + sub_env.SYSTEM_INCLUDES))
         files = self.vcxproj._add(project, 'ItemGroup')
 
@@ -444,6 +445,7 @@ class vs2003(Build.BuildContext):
         self.env.VARIANT = '$(Variant)'
         self.env.TOOLCHAIN = '$(Toolchain)'
         self.env.PREFIX = '$(Prefix)'
+        self.env.TMPDIR = '$(TmpDir)'
         self.env.DEPLOY_ROOTDIR = '$(Deploy_RootDir)'
         self.env.DEPLOY_BINDIR = '$(Deploy_BinDir)'
         self.env.DEPLOY_RUNBINDIR = '$(Deploy_RunBinDir)'

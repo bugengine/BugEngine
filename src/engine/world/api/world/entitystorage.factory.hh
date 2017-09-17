@@ -19,6 +19,7 @@ class EntityStorageFactory : public EntityStorage
 public:
     typedef COMPONENT_LIST FactoryComponentList;
     typedef PARTITION_LIST FactoryPartitionList;
+    friend struct BugEngine::be_typeid< EntityStorageFactory<COMPONENT_LIST, PARTITION_LIST> >;
 private:
     COMPONENT_LIST m_list;
     PARTITION_LIST m_partitions;
@@ -45,10 +46,10 @@ public:
         be_forceuse(isConst);
         const EntityStorageFactory* factory = static_cast<const EntityStorageFactory*>(from);
         return RTTI::Value(RTTI::Value::ByRef(Helper::ProductGetter<
-                                                T,
-                                                typename COMPONENT_LIST::Type,
-                                                (StorageSize)COMPONENT_LIST::Storage,
-                                                typename COMPONENT_LIST::Tail>::getProduct(factory->m_list)));
+                                              T,
+                                              typename COMPONENT_LIST::Type,
+                                              (StorageSize)COMPONENT_LIST::Storage,
+                                              typename COMPONENT_LIST::Tail>::getProduct(factory->m_list)));
     }
     template< typename T >
     static RTTI::Value getPartition(void* from, bool isConst)
@@ -56,20 +57,38 @@ public:
         be_forceuse(isConst);
         const EntityStorageFactory* factory = static_cast<const EntityStorageFactory*>(from);
         return RTTI::Value(RTTI::Value::ByRef(Helper::PartitionGetter<
-                                                T,
-                                                typename PARTITION_LIST::Type,
-                                                typename PARTITION_LIST::Tail>::getPartition(factory->m_partitions)));
+                                              T,
+                                              typename PARTITION_LIST::Type,
+                                              typename PARTITION_LIST::Tail>::getPartition(factory->m_partitions)));
     }
-    static raw<const RTTI::Property> s_properties;
-};
+private:
+    enum
+    {
+        ComponentCount = 1 + COMPONENT_LIST::Index,
+        PartitionCount = 1 + PARTITION_LIST::Index,
+        PropertyCount = ComponentCount+PartitionCount
+    };
+    static raw< RTTI::staticarray<const RTTI::Property> > getProperties()
+    {
+        typedef RTTI::staticarray_n< PropertyCount, RTTI::Property> PropertyArray;
 
-template< typename COMPONENT_LIST, typename PARTITION_LIST >
-raw<const RTTI::Property> EntityStorageFactory<COMPONENT_LIST, PARTITION_LIST>::s_properties =
-{
-    &Helper::ComponentListPropertyInfo<EntityStorageFactory<COMPONENT_LIST, PARTITION_LIST>,
-                                       typename COMPONENT_LIST::Type,
-                                       (StorageSize)COMPONENT_LIST::Storage,
-                                       typename COMPONENT_LIST::Tail>::s_property
+        static byte s_buffer[sizeof(PropertyArray)];
+        PropertyArray* properties = reinterpret_cast<PropertyArray* >(s_buffer);
+        new (properties) u32(PropertyCount);
+        Helper::Property<EntityStorageFactory<COMPONENT_LIST, PARTITION_LIST>,
+                         0,
+                         typename COMPONENT_LIST::Type,
+                         (StorageSize)COMPONENT_LIST::Storage,
+                         typename COMPONENT_LIST::Tail>::fillProperty(properties->elements);
+        Helper::PartitionListPropertyInfo<EntityStorageFactory<COMPONENT_LIST, PARTITION_LIST>,
+                                          0,
+                                          typename PARTITION_LIST::Type,
+                                          typename PARTITION_LIST::Tail>::fillProperty(properties->elements + ComponentCount);
+        raw< RTTI::staticarray<const RTTI::Property> > result = {
+                reinterpret_cast< RTTI::staticarray<const RTTI::Property>* >(properties)
+            };
+        return result;
+    }
 };
 
 }}
@@ -90,15 +109,15 @@ struct be_typeid< World::EntityStorageFactory<COMPONENT_LIST, PARTITION_LIST> >
         static RTTI::Class s_class =
         {
             istring("EntityStorageFactory"),
-            {0},
-            be_typeid<World::EntityStorage>::klass(),
             0,
             0,
             RTTI::ClassType_Object,
             {0},
-            World::EntityStorageFactory<COMPONENT_LIST, PARTITION_LIST>::s_properties,
-            be_typeid<World::EntityStorage>::klass()->methods,
-            be_typeid<World::EntityStorage>::klass()->objects,
+            {be_typeid<World::EntityStorage>::preklass().m_ptr},
+            {0},
+            {RTTI::staticarray<const RTTI::Tag>::s_null},
+            {RTTI::staticarray<const RTTI::Property>::s_null},
+            {RTTI::staticarray<const RTTI::Method>::s_null},
             {0},
             {0},
             0,
@@ -109,9 +128,23 @@ struct be_typeid< World::EntityStorageFactory<COMPONENT_LIST, PARTITION_LIST> >
     }
     static inline raw<const RTTI::Class> klass()
     {
-        return preklass();
+        static raw<const RTTI::Class> cls = registerProperties();
+        return cls;
+    }
+    BE_EXPORT static raw<const RTTI::Class> s_initialisation;
+private:
+    static inline raw<const RTTI::Class> registerProperties()
+    {
+        raw<RTTI::Class> cls = preklass();
+        cls->properties = World::EntityStorageFactory<COMPONENT_LIST, PARTITION_LIST>::getProperties();
+        return cls;
     }
 };
+
+template< typename COMPONENT_LIST, typename PARTITION_LIST >
+BE_EXPORT
+raw<const RTTI::Class> be_typeid< World::EntityStorageFactory<COMPONENT_LIST, PARTITION_LIST> >::s_initialisation = klass();
+
 
 }
 

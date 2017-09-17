@@ -16,8 +16,12 @@
 # define be_break()              __asm("trap")
 #elif defined(_MIPS)
 # define be_break()              __asm("break")
+#elif defined(_ARM64)
+# define be_break()             __asm__ volatile(".word 0xd4200000");
+#elif defined(_ARM) && !defined(__thumb__)
+# define be_break()             __asm__ volatile(".word 0xe7f001f0");
 #elif defined(_ARM)
-# define be_break()
+# define be_break()             __asm__ volatile(".short 0xde01");
 #else
 # error "Breakpoint not supported on this platform"
 # define be_break()
@@ -61,7 +65,7 @@ typedef u8                      byte;
 #endif
 
 #ifdef __MACH__
-# define be_section(name) __attribute__((section("." #name "," #name)))
+# define be_section(name)
 #else
 # define be_section(name) __attribute__((section("." #name)))
 #endif

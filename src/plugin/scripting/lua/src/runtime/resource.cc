@@ -3,8 +3,8 @@
 
 #include    <stdafx.h>
 
-#include    <luaresource.hh>
-#include    <luacontext.hh>
+#include    <runtime/resource.hh>
+#include    <context.hh>
 #include    <resource/resourcemanager.hh>
 
 

@@ -87,21 +87,26 @@ void Type::destroy(void* ptr) const
     }
 }
 
-u32 Type::distance(const Type& other) const
+ConversionCost Type::calculateConversion(const Type& other) const
 {
-    u32 result = 0;
+    ConversionCost result;
 
+    if (other.metaclass->type() == ClassType_Variant)
+        return ConversionCost::s_variant;
     if (other.indirection > 0 && access < other.access)
-        return static_cast<u32>(MaxTypeDistance);
+        return ConversionCost::s_incompatible;
     else if (other.indirection > 0)
-        result += access - other.access;
+        result.qualification += access - other.access;
 
     if (indirection < other.indirection)
-        return static_cast<u32>(MaxTypeDistance);
+        return ConversionCost::s_incompatible;
     else
-        result += indirection - other.indirection;
+        result.qualification  += indirection - other.indirection;
 
-    return result + metaclass->distance(other.metaclass);
+    if (metaclass->distance(other.metaclass, result.promotion))
+        return result;
+    else
+        return ConversionCost::s_incompatible;
 }
 
 minitl::format<1024u> Type::name() const

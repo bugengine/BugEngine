@@ -117,7 +117,7 @@ PyTypeObject PyBugNumber<T>::s_pyType =
     0,
     0,
     0,
-    0,
+    PyBugObject::s_methods,
     0,
     0,
     &PyBugObject::s_pyType,
@@ -141,7 +141,7 @@ PyTypeObject PyBugNumber<T>::s_pyType =
 };
 
 template< typename T >
-PyObject* PyBugNumber<T>::create(PyObject* owner, const RTTI::Value& value)
+PyObject* PyBugNumber<T>::stealValue(PyObject* owner, RTTI::Value& value)
 {
     be_assert(value.type().metaclass->type() == RTTI::ClassType_Number,
               "PyBugNumber only accepts Number types");
@@ -149,12 +149,14 @@ PyObject* PyBugNumber<T>::create(PyObject* owner, const RTTI::Value& value)
               "expected %s; got %s" | be_typeid<T>::type().metaclass->name
                                     | value.type().metaclass->name);
     PyObject* result = s_pyType.tp_alloc(&s_pyType, 0);
-    ((PyBugNumber*)result)->owner = owner;
+    static_cast<PyBugNumber*>(result)->owner = owner;
+
     if (owner)
     {
         Py_INCREF(owner);
     }
-    new(&((PyBugNumber*)result)->value) RTTI::Value(value);
+    new(&(static_cast<PyBugNumber*>(result))->value) RTTI::Value();
+    (static_cast<PyBugNumber*>(result))->value.swap(value);
     return result;
 }
 

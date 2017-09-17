@@ -6,14 +6,16 @@
 /**************************************************************************************************/
 
 #define     BE_OPTIM_LEVEL_DEBUG    1
-#define     BE_OPTIM_LEVEL_FINAL    2
+#define     BE_OPTIM_LEVEL_PROFILE  2
+#define     BE_OPTIM_LEVEL_FINAL    3
 
-#ifdef _DEBUG
-# define    BE_DEBUG        1
+#ifdef BE_DEBUG
 # define    BE_FLAVOUR      Debug
 # define    BE_OPTIM_LEVEL  BE_OPTIM_LEVEL_DEBUG
+#elif defined(BE_PROFILE)
+# define    BE_FLAVOUR      Profile
+# define    BE_OPTIM_LEVEL  BE_OPTIM_LEVEL_PROFILE
 #else
-# define    BE_FINAL        1
 # define    BE_FLAVOUR      Final
 # define    BE_OPTIM_LEVEL  BE_OPTIM_LEVEL_FINAL
 #endif

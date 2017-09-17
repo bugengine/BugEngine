@@ -4,6 +4,7 @@ import os
 import re
 import sys
 import shlex
+from copy import deepcopy
 
 
 class Compiler:
@@ -16,10 +17,11 @@ class Compiler:
         'amd64':    'amd64',
         'x86_64':   'amd64',
         'x64':      'amd64',
-        'arm':      'armv4',
-        'armv4':    'armv4',
-        'armv5':    'armv5',
-        'armv6':    'armv6',
+        'arm':      'armv7a',
+        #'armv4':    'armv4',
+        #'armv5':    'armv5',
+        #'armv6':    'armv6',
+        'armv6k':   'armv6k',
         'armv7':    'armv7a',
         'armv7a':   'armv7a',
         'armv7s':   'armv7s',
@@ -40,7 +42,7 @@ class Compiler:
     }
 
     def __init__(self, compiler_c, compiler_cxx, version, platform, arch,
-                 extra_args = [], extra_env={}):
+                 extra_args = {}, extra_env={}):
         def to_number(version_string):
              v = version_string.split('-')[0].split('.')
              result = [0, 0, 0]
@@ -56,7 +58,7 @@ class Compiler:
         self.compiler_c = compiler_c
         self.compiler_cxx = compiler_cxx
         self.defines = []
-        self.extra_args = extra_args[:]
+        self.extra_args = deepcopy(extra_args)
         self.version = version
         self.version_number = to_number(version)
         self.platform = platform
@@ -67,6 +69,12 @@ class Compiler:
         for env_name, env_value in extra_env.items():
             self.env[env_name] = env_value
         self.directories = [os.path.dirname(compiler_c)]
+
+    def add_flags(self, compiler, flags):
+        try:
+            self.extra_args[compiler] += Utils.to_list(flags)[:]
+        except KeyError:
+            self.extra_args[compiler] = Utils.to_list(flags)[:]
 
     @classmethod
     def to_target_arch(self, arch):
@@ -92,26 +100,26 @@ class Compiler:
             return (p.returncode, out, err)
 
     def run_c(self, args, input=None):
-        return self.run([self.compiler_c] + self.extra_args + args, input, self.env)
+        return self.run([self.compiler_c] + self.extra_args.get('c', []) + args, input, self.env)
 
     def run_cxx(self, args, input=None):
-        return self.run([self.compiler_cxx] + self.extra_args + args, input, self.env)
+        return self.run([self.compiler_cxx] + self.extra_args.get('cxx', []) + args, input, self.env)
 
     def sort_name(self):
         compiler_name = self.__class__.__name__.lower()
         return self.arch, compiler_name, self.platform, self.version_number, self.arch_name
 
     def name(self):
-        compiler_name = self.__class__.__name__.lower()
+        compiler_name = self.NAMES[0]
         return '%s-%s-%s-%s' % (compiler_name, self.platform, self.arch_name, self.version)
 
     def get_multilib_compilers(self):
         return []
 
     def load_in_env(self, conf, platform):
-        conf.env.append_unique('CFLAGS', self.extra_args)
-        conf.env.append_unique('CXXFLAGS', self.extra_args)
-        conf.env.append_unique('LINKFLAGS', self.extra_args)
+        conf.env.append_unique('CFLAGS', self.extra_args.get('c', []))
+        conf.env.append_unique('CXXFLAGS', self.extra_args.get('cxx', []))
+        conf.env.append_unique('LINKFLAGS', self.extra_args.get('link', []))
         self.set_optimisation_options(conf)
         self.set_warning_options(conf)
 
@@ -120,7 +128,10 @@ class Compiler:
 
 
 class GnuCompiler(Compiler):
-    ALL_ARM_ARCHS = ('armv5', 'armv6', 'armv7', 'armv7a', 'armv7k', 'armv7s')
+    ALL_ARM_ARCHS = ('armv7a', 'armv7k', 'armv7s')
+    ARCH_FLAGS = {
+            'arm':   ['-march=armv7-a'],
+        }
     MULTILIBS = {
         'x86':      ((['-m64'], 'amd64'),),
         'amd64':    ((['-m32'], 'x86'),),
@@ -131,10 +142,10 @@ class GnuCompiler(Compiler):
         'mips64':   ((['-m32'], 'mips'),),
         'mips64el': ((['-m32'], 'mipsel'),),
         'arm':      [(['-march=%s'%a], a) for a in ALL_ARM_ARCHS],
-        'armv4':    [(['-march=%s'%a], a) for a in ALL_ARM_ARCHS],
-        'armv5':    [(['-march=%s'%a], a) for a in ALL_ARM_ARCHS],
-        'armv6':    [(['-march=%s'%a], a) for a in ALL_ARM_ARCHS],
-        'armv7':    [(['-march=%s'%a], a) for a in ALL_ARM_ARCHS],
+        #'armv4':    [(['-march=%s'%a], a) for a in ALL_ARM_ARCHS],
+        #'armv5':    [(['-march=%s'%a], a) for a in ALL_ARM_ARCHS],
+        'armv6k':    [(['-march=%s'%a], a) for a in ALL_ARM_ARCHS],
+        #'armv7':    [(['-march=%s'%a], a) for a in ALL_ARM_ARCHS],
         'armv7a':   [(['-march=%s'%a], a) for a in ALL_ARM_ARCHS],
         'armv7k':   [(['-march=%s'%a], a) for a in ALL_ARM_ARCHS],
         'armv7l':   [(['-march=%s'%a], a) for a in ALL_ARM_ARCHS],
@@ -159,17 +170,18 @@ class GnuCompiler(Compiler):
         (('__arm__',),                                      'armv4'),
         (('__arm__', '__ARM_ARCH_5__'),                     'armv5'),
         (('__arm__', '__ARM_ARCH_6__'),                     'armv6'),
-        (('__arm__', '__ARM_ARCH_6K__'),                    'armv6'),
+        (('__arm__', '__ARM_ARCH_6K__'),                    'armv6k'),
         (('__arm__', '__ARM_ARCH_7A__'),                    'armv7a'),
         (('__arm__', '__ARM_ARCH_7A__', '__ARM_ARCH_7K__'), 'armv7k'),
         (('__arm__', '__ARM_ARCH_7S__'),                    'armv7s'),
     )
 
-    def __init__(self, compiler_c, compiler_cxx, extra_args = [], extra_env={}):
+    def __init__(self, compiler_c, compiler_cxx, extra_args={}, extra_env={}):
         extra_env = dict(extra_env)
         extra_env['LC_ALL'] = 'C'
         extra_env['LANG'] = 'C'
         self.sysroot = None
+        extra_args = deepcopy(extra_args)
         version, platform, arch = self.get_version(compiler_cxx, extra_args, extra_env)
         Compiler.__init__(self, compiler_c, compiler_cxx, version,
                           platform, arch, extra_args, extra_env)
@@ -184,17 +196,38 @@ class GnuCompiler(Compiler):
         def split_triple(t):
             t = t.split('-')
             return t[0], '-'.join(t[1:])
-        result, out, err = self.run([compiler_c] + extra_args + ['-v', '-dM', '-E', '-'], '\n', env=env)
-        macros = set([])
+        arch = None
         platform = None
+        result, out, err = self.run([compiler_c] + extra_args.get('c', []) + ['-dumpmachine'], env=env)
+        self.target = out.strip()
+        if self.target.find('-') != -1:
+            arch, platform = split_triple(self.target)
+        else:
+            platform = self.target
+        if arch:
+            try:
+                extra_args['c'] += self.ARCH_FLAGS.get(arch, [])
+            except KeyError:
+                extra_args['c'] = self.ARCH_FLAGS.get(arch, [])
+            try:
+                extra_args['cxx'] += self.ARCH_FLAGS.get(arch, [])
+            except KeyError:
+                extra_args['cxx'] = self.ARCH_FLAGS.get(arch, [])
+            try:
+                extra_args['link'] += self.ARCH_FLAGS.get(arch, [])
+            except KeyError:
+                extra_args['link'] = self.ARCH_FLAGS.get(arch, [])
+        result, out, err = self.run([compiler_c] + extra_args.get('c', []) + ['-v', '-dM', '-E', '-'], '\n', env=env)
+        macros = set([])
         if result != 0:
-            #print(result, out, err)
             raise Exception('Error running %s: %s' % (compiler_c, err))
         out = err.split('\n') + out.split('\n')
         for line in out:
             for name in self.NAMES:
                 if line.find('%s version ' % name.lower()) != -1:
                     words = line.split()
+                    if 'Apple' in words:
+                        self.NAMES = ['Apple'+self.NAMES[0]] + list(self.NAMES)
                     while words[0] != name.lower() and words[1] != 'version':
                         words.pop(0)
                     version = words[2].split('-')[0]
@@ -203,6 +236,7 @@ class GnuCompiler(Compiler):
                 while words[0] != 'Apple' and words[1] != 'LLVM' and words[2] != 'version':
                     words.pop(0)
                 version = words[3].split('-')[0]
+                self.NAMES = ['Apple'+self.NAMES[0]] + list(self.NAMES)
             if line.startswith('#define'):
                 macro = line.split()[1].strip()
                 macros.add(macro)
@@ -210,12 +244,7 @@ class GnuCompiler(Compiler):
             if sysroot != -1:
                 sysroot = shlex.split(line[sysroot:].replace('\\', '\\\\'))[1]
                 self.sysroot = os.path.normpath(sysroot)
-        result, out, err = self.run([compiler_c] + extra_args + ['-dumpmachine'], env=env)
-        self.target = out.strip()
-        if self.target.find('-') != -1:
-            arch, platform = split_triple(self.target)
-        else:
-            platform = self.target
+
         best = 0
         for values, a in self.MACRO_ARCHS:
             for v in values:
@@ -238,10 +267,12 @@ class GnuCompiler(Compiler):
             result = []
             for multilib in multilibs:
                 try:
-                    c = self.__class__(self.compiler_c, self.compiler_cxx, multilib[0])
+                    c = self.__class__(self.compiler_c, self.compiler_cxx,
+                                       { 'c': multilib[0][:],
+                                         'cxx': multilib[0][:],
+                                         'link': multilib[0][:],})
                     result.append(c)
                 except Exception as e:
-                    #print(e)
                     pass
             return result
 
@@ -252,6 +283,7 @@ class GnuCompiler(Compiler):
         try:
             result, out, err = self.run_cxx([node.abspath(), '-c', '-o', tgtnode.abspath()])
         except Exception as e:
+            print(e)
             return False
         finally:
             node.delete()
@@ -291,7 +323,7 @@ class GnuCompiler(Compiler):
         Compiler.load_in_env(self, conf, platform)
 
 
-        sys_dirs = self.directories[:]
+        sys_dirs = self.directories + platform.directories
         d, a = os.path.split(self.directories[0])
         while a:
             pd = os.path.join(d, 'bin')

@@ -170,6 +170,12 @@ const format<SIZE>& operator|(const format<SIZE>& f, T value)
     return f | static_cast<u64>(value);
 }
 
+template< u16 SIZE >
+const format<SIZE>& operator|(const format<SIZE>& f, bool value)
+{
+    return f | (value ? "true" : "false");
+}
+
 template< u16 SIZE, typename T >
 const format<SIZE>& operator|(const format<SIZE>& f, const T* value)
 {

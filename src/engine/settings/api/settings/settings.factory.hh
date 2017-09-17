@@ -69,36 +69,41 @@ raw<RTTI::Class> be_game_Namespace_BugEngine_Settings();
 template< typename T >
 struct BE_EXPORT be_typeid< Settings::Settings<T> >
 {
+    be_section(rtti_text_trampoline_factory)
     static RTTI::Value callGet(RTTI::Value* params, u32 paramCount)
     {
         be_assert(paramCount == 0, "expected no parameter; received %d" | paramCount);
         be_forceuse(params);
         return RTTI::Value(RTTI::Value::ByRef(Settings::Settings<T>::get()));
     }
+
     static inline RTTI::Type  type()
     {
         return RTTI::Type::makeType(preklass(), RTTI::Type::Value, RTTI::Type::Mutable, RTTI::Type::Mutable);
     }
+
     static istring name()
     {
         static istring s_name(minitl::format<1024u>("Settings<%s>") | be_typeid<T>::name());
         return s_name;
     }
 
+    be_section(rtti_text_cls_factory)
     static inline raw<RTTI::Class> preklass()
     {
+        be_section(rtti_cls_factory)
         static RTTI::Class s_class =
         {
             name(),
-            be_game_Namespace_BugEngine_Settings(),
-            be_typeid<void>::klass(),
             0,
             0,
             RTTI::ClassType_Struct,
+            {be_game_Namespace_BugEngine_Settings().m_ptr},
+            be_typeid<void>::klass(),
             {0},
-            {0},
-            {0},
-            {0},
+            {RTTI::staticarray<const RTTI::Tag>::s_null},
+            {RTTI::staticarray<const RTTI::Property>::s_null},
+            {RTTI::staticarray<const RTTI::Method>::s_null},
             {0},
             {0},
             0,
@@ -107,43 +112,52 @@ struct BE_EXPORT be_typeid< Settings::Settings<T> >
         raw<RTTI::Class> result = { &s_class };
         return result;
     }
+
     static inline raw<const RTTI::Class> klass()
     {
+        static raw<const RTTI::Class> result = registerProperties();
+        return result;
+    }
+
+    be_section(rtti_text_cls_props_factory)
+    static raw<const RTTI::Class> registerProperties()
+    {
         static raw<RTTI::Class> result = preklass();
-        static RTTI::Method::Overload get_overload = {
-            {0},
-            {0},
-            be_typeid<T&>::type(),
-            0,
-            {0},
-            true,
-            &callGet
-        };
-        static RTTI::Method get = {
-            "get",
-            {0},
-            {&get},
+        be_section(rtti_method_factory)
+        static RTTI::staticarray_n< 1, const RTTI::Method::Overload > s_method_get_overloads = {
             1,
-            {&get_overload}
+            {
+                {
+                    {RTTI::staticarray<const RTTI::Tag>::s_null},
+                    {RTTI::staticarray<const RTTI::Method::Parameter>::s_null},
+                    be_typeid<T&>::type(),
+                    false,
+                    &callGet
+                },
+            }
         };
+        be_section(rtti_method_factory)
+        static RTTI::Method s_get_method = {
+            istring("get"),
+            {reinterpret_cast< RTTI::staticarray< const RTTI::Method::Overload >* >(&s_method_get_overloads)},
+            {&s_get_method}
+        };
+        be_section(rtti_object_factory)
         static RTTI::ObjectInfo valueGet = {
             {0},
-            {0},
-            get.name,
-            RTTI::Value(get)
+            {RTTI::staticarray<const RTTI::Tag>::s_null},
+            s_get_method.name,
+            RTTI::Value(s_get_method)
         };
-        static const RTTI::ObjectInfo* objects = result->objects.set(&valueGet);
-        be_forceuse(objects);
+        result->objects.set(&valueGet);
+        be_section(rtti_object_factory)
         static RTTI::ObjectInfo s_object = {
             ::BugEngine::be_game_Namespace_BugEngine_Settings()->objects,
-            {0},
+            {RTTI::staticarray<const RTTI::Tag>::s_null},
             name(),
             RTTI::Value(result)
         };
-        static raw<const RTTI::ObjectInfo> s_object_ptr = {&s_object};
-        static const RTTI::ObjectInfo* s_object_set =
-                be_game_Namespace_BugEngine_Settings()->objects.set(s_object_ptr.operator->());;
-        be_forceuse(s_object_set);
+        be_game_Namespace_BugEngine_Settings()->objects.set(&s_object);;
         return result;
     }
 

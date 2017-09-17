@@ -9,17 +9,22 @@ from waflib import Options, Utils
 
 
 def options(opt):
+    sdks = ['/%s'%d for d in os.listdir('/') if d.startswith('Developer')]
+    sdks += [os.path.join('/', 'Applications', d, 'Contents', 'Developer') for d in os.listdir('/Applications') if d.startswith('Xcode')]
     try:
         p = Utils.subprocess.Popen(['xcode-select', '--print-path'], stdin=Utils.subprocess.PIPE, stdout=Utils.subprocess.PIPE, stderr=Utils.subprocess.PIPE)
         out = p.communicate()[0]
-    except:
-        out = '/Developer,/Applications/Xcode.app/Contents/Developer'
-    if not isinstance(out, str):
-        out = out.decode(sys.stdout.encoding)
-    out = out.split('\n')[0]
+    except Exception:
+        pass
+    else:
+        if not isinstance(out, str):
+            out = out.decode(sys.stdout.encoding)
+        out = out.split('\n')[0]
+        if out not in sdks:
+            sdks.append(out)
     opt.add_option( '--xcode-sdks',
                     action='store',
-                    default=out,
+                    default=','.join(sdks),
                     dest='xcode_sdks',
                     help='Paths of the different XCode SDKs')
 
@@ -123,6 +128,8 @@ def configure(conf):
                     conf.darwin_sdks[sdk_os].sort()
                 except KeyError:
                     conf.darwin_sdks[sdk_os] = [(sdk_version, sdk_archs, sdk_path)]
+    for sdk_os in conf.darwin_sdks.keys():
+        conf.darwin_sdks[sdk_os] = sorted(conf.darwin_sdks[sdk_os], key = lambda x: (-len(x[1]), x[0]))
 
 
 def build(bld):

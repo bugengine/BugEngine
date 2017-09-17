@@ -8,7 +8,7 @@ class MSVC(Configure.ConfigurationContext.Compiler):
         self.NAMES = [name, 'msvc']
         p = os.pathsep.join([os.environ.get('PATH', '')] + path)
         flags = ['/I%s'%i for i in includes] + ['/LIBPATH:%i' for l in libdirs]
-        Configure.ConfigurationContext.Compiler.__init__(self, cl, cl, version, 'windows-%s'%name, arch, [], {'PATH': p})
+        Configure.ConfigurationContext.Compiler.__init__(self, cl, cl, version, 'windows-%s'%name, arch, {}, {'PATH': p})
         self.batfile = bat
         self.args = args
         self.arch_name = target_arch

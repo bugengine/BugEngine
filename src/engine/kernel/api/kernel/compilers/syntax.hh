@@ -24,8 +24,7 @@ typedef unsigned long int   intptr_t;
 
 #define override
 #define BE_NOINLINE
-#define BE_ALWAYSINLINE
-#define BE_SELECTOVERLOAD(o)
+#define BE_ALWAYSINLINE         inline
 #define BE_SUPPORTS_EXCEPTIONS  1
 
 #define BE_EXPORT

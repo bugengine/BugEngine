@@ -47,7 +47,6 @@ PythonLibrary::PythonLibrary(const char* pythonLibraryName)
 #       define be_get_func(f)                                                       \
             be_get_func_name(f, f)
 
-        be_get_func(Py_SetPythonHome);
         be_get_func(Py_InitializeEx);
         be_get_func(Py_Finalize);
         be_get_func(Py_NewInterpreter);
@@ -60,6 +59,7 @@ PythonLibrary::PythonLibrary(const char* pythonLibraryName)
         {
             be_get_func(PyModule_Create2);
             be_get_func_name(PyImport_AppendInittab, PyImport_AppendInittab3);
+            be_get_func_name(Py_SetPythonHome, Py_SetPythonHome3);
         }
         else
         {
@@ -68,6 +68,7 @@ PythonLibrary::PythonLibrary(const char* pythonLibraryName)
             be_get_func_opt(Py_InitModule4);
             be_get_func_opt(Py_InitModule4_64);
             be_get_func_name(PyImport_AppendInittab, PyImport_AppendInittab2);
+            be_get_func_name(Py_SetPythonHome, Py_SetPythonHome2);
         }
         if (m_version >= 32)
         {
@@ -96,6 +97,7 @@ PythonLibrary::PythonLibrary(const char* pythonLibraryName)
         be_get_func(_PyArg_ParseTuple_SizeT);
         be_get_func(_PyArg_ParseTupleAndKeywords_SizeT);
         be_get_func(PyObject_IsTrue);
+        be_get_func(PyCFunction_NewEx);
         be_get_func(PyType_Ready);
         be_get_func(PyType_GenericAlloc);
         be_get_func(PyType_GenericNew);
@@ -164,6 +166,7 @@ PythonLibrary::PythonLibrary(const char* pythonLibraryName)
         be_get_func(PyErr_SetString);
         be_get_func(PyErr_Format);
         be_get_func(PyErr_BadArgument);
+        be_get_func(PyBool_Type);
         be_get_func(PyFloat_Type);
         be_get_func(PyExc_Exception);
         be_get_func(PyExc_AttributeError);

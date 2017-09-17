@@ -75,7 +75,6 @@ extern "C" int be_value_wrap()
     return 1;
 }
 
-#define YY_NO_INPUT
 #define YY_INPUT(buf,result,max_size)                                               \
         {                                                                           \
             using namespace ::BugEngine::RTTI::Parser;                              \
@@ -146,7 +145,7 @@ false                                           { update(be_value_leng);
                                                   yylval.fValue.value = strToDouble(be_value_text, be_value_leng);
                                                   yylval.fValue.location = ::BugEngine::RTTI::Parser::g_parseContext->location;
                                                   return VAL_FLOAT; }
-"\n"                                            { newline(); }
+"\n"                                            { (void)&yyinput; newline(); }
 [ \r\t]+                                        { update(be_value_leng); }
 \#[^\n]*\n                                      { update(be_value_leng); }
 .                                               { update(be_value_leng);
@@ -160,7 +159,7 @@ false                                           { update(be_value_leng);
 #pragma warning(pop)
 #endif
 
-#ifndef FLEX_BETA
+#if (YY_FLEX_MINOR_VERSION < 5) || (YY_FLEX_MINOR_VERSION == 5 && YY_FLEX_SUBMINOR_VERSION < 5)
 int be_value_lex_destroy()
 {
     return 0;

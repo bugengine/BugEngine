@@ -5,6 +5,7 @@
 #define BE_PACKAGE_NODES_PARAMETER_HH_
 /**************************************************************************************************/
 #include    <package/stdafx.h>
+#include    <rtti/typeinfo.script.hh>
 
 namespace BugEngine { namespace PackageBuilder { namespace Nodes
 {
@@ -20,7 +21,7 @@ public:
     ~Parameter();
 
     istring name() const;
-    bool isCompatible(const RTTI::Type& type) const;
+    RTTI::ConversionCost calculateConversion(const RTTI::Type& type) const;
     RTTI::Value as(const RTTI::Type& type) const;
 };
 
