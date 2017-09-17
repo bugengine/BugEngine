@@ -26,7 +26,8 @@ struct PyMemberDef;
 struct PyGetSetDef;
 
 
-typedef void (*Py_SetPythonHomeType)(const char* home);
+typedef void (*Py_SetPythonHome2Type)(const char* home);
+typedef void (*Py_SetPythonHome3Type)(const wchar_t* home);
 typedef void (*Py_InitializeExType)(int initsigs);
 typedef void (*Py_FinalizeType)();
 typedef PyThreadState* (*Py_NewInterpreterType)();
@@ -56,48 +57,48 @@ typedef PyCodeObject* (*Py_CompileStringFlagsType)(const char* str, const char* 
                                                    int start, void* flags);
 typedef PyCodeObject* (*Py_CompileStringExFlagsType)(const char* str, const char* filename,
                                                      int start, void* flags, int optimize);
-typedef PyObject* (*PyEval_EvalCodeExType)(PyCodeObject *co, PyObject *globals, PyObject *locals,
-                                           PyObject **args, int argcount,
-                                           PyObject **kws, int kwcount,
-                                           PyObject **defs, int defcount,
-                                           PyObject *closure);
+typedef PyObject* (*PyEval_EvalCodeExType)(PyCodeObject *co, PyObject* globals, PyObject* locals,
+                                           PyObject** args, int argcount,
+                                           PyObject** kws, int kwcount,
+                                           PyObject** defs, int defcount,
+                                           PyObject* closure);
 
 typedef PyObject* (*PyCFunction)(PyObject* self, PyObject* args);
 
-typedef PyObject* (*unaryfunc)(PyObject *);
-typedef PyObject* (*binaryfunc)(PyObject *, PyObject *);
-typedef PyObject* (*ternaryfunc)(PyObject *, PyObject *, PyObject *);
-typedef Py_ssize_t (*lenfunc)(PyObject *);
-typedef PyObject *(*ssizeargfunc)(PyObject *, Py_ssize_t);
-typedef PyObject *(*ssizessizeargfunc)(PyObject *, Py_ssize_t, Py_ssize_t);
-typedef int(*ssizeobjargproc)(PyObject *, Py_ssize_t, PyObject *);
-typedef int(*ssizessizeobjargproc)(PyObject *, Py_ssize_t, Py_ssize_t, PyObject *);
-typedef int(*objobjargproc)(PyObject *, PyObject *, PyObject *);
+typedef PyObject* (*unaryfunc)(PyObject*);
+typedef PyObject* (*binaryfunc)(PyObject*, PyObject*);
+typedef PyObject* (*ternaryfunc)(PyObject*, PyObject*, PyObject*);
+typedef Py_ssize_t (*lenfunc)(PyObject*);
+typedef PyObject* (*ssizeargfunc)(PyObject*, Py_ssize_t);
+typedef PyObject* (*ssizessizeargfunc)(PyObject*, Py_ssize_t, Py_ssize_t);
+typedef int(*ssizeobjargproc)(PyObject*, Py_ssize_t, PyObject*);
+typedef int(*ssizessizeobjargproc)(PyObject*, Py_ssize_t, Py_ssize_t, PyObject*);
+typedef int(*objobjargproc)(PyObject*, PyObject*, PyObject*);
 
-typedef int (*visitproc)(PyObject *object, void *arg);
-typedef int (*traverseproc)(PyObject *self, visitproc visit, void *arg);
-typedef int (*inquiry)(PyObject *self);
+typedef int (*visitproc)(PyObject* object, void *arg);
+typedef int (*traverseproc)(PyObject* self, visitproc visit, void *arg);
+typedef int (*inquiry)(PyObject* self);
 typedef void (*freefunc)(void *);
-typedef void (*destructor)(PyObject *);
-typedef int (*printfunc)(PyObject *, FILE*, int);
+typedef void (*destructor)(PyObject*);
+typedef int (*printfunc)(PyObject*, FILE*, int);
 typedef int (*cmpfunc)(PyObject*, PyObject*);
 typedef PyObject* (*reprfunc)(PyObject*);
 typedef void (*freefunc)(void*);
-typedef PyObject* (*getattrfunc)(PyObject *, const char *);
-typedef PyObject* (*getattrofunc)(PyObject *, PyObject *);
-typedef int (*setattrfunc)(PyObject *, const char *, PyObject *);
-typedef int (*setattrofunc)(PyObject *, PyObject *, PyObject *);
-typedef Py_hash_t (*hashfunc)(PyObject *);
-typedef PyObject *(*richcmpfunc) (PyObject *, PyObject *, int);
-typedef PyObject *(*getiterfunc) (PyObject *);
-typedef PyObject *(*iternextfunc) (PyObject *);
-typedef PyObject *(*descrgetfunc) (PyObject *, PyObject *, PyObject *);
-typedef int (*descrsetfunc) (PyObject *, PyObject *, PyObject *);
-typedef int (*initproc)(PyObject *, PyObject *, PyObject *);
-typedef int (*objobjproc)(PyObject *, PyObject *);
-typedef int (*coercion)(PyObject **, PyObject **);
-typedef PyObject *(*newfunc)(PyTypeObject*, PyObject *, PyObject *);
-typedef PyObject *(*allocfunc)(PyTypeObject *, Py_ssize_t);
+typedef PyObject* (*getattrfunc)(PyObject*, const char *);
+typedef PyObject* (*getattrofunc)(PyObject*, PyObject*);
+typedef int (*setattrfunc)(PyObject*, const char *, PyObject*);
+typedef int (*setattrofunc)(PyObject*, PyObject*, PyObject*);
+typedef Py_hash_t (*hashfunc)(PyObject*);
+typedef PyObject* (*richcmpfunc) (PyObject*, PyObject*, int);
+typedef PyObject* (*getiterfunc) (PyObject*);
+typedef PyObject* (*iternextfunc) (PyObject*);
+typedef PyObject* (*descrgetfunc) (PyObject*, PyObject*, PyObject*);
+typedef int (*descrsetfunc) (PyObject*, PyObject*, PyObject*);
+typedef int (*initproc)(PyObject*, PyObject*, PyObject*);
+typedef int (*objobjproc)(PyObject*, PyObject*);
+typedef int (*coercion)(PyObject**, PyObject**);
+typedef PyObject* (*newfunc)(PyTypeObject*, PyObject*, PyObject*);
+typedef PyObject* (*allocfunc)(PyTypeObject *, Py_ssize_t);
 
 
 typedef int (*PyObject_SetAttrStringType)(PyObject* o, const char* name, PyObject* value);
@@ -109,24 +110,25 @@ typedef int (*PyType_ReadyType)(PyTypeObject* type);
 typedef PyObject* (*PyType_GenericAllocType)(PyTypeObject* type, Py_ssize_t size);
 typedef PyObject* (*PyType_GenericNewType)(PyTypeObject* type, PyObject* args, PyObject* kwargs);
 typedef int (*PyObject_IsTrueType)(PyObject* arg);
+typedef PyObject* (*PyCFunction_NewExType)(PyMethodDef* method, PyObject* self, PyObject* module);
 
 typedef PyObject* (*PyList_NewType)(Py_ssize_t len);
-typedef Py_ssize_t (*PyList_SizeType)(PyObject *list);
-typedef PyObject* (*PyList_GetItemType)(PyObject *list, Py_ssize_t index);
-typedef int (*PyList_SetItemType)(PyObject *list, Py_ssize_t index, PyObject *item);
-typedef int (*PyList_InsertType)(PyObject *list, Py_ssize_t index, PyObject *item);
-typedef int (*PyList_AppendType)(PyObject *list, PyObject *item);
-typedef PyObject* (*PyList_GetSliceType)(PyObject *list, Py_ssize_t low, Py_ssize_t high);
-typedef int (*PyList_SetSliceType)(PyObject *list, Py_ssize_t low, Py_ssize_t high, PyObject *itemlist);
+typedef Py_ssize_t (*PyList_SizeType)(PyObject* list);
+typedef PyObject* (*PyList_GetItemType)(PyObject* list, Py_ssize_t index);
+typedef int (*PyList_SetItemType)(PyObject* list, Py_ssize_t index, PyObject* item);
+typedef int (*PyList_InsertType)(PyObject* list, Py_ssize_t index, PyObject* item);
+typedef int (*PyList_AppendType)(PyObject* list, PyObject* item);
+typedef PyObject* (*PyList_GetSliceType)(PyObject* list, Py_ssize_t low, Py_ssize_t high);
+typedef int (*PyList_SetSliceType)(PyObject* list, Py_ssize_t low, Py_ssize_t high, PyObject* itemlist);
 
 typedef PyObject* (*PyTuple_NewType)(Py_ssize_t len);
-typedef Py_ssize_t (*PyTuple_SizeType)(PyObject *tuple);
-typedef PyObject* (*PyTuple_GetItemType)(PyObject *tuple, Py_ssize_t index);
-typedef int (*PyTuple_SetItemType)(PyObject *list, Py_ssize_t index, PyObject *item);
-typedef PyObject* (*PyTuple_GetSliceType)(PyObject *list, Py_ssize_t low, Py_ssize_t high);
+typedef Py_ssize_t (*PyTuple_SizeType)(PyObject* tuple);
+typedef PyObject* (*PyTuple_GetItemType)(PyObject* tuple, Py_ssize_t index);
+typedef int (*PyTuple_SetItemType)(PyObject* list, Py_ssize_t index, PyObject* item);
+typedef PyObject* (*PyTuple_GetSliceType)(PyObject* list, Py_ssize_t low, Py_ssize_t high);
 
 typedef PyObject* (*PyDict_NewType)();
-typedef Py_ssize_t (*PyDict_SizeType)(PyObject *dict);
+typedef Py_ssize_t (*PyDict_SizeType)(PyObject* dict);
 typedef PyObject* (*PyDict_GetItemType)(PyObject* dict, PyObject* key);
 typedef int (*PyDict_SetItemType)(PyObject* dict, PyObject* key, PyObject* item);
 typedef int (*PyDict_DelItemType)(PyObject* dict, PyObject* key);
@@ -136,9 +138,9 @@ typedef int (*PyDict_SetItemStringType)(PyObject* dict, const char* key, PyObjec
 typedef PyObject* (*PyString_FromStringType)(const char *v);
 typedef PyObject* (*PyString_FromStringAndSizeType)(const char *v, Py_ssize_t len);
 typedef PyObject* (*PyString_FromFormatType)(const char *format, ...);
-typedef Py_ssize_t (*PyString_SizeType)(PyObject *string);
-typedef char* (*PyString_AsStringType)(PyObject *string);
-typedef int (*PyString_AsStringAndSizeType)(PyObject *obj, char **buffer, Py_ssize_t *length);
+typedef Py_ssize_t (*PyString_SizeType)(PyObject* string);
+typedef char* (*PyString_AsStringType)(PyObject* string);
+typedef int (*PyString_AsStringAndSizeType)(PyObject* obj, char **buffer, Py_ssize_t *length);
 
 typedef PyObject* (*PyUnicode_FromStringType)(const char *v);
 typedef PyObject* (*PyUnicode_FromStringAndSizeType)(const char *v, Py_ssize_t len);
@@ -148,6 +150,7 @@ typedef PyObject* (*PyUnicode_AsASCIIStringType)(PyObject* unicode);
 typedef PyObject* (*PyUnicode_AsUTF8StringType)(PyObject* unicode);
 typedef char* (*PyBytes_AsStringType)(PyObject* bytes);
 
+typedef int (*PyBool_CheckType)(PyObject* boolobject);
 typedef PyObject* (*PyBool_FromLongType)(long value);
 typedef PyObject* (*PyInt_FromLongType)(long value);
 typedef unsigned long (*PyInt_AsUnsignedLongMaskType)(PyObject* intobject);
@@ -162,6 +165,7 @@ typedef void (*PyErr_SetStringType)(PyTypeObject* errorType, const char* message
 typedef PyObject* (*PyErr_FormatType)(PyTypeObject* errorType, const char* format, ...);
 typedef int (*PyErr_BadArgumentType)();
 
+typedef PyTypeObject* PyBool_TypeType;
 typedef PyTypeObject* PyFloat_TypeType;
 typedef PyTypeObject** PyExc_ExceptionType;
 typedef PyTypeObject** PyExc_AttributeErrorType;

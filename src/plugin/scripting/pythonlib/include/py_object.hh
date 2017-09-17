@@ -18,11 +18,13 @@ struct PyBugObject : public PyObject
 
     static void registerType(PyObject* module);
 
-    static PyObject* create(PyObject* owner, const RTTI::Value& value);
+    static PyObject* stealValue(PyObject* owner, RTTI::Value& value);
     static PyObject* newinst(PyTypeObject* type, PyObject* args, PyObject* kwargs);
-    static u32 distance(PyObject* object, const RTTI::Type& desiredType);
-    static void unpack(PyObject* object, const RTTI::Type& desiredType, RTTI::Value* buffer);
-    static void unpackAny(PyObject* object, RTTI::Value* buffer);
+    static PyObject* dir(raw<const RTTI::Class> metaclass);
+    static PyObject* dir(PyObject* self, PyObject* args);
+    static RTTI::ConversionCost distance(PyObject* object, const RTTI::Type& desiredType);
+    static void unpack(PyObject* object, const RTTI::Type& desiredType, void* buffer);
+    static void unpackAny(PyObject* object, void* buffer);
     static PyObject* getattr(PyObject* self, const char* name);
     static int setattr(PyObject* self, const char* name, PyObject* value);
     static PyObject* repr(PyObject* self);
@@ -31,6 +33,7 @@ struct PyBugObject : public PyObject
     static int nonZero(PyObject* self);
 
     static PyTypeObject s_pyType;
+    static PyMethodDef s_methods[];
 };
 
 }}

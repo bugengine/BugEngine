@@ -8,6 +8,13 @@
 
 #include    <darwin/platformrenderer.hh>
 
+#ifndef MAC_OS_X_VERSION_10_12
+# define MAC_OS_X_VERSION_10_12 101200
+#endif
+
+#if __MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_12
+# define NSEventMaskAny NSAnyEventMask
+#endif
 
 namespace BugEngine { namespace Windowing
 {
@@ -38,7 +45,7 @@ void Renderer::PlatformRenderer::flush()
 {
     [m_pool release];
     m_pool = [[NSAutoreleasePool alloc] init];
-    while(NSEvent* event = [m_application nextEventMatchingMask:NSAnyEventMask
+    while(NSEvent* event = [m_application nextEventMatchingMask:NSEventMaskAny
                                                       untilDate:nil
                                                          inMode:NSDefaultRunLoopMode
                                                         dequeue:YES])

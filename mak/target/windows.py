@@ -49,7 +49,7 @@ class Windows(Configure.ConfigurationContext.Platform):
         else:
             env.MS_PROJECT_PLATFORM = 'Win32'
 
-        env.append_unique('DEFINES', ['_WIN32_WINNT=0x0502', 'WINVER=0x0502'])
+        env.append_unique('DEFINES', ['_WIN32_WINNT=0x0502', 'WINVER=0x0502', '_CRT_SECURE_NO_DEPRECATE=1', '_CRT_SECURE_NO_WARNINGS=1'])
 
     def find_winres(self, conf, compiler):
         winres = conf.find_program(compiler.target + '-windres', var='WINRC',
@@ -66,7 +66,7 @@ class Windows_Clang(Windows):
     def load_in_env(self, conf, compiler):
         Windows.load_in_env(self, conf, compiler)
         env = conf.env
-        env.append_unique('LINKFLAGS', ['-static-libgcc', '-static-libstdc++', '-pthread'])
+        env.append_unique('LINKFLAGS', ['-static-libgcc', '-static-libstdc++'])
         env.append_unique('STLIB', ['pthread'])
         env.append_unique('CXXFLAGS_warnall', ['-Wno-unknown-pragmas', '-Wno-comment'])
         self.find_winres(conf, compiler)

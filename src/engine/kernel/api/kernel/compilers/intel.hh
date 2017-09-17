@@ -47,7 +47,6 @@ typedef u8                      byte;
 # define override
 # define BE_NOINLINE            __attribute__((noinline))
 # define BE_ALWAYSINLINE        __attribute__((always_inline))
-# define BE_SELECTOVERLOAD(o)   
 
 #ifndef BE_STATIC
 # define BE_EXPORT              __attribute__ ((visibility("default")))
@@ -70,7 +69,6 @@ typedef u8                      byte;
 # define BE_THREAD_LOCAL        __declspec(thread)
 # define BE_NOINLINE            __declspec(noinline)
 # define BE_ALWAYSINLINE        inline
-# define BE_SELECTOVERLOAD(o)   
 #define BE_SUPPORTS_EXCEPTIONS  1
 
 # pragma warning(disable:4275)
@@ -97,7 +95,7 @@ typedef u8                      byte;
 #  define _CRT_SECURE_NO_DEPRECATE 1
 # endif
 
-#define be_section(name) __declspec(allocate("." #name))
+#define be_section(name)
 
 #endif
 

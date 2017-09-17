@@ -27,8 +27,6 @@ typedef u8                      byte;
 #define    override
 #define BE_NOINLINE            
 #define BE_ALWAYSINLINE         inline
-#define BE_SELECTOVERLOAD(o)    (o)
-#define BE_SUPPORTS_EXCEPTIONS  1
 
 #define BE_EXPORT               __global
 #define BE_IMPORT

@@ -9,15 +9,13 @@
 namespace BugEngine
 {
 
-class StringCache;
-
 class be_api(CORE) istring
 {
 private:
-    const StringCache* m_index;
+    u32 m_index;
 private:
-    const StringCache* init(const char *str);
-    const StringCache* init(const char *begin, const char *end);
+    u32 init(const char *str);
+    u32 init(const char *begin, const char *end);
 public:
     istring();
     istring(const char *str);

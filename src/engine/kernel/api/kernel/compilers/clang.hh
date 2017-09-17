@@ -1,8 +1,8 @@
 /* BugEngine <bugengine.devel@gmail.com> / 2008-2014
    see LICENSE for detail */
 
-#ifndef BE_KERNEL_COMPILERS_GCC_HH_
-#define BE_KERNEL_COMPILERS_GCC_HH_
+#ifndef BE_KERNEL_COMPILERS_CLANG_HH_
+#define BE_KERNEL_COMPILERS_CLANG_HH_
 /**************************************************************************************************/
 
 #define be_alignof(t)           __alignof__(t)
@@ -12,10 +12,12 @@
 # define be_break()             __asm("trap")
 #elif defined(_MIPS)
 # define be_break()             __asm("break")
-#elif defined(_ARM)
-# define be_break()             
 #elif defined(_ARM64)
-# define be_break()             
+# define be_break()             __asm__ volatile("brk 0x0")
+#elif defined(_ARM) && !defined(__thumb__)
+# define be_break()             __asm__ volatile(".inst 0xe7f001f0")
+#elif defined(_ARM)
+# define be_break()             __asm__ volatile(".inst 0xde01");
 #else
 # error "Breakpoint not supported on this platform"
 # define be_break()
@@ -40,7 +42,6 @@ typedef u8                      byte;
 #define override
 #define BE_NOINLINE             __attribute__((noinline))
 #define BE_ALWAYSINLINE         __attribute__((always_inline))
-#define BE_SELECTOVERLOAD(o)    
 #define BE_SUPPORTS_EXCEPTIONS  __EXCEPTIONS
 
 #ifndef BE_STATIC
@@ -57,7 +58,7 @@ typedef u8                      byte;
 #endif
 
 #ifdef __MACH__
-# define be_section(name) __attribute__((section("." #name "," #name)))
+# define be_section(name)
 #else
 # define be_section(name) __attribute__((section("." #name)))
 #endif

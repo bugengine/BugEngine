@@ -150,6 +150,102 @@ static inline byte4x4 make_byte4x4(u8 x1, u8 x2, u8 x3, u8 x4, u8 x5, u8 x6, u8 
 }
 
 
+typedef _Kernel::array<i8, 1, 2>          sbyte1x2;
+static inline sbyte1x2 make_sbyte1x2(i8 x1, i8 x2)
+{
+    sbyte1x2 result = {{x1, x2}};
+    return result;
+}
+typedef _Kernel::array<i8, 1, 3>          sbyte1x3;
+static inline sbyte1x3 make_sbyte1x3(i8 x1, i8 x2, i8 x3)
+{
+    sbyte1x3 result = {{x1, x2, x3}};
+    return result;
+}
+typedef _Kernel::array<i8, 1, 4>          sbyte1x4;
+static inline sbyte1x4 make_sbyte1x4(i8 x1, i8 x2, i8 x3, i8 x4)
+{
+    sbyte1x4 result = {{x1, x2, x3, x4}};
+    return result;
+}
+
+typedef _Kernel::array<i8, 2, 1>          sbyte2;
+static inline sbyte2 make_sbyte2(i8 x1, i8 x2)
+{
+    sbyte2 result = {{x1, x2}};
+    return result;
+}
+typedef _Kernel::array<i8, 2, 2>          sbyte2x2;
+static inline sbyte2x2 make_sbyte2x2(i8 x1, i8 x2, i8 x3, i8 x4)
+{
+    sbyte2x2 result = {{{{x1, x2}}, {{x3, x4}}}};
+    return result;
+}
+typedef _Kernel::array<i8, 2, 3>          sbyte2x3;
+static inline sbyte2x3 make_sbyte2x3(i8 x1, i8 x2, i8 x3, i8 x4, i8 x5, i8 x6)
+{
+    sbyte2x3 result = {{{{x1, x2, x3}}, {{x4, x5, x6}}}};
+    return result;
+}
+typedef _Kernel::array<i8, 2, 4>          sbyte2x4;
+static inline sbyte2x4 make_sbyte2x4(i8 x1, i8 x2, i8 x3, i8 x4, i8 x5, i8 x6, i8 x7, i8 x8)
+{
+    sbyte2x4 result = {{{{x1, x2, x3, x4}}, {{x5, x6, x7, x8}}}};
+    return result;
+}
+
+typedef _Kernel::array<i8, 3, 1>          sbyte3;
+static inline sbyte3 make_sbyte3(i8 x1, i8 x2, i8 x3)
+{
+    sbyte3 result = {{x1, x2, x3}};
+    return result;
+}
+typedef _Kernel::array<i8, 3, 2>          sbyte3x2;
+static inline sbyte3x2 make_sbyte3x2(i8 x1, i8 x2, i8 x3, i8 x4, i8 x5, i8 x6)
+{
+    sbyte3x2 result = {{{{x1, x2}}, {{x3, x4}}, {{x5, x6}}}};
+    return result;
+}
+typedef _Kernel::array<i8, 3, 3>          sbyte3x3;
+static inline sbyte3x3 make_sbyte3x3(i8 x1, i8 x2, i8 x3, i8 x4, i8 x5, i8 x6, i8 x7, i8 x8, i8 x9)
+{
+    sbyte3x3 result = {{{{x1, x2, x3}}, {{x4, x5, x6}}, {{x7, x8, x9}}}};
+    return result;
+}
+typedef _Kernel::array<i8, 3, 4>          sbyte3x4;
+static inline sbyte3x4 make_sbyte3x4(i8 x1, i8 x2, i8 x3, i8 x4, i8 x5, i8 x6, i8 x7, i8 x8, i8 x9, i8 x10, i8 x11, i8 x12)
+{
+    sbyte3x4 result = {{{{x1, x2, x3, x4}}, {{x5, x6, x7, x8}}, {{x9, x10, x11, x12}}}};
+    return result;
+}
+
+typedef _Kernel::array<i8, 4, 1>          sbyte4;
+static inline sbyte4 make_sbyte4(i8 x1, i8 x2, i8 x3, i8 x4)
+{
+    sbyte4 result = {{x1, x2, x3, x4}};
+    return result;
+}
+typedef _Kernel::array<i8, 4, 2>          sbyte4x2;
+static inline sbyte4x2 make_sbyte4x2(i8 x1, i8 x2, i8 x3, i8 x4, i8 x5, i8 x6, i8 x7, i8 x8)
+{
+    sbyte4x2 result = {{{{x1, x2}}, {{x3, x4}}, {{x5, x6}}, {{x7, x8}}}};
+    return result;
+}
+typedef _Kernel::array<i8, 4, 3>          sbyte4x3;
+static inline sbyte4x3 make_sbyte4x3(i8 x1, i8 x2, i8 x3, i8 x4, i8 x5, i8 x6, i8 x7, i8 x8, i8 x9, i8 x10, i8 x11, i8 x12)
+{
+    sbyte4x3 result = {{{{x1, x2, x3}}, {{x4, x5, x6}}, {{x7, x8, x9}}, {{x10, x11, x12}}}};
+    return result;
+}
+typedef _Kernel::array<i8, 4, 4>          sbyte4x4;
+static inline sbyte4x4 make_sbyte4x4(i8 x1, i8 x2, i8 x3, i8 x4, i8 x5, i8 x6, i8 x7, i8 x8, i8 x9, i8 x10, i8 x11, i8 x12, i8 x13, i8 x14, i8 x15, i8 x16)
+{
+    sbyte4x4 result = {{{{x1, x2, x3, x4}}, {{x5, x6, x7, x8}}, {{x9, x10, x11, x12}}, {{x13, x14, x15, x16}}}};
+    return result;
+}
+
+
+
 typedef _Kernel::array<i16, 1, 2>         short1x2;
 static inline short1x2 make_short1x2(i16 x1, i16 x2)
 {
@@ -815,6 +911,100 @@ static inline float4x4 make_float4x4(float x1, float x2, float x3, float x4, flo
 }
 
 
+
+typedef _Kernel::array<double, 1, 2>       double1x2;
+static inline double1x2 make_double1x2(double x1, double x2)
+{
+    double1x2 result = {{x1, x2}};
+    return result;
+}
+typedef _Kernel::array<double, 1, 3>       double1x3;
+static inline double1x3 make_double1x3(double x1, double x2, double x3)
+{
+    double1x3 result = {{x1, x2, x3}};
+    return result;
+}
+typedef _Kernel::array<double, 1, 4>       double1x4;
+static inline double1x4 make_double1x4(double x1, double x2, double x3, double x4)
+{
+    double1x4 result = {{x1, x2, x3, x4}};
+    return result;
+}
+
+typedef _Kernel::array<double, 2, 1>       double2;
+static inline double2 make_double2(double x1, double x2)
+{
+    double2 result = {{x1, x2}};
+    return result;
+}
+typedef _Kernel::array<double, 2, 2>       double2x2;
+static inline double2x2 make_double2x2(double x1, double x2, double x3, double x4)
+{
+    double2x2 result = {{{{x1, x2}}, {{x3, x4}}}};
+    return result;
+}
+typedef _Kernel::array<double, 2, 3>       double2x3;
+static inline double2x3 make_double2x3(double x1, double x2, double x3, double x4, double x5, double x6)
+{
+    double2x3 result = {{{{x1, x2, x3}}, {{x4, x5, x6}}}};
+    return result;
+}
+typedef _Kernel::array<double, 2, 4>       double2x4;
+static inline double2x4 make_double2x4(double x1, double x2, double x3, double x4, double x5, double x6, double x7, double x8)
+{
+    double2x4 result = {{{{x1, x2, x3, x4}}, {{x5, x6, x7, x8}}}};
+    return result;
+}
+
+typedef _Kernel::array<double, 3, 1>       double3;
+static inline double3 make_double3(double x1, double x2, double x3)
+{
+    double3 result = {{x1, x2, x3}};
+    return result;
+}
+typedef _Kernel::array<double, 3, 2>       double3x2;
+static inline double3x2 make_double3x2(double x1, double x2, double x3, double x4, double x5, double x6)
+{
+    double3x2 result = {{{{x1, x2}}, {{x3, x4}}, {{x5, x6}}}};
+    return result;
+}
+typedef _Kernel::array<double, 3, 3>       double3x3;
+static inline double3x3 make_double3x3(double x1, double x2, double x3, double x4, double x5, double x6, double x7, double x8, double x9)
+{
+    double3x3 result = {{{{x1, x2, x3}}, {{x4, x5, x6}}, {{x7, x8, x9}}}};
+    return result;
+}
+typedef _Kernel::array<double, 3, 4>       double3x4;
+static inline double3x4 make_double3x4(double x1, double x2, double x3, double x4, double x5, double x6, double x7, double x8, double x9, double x10, double x11, double x12)
+{
+    double3x4 result = {{{{x1, x2, x3, x4}}, {{x5, x6, x7, x8}}, {{x9, x10, x11, x12}}}};
+    return result;
+}
+
+typedef _Kernel::array<double, 4, 1>       double4;
+static inline double4 make_double4(double x1, double x2, double x3, double x4)
+{
+    double4 result = {{x1, x2, x3, x4}};
+    return result;
+}
+typedef _Kernel::array<double, 4, 2>       double4x2;
+static inline double4x2 make_double4x2(double x1, double x2, double x3, double x4, double x5, double x6, double x7, double x8)
+{
+    double4x2 result = {{{{x1, x2}}, {{x3, x4}}, {{x5, x6}}, {{x7, x8}}}};
+    return result;
+}
+typedef _Kernel::array<double, 4, 3>       double4x3;
+static inline double4x3 make_double4x3(double x1, double x2, double x3, double x4, double x5, double x6, double x7, double x8, double x9, double x10, double x11, double x12)
+{
+    double4x3 result = {{{{x1, x2, x3}}, {{x4, x5, x6}}, {{x7, x8, x9}}, {{x10, x11, x12}}}};
+    return result;
+}
+typedef _Kernel::array<double, 4, 4>       double4x4;
+static inline double4x4 make_double4x4(double x1, double x2, double x3, double x4, double x5, double x6, double x7, double x8, double x9, double x10, double x11, double x12, double x13, double x14, double x15, double x16)
+{
+    double4x4 result = {{{{x1, x2, x3, x4}}, {{x5, x6, x7, x8}}, {{x9, x10, x11, x12}}, {{x13, x14, x15, x16}}}};
+    return result;
+}
 
 typedef _Kernel::array<u8, 4, 1>          color32;
 typedef _Kernel::array<u8, 4, 1>          color128;

@@ -20,10 +20,10 @@ static RTTI::Value make_tuple(RTTI::Value* v, u32 count);
 
 }
 
-#include    <rtti/engine/helper/tuple2.hh>
-#include    <rtti/engine/helper/tuple3.hh>
-#include    <rtti/engine/helper/tuple4.hh>
-#include    <rtti/engine/helper/tuple5.hh>
+#include    <rtti/engine/helper/tuple2.factory.hh>
+#include    <rtti/engine/helper/tuple3.factory.hh>
+#include    <rtti/engine/helper/tuple4.factory.hh>
+#include    <rtti/engine/helper/tuple5.factory.hh>
 
 /**************************************************************************************************/
 #endif

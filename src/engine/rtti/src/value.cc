@@ -92,16 +92,19 @@ void* Value::unpackAs(const Type& ti,
         rptr = *(ref<minitl::refcountable>*)mem;
         wptr = rptr;
         mem = (void*)&wptr;
+        /* falls through */
     case Type::WeakPtr:
         if (ti.indirection == Type::WeakPtr)
             break;
         wptr = *(weak<minitl::refcountable>*)mem;
         obj = wptr.operator->();
         mem = (void*)&obj;
+        /* falls through */
     case Type::RawPtr:
         if (ti.indirection == Type::RawPtr)
             break;
         mem = *(void**)mem;
+        /* falls through */
     default:
         break;
     }
@@ -138,6 +141,42 @@ Value Value::operator()(Value params[], u32 paramCount)
                       "Not a callable object: %s" | m_type,
                       return Value());
     return call.as<const Method* const>()->doCall(params, paramCount);
+}
+
+void Value::swap(Value& other)
+{
+    if (&other != this)
+    {
+        if (m_reference && other.m_reference)
+        {
+            minitl::swap(m_type, other.m_type);
+            minitl::swap(m_ref, other.m_ref);
+        }
+        else if (m_reference)
+        {
+            minitl::swap(m_type, other.m_type);
+            minitl::swap(m_reference, other.m_reference);
+            Reference r = m_ref;
+            m_type.copy(other.m_buffer, m_buffer);
+            m_type.destroy(other.m_buffer);
+            other.m_ref = r;
+        }
+        else if (other.m_reference)
+        {
+            Reference r = other.m_ref;
+            m_type.copy(m_buffer, other.m_buffer);
+            m_type.destroy(m_buffer);
+            m_ref = r;
+            minitl::swap(m_type, other.m_type);
+            minitl::swap(m_reference, other.m_reference);
+        }
+        else
+        {
+            Value v(*this);
+            *this = other;
+            other = v;
+        }
+    }
 }
 
 }}

@@ -3,10 +3,10 @@
 
 #include    <stdafx.h>
 
-#include    <luacontext.hh>
-#include    <luaplugin.hh>
-#include    <luavalue.hh>
-#include    <luaresource.hh>
+#include    <context.hh>
+#include    <runtime/plugin.hh>
+#include    <runtime/object.hh>
+#include    <runtime/resource.hh>
 
 
 namespace BugEngine
@@ -24,6 +24,7 @@ namespace Lua
 {
 
 static ref<Logger> s_logger(Logger::instance("scripting.lua"));
+static const raw<const RTTI::Class> s_voidClass = be_typeid<void>::klass();
 
 static const char* s_metaTables[] = {
     "BugEngine.Object",
@@ -120,71 +121,59 @@ void Context::checkArg(lua_State* state, int narg, const RTTI::Type& type)
     }
 }
 
-void Context::push(lua_State* state, const RTTI::Value& v)
+int Context::push(lua_State* state, const RTTI::Value& v)
 {
     const RTTI::Type& t = v.type();
-    if (t.metaclass->type() == RTTI::ClassType_Number)
+    if (t.metaclass == s_voidClass)
+    {
+        return 0;
+    }
+    else if (v.type().indirection >= RTTI::Type::RawPtr && v.as<const void* const>() == 0)
+    {
+        lua_pushnil(state);
+        return 1;
+    }
+    else if (t.metaclass->type() == RTTI::ClassType_Number)
     {
         switch(t.metaclass->index())
         {
-        case 0:
-            be_assert(be_typeid<bool>::klass() == t.metaclass,
-                      "mismatching index for class %s: mistaken for %s" | t.metaclass->fullname() | be_typeid<bool>::klass()->fullname());
+        case RTTI::ClassIndex_bool:
             lua_pushboolean(state, v.as<bool>());
-            return;
-        case 1:
-            be_assert(be_typeid<u8>::klass() == t.metaclass,
-                      "mismatching index for class %s: mistaken for %s" | t.metaclass->fullname() | be_typeid<u8>::klass()->fullname());
+            return 1;
+        case RTTI::ClassIndex_u8:
             lua_pushnumber(state, v.as<u8>());
-            return;
-        case 2:
-            be_assert(be_typeid<u16>::klass() == t.metaclass,
-                      "mismatching index for class %s: mistaken for %s" | t.metaclass->fullname() | be_typeid<u16>::klass()->fullname());
+            return 1;
+        case RTTI::ClassIndex_u16:
             lua_pushnumber(state, v.as<u16>());
-            return;
-        case 3:
-            be_assert(be_typeid<u32>::klass() == t.metaclass,
-                      "mismatching index for class %s: mistaken for %s" | t.metaclass->fullname() | be_typeid<u32>::klass()->fullname());
+            return 1;
+        case RTTI::ClassIndex_u32:
             lua_pushnumber(state, v.as<u32>());
-            return;
-        case 4:
-            be_assert(be_typeid<u64>::klass() == t.metaclass,
-                      "mismatching index for class %s: mistaken for %s" | t.metaclass->fullname() | be_typeid<u64>::klass()->fullname());
+            return 1;
+        case RTTI::ClassIndex_u64:
             lua_pushnumber(state, (lua_Number)v.as<u64>());
-            return;
-        case 5:
-            be_assert(be_typeid<i8>::klass() == t.metaclass,
-                      "mismatching index for class %s: mistaken for %s" | t.metaclass->fullname() | be_typeid<i8>::klass()->fullname());
+            return 1;
+        case RTTI::ClassIndex_i8:
             lua_pushnumber(state, v.as<i8>());
-            return;
-        case 6:
-            be_assert(be_typeid<i16>::klass() == t.metaclass,
-                      "mismatching index for class %s: mistaken for %s" | t.metaclass->fullname() | be_typeid<i16>::klass()->fullname());
+            return 1;
+        case RTTI::ClassIndex_i16:
             lua_pushnumber(state, v.as<i16>());
-            return;
-        case 7:
-            be_assert(be_typeid<i32>::klass() == t.metaclass,
-                      "mismatching index for class %s: mistaken for %s" | t.metaclass->fullname() | be_typeid<i32>::klass()->fullname());
+            return 1;
+        case RTTI::ClassIndex_i32:
             lua_pushnumber(state, v.as<i32>());
-            return;
-        case 8:
-            be_assert(be_typeid<i64>::klass() == t.metaclass,
-                      "mismatching index for class %s: mistaken for %s" | t.metaclass->fullname() | be_typeid<i64>::klass()->fullname());
+            return 1;
+        case RTTI::ClassIndex_i64:
             lua_pushnumber(state, (lua_Number)v.as<i64>());
-            return;
-        case 9:
-            be_assert(be_typeid<float>::klass() == t.metaclass,
-                      "mismatching index for class %s: mistaken for %s" | t.metaclass->fullname() | be_typeid<float>::klass()->fullname());
+            return 1;
+        case RTTI::ClassIndex_float:
             lua_pushnumber(state, v.as<float>());
-            return;
-        case 10:
-            be_assert(be_typeid<double>::klass() == t.metaclass,
-                      "mismatching index for class %s: mistaken for %s" | t.metaclass->fullname() | be_typeid<double>::klass()->fullname());
+            return 1;
+        case RTTI::ClassIndex_double:
             lua_pushnumber(state, v.as<double>());
-            return;
+            return 1;
         default:
             be_notreached();
             lua_pushnumber(state, 0);
+            return 1;
         }
     }
     else
@@ -193,6 +182,7 @@ void Context::push(lua_State* state, const RTTI::Value& v)
         new(userdata) RTTI::Value(v);
         luaL_getmetatable(state, "BugEngine.Object");
         lua_setmetatable(state, -2);
+        return 1;
     }
 }
 
@@ -399,6 +389,24 @@ void* Context::luaAlloc(void* /*ud*/, void* ptr, size_t osize, size_t nsize)
         Arena::lua().free(ptr);
         return 0;
     }
+}
+
+minitl::format<1024u> Context::getCallInfo(lua_State *state)
+{
+    lua_Debug ar0, ar1;
+    const char* source = "unknown source";
+    const char* name = "unknown method";
+    int line = -1;
+    if (lua_getstack(state, 0, &ar0) && lua_getinfo(state, "n", &ar0))
+    {
+        name = ar0.name;
+    }
+    if (lua_getstack(state, 1, &ar1) && lua_getinfo(state, "Sl", &ar1))
+    {
+        source = ar1.source;
+        line = ar1.currentline;
+    }
+    return minitl::format<1024u>("%s:%d (%s)") | source | line | name;
 }
 
 Context::Context(const Plugin::Context& context)

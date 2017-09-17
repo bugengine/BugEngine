@@ -1,8 +1,8 @@
 /* BugEngine <bugengine.devel@gmail.com> / 2008-2014
  see LICENSE for detail */
 
-#ifndef BE_LUA_LUARESOURCE_HH_
-#define BE_LUA_LUARESOURCE_HH_
+#ifndef BE_LUA_RUNTIME_RESOURCE_HH_
+#define BE_LUA_RUNTIME_RESOURCE_HH_
 /**************************************************************************************************/
 #include    <stdafx.h>
 

@@ -17,19 +17,18 @@ class Reference;
 class Object : public Instance
 {
 private:
-    RTTI::Type                          m_objectType;
-    ref<Reference>                      m_methodReference;
-    raw<const RTTI::Method>             m_method;
-    minitl::vector< OverloadMatch >     m_overloads;
+    RTTI::Type                      m_objectType;
+    ref<Reference>                  m_methodReference;
+    raw<const RTTI::Method>         m_method;
+    minitl::vector<OverloadMatch>   m_overloads;
 private:
     void resolveOverload();
-    void addedParameter(ref<Parameter> parameter) override;
+    void addedParameter(ref<const Parameter> parameter) override;
 public:
     Object(weak<Package> owner, u32 line, u32 begin, u32 end);
     ~Object();
 
     raw<const RTTI::Method> method() const                      { return m_method; }
-    const minitl::vector< OverloadMatch >& overloads() const    { return m_overloads; }
 
     void setMethod(ref<Reference> reference);
 

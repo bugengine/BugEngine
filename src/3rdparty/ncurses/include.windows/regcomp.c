@@ -506,8 +506,8 @@ weak_alias (__regcomp, regcomp)
    from either regcomp or regexec.   We don't use PREG here.  */
 
 size_t
-regerror (errcode, preg, errbuf, errbuf_size)
-    int errcode;
+regerror (errorcode, preg, errbuf, errbuf_size)
+    int errorcode;
     const regex_t *__restrict preg;
     char *__restrict errbuf;
     size_t errbuf_size;
@@ -515,8 +515,8 @@ regerror (errcode, preg, errbuf, errbuf_size)
   const char *msg;
   size_t msg_size;
 
-  if (BE (errcode < 0
-	  || errcode >= (int) (sizeof (__re_error_msgid_idx)
+  if (BE (errorcode < 0
+	  || errorcode >= (int) (sizeof (__re_error_msgid_idx)
 			       / sizeof (__re_error_msgid_idx[0])), 0))
     /* Only error codes returned by the rest of the code should be passed
        to this routine.  If we are given anything else, or if other regex
@@ -524,7 +524,7 @@ regerror (errcode, preg, errbuf, errbuf_size)
        Dump core so we can fix it.  */
     abort ();
 
-  msg = gettext (__re_error_msgid + __re_error_msgid_idx[errcode]);
+  msg = gettext (__re_error_msgid + __re_error_msgid_idx[errorcode]);
 
   msg_size = strlen (msg) + 1; /* Includes the null.  */
 

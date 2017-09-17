@@ -9,6 +9,12 @@
 namespace BugEngine { namespace Python
 {
 
+PyMethodDef PyBugNamespace::s_methods[] =
+{
+    {"__dir__", &PyBugNamespace::dir, METH_NOARGS, NULL},
+    {NULL, NULL, 0, NULL}
+};
+
 PyTypeObject PyBugNamespace::s_pyType =
 {
     { { 0, 0 }, 0 },
@@ -25,7 +31,7 @@ PyTypeObject PyBugNamespace::s_pyType =
     0,
     0,
     0,
-    &PyBugObject::call,
+    0,
     0,
     0,
     0,
@@ -38,10 +44,10 @@ PyTypeObject PyBugNamespace::s_pyType =
     0,
     0,
     0,
+    PyBugNamespace::s_methods,
     0,
     0,
-    0,
-    0,
+    &PyBugObject::s_pyType,
     0,
     0,
     0,
@@ -61,17 +67,19 @@ PyTypeObject PyBugNamespace::s_pyType =
     0
 };
 
-PyObject* PyBugNamespace::create(PyObject* owner, const RTTI::Value& value)
+PyObject* PyBugNamespace::stealValue(PyObject* owner, RTTI::Value& value)
 {
     be_assert(value.type().metaclass->type() == RTTI::ClassType_Namespace,
               "PyBugNamespace only accepts Namespace types");
     PyObject* result = s_pyType.tp_alloc(&s_pyType, 0);
-    ((PyBugNamespace*)result)->owner = owner;
+    static_cast<PyBugNamespace*>(result)->owner = owner;
+
     if (owner)
     {
         Py_INCREF(owner);
     }
-    new(&((PyBugNamespace*)result)->value) RTTI::Value(value);
+    new(&(static_cast<PyBugNamespace*>(result))->value) RTTI::Value();
+    (static_cast<PyBugNamespace*>(result))->value.swap(value);
     return result;
 }
 
@@ -93,7 +101,8 @@ PyObject* PyBugNamespace::getattr(PyObject* self, const char* name)
     {
         if (o->name == name_)
         {
-            return PyBugObject::create(self, o->value);
+            RTTI::Value v = o->value;
+            return PyBugObject::stealValue(self, v);
         }
     }
     return PyBugObject::getattr(self, name);
@@ -110,8 +119,8 @@ int PyBugNamespace::setattr(PyObject* self, const char* name, PyObject* value)
         {
             if (ob->value.type().access != RTTI::Type::Const)
             {
-                u32 d = distance(value, ob->value.type());
-                if (d < RTTI::Type::MaxTypeDistance)
+                RTTI::ConversionCost c = distance(value, ob->value.type());
+                if (c < RTTI::ConversionCost::s_incompatible)
                 {
                     RTTI::Value* v = (RTTI::Value*)malloca(sizeof(RTTI::Value));
                     unpack(value, ob->value.type(), v);
@@ -145,6 +154,39 @@ int PyBugNamespace::setattr(PyObject* self, const char* name, PyObject* value)
     return -1;
 }
 
+
+PyObject* PyBugNamespace::dir(PyObject* self, PyObject* args)
+{
+    PyBugObject* self_ = static_cast<PyBugObject*>(self);
+    be_forceuse(args);
+    PyObject* result = s_library->m_PyList_New(0);
+    if (!result)
+        return NULL;
+    const RTTI::Class& klass = self_->value.as<const RTTI::Class&>();
+    PyString_FromStringAndSizeType fromString = s_library->getVersion() >= 30
+            ?   s_library->m_PyUnicode_FromStringAndSize
+            :   s_library->m_PyString_FromStringAndSize;
+
+    for (raw<const RTTI::ObjectInfo> o = klass.objects; o; o = o->next)
+    {
+        PyObject* str = fromString(o->name.c_str(), o->name.size());
+        if (!str)
+        {
+            Py_DECREF(result);
+            return NULL;
+        }
+        if (s_library->m_PyList_Append(result, str) == -1)
+        {
+            Py_DECREF(str);
+            Py_DECREF(result);
+            return NULL;
+        }
+        Py_DECREF(str);
+    }
+    return result;
+}
+
+
 PyObject* PyBugNamespace::repr(PyObject *self)
 {
     PyBugObject* self_ = static_cast<PyBugObject*>(self);
@@ -166,10 +208,10 @@ void PyBugNamespace::registerType(PyObject* module)
     int result = s_library->m_PyType_Ready(&s_pyType);
     be_assert(result >= 0, "unable to register type");
     Py_INCREF(&s_pyType);
-    result = (*s_library->m_PyModule_AddObject)(module, "Array", (PyObject*)&s_pyType);
+    result = (*s_library->m_PyModule_AddObject)(module, "Namespace", (PyObject*)&s_pyType);
     be_assert(result >= 0, "unable to register type");
-    result = (*s_library->m_PyModule_AddObject)(module, "BugEngine",
-                                                create(0, RTTI::Value(be_game_Namespace())));
+    RTTI::Value v = RTTI::Value(be_game_Namespace());
+    result = (*s_library->m_PyModule_AddObject)(module, "BugEngine", stealValue(0, v));
     be_assert(result >= 0, "unable to register type");
     be_forceuse(result);
 }

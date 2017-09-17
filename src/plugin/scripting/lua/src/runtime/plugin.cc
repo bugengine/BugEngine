@@ -3,8 +3,8 @@
 
 #include    <stdafx.h>
 
-#include    <luaplugin.hh>
-#include    <luacontext.hh>
+#include    <runtime/plugin.hh>
+#include    <context.hh>
 #include    <plugin/plugin.hh>
 
 

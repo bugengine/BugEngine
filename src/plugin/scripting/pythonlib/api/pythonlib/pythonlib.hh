@@ -53,7 +53,8 @@ private:
     int                                     m_version;
     PyThreadState*                          m_mainThread;
 private: // friend ThreadLock
-    Py_SetPythonHomeType                    m_Py_SetPythonHome;
+    Py_SetPythonHome2Type                   m_Py_SetPythonHome2;
+    Py_SetPythonHome3Type                   m_Py_SetPythonHome3;
     Py_InitializeExType                     m_Py_InitializeEx;
     Py_FinalizeType                         m_Py_Finalize;
     Py_NewInterpreterType                   m_Py_NewInterpreter;
@@ -89,6 +90,7 @@ public:
     PyType_GenericAllocType                 m_PyType_GenericAlloc;
     PyType_GenericNewType                   m_PyType_GenericNew;
     PyType_ReadyType                        m_PyType_Ready;
+    PyCFunction_NewExType                   m_PyCFunction_NewEx;
 
     PyList_NewType                          m_PyList_New;
     PyList_SizeType                         m_PyList_Size;
@@ -142,6 +144,7 @@ public:
     PyErr_FormatType                        m_PyErr_Format;
     PyErr_BadArgumentType                   m_PyErr_BadArgument;
 
+    PyBool_TypeType                         m_PyBool_Type;
     PyFloat_TypeType                        m_PyFloat_Type;
     PyExc_ExceptionType                     m_PyExc_Exception;
     PyExc_AttributeErrorType                m_PyExc_AttributeError;
@@ -154,6 +157,7 @@ public:
 };
 
 extern tls<PythonLibrary> s_library;
+extern PyObject* s_moduleObject;
 
 be_api(PYTHONLIB) PyObject* init2_py_bugengine(bool registerLog);
 be_api(PYTHONLIB) PyObject* init3_py_bugengine(bool registerLog);

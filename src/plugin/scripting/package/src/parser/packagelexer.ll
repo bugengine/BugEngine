@@ -32,6 +32,7 @@ using namespace BugEngine::PackageBuilder::Nodes;
 # undef strdup
 #endif
 #define strdup(x)    be_strdup(x)
+
 static char *be_strdup(const char *src)
 {
     size_t x = strlen(src);
@@ -80,7 +81,6 @@ extern "C" int be_package_wrap()
     return 1;
 }
 
-#define YY_NO_INPUT
 #define YY_INPUT(buf,result,max_size)                               \
         {                                                           \
             result = max_size > g_buffer->count()-g_bufferPosition  \
@@ -118,7 +118,7 @@ as                                                      { update(be_package_leng
 \<[^\r\n\"]*\>                                          { update(be_package_leng); yylval.sValue = be_strdup(be_package_text+1); yylval.sValue[be_package_leng-2] = 0; return VAL_FILENAME; }
 -?[0-9]+                                                { update(be_package_leng); yylval.iValue = strToInteger(be_package_text, be_package_leng); return VAL_INTEGER; }
 {DIGITS}("."{DIGITS}?)?([eE]{SIGN}?{DIGITS})?           { update(be_package_leng); yylval.fValue = strToDouble(be_package_text, be_package_leng); return VAL_FLOAT; }
-"\n"                                                    { newline(); }
+"\n"                                                    { (void)&yyinput; newline(); }
 [ \r\t]+                                                { update(be_package_leng); }
 \#[^\n]*\n                                              { update(be_package_leng); }
 .                                                       { update(be_package_leng); return *be_package_text; }
@@ -129,7 +129,7 @@ as                                                      { update(be_package_leng
 #pragma warning(pop)
 #endif
 
-#ifndef FLEX_BETA
+#if (YY_FLEX_MINOR_VERSION < 5) || (YY_FLEX_MINOR_VERSION == 5 && YY_FLEX_SUBMINOR_VERSION < 5)
 int be_package_lex_destroy()
 {
     return 0;

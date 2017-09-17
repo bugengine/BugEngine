@@ -6,7 +6,6 @@
 /**************************************************************************************************/
 #include    <rtti/stdafx.h>
 #include    <rtti/classinfo.script.hh>
-#include    <rtti/builtin.hh>
 
 namespace BugEngine { namespace RTTI
 {
@@ -35,33 +34,6 @@ enum ClassIndex_String
     ClassIndex_ipath = 3,
     ClassIndex_text = 4
 };
-
-template< typename T >
-struct TypeIndex;
-
-#define MakeIndex(t)                            \
-    template< >                                 \
-    struct TypeIndex<t>                         \
-    {                                           \
-        enum Index_ { Index = ClassIndex_##t };  \
-    }
-
-MakeIndex(bool);
-MakeIndex(u8);
-MakeIndex(u16);
-MakeIndex(u32);
-MakeIndex(u64);
-MakeIndex(i8);
-MakeIndex(i16);
-MakeIndex(i32);
-MakeIndex(i64);
-MakeIndex(float);
-MakeIndex(double);
-MakeIndex(istring);
-MakeIndex(inamespace);
-MakeIndex(ifilename);
-MakeIndex(ipath);
-MakeIndex(text);
 
 }}
 

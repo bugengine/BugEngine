@@ -202,10 +202,9 @@ struct vector<T>::const_reverse_iterator_policy
 
 
 template< typename T >
-vector<T>::vector(Allocator& allocator, size_type count)
-:   m_memory(allocator, count)
+vector<T>::vector(Allocator& allocator, size_type initialCapacity)
+:   m_memory(allocator, initialCapacity)
 ,   m_end(m_memory)
-,   m_capacity(m_memory)
 {
 }
 
@@ -213,7 +212,6 @@ template< typename T >
 vector<T>::vector(const vector& other)
     :   m_memory(other.m_memory.arena(), other.size())
     ,   m_end(m_memory)
-    ,   m_capacity(m_memory)
 {
     push_back(other.begin(), other.end());
 }
@@ -223,7 +221,6 @@ template< typename ITERATOR >
 vector<T>::vector(Allocator& allocator, ITERATOR first, ITERATOR last)
     :   m_memory(allocator, minitl::distance(first, last))
     ,   m_end(m_memory)
-    ,   m_capacity(m_memory)
 {
     push_back(first, last);
 }
@@ -441,8 +438,7 @@ void                                         vector<T>::clear()
 template< typename T >
 void                                         vector<T>::ensure(size_type size)
 {
-    size_type capacity = distance(m_memory.data(), m_capacity);
-    if (size > capacity)
+    if (size > m_memory.count())
     {
         size = size >> 1  | size;
         size = size >> 2  | size;
@@ -458,8 +454,7 @@ void                                         vector<T>::ensure(size_type size)
 template< typename T >
 void                                         vector<T>::reserve(size_type size)
 {
-    size_type capacity = distance(m_memory.data(), m_capacity);
-    if (size > capacity)
+    if (size > m_memory.count())
     {
         Allocator::Block<T> block(m_memory.arena(), size);
         pointer t = block;
@@ -470,7 +465,6 @@ void                                         vector<T>::reserve(size_type size)
         }
         m_memory.swap(block);
         m_end = t;
-        m_capacity = advance_ptr(m_memory.data(), size);
     }
 }
 
@@ -479,7 +473,6 @@ void swap(vector<T>& t1, vector<T>& t2)
 {
     t1.m_memory.swap(t2.m_memory);
     swap(t1.m_end, t2.m_end);
-    swap(t1.m_capacity, t2.m_capacity);
 }
 
 }

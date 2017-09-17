@@ -1,8 +1,8 @@
 /* BugEngine <bugengine.devel@gmail.com> / 2008-2014
    see LICENSE for detail */
 
-#ifndef BE_LUA_LUASCRIPT_SCRIPT_HH_
-#define BE_LUA_LUASCRIPT_SCRIPT_HH_
+#ifndef BE_LUA_LUA_SCRIPT_HH_
+#define BE_LUA_LUA_SCRIPT_HH_
 /**************************************************************************************************/
 #include    <stdafx.h>
 #include    <bugengine/script.script.hh>

@@ -35,15 +35,16 @@ void ZipValue::addEvent(ref<Event> event)
     m_events.push_back(event);
 }
 
-bool ZipValue::isCompatible(const RTTI::Type& type) const
+RTTI::ConversionCost ZipValue::calculateConversion(const RTTI::Type& type) const
 {
     be_forceuse(type);
-    return false;
+    return RTTI::ConversionCost::s_incompatible;
 }
 
 RTTI::Value ZipValue::as(const RTTI::Type& type) const
 {
-    be_assert(isCompatible(type), minitl::format<4096>("invalid conversion from %s to %s") | be_typeid< weak<const File> >::type() | type);
+    be_assert(calculateConversion(type) < RTTI::ConversionCost::s_incompatible,
+              "invalid conversion from %s to %s" | be_typeid< weak<const File> >::type() | type);
     return RTTI::Value();
 }
 }}}

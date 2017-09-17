@@ -16,14 +16,14 @@ class ICC(Configure.ConfigurationContext.GnuCompiler):
     }
     TOOLS = 'icc icpc'
 
-    def __init__(self, icc, icpc, extra_args = [], extra_env={}):
+    def __init__(self, icc, icpc, extra_args={}, extra_env={}):
         Configure.ConfigurationContext.GnuCompiler.__init__(self, icc, icpc, extra_args, extra_env)
 
     def get_version(self, icc, extra_args, extra_env):
         env = os.environ.copy()
         for env_name, env_value in extra_env.items():
             env[env_name] = env_value
-        result, out, err = self.run([icc] + extra_args + ['-dM', '-E', '-'], '', env=env)
+        result, out, err = self.run([icc] + extra_args.get('c', []) + ['-dM', '-E', '-'], '', env=env)
         if result != 0:
             raise Exception('could not run ICC %s (%s)' % (icc, err))
         for l in out.split('\n'):
@@ -71,6 +71,18 @@ class ICC(Configure.ConfigurationContext.GnuCompiler):
             v.CFLAGS_exportall = ['-fvisibility=default']
             v.CXXFLAGS_exportall = ['-fvisibility=default']
 
+    def is_valid(self, conf):
+        node = conf.bldnode.make_node('main.cxx')
+        tgtnode = node.change_ext('')
+        node.write('#include <iostream>\nint main() {}\n')
+        try:
+            result, out, err = self.run_cxx([node.abspath(), '-c', '-o', tgtnode.abspath()])
+        except Exception as e:
+            return False
+        finally:
+            node.delete()
+            tgtnode.delete()
+        return result == 0
 
 def detect_icc(conf):
     bindirs = os.environ['PATH'].split(os.pathsep) + conf.env.EXTRA_PATH

@@ -17,26 +17,26 @@ class SunCC(Configure.ConfigurationContext.GnuCompiler):
     }
     TOOLS = 'suncc suncxx'
 
-    def __init__(self, suncc, sunCC, extra_args = [], extra_env={}):
+    def __init__(self, suncc, sunCC, extra_args={}, extra_env={}):
         Configure.ConfigurationContext.GnuCompiler.__init__(self, suncc, sunCC, extra_args, extra_env)
         if self.platform == 'linux-gnu':
-            if self.version_number < (5, 14):
-                self.extra_args.append('-library=Crun,stlport4')
+            if self.version_number <= (5, 13, 0):
+                self.add_flags('cxx', ['-library=Crun,stlport4'])
+                self.add_flags('link', ['-library=Crun,stlport4', '-staticlib=Crun,stlport4'])
             if self.arch == 'amd64':
+                if os.path.isdir('/lib/x86_64-linux-gnu'):
+                    self.add_flags('link', ['-L/lib/x86_64-linux-gnu'])
                 if os.path.isdir('/usr/lib/x86_64-linux-gnu'):
-                    self.extra_args.append('-L/usr/lib/x86_64-linux-gnu')
+                    self.add_flags('link', ['-L/usr/lib/x86_64-linux-gnu'])
             elif self.arch == 'x86':
-                if os.path.isdir('/usr/lib/i386-linux-gnu'):
-                    self.extra_args.append('-L/usr/lib/i386-linux-gnu')
-                if os.path.isdir('/usr/lib/i486-linux-gnu'):
-                    self.extra_args.append('-L/usr/lib/i486-linux-gnu')
-                if os.path.isdir('/usr/lib/i586-linux-gnu'):
-                    self.extra_args.append('-L/usr/lib/i586-linux-gnu')
-                if os.path.isdir('/usr/lib/i686-linux-gnu'):
-                    self.extra_args.append('-L/usr/lib/i686-linux-gnu')
+                for arch in ('i386', 'i486', 'i586', 'i686'):
+                    if os.path.isdir('/lib/%s-linux-gnu' % arch):
+                        self.add_flags('link', ['-L/lib/%s-linux-gnu' % arch])
+                    if os.path.isdir('/usr/lib/%s-linux-gnu' % arch):
+                        self.add_flags('link', ['-L/usr/lib/%s-linux-gnu' % arch])
 
     def get_version(self, sunCC, extra_args, extra_env):
-        result, out, err = self.run([sunCC] + extra_args + ['-xdumpmacros', '-E', '/dev/null'])
+        result, out, err = self.run([sunCC] + extra_args.get('cxx', []) + ['-xdumpmacros', '-E', '/dev/null'])
         if result != 0:
             raise Exception('could not run SunCC %s (%s)' % (sunCC, err))
         for l in out.split('\n') + err.split('\n'):
@@ -69,20 +69,21 @@ class SunCC(Configure.ConfigurationContext.GnuCompiler):
 
         v['CFLAGS_profile'] = ['-g', '-DNDEBUG', '-fast']
         v['CXXFLAGS_profile'] = ['-g', '-DNDEBUG', '-fast',
-                                '-features=no%except', '-features=mutable',
+                                '-features=mutable',
                                 '-features=localfor', '-features=bool', '-features=no%split_init']
         v['LINKFLAGS_profile'] = ['-g']
 
         v['CFLAGS_final'] = ['-g', '-DNDEBUG', '-fast']
         v['CXXFLAGS_final'] = ['-g', '-DNDEBUG', '-fast',
-                                '-features=no%except', '-features=mutable',
+                                '-features=mutable',
                                 '-features=localfor', '-features=bool', '-features=no%split_init']
+        if self.version_number[0:2] != (5,13):
+            v['CXXFLAGS_profile'] += ['-features=no%except']
+            v['CXXFLAGS_final'] += ['-features=no%except']
         v['LINKFLAGS_final'] = ['-g']
 
     def set_warning_options(self, conf):
         v = conf.env
-        v['RPATH_ST'] = '-R%s'
-
         v['CFLAGS_warnnone'] = ['-w', '-errtags=yes', '-erroff=%all']
         v['CXXFLAGS_warnnone'] = ['-w', '-errtags=yes', '-erroff=%all']
         v['CFLAGS_warnall'] = ['+w2', '-errtags=yes']
@@ -91,37 +92,50 @@ class SunCC(Configure.ConfigurationContext.GnuCompiler):
                                  'reftotemp,truncwarn,badargtype2w,hidef,wemptydecl,notemsource,'
                                  'nonewline,inllargeuse']
 
+    def is_valid(self, conf):
+        node = conf.bldnode.make_node('main.cxx')
+        tgtnode = node.change_ext('')
+        node.write('#define _GNU_SOURCE\n#include <cstdlib>\n#include <iostream>\nint main() {}\n')
+        try:
+            result, out, err = self.run_cxx([node.abspath(), '-c', '-o', tgtnode.abspath()])
+        except Exception as e:
+            return False
+        finally:
+            node.delete()
+            tgtnode.delete()
+        return result == 0
 
     def load_in_env(self, conf, platform):
         Configure.ConfigurationContext.GnuCompiler.load_in_env(self, conf, platform)
         v = conf.env
+        v['RPATH_ST'] = '-R%s'
         if platform.NAME == 'Linux':
-            v.STATIC = 1
+            #v.STATIC = 1
             if self.arch == 'x86':
                 v.append_unique('SYSTEM_LIBPATHS', ['=/usr/lib/i386-linux-gnu'])
-                v.append_unique('CFLAGS', ['-xarch=sse2', '-I/usr/include/i386-linux-gnu'])
-                v.append_unique('CXXFLAGS', [os.path.join(conf.bugenginenode.abspath(),
-                                                          'mak/compiler/suncc/interlocked-a=x86.il'),
-                                             '-xarch=sse2', '-I/usr/include/i386-linux-gnu',
-                                             '-include', 'cstdio'])
-                v.append_unique('LINKFLAGS', [])
+                v.CFLAGS += ['-xtarget=opteron']
+                v.CXXFLAGS += [os.path.join(conf.bugenginenode.abspath(),
+                                            'mak/compiler/suncc/interlocked-a=x86.il'),
+                               '-xarch=sse2', '-xchip=generic', '-xcache=64/64/2:1024/64/16',
+                               '-include', 'math.h']
             elif self.arch == 'amd64':
                 v.append_unique('SYSTEM_LIBPATHS', ['=/usr/lib/x86_64-linux-gnu'])
-                v.append_unique('CFLAGS', ['-I/usr/include/x86_64-linux-gnu'])
-                v.append_unique('CXXFLAGS', [os.path.join(conf.bugenginenode.abspath(),
-                                                          'mak/compiler/suncc/interlocked-a=amd64.il'),
-                                             '-I/usr/include/x86_64-linux-gnu',
-                                             '-include', 'cstdio'])
-                v.append_unique('LINKFLAGS', [])
+                v.CFLAGS += ['-xtarget=opteron']
+                v.CXXFLAGS += [os.path.join(conf.bugenginenode.abspath(),
+                                            'mak/compiler/suncc/interlocked-a=amd64.il'),
+                               '-xarch=sse2', '-xchip=generic', '-xcache=64/64/2:1024/64/16',
+                               '-include', 'math.h']
             v.append_unique('CFLAGS', ['-mt', '-xldscope=hidden', '-Kpic', '-DPIC', '-D__PIC__'])
             v.append_unique('CXXFLAGS', ['-mt', '-xldscope=hidden', '-Kpic', '-DPIC', '-D__PIC__'])
-            v.append_unique('LINKFLAGS', ['-lrt', '-mt', '-znow', '-xldscope=hidden', '-z', 'absexec', '-Kpic'])
-            if self.version_number < (5, 14):
-                v.append_unique('CXXFLAGS', ['-library=Crun,stlport4'])
-                v.append_unique('LINKFLAGS', ['-library=Crun,stlport4', '-staticlib=Crun,stlport4'])
+            v.append_unique('LINKFLAGS', ['-lrt', '-mt', '-znow', '-xldscope=hidden']) #, '-z', 'absexec', '-Kpic'])
+            v.CFLAGS_exportall = ['-xldscope=symbolic']
+            v.CXXFLAGS_exportall = ['-xldscope=symbolic']
+            v.SHLIB_MARKER = '-Bdynamic'
+            v.STLIB_MARKER = '-Bstatic'
 
     def populate_useful_variables(self, conf):
         pass
+
 
 def detect_suncc(conf):
     seen = set([])

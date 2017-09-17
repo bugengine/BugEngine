@@ -3,6 +3,8 @@
 
 #include    <pythonlib/stdafx.h>
 #include    <pythonlib/pythonlib.hh>
+#include    <rtti/engine/call.hh>
+#include    <rtti/engine/scriptingapi.hh>
 #include    <py_array.hh>
 
 namespace BugEngine { namespace Python
@@ -85,6 +87,20 @@ static PyTypeObject::Py3NumberMethods s_py3ArrayNumber =
     0
 };
 
+static PyTypeObject::PySequenceMethods s_pyArraySequence =
+{
+    &PyBugArray::length,
+    0,
+    0,
+    &PyBugArray::item,
+    0,
+    &PyBugArray::setItem,
+    0,
+    0,
+    0,
+    0
+};
+
 PyTypeObject PyBugArray::s_pyType =
 {
     { { 0, 0 }, 0 },
@@ -98,7 +114,7 @@ PyTypeObject PyBugArray::s_pyType =
     0,
     &PyBugArray::repr,
     0,
-    0,
+    &s_pyArraySequence,
     0,
     0,
     0,
@@ -114,7 +130,7 @@ PyTypeObject PyBugArray::s_pyType =
     0,
     0,
     0,
-    0,
+    PyBugObject::s_methods,
     0,
     0,
     0,
@@ -137,17 +153,26 @@ PyTypeObject PyBugArray::s_pyType =
     0
 };
 
-PyObject* PyBugArray::create(PyObject* owner, const RTTI::Value& value)
+PyObject* PyBugArray::stealValue(PyObject* owner, RTTI::Value& value)
 {
     be_assert(value.type().metaclass->type() == RTTI::ClassType_Array,
               "PyBugArray only accepts Array types");
-    PyObject* result = s_pyType.tp_alloc(&s_pyType, 0);
-    ((PyBugArray*)result)->owner = owner;
+    PyBugArray* result = static_cast<PyBugArray*>(s_pyType.tp_alloc(&s_pyType, 0));
+    (result)->owner = owner;
+
     if (owner)
     {
         Py_INCREF(owner);
     }
-    new(&((PyBugArray*)result)->value) RTTI::Value(value);
+
+    raw<const RTTI::Class> arrayClass = value.type().metaclass;
+    new(&(static_cast<PyBugArray*>(result))->value) RTTI::Value();
+    (static_cast<PyBugArray*>(result))->value.swap(value);
+    be_assert(arrayClass->apiMethods,
+              "Array type %s does not implement API methods" | arrayClass->fullname());
+    be_assert(arrayClass->apiMethods->arrayScripting,
+              "Array type %s does not implement Array API methods" | arrayClass->fullname());
+    be_forceuse(arrayClass);
     return result;
 }
 
@@ -204,20 +229,70 @@ PyObject* PyBugArray::repr(PyObject *self)
 
 int PyBugArray::nonZero(PyObject *self)
 {
+    return length(self) > 0;
+}
+
+
+Py_ssize_t PyBugArray::length(PyObject *self)
+{
     PyBugArray* self_ = static_cast<PyBugArray*>(self);
     const RTTI::Type t = self_->value.type();
     be_assert(t.metaclass->type() == RTTI::ClassType_Array,
               "PyBugArray expected array value");
-    if (t.indirection == RTTI::Type::Value)
+    return Py_ssize_t(t.metaclass->apiMethods->arrayScripting->size(self_->value));
+}
+
+PyObject* PyBugArray::item(PyObject *self, Py_ssize_t index)
+{
+    PyBugArray* self_ = static_cast<PyBugArray*>(self);
+    if (index >= 0 && index < length(self))
     {
-        be_unimplemented();
-        return 1;
+        u32 index_ = be_checked_numcast<u32>(index);
+        const RTTI::Type t = self_->value.type();
+        RTTI::Value v = t.isConst()
+                        ? t.metaclass->apiMethods->arrayScripting->indexConst(self_->value, index_)
+                        : t.metaclass->apiMethods->arrayScripting->index(self_->value, index_);
+        return PyBugObject::stealValue(0, v);
     }
     else
     {
-        return self_->value.as<const void* const>() != 0;
+        s_library->m_PyErr_Format(*s_library->m_PyExc_IndexError,
+                                  "Index out of range");
+        return 0;
     }
 }
+
+int PyBugArray::setItem(PyObject *self, Py_ssize_t index, PyObject *value)
+{
+    PyBugArray* self_ = static_cast<PyBugArray*>(self);
+    const RTTI::Type t = self_->value.type();
+    raw<const RTTI::ScriptingArrayAPI> arrayApi = t.metaclass->apiMethods->arrayScripting;
+    if (t.isConst())
+    {
+        s_library->m_PyErr_Format(*s_library->m_PyExc_TypeError,
+                                  "instance of %s is const",
+                                  self_->value.type().name().c_str());
+        return -1;
+    }
+    else if (distance(value, arrayApi->value_type) >= RTTI::ConversionCost::s_incompatible)
+    {
+        s_library->m_PyErr_Format(*s_library->m_PyExc_TypeError,
+                                  "Cannot convert to array value_type %s",
+                                  arrayApi->value_type.name().c_str());
+        return -1;
+    }
+    else
+    {
+        u32 index_ = be_checked_numcast<u32>(index);
+        RTTI::Value* v = (RTTI::Value*)malloca(sizeof(RTTI::Value));
+        PyBugObject::unpack(value, arrayApi->value_type, v);
+        arrayApi->index(self_->value, index_) = *v;
+        v->~Value();
+        freea(v);
+        return 0;
+    }
+}
+
 
 void PyBugArray::registerType(PyObject* module)
 {

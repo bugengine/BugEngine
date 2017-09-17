@@ -586,6 +586,13 @@ def check_use_taskgens(self):
                 self.uselib = [name]
 
 
+@feature('c', 'cxx')
+def set_optim_define(self):
+    o = getattr(self.bld, 'optim', None)
+    if o:
+        self.env.append_unique('DEFINES', ['BE_%s' % o.upper()])
+
+
 @feature('cxx')
 def set_building_name_inherits(self):
     seen = set([])
@@ -716,6 +723,7 @@ def gather_extra_source(self):
     if preprocess:
         preprocess.post()
         self.source += getattr(preprocess, 'out_sources', [])
+
 
 @taskgen_method
 def make_bld_node_common(self, node, path, name):
@@ -893,6 +901,7 @@ def cc_hook(self, node):
     else:
         self.create_compiled_task('cxx', node)
 
+
 @feature('c', 'cxx')
 @after_method('process_source')
 def apply_link(self):
@@ -916,6 +925,7 @@ def apply_link(self):
     path, name = os.path.split(self.target)
     out_node = self.make_bld_node('.bin', None, os.path.join(path, pattern%name))
     self.link_task.set_outputs(out_node)
+
 
 @feature('cshlib', 'cxxshlib')
 @after_method('apply_link')

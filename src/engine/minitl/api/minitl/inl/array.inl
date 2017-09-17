@@ -17,7 +17,7 @@ array<T>::array(Allocator& allocator, u32 size)
 {
     for (u32 i = 0; i < size; ++i)
     {
-        new (&m_array[i]) T;
+        new ((void*)&m_array[i]) T;
     }
 }
 
@@ -28,7 +28,7 @@ array<T>::array(Allocator& allocator, ITERATOR begin, ITERATOR end)
 {
     for (int i = 0; begin != end; ++begin, ++i)
     {
-        new (&m_array[i])T(*begin);
+        new ((void*)&m_array[i])T(*begin);
     }
 }
 

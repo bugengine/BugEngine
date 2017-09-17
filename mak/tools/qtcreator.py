@@ -10,6 +10,7 @@ from waflib import Context, Build, Logs
 from minixml import XmlDocument, XmlNode
 from xml.dom.minidom import parse
 
+
 if sys.platform == 'win32':
     HOME_DIRECTORY=os.path.join(os.getenv('APPDATA'), 'QtProject', 'qtcreator')
 else:
@@ -21,16 +22,27 @@ except:
     import md5
     createMd5=md5.new
 
+
 if sys.hexversion >= 0x3000000:
     unicode = str
 
+
 VAR_PATTERN = '${%s}' if sys.platform != 'win32' else '%%%s%%'
+
 
 IGNORE_PATTERNS=[
     re.compile('.*\.pyc'),
     re.compile('.*__pycache__.*'),
 ]
 
+
+def qbsArch(arch_name):
+    archs = {
+        'amd64': 'x86_64',
+        'x64': 'x86_64',
+        'aarch64': 'arm64'
+    }
+    return archs.get(arch_name, arch_name)
 
 def _hexdigest(s):
     """Return a string as a string of hex characters.
@@ -165,7 +177,7 @@ class QtObject:
 
     def copy_from(self, other):
         for (var_name, user_edit) in self.__class__.published_vars:
-            if user_edit:
+            if not user_edit:
                 value = getattr(other, var_name.replace('.', '_'), None)
                 if value:
                     setattr(self, var_name.replace('.', '_'), value)
@@ -191,7 +203,13 @@ class QtToolchain(QtObject):
         ('ProjectExplorer.CustomToolChain.Mkspecs', False),
         ('ProjectExplorer.CustomToolChain.OutputParser', False),
         ('ProjectExplorer.CustomToolChain.PredefinedMacros', False),
-        ('ProjectExplorer.CustomToolChain.TargetAbi', False),
+        ('ProjectExplorer.GccToolChain.Path', False),
+        ('ProjectExplorer.GccToolChain.TargetAbi', False),
+        ('ProjectExplorer.GccToolChain.PlatformCodeGenFlags', False),
+        ('ProjectExplorer.GccToolChain.PlatformLinkerFlags', False),
+        ('ProjectExplorer.MsvcToolChain.VarsBat', False),
+        ('ProjectExplorer.MsvcToolChain.VarsBatArg', False),
+        ('ProjectExplorer.MsvcToolChain.SupportedAbi', False),
         ('ProjectExplorer.ToolChain.Language', False),
         ('ProjectExplorer.ToolChain.Autodetect', False),
         ('ProjectExplorer.ToolChain.DisplayName', True),
@@ -248,7 +266,17 @@ class QtToolchain(QtObject):
                 variant
             )
             compiler = env.CC if language == 1 else env.CXX
-            flags = env.CFLAGS if language == 1 else env.CXXFLAGS
+            original_flags = env.CFLAGS[:] if language == 1 else env.CXXFLAGS[:]
+            flags = []
+            while original_flags:
+                f = original_flags.pop(0)
+                for undesirable_flag in ['-target', '-triple', '-arch', '-march']:
+                    if f.startswith(undesirable_flag):
+                        if f == undesirable_flag:
+                            original_flags.pop(0)
+                        break
+                else:
+                    flags.append(f)
             if isinstance(compiler, list):
                 compiler = compiler[0]
 
@@ -546,20 +574,20 @@ class QtCreator(Build.BuildContext):
             else:
                 bld_env = env
             toolchains = [None, None]
-            for l in (1, 2):
-                toolchains[l-1] = QtToolchain(l, env_name, bld_env)
+            for l in (0, 1):
+                toolchains[l] = QtToolchain(l+1, env_name, bld_env)
 
                 for t_name, t in self.toolchains:
-                    if t_name == toolchains[l-1].ProjectExplorer_ToolChain_Id:
-                        t.copy_from(toolchains[l-1])
-                        toolchains[l-1] = t
+                    if t_name == toolchains[l].ProjectExplorer_ToolChain_Id:
+                        t.copy_from(toolchains[l])
+                        toolchains[l] = t
                         try:
                             self.toolchains_to_remove.remove(t)
                         except ValueError:
                             pass
                         break
                 else:
-                    self.toolchains.append((toolchains[l-1].ProjectExplorer_ToolChain_Id, toolchains[l-1]))
+                    self.toolchains.append((toolchains[l].ProjectExplorer_ToolChain_Id, toolchains[l]))
             if self.__class__.version[0] == 2:
                 if env.LLDB:
                     debugger = [
@@ -817,7 +845,8 @@ class QtCreator(Build.BuildContext):
                                               'Qbs configuration'),
                                             ('ProjectExplorer.ProjectConfiguration.DisplayName', ''),
                                             ('Qbs.Configuration', [
-                                                ('qbs.buildVariant', 'debug')
+                                                ('qbs.buildVariant', 'debug'),
+                                                ('qbs.architecture', qbsArch(env.ARCHITECTURE))
                                             ]),
                                             ('ProjectExplorer.ProjectConfiguration.Id',
                                               'Qbs.BuildStep')
@@ -961,7 +990,7 @@ class QtCreator(Build.BuildContext):
                                     ('Analyzer.Valgrind.VisibleErrorKinds', (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14)),
                                     ('PE.EnvironmentAspect.Base', 2),
                                     ('PE.EnvironmentAspect.Changes', ()),
-                                    ('ProjectExplorer.CustomExecutableRunConfiguration.Arguments', '-c "import %s; import code; code.InteractiveConsole(globals()).interact()"' % task_gen.target),
+                                    ('ProjectExplorer.CustomExecutableRunConfiguration.Arguments', '-i -c "import %s"' % task_gen.target),
                                     ('ProjectExplorer.CustomExecutableRunConfiguration.Executable', sys.executable),
                                     ('ProjectExplorer.CustomExecutableRunConfiguration.UseTerminal', True),
                                     ('ProjectExplorer.CustomExecutableRunConfiguration.WorkingDirectory', to_var('RUNBIN_DIR')),
