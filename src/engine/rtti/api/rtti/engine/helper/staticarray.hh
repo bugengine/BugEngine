@@ -9,6 +9,9 @@ see LICENSE for detail */
 namespace BugEngine { namespace RTTI
 {
 
+be_api(RTTI)
+extern char s_zero[];
+
 template< typename T >
 struct staticarray
 {
@@ -30,7 +33,6 @@ struct staticarray
     T* end()                { return &elements[count]; }
     const T* end() const    { return &elements[count]; }
 
-    static char s_nullStaticArray[sizeof(u32)];
     static staticarray<T>* s_null;
 };
 
@@ -49,9 +51,7 @@ struct staticarray_n<0, T>
 };
 
 template< typename T >
-char staticarray<T>::s_nullStaticArray[4] = { 0 };
-template< typename T >
-staticarray<T>* staticarray<T>::s_null = reinterpret_cast< staticarray<T>* >(&staticarray<T>::s_null);
+staticarray<T>* staticarray<T>::s_null = reinterpret_cast< staticarray<T>* >(s_zero);
 
 }}
 

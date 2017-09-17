@@ -311,9 +311,9 @@ class GnuCompiler(Compiler):
         v = conf.env
         v.CFLAGS_warnnone = ['-w']
         v.CXXFLAGS_warnnone = ['-w']
-        v.CFLAGS_warnall = ['-std=c99', '-Wall', '-Wextra', '-pedantic', '-Winline', '-Werror']
+        v.CFLAGS_warnall = ['-std=c99', '-Wall', '-Wextra', '-pedantic', '-Winline', '-Werror', '-Wstrict-aliasing']
         v.CXXFLAGS_warnall = ['-Wall', '-Wextra', '-Werror', '-Wno-sign-compare',
-                              '-Woverloaded-virtual', '-Wno-invalid-offsetof']
+                              '-Woverloaded-virtual', '-Wno-invalid-offsetof', '-Wstrict-aliasing']
 
     def load_in_env(self, conf, platform, sysroot=None):
         env = conf.env
