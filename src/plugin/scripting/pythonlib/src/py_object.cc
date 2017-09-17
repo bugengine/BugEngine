@@ -9,6 +9,7 @@
 #include    <py_string.hh>
 #include    <py_array.hh>
 #include    <py_namespace.hh>
+#include    <py_class.hh>
 #include    <py_call.hh>
 #include    <py_boundmethod.hh>
 #include    <rtti/classinfo.script.hh>
