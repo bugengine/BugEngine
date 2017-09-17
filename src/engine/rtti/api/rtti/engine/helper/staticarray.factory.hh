@@ -6,6 +6,8 @@ see LICENSE for detail */
 /**************************************************************************************************/
 #include    <rtti/stdafx.h>
 #include    <rtti/engine/helper/staticarray.hh>
+#include    <rtti/engine/helper/method.hh>
+#include    <rtti/engine/scriptingapi.hh>
 #include    <rtti/value.hh>
 #include    <rtti/typeinfo.hh>
 
@@ -17,7 +19,7 @@ template< typename T >
 struct be_typeid< RTTI::staticarray<T> >
 {
     static const RTTI::Type value_type;
-    static inline raw<RTTI::Class> preklass();
+    static BE_EXPORT raw<RTTI::Class> preklass();
     static inline istring name();
     static inline raw<const RTTI::Class> klass();
     static inline RTTI::Type  type();
@@ -29,7 +31,7 @@ private:
     static RTTI::Value callStaticArrayOperatorIndex(RTTI::Value* params, u32 paramCount);
     static RTTI::Value callStaticArraySize(RTTI::Value* params, u32 paramCount);
     static RTTI::Value callStaticArrayOperatorIndexConst(RTTI::Value* params, u32 paramCount);
-    static raw<const RTTI::Class> registerProperties();
+    static BE_EXPORT raw<const RTTI::Class> registerProperties();
 };
 
 
