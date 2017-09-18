@@ -19,7 +19,40 @@ addons:
      - zlib1g-dev
      - libopenal-dev
 
+matrix:
+  include:
+    - os: linux
+      env: COMPILER=gcc_amd64 COMPILER_VERSION=4.8.4 TARGET_OS=linux_amd64 FLAVOR=debug
+    - os: linux
+      env: COMPILER=gcc_amd64 COMPILER_VERSION=4.8.4 TARGET_OS=linux_amd64 FLAVOR=profile
+    - os: linux
+      env: COMPILER=gcc_amd64 COMPILER_VERSION=4.8.4 TARGET_OS=linux_amd64 FLAVOR=final
+    - os: linux
+      env: COMPILER=clang_amd64 COMPILER_VERSION=3.9.0 TARGET_OS=linux_amd64 FLAVOR=debug
+    - os: linux
+      env: COMPILER=clang_amd64 COMPILER_VERSION=3.9.0 TARGET_OS=linux_amd64 FLAVOR=profile
+    - os: linux
+      env: COMPILER=clang_amd64 COMPILER_VERSION=3.9.0 TARGET_OS=linux_amd64 FLAVOR=final
+    - os: linux
+      env: COMPILER=gcc_x86 COMPILER_VERSION=4.2.1 TARGET_OS=windows_x86 FLAVOR=debug
+    - os: linux
+      env: COMPILER=gcc_x86 COMPILER_VERSION=4.2.1 TARGET_OS=windows_x86 FLAVOR=profile
+    - os: linux
+      env: COMPILER=gcc_x86 COMPILER_VERSION=4.2.1 TARGET_OS=windows_x86 FLAVOR=final
+    - os: osx
+      env: COMPILER=appleclang COMPILER_VERSION=7.3.0 TARGET_OS=macosx10.11 FLAVOR=debug
+    - os: osx
+      env: COMPILER=appleclang COMPILER_VERSION=7.3.0 TARGET_OS=macosx10.11 FLAVOR=profile
+    - os: osx
+      env: COMPILER=appleclang COMPILER_VERSION=7.3.0 TARGET_OS=macosx10.11 FLAVOR=final
+    - os: osx
+      env: COMPILER=appleclang COMPILER_VERSION=7.3.0 TARGET_OS=iphonesimulator9.3 FLAVOR=debug
+    - os: osx
+      env: COMPILER=appleclang COMPILER_VERSION=7.3.0 TARGET_OS=iphonesimulator9.3 FLAVOR=profile
+    - os: osx
+      env: COMPILER=appleclang COMPILER_VERSION=7.3.0 TARGET_OS=iphonesimulator9.3 FLAVOR=final
+
 script:
   - CC= CXX= ./waf configure
-  - ./waf build:all --nomaster
+  - ./waf build:${TARGET_OS}-${COMPILER}-${COMPILER_VERSION}:${FLAVOR} --nomaster
 
