@@ -14,7 +14,7 @@ addons:
      - python3.4-dev
      - libfreetype6-dev
      - libgl1-mesa-dev
-     - libglesv2-mesa-dev
+     - libgles2-mesa-dev
      - libncurses5-dev
      - zlib1g-dev
      - libopenal-dev
