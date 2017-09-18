@@ -5,8 +5,9 @@
 #define BE_RTTI_CLASSINFO_SCRIPT_HH_
 /**************************************************************************************************/
 #include    <rtti/stdafx.h>
-#include    <rtti/engine/helper/staticarray.hh>
 #include    <core/md5.hh>
+#include    <rtti/engine/helper/staticarray.hh>
+#include    <rtti/engine/helper/staticarray.factory.hh>
 
 namespace BugEngine { namespace RTTI
 {
@@ -17,6 +18,8 @@ struct Property;
 struct Method;
 struct Tag;
 struct ScriptingAPI;
+template< typename T >
+struct staticarray;
 
 enum ClassType
 {
@@ -140,10 +143,51 @@ raw<RTTI::Class> be_game_Namespace_BugEngine();
 
 }
 
-#include    <rtti/engine/taginfo.script.hh>
-#include    <rtti/engine/propertyinfo.script.hh>
-#include    <rtti/engine/methodinfo.script.hh>
-#include    <rtti/engine/objectinfo.script.hh>
+#include    <rtti/engine/helper/staticarray.factory.inl>
+
+
+namespace minitl
+{
+
+template<u16 SIZE>
+const minitl::format<SIZE>& operator|(const minitl::format<SIZE>& format, const BugEngine::RTTI::Type& type)
+{
+    minitl::format<4096> typeName("%s%s%s%s%s");
+    if (type.constness == BugEngine::RTTI::Type::Const)
+    {
+        typeName | "const ";
+    }
+    else
+    {
+        typeName | "";
+    }
+    const char* constness = "";
+    if (type.access == BugEngine::RTTI::Type::Const)
+    {
+        constness = "const ";
+    }
+    switch(type.indirection)
+    {
+        case BugEngine::RTTI::Type::RefPtr:
+        typeName | "ref<" | constness | type.metaclass->fullname() | ">";
+        break;
+    case BugEngine::RTTI::Type::WeakPtr:
+        typeName | "weak<" | constness | type.metaclass->fullname() | ">";
+        break;
+    case BugEngine::RTTI::Type::RawPtr:
+        typeName | "raw<" | constness | type.metaclass->fullname() | ">";
+        break;
+    case BugEngine::RTTI::Type::Value:
+        typeName | "" | "" | type.metaclass->fullname() | "";
+        break;
+    default:
+        be_notreached();
+        break;
+    }
+    return format | typeName.c_str();
+}
+
+}
 
 /**************************************************************************************************/
 #endif

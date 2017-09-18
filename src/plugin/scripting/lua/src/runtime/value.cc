@@ -4,6 +4,9 @@
 #include    <stdafx.h>
 #include    <runtime/value.hh>
 #include    <context.hh>
+#include    <rtti/engine/methodinfo.script.hh>
+#include    <rtti/engine/propertyinfo.script.hh>
+#include    <rtti/engine/objectinfo.script.hh>
 
 
 namespace BugEngine { namespace Lua

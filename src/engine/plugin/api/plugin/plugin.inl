@@ -6,6 +6,9 @@
 #include    <plugin/dynobjectlist.hh>
 #include    <core/environment.hh>
 #include    <rtti/classinfo.script.hh>
+#include    <rtti/engine/objectinfo.script.hh>
+#include    <rtti/engine/helper/staticarray.hh>
+#include    <rtti/value.hh>
 
 
 namespace BugEngine { namespace Plugin

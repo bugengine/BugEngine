@@ -850,10 +850,11 @@ class Root(Container):
     def cpp_name(self):
         return ''
 
-    def dump(self, definition, instance):
+    def dump(self, definition, instance, include):
         instance.write('#include <rtti/stdafx.h>\n')
         instance.write('#include <rtti/classinfo.script.hh>\n')
         instance.write('#include <rtti/typeinfo.hh>\n')
+        instance.write('#include <%s>\n' % include)
         definition.write('#include <rtti/stdafx.h>\n')
         definition.write('#include <rtti/engine/helper/staticarray.factory.hh>\n')
         definition.write('#include <rtti/classinfo.script.hh>\n')
@@ -867,6 +868,8 @@ class Root(Container):
         definition.write('#include <rtti/engine/taginfo.script.hh>\n')
         definition.write('#include <rtti/engine/helper/method.hh>\n')
         definition.write('#include <rtti/engine/helper/get.hh>\n')
+        definition.write('#include <%s>\n' % include)
+
 
         if self.objects:
             definition.write('\nnamespace BugEngine\n{\n')
