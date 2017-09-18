@@ -10,6 +10,7 @@
 #include    <minitl/intrusive_list.hh>
 #include    <minitl/hash_map.hh>
 #include    <package/logger.hh>
+#include    <rtti/value.hh>
 
 namespace BugEngine { namespace PackageBuilder { namespace Nodes
 {

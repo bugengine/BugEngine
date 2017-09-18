@@ -7,6 +7,7 @@
 #include    <scheduler/stdafx.h>
 #include    <scheduler/kernel/iproduct.script.hh>
 #include    <scheduler/kernel/stream.factory.hh>
+#include    <rtti/engine/helper/staticarray.hh>
 #include    <rtti/typeinfo.hh>
 
 namespace BugEngine { namespace Kernel

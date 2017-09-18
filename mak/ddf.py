@@ -37,9 +37,7 @@ if __name__ == '__main__':
             if options.pch:
                 classes.write('#include <%s>\n' % options.pch)
                 instances.write('#include <%s>\n' % options.pch)
-            classes.write('#include <%s>\n' % args[0])
-            instances.write('#include <%s>\n' % args[0])
-            result.dump(classes, instances)
+            result.dump(classes, instances, args[0])
             with open(args[1], 'w') as c:
                 c.write(classes.getvalue())
             with open(args[2], 'w') as i:

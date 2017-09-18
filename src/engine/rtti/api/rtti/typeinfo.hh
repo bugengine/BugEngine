@@ -7,10 +7,14 @@
 #include    <rtti/stdafx.h>
 #include    <rtti/typeinfo.script.hh>
 #include    <minitl/typemanipulation.hh>
-#include    <rtti/classinfo.script.hh>
 
 namespace BugEngine
 {
+
+namespace RTTI
+{
+    struct Class;
+}
 
 template< typename T >
 struct be_typeid
@@ -189,50 +193,6 @@ struct be_typeid< scoped<T> >
 };
 
 template< > BE_EXPORT raw<RTTI::Class> be_typeid< void >::preklass();
-
-}
-
-
-namespace minitl
-{
-
-template<u16 SIZE>
-const minitl::format<SIZE>& operator|(const minitl::format<SIZE>& format, const BugEngine::RTTI::Type& type)
-{
-    minitl::format<4096> typeName("%s%s%s%s%s");
-    if (type.constness == BugEngine::RTTI::Type::Const)
-    {
-        typeName | "const ";
-    }
-    else
-    {
-        typeName | "";
-    }
-    const char* constness = "";
-    if (type.access == BugEngine::RTTI::Type::Const)
-    {
-        constness = "const ";
-    }
-    switch(type.indirection)
-    {
-        case BugEngine::RTTI::Type::RefPtr:
-        typeName | "ref<" | constness | type.metaclass->fullname() | ">";
-        break;
-    case BugEngine::RTTI::Type::WeakPtr:
-        typeName | "weak<" | constness | type.metaclass->fullname() | ">";
-        break;
-    case BugEngine::RTTI::Type::RawPtr:
-        typeName | "raw<" | constness | type.metaclass->fullname() | ">";
-        break;
-    case BugEngine::RTTI::Type::Value:
-        typeName | "" | "" | type.metaclass->fullname() | "";
-        break;
-    default:
-        be_notreached();
-        break;
-    }
-    return format | typeName.c_str();
-}
 
 }
 

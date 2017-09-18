@@ -6,6 +6,7 @@
 /**************************************************************************************************/
 #include    <rtti/stdafx.h>
 #include    <rtti/classinfo.script.hh>
+#include    <rtti/engine/helper/staticarray.hh>
 #include    <rtti/engine/objectinfo.script.hh>
 
 

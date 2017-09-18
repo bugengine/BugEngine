@@ -3,6 +3,7 @@
 
 #include    <rtti/stdafx.h>
 #include    <rtti/conversion.script.hh>
+#include    <rtti/typeinfo.script.hh>
 
 namespace BugEngine { namespace RTTI
 {
