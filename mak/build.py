@@ -116,7 +116,7 @@ for command in ['build', 'clean']:
                 self.load_envs()
             for toolchain in self.env.ALL_TOOLCHAINS:
                 for variant in self.env.ALL_VARIANTS:
-                    Options.commands.append('%s:%s:%s'%(command, toolchain, variant))
+                    Options.commands.append('%s:%s:%s'%(self.cmd[:-4], toolchain, variant))
 
 
 def safe_name(name):

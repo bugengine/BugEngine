@@ -1,60 +1,25 @@
+language: cpp
+
+sudo: false
+
 os:
  - linux
-language: cpp
-env:
- - OS_NAME=linux
-   COMPILER=gcc
-   ARCH=amd64
-   VERSION=4.8.4
-   VARIANT=debug
-   MASTER=--nomaster
- - OS_NAME=linux
-   COMPILER=gcc
-   ARCH=amd64
-   VERSION=4.8.4
-   VARIANT=profile
-   MASTER=
- - OS_NAME=linux
-   COMPILER=gcc
-   ARCH=amd64
-   VERSION=4.8.4
-   VARIANT=final
-   MASTER=
- - OS_NAME=linux
-   COMPILER=clang
-   ARCH=amd64
-   VERSION=3.9.0
-   VARIANT=debug
-   MASTER=--nomaster
- - OS_NAME=linux
-   COMPILER=clang
-   ARCH=amd64
-   VERSION=3.9.0
-   VARIANT=profile
-   MASTER=
- - OS_NAME=linux
-   COMPILER=clang
-   ARCH=amd64
-   VERSION=3.9.0
-   VARIANT=final
-   MASTER=
- - OS_NAME=windows
-   COMPILER=gcc
-   ARCH=x86
-   VERSION=4.2.1
-   VARIANT=debug
-   MASTER=--nomaster
- - OS_NAME=windows
-   COMPILER=gcc
-   ARCH=x86
-   VERSION=4.2.1
-   VARIANT=profile
-   MASTER=
- - OS_NAME=windows
-   COMPILER=gcc
-   ARCH=x86
-   VERSION=4.2.1
-   VARIANT=final
-   MASTER=
-script: CC= CXX= ./waf configure --platforms=$OS_NAME --compilers=$COMPILER $MASTER install:${OS_NAME}_${ARCH}-${COMPILER}_${ARCH}-${VERSION}:${VARIANT}
+ - osx
+
+addons:
+  apt:
+    packages:
+     - ocl-icd-opencl-dev
+     - python2.7-dev
+     - python3.4-dev
+     - libfreetype6-dev
+     - libgl1-mesa-dev
+     - libglesv2-mesa-dev
+     - libncurses5-dev
+     - zlib1g-dev
+     - libopenal-dev
+
+script:
+  - CC= CXX= ./waf configure
+  - ./waf build:all --nomaster
 
