@@ -288,14 +288,11 @@ PyObject* PyBugObject::stealValue(PyObject* owner, RTTI::Value& value)
         {
             PyObject* result = s_pyType.tp_alloc(&s_pyType, 0);
             ((PyBugObject*)result)->owner = owner;
+            new(&(static_cast<PyBugObject*>(result))->value) RTTI::Value();
+            (static_cast<PyBugObject*>(result))->value.swap(value);
             if (owner)
             {
                 Py_INCREF(owner);
-                new(&((PyBugObject*)result)->value) RTTI::Value(RTTI::Value::ByRef(value));
-            }
-            else
-            {
-                new(&((PyBugObject*)result)->value) RTTI::Value(value);
             }
             return result;
         }
