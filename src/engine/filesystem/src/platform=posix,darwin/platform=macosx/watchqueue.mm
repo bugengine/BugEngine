@@ -4,6 +4,7 @@
 #include    <filesystem/stdafx.h>
 #include    <macosx/watchqueue.hh>
 
+#include    <diskwatch.hh>
 #include    <watchpoint.hh>
 
 #include    <core/environment.hh>
