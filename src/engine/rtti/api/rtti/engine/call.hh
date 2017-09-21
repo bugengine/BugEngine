@@ -198,7 +198,7 @@ Value call(CallInfo callInfo,
     for (; p != callInfo.overload->params.end(); ++p, ++index)
     {
         be_assert(p->defaultValue, "Parameter does not have a default value");
-        new (static_cast<void*>(&v[index])) Value(Value::ByRef(p->defaultValue));
+        new (static_cast<void*>(&v[index])) Value(Value::ByRef(*(p->defaultValue)));
     }
     for (u32 i = argumentCount - callInfo.variadicCount; i < argumentCount; ++i, ++index)
     {
