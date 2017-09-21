@@ -116,8 +116,6 @@ const istring Partition<T, void>::name()
     return be_typeid<T>::klass()->name;
 }
 
-namespace Helper
-{
 
 template< typename PARTITION, u32 INDEX, typename T, typename TAIL >
 struct PartitionPropertyInfo
@@ -129,8 +127,8 @@ struct PartitionPropertyInfo
                                       typename TAIL::Type,
                                       typename TAIL::Tail> PropertyParent;
         RTTI::Property property = {
-            {&RTTI::staticarray<const RTTI::Tag>::s_null},
-            be_typeid<T>::preklass()->name,
+            {0},
+            be_typeid<T>::klass()->name,
             be_typeid<PARTITION>::type(),
             be_typeid< const Kernel::Product<T>& >::type(),
             &PARTITION::template getProduct<T>
@@ -146,8 +144,8 @@ struct PartitionPropertyInfo<PARTITION, INDEX, T, void>
     static inline void fillProperty(RTTI::Property properties[])
     {
         RTTI::Property property = {
-            {&RTTI::staticarray<const RTTI::Tag>::s_null},
-            be_typeid<T>::preklass()->name,
+            {0},
+            be_typeid<T>::klass()->name,
             be_typeid<PARTITION>::type(),
             be_typeid< const Kernel::Product<T>& >::type(),
             &PARTITION::template getProduct<T>
@@ -156,31 +154,47 @@ struct PartitionPropertyInfo<PARTITION, INDEX, T, void>
     }
 };
 
-template< typename T, typename TAIL>
-struct PartitionPropertyBuilder
+template< typename T >
+struct Partition_BugHelper
 {
+
     enum
     {
-        PropertyCount = 1 + Partition<T, TAIL>::Index
+        PropertyCount = 1 + T::Index
     };
-    static raw< RTTI::staticarray<const RTTI::Property> > getPartitionProperties()
+    static RTTI::staticarray<const RTTI::Property> getPartitionProperties()
     {
-        typedef RTTI::staticarray_n< PropertyCount, const RTTI::Property> PropertyArray;
+        static byte s_propertyBuffer[PropertyCount * sizeof(RTTI::Property)];
+        RTTI::Property* properties = reinterpret_cast<RTTI::Property*>(s_propertyBuffer);
 
-        static byte s_buffer[sizeof(PropertyArray)];
-        RTTI::Property* propertyBuffer = reinterpret_cast<RTTI::Property*>(s_buffer + sizeof(u64));
-        new (s_buffer) u64(PropertyCount);
-        PartitionPropertyInfo<Partition<T, TAIL>,
+        PartitionPropertyInfo<T,
                               0,
-                              typename Partition<T, TAIL>::Type,
-                              typename Partition<T, TAIL>::Tail>::fillProperty(propertyBuffer);
-        PropertyArray* properties = reinterpret_cast<PropertyArray* >(s_buffer);
-        raw< RTTI::staticarray<const RTTI::Property> > result = { &properties->array };
+                              typename T::Type,
+                              typename T::Tail>::fillProperty(properties);
+        RTTI::staticarray<const RTTI::Property> result = { PropertyCount, properties };
         return result;
     }
+
+    static RTTI::Class s_class;
 };
 
-}
+template< typename T >
+RTTI::Class Partition_BugHelper<T>::s_class = {
+    istring("Partition"),
+    0,
+    0,
+    RTTI::ClassType_Object,
+    {0},
+    be_typeid<void>::klass(),
+    {0},
+    {0},
+    getPartitionProperties(),
+    {0, 0},
+    {0},
+    {0},
+    0,
+    0
+};
 
 template< typename T1 = void, typename T2 = void, typename T3 = void, typename T4 = void, typename T5 = void,
           typename T6 = void, typename T7 = void, typename T8 = void, typename T9 = void, typename T10 = void,
@@ -211,41 +225,17 @@ namespace BugEngine
 template< typename T, typename TAIL >
 struct be_typeid< World::Partition<T, TAIL> >
 {
-    static inline RTTI::Type  type()  { return RTTI::Type::makeType(preklass(), RTTI::Type::Value, RTTI::Type::Mutable, RTTI::Type::Mutable); }
-    static inline raw<RTTI::Class> preklass()
+    static inline RTTI::Type  type()  { return RTTI::Type::makeType(klass(), RTTI::Type::Value, RTTI::Type::Mutable, RTTI::Type::Mutable); }
+    BE_EXPORT static inline raw<RTTI::Class> ns()
     {
-        be_forceuse(s_initialisation);
-        static RTTI::Class s_class =
-        {
-            istring("Partition"),
-            0,
-            0,
-            RTTI::ClassType_Object,
-            {0},
-            be_typeid<void>::klass(),
-            {0},
-            {&RTTI::staticarray<const RTTI::Tag>::s_null},
-            {&RTTI::staticarray<const RTTI::Property>::s_null},
-            {&RTTI::staticarray<const RTTI::Method>::s_null},
-            {0},
-            {0},
-            0,
-            0
-        };
-        raw<RTTI::Class> result = { &s_class };
+        raw<RTTI::Class> result = { &World::Partition_BugHelper<  World::Partition<T, TAIL> >::s_class };
         return result;
     }
-    static inline raw<const RTTI::Class> klass()
+    BE_EXPORT static inline raw<const RTTI::Class> klass()
     {
-        raw<RTTI::Class> cls = preklass();
-        cls->properties = World::Helper::PartitionPropertyBuilder<T, TAIL>::getPartitionProperties();
-        return cls;
+        return ns();
     }
-    BE_EXPORT static raw<const RTTI::Class> s_initialisation;
 };
-template< typename T, typename TAIL >
-BE_EXPORT
-raw<const RTTI::Class> be_typeid< World::Partition<T, TAIL> >::s_initialisation = klass();
 
 
 }

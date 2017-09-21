@@ -20,10 +20,10 @@ published:
     struct be_api(RTTI) Parameter
     {
     published:
-        raw< staticarray<const Tag> >   tags;
-        istring                         name;
-        Type                            type;
-        raw<const Value>                defaultValue;
+        raw< const staticarray<const Tag> > tags;
+        istring                             name;
+        Type                                type;
+        raw<const Value>                    defaultValue;
     published:
         Value getTag(const Type& type) const;
         Value getTag(raw<const Class> type) const;
@@ -35,14 +35,13 @@ published:
     struct be_api(RTTI) Overload
     {
     published:
-        raw< staticarray<const Tag> >       tags;
-        raw< staticarray<const Parameter> > params;
+        raw< const staticarray<const Tag> > tags;
+        staticarray<const Parameter>        params;
         Type                                returnType;
         bool                                vararg;
     published:
         Value getTag(const Type& tagType) const;
         Value getTag(raw<const Class> tagType) const;
-        u32 parameterCount() const { return params ? params->count : 0; }
     public:
         Value (*call)(Value* params, u32 nparams);
     private:
@@ -50,10 +49,10 @@ published:
     };
 
 published:
-    istring                             name;
-    raw< staticarray<const Overload> >  overloads;
+    istring                       name;
+    staticarray<const Overload>   overloads;
     be_tag(Alias("?call"))
-    raw<const Method>                   call;
+    raw<const Method>             call;
 published:
     Value doCall(Value* params, u32 nparams) const;
 private:

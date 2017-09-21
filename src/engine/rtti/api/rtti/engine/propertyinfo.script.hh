@@ -18,10 +18,10 @@ struct be_api(RTTI) Property
 {
     friend class Value;
 published:
-    raw< staticarray<const Tag> >   tags;
-    istring                         name;
-    Type                            owner;
-    Type                            type;
+    raw< const staticarray<const Tag> > tags;
+    istring                             name;
+    Type                                owner;
+    Type                                type;
 
     Value get(Value& from) const;
     Value get(const Value& from) const;

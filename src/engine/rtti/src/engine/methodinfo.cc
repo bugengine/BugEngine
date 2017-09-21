@@ -15,10 +15,13 @@ const Value Method::Parameter::s_noDefaultValue;
 
 Value Method::Parameter::getTag(const Type& tagType) const
 {
-    for (const Tag* tag = tags->begin(); tag != tags->end(); ++tag)
+    if (tags)
     {
-        if (tagType <= tag->tag.type())
-            return Value(Value::ByRef(tag->tag));
+        for (const Tag* tag = tags->begin(); tag != tags->end(); ++tag)
+        {
+            if (tagType <= tag->tag.type())
+                return Value(Value::ByRef(tag->tag));
+        }
     }
     return Value();
 }
@@ -30,10 +33,13 @@ Value Method::Parameter::getTag(raw<const Class> tagType) const
 
 Value Method::Overload::getTag(const Type& type) const
 {
-    for (const Tag* tag = tags->begin(); tag != tags->end(); ++tag)
+    if (tags)
     {
-        if (type <= tag->tag.type())
-            return Value(Value::ByRef(tag->tag));
+        for (const Tag* tag = tags->begin(); tag != tags->end(); ++tag)
+        {
+            if (type <= tag->tag.type())
+                return Value(Value::ByRef(tag->tag));
+        }
     }
     return Value();
 }

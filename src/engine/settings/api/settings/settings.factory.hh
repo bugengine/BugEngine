@@ -60,108 +60,107 @@ SettingsProvider::SettingsRegistration Settings<T>::s_registration;
 
 }}
 
-
 namespace BugEngine
 {
 
 raw<RTTI::Class> be_game_Namespace_BugEngine_Settings();
 
 template< typename T >
-struct BE_EXPORT be_typeid< Settings::Settings<T> >
+struct be_typeid< Settings::Settings<T> >
 {
-    be_section(rtti_text_trampoline_factory)
-    static RTTI::Value callGet(RTTI::Value* params, u32 paramCount)
-    {
-        be_assert(paramCount == 0, "expected no parameter; received %d" | paramCount);
-        be_forceuse(params);
-        return RTTI::Value(RTTI::Value::ByRef(Settings::Settings<T>::get()));
-    }
-
-    static inline RTTI::Type  type()
-    {
-        return RTTI::Type::makeType(preklass(), RTTI::Type::Value, RTTI::Type::Mutable, RTTI::Type::Mutable);
-    }
-
-    static istring name()
-    {
-        static istring s_name(minitl::format<1024u>("Settings<%s>") | be_typeid<T>::name());
-        return s_name;
-    }
-
-    be_section(rtti_text_cls_factory)
-    static inline raw<RTTI::Class> preklass()
-    {
-        be_section(rtti_cls_factory)
-        static RTTI::Class s_class =
-        {
-            name(),
-            0,
-            0,
-            RTTI::ClassType_Struct,
-            {be_game_Namespace_BugEngine_Settings().m_ptr},
-            be_typeid<void>::klass(),
-            {0},
-            {&RTTI::staticarray<const RTTI::Tag>::s_null},
-            {&RTTI::staticarray<const RTTI::Property>::s_null},
-            {&RTTI::staticarray<const RTTI::Method>::s_null},
-            {0},
-            {0},
-            0,
-            0
-        };
-        raw<RTTI::Class> result = { &s_class };
-        return result;
-    }
-
-    static inline raw<const RTTI::Class> klass()
-    {
-        static raw<const RTTI::Class> result = registerProperties();
-        return result;
-    }
-
-    be_section(rtti_text_cls_props_factory)
-    static raw<const RTTI::Class> registerProperties()
-    {
-        static raw<RTTI::Class> result = preklass();
-        be_section(rtti_method_factory)
-        static RTTI::staticarray_n< 1, const RTTI::Method::Overload > s_method_get_overloads = {
-            {1},
-            {
-                {
-                    {&RTTI::staticarray<const RTTI::Tag>::s_null},
-                    {&RTTI::staticarray<const RTTI::Method::Parameter>::s_null},
-                    be_typeid<T&>::type(),
-                    false,
-                    &callGet
-                },
-            }
-        };
-        be_section(rtti_method_factory)
-        static RTTI::Method s_get_method = {
-            istring("get"),
-            {&s_method_get_overloads.array},
-            {&s_get_method}
-        };
-        be_section(rtti_object_factory)
-        static RTTI::ObjectInfo valueGet = {
-            {0},
-            {&RTTI::staticarray<const RTTI::Tag>::s_null},
-            s_get_method.name,
-            RTTI::Value(s_get_method)
-        };
-        result->objects.set(&valueGet);
-        be_section(rtti_object_factory)
-        static RTTI::ObjectInfo s_object = {
-            ::BugEngine::be_game_Namespace_BugEngine_Settings()->objects,
-            {&RTTI::staticarray<const RTTI::Tag>::s_null},
-            name(),
-            RTTI::Value(result)
-        };
-        be_game_Namespace_BugEngine_Settings()->objects.set(&s_object);;
-        return result;
-    }
-
+    static BE_EXPORT raw<RTTI::Class> ns();
+    static BE_EXPORT raw<const RTTI::Class> klass();
+    static BE_EXPORT RTTI::Type  type();
 };
+
+
+namespace Settings
+{
+
+template< typename T >
+struct BE_EXPORT Settings_BugHelper
+{
+    static RTTI::Value trampoline_method_get_overload_0(RTTI::Value* parameters, u32 parameterCount);
+    static RTTI::Method::Overload s_method_get_overloads[];
+    static ::BugEngine::RTTI::Method s_methods[];
+    static ::BugEngine::RTTI::Class s_class;
+};
+
+template< typename T >
+be_section(rtti_text_trampoline_factory)
+RTTI::Value Settings_BugHelper<T>::trampoline_method_get_overload_0(RTTI::Value* params, u32 paramCount)
+{
+    be_assert(paramCount == 0, "expected no parameter; received %d" | paramCount);
+    be_forceuse(params);
+    return RTTI::Value(RTTI::Value::ByRef(Settings<T>::get()));
+}
+
+template< typename T >
+be_section(rtti_method_factory)
+RTTI::Method::Overload Settings_BugHelper<T>::s_method_get_overloads[] = {
+    {
+        { 0 },
+        { 0, 0 },
+        be_typeid< T& >::type(),
+        false,
+        &trampoline_method_get_overload_0
+    }
+};
+
+template< typename T >
+be_section(rtti_method_factory)
+RTTI::Method Settings_BugHelper<T>::s_methods[1] = {
+    {
+        istring("get"),
+        { 1, s_method_get_overloads },
+        {&s_methods[0]}
+    }
+};
+
+template< typename T >
+be_section(rtti_cls_factory)
+RTTI::Class Settings_BugHelper<T>::s_class =
+{
+    istring(minitl::format<1024u>("Settings<%s>") | be_typeid<T>::klass()->name),
+    0,
+    0,
+    RTTI::ClassType_Struct,
+    {be_game_Namespace_BugEngine_Settings().m_ptr},
+    be_typeid<void>::klass(),
+    {0},
+    {0},
+    {0, 0},
+    {1, s_methods},
+    {0},
+    {0},
+    0,
+    0
+};
+
+}
+
+template< typename T >
+BE_EXPORT
+raw<RTTI::Class> be_typeid< Settings::Settings<T> >::ns()
+{
+    raw< RTTI::Class > result = { &Settings::Settings_BugHelper<T>::s_class };
+    return result;
+}
+
+template< typename T >
+BE_EXPORT
+raw<const RTTI::Class> be_typeid< Settings::Settings<T> >::klass()
+{
+    return ns();
+}
+
+template< typename T >
+BE_EXPORT
+RTTI::Type be_typeid< Settings::Settings<T> >::type()
+{
+    return RTTI::Type::makeType(klass(), RTTI::Type::Value, RTTI::Type::Mutable, RTTI::Type::Mutable);
+}
+
 
 }
 
