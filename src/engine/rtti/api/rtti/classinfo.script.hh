@@ -7,7 +7,6 @@
 #include    <rtti/stdafx.h>
 #include    <core/md5.hh>
 #include    <rtti/engine/helper/staticarray.hh>
-#include    <rtti/engine/helper/staticarray.factory.hh>
 
 namespace BugEngine { namespace RTTI
 {
@@ -91,17 +90,17 @@ published:
     raw<const Class> const              owner;
     raw<const Class> const              parent;
     raw<const ObjectInfo>               objects;
-    raw< staticarray<const Tag> >       tags;
-    raw< staticarray<const Property> >  properties;
-    raw< staticarray<const Method> >    methods;
+    raw< const staticarray<const Tag> > tags;
+    staticarray<const Property>         properties;
+    staticarray<const Method>           methods;
     be_tag(Alias("?call"))
     raw<const Method>                   constructor;
 public:
     raw<const ScriptingAPI>             apiMethods;
     typedef void (*CopyConstructor)(const void* source, void* destination);
     typedef void (*Destructor)(void* object);
-    const CopyConstructor               copyconstructor;
-    const Destructor                    destructor;
+    const CopyConstructor       copyconstructor;
+    const Destructor            destructor;
 published:
     typedef enum ClassType ClassType;
     Value getTag(const Type& type) const;
@@ -143,51 +142,6 @@ raw<RTTI::Class> be_game_Namespace_BugEngine();
 
 }
 
-#include    <rtti/engine/helper/staticarray.factory.inl>
-
-
-namespace minitl
-{
-
-template<u16 SIZE>
-const minitl::format<SIZE>& operator|(const minitl::format<SIZE>& format, const BugEngine::RTTI::Type& type)
-{
-    minitl::format<4096> typeName("%s%s%s%s%s");
-    if (type.constness == BugEngine::RTTI::Type::Const)
-    {
-        typeName | "const ";
-    }
-    else
-    {
-        typeName | "";
-    }
-    const char* constness = "";
-    if (type.access == BugEngine::RTTI::Type::Const)
-    {
-        constness = "const ";
-    }
-    switch(type.indirection)
-    {
-        case BugEngine::RTTI::Type::RefPtr:
-        typeName | "ref<" | constness | type.metaclass->fullname() | ">";
-        break;
-    case BugEngine::RTTI::Type::WeakPtr:
-        typeName | "weak<" | constness | type.metaclass->fullname() | ">";
-        break;
-    case BugEngine::RTTI::Type::RawPtr:
-        typeName | "raw<" | constness | type.metaclass->fullname() | ">";
-        break;
-    case BugEngine::RTTI::Type::Value:
-        typeName | "" | "" | type.metaclass->fullname() | "";
-        break;
-    default:
-        be_notreached();
-        break;
-    }
-    return format | typeName.c_str();
-}
-
-}
 
 /**************************************************************************************************/
 #endif

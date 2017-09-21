@@ -89,7 +89,7 @@ struct PartitionListPropertyInfo
                                           typename TAIL::Type,
                                           typename TAIL::Tail> PropertyParent;
         RTTI::Property property = {
-            {&RTTI::staticarray<const RTTI::Tag>::s_null},
+            {0},
             T::name(),
             be_typeid<PARTITIONLIST>::type(),
             be_typeid< const T& >::type(),
@@ -106,7 +106,7 @@ struct PartitionListPropertyInfo<PARTITIONLIST, INDEX, T, void>
     static inline void fillProperty(RTTI::Property properties[])
     {
         RTTI::Property property = {
-            {&RTTI::staticarray<const RTTI::Tag>::s_null},
+            {0},
             T::name(),
             be_typeid<PARTITIONLIST>::type(),
             be_typeid< const T& >::type(),
@@ -123,18 +123,15 @@ struct PartitionListPropertyBuilder
     {
         PropertyCount = 1 + Partition<T, TAIL>::Index
     };
-    static raw< RTTI::staticarray<const RTTI::Property> > getPartitionProperties()
+    static RTTI::staticarray<const RTTI::Property> getPartitionProperties()
     {
-        typedef RTTI::staticarray_n< PropertyCount, RTTI::Property> PropertyArray;
-
-        static byte s_buffer[sizeof(PropertyArray)];
-        PropertyArray* properties = reinterpret_cast<PropertyArray* >(s_buffer);
-        new (properties) u32(PropertyCount);
+        static byte s_propertyBuffer[PropertyCount * sizeof(RTTI::Property)];
+        RTTI::Property* properties = reinterpret_cast<RTTI::Property*>(s_propertyBuffer);
         PartitionPropertyInfo<Partition<T, TAIL>,
                               Partition<T, TAIL>::Index,
                               typename Partition<T, TAIL>::Type,
-                              typename Partition<T, TAIL>::Tail>::fillProperty(properties->elements);
-        raw< RTTI::staticarray<const RTTI::Property> > result = { &properties->array };
+                              typename Partition<T, TAIL>::Tail>::fillProperty(properties);
+        RTTI::staticarray<const RTTI::Property> result = { PropertyCount, properties };;
         return result;
     }
 };

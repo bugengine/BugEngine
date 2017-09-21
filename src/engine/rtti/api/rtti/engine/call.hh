@@ -52,13 +52,13 @@ CallInfo getCost(raw<const Method::Overload> overload,
                  const ArgInfo<T> namedArguments[] = 0, u32 namedArgumentCount = 0)
 {
     CallInfo result = { ConversionCost::s_incompatible, overload, 0, 0 };
-    if (namedArgumentCount > overload->params->count)
+    if (namedArgumentCount > overload->params.count)
     {
         /* too many arguments */
         return result;
     }
     ConversionCost cost;
-    u32 placedArgumentCount = overload->params->count - namedArgumentCount;
+    u32 placedArgumentCount = overload->params.count - namedArgumentCount;
     if (placedArgumentCount > argumentCount)
         placedArgumentCount = argumentCount;
     u32 variadicArgumentCount = argumentCount - placedArgumentCount;
@@ -73,7 +73,7 @@ CallInfo getCost(raw<const Method::Overload> overload,
         result.variadicCount = variadicArgumentCount;
     }
 
-    const Method::Parameter* const begin = overload->params->begin();
+    const Method::Parameter* const begin = overload->params.begin();
     const Method::Parameter* p = begin;
     for (u32 i = 0; i < placedArgumentCount; ++i, ++p)
     {
@@ -82,7 +82,7 @@ CallInfo getCost(raw<const Method::Overload> overload,
             return result;
     }
 
-    u32 remainingParamCount = overload->params->count - placedArgumentCount;
+    u32 remainingParamCount = overload->params.count - placedArgumentCount;
     size_t s = sizeof(raw<const Method::Parameter>) * remainingParamCount;
     const Method::Parameter** namedParams = (const Method::Parameter**)malloca(s);
     for (u32 i = 0; i < remainingParamCount; ++i)
@@ -106,7 +106,7 @@ CallInfo getCost(raw<const Method::Overload> overload,
             return result;
         }
     }
-    result.defaultValuesCount = overload->params->count - placedArgumentCount - namedArgumentCount;
+    result.defaultValuesCount = overload->params.count - placedArgumentCount - namedArgumentCount;
     for (u32 i = 0; i < remainingParamCount - namedArgumentCount; ++i)
     {
         if (!namedParams[namedArgumentCount+i]->defaultValue.operator *())
@@ -145,9 +145,9 @@ CallInfo resolve(raw<const Method> method,
         0,
         0
     };
-    for (u32 i = 0; i < method->overloads->count; ++i)
+    for (u32 i = 0; i < method->overloads.count; ++i)
     {
-        raw<const Method::Overload> overload = { method->overloads->begin() + i };
+        raw<const Method::Overload> overload = { method->overloads.begin() + i };
         CallInfo c = getCost(overload, indices[indexTmp], arguments, argumentCount,
                              namedArguments, namedArgumentCount);
         if (c.conversion < best.conversion)
@@ -172,12 +172,12 @@ Value call(CallInfo callInfo,
            const ArgInfo<T> arguments[], u32 argumentCount,
            const ArgInfo<T> namedArguments[] = 0, u32 namedArgumentCount = 0)
 {
-    Value* v = (Value*)malloca(sizeof(Value) * (callInfo.overload->params->count + callInfo.variadicCount));
-    const Method::Parameter* const begin = callInfo.overload->params->begin();
+    Value* v = (Value*)malloca(sizeof(Value) * (callInfo.overload->params.count + callInfo.variadicCount));
+    const Method::Parameter* const begin = callInfo.overload->params.begin();
     const Method::Parameter* p = begin;
     for (u32 i = 0; i < argumentCount - callInfo.variadicCount; ++i, ++p)
     {
-        be_assert(p != callInfo.overload->params->end(),
+        be_assert(p != callInfo.overload->params.end(),
                   "too many arguments passed to call");
         convert(arguments[i].type, static_cast<void*>(&v[i]), p->type);
     }
@@ -186,16 +186,16 @@ Value call(CallInfo callInfo,
     {
         for (; namedArguments[i].parameter != index; ++index, ++p)
         {
-            be_assert(p != callInfo.overload->params->end(),
+            be_assert(p != callInfo.overload->params.end(),
                       "too many arguments passed to call");
             be_assert(*(p->defaultValue), "Parameter does not have a default value");
             new (static_cast<void*>(&v[index])) Value(Value::ByRef(*(p->defaultValue)));
         }
-        be_assert(p != callInfo.overload->params->end(),
+        be_assert(p != callInfo.overload->params.end(),
                   "too many arguments passed to call");
         convert(namedArguments[i].type, static_cast<void*>(&v[index]), p->type);
     }
-    for (; p != callInfo.overload->params->end(); ++p, ++index)
+    for (; p != callInfo.overload->params.end(); ++p, ++index)
     {
         be_assert(p->defaultValue, "Parameter does not have a default value");
         new (static_cast<void*>(&v[index])) Value(Value::ByRef(p->defaultValue));
@@ -205,7 +205,7 @@ Value call(CallInfo callInfo,
         convert(namedArguments[i].type, static_cast<void*>(&v[index]), p->type);
     }
     Value result = callInfo.overload->call(v, argumentCount);
-    for (u32 i = callInfo.overload->params->count + callInfo.variadicCount; i > 0; --i)
+    for (u32 i = callInfo.overload->params.count + callInfo.variadicCount; i > 0; --i)
     {
         v[i-1].~Value();
     }

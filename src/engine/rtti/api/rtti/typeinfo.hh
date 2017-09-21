@@ -14,37 +14,35 @@ namespace BugEngine
 namespace RTTI
 {
     struct Class;
+    struct Property;
+    struct Method;
 }
 
 template< typename T >
 struct be_typeid
 {
     template< typename U > friend struct be_typeid;
-private:
-    static raw<const RTTI::Class> registerProperties();
 public:
-    static BE_EXPORT raw<RTTI::Class> preklass();
-    static BE_EXPORT istring name();
-    static inline raw<const RTTI::Class> klass()
-    {
-        static raw<const RTTI::Class> cls = registerProperties();
-        return cls;
-    }
-    static inline RTTI::Type  type()
-    {
-        return RTTI::Type::makeType(preklass(),
-                                    RTTI::Type::Value,
-                                    RTTI::Type::Mutable,
-                                    RTTI::Type::Mutable);
-    }
+    static BE_EXPORT raw<const RTTI::Class> klass();
+    static BE_EXPORT raw<RTTI::Class> ns();
+    static BE_EXPORT RTTI::Type  type();
 };
+
+template< typename T >
+RTTI::Type be_typeid<T>::type()
+{
+    return RTTI::Type::makeType(klass(),
+                                RTTI::Type::Value,
+                                RTTI::Type::Mutable,
+                                RTTI::Type::Mutable);
+}
 
 template< typename T >
 struct be_typeid<const T> : public be_typeid<T>
 {
     static inline RTTI::Type  type()
     {
-        return RTTI::Type::makeType(be_typeid<T>::preklass(),
+        return RTTI::Type::makeType(be_typeid<T>::klass(),
                                     RTTI::Type::Value,
                                     RTTI::Type::Const,
                                     RTTI::Type::Const);
@@ -56,7 +54,7 @@ struct be_typeid< T& >
 {
     static inline RTTI::Type  type()
     {
-        return RTTI::Type::makeType(be_typeid<T>::preklass(),
+        return RTTI::Type::makeType(be_typeid<T>::klass(),
                                     RTTI::Type::Value,
                                     RTTI::Type::Mutable,
                                     RTTI::Type::Const);
@@ -68,7 +66,7 @@ struct be_typeid< const T& >
 {
     static inline RTTI::Type  type()
     {
-        return RTTI::Type::makeType(be_typeid<T>::preklass(),
+        return RTTI::Type::makeType(be_typeid<T>::klass(),
                                     RTTI::Type::Value,
                                     RTTI::Type::Const,
                                     RTTI::Type::Const);
@@ -80,7 +78,7 @@ struct be_typeid< ref<T> >
 {
     static inline RTTI::Type  type()
     {
-        return RTTI::Type::makeType(be_typeid<T>::preklass(),
+        return RTTI::Type::makeType(be_typeid<T>::klass(),
                                     RTTI::Type::RefPtr,
                                     minitl::is_const<T>::Value
                                         ?   RTTI::Type::Const
@@ -93,7 +91,7 @@ struct be_typeid< weak<T> >
 {
     static inline RTTI::Type  type()
     {
-        return RTTI::Type::makeType(be_typeid<T>::preklass(),
+        return RTTI::Type::makeType(be_typeid<T>::klass(),
                                     RTTI::Type::WeakPtr,
                                     minitl::is_const<T>::Value
                                         ?   RTTI::Type::Const
@@ -107,7 +105,7 @@ struct be_typeid< raw<T> >
 {
     static inline RTTI::Type  type()
     {
-        return RTTI::Type::makeType(be_typeid<T>::preklass(),
+        return RTTI::Type::makeType(be_typeid<T>::klass(),
                                     RTTI::Type::RawPtr,
                                     minitl::is_const<T>::Value
                                         ?   RTTI::Type::Const
@@ -121,7 +119,7 @@ struct be_typeid< T* >
 {
     static inline RTTI::Type  type()
     {
-        return RTTI::Type::makeType(be_typeid<T>::preklass(),
+        return RTTI::Type::makeType(be_typeid<T>::klass(),
                                     RTTI::Type::RawPtr,
                                     minitl::is_const<T>::Value
                                         ?   RTTI::Type::Const
@@ -136,7 +134,7 @@ struct be_typeid< ref<T> const >
 {
     static inline RTTI::Type  type()
     {
-        return RTTI::Type::makeType(be_typeid<T>::preklass(),
+        return RTTI::Type::makeType(be_typeid<T>::klass(),
                                     RTTI::Type::RefPtr,
                                     minitl::is_const<T>::Value
                                         ?   RTTI::Type::Const
@@ -150,7 +148,7 @@ struct be_typeid< weak<T> const >
 {
     static inline RTTI::Type  type()
     {
-        return RTTI::Type::makeType(be_typeid<T>::preklass(),
+        return RTTI::Type::makeType(be_typeid<T>::klass(),
                                     RTTI::Type::WeakPtr,
                                     minitl::is_const<T>::Value
                                         ?   RTTI::Type::Const
@@ -164,7 +162,7 @@ struct be_typeid< raw<T> const >
 {
     static inline RTTI::Type  type()
     {
-        return RTTI::Type::makeType(be_typeid<T>::preklass(),
+        return RTTI::Type::makeType(be_typeid<T>::klass(),
                                     RTTI::Type::RawPtr,
                                     minitl::is_const<T>::Value
                                         ?   RTTI::Type::Const
@@ -178,7 +176,7 @@ struct be_typeid< T* const >
 {
     static inline RTTI::Type  type()
     {
-        return RTTI::Type::makeType(be_typeid<T>::preklass(),
+        return RTTI::Type::makeType(be_typeid<T>::klass(),
                                     RTTI::Type::RawPtr,
                                     minitl::is_const<T>::Value
                                         ?   RTTI::Type::Const
@@ -192,7 +190,8 @@ struct be_typeid< scoped<T> >
 {
 };
 
-template< > BE_EXPORT raw<RTTI::Class> be_typeid< void >::preklass();
+template< > BE_EXPORT raw<const RTTI::Class> be_typeid< void >::klass();
+template< > BE_EXPORT raw<RTTI::Class> be_typeid< void >::ns();
 
 }
 

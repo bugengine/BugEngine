@@ -21,8 +21,8 @@ static void convert(ref<const Parameter> parameter, void* buffer, const RTTI::Ty
 }
 
 OverloadMatch::OverloadMatch(raw<const RTTI::Method::Overload> overload)
-    :   m_args(Arena::packageBuilder(), overload->params->count)
-    ,   m_indices(Arena::packageBuilder(), overload->params->count)
+    :   m_args(Arena::packageBuilder(), overload->params.count)
+    ,   m_indices(Arena::packageBuilder(), overload->params.count)
     ,   m_callInfo()
 {
     m_callInfo.overload = overload;

@@ -13,7 +13,7 @@
 #include    <rtti/engine/helper/get.hh>
 #include    <rtti/engine/helper/method.hh>
 #include    <minitl/tuple.hh>
-
+#if 0
 namespace BugEngine
 {
 
@@ -223,7 +223,7 @@ RTTI::Type be_typeid< minitl::tuple<T1, T2, T3, T4> >::type()
 }
 
 }
-
+#endif
 /**************************************************************************************************/
 #endif
 

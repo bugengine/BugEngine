@@ -275,8 +275,8 @@ raw<const Property> Class::getProperty(istring propertyName) const
     raw<const Class> thisCls = { this };
     for (raw< const Class > cls = thisCls; cls; cls = cls->parent)
     {
-        for (const Property* p = cls->properties->begin();
-             p != cls->properties->end();
+        for (const Property* p = cls->properties.begin();
+             p != cls->properties.end();
              ++p)
         {
             if (p->name == propertyName)
@@ -294,8 +294,8 @@ raw<const Method> Class::getMethod(istring methodName) const
     raw<const Class> thisCls = { this };
     for (raw< const Class > cls = thisCls; cls; cls = cls->parent)
     {
-        for (const Method* m = cls->methods->begin();
-             m != cls->methods->end();
+        for (const Method* m = cls->methods.begin();
+             m != cls->methods.end();
              ++m)
         {
             if (m->name == methodName)
@@ -473,9 +473,9 @@ Value Class::findClass(inamespace name)
 raw<RTTI::Class> be_game_Namespace()
 {
     static RTTI::Class ci = { "BugEngine", 0, 0, RTTI::ClassType_Namespace, {0}, {0}, {0},
-                              {&RTTI::staticarray<const RTTI::Tag>::s_null},
-                              {&RTTI::staticarray<const RTTI::Property>::s_null},
-                              {&RTTI::staticarray<const RTTI::Method>::s_null},
+                              {0},
+                              {0, 0},
+                              {0, 0},
                               {0}, {0}, 0, 0 };
     raw<RTTI::Class> result = {&ci};
     return result;

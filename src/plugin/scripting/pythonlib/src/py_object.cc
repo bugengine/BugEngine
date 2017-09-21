@@ -697,18 +697,15 @@ static inline void unpackPod(PyObject* arg, const RTTI::Type& type, void* buffer
     RTTI::Value* v = (RTTI::Value*)malloca(sizeof(RTTI::Value));
     for (raw<const RTTI::Class> c = type.metaclass; c; c = c->parent)
     {
-        if (c->properties)
+        for (const RTTI::Property* p = c->properties.begin();
+             p != c->properties.end();
+             ++p)
         {
-            for (const RTTI::Property* p = c->properties->begin();
-                 p != c->properties->end();
-                 ++p)
-            {
-                PyObject* value = s_library->m_PyDict_GetItemString(arg, p->name.c_str());
+            PyObject* value = s_library->m_PyDict_GetItemString(arg, p->name.c_str());
 
-                PyBugObject::unpack(value, p->type, v);
-                p->set(*result, *v);
-                v->~Value();
-            }
+            PyBugObject::unpack(value, p->type, v);
+            p->set(*result, *v);
+            v->~Value();
         }
     }
     freea(v);
@@ -789,21 +786,18 @@ RTTI::ConversionCost PyBugObject::distance(PyObject* object, const RTTI::Type& d
             u32 i = 0;
             for (raw<const RTTI::Class> c = desiredType.metaclass; c; c = c->parent)
             {
-                if (c->properties)
+                for (const RTTI::Property* p = c->properties.begin();
+                     p != c->properties.end();
+                     ++p)
                 {
-                    for (const RTTI::Property* p = c->properties->begin();
-                         p != c->properties->end();
-                         ++p)
+                    PyObject* value = s_library->m_PyDict_GetItemString(object, p->name.c_str());
+                    if (!value)
                     {
-                        PyObject* value = s_library->m_PyDict_GetItemString(object, p->name.c_str());
-                        if (!value)
-                        {
-                            return RTTI::ConversionCost::s_incompatible;
-                        }
-                        if (distance(value, p->type) >= RTTI::ConversionCost::s_incompatible)
-                        {
-                            return RTTI::ConversionCost::s_incompatible;
-                        }
+                        return RTTI::ConversionCost::s_incompatible;
+                    }
+                    if (distance(value, p->type) >= RTTI::ConversionCost::s_incompatible)
+                    {
+                        return RTTI::ConversionCost::s_incompatible;
                     }
                 }
             }
@@ -911,7 +905,7 @@ PyObject* PyBugObject::dir(raw<const RTTI::Class> metaclass)
     }
     for (raw<const RTTI::Class> cls = metaclass; cls; cls = cls->parent)
     {
-        for (const RTTI::Property* p = cls->properties->begin(); p != cls->properties->end(); ++p)
+        for (const RTTI::Property* p = cls->properties.begin(); p != cls->properties.end(); ++p)
         {
             PyObject* str = fromString(p->name.c_str(), p->name.size());
             if (!str)
@@ -927,7 +921,7 @@ PyObject* PyBugObject::dir(raw<const RTTI::Class> metaclass)
             }
             Py_DECREF(str);
         }
-        for (const RTTI::Method* m = cls->methods->begin(); m != cls->methods->end(); ++m)
+        for (const RTTI::Method* m = cls->methods.begin(); m != cls->methods.end(); ++m)
         {
             PyObject* str = fromString(m->name.c_str(), m->name.size());
             if (!str)

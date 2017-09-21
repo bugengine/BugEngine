@@ -32,10 +32,13 @@ void Property::set(Value& from, const Value& value) const
 
 Value Property::getTag(const Type& tagType) const
 {
-    for (const Tag* tag = tags->begin(); tag != tags->end(); ++tag)
+    if (tags)
     {
-        if (tagType <= tag->tag.type())
-           return Value(Value::ByRef(tag->tag));
+        for (const Tag* tag = tags->begin(); tag != tags->end(); ++tag)
+        {
+            if (tagType <= tag->tag.type())
+               return Value(Value::ByRef(tag->tag));
+        }
     }
     return Value();
 }

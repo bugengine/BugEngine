@@ -15,10 +15,10 @@ struct Tag;
 
 struct be_api(RTTI) ObjectInfo
 {
-    raw<const ObjectInfo> const     next;
-    raw< staticarray<const Tag> >   tags;
-    istring const                   name;
-    mutable Value                   value;
+    raw<const ObjectInfo> const         next;
+    raw< const staticarray<const Tag> > tags;
+    istring const                       name;
+    mutable Value                       value;
 };
 
 }}
