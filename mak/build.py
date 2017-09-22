@@ -297,7 +297,7 @@ def module(bld, name, module_path, depends,
                 n = extra_source_node.make_node('include')
                 if os.path.isdir(n.abspath()):
                     include += [n]
-        target_prefix = (env.ENV_PREFIX + '/') if env.ENV_PREFIX else ''
+        target_prefix = (env.ENV_PREFIX + '.') if env.ENV_PREFIX else ''
 
         if not build:
             sources = []
@@ -734,6 +734,7 @@ def make_bld_node_common(self, node, path, name):
         out_dir = path.path_from(self.bld.bldnode)
         out_dir = out_dir[out_dir.find(os.path.sep)+1:]
         if out_dir[0] == '.':
+            out_dir = out_dir[out_dir.find(os.path.sep)+1:]
             out_dir = out_dir[out_dir.find(os.path.sep)+1:]
             node = node.make_node(self.target)
             node = node.make_node(out_dir)
