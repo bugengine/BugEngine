@@ -30,7 +30,5 @@ typedef unsigned long int   intptr_t;
 #define BE_EXPORT
 #define BE_IMPORT
 
-#define be_section(name)
-
 /**************************************************************************************************/
 #endif

@@ -56,12 +56,6 @@ typedef u8                      byte;
 # define BE_IMPORT
 #endif
 
-#ifdef __MACH__
-# define be_section(name) __attribute__((section("." #name "," #name)))
-#else
-# define be_section(name) __attribute__((section("." #name)))
-#endif
-
 #else
 
 # define BE_EXPORT              __declspec(dllexport)
@@ -94,8 +88,6 @@ typedef u8                      byte;
 # ifndef _CRT_SECURE_NO_DEPRECATE
 #  define _CRT_SECURE_NO_DEPRECATE 1
 # endif
-
-#define be_section(name)
 
 #endif
 

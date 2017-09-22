@@ -116,26 +116,6 @@ struct PartitionListPropertyInfo<PARTITIONLIST, INDEX, T, void>
     }
 };
 
-template< typename T, typename TAIL>
-struct PartitionListPropertyBuilder
-{
-    enum
-    {
-        PropertyCount = 1 + Partition<T, TAIL>::Index
-    };
-    static RTTI::staticarray<const RTTI::Property> getPartitionProperties()
-    {
-        static byte s_propertyBuffer[PropertyCount * sizeof(RTTI::Property)];
-        RTTI::Property* properties = reinterpret_cast<RTTI::Property*>(s_propertyBuffer);
-        PartitionPropertyInfo<Partition<T, TAIL>,
-                              Partition<T, TAIL>::Index,
-                              typename Partition<T, TAIL>::Type,
-                              typename Partition<T, TAIL>::Tail>::fillProperty(properties);
-        RTTI::staticarray<const RTTI::Property> result = { PropertyCount, properties };;
-        return result;
-    }
-};
-
 }
 
 template< typename T1 = void, typename T2 = void, typename T3 = void, typename T4 = void, typename T5 = void,

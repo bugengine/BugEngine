@@ -68,7 +68,6 @@ raw<RTTI::Class> be_game_Namespace_BugEngine_Settings();
 template< typename T >
 struct be_typeid< Settings::Settings<T> >
 {
-    static BE_EXPORT raw<RTTI::Class> ns();
     static BE_EXPORT raw<const RTTI::Class> klass();
     static BE_EXPORT RTTI::Type  type();
 };
@@ -81,13 +80,11 @@ template< typename T >
 struct BE_EXPORT Settings_BugHelper
 {
     static RTTI::Value trampoline_method_get_overload_0(RTTI::Value* parameters, u32 parameterCount);
-    static RTTI::Method::Overload s_method_get_overloads[];
-    static ::BugEngine::RTTI::Method s_methods[];
-    static ::BugEngine::RTTI::Class s_class;
+    static const RTTI::Method::Overload s_method_get_overloads[];
+    static const RTTI::Method s_methods[];
 };
 
 template< typename T >
-be_section(rtti_text_trampoline_factory)
 RTTI::Value Settings_BugHelper<T>::trampoline_method_get_overload_0(RTTI::Value* params, u32 paramCount)
 {
     be_assert(paramCount == 0, "expected no parameter; received %d" | paramCount);
@@ -96,8 +93,7 @@ RTTI::Value Settings_BugHelper<T>::trampoline_method_get_overload_0(RTTI::Value*
 }
 
 template< typename T >
-be_section(rtti_method_factory)
-RTTI::Method::Overload Settings_BugHelper<T>::s_method_get_overloads[] = {
+const RTTI::Method::Overload Settings_BugHelper<T>::s_method_get_overloads[] = {
     {
         { 0 },
         { 0, 0 },
@@ -108,8 +104,7 @@ RTTI::Method::Overload Settings_BugHelper<T>::s_method_get_overloads[] = {
 };
 
 template< typename T >
-be_section(rtti_method_factory)
-RTTI::Method Settings_BugHelper<T>::s_methods[1] = {
+const RTTI::Method Settings_BugHelper<T>::s_methods[1] = {
     {
         istring("get"),
         { 1, s_method_get_overloads },
@@ -117,41 +112,33 @@ RTTI::Method Settings_BugHelper<T>::s_methods[1] = {
     }
 };
 
-template< typename T >
-be_section(rtti_cls_factory)
-RTTI::Class Settings_BugHelper<T>::s_class =
-{
-    istring(minitl::format<1024u>("Settings<%s>") | be_typeid<T>::klass()->name),
-    0,
-    0,
-    RTTI::ClassType_Struct,
-    {be_game_Namespace_BugEngine_Settings().m_ptr},
-    be_typeid<void>::klass(),
-    {0},
-    {0},
-    {0, 0},
-    {1, s_methods},
-    {0},
-    {0},
-    0,
-    0
-};
-
 }
 
-template< typename T >
-BE_EXPORT
-raw<RTTI::Class> be_typeid< Settings::Settings<T> >::ns()
-{
-    raw< RTTI::Class > result = { &Settings::Settings_BugHelper<T>::s_class };
-    return result;
-}
 
 template< typename T >
 BE_EXPORT
 raw<const RTTI::Class> be_typeid< Settings::Settings<T> >::klass()
 {
-    return ns();
+    static const RTTI::Class s_class =
+    {
+        istring(minitl::format<1024u>("Settings<%s>") | be_typeid<T>::name()),
+        0,
+        0,
+        RTTI::ClassType_Struct,
+        {be_game_Namespace_BugEngine_Settings().m_ptr},
+        be_typeid<void>::klass(),
+        {0},
+        {0},
+        {0, 0},
+        {1, Settings::Settings_BugHelper<T>::s_methods},
+        {0},
+        {0},
+        0,
+        0
+    };
+
+    raw< const RTTI::Class > result = { &s_class };
+    return result;
 }
 
 template< typename T >

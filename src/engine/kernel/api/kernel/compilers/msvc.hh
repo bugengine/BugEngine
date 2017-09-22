@@ -79,7 +79,5 @@ typedef u8                      byte;
 #endif
 #define  _CRT_SECURE_NO_DEPRECATE 1
 
-#define be_section(name)
-
 /**************************************************************************************************/
 #endif

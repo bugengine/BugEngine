@@ -24,8 +24,8 @@ struct be_typeid
     template< typename U > friend struct be_typeid;
 public:
     static BE_EXPORT raw<const RTTI::Class> klass();
-    static BE_EXPORT raw<RTTI::Class> ns();
     static BE_EXPORT RTTI::Type  type();
+    static BE_EXPORT istring name();
 };
 
 template< typename T >
@@ -191,7 +191,6 @@ struct be_typeid< scoped<T> >
 };
 
 template< > BE_EXPORT raw<const RTTI::Class> be_typeid< void >::klass();
-template< > BE_EXPORT raw<RTTI::Class> be_typeid< void >::ns();
 
 }
 
