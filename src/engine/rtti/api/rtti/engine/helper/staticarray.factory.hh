@@ -23,7 +23,6 @@ namespace BugEngine
 template< typename T >
 struct be_typeid< RTTI::staticarray<T> >
 {
-    static BE_EXPORT raw<RTTI::Class> ns();
     static BE_EXPORT raw<const RTTI::Class> klass();
     static BE_EXPORT RTTI::Type  type();
 };
@@ -40,12 +39,12 @@ struct staticarray_BugHelper
     static RTTI::Value callStaticArraySize(RTTI::Value* params, u32 paramCount);
     static RTTI::Value callStaticArrayOperatorIndexConst(RTTI::Value* params, u32 paramCount);
 
-    static RTTI::Method::Parameter s_index_0_params[2];
-    static RTTI::Method::Parameter s_index_1_params[2];
-    static RTTI::Method::Overload s_method_index_overloads[2];
-    static RTTI::Method::Parameter s_size_params[1];
-    static RTTI::Method::Overload s_method_size_overloads[1];
-    static RTTI::Method s_methods[2];
+    static const RTTI::Method::Parameter s_index_0_params[2];
+    static const RTTI::Method::Parameter s_index_1_params[2];
+    static const RTTI::Method::Overload s_method_index_overloads[2];
+    static const RTTI::Method::Parameter s_size_params[1];
+    static const RTTI::Method::Overload s_method_size_overloads[1];
+    static const RTTI::Method s_methods[2];
     static const RTTI::ScriptingArrayAPI scriptingArrayAPI;
     static const RTTI::ScriptingAPI scriptingAPI;
 };
@@ -93,7 +92,7 @@ RTTI::Value staticarray_BugHelper<T>::callStaticArrayOperatorIndexConst(RTTI::Va
 }
 
 template< typename T >
-RTTI::Method::Parameter staticarray_BugHelper<T>::s_index_0_params[2] = {
+const RTTI::Method::Parameter staticarray_BugHelper<T>::s_index_0_params[2] = {
     {
         {0},
         istring("this"),
@@ -109,7 +108,7 @@ RTTI::Method::Parameter staticarray_BugHelper<T>::s_index_0_params[2] = {
 };
 
 template< typename T >
-RTTI::Method::Parameter staticarray_BugHelper<T>::s_index_1_params[2] = {
+const RTTI::Method::Parameter staticarray_BugHelper<T>::s_index_1_params[2] = {
     {
         {0},
         istring("this"),
@@ -125,7 +124,7 @@ RTTI::Method::Parameter staticarray_BugHelper<T>::s_index_1_params[2] = {
 };
 
 template< typename T >
-RTTI::Method::Overload staticarray_BugHelper<T>::s_method_index_overloads[2] = {
+const RTTI::Method::Overload staticarray_BugHelper<T>::s_method_index_overloads[2] = {
     {
         {0},
         {2, s_index_0_params},
@@ -143,7 +142,7 @@ RTTI::Method::Overload staticarray_BugHelper<T>::s_method_index_overloads[2] = {
 };
 
 template< typename T >
-RTTI::Method::Parameter staticarray_BugHelper<T>::s_size_params[1] = {
+const RTTI::Method::Parameter staticarray_BugHelper<T>::s_size_params[1] = {
     {
         {0},
         istring("this"),
@@ -153,7 +152,7 @@ RTTI::Method::Parameter staticarray_BugHelper<T>::s_size_params[1] = {
 };
 
 template< typename T >
-RTTI::Method::Overload staticarray_BugHelper<T>::s_method_size_overloads[1] = {
+const RTTI::Method::Overload staticarray_BugHelper<T>::s_method_size_overloads[1] = {
     {
         {0},
         {1, s_size_params},
@@ -164,7 +163,7 @@ RTTI::Method::Overload staticarray_BugHelper<T>::s_method_size_overloads[1] = {
 };
 
 template< typename T >
-RTTI::Method staticarray_BugHelper<T>::s_methods[2] = {
+const RTTI::Method staticarray_BugHelper<T>::s_methods[2] = {
     {
         RTTI::Class::nameOperatorIndex(),
         {2, s_method_index_overloads},
@@ -192,9 +191,9 @@ const RTTI::ScriptingAPI staticarray_BugHelper<T>::scriptingAPI = {
 
 template< typename T >
 BE_EXPORT
-raw<RTTI::Class> be_typeid< RTTI::staticarray<T> >::ns()
+raw<const RTTI::Class> be_typeid< RTTI::staticarray<T> >::klass()
 {
-    static ::BugEngine::RTTI::Class s_class = {
+    static const ::BugEngine::RTTI::Class s_class = {
         istring(minitl::format<1024u>("staticarray<%s>") | be_typeid<T>::klass()->name),
         u32(sizeof(RTTI::staticarray<T>)),
         0,
@@ -210,15 +209,8 @@ raw<RTTI::Class> be_typeid< RTTI::staticarray<T> >::ns()
         &RTTI::wrapCopy< RTTI::staticarray<T> >,
         &RTTI::wrapDestroy< RTTI::staticarray<T> >
     };
-    raw< RTTI::Class > result = { &s_class };
+    raw< const RTTI::Class > result = { &s_class };
     return result;
-}
-
-template< typename T >
-BE_EXPORT
-raw<const RTTI::Class> be_typeid< RTTI::staticarray<T> >::klass()
-{
-    return ns();
 }
 
 template< typename T >

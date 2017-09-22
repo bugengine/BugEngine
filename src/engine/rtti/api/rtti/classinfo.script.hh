@@ -89,7 +89,7 @@ published:
     u32 const                           id;
     raw<const Class> const              owner;
     raw<const Class> const              parent;
-    raw<const ObjectInfo>               objects;
+    mutable raw<const ObjectInfo>       objects;
     raw< const staticarray<const Tag> > tags;
     staticarray<const Property>         properties;
     staticarray<const Method>           methods;

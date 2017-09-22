@@ -13,233 +13,249 @@
 #include    <rtti/engine/helper/get.hh>
 #include    <rtti/engine/helper/method.hh>
 #include    <minitl/tuple.hh>
-#if 0
+
 namespace BugEngine
 {
+
 
 template< typename T1, typename T2, typename T3, typename T4, typename T5 >
 struct be_typeid< minitl::tuple<T1, T2, T3, T4, T5> >
 {
-    static RTTI::Value make_tuple(RTTI::Value* v, u32 count);
-    static RTTI::Value make_default_tuple(RTTI::Value* v, u32 count);
-    static const RTTI::Type first_type;
-    static const RTTI::Type second_type;
-    static const RTTI::Type third_type;
-    static const RTTI::Type fourth_type;
-    static const RTTI::Type fifth_type;
-    static inline raw<RTTI::Class> preklass();
-    static inline istring name();
-    static inline raw<const RTTI::Class> klass();
-    static inline RTTI::Type  type();
-private:
-    static raw<const RTTI::Class> initialisation;
-    static raw<const RTTI::Class> registerProperties();
+    static BE_EXPORT raw<const RTTI::Class> klass();
+    static BE_EXPORT RTTI::Type  type();
+    static BE_EXPORT istring name();
 };
 
+template< typename T1, typename T2, typename T3, typename T4, typename T5 >
+struct tuple5_BugHelper
+{
+    static RTTI::Value trampoline_method_tuple_overload_0(RTTI::Value* parameters, u32 parameterCount);
+    static RTTI::Value trampoline_method_tuple_overload_1(RTTI::Value* parameters, u32 parameterCount);
+    static const RTTI::Method::Parameter s_method_tuple_overload_1_params[];
+    static const RTTI::Method::Overload s_method_tuple_overloads[];
+    static const RTTI::Method s_methods[];
+    static const RTTI::Property s_properties[];
+    static const RTTI::ObjectInfo s_first_type_object_first_type;
+    static const RTTI::ObjectInfo s_second_type_object_second_type;
+    static const RTTI::ObjectInfo s_third_type_object_third_type;
+    static const RTTI::ObjectInfo s_fourth_type_object_fourth_type;
+    static const RTTI::ObjectInfo s_fifth_type_object_fifth_type;
+};
 
 template< typename T1, typename T2, typename T3, typename T4, typename T5 >
-be_section(rtti_text_trampoline)
-RTTI::Value be_typeid< minitl::tuple<T1, T2, T3, T4, T5> >::make_tuple(RTTI::Value* v,
-                                                                       u32 count)
+RTTI::Value tuple5_BugHelper<T1, T2, T3, T4, T5>::trampoline_method_tuple_overload_0(RTTI::Value* parameters, u32 parameterCount)
 {
-    be_assert(count == 5, "expected 5 parameters; received %d" | count);
-    T1* t1 = static_cast<T1*>(malloca(sizeof(T1)));
-    T2* t2 = static_cast<T2*>(malloca(sizeof(T2)));
-    T3* t3 = static_cast<T3*>(malloca(sizeof(T3)));
-    T4* t4 = static_cast<T4*>(malloca(sizeof(T4)));
-    T5* t5 = static_cast<T5*>(malloca(sizeof(T5)));
-    new (t1) T1(v[0].as<T1>());
-    new (t2) T2(v[1].as<T2>());
-    new (t3) T3(v[2].as<T3>());
-    new (t4) T4(v[3].as<T4>());
-    new (t5) T5(v[4].as<T5>());
-    minitl::tuple<T1, T2, T3, T4, T5> result(*t1, *t2, *t3, *t4, *t5);
-    t5->~T5();
-    t4->~T4();
-    t3->~T3();
-    t2->~T2();
-    t1->~T1();
-    freea(t5);
-    freea(t4);
-    freea(t3);
-    freea(t2);
-    freea(t1);
-    return RTTI::Value(result);
-}
-
-template< typename T1, typename T2, typename T3, typename T4, typename T5 >
-be_section(rtti_text_trampoline)
-RTTI::Value be_typeid< minitl::tuple<T1, T2, T3, T4, T5> >::make_default_tuple(RTTI::Value* v,
-                                                                               u32 count)
-{
-    be_assert(count == 0, "expected no parameter; received %d" | count);
-    be_forceuse(v);
-    be_forceuse(count);
+    be_forceuse(parameters);
+    be_forceuse(parameterCount);
     return RTTI::Value(minitl::tuple<T1, T2, T3, T4, T5>());
 }
 
 template< typename T1, typename T2, typename T3, typename T4, typename T5 >
-raw<const RTTI::Class> be_typeid< minitl::tuple<T1, T2, T3, T4, T5> >::initialisation =
-            be_typeid< minitl::tuple<T1, T2, T3, T4, T5> >::klass();
+RTTI::Value tuple5_BugHelper<T1, T2, T3, T4, T5>::trampoline_method_tuple_overload_1(RTTI::Value* parameters, u32 parameterCount)
+{
+    be_forceuse(parameters);
+    be_forceuse(parameterCount);
+    return RTTI::Value(minitl::tuple<T1, T2, T3, T4, T5>(parameters[0].as< const T1&  >(),
+                                                         parameters[1].as< const T2&  >(),
+                                                         parameters[2].as< const T3&  >(),
+                                                         parameters[3].as< const T4&  >(),
+                                                         parameters[4].as< const T5&  >()));
+}
+
+template< typename T1, typename T2, typename T3, typename T4, typename T5 >
+const RTTI::ObjectInfo tuple5_BugHelper<T1, T2, T3, T4, T5>::s_fifth_type_object_fifth_type = {
+    {0},
+    { 0 },
+    istring(istring("fifth_type")),
+    RTTI::Value(
+        be_typeid< T5 >::type())
+};
+
+template< typename T1, typename T2, typename T3, typename T4, typename T5 >
+const RTTI::ObjectInfo tuple5_BugHelper<T1, T2, T3, T4, T5>::s_fourth_type_object_fourth_type = {
+    {&s_fifth_type_object_fifth_type},
+    { 0 },
+    istring(istring("fourth_type")),
+    RTTI::Value(
+        be_typeid< T4 >::type())
+};
+
+template< typename T1, typename T2, typename T3, typename T4, typename T5 >
+const RTTI::ObjectInfo tuple5_BugHelper<T1, T2, T3, T4, T5>::s_third_type_object_third_type = {
+    {&s_fourth_type_object_fourth_type},
+    { 0 },
+    istring(istring("third_type")),
+    RTTI::Value(
+        be_typeid< T3 >::type())
+};
+
+template< typename T1, typename T2, typename T3, typename T4, typename T5 >
+const RTTI::ObjectInfo tuple5_BugHelper<T1, T2, T3, T4, T5>::s_second_type_object_second_type = {
+    {&s_third_type_object_third_type},
+    { 0 },
+    istring(istring("second_type")),
+    RTTI::Value(
+        be_typeid< T2 >::type())
+};
+
+template< typename T1, typename T2, typename T3, typename T4, typename T5 >
+const RTTI::ObjectInfo tuple5_BugHelper<T1, T2, T3, T4, T5>::s_first_type_object_first_type = {
+    {&s_second_type_object_second_type},
+    { 0 },
+    istring(istring("first_type")),
+    RTTI::Value(
+        be_typeid< T1 >::type())
+};
+
+template< typename T1, typename T2, typename T3, typename T4, typename T5 >
+const RTTI::Method::Parameter tuple5_BugHelper<T1, T2, T3, T4, T5>::s_method_tuple_overload_1_params[] = {
+    {
+        { 0 },
+        istring("first"),
+        be_typeid< T1  >::type(),
+        {&RTTI::Method::Parameter::s_noDefaultValue}
+    },
+    {
+        { 0 },
+        istring("second"),
+        be_typeid< T2  >::type(),
+        {&RTTI::Method::Parameter::s_noDefaultValue}
+    },
+    {
+        { 0 },
+        istring("third"),
+        be_typeid< T3  >::type(),
+        {&RTTI::Method::Parameter::s_noDefaultValue}
+    },
+    {
+        { 0 },
+        istring("fourth"),
+        be_typeid< T4  >::type(),
+        {&RTTI::Method::Parameter::s_noDefaultValue}
+    },
+    {
+        { 0 },
+        istring("fifth"),
+        be_typeid< T5  >::type(),
+        {&RTTI::Method::Parameter::s_noDefaultValue}
+    }
+};
+
+template< typename T1, typename T2, typename T3, typename T4, typename T5 >
+const RTTI::Method::Overload tuple5_BugHelper<T1, T2, T3, T4, T5>::s_method_tuple_overloads[] = {
+    {
+        { 0 },
+        { 0, 0 },
+        be_typeid< minitl::tuple<T1, T2, T3, T4, T5> >::type(),
+        false,
+        &trampoline_method_tuple_overload_0
+    },
+    {
+        { 0 },
+        { 5, s_method_tuple_overload_1_params },
+        be_typeid< minitl::tuple<T1, T2, T3, T4, T5> >::type(),
+        false,
+        &trampoline_method_tuple_overload_1
+    }
+};
+
+template< typename T1, typename T2, typename T3, typename T4, typename T5 >
+const RTTI::Method tuple5_BugHelper<T1, T2, T3, T4, T5>::s_methods[1] = {
+    {
+        istring("tuple"),
+        { 2, s_method_tuple_overloads },
+        {&s_methods[0]}
+    }
+};
+
+template< typename T1, typename T2, typename T3, typename T4, typename T5 >
+const RTTI::Property tuple5_BugHelper<T1, T2, T3, T4, T5>::s_properties[5] = {
+    {
+        { 0 },
+        istring("first"),
+        be_typeid< minitl::tuple<T1, T2, T3, T4, T5> >::type(),
+        be_typeid< T1  >::type(),
+        &RTTI::PropertyHelper< T1 , minitl::tuple<T1, T2, T3, T4, T5>, &minitl::tuple<T1, T2, T3, T4, T5>::first >::get
+    },
+    {
+        { 0 },
+        istring("second"),
+        be_typeid< minitl::tuple<T1, T2, T3, T4, T5> >::type(),
+        be_typeid< T2  >::type(),
+        &RTTI::PropertyHelper< T2 , minitl::tuple<T1, T2, T3, T4, T5>, &minitl::tuple<T1, T2, T3, T4, T5>::second >::get
+    },
+    {
+        { 0 },
+        istring("third"),
+        be_typeid< minitl::tuple<T1, T2, T3, T4, T5> >::type(),
+        be_typeid< T3  >::type(),
+        &RTTI::PropertyHelper< T3 , minitl::tuple<T1, T2, T3, T4, T5>, &minitl::tuple<T1, T2, T3, T4, T5>::third >::get
+    },
+    {
+        { 0 },
+        istring("fourth"),
+        be_typeid< minitl::tuple<T1, T2, T3, T4, T5> >::type(),
+        be_typeid< T4  >::type(),
+        &RTTI::PropertyHelper< T4 , minitl::tuple<T1, T2, T3, T4, T5>, &minitl::tuple<T1, T2, T3, T4, T5>::fourth >::get
+    },
+    {
+        { 0 },
+        istring("fifth"),
+        be_typeid< minitl::tuple<T1, T2, T3, T4, T5> >::type(),
+        be_typeid< T5  >::type(),
+        &RTTI::PropertyHelper< T5 , minitl::tuple<T1, T2, T3, T4, T5>, &minitl::tuple<T1, T2, T3, T4, T5>::fifth >::get
+    }
+};
 
 
 template< typename T1, typename T2, typename T3, typename T4, typename T5 >
-be_section(rtti_text_cls)
-raw<RTTI::Class> be_typeid< minitl::tuple<T1, T2, T3, T4, T5> >::preklass()
+BE_EXPORT
+raw<const RTTI::Class> be_typeid< minitl::tuple<T1, T2, T3, T4, T5> >::klass()
 {
-    be_section(rtti_cls)
-    static RTTI::Class cls = {
-        be_typeid< minitl::tuple<T1, T2, T3, T4, T5> >::name(),
-        u32(sizeof(minitl::tuple<T1, T2, T3, T4, T5>)),
-        0,
-        RTTI::ClassType_Struct,
-        {be_game_Namespace().m_ptr},
-        {be_typeid< void >::preklass().m_ptr},
-        {0},
-        {&RTTI::staticarray<const RTTI::Tag>::s_null},
-        {&RTTI::staticarray<const RTTI::Property>::s_null},
-        {&RTTI::staticarray<const RTTI::Method>::s_null},
-        {0},
-        {0},
-        &RTTI::wrapCopy< minitl::tuple<T1, T2, T3, T4, T5> >,
-        &RTTI::wrapDestroy< minitl::tuple<T1, T2, T3, T4, T5> >};
-    raw< RTTI::Class > result = { &cls };
+    static const
+    RTTI::Class s_class = {
+        /* .name */               name(),
+        /* .size */               u32(sizeof(minitl::tuple<T1, T2, T3, T4, T5>)),
+        /* .offset */             0,
+        /* .id */                 RTTI::ClassType_Struct,
+        /* .owner */              {be_game_Namespace().m_ptr},
+        /* .parent */             {be_typeid< void >::klass().m_ptr},
+        /* .objects */            {&tuple5_BugHelper<T1, T2, T3, T4, T5>::s_first_type_object_first_type},
+        /* .tags */               { 0 },
+        /* .properties */         { 5, tuple5_BugHelper<T1, T2, T3, T4, T5>::s_properties },
+        /* .methods */            { 1, tuple5_BugHelper<T1, T2, T3, T4, T5>::s_methods },
+        /* .constructor */        {tuple5_BugHelper<T1, T2, T3, T4, T5>::s_methods},
+        /* .apiMethods */         {0},
+        /* .copyconstructor */    &RTTI::wrapCopy< minitl::tuple<T1, T2, T3, T4, T5> >,
+        /* .destructor */         &RTTI::wrapDestroy< minitl::tuple<T1, T2, T3, T4, T5> >
+    };
+
+    raw< const RTTI::Class > result = { &s_class };
     return result;
 }
 
 template< typename T1, typename T2, typename T3, typename T4, typename T5 >
-const RTTI::Type be_typeid< minitl::tuple<T1, T2, T3, T4, T5> >::first_type = be_typeid<T1>::type();
-template< typename T1, typename T2, typename T3, typename T4, typename T5 >
-const RTTI::Type be_typeid< minitl::tuple<T1, T2, T3, T4, T5> >::second_type = be_typeid<T2>::type();
-template< typename T1, typename T2, typename T3, typename T4, typename T5 >
-const RTTI::Type be_typeid< minitl::tuple<T1, T2, T3, T4, T5> >::third_type = be_typeid<T3>::type();
-template< typename T1, typename T2, typename T3, typename T4, typename T5 >
-const RTTI::Type be_typeid< minitl::tuple<T1, T2, T3, T4, T5> >::fourth_type = be_typeid<T4>::type();
-template< typename T1, typename T2, typename T3, typename T4, typename T5 >
-const RTTI::Type be_typeid< minitl::tuple<T1, T2, T3, T4, T5> >::fifth_type = be_typeid<T5>::type();
-
-
-template< typename T1, typename T2, typename T3, typename T4, typename T5 >
-be_section(rtti_text_cls_props)
-raw<const RTTI::Class> be_typeid< minitl::tuple<T1, T2, T3, T4, T5> >::registerProperties()
+BE_EXPORT
+RTTI::Type be_typeid< minitl::tuple<T1, T2, T3, T4, T5> >::type()
 {
-    raw< RTTI::Class > result = preklass();
-    be_section(rtti_method)
-        static RTTI::staticarray_n< 5, const RTTI::Method::Parameter > s_tuple_0_params = {
-        5,
-        {
-            { {&RTTI::staticarray<const RTTI::Tag>::s_null}, istring("first"), be_typeid< T1 >::type() },
-            { {&RTTI::staticarray<const RTTI::Tag>::s_null}, istring("second"), be_typeid< T2 >::type() },
-            { {&RTTI::staticarray<const RTTI::Tag>::s_null}, istring("third"), be_typeid< T3 >::type() },
-            { {&RTTI::staticarray<const RTTI::Tag>::s_null}, istring("fourth"), be_typeid< T4 >::type() },
-            { {&RTTI::staticarray<const RTTI::Tag>::s_null}, istring("fifth"), be_typeid< T5 >::type() }
-        }
-    };
-    be_section(rtti_method)
-        static RTTI::staticarray_n< 2, const RTTI::Method::Overload > s_method_tuple_overloads = {
-        {2},
-        {
-            {
-                {&RTTI::staticarray<const RTTI::Tag>::s_null},
-                { &s_tuple_0_params.array },
-                be_typeid< minitl::tuple<T1, T2, T3, T4, T5> >::type(),
-                false,
-                &make_tuple
-            },
-            {
-                {&RTTI::staticarray<const RTTI::Tag>::s_null},
-                {&RTTI::staticarray<const RTTI::Method::Parameter>::s_null},
-                be_typeid< minitl::tuple<T1, T2, T3, T4, T5> >::type(),
-                false,
-                &make_default_tuple
-            }
-        }
-    };
-    be_section(rtti_method)
-        static RTTI::staticarray_n< 1, const RTTI::Method > s_methods = {
-        {1},
-        {
-            {
-                istring("tuple"),
-                { &s_method_tuple_overloads.array },
-                { &s_methods.elements[0] }
-            }
-        }
-    };
-    result->methods.set(&s_methods.array);
-    be_section(rtti_prop)
-        static RTTI::staticarray_n< 5, const RTTI::Property > s_properties = {
-        {5},
-        {
-            {
-                {&RTTI::staticarray<const RTTI::Tag>::s_null},
-                istring("fifth"),
-                be_typeid< minitl::tuple<T1, T2, T3, T4, T5> >::type(),
-                be_typeid< T5  >::type(),
-                &RTTI::PropertyHelper< T4 , minitl::tuple<T1, T2, T3, T4, T5>, &minitl::tuple<T1, T2, T3, T4, T5>::fourth >::get
-            },
-            {
-                {&RTTI::staticarray<const RTTI::Tag>::s_null},
-                istring("fourth"),
-                be_typeid< minitl::tuple<T1, T2, T3, T4, T5> >::type(),
-                be_typeid< T4  >::type(),
-                &RTTI::PropertyHelper< T4 , minitl::tuple<T1, T2, T3, T4, T5>, &minitl::tuple<T1, T2, T3, T4, T5>::fourth >::get
-            },
-            {
-                {&RTTI::staticarray<const RTTI::Tag>::s_null},
-                istring("third"),
-                be_typeid< minitl::tuple<T1, T2, T3, T4, T5> >::type(),
-                be_typeid< T3  >::type(),
-                &RTTI::PropertyHelper< T3 , minitl::tuple<T1, T2, T3, T4, T5>, &minitl::tuple<T1, T2, T3, T4, T5>::third >::get
-            },
-            {
-                {&RTTI::staticarray<const RTTI::Tag>::s_null},
-                istring("second"),
-                be_typeid< minitl::tuple<T1, T2, T3, T4, T5> >::type(),
-                be_typeid< T2  >::type(),
-                &RTTI::PropertyHelper< T2 , minitl::tuple<T1, T2, T3, T4, T5>, &minitl::tuple<T1, T2, T3, T4, T5>::second >::get
-            },
-            {
-                {&RTTI::staticarray<const RTTI::Tag>::s_null},
-                istring("first"),
-                be_typeid< minitl::tuple<T1, T2, T3, T4, T5> >::type(),
-                be_typeid< T1  >::type(),
-                &RTTI::PropertyHelper< T1 , minitl::tuple<T1, T2, T3, T4, T5>, &minitl::tuple<T1, T2, T3, T4, T5>::first >::get
-            }
-        }
-    };
-    result->properties.set(&s_properties.array);
-    return result;
+    return RTTI::Type::makeType(klass(), RTTI::Type::Value, RTTI::Type::Mutable, RTTI::Type::Mutable);
 }
 
 template< typename T1, typename T2, typename T3, typename T4, typename T5 >
+BE_EXPORT
 istring be_typeid< minitl::tuple<T1, T2, T3, T4, T5> >::name()
 {
-    static istring s_name(minitl::format<512u>("tuple<%s,%s,%s,%s,%s>")
-                        | be_typeid<T1>::name()
-                        | be_typeid<T2>::name()
-                        | be_typeid<T3>::name()
-                        | be_typeid<T4>::name()
-                        | be_typeid<T5>::name());
+    static istring s_name(minitl::format<1024u>("tuple<%s,%s,%s,%s,%s>")
+                        | be_typeid<T1>::klass()->name
+                        | be_typeid<T2>::klass()->name
+                        | be_typeid<T3>::klass()->name
+                        | be_typeid<T4>::klass()->name
+                        | be_typeid<T5>::klass()->name);
     return s_name;
 }
 
-template< typename T1, typename T2, typename T3, typename T4, typename T5 >
-raw<const RTTI::Class> be_typeid< minitl::tuple<T1, T2, T3, T4, T5> >::klass()
-{
-    static raw<const RTTI::Class> result = registerProperties();
-    return result;
 }
 
-template< typename T1, typename T2, typename T3, typename T4, typename T5 >
-RTTI::Type be_typeid< minitl::tuple<T1, T2, T3, T4, T5> >::type()
-{
-    return RTTI::Type::makeType(klass(), RTTI::Type::Value,
-                                RTTI::Type::Mutable, RTTI::Type::Mutable);
-}
-
-}
-#endif
 /**************************************************************************************************/
 #endif
 
