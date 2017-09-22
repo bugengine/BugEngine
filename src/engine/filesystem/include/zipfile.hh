@@ -6,6 +6,8 @@
 /**************************************************************************************************/
 #include    <filesystem/stdafx.h>
 #include    <filesystem/file.script.hh>
+#include    <cstdlib>
+#include    <cstdio>
 #include    <unzip.h>
 
 namespace BugEngine
