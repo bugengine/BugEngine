@@ -252,7 +252,7 @@ def module(bld, name, module_path, depends,
                 kernelsources = [kernelpath]
                 kernels = []
                 for env in bld.multiarch_envs:
-                    target_prefix = (env.ENV_PREFIX + '/') if env.ENV_PREFIX else ''
+                    target_prefix = (env.ENV_PREFIX + '.') if env.ENV_PREFIX else ''
                     kernel_name = kernel[:kernel.rfind('.')]
                     t = bld(
                         env = env.derive(),
@@ -389,7 +389,7 @@ def thirdparty(bld, name, feature='', path='.', var=''):
     internal_deps = []
     supported = False
     for env in bld.multiarch_envs:
-        target_prefix = (env.ENV_PREFIX + '/') if env.ENV_PREFIX else ''
+        target_prefix = (env.ENV_PREFIX + '.') if env.ENV_PREFIX else ''
         target_name = target_prefix + name
         if env['check_%s' % var] or env.PROJECTS:
             if feature:
