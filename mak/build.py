@@ -742,8 +742,11 @@ def make_bld_node_common(self, node, path, name):
         else:
             node = self.bld.bldnode.make_node(out_dir).make_node(name)
     else:
+        out_dir = path.path_from(self.path)
+        while out_dir[0] == '.':
+            out_dir = out_dir[out_dir.find(os.path.sep)+1:]
         node = node.make_node(self.target)
-        node = node.make_node(path.path_from(self.path))
+        node = node.make_node(out_dir)
         node = node.make_node(name)
     node.parent.mkdir()
     return node
