@@ -162,7 +162,7 @@ struct Partition_BugHelper
     {
         PropertyCount = 1 + T::Index
     };
-    static byte s_propertyBuffer[PropertyCount * sizeof(RTTI::Property)];
+    static byte s_propertyBuffer[];
     static RTTI::Property* s_properties;
 
     static bool getPartitionProperties()
@@ -176,7 +176,7 @@ struct Partition_BugHelper
 };
 
 template< typename T >
-byte Partition_BugHelper<T>::s_propertyBuffer[PropertyCount * sizeof(RTTI::Property)];
+byte Partition_BugHelper<T>::s_propertyBuffer[Partition_BugHelper<T>::PropertyCount * sizeof(RTTI::Property)];
 
 template< typename T >
 RTTI::Property* Partition_BugHelper<T>::s_properties = reinterpret_cast<RTTI::Property*>(s_propertyBuffer);
