@@ -609,7 +609,7 @@ class Class(Container):
         pass
 
     def declare(self, owner, struct_owners, definition, instance, prefix):
-        instance.write('raw< ::BugEngine::RTTI::Class > klass_%s();\n' % self.name[-1])
+        instance.write('raw< const ::BugEngine::RTTI::Class > klass_%s();\n' % self.name[-1])
         if struct_owners:
             for alias, alias_cpp in self.all_names():
                 definition.write('    static const ::BugEngine::RTTI::ObjectInfo s%s_object_%s;\n' % (prefix, alias_cpp))

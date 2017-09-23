@@ -74,7 +74,7 @@ struct EntityStorage_BugHelper
         PropertyCount = ComponentCount+PartitionCount
     };
 
-    static byte s_propertyBuffer[PropertyCount * sizeof(RTTI::Property)];
+    static byte s_propertyBuffer[];
     static RTTI::Property* s_properties;
 
     static bool getProperties()
@@ -94,7 +94,7 @@ struct EntityStorage_BugHelper
 };
 
 template< typename STORAGE >
-byte EntityStorage_BugHelper<STORAGE>::s_propertyBuffer[PropertyCount * sizeof(RTTI::Property)];
+byte EntityStorage_BugHelper<STORAGE>::s_propertyBuffer[EntityStorage_BugHelper<STORAGE>::PropertyCount * sizeof(RTTI::Property)];
 
 template< typename STORAGE >
 RTTI::Property* EntityStorage_BugHelper<STORAGE>::s_properties = reinterpret_cast<RTTI::Property*>(s_propertyBuffer);
