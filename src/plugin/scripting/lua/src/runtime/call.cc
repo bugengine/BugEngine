@@ -268,6 +268,7 @@ int call(lua_State *state, raw<const RTTI::Method> method)
                 }
                 break;
             default:
+                lua_pop(state, 1);
                 error = true;
                 break;
             }
@@ -310,7 +311,12 @@ int call(lua_State *state, raw<const RTTI::Method> method)
     else
     {
         freea(parameters);
-        return error(state, "no overload can convert all parameters");
+        char message[4096] = "no overload can convert all parameters\n  ";
+        for (u32 i = 0; i < nargs; ++i)
+        {
+            strcat(message, minitl::format<128u>("%s%s") | Context::tostring(state, 2+i) | (i < nargs-1 ? ", " : ""));
+        }
+        return error(state, message);
     }
 }
 

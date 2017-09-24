@@ -116,28 +116,12 @@ const RTTI::ObjectInfo array_BugHelper<T>::s_prop_value_type_object_value_type =
 };
 
 template< typename T >
-const RTTI::Method::Parameter array_BugHelper<T>::s_method_array_overload_0_params[] = {
-    {
-        { 0 },
-        istring("values"),
-        be_typeid< BugEngine::RTTI::Value * >::type(),
-        {&RTTI::Method::Parameter::s_noDefaultValue}
-    },
-    {
-        { 0 },
-        istring("count"),
-        be_typeid< u32  >::type(),
-        {&RTTI::Method::Parameter::s_noDefaultValue}
-    }
-};
-
-template< typename T >
 const RTTI::Method::Overload array_BugHelper<T>::s_method_array_overloads[] = {
     {
         { 0 },
-        { 2, s_method_array_overload_0_params },
+        { 0, 0 },
         be_typeid< minitl::array<T> >::type(),
-        false,
+        true,
         &trampoline_method_array_overload_0
     }
 };
@@ -251,11 +235,11 @@ template< typename T >
 BE_EXPORT
 raw<const RTTI::Class> be_typeid< minitl::array<T> >::klass()
 {
-    const RTTI::Class s_class = {
+    static const RTTI::Class s_class = {
         "array",
         u32(sizeof(minitl::array<T>)),
         0,
-        RTTI::ClassType_Struct,
+        RTTI::ClassType_Array,
         {0},
         {be_typeid< void >::klass().m_ptr},
         {0},

@@ -7,6 +7,7 @@
 #include    <rtti/engine/methodinfo.script.hh>
 #include    <rtti/engine/propertyinfo.script.hh>
 #include    <rtti/engine/objectinfo.script.hh>
+#include    <rtti/engine/scriptingapi.hh>
 
 
 namespace BugEngine { namespace Lua
@@ -199,7 +200,7 @@ static bool convertTableToValue(lua_State *state, int index, const RTTI::Type& t
 {
     if (type.metaclass->type() == RTTI::ClassType_Array)
     {
-        RTTI::Type arrayType = RTTI::Value(type.metaclass)["value_type"].as<const RTTI::Type&>();
+        RTTI::Type arrayType = type.metaclass->apiMethods->arrayScripting->value_type;
         int count = luaL_len(state, index);
         RTTI::Value* parameters = (RTTI::Value*)malloca(minitl::align(count * sizeof(RTTI::Value), be_alignof(RTTI::Value)));
 
