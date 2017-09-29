@@ -1,8 +1,41 @@
-def build(bld):
+"""
+    Use this file to declare all libraries and modules in the bugengine
+"""
+
+
+def externals(bld):
+    """
+        Declares all external modules
+    """
     bld.external('3rdparty.zlib')
     bld.external('3rdparty.minizip')
     bld.external('3rdparty.mak')
+    bld.external('3rdparty.console')
+    bld.external('3rdparty.X11')
+    bld.external('3rdparty.win32')
+    bld.external('3rdparty.DirectX9')
+    bld.external('3rdparty.DirectX10')
+    bld.external('3rdparty.DirectX11')
+    bld.external('3rdparty.OpenGL')
+    bld.external('3rdparty.OpenGLES2')
+    bld.external('3rdparty.OpenCL')
+    bld.external('3rdparty.OpenAL')
+    bld.external('3rdparty.oggvorbis')
+    bld.external('3rdparty.bullet')
+    bld.external('3rdparty.freetype')
+    bld.external('3rdparty.fontconfig')
+    bld.external('3rdparty.lua')
+    bld.external('3rdparty.squirrel')
+    bld.external('3rdparty.ncurses')
+    bld.external('3rdparty.tcltk')
+    bld.external('3rdparty.python')
+    bld.external('3rdparty.scintilla')
 
+
+def bugengine(bld):
+    """
+        Declares the main library and entry point
+    """
     bld.library('engine.kernel',
                 [])
     bld.library('engine.minitl',
@@ -36,29 +69,11 @@ def build(bld):
 
     bld.engine('bugengine', ['engine.bugengine'], path='engine.main')
 
-    bld.external('3rdparty.console')
-    bld.external('3rdparty.X11')
-    bld.external('3rdparty.win32')
-    bld.external('3rdparty.DirectX9')
-    bld.external('3rdparty.DirectX10')
-    bld.external('3rdparty.DirectX11')
-    bld.external('3rdparty.OpenGL')
-    bld.external('3rdparty.OpenGLES2')
-    bld.external('3rdparty.OpenCL')
 
-    bld.external('3rdparty.OpenAL')
-    bld.external('3rdparty.oggvorbis')
-
-    bld.external('3rdparty.bullet')
-    bld.external('3rdparty.freetype')
-    bld.external('3rdparty.fontconfig')
-
-    bld.external('3rdparty.lua')
-    bld.external('3rdparty.squirrel')
-    bld.external('3rdparty.ncurses')
-    bld.external('3rdparty.tcltk')
-    bld.external('3rdparty.python')
-
+def plugins(bld):
+    """
+        Declares all plugins
+    """
     bld.plugin('plugin.debug.runtime',
                ['engine.bugengine'])
     bld.plugin('plugin.debug.assert',
@@ -172,16 +187,20 @@ def build(bld):
                ['engine.bugengine', '3rdparty.ncurses'],
                platforms=['pc'])
 
-    bld.external('3rdparty.scintilla')
     bld.plugin('tool.bugeditor.ui',
                ['engine.bugengine', '3rdparty.scintilla'],
                platforms=['pc'])
+
+
+def games(bld):
+    """
+        Declares all games/samples/tools/autotests
+    """
     bld.game('bugeditor',
              ['engine.bugengine', 'tool.bugeditor.ui',
               'plugin.scripting.package'],
              path='tool.bugeditor.main',
              platforms=['pc'])
-
     bld.game('sample.kernel',
              ['engine.bugengine', 'plugin.scripting.package'])
     bld.game('sample.text',
@@ -194,3 +213,12 @@ def build(bld):
                       'plugin.scripting.package'],
              path='tool.help', platforms=['pc'])
 
+
+def build(bld):
+    """
+        Declares each bugengine module and their dependencies
+    """
+    externals(bld)
+    bugengine(bld)
+    plugins(bld)
+    games(bld)
