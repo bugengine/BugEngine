@@ -174,12 +174,11 @@ def module(bld, name, module_path, depends,
             build = True
 
     source_node = bld.path.make_node(module_path.replace('.', '/'))
-    project_path = source_node.parent.path_from(bld.srcnode).replace('/', '.')
-    project_path = '%s.%s' % (project_path, name.split('.')[-1])
+    project_path = source_node.path_from(bld.srcnode).replace('/', '.')
     if 'plugin' in features:
         plugin_name = name.replace('.', '_')
     else:
-        plugin_name = 'game'
+        plugin_name = 'bugengine'
 
     compile_extensions = ['cxx', 'cpp', 'cc', 'c', 'rc', 'm', 'mm']
     preprocess_extensions = ['yy', 'll', 'plist']
