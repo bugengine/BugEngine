@@ -210,7 +210,7 @@ void PyBugNamespace::registerType(PyObject* module)
     Py_INCREF(&s_pyType);
     result = (*s_library->m_PyModule_AddObject)(module, "Namespace", (PyObject*)&s_pyType);
     be_assert(result >= 0, "unable to register type");
-    RTTI::Value v = RTTI::Value(be_game_Namespace());
+    RTTI::Value v = RTTI::Value(be_bugengine_Namespace());
     result = (*s_library->m_PyModule_AddObject)(module, "BugEngine", stealValue(0, v));
     be_assert(result >= 0, "unable to register type");
     be_forceuse(result);

@@ -170,7 +170,7 @@ raw<const RTTI::Class> be_typeid< minitl::tuple<T1, T2, T3> >::klass()
         /* .size */               u32(sizeof(minitl::tuple<T1, T2, T3>)),
         /* .offset */             0,
         /* .id */                 RTTI::ClassType_Struct,
-        /* .owner */              {be_game_Namespace().m_ptr},
+        /* .owner */              {be_bugengine_Namespace().m_ptr},
         /* .parent */             {be_typeid< void >::klass().m_ptr},
         /* .objects */            {&tuple3_BugHelper<T1, T2, T3>::s_first_type_object_first_type},
         /* .tags */               { 0 },

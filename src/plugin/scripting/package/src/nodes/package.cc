@@ -96,7 +96,7 @@ Package::Package(const ifilename& filename)
     ,   m_values(Arena::packageBuilder())
     ,   m_logger()
 {
-    m_rootNamespace->add(inamespace("game"), RTTI::Value(be_game_Namespace()));
+    m_rootNamespace->add(inamespace("game"), RTTI::Value(be_bugengine_Namespace()));
 }
 
 Package::~Package()

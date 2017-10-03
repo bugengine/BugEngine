@@ -450,7 +450,7 @@ Context::Context(const Plugin::Context& context)
     lua_setmetatable(m_state, -2);
     lua_setglobal(m_state, "resources");
 
-    push(m_state, RTTI::Value(be_game_Namespace()));
+    push(m_state, RTTI::Value(be_bugengine_Namespace()));
     lua_setglobal(m_state, "BugEngine");
     for (const luaL_Reg* method = base_funcs; method->func != 0; ++method)
     {

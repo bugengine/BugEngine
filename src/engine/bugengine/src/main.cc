@@ -19,7 +19,7 @@
 #include    <cstdlib>
 #include    <unistd.h>
 
-BE_REGISTER_NAMESPACE_2_NAMED(game, BugEngine, MainSettings);
+BE_REGISTER_NAMESPACE_2_NAMED(bugengine, BugEngine, MainSettings);
 
 namespace
 {

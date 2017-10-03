@@ -5,7 +5,7 @@
 #include    <scheduler/kernel/kernel.script.hh>
 #include    <rtti/engine/namespace.hh>
 
-BE_REGISTER_NAMESPACE_2_(game, BugEngine, Kernel);
+BE_REGISTER_NAMESPACE_2_(bugengine, BugEngine, Kernel);
 
 namespace BugEngine { namespace Kernel
 {
