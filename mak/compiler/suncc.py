@@ -110,20 +110,23 @@ class SunCC(Configure.ConfigurationContext.GnuCompiler):
         v = conf.env
         v['RPATH_ST'] = '-R%s'
         if platform.NAME == 'Linux':
+            v.IDIRAFTER = '-I'
             #v.STATIC = 1
             if self.arch == 'x86':
                 v.append_unique('SYSTEM_LIBPATHS', ['=/usr/lib/i386-linux-gnu'])
-                v.CFLAGS += ['-xtarget=opteron']
+                v.CFLAGS += ['-xtarget=opteron', '-I/usr/include/i386-linux-gnu']
                 v.CXXFLAGS += [os.path.join(conf.bugenginenode.abspath(),
                                             'mak/compiler/suncc/interlocked-a=x86.il'),
                                '-xarch=sse2', '-xchip=generic', '-xcache=64/64/2:1024/64/16',
+                               '-I/usr/include/i386-linux-gnu',
                                '-include', 'math.h']
             elif self.arch == 'amd64':
                 v.append_unique('SYSTEM_LIBPATHS', ['=/usr/lib/x86_64-linux-gnu'])
-                v.CFLAGS += ['-xtarget=opteron']
+                v.CFLAGS += ['-xtarget=opteron', '-I/usr/include/x86_64-linux-gnu']
                 v.CXXFLAGS += [os.path.join(conf.bugenginenode.abspath(),
                                             'mak/compiler/suncc/interlocked-a=amd64.il'),
                                '-xarch=sse2', '-xchip=generic', '-xcache=64/64/2:1024/64/16',
+                               '-I/usr/include/x86_64-linux-gnu',
                                '-include', 'math.h']
             v.append_unique('CFLAGS', ['-mt', '-xldscope=hidden', '-Kpic', '-DPIC', '-D__PIC__'])
             v.append_unique('CXXFLAGS', ['-mt', '-xldscope=hidden', '-Kpic', '-DPIC', '-D__PIC__'])

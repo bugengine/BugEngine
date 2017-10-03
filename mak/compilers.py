@@ -320,6 +320,7 @@ class GnuCompiler(Compiler):
         env.CC = self.compiler_c
         env.CXX = self.compiler_cxx
         env.SYSROOT = sysroot or self.sysroot or []
+        env.IDIRAFTER = '-idirafter'
         Compiler.load_in_env(self, conf, platform)
 
 

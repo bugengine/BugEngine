@@ -58,6 +58,11 @@ class ICC(Configure.ConfigurationContext.GnuCompiler):
     def load_in_env(self, conf, platform):
         Configure.ConfigurationContext.GnuCompiler.load_in_env(self, conf, platform)
         v = conf.env
+        if platform.NAME == 'Linux':
+            if self.arch == 'x86':
+                v.append_unique('SYSTEM_LIBPATHS', ['=/usr/lib/i386-linux-gnu'])
+            elif self.arch == 'amd64':
+                v.append_unique('SYSTEM_LIBPATHS', ['=/usr/lib/x86_64-linux-gnu'])
         v.append_unique('CFLAGS', ['-fPIC'])
         v.append_unique('CXXFLAGS', ['-fPIC'])
         if platform.NAME != 'windows':

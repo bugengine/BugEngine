@@ -61,6 +61,7 @@ class MSVC(Configure.ConfigurationContext.Compiler):
         conf.env.MSVC_BATFILE = [self.batfile, self.args]
         conf.env.COMPILER_NAME='msvc'
         conf.env.COMPILER_TARGET='windows-win32-msvc-%s'%version
+        conf.env.IDIRAFTER='/I'
         if os_platform().endswith('64'):
             conf.find_program('cdb64', var='CDB', mandatory=False)
         else:
