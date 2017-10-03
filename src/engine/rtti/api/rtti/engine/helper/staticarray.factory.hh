@@ -198,7 +198,7 @@ raw<const RTTI::Class> be_typeid< RTTI::staticarray<T> >::klass()
         u32(sizeof(RTTI::staticarray<T>)),
         0,
         RTTI::ClassType_Array,
-        {be_game_Namespace().m_ptr},
+        {be_bugengine_Namespace().m_ptr},
         {be_typeid< void >::klass().m_ptr},
         {0},
         {0},

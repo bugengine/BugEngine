@@ -460,7 +460,7 @@ inamespace Class::fullname() const
 
 Value Class::findClass(inamespace name)
 {
-    Value v = Value(raw<const RTTI::Class>(be_game_Namespace()));
+    Value v = Value(raw<const RTTI::Class>(be_bugengine_Namespace()));
     while (v && name.size())
     {
         v = v[name.pop_front()];
@@ -470,7 +470,7 @@ Value Class::findClass(inamespace name)
 
 }
 
-raw<RTTI::Class> be_game_Namespace()
+raw<RTTI::Class> be_bugengine_Namespace()
 {
     static RTTI::Class ci = { "BugEngine", 0, 0, RTTI::ClassType_Namespace, {0}, {0}, {0},
                               {0},
@@ -481,12 +481,12 @@ raw<RTTI::Class> be_game_Namespace()
     return result;
 }
 
-raw<RTTI::Class> be_game_Namespace_BugEngine()
+raw<RTTI::Class> be_bugengine_Namespace_BugEngine()
 {
-    return be_game_Namespace();
+    return be_bugengine_Namespace();
 }
 
-static RTTI::ObjectInfo ob = { be_game_Namespace_BugEngine()->objects, {0}, "BugEngine", RTTI::Value(be_game_Namespace()) };
-BE_EXPORT const RTTI::ObjectInfo* obptr = (be_game_Namespace_BugEngine()->objects.m_ptr = &ob);
+static RTTI::ObjectInfo ob = { be_bugengine_Namespace_BugEngine()->objects, {0}, "BugEngine", RTTI::Value(be_bugengine_Namespace()) };
+BE_EXPORT const RTTI::ObjectInfo* obptr = (be_bugengine_Namespace_BugEngine()->objects.m_ptr = &ob);
 
 }

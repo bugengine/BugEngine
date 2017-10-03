@@ -8,7 +8,7 @@
 #include    <scheduler/task/group.hh>
 #include    <rtti/engine/namespace.hh>
 
-BE_REGISTER_NAMESPACE_2_NAMED(game, BugEngine, World);
+BE_REGISTER_NAMESPACE_2_NAMED(bugengine, BugEngine, World);
 
 namespace BugEngine { namespace World
 {

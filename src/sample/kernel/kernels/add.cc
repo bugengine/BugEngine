@@ -1,6 +1,7 @@
 /* BugEngine <bugengine.devel@gmail.com> / 2008-2014
    see LICENSE for detail */
 
+#include    <kernel/input/segment.hh>
 #include    <components.script.hh>
 #include    <cstdio>
 

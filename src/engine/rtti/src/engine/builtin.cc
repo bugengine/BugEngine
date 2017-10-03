@@ -7,9 +7,9 @@
 #include    <rtti/engine/array.factory.hh>
 #include    <rtti/engine/helper/method.hh>
 
-BE_REGISTER_NAMESPACE_2_(game, BugEngine, RTTI);
-BE_REGISTER_NAMESPACE_2_(game, BugEngine, EditHint);
-BE_REGISTER_NAMESPACE_2_(game, BugEngine, Documentation);
+BE_REGISTER_NAMESPACE_2_(bugengine, BugEngine, RTTI);
+BE_REGISTER_NAMESPACE_2_(bugengine, BugEngine, EditHint);
+BE_REGISTER_NAMESPACE_2_(bugengine, BugEngine, Documentation);
 
 namespace BugEngine
 {

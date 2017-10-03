@@ -63,7 +63,7 @@ SettingsProvider::SettingsRegistration Settings<T>::s_registration;
 namespace BugEngine
 {
 
-raw<RTTI::Class> be_game_Namespace_BugEngine_Settings();
+raw<RTTI::Class> be_bugengine_Namespace_BugEngine_Settings();
 
 template< typename T >
 struct be_typeid< Settings::Settings<T> >
@@ -125,7 +125,7 @@ raw<const RTTI::Class> be_typeid< Settings::Settings<T> >::klass()
         0,
         0,
         RTTI::ClassType_Struct,
-        {be_game_Namespace_BugEngine_Settings().m_ptr},
+        {be_bugengine_Namespace_BugEngine_Settings().m_ptr},
         be_typeid<void>::klass(),
         {0},
         {0},

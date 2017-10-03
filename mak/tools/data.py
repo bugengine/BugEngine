@@ -28,37 +28,12 @@ cls.scan = scan
 
 
 class docgen(Task.Task):
-    def process_node_gcode(self, node):
+    def process_node(self, node):
         return []
-
-    def process_node_github(self, node):
-        return []
-
-    def cleanup_gcode(self):
-        files = self.out_dir_gcode.ant_glob()
-        for file in files:
-            if file.name.startswith('api.'):
-                if file not in self.outputs:
-                    file.delete()
-
-    def cleanup_github(self):
-        files = self.out_dir_github.ant_glob()
-        for file in files:
-            if file not in self.outputs:
-                while file:
-                    file.delete()
-                    file = file.parent
-                    if file.children:
-                        break
-                    if file == self.out_dir:
-                        break
 
     def run(self):
         for input in self.inputs:
-            self.outputs += self.process_node_gcode(input)
-            self.outputs += self.process_node_github(input)
-        self.cleanup_gcode()
-        self.cleanup_github()
+            self.outputs += self.process_node(input)
         return 0
 
 
@@ -86,12 +61,11 @@ def datagen(self, node):
 
 @extension('.doc')
 def docgen(self, node):
-    try:
-        doc_task = self.bld.doc_task
-    except AttributeError:
-        doc_task = self.bld.doc_task = self.create_task('docgen', [], [])
-        doc_task.out_dir_gcode = self.bld.srcnode.make_node('doc/wiki.googlecode')
-        doc_task.out_dir_gcode.mkdir()
-        doc_task.out_dir_github = self.bld.srcnode.make_node('doc/wiki.github/api')
-        doc_task.out_dir_github.mkdir()
+    if self.source_nodes[0].is_child_of(self.bld.bugenginenode):
+        out_node = self.bld.bugenginenode
+    else:
+        out_node = self.bld.srcnode
+    doc_task = self.create_task('docgen', [], [])
+    doc_task.out_dir = out_node.make_node('doc/api')
+    doc_task.out_dir.mkdir()
     doc_task.set_inputs([node])
