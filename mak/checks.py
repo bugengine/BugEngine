@@ -261,9 +261,16 @@ def run_pkg_config(conf, name):
                 value = value.format(value, **expand)
                 configs[var_name.strip()] = value.strip().split()
     ld_flags = configs.get('Libs') or []
+    cflags = []
+    for f in configs.get('Cflags') or []:
+        if f.startswith('-I'):
+            cflags += [conf.env.IDIRAFTER, f[2:]]
+        else:
+            cflags.append(f)
     configs['Libs'] = [i[2:] for i in ld_flags if i[0:2] == '-l']
     configs['LdFlags'] = [i for i in ld_flags if i[0:2] != '-l']
-    return configs.get('Cflags'), configs.get('Libs'), configs.get('LdFlags')
+    configs['LdFlags'] = [i for i in ld_flags if i[0:2] != '-l']
+    return cflags, configs.get('Libs'), configs.get('LdFlags')
 
 
 @conf
