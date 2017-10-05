@@ -108,6 +108,16 @@ class install_task(Task.Task):
 
 
 for command in ['build', 'clean']:
+    for variant in ['debug', 'profile', 'final']:
+        class BuildWrapperVariant(Build.BuildContext):
+            cmd = '%s:all:%s'%(command, variant)
+            def execute(self):
+                self.restore()
+                if not self.all_envs:
+                    self.load_envs()
+                for toolchain in self.env.ALL_TOOLCHAINS:
+                    cmd, all, variant = self.cmd.split(':')
+                    Options.commands.append('%s:%s:%s'%(cmd, toolchain, variant))
     class BuildWrapperAll(Build.BuildContext):
         cmd = '%s:all'%command
         def execute(self):
@@ -380,10 +390,6 @@ def thirdparty(bld, name, feature='', path='.', var=''):
     project_path = '%s.%s' % (project_path, name.split('.')[-1])
     if not var: var = bld.path.name
 
-    lib_paths = [i.path_from(bld.bldnode) for i in [source_node.make_node('lib')] + [source_node.make_node('lib.%s'%platform) for platform in platform_specific + arch_specific] if os.path.isdir(i.abspath())]
-    bin_paths = [i for i in [source_node.make_node('bin.%s'%arch) for arch in arch_specific] if os.path.isdir(i.abspath())]
-    data_paths = [i for i in [source_node.make_node('data.%s'%arch) for arch in arch_specific] if os.path.isdir(i.abspath())]
-    includes = [i for i in [source_node.make_node('api')] + [source_node.make_node('api.%s'%platform) for platform in platform_specific + arch_specific] if os.path.isdir(i.abspath())]
 
     internal_deps = []
     supported = False
@@ -394,14 +400,11 @@ def thirdparty(bld, name, feature='', path='.', var=''):
             if feature:
                 bld.add_feature(feature, env)
             supported = True
-            includes = env['check_%s_includes' % var] + includes
-            lib_paths = env['check_%s_libpath' % var] + lib_paths
+            includes = env['check_%s_includes' % var]
+            lib_paths = env['check_%s_libpath' % var]
             libs = env['check_%s_libs' % var]
             frameworks = env['check_%s_frameworks' % var]
             defines = env['check_%s_defines' % var]
-            env.append_unique('CFLAGS_%s'%name, env['check_%s_cflags' % var])
-            env.append_unique('CXXFLAGS_%s'%name, env['check_%s_cxxflags' % var])
-            env.append_unique('LINKFLAGS_%s'%name, env['check_%s_ldflags' % var])
             tg = bld(target=target_name,
                      features=['cxx'],
                      module_path=project_path,
@@ -410,6 +413,9 @@ def thirdparty(bld, name, feature='', path='.', var=''):
                      export_libpath=lib_paths,
                      export_lib=libs,
                      export_framework=frameworks,
+                     export_cflags = env['check_%s_cflags' % var],
+                     export_cxxflags = env['check_%s_cxxflags' % var],
+                     export_linkflags = env['check_%s_ldflags' % var],
                      source_nodes=[source_node])
             if target_prefix:
                 internal_deps.append(tg.name)
@@ -419,6 +425,8 @@ def thirdparty(bld, name, feature='', path='.', var=''):
         else:
             install_tg = tg
 
+        bin_paths = [i for i in [source_node.make_node('bin.%s'%arch) for arch in arch_specific] if os.path.isdir(i.abspath())]
+        data_paths = [i for i in [source_node.make_node('data.%s'%arch) for arch in arch_specific] if os.path.isdir(i.abspath())]
         for bin_path in bin_paths:
             install_tg.deploy_directory(bld.env, bin_path, '', 'DEPLOY_RUNBINDIR')
         for data_path in data_paths:
@@ -442,7 +450,7 @@ def library(bld, name, depends=[], features=[], platforms=[],
             if p not in bld.env.VALID_PLATFORMS:
                 return None
     module(bld, name, path, depends, platforms,
-        ['cxx', 'cxxobjects'],
+        bld.env.DYNAMIC and ['cxx', 'cxxshlib', 'shared_lib'] or ['cxx', 'cxxobjects'],
         features,
         extra_includes, extra_defines,
         extra_public_includes, extra_public_defines,
@@ -494,7 +502,7 @@ def engine(bld, name, depends=[], features=[], platforms=[], path='', use_master
         for p in platforms:
             if p not in bld.env.VALID_PLATFORMS:
                 return None
-    bld.launcher = module(bld, name, path, depends + ['3rdparty.console'], platforms, ['cxx', 'cxxprogram', 'launcher'],
+    bld.launcher = module(bld, name, path, depends + ['3rdparty.system.console'], platforms, ['cxx', 'cxxprogram', 'launcher'],
                           features, [], [], [], [], use_master, warnings, False)
     if 'windows' in bld.env.VALID_PLATFORMS:
         module(bld, name+'w', path, depends, platforms, ['cxx', 'cxxprogram', 'launcher'],
@@ -530,6 +538,9 @@ def build(bld):
     bld.load('kernel', tooldir=[os.path.join(bld.path.abspath(), 'tools')])
     bld.load('kernel_preprocess', tooldir=[os.path.join(bld.path.abspath(), 'tools')])
     bld.env.STATIC = bld.env.STATIC or Options.options.static
+    bld.env.DYNAMIC = Options.options.dynamic
+    if bld.env.STATIC and bld.env.DYNAMIC:
+        raise Errors.WafError('Engine requested to be built both as static and dynamic')
     bld.original_env = bld.env
     bld.multiarch_envs = [bld.all_envs[envname] for envname in bld.env.SUB_TOOLCHAINS] or [bld.env]
 
@@ -861,7 +872,7 @@ def c_hook(self, node):
     if 'master' in self.features and not Options.options.nomaster:
         try:
             mastertask_c = self.mastertasks_c[-1]
-            if len(mastertask_c.inputs) <= 20:
+            if len(mastertask_c.inputs) <= 10:
                 mastertask_c.set_inputs([node])
             else:
                 output = self.make_bld_node('.src', None, 'master-c-%d.%s' % (len(self.mastertasks_c), self.objc and 'm' or 'c'))
@@ -890,7 +901,7 @@ def cc_hook(self, node):
         else:
             try:
                 mastertask_cxx = self.mastertasks_cxx[-1]
-                if len(mastertask_cxx.inputs) <= 20:
+                if len(mastertask_cxx.inputs) <= 10:
                     mastertask_cxx.set_inputs([node])
                 else:
                     output = self.make_bld_node('.src', None, 'master-cxx-%d.%s' % (len(self.mastertasks_cxx), self.objc and 'mm' or 'cc'))

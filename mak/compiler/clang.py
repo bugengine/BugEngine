@@ -88,10 +88,14 @@ class Clang(Configure.ConfigurationContext.GnuCompiler):
 
     def load_in_env(self, conf, platform, sysroot=None):
         Configure.ConfigurationContext.GnuCompiler.load_in_env(self, conf, platform)
+        env = conf.env
+        # Typedef of __float128 on older clangs
+        if self.version_number < (3, 9):
+            env.append_unique('CXXFLAGS', ['-include', os.path.join(conf.bugenginenode.abspath(),
+                                                                    'mak/compiler/clang/float128.h')])
         # Template export was fixed in Clang 3.2
         if self.version_number >= (3, 2):
             if platform.NAME != 'windows':
-                env = conf.env
                 env.append_unique('CFLAGS', ['-fvisibility=hidden'])
                 env.append_unique('CXXFLAGS', ['-fvisibility=hidden'])
                 env.CFLAGS_exportall = ['-fvisibility=default']

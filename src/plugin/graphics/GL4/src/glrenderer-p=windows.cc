@@ -17,7 +17,7 @@
 #include    <loaders/shader/glshader.hh>
 #include    <core/threads/thread.hh>
 
-#include    <GL4/wglext.h>
+#include    <GL/wglext.h>
 
 namespace BugEngine { namespace OpenGL
 {

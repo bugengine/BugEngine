@@ -14,6 +14,7 @@
 
 # include <stdint.h>
 # include <stdlib.h>
+# include <alloca.h>
 typedef int8_t                  i8;
 typedef int16_t                 i16;
 typedef int32_t                 i32;
@@ -25,11 +26,16 @@ typedef uint64_t                u64;
 typedef u8                      byte;
 
 #define    override
-#define BE_NOINLINE            
+#define BE_NOINLINE
 #define BE_ALWAYSINLINE         inline
 
 #define BE_EXPORT               __global
 #define BE_IMPORT
+
+#ifndef alloca
+# define alloca(x) __builtin_alloca(x)
+extern "C" void* __builtin_alloca(size_t);
+#endif
 
 #undef __REDIRECT
 #include <cerrno>

@@ -18,6 +18,7 @@ except ImportError:
 def options(opt):
     "Creates main option groups and load options for the host and all targets"
     opt.add_option_group('SDK paths and options')
+    opt.add_option_group('3rd party libraries')
     opt.bugenginenode = opt.path.parent
 
     opt.load('visualstudio', tooldir=[os.path.join(opt.path.abspath(), 'tools')])
@@ -30,8 +31,13 @@ def options(opt):
     opt.recurse('hosts.py')
     opt.recurse('compilers.py')
     opt.recurse('targets.py')
-    for third_party in opt.path.parent.make_node('src').make_node('3rdparty').listdir():
-        opt.recurse('../src/3rdparty/%s/%s.py'%(third_party, third_party))
+    opt.recurse('../src/3rdparty/mak/mak.py')
+    third_party_node = opt.path.parent.make_node('src').make_node('3rdparty')
+    for category in third_party_node.listdir():
+        if category != 'mak':
+            category_node = third_party_node.make_node(category)
+            for third_party in category_node.listdir():
+                opt.recurse('../src/3rdparty/%s/%s/%s.py'%(category, third_party, third_party))
     option_file = opt.path.parent.find_node('options')
     if option_file:
         with open(option_file.abspath(), 'r') as file:
@@ -57,10 +63,17 @@ def configure(conf):
 
 def setup(conf):
     "setup step before the build: recursively cals setup on every third party library"
-    for third_party in conf.bugenginenode.make_node('src').make_node('3rdparty').listdir():
-        conf.recurse('../src/3rdparty/%s/%s.py'%(third_party, third_party),
-                     name='setup',
-                     once=False)
+    conf.recurse('../src/3rdparty/mak/mak.py', name='setup', once=False)
+    third_party_node = conf.path.parent.make_node('src').make_node('3rdparty')
+    for category in third_party_node.listdir():
+        if category != 'mak':
+            conf.start_msg('      `- [%s]' % category)
+            category_node = third_party_node.make_node(category)
+            for third_party in category_node.listdir():
+                conf.recurse('../src/3rdparty/%s/%s/%s.py'%(category, third_party, third_party),
+                             name='setup',
+                             once=False)
+            conf.end_msg('')
 
 
 def build(bld):

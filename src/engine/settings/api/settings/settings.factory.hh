@@ -19,7 +19,7 @@ namespace BugEngine { namespace Settings
 template< typename T >
 struct Settings;
 
-struct be_api(Settings) SettingsBase : public minitl::intrusive_list<SettingsBase>::item
+struct be_api(SETTINGS) SettingsBase : public minitl::intrusive_list<SettingsBase>::item
 {
     template< typename T >
     friend struct Settings;

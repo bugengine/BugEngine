@@ -7,29 +7,28 @@ def externals(bld):
     """
         Declares all external modules
     """
-    bld.external('3rdparty.zlib')
-    bld.external('3rdparty.minizip')
+    bld.external('3rdparty.system.zlib')
+    bld.external('3rdparty.system.minizip')
     bld.external('3rdparty.mak')
-    bld.external('3rdparty.console')
-    bld.external('3rdparty.X11')
-    bld.external('3rdparty.win32')
-    bld.external('3rdparty.DirectX9')
-    bld.external('3rdparty.DirectX10')
-    bld.external('3rdparty.DirectX11')
-    bld.external('3rdparty.OpenGL')
-    bld.external('3rdparty.OpenGLES2')
-    bld.external('3rdparty.OpenCL')
-    bld.external('3rdparty.OpenAL')
-    bld.external('3rdparty.oggvorbis')
-    bld.external('3rdparty.bullet')
-    bld.external('3rdparty.freetype')
-    bld.external('3rdparty.fontconfig')
-    bld.external('3rdparty.lua')
-    bld.external('3rdparty.squirrel')
-    bld.external('3rdparty.ncurses')
-    bld.external('3rdparty.tcltk')
-    bld.external('3rdparty.python')
-    bld.external('3rdparty.scintilla')
+    bld.external('3rdparty.system.console')
+    bld.external('3rdparty.system.X11')
+    bld.external('3rdparty.system.win32')
+    bld.external('3rdparty.graphics.DirectX9')
+    bld.external('3rdparty.graphics.DirectX10')
+    bld.external('3rdparty.graphics.DirectX11')
+    bld.external('3rdparty.graphics.OpenGL')
+    bld.external('3rdparty.graphics.OpenGLES2')
+    bld.external('3rdparty.compute.OpenCL')
+    bld.external('3rdparty.audio.OpenAL')
+    bld.external('3rdparty.audio.oggvorbis')
+    bld.external('3rdparty.physics.bullet')
+    bld.external('3rdparty.system.freetype')
+    bld.external('3rdparty.system.fontconfig')
+    bld.external('3rdparty.scripting.lua')
+    bld.external('3rdparty.scripting.squirrel')
+    bld.external('3rdparty.system.ncurses')
+    bld.external('3rdparty.scripting.tcltk')
+    bld.external('3rdparty.scripting.python')
 
 
 def bugengine(bld):
@@ -45,9 +44,9 @@ def bugengine(bld):
     bld.library('engine.network',
                 ['engine.core'])
     bld.library('engine.rtti',
-                ['engine.core', 'engine.network', '3rdparty.zlib'])
+                ['engine.core', 'engine.network', '3rdparty.system.zlib'])
     bld.library('engine.filesystem',
-                ['engine.core', 'engine.rtti', '3rdparty.minizip'])
+                ['engine.core', 'engine.rtti', '3rdparty.system.minizip'])
     bld.library('engine.rttiparse',
                 ['engine.core', 'engine.rtti', 'engine.filesystem'])
     bld.library('engine.settings',
@@ -83,7 +82,7 @@ def plugins(bld):
                ['engine.bugengine'])
 
     bld.plugin('plugin.physics.bullet',
-               ['engine.bugengine', '3rdparty.bullet'])
+               ['engine.bugengine', '3rdparty.physics.bullet'])
 
     bld.plugin('plugin.graphics.3d',
                ['engine.bugengine'])
@@ -104,12 +103,12 @@ def plugins(bld):
                platforms=['pc'])
 
     #bld.plugin('plugin.audio.AL',
-    #		   ['engine.bugengine', '3rdparty.OpenAL'])
+    #		   ['engine.bugengine', '3rdparty.audio.OpenAL'])
 
     bld.plugin('plugin.scripting.lua',
-               ['engine.bugengine', '3rdparty.lua'])
+               ['engine.bugengine', '3rdparty.scripting.lua'])
     bld.plugin('plugin.scripting.squirrel',
-               ['engine.bugengine', '3rdparty.squirrel'])
+               ['engine.bugengine', '3rdparty.scripting.squirrel'])
     bld.plugin('plugin.input.input',
                ['engine.bugengine'])
     bld.shared_library('plugin.scripting.pythonlib',
@@ -123,7 +122,7 @@ def plugins(bld):
                       path='plugin.scripting.pythonmodule',
                       platforms=['pc'])
     if bld.env.PROJECTS:
-        python_deps = ['3rdparty.python%s'%version.replace('.', '')
+        python_deps = ['3rdparty.scripting.python%s'%version.replace('.', '')
                        for version in bld.env.PYTHON_VERSIONS]
         bld.plugin('plugin.scripting.pythonbinding',
                    ['engine.bugengine', 'plugin.scripting.pythonlib'] + python_deps)
@@ -131,7 +130,7 @@ def plugins(bld):
         for version in bld.env.PYTHON_VERSIONS:
             bld.plugin('plugin.scripting.python%s' % version.replace('.', ''),
                        ['engine.bugengine', 'plugin.scripting.python',
-                        '3rdparty.python%s'%version.replace('.', '')],
+                        '3rdparty.scripting.python%s'%version.replace('.', '')],
                        path='plugin.scripting.pythonbinding',
                        features=['python%s'%version])
 
@@ -140,7 +139,7 @@ def plugins(bld):
     #bld.plugin('plugin.kernel.directcompute',
     #		   ['engine.bugengine'])
     bld.plugin('plugin.kernel.opencl',
-               ['engine.bugengine', '3rdparty.OpenCL', '3rdparty.OpenGL'],
+               ['engine.bugengine', '3rdparty.compute.OpenCL', '3rdparty.graphics.OpenGL'],
                features=['OpenCL'])
 
     bld.plugin('plugin.graphics.nullrender',
@@ -151,44 +150,44 @@ def plugins(bld):
                 'plugin.graphics.shadermodel4'])
     bld.plugin('plugin.graphics.windowing',
                ['engine.bugengine', 'plugin.graphics.3d',
-                '3rdparty.X11', '3rdparty.OpenGL'],
+                '3rdparty.system.X11', '3rdparty.graphics.OpenGL'],
                features=['GUI'])
     bld.plugin('plugin.graphics.GL4',
                ['engine.bugengine', 'plugin.graphics.windowing',
-                '3rdparty.OpenGL'],
+                '3rdparty.graphics.OpenGL'],
                features=['OpenGL', 'GUI'])
     bld.plugin('plugin.kernel.opencl_gl',
                ['engine.bugengine', 'plugin.graphics.GL4',
-                '3rdparty.OpenGL', '3rdparty.OpenCL',
+                '3rdparty.graphics.OpenGL', '3rdparty.compute.OpenCL',
                 'plugin.kernel.opencl'],
                features=['OpenGL', 'OpenCL', 'GUI'])
     bld.plugin('plugin.graphics.Dx9',
                ['engine.bugengine', 'plugin.graphics.windowing',
-                '3rdparty.DirectX9'],
+                '3rdparty.graphics.DirectX9'],
                features=['DirectX9', 'GUI'])
     #bld.plugin('plugin.graphics.Dx10',
     #           ['engine.bugengine', 'plugin.graphics.windowing',
-    #            '3rdparty.DirectX10'],
+    #            '3rdparty.graphics.DirectX10'],
     #           features=['DirectX10', 'GUI'])
     #bld.plugin('plugin.graphics.Dx11',
     #           ['engine.bugengine', 'plugin.graphics.windowing',
-    #            '3rdparty.DirectX11'],
+    #            '3rdparty.graphics.DirectX11'],
     #           features=['DirectX11', 'GUI'])
     bld.plugin('plugin.graphics.GLES2',
                ['engine.bugengine', 'plugin.graphics.windowing',
-                '3rdparty.OpenGLES2'],
+                '3rdparty.graphics.OpenGLES2'],
                features=['OpenGLES2', 'GUI'])
 
     bld.plugin('plugin.graphics.text',
                ['engine.bugengine', 'plugin.graphics.3d',
-                '3rdparty.freetype', '3rdparty.fontconfig'])
+                '3rdparty.system.freetype', '3rdparty.system.fontconfig'])
 
     bld.plugin('plugin.ui.console',
-               ['engine.bugengine', '3rdparty.ncurses'],
+               ['engine.bugengine', '3rdparty.system.ncurses'],
                platforms=['pc'])
 
     bld.plugin('tool.bugeditor.ui',
-               ['engine.bugengine', '3rdparty.scintilla'],
+               ['engine.bugengine'],
                platforms=['pc'])
 
 
