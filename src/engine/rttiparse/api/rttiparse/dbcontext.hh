@@ -48,7 +48,7 @@ struct Error
 
 typedef minitl::vector< Error > ErrorList;
 
-struct DbContext
+struct be_api(RTTIPARSE) DbContext
 {
     const ifilename             filename;
     ref<const Namespace> const  rootNamespace;

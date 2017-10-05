@@ -14,7 +14,7 @@ namespace BugEngine { namespace RTTI { namespace Parser
 class Object;
 struct DbContext;
 
-class Namespace : public minitl::refcountable
+class be_api(RTTIPARSE) Namespace : public minitl::refcountable
 {
 private:
     minitl::Allocator&                          m_allocator;
