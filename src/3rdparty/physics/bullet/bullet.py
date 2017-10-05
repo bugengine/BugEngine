@@ -11,10 +11,13 @@ def options(opt):
 
 
 def setup(conf):
-    try:
-        conf.pkg_config('bullet')
-    except Exception as e:
-        pprint('BLUE', '=bullet', sep=' ')
+    if conf.env.CXX_NAME != 'sun':
+        try:
+            conf.pkg_config('bullet')
+        except Exception as e:
+            pprint('BLUE', '=bullet', sep=' ')
+        else:
+            conf.env.SYSTEM_BULLET = True
+            pprint('GREEN', '+bullet', sep=' ')
     else:
-        conf.env.SYSTEM_BULLET = True
-        pprint('GREEN', '+bullet', sep=' ')
+        pprint('BLUE', '=bullet', sep=' ')
