@@ -481,7 +481,7 @@ raw<RTTI::Class> be_bugengine_Namespace()
     return result;
 }
 
-BE_EXPORT raw<RTTI::Class> be_bugengine_Namespace_BugEngine()
+raw<RTTI::Class> be_bugengine_Namespace_BugEngine()
 {
     return be_bugengine_Namespace();
 }
