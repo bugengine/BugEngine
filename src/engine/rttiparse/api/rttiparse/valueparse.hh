@@ -15,14 +15,14 @@
 namespace BugEngine { namespace RTTI
 {
 
-be_api(RTTI)
+be_api(RTTIPARSE)
 ref<Parser::Node> parseValue(minitl::Allocator& arena,
                              Parser::ErrorList& errors,
                              const char* strBegin,
                              const char *strEnd = 0,
                              u32 initialLine = 0,
                              u32 initialColumn = 0);
-be_api(RTTI)
+be_api(RTTIPARSE)
 ref<Parser::Object> parseObject(minitl::Allocator& arena,
                                 Parser::ErrorList& errors,
                                 const char* strBegin,

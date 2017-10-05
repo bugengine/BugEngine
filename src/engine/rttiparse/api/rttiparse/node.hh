@@ -14,7 +14,7 @@ namespace BugEngine { namespace RTTI { namespace Parser
 {
 
 class Array;
-class be_api(RTTI) Node : public minitl::refcountable
+class be_api(RTTIPARSE) Node : public minitl::refcountable
 {
     friend class Array;
 protected:

@@ -21,7 +21,7 @@ struct Parameter
     ref<Node>       value;
 };
 
-class Object : public Node
+class be_api(RTTIPARSE) Object : public Node
 {
 private:
     const ref<Reference>            m_className;
