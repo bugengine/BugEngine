@@ -27,7 +27,7 @@ namespace BugEngine { namespace Plugin
             raw<RTTI::Class> ptr = {&ci};                                                           \
             return ptr;                                                                             \
         }                                                                                           \
-        raw<RTTI::Class> be_##name##_Namespace_BugEngine()                                          \
+        BE_EXPORT raw<RTTI::Class> be_##name##_Namespace_BugEngine()                                \
         {                                                                                           \
             return be_##name##_Namespace();                                                         \
         }                                                                                           \
