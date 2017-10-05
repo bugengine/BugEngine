@@ -16,14 +16,14 @@ struct SettingsBase;
 template< typename T >
 struct Settings;
 
-class be_api(Settings) SettingsProvider : public minitl::refcountable
+class be_api(SETTINGS) SettingsProvider : public minitl::refcountable
                                         , public minitl::intrusive_list<SettingsProvider>::item
 {
     friend struct SettingsBase;
     template< typename T >
     friend struct Settings;
 private:
-    struct SettingsRegistration
+    struct be_api(SETTINGS) SettingsRegistration
     {
         static minitl::intrusive_list<SettingsProvider>& getSettingsList();
         SettingsRegistration();

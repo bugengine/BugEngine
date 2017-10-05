@@ -100,7 +100,7 @@ def check_lib(self, libname, var='', libpath=[], includepath=[], includes=[], fu
         self.env.append_unique('check_%s_includes' % var, includepath)
         Logs.pprint('GREEN', '+%s' % var, sep=' ')
 
-    return self.env['%s_libs' % var]
+    return self.env['check_%s' % var]
 
 
 @conf
@@ -260,27 +260,39 @@ def run_pkg_config(conf, name):
                 value = value.replace('${', '{')
                 value = value.format(value, **expand)
                 configs[var_name.strip()] = value.strip().split()
-    ld_flags = configs.get('Libs') or []
     cflags = []
+    libs = []
+    ldflags = []
     for f in configs.get('Cflags') or []:
         if f.startswith('-I'):
-            cflags += [conf.env.IDIRAFTER, f[2:]]
+            include = f[2:]
+            if include[0] == '/' and not include.startswith(sysroot):
+                include = os.path.join(sysroot, include[1:])
+            cflags += [conf.env.IDIRAFTER, include]
         else:
             cflags.append(f)
-    configs['Libs'] = [i[2:] for i in ld_flags if i[0:2] == '-l']
-    configs['LdFlags'] = [i for i in ld_flags if i[0:2] != '-l']
-    configs['LdFlags'] = [i for i in ld_flags if i[0:2] != '-l']
-    return cflags, configs.get('Libs'), configs.get('LdFlags')
+    for f in configs.get('Libs') or []:
+        if f.startswith('-l'):
+            libs.append(f[2:])
+        elif f[0:2] == '-L':
+            libdir = f[2:]
+            if libdir[0] == '/' and not libdir.startswith(sysroot):
+                libdir = os.path.join(sysroot, libdir)
+            ldflags += ['-L%s' % libdir]
+        else:
+            ldflags.append(f)
+    return cflags, libs, ldflags
 
 
 @conf
 def pkg_config(conf, name, var=''):
-    if not var: var = self.path.name
+    if not var: var = conf.path.name
     cflags, libs, ldflags = conf.run_pkg_config(name)
-    conf.env['CFLAGS_%s'%var] = cflags
-    conf.env['CXXFLAGS_%s'%var] = cflags
-    conf.env['LINKFLAGS_%s'%var] = ldflags
-    conf.env['LIB_%s'%var] = libs
+    conf.env['check_%s' % var] = True
+    conf.env['check_%s_cflags'%var] += cflags
+    conf.env['check_%s_cxxflags'%var] += cflags
+    conf.env['check_%s_ldflags'%var] += ldflags
+    conf.env['check_%s_libs'%var] += libs
 
 
 def configure(conf):

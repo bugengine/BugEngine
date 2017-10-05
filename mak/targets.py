@@ -52,16 +52,18 @@ class Platform:
                 v.ENV_PREFIX = compiler.arch
             if not sub_compilers:
                 conf.recurse(conf.bugenginenode.abspath()+'/mak/arch/%s'%compiler.arch, once=False)
-                conf.recurse(conf.bugenginenode.abspath()+'/mak', name='setup', once=False)
-            if v.STATIC:
-                v.append_unique('DEFINES', ['BE_STATIC=1'])
-            conf.variant = ''
+
         except Exception as e:
             conf.end_msg(e, color='RED')
             conf.variant = ''
             return None
         else:
-            conf.end_msg(' ')
+            conf.end_msg('')
+            if not sub_compilers:
+                conf.recurse(conf.bugenginenode.abspath()+'/mak', name='setup', once=False)
+            if v.STATIC:
+                v.append_unique('DEFINES', ['BE_STATIC=1'])
+            conf.variant = ''
             v.TMPDIR = os.path.join(conf.bldnode.abspath(), toolchain)
             v.PREFIX = os.path.join('bld', toolchain)
             conf.variant = ''

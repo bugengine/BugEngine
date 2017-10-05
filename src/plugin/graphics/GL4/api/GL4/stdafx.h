@@ -20,14 +20,13 @@
 
 #ifdef BE_PLATFORM_MACOS
 # include   <OpenGL/OpenGL.h>
-# include   <GL4/gl3.h>
 # include   <OpenGL/gl.h>
 # ifndef APIENTRY
 #  define APIENTRY
 # endif
 #else
 # include   <GL/gl.h>
-# include   <GL4/glext.h>
+# include   <GL/glext.h>
 #endif
 
 /**************************************************************************************************/

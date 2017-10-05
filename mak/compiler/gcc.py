@@ -112,6 +112,10 @@ def detect_gcc_from_path(conf, path, seen):
                         c = find_target_gcc('llvm', LLVM)
                         if c:
                             gcc_compilers.append(c)
+    return gcc_compilers
+
+
+def detect_multilib_compilers(conf, gcc_compilers, seen):
     for c in gcc_compilers:
         for multilib_compiler in c.get_multilib_compilers():
             if not multilib_compiler.is_valid(conf):
@@ -121,6 +125,7 @@ def detect_gcc_from_path(conf, path, seen):
             except KeyError:
                 seen[multilib_compiler.name()] = multilib_compiler
                 conf.compilers.append(multilib_compiler)
+
 
 def get_native_gcc(conf, seen):
     import platform
@@ -161,13 +166,15 @@ def detect_gcc(conf):
             pass
     paths = paths.union(conf.env.ALL_ARCH_LIBPATHS)
     seen = {}
+    gcc_compilers = []
     for path in paths:
         try:
             for lib in os.listdir(path):
                 if lib.startswith('gcc'):
-                    detect_gcc_from_path(conf, os.path.join(path, lib), seen)
+                    gcc_compilers += detect_gcc_from_path(conf, os.path.join(path, lib), seen)
         except OSError:
             pass
+    detect_multilib_compilers(conf, gcc_compilers, seen)
     get_native_gcc(conf, seen)
 
 

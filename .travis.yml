@@ -18,6 +18,7 @@ addons:
      - libbullet-dev
      - libogg-dev
      - libvorbis-dev
+     - libminizip-dev
 
 
 matrix:
@@ -55,5 +56,11 @@ matrix:
 
 script:
   - CC= CXX= ./waf configure
+  - ./waf build:${TARGET_OS}-${COMPILER}-${COMPILER_VERSION}:${FLAVOR}
+  - ./waf build:${TARGET_OS}-${COMPILER}-${COMPILER_VERSION}:${FLAVOR} --static
+  - ./waf build:${TARGET_OS}-${COMPILER}-${COMPILER_VERSION}:${FLAVOR} --dynamic
   - ./waf build:${TARGET_OS}-${COMPILER}-${COMPILER_VERSION}:${FLAVOR} --nomaster
+  - ./waf build:${TARGET_OS}-${COMPILER}-${COMPILER_VERSION}:${FLAVOR} --nomaster
+        --with-included-bullet --with-included-freetype --with-included-lua --with-included-squirrel
+        --with-included-zlib --with-included-minizip --with-included-oggvorbis
 

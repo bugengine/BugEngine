@@ -9,9 +9,9 @@
 #include    <rtti/stdafx.h>
 
 #if defined(building_settings) || defined(SETTINGS_EXPORTS)
-# define     SettingsEXPORT      BE_EXPORT
+# define     SETTINGSEXPORT      BE_EXPORT
 #else
-# define     SettingsEXPORT      BE_IMPORT
+# define     SETTINGSEXPORT      BE_IMPORT
 #endif
 
 /**************************************************************************************************/

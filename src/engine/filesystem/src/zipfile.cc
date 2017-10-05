@@ -24,6 +24,7 @@ void ZipFile::doFillBuffer(weak<File::Ticket> ticket) const
     /* state of the previous read */
     static const unz_file_pos* s_currentFile = 0;
     static i64 s_fileOffset = 0;
+    unz_file_pos filePos = m_filePos;
 
 
     be_assert(ticket->file == this, "trying to read wrong file");
@@ -32,7 +33,7 @@ void ZipFile::doFillBuffer(weak<File::Ticket> ticket) const
         s_currentFile = &m_filePos;
         s_fileOffset = 0;
         unzCloseCurrentFile(m_handle);
-        int result = unzGoToFilePos(m_handle, &m_filePos);
+        int result = unzGoToFilePos(m_handle, &filePos);
         be_assert(result == UNZ_OK, "could not go to file %s" | m_filename);
         result = unzOpenCurrentFile(m_handle);
         be_assert(result == UNZ_OK, "could not open file %s" | m_filename);

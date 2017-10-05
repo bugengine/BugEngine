@@ -11,7 +11,7 @@
 namespace BugEngine { namespace Settings
 {
 
-class CommandLineSettingsProvider : public SettingsProvider
+class be_api(SETTINGS) CommandLineSettingsProvider : public SettingsProvider
 {
 private:
     minitl::hashmap< istring, SettingsProvider::SettingsList > buildSettings(int argc,
