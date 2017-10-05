@@ -219,7 +219,7 @@ def configure(conf):
 
 
 def build(bld):
-    bld.platforms.append(bld.external('3rdparty.cocoa'))
+    bld.platforms.append(bld.external('3rdparty.system.cocoa'))
 
 
 def plugins(bld):
