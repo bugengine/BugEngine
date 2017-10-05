@@ -63,7 +63,7 @@ SettingsProvider::SettingsRegistration Settings<T>::s_registration;
 namespace BugEngine
 {
 
-raw<RTTI::Class> be_bugengine_Namespace_BugEngine_Settings();
+BE_EXPORT raw<RTTI::Class> be_bugengine_Namespace_BugEngine_Settings();
 
 template< typename T >
 struct be_typeid< Settings::Settings<T> >

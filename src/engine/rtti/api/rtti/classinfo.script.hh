@@ -137,8 +137,8 @@ private: // friend Value
 
 }
 
-be_api(RTTI) raw<RTTI::Class> be_bugengine_Namespace();
-be_api(RTTI) raw<RTTI::Class> be_bugengine_Namespace_BugEngine();
+BE_EXPORT raw<RTTI::Class> be_bugengine_Namespace();
+BE_EXPORT raw<RTTI::Class> be_bugengine_Namespace_BugEngine();
 
 }
 
