@@ -1,5 +1,9 @@
+import os
+
+
 def options(opt):
     pass
+
 
 def setup(conf):
     if 'windows' in conf.env.VALID_PLATFORMS:
