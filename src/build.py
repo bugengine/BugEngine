@@ -126,6 +126,16 @@ def plugins(bld):
                        for version in bld.env.PYTHON_VERSIONS]
         bld.plugin('plugin.scripting.pythonbinding',
                    ['engine.bugengine', 'plugin.scripting.pythonlib'] + python_deps)
+    elif bld.env.STATIC and bld.env.PYTHON_VERSIONS:
+        # In static mode, there can only be one Python plugin;
+        # use the highest available version
+        version = bld.env.PYTHON_VERSIONS[-1]
+        bld.plugin('plugin.scripting.python%s' % version.replace('.', ''),
+                   ['engine.bugengine', 'plugin.scripting.python',
+                    '3rdparty.scripting.python%s'%version.replace('.', '')],
+                   path='plugin.scripting.pythonbinding',
+                   features=['python%s'% version])
+
     else:
         for version in bld.env.PYTHON_VERSIONS:
             bld.plugin('plugin.scripting.python%s' % version.replace('.', ''),
