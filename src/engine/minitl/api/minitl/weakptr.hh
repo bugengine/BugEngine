@@ -113,11 +113,11 @@ struct hash< weak<T> >
 {
     u32 operator()(weak<T> t)
     {
-        return u32(intptr_t(t.operator->()));
+        return hash<T*>()(t.operator->());
     }
     bool operator()(weak<T> t1, weak<T> t2)
     {
-        return t1 == t2;
+        return hash<T*>()(t1.operator->(), t2.operator ->());
     }
 };
 
