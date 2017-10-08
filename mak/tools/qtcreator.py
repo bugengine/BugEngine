@@ -850,7 +850,7 @@ class QtCreator(Build.BuildContext):
                                             ('ProjectExplorer.ProjectConfiguration.DisplayName', ''),
                                             ('Qbs.Configuration', [
                                                 ('qbs.buildVariant', 'debug'),
-                                                ('qbs.architecture', qbsArch(env.ARCHITECTURE))
+                                                ('qbs.architecture', qbsArch(env.TARGET_ARCH))
                                             ]),
                                             ('ProjectExplorer.ProjectConfiguration.Id',
                                               'Qbs.BuildStep')

@@ -120,6 +120,7 @@ class Compiler:
         conf.env.append_unique('CFLAGS', self.extra_args.get('c', []))
         conf.env.append_unique('CXXFLAGS', self.extra_args.get('cxx', []))
         conf.env.append_unique('LINKFLAGS', self.extra_args.get('link', []))
+        conf.env.TARGET_ARCH = self.arch_name
         self.set_optimisation_options(conf)
         self.set_warning_options(conf)
 
