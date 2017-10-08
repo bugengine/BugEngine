@@ -270,13 +270,17 @@ class QtToolchain(QtObject):
             flags = []
             while original_flags:
                 f = original_flags.pop(0)
-                for undesirable_flag in ['-target', '-triple', '-arch', '-march']:
-                    if f.startswith(undesirable_flag):
-                        if f == undesirable_flag:
-                            original_flags.pop(0)
-                        break
+                if f == '-target':
+                    f = original_flags.pop(0)
+                    flags.append('--target=%s'%f)
                 else:
-                    flags.append(f)
+                    for undesirable_flag in ['-triple', '-arch', '-march']:
+                        if f.startswith(undesirable_flag):
+                            if f == undesirable_flag:
+                                original_flags.pop(0)
+                            break
+                    else:
+                        flags.append(f)
             if isinstance(compiler, list):
                 compiler = compiler[0]
 
