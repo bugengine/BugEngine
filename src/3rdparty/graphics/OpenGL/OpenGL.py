@@ -13,6 +13,7 @@ def setup(conf):
     elif 'windows' in conf.env.VALID_PLATFORMS:
         conf.check_lib(['opengl32', 'gdi32'],
                        includes=['GL/gl.h'],
+                       includepath=[os.path.join(conf.path.abspath(), 'api')],
                        functions=['glBegin'])
     else:
         try:
@@ -20,7 +21,6 @@ def setup(conf):
         except Exception as e:
             conf.check_lib('GL', var='OpenGL',
                            includes=['GL/gl.h'],
-                           includepath=[os.path.join(conf.path.abspath(), 'api')],
                            functions=['glBegin']) or pprint('YELLOW', '-GL', sep=' ')
         else:
             conf.env.SYSTEM_OPENGL = True
