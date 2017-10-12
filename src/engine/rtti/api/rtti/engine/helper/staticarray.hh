@@ -15,21 +15,52 @@ struct staticarray
     u32 const   count;
     T* const    elements;
 
-    T& operator[](const u32 index)
-    {
-        be_assert(index < count, "index %d out of range (0, %d)" | index | (count-1));
-        return *(begin()+index);
-    }
-    const T& operator[](const u32 index) const
-    {
-        be_assert(index < count, "index %d out of range (0, %d)" | index | (count-1));
-        return *(begin()+index);
-    }
-    T* begin()              { return elements; }
-    const T* begin() const  { return elements; }
-    T* end()                { return begin() + count; }
-    const T* end() const    { return begin() + count; }
+    inline T& operator[](const u32 index);
+    inline const T& operator[](const u32 index) const;
+
+    inline T* begin();
+    inline const T* begin() const;
+    inline T* end();
+    inline const T* end() const;
 };
+
+template< typename T >
+T& staticarray<T>::operator[](const u32 index)
+{
+    be_assert(index < count, "index %d out of range (0, %d)" | index | (count-1));
+    return *(begin()+index);
+}
+
+template< typename T >
+const T& staticarray<T>::operator[](const u32 index) const
+{
+    be_assert(index < count, "index %d out of range (0, %d)" | index | (count-1));
+    return *(begin()+index);
+}
+
+template< typename T >
+T* staticarray<T>::begin()
+{
+    return elements;
+}
+
+template< typename T >
+const T* staticarray<T>::begin() const
+{
+    return elements;
+}
+
+template< typename T >
+T* staticarray<T>::end()
+{
+    return begin() + count;
+}
+
+template< typename T >
+const T* staticarray<T>::end() const
+{
+    return begin() + count;
+}
 
 }}
 

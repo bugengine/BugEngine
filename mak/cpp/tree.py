@@ -947,4 +947,5 @@ class Root(Container):
             for object in self.objects:
                 object.write_content(self, [], '', [], definition, instance)
                 next_object = object.write_object(self, [], '', [], next_object, definition, instance)
-            instance.write('}\n')
+            instance.write('}\n\n')
+        definition.write('\n\n')

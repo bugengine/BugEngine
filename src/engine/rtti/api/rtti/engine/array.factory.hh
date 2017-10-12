@@ -1,8 +1,8 @@
 /* BugEngine <bugengine.devel@gmail.com> / 2008-2014
    see LICENSE for detail */
 
-#ifndef BE_RTTI_ENGINE_ARRAY_HH_
-#define BE_RTTI_ENGINE_ARRAY_HH_
+#ifndef BE_RTTI_ENGINE_ARRAY_FACTORY_HH_
+#define BE_RTTI_ENGINE_ARRAY_FACTORY_HH_
 /**************************************************************************************************/
 #include    <rtti/stdafx.h>
 #include    <rtti/typeinfo.hh>
