@@ -380,7 +380,7 @@ def external(bld, name):
 
 
 @conf
-def thirdparty(bld, name, feature='', path='.', var=''):
+def thirdparty(bld, name, feature='', path='.', var='', use=[]):
     archs = bld.env.VALID_ARCHITECTURES
     platforms = bld.env.VALID_PLATFORMS
     platform_specific = platforms
@@ -416,7 +416,8 @@ def thirdparty(bld, name, feature='', path='.', var=''):
                      export_cflags = env['check_%s_cflags' % var],
                      export_cxxflags = env['check_%s_cxxflags' % var],
                      export_linkflags = env['check_%s_ldflags' % var],
-                     source_nodes=[source_node])
+                     source_nodes=[source_node],
+                     use=[target_prefix+u for u in use])
             if target_prefix:
                 internal_deps.append(tg.name)
     if supported:

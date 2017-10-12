@@ -1,3 +1,4 @@
+import os
 from waflib.Logs import pprint
 
 
@@ -7,7 +8,8 @@ def options(opt):
 
 def setup(conf):
     if 'darwin' in conf.env.VALID_PLATFORMS:
-        conf.check_framework('OpenGL')
+        conf.check_framework('OpenGL',
+                             includepath=[os.path.join(conf.path.abspath(), 'api')])
     elif 'windows' in conf.env.VALID_PLATFORMS:
         conf.check_lib(['opengl32', 'gdi32'],
                        includes=['GL/gl.h'],
