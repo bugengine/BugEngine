@@ -32,80 +32,35 @@ private:
     {
         typedef const minitl::pointer* pointer;
     };
+    typedef typename ptr<T>::pointer pointer;
 private:
-    typename ptr<T>::pointer m_ptr;
+    pointer m_ptr;
 private:
-    void swap(weak& other)
-    {
-        typename ptr<T>::pointer tmp = other.m_ptr;
-        other.m_ptr = m_ptr;
-        m_ptr = tmp;
-    }
+    inline void swap(weak& other);
 public:
-    weak() : m_ptr(0) {}
-    weak(T* p)
-        : m_ptr(p)
-    {
-        #if BE_ENABLE_WEAKCHECK
-            if (m_ptr) m_ptr->addweak();
-        #endif
-    }
+    inline weak();
+    inline weak(T* p);
     template< typename U >
-    weak(ref<U> other)
-        : m_ptr(checkIsA<T>(other.operator->()))
-    {
-        #if BE_ENABLE_WEAKCHECK
-            if (m_ptr) m_ptr->addweak();
-        #endif
-    }
+    inline weak(ref<U> other);
     template< typename U >
-    weak(const scoped<U>& other)
-        : m_ptr(checkIsA<T>(other.operator->()))
-    {
-        #if BE_ENABLE_WEAKCHECK
-            if (m_ptr) m_ptr->addweak();
-        #endif
-    }
-    weak(const weak& other)
-        : m_ptr(other.operator->())
-    {
-        #if BE_ENABLE_WEAKCHECK
-            if (m_ptr) m_ptr->addweak();
-        #endif
-    }
+    inline weak(const scoped<U>& other);
+    inline weak(const weak& other);
     template< typename U >
-    weak(const weak<U>& other)
-        : m_ptr(checkIsA<T>(other.operator->()))
-    {
-        #if BE_ENABLE_WEAKCHECK
-            if (m_ptr) m_ptr->addweak();
-        #endif
-    }
-    ~weak()
-    {
-        #if BE_ENABLE_WEAKCHECK
-            if (m_ptr) m_ptr->decweak();
-        #endif
-    }
+    inline weak(const weak<U>& other);
+    inline ~weak();
 
-    weak& operator=(const weak& other) { weak(other).swap(*this); return *this; }
+    inline weak& operator=(const weak& other);
     template< typename U >
-    weak& operator=(const weak<U>& other) { weak(other).swap(*this); return *this; }
+    inline weak& operator=(const weak<U>& other);
     template< typename U >
-    weak& operator=(U* other) { weak(other).swap(*this); return *this; }
+    inline weak& operator=(U* other);
 
-    T* operator->() const { return static_cast<T*>(m_ptr); }
-    operator const void*() const { return m_ptr; }
-    bool operator!() const { return m_ptr == 0; }
-    T& operator*() { return *static_cast<T*>(m_ptr); }
+    inline T* operator->() const;
+    inline operator const void*() const;
+    inline bool operator!() const;
+    inline T& operator*();
 
-    void clear()
-    {
-        #if BE_ENABLE_WEAKCHECK
-            if (m_ptr) m_ptr->decweak();
-        #endif
-        m_ptr = 0;
-    }
+    inline void clear();
 };
 
 template< typename T >
