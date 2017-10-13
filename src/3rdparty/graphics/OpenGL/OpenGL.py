@@ -18,9 +18,11 @@ def setup(conf):
     else:
         try:
             conf.pkg_config('gl', var='OpenGL')
+            conf.env.append_unique('check_OpenGL_includes', [os.path.join(conf.path.abspath(), 'api')])
         except Exception as e:
             conf.check_lib('GL', var='OpenGL',
                            includes=['GL/gl.h'],
+                           includepath=[os.path.join(conf.path.abspath(), 'api')],
                            functions=['glBegin']) or pprint('YELLOW', '-GL', sep=' ')
         else:
             conf.env.SYSTEM_OPENGL = True
