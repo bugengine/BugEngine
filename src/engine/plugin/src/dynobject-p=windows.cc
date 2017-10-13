@@ -4,6 +4,9 @@
 #include    <plugin/stdafx.h>
 #include    <plugin/dynobject.hh>
 #include    <core/environment.hh>
+
+#if !BE_STATIC
+
 #include    <winerror.h>
 
 namespace BugEngine { namespace Plugin
@@ -45,4 +48,4 @@ void* DynamicObject::getSymbolInternal(Handle handle, const istring& name)
 }
 
 }}
-
+#endif
