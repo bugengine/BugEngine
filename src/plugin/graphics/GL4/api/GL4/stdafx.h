@@ -25,7 +25,8 @@
 #  define APIENTRY
 # endif
 #elif defined(BE_PLATFORM_WIN32)
-# include  <GL4/gl.h>
+#define GL_GLEXT_PROTOTYPES 1
+# include  <GL4/glcorearb.h>
 # include  <GL4/glext.h>
 #else
 # include   <GL/gl.h>
