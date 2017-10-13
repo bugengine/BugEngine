@@ -19,11 +19,14 @@
 #endif
 
 #ifdef BE_PLATFORM_MACOS
-# include   <OpenGL/OpenGL.h>
-# include   <OpenGL/gl.h>
+# include  <OpenGL/OpenGL.h>
+# include  <OpenGL/gl.h>
 # ifndef APIENTRY
 #  define APIENTRY
 # endif
+#elif defined(BE_PLATFORM_WIN32)
+# include  <GL4/gl.h>
+# include  <GL4/glext.h>
 #else
 # include   <GL/gl.h>
 # include   <GL/glext.h>
