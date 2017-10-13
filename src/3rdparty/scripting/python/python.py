@@ -37,14 +37,10 @@ def python_config(conf, version, var=''):
                 int main() { Py_Initialize(); return 0; }
             """)
         conf.env['check_%s' % var] = True
-        conf.env.append_value('check_%s_cflags' % var, cflags)
-        conf.env.append_value('check_%s_cxxflags' % var, cflags)
-        conf.env.append_value('check_%s_ldflags' % var, ldflags)
-        conf.env.append_value('check_%s_libs' % var, libs)
         for lib in libs:
             if lib.startswith('python'):
                 lib_name = lib
-        conf.env.append_unique('check_%s_defines' % var, ['PYTHON_LIBRARY="%s"'%lib_name])
+        conf.env['check_%s_pylib' % var] = lib_name
     elif 'macosx' in conf.env.VALID_PLATFORMS:
         conf.recurse('../python%s/python%s.py' % (version_number, version_number), name='setup_python', once=False)
     elif 'windows' in conf.env.VALID_PLATFORMS:

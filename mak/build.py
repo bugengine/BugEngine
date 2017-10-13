@@ -3,7 +3,7 @@ from waflib.Configure import conf
 from waflib.TaskGen import feature, taskgen_method, extension, before_method, after_method
 import os
 import shutil
-from waflib.Tools import ccroot, c, cxx
+from waflib.Tools import ccroot, c, cxx, winres
 
 
 old_log_display = Task.Task.log_display
@@ -210,8 +210,8 @@ def module(bld, name, module_path, depends,
         pass
 
     extras = []
-    if bld.env.STATIC:
-        extra_defines = extra_defines + ['BE_STATIC=1']
+    static_defines = bld.env.STATIC and ['BE_STATIC=1'] or []
+    extra_defines = extra_defines + static_defines
     if source_node.is_child_of(bld.bugenginenode):
         relative_path = source_node.path_from(bld.bugenginenode)
         for platform in bld.bugenginenode.make_node('extra').listdir():
@@ -268,7 +268,7 @@ def module(bld, name, module_path, depends,
                         target = target_prefix + name + '.' + kernel_name,
                         features = ['cxx', bld.env.STATIC and 'cxxobjects' or 'cxxshlib', 'kernel'],
                         extra_use = extra_features,
-                        defines = [
+                        defines = static_defines + [
                                 'BE_BUILD_KERNEL=1',
                                 'BE_KERNELID=%s_%s'%(name.replace('.', '_'),kernel_name),
                                 'BE_KERNELNAME=%s.%s'%(name, kernel_name)],
@@ -495,7 +495,10 @@ def shared_library(bld, name, depends=[], features=[], platforms=[],
 
 
 @conf
-def engine(bld, name, depends=[], features=[], platforms=[], path='', use_master=True, warnings=True):
+def engine(bld, name, depends=[], features=[], platforms=[],
+           extra_includes=[], extra_defines=[],
+           extra_public_includes=[], extra_public_defines=[],
+           path='', use_master=True, warnings=True):
     if getattr(bld, 'launcher', None) != None:
         raise Errors.WafError('Only one engine can be defined')
     if not path: path=name
@@ -503,15 +506,21 @@ def engine(bld, name, depends=[], features=[], platforms=[], path='', use_master
         for p in platforms:
             if p not in bld.env.VALID_PLATFORMS:
                 return None
-    bld.launcher = module(bld, name, path, depends + ['3rdparty.system.console'], platforms, ['cxx', 'cxxprogram', 'launcher'],
-                          features, [], [], [], [], use_master, warnings, False)
+    bld.launcher = module(bld, name, path, depends + ['3rdparty.system.console'], platforms,
+                          ['cxx', 'cxxprogram', 'launcher'], features,
+                          extra_includes, extra_defines, extra_public_includes, extra_public_defines,
+                          use_master, warnings, False)
     if 'windows' in bld.env.VALID_PLATFORMS:
         module(bld, name+'w', path, depends, platforms, ['cxx', 'cxxprogram', 'launcher'],
-               features, [], [], [], [], use_master, warnings, False)
+               features, extra_includes, extra_defines, extra_public_includes, extra_public_defines,
+               use_master, warnings, False)
 
 
 @conf
-def game(bld, name, depends=[], features=[], platforms=[], path='', use_master=True, warnings=True):
+def game(bld, name, depends=[], features=[], platforms=[],
+         extra_includes=[], extra_defines=[],
+         extra_public_includes=[], extra_public_defines=[],
+         path='', use_master=True, warnings=True):
     if not path: path=name
     if not bld.env.PROJECTS:
         for p in platforms:
@@ -519,18 +528,23 @@ def game(bld, name, depends=[], features=[], platforms=[], path='', use_master=T
                 return None
     module(bld, name, path, depends, platforms,
         ['cxx', bld.env.STATIC and 'cxxobjects' or 'cxxshlib', 'plugin', 'game'],
-        features, [], [], [], [], use_master, warnings, False)
+        features, extra_includes, extra_defines, extra_public_includes, extra_public_defines,
+        use_master, warnings, False)
 
 
 @conf
-def plugin(bld, name, depends=[], features=[], platforms=[], path='', use_master=True, warnings=True):
+def plugin(bld, name, depends=[], features=[], platforms=[],
+           extra_includes=[], extra_defines=[],
+           extra_public_includes=[], extra_public_defines=[],
+           path='', use_master=True, warnings=True):
     if not path: path=name
     for p in platforms:
         if p not in bld.env.VALID_PLATFORMS:
             return None
     module(bld, name, path, depends, platforms,
         ['cxx', bld.env.STATIC and 'cxxobjects' or 'cxxshlib', 'plugin'],
-        features, [], [], [], [], use_master, warnings, False)
+        features, extra_includes, extra_defines, extra_public_includes, extra_public_defines,
+        use_master, warnings, False)
 
 
 def build(bld):
@@ -866,6 +880,22 @@ def create_kernel_namespace(self):
             self.out_sources.append(out)
         except:
             self.out_sources = [out]
+
+
+@extension('.rc')
+def rc_file(self, node):
+    """
+    Bind the .rc extension to a winrc task
+    """
+    obj_ext = '.o'
+    if self.env['WINRC_TGT_F'] == '/fo':
+        obj_ext = '.res'
+    out = self.make_bld_node('.obj', node.parent, node.name[:node.name.rfind('.')]+obj_ext)
+    rctask = self.create_task('winrc', node, out)
+    try:
+        self.compiled_tasks.append(rctask)
+    except AttributeError:
+        self.compiled_tasks = [rctask]
 
 
 @extension('.c', '.m')
