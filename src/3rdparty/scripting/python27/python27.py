@@ -19,6 +19,6 @@ def setup_python(conf):
                                                                        conf.env.VALID_ARCHITECTURES[0]))
     elif 'macosx' in conf.env.VALID_PLATFORMS:
         conf.env.check_python27 = True
-        conf.env.check_python27_defines = ['PYTHON_LIBRARY="python2.7"']
+        conf.env.check_python27_pylib = "python27"
     else:
         raise Errors.WafError('%s not available' % conf.path.name)

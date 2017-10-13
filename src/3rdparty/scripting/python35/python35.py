@@ -19,6 +19,6 @@ def setup_python(conf):
                                                                        conf.env.VALID_ARCHITECTURES[0]))
     elif 'macosx' in conf.env.VALID_PLATFORMS:
         conf.env.check_python35 = True
-        conf.env.check_python35_defines = ['PYTHON_LIBRARY="python3.5m"']
+        conf.env.check_python35_pylib = "python35m"
     else:
         raise Errors.WafError('%s not available' % conf.path.name)
