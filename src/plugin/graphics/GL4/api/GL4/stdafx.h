@@ -24,13 +24,10 @@
 # ifndef APIENTRY
 #  define APIENTRY
 # endif
-#elif defined(BE_PLATFORM_WIN32)
-#define GL_GLEXT_PROTOTYPES 1
+#else
+# define GL_GLEXT_PROTOTYPES 1
 # include  <GL4/glcorearb.h>
 # include  <GL4/glext.h>
-#else
-# include   <GL/gl.h>
-# include   <GL/glext.h>
 #endif
 
 /**************************************************************************************************/
