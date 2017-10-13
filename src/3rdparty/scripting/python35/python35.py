@@ -11,8 +11,8 @@ def setup_python(conf):
     if 'windows' in conf.env.VALID_PLATFORMS:
         for a in conf.env.VALID_ARCHITECTURES:
             if os.path.isdir(os.path.join(conf.path.abspath(), 'bin.windows.%s' % a)):
-                conf.env.check_python34 = True
-                conf.env.check_python34_defines = ['PYTHON_LIBRARY="python34"']
+                conf.env.check_python35 = True
+                conf.env.check_python35_pylib = "python35"
                 break
         else:
             raise Errors.WafError('%s not available for windows %s' % (conf.path.name,
