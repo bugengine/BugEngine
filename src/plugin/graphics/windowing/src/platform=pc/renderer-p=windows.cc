@@ -54,7 +54,7 @@ Renderer::PlatformRenderer::PlatformRenderer(weak<Renderer> renderer)
     m_wndClassEx.style          = CS_HREDRAW | CS_VREDRAW | CS_OWNDC;
     m_wndClassEx.lpfnWndProc    = WindowProc;
     m_wndClassEx.hInstance      = (HINSTANCE)::GetModuleHandle(0);
-    m_wndClassEx.hIcon          = LoadIcon((HINSTANCE)::GetModuleHandle(0), (LPCTSTR)IDI_BE_ICON);
+    m_wndClassEx.hIcon          = 0;
     m_wndClassEx.hIconSm        = 0;
     m_wndClassEx.hCursor        = LoadCursor(0, (LPCTSTR)IDC_ARROW);
     m_wndClassEx.hbrBackground  = NULL;

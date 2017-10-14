@@ -1,6 +1,0 @@
-/* BugEngine <bugengine.devel@gmail.com> / 2008-2014
-   see LICENSE for detail */
-
-#include    <windowing/win32/resource.h>
-
-IDI_BE_ICON        ICON    DISCARDABLE     "directx.ico"
