@@ -191,9 +191,9 @@ environment:
 
 
 build_script:
-  - python waf configure --compilers=${COMPILER_NAME}
-  - python waf build:${TARGET_OS}-${COMPILER}-${COMPILER_VERSION}:${FLAVOR}
-  - python waf build:${TARGET_OS}-${COMPILER}-${COMPILER_VERSION}:${FLAVOR} --static
-  - python waf build:${TARGET_OS}-${COMPILER}-${COMPILER_VERSION}:${FLAVOR} --dynamic
-  - python waf build:${TARGET_OS}-${COMPILER}-${COMPILER_VERSION}:${FLAVOR} --nomaster
+  - python waf configure --compilers=%COMPILER_NAME%
+  - python waf build:%TARGET_OS%-%COMPILER%-%COMPILER_VERSION%:%FLAVOR%
+  - python waf build:%TARGET_OS%-%COMPILER%-%COMPILER_VERSION%:%FLAVOR% --static
+  - python waf build:%TARGET_OS%-%COMPILER%-%COMPILER_VERSION%:%FLAVOR% --dynamic
+  - python waf build:%TARGET_OS%-%COMPILER%-%COMPILER_VERSION%:%FLAVOR% --nomaster
 
