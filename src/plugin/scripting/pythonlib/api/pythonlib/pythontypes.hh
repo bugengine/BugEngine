@@ -470,16 +470,16 @@ struct PyModuleDef
 #define Py_INCREF(pyobject)                                                                         \
     do                                                                                              \
     {                                                                                               \
-        BugEngine::Python::PyObject* o = reinterpret_cast<BugEngine::Python::PyObject*>(pyobject);  \
-        ++ o->py_refcount;                                                                          \
+        BugEngine::Python::PyObject* o_ = reinterpret_cast<BugEngine::Python::PyObject*>(pyobject); \
+        ++ o_->py_refcount;                                                                         \
     } while (0)
 #define Py_DECREF(pyobject)                                                                         \
     do                                                                                              \
     {                                                                                               \
-        BugEngine::Python::PyObject* o = reinterpret_cast<BugEngine::Python::PyObject*>(pyobject);  \
-        if (--o->py_refcount == 0)                                                                  \
+        BugEngine::Python::PyObject* o_ = reinterpret_cast<BugEngine::Python::PyObject*>(pyobject); \
+        if (--o_->py_refcount == 0)                                                                 \
         {                                                                                           \
-            o->py_type->tp_dealloc(o);                                                              \
+            o_->py_type->tp_dealloc(o_);                                                            \
         }                                                                                           \
     } while (0)
 
