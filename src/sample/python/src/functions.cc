@@ -5,8 +5,6 @@
 #include    <functions.script.hh>
 #include    <rtti/engine/namespace.hh>
 
-BE_REGISTER_NAMESPACE_2(BugEngine, TestCases)
-
 namespace BugEngine { namespace TestCases
 {
 
