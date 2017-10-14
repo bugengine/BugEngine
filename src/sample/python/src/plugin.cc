@@ -4,6 +4,8 @@
 #include    <stdafx.h>
 #include    <pythonsample.hh>
 #include    <plugin/plugin.hh>
+#include    <rtti/engine/namespace.hh>
 #include    <bugengine/application.hh>
 
 BE_PLUGIN_REGISTER(BugEngine::PythonSample);
+BE_REGISTER_NAMESPACE_2(BugEngine, TestCases)
