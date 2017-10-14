@@ -13,7 +13,7 @@
 #define BE_REGISTER_NAMESPACE_1_NAMED(plugin, n)                                                                                                \
 namespace BugEngine                                                                                                                             \
 {                                                                                                                                               \
-    raw<BugEngine::RTTI::Class> be_##plugin##_Namespace();                                                                            \
+    BE_EXPORT raw<BugEngine::RTTI::Class> be_##plugin##_Namespace();                                                                            \
     BE_EXPORT raw<BugEngine::RTTI::Class> be_##plugin##_Namespace_##n()                                                                         \
     {                                                                                                                                           \
         static RTTI::Class ci = { #n, 0, 0, RTTI::ClassType_Namespace, {0}, {0}, {0}, {0}, {0, 0}, {0, 0}, {0}, {0}, 0, 0 };                    \
@@ -28,7 +28,7 @@ namespace BugEngine                                                             
 #define BE_REGISTER_NAMESPACE_2_NAMED(plugin, n1, n2)                                                                                           \
 namespace BugEngine                                                                                                                             \
 {                                                                                                                                               \
-    raw<BugEngine::RTTI::Class> be_##plugin##_Namespace_BugEngine();                                                                  \
+    BE_EXPORT raw<BugEngine::RTTI::Class> be_##plugin##_Namespace_BugEngine();                                                                  \
     BE_EXPORT raw<BugEngine::RTTI::Class> be_##plugin##_Namespace_##n1##_##n2()                                                                 \
     {                                                                                                                                           \
         static RTTI::Class ci = { #n2, 0, 0, RTTI::ClassType_Namespace, {be_##plugin##_Namespace_##n1().m_ptr}, {0}, {0},                       \
