@@ -459,6 +459,23 @@ def library(bld, name, depends=[], features=[], platforms=[],
 
 
 @conf
+def headers(bld, name, depends=[], features=[], platforms=[],
+            extra_public_includes=[], extra_public_defines=[],
+            path='', use_master=True, warnings=True, export_all=False):
+    if not path: path=name
+    if not bld.env.PROJECTS:
+        for p in platforms:
+            if p not in bld.env.VALID_PLATFORMS:
+                return None
+    module(bld, name, path, depends, platforms,
+        ['cxx'],
+        features,
+        [], [],
+        extra_public_includes, extra_public_defines,
+        use_master, warnings, export_all)
+
+
+@conf
 def static_library(bld, name, depends=[], features=[], platforms=[],
         extra_includes=[], extra_defines=[],
         extra_public_includes=[], extra_public_defines=[],

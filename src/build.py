@@ -35,7 +35,7 @@ def bugengine(bld):
     """
         Declares the main library and entry point
     """
-    bld.library('engine.kernel',
+    bld.headers('engine.kernel',
                 [])
     bld.library('engine.minitl',
                 bld.platforms+['engine.kernel'])
