@@ -3,7 +3,7 @@
 environment:
   matrix:
     - COMPILER: msvc_x86
-      COMPILER_NAME: msvc
+      COMPILER_NAME: msvc,gcc,clang
       COMPILER_VERSION: 9.0
       TARGET_OS: windows_x86
       FLAVOR: debug
@@ -17,17 +17,17 @@ environment:
       COMPILER_VERSION: 9.0
       TARGET_OS: windows_x86
       FLAVOR: final
-    - COMPILER: msvc_x64
+    - COMPILER: msvc_x86_amd64
       COMPILER_NAME: msvc
       COMPILER_VERSION: 9.0
       TARGET_OS: windows_amd64
       FLAVOR: debug
-    - COMPILER: msvc_x64
+    - COMPILER: msvc_x86_amd64
       COMPILER_NAME: msvc
       COMPILER_VERSION: 9.0
       TARGET_OS: windows_amd64
       FLAVOR: profile
-    - COMPILER: msvc_x64
+    - COMPILER: msvc_x86_amd64
       COMPILER_NAME: msvc
       COMPILER_VERSION: 9.0
       TARGET_OS: windows_amd64
@@ -47,17 +47,17 @@ environment:
       COMPILER_VERSION: 10.0
       TARGET_OS: windows_x86
       FLAVOR: final
-    - COMPILER: msvc_x64
+    - COMPILER: msvc_x86_amd64
       COMPILER_NAME: msvc
       COMPILER_VERSION: 10.0
       TARGET_OS: windows_amd64
       FLAVOR: debug
-    - COMPILER: msvc_x64
+    - COMPILER: msvc_x86_amd64
       COMPILER_NAME: msvc
       COMPILER_VERSION: 10.0
       TARGET_OS: windows_amd64
       FLAVOR: profile
-    - COMPILER: msvc_x64
+    - COMPILER: msvc_x86_amd64
       COMPILER_NAME: msvc
       COMPILER_VERSION: 10.0
       TARGET_OS: windows_amd64
@@ -77,17 +77,17 @@ environment:
       COMPILER_VERSION: 11.0
       TARGET_OS: windows_x86
       FLAVOR: final
-    - COMPILER: msvc_x64
+    - COMPILER: msvc_x86_amd64
       COMPILER_NAME: msvc
       COMPILER_VERSION: 11.0
       TARGET_OS: windows_amd64
       FLAVOR: debug
-    - COMPILER: msvc_x64
+    - COMPILER: msvc_x86_amd64
       COMPILER_NAME: msvc
       COMPILER_VERSION: 11.0
       TARGET_OS: windows_amd64
       FLAVOR: profile
-    - COMPILER: msvc_x64
+    - COMPILER: msvc_x86_amd64
       COMPILER_NAME: msvc
       COMPILER_VERSION: 11.0
       TARGET_OS: windows_amd64
