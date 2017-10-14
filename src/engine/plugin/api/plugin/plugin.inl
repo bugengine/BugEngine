@@ -17,7 +17,7 @@ namespace BugEngine { namespace Plugin
 #define BE_PLUGIN_NAMESPACE_CREATE_(name)                                                           \
     namespace BugEngine                                                                             \
     {                                                                                               \
-        BE_EXPORT raw<RTTI::Class> be_##name##_Namespace()                                          \
+        raw<RTTI::Class> be_##name##_Namespace()                                                    \
         {                                                                                           \
             static RTTI::ObjectInfo ob = { {0}, {0}, "BugEngine", RTTI::Value() };                  \
             static RTTI::Class ci = { "BugEngine", 0, 0, RTTI::ClassType_Namespace, {0}, {0},       \
@@ -27,7 +27,7 @@ namespace BugEngine { namespace Plugin
             raw<RTTI::Class> ptr = {&ci};                                                           \
             return ptr;                                                                             \
         }                                                                                           \
-        BE_EXPORT raw<RTTI::Class> be_##name##_Namespace_BugEngine()                                \
+        raw<RTTI::Class> be_##name##_Namespace_BugEngine()                                          \
         {                                                                                           \
             return be_##name##_Namespace();                                                         \
         }                                                                                           \
