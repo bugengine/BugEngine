@@ -128,6 +128,67 @@ environment:
       TARGET_OS: windows_amd64
       FLAVOR: final
       APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+    - COMPILER: gcc_amd64
+      COMPILER_VERSION: 5.4.0
+      TARGET_OS: windows_amd64
+      FLAVOR: debug
+    - COMPILER: gcc_amd64
+      COMPILER_VERSION: 5.4.0
+      TARGET_OS: windows_amd64
+      FLAVOR: profile
+    - COMPILER: gcc_amd64
+      COMPILER_VERSION: 5.4.0
+      TARGET_OS: windows_amd64
+      FLAVOR: final
+    - COMPILER: gcc_amd64
+      COMPILER_VERSION: 6.3.0
+      TARGET_OS: windows_amd64
+      FLAVOR: debug
+    - COMPILER: gcc_amd644
+      COMPILER_VERSION: 6.3.0
+      TARGET_OS: windows_amd64
+      FLAVOR: profile
+    - COMPILER: gcc_amd64
+      COMPILER_VERSION: 6.3.0
+      TARGET_OS: windows_amd64
+      FLAVOR: final
+    - COMPILER: gcc_x86
+      COMPILER_VERSION: 5.3.0
+      TARGET_OS: windows_x86
+      FLAVOR: debug
+    - COMPILER: gcc_x68
+      COMPILER_VERSION: 5.3.0
+      TARGET_OS: windows_x86
+      FLAVOR: profile
+    - COMPILER: gcc_x86
+      COMPILER_VERSION: 5.3.0
+      TARGET_OS: windows_x86
+      FLAVOR: final
+    - COMPILER: gcc_x86
+      COMPILER_VERSION: 5.4.0
+      TARGET_OS: windows_x86
+      FLAVOR: debug
+    - COMPILER: gcc_x68
+      COMPILER_VERSION: 5.4.0
+      TARGET_OS: windows_x86
+      FLAVOR: profile
+    - COMPILER: gcc_x86
+      COMPILER_VERSION: 5.4.0
+      TARGET_OS: windows_x86
+      FLAVOR: final
+    - COMPILER: gcc_x86
+      COMPILER_VERSION: 6.3.0
+      TARGET_OS: windows_x86
+      FLAVOR: debug
+    - COMPILER: gcc_x68
+      COMPILER_VERSION: 6.3.0
+      TARGET_OS: windows_x86
+      FLAVOR: profile
+    - COMPILER: gcc_x86
+      COMPILER_VERSION: 6.3.0
+      TARGET_OS: windows_x86
+      FLAVOR: final
+
 
 
 build_script:
