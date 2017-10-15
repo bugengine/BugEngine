@@ -221,7 +221,7 @@ class GnuCompiler(Compiler):
         result, out, err = self.run([compiler_c] + extra_args.get('c', []) + ['-v', '-dM', '-E', '-'], '\n', env=env)
         macros = set([])
         if result != 0:
-            raise Exception('Error running %s: %s' % (compiler_c, err))
+            raise Exception('Error running %s:\nresult: %d\nstdout: %s\nstderr: %s\n' % (compiler_c, result, out, err))
         out = err.split('\n') + out.split('\n')
         for line in out:
             for name in self.NAMES:
