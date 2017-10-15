@@ -131,8 +131,8 @@ environment:
 
 
 build_script:
+  - set PATH=%PATH%;C:\msys64\usr\bin;C:\msys64\mingw32\bin;C:\msys64\mingw64\bin;C:\cygwin\bin;C:\cygwin64\bin;C:\MinGW\msys\1.0\bin;C:\MinGW\bin;C:\mingw-w64\i686-5.3.0-posix-dwarf-rt_v4-rev0\bin;C:\mingw-w64\i686-6.3.0-posix-dwarf-rt_v5-rev1\bin;C:\mingw-w64\x86_64-6.3.0-posix-seh-rt_v5-rev1\bin
   - set
-  - set PATH=%PATH%;C:\MinGW\msys\1.0\bin;C:\MinGW\bin;C:\mingw-w64\i686-5.3.0-posix-dwarf-rt_v4-rev0\bin;C:\mingw-w64\i686-6.3.0-posix-dwarf-rt_v5-rev1\bin;C:\mingw-w64\x86_64-6.3.0-posix-seh-rt_v5-rev1\bin
   - python waf configure
   - python waf build:%TARGET_OS%-%COMPILER%-%COMPILER_VERSION%:%FLAVOR%
   - python waf build:%TARGET_OS%-%COMPILER%-%COMPILER_VERSION%:%FLAVOR% --static
