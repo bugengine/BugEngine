@@ -3,187 +3,127 @@
 environment:
   matrix:
     - COMPILER: msvc_x86
-      COMPILER_NAME: msvc,gcc,clang
       COMPILER_VERSION: 9.0
       TARGET_OS: windows_x86
       FLAVOR: debug
     - COMPILER: msvc_x86
-      COMPILER_NAME: msvc
       COMPILER_VERSION: 9.0
       TARGET_OS: windows_x86
       FLAVOR: profile
     - COMPILER: msvc_x86
-      COMPILER_NAME: msvc
       COMPILER_VERSION: 9.0
       TARGET_OS: windows_x86
       FLAVOR: final
-    - COMPILER: msvc_x86_amd64
-      COMPILER_NAME: msvc
-      COMPILER_VERSION: 9.0
-      TARGET_OS: windows_amd64
-      FLAVOR: debug
-    - COMPILER: msvc_x86_amd64
-      COMPILER_NAME: msvc
-      COMPILER_VERSION: 9.0
-      TARGET_OS: windows_amd64
-      FLAVOR: profile
-    - COMPILER: msvc_x86_amd64
-      COMPILER_NAME: msvc
-      COMPILER_VERSION: 9.0
-      TARGET_OS: windows_amd64
-      FLAVOR: final
     - COMPILER: msvc_x86
-      COMPILER_NAME: msvc
       COMPILER_VERSION: 10.0
       TARGET_OS: windows_x86
       FLAVOR: debug
     - COMPILER: msvc_x86
-      COMPILER_NAME: msvc
       COMPILER_VERSION: 10.0
       TARGET_OS: windows_x86
       FLAVOR: profile
     - COMPILER: msvc_x86
-      COMPILER_NAME: msvc
       COMPILER_VERSION: 10.0
       TARGET_OS: windows_x86
       FLAVOR: final
-    - COMPILER: msvc_x86_amd64
-      COMPILER_NAME: msvc
-      COMPILER_VERSION: 10.0
-      TARGET_OS: windows_amd64
-      FLAVOR: debug
-    - COMPILER: msvc_x86_amd64
-      COMPILER_NAME: msvc
-      COMPILER_VERSION: 10.0
-      TARGET_OS: windows_amd64
-      FLAVOR: profile
-    - COMPILER: msvc_x86_amd64
-      COMPILER_NAME: msvc
-      COMPILER_VERSION: 10.0
-      TARGET_OS: windows_amd64
-      FLAVOR: final
     - COMPILER: msvc_x86
-      COMPILER_NAME: msvc
       COMPILER_VERSION: 11.0
       TARGET_OS: windows_x86
       FLAVOR: debug
     - COMPILER: msvc_x86
-      COMPILER_NAME: msvc
       COMPILER_VERSION: 11.0
       TARGET_OS: windows_x86
       FLAVOR: profile
     - COMPILER: msvc_x86
-      COMPILER_NAME: msvc
       COMPILER_VERSION: 11.0
       TARGET_OS: windows_x86
       FLAVOR: final
     - COMPILER: msvc_x86_amd64
-      COMPILER_NAME: msvc
       COMPILER_VERSION: 11.0
       TARGET_OS: windows_amd64
       FLAVOR: debug
     - COMPILER: msvc_x86_amd64
-      COMPILER_NAME: msvc
       COMPILER_VERSION: 11.0
       TARGET_OS: windows_amd64
       FLAVOR: profile
     - COMPILER: msvc_x86_amd64
-      COMPILER_NAME: msvc
       COMPILER_VERSION: 11.0
       TARGET_OS: windows_amd64
       FLAVOR: final
     - COMPILER: msvc_x86
-      COMPILER_NAME: msvc
       COMPILER_VERSION: 12.0
       TARGET_OS: windows_x86
       FLAVOR: debug
     - COMPILER: msvc_x86
-      COMPILER_NAME: msvc
       COMPILER_VERSION: 12.0
       TARGET_OS: windows_x86
       FLAVOR: profile
     - COMPILER: msvc_x86
-      COMPILER_NAME: msvc
       COMPILER_VERSION: 12.0
       TARGET_OS: windows_x86
       FLAVOR: final
     - COMPILER: msvc_x64
-      COMPILER_NAME: msvc
       COMPILER_VERSION: 12.0
       TARGET_OS: windows_amd64
       FLAVOR: debug
     - COMPILER: msvc_x64
-      COMPILER_NAME: msvc
       COMPILER_VERSION: 12.0
       TARGET_OS: windows_amd64
       FLAVOR: profile
     - COMPILER: msvc_x64
-      COMPILER_NAME: msvc
       COMPILER_VERSION: 12.0
       TARGET_OS: windows_amd64
       FLAVOR: final
     - COMPILER: msvc_x86
-      COMPILER_NAME: msvc
       COMPILER_VERSION: 14.0
       TARGET_OS: windows_x86
       FLAVOR: debug
     - COMPILER: msvc_x86
-      COMPILER_NAME: msvc
       COMPILER_VERSION: 14.0
       TARGET_OS: windows_x86
       FLAVOR: profile
     - COMPILER: msvc_x86
-      COMPILER_NAME: msvc
       COMPILER_VERSION: 14.0
       TARGET_OS: windows_x86
       FLAVOR: final
     - COMPILER: msvc_x64
-      COMPILER_NAME: msvc
       COMPILER_VERSION: 14.0
       TARGET_OS: windows_amd64
       FLAVOR: debug
     - COMPILER: msvc_x64
-      COMPILER_NAME: msvc
       COMPILER_VERSION: 14.0
       TARGET_OS: windows_amd64
       FLAVOR: profile
     - COMPILER: msvc_x64
-      COMPILER_NAME: msvc
       COMPILER_VERSION: 14.0
       TARGET_OS: windows_amd64
       FLAVOR: final
     - COMPILER: msvc_x86
-      COMPILER_NAME: msvc
       COMPILER_VERSION: 15.0
       TARGET_OS: windows_x86
       FLAVOR: debug
       APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
     - COMPILER: msvc_x86
-      COMPILER_NAME: msvc
       COMPILER_VERSION: 15.0
       TARGET_OS: windows_x86
       FLAVOR: profile
       APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
     - COMPILER: msvc_x86
-      COMPILER_NAME: msvc
       COMPILER_VERSION: 15.0
       TARGET_OS: windows_x86
       FLAVOR: final
       APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
     - COMPILER: msvc_x64
-      COMPILER_NAME: msvc
       COMPILER_VERSION: 15.0
       TARGET_OS: windows_amd64
       FLAVOR: debug
       APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
     - COMPILER: msvc_x64
-      COMPILER_NAME: msvc
       COMPILER_VERSION: 15.0
       TARGET_OS: windows_amd64
       FLAVOR: profile
       APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
     - COMPILER: msvc_x64
-      COMPILER_NAME: msvc
       COMPILER_VERSION: 15.0
       TARGET_OS: windows_amd64
       FLAVOR: final
@@ -191,7 +131,8 @@ environment:
 
 
 build_script:
-  - python waf configure --compilers=%COMPILER_NAME%
+  - set
+  - python waf configure
   - python waf build:%TARGET_OS%-%COMPILER%-%COMPILER_VERSION%:%FLAVOR%
   - python waf build:%TARGET_OS%-%COMPILER%-%COMPILER_VERSION%:%FLAVOR% --static
   - python waf build:%TARGET_OS%-%COMPILER%-%COMPILER_VERSION%:%FLAVOR% --dynamic
