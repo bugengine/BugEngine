@@ -1,6 +1,7 @@
 Building BugEngine
 ==================
-[![Build Status](https://travis-ci.org/bugengine/BugEngine.svg?branch=master)](https://travis-ci.org/bugengine/BugEngine)
+[![Travis Build Status](https://travis-ci.org/bugengine/BugEngine.svg?branch=master)](https://travis-ci.org/bugengine/BugEngine)
+[![AppVeyor Build status](https://ci.appveyor.com/api/projects/status/3nlym06xn9528h9e/branch/master?svg=true)](https://ci.appveyor.com/project/bugengine/bugengine/branch/master)
 
 Supported platforms
 -------------------
