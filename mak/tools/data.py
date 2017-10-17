@@ -40,7 +40,7 @@ class docgen(Task.Task):
 @extension('.h', '.hh', '.hxx')
 def datagen(self, node):
     outs = []
-    out_node = self.make_bld_node('.src', node.parent, '%s.cc'%node.name[:node.name.rfind('.')])
+    out_node = self.make_bld_node('src', node.parent, '%s.cc'%node.name[:node.name.rfind('.')])
     outs.append(out_node)
     outs.append(out_node.change_ext('-instances.cc'))
     outs.append(out_node.change_ext('.doc'))

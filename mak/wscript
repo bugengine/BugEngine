@@ -93,6 +93,7 @@ def build(bld):
     bld.recurse('build.py')
     bld.recurse('hosts.py')
     bld.recurse('targets.py')
+    bld.recurse('install.py')
 
     if bld.env.PROJECTS:
         def rc_hook(self, node):

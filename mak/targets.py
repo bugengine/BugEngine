@@ -14,7 +14,7 @@ def add_build_command(toolchain, optimisation):
             bugengine_variant = toolchain
 
             def get_variant_dir(self):
-                return os.path.join(self.out_dir, self.optim)
+                return os.path.join(self.out_dir, self.bugengine_variant)
             variant_dir = property(get_variant_dir, None)
 
 
@@ -94,7 +94,7 @@ Configure.ConfigurationContext.Platform = Platform
 def options(opt):
     gr = opt.add_option_group('configure options')
     for target in opt.path.make_node('target').listdir():
-        if target.endswith('.py'):
+        if target.endswith('.py') and not target.endswith('_build.py'):
             opt.recurse('target/%s'%target)
     for extra in opt.bugenginenode.make_node('extra').listdir():
         if os.path.isfile(os.path.join(opt.bugenginenode.abspath(), 'extra', extra, 'wscript')):
@@ -113,8 +113,9 @@ def configure(conf):
     platforms = Options.options.platforms
     platforms = platforms.split(',') if platforms else []
     for target in conf.path.make_node('target').listdir():
-        if not platforms or target[:-3] in platforms:
-            conf.recurse('target/%s'%target)
+        if target.endswith('.py') and not target.endswith('_build.py'):
+            if not platforms or target[:-3] in platforms:
+                conf.recurse('target/%s'%target)
     for extra in conf.bugenginenode.make_node('extra').listdir():
         if not platforms or extra in platforms:
             if os.path.isfile(os.path.join(conf.bugenginenode.abspath(), 'extra', extra, 'wscript')):
@@ -132,16 +133,16 @@ def build(bld):
     if bld.env.VALID_PLATFORMS:
         if os.path.isdir(os.path.join(bld.bugenginenode.abspath(), 'extra', bld.env.VALID_PLATFORMS[0])):
             bld.recurse(os.path.join(bld.bugenginenode.abspath(), 'extra', bld.env.VALID_PLATFORMS[0]))
-        if os.path.isfile(os.path.join(bld.path.abspath(), 'target', bld.env.VALID_PLATFORMS[0]+'.py')):
-            bld.recurse('target/%s'%bld.env.VALID_PLATFORMS[0])
+        if os.path.isfile(os.path.join(bld.path.abspath(), 'target', bld.env.VALID_PLATFORMS[0]+'_build.py')):
+            bld.recurse('target/%s_build'%bld.env.VALID_PLATFORMS[0])
 
 def plugins(bld):
     if bld.env.VALID_PLATFORMS:
         extra = bld.bugenginenode.make_node('extra').make_node(bld.env.VALID_PLATFORMS[0])
         if os.path.isdir(extra.abspath()):
             bld.recurse(extra.abspath(), name='plugins')
-        if os.path.isfile(os.path.join(bld.path.abspath(), 'target', bld.env.VALID_PLATFORMS[0]+'.py')):
-            bld.recurse('target/%s'%bld.env.VALID_PLATFORMS[0], name='plugins')
+        if os.path.isfile(os.path.join(bld.path.abspath(), 'target', bld.env.VALID_PLATFORMS[0]+'_build.py')):
+            bld.recurse('target/%s_build.py'%bld.env.VALID_PLATFORMS[0], name='plugins')
 
 from waflib import ConfigSet
 try:

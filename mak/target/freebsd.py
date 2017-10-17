@@ -26,6 +26,7 @@ class FreeBSD(Configure.ConfigurationContext.Platform):
         env.DEPLOY_PLUGINDIR = os.path.join('share', 'bugengine', 'plugin')
         env.DEPLOY_KERNELDIR = os.path.join('share', 'bugengine', 'kernel')
         env.pymodule_PATTERN = '%s.so'
+        env.STRIP_BINARY = True
 
         env.append_unique('CFLAGS', ['-fPIC'])
         env.append_unique('CXXFLAGS', ['-fPIC'])
@@ -45,10 +46,3 @@ def options(opt):
 def configure(conf):
     conf.platforms.append(FreeBSD())
 
-
-def build(bld):
-    pass
-
-
-def plugins(bld):
-    pass

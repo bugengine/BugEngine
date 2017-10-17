@@ -106,7 +106,6 @@ class install_task(Task.Task):
         return 0
 
 
-
 for command in ['build', 'clean']:
     for variant in ['debug', 'profile', 'final']:
         class BuildWrapperVariant(Build.BuildContext):
@@ -674,62 +673,6 @@ def rename_executable(self):
     self.target = self.real_target
 
 
-@feature('kernel')
-@after_method('apply_link')
-def install_kernel(self):
-    if not self.env.ENV_PREFIX and not self.bld.env.STATIC: #no multiarch, no static
-        self.install_files(os.path.join(self.bld.env.PREFIX, self.bld.optim, self.bld.env.DEPLOY_KERNELDIR),
-                           [self.link_task.outputs[0]],
-                           Utils.O755)
-        if self.env.CC_NAME == 'msvc':
-            self.install_files(os.path.join(self.bld.env.PREFIX, self.bld.optim, self.bld.env.DEPLOY_KERNELDIR),
-                               [self.link_task.outputs[1]])
-
-
-@feature('plugin')
-@after_method('apply_link')
-def install_plugin(self):
-    if ('cshlib' in self.features) or ('cxxshlib' in self.features):
-        if not self.env.ENV_PREFIX: #no multiarch
-            self.install_files(os.path.join(self.bld.env.PREFIX, self.bld.optim, self.bld.env.DEPLOY_PLUGINDIR),
-                               [self.link_task.outputs[0]],
-                               Utils.O755)
-            if self.env.CC_NAME == 'msvc':
-                self.install_files(os.path.join(self.bld.env.PREFIX, self.bld.optim, self.bld.env.DEPLOY_PLUGINDIR),
-                                   [self.link_task.outputs[1]])
-
-
-@feature('shared_lib')
-@after_method('apply_link')
-def install_shared_lib(self):
-    if ('cshlib' in self.features) or ('cxxshlib' in self.features):
-        if not self.env.ENV_PREFIX: #no multiarch
-            self.install_files(os.path.join(self.bld.env.PREFIX, self.bld.optim, self.bld.env.DEPLOY_RUNBINDIR),
-                               [self.link_task.outputs[0]],
-                               Utils.O755)
-            if self.env.CC_NAME == 'msvc':
-                self.install_files(os.path.join(self.bld.env.PREFIX, self.bld.optim, self.bld.env.DEPLOY_RUNBINDIR),
-                                   [self.link_task.outputs[1]])
-
-
-@feature('launcher')
-@after_method('apply_link')
-def install_program(self):
-    if not self.env.ENV_PREFIX: #no multiarch
-        self.install_files(os.path.join(self.bld.env.PREFIX, self.bld.optim, self.bld.env.DEPLOY_BINDIR),
-                           [self.link_task.outputs[0]],
-                           chmod=Utils.O755)
-        if self.env.CC_NAME == 'msvc':
-            self.install_files(os.path.join(self.bld.env.PREFIX, self.bld.optim, self.bld.env.DEPLOY_BINDIR),
-                               [self.link_task.outputs[1]])
-
-
-@feature('game')
-@after_method('apply_link')
-def install_game(self):
-    pass #also plugin
-
-
 @feature('launcher')
 def launcher_feature(task):
     pass
@@ -770,24 +713,21 @@ def gather_extra_source(self):
 @taskgen_method
 def make_bld_node_common(self, node, path, name):
     if not path:
-        node = node.make_node(self.target)
         node = node.make_node(name)
     elif path.is_child_of(self.bld.bldnode):
         out_dir = path.path_from(self.bld.bldnode)
+        # skip variant
         out_dir = out_dir[out_dir.find(os.path.sep)+1:]
-        if out_dir[0] == '.':
-            out_dir = out_dir[out_dir.find(os.path.sep)+1:]
-            out_dir = out_dir[out_dir.find(os.path.sep)+1:]
-            node = node.make_node(self.target)
-            node = node.make_node(out_dir)
-            node = node.make_node(name)
-        else:
-            node = self.bld.bldnode.make_node(out_dir).make_node(name)
+        # skip target
+        out_dir = out_dir[out_dir.find(os.path.sep)+1:]
+        # skip category
+        out_dir = out_dir[out_dir.find(os.path.sep)+1:]
+        node = node.make_node(out_dir)
+        node = node.make_node(name)
     else:
         out_dir = path.path_from(self.path)
         while out_dir[0] == '.':
             out_dir = out_dir[out_dir.find(os.path.sep)+1:]
-        node = node.make_node(self.target)
         node = node.make_node(out_dir)
         node = node.make_node(name)
     node.parent.mkdir()
@@ -797,9 +737,9 @@ def make_bld_node_common(self, node, path, name):
 @taskgen_method
 def make_bld_node(self, category, path, name):
     try:
-        node = self.bld.bldnode.make_node(self.bld.bugengine_variant).make_node(category)
+        node = self.bld.bldnode.make_node(self.bld.optim).make_node(self.target).make_node(category)
     except AttributeError:
-        node = self.bld.bldnode.make_node('__all__').make_node(category)
+        node = self.bld.bldnode.make_node('_any_').make_node(self.target).make_node(category)
     return self.make_bld_node_common(node, path, name)
 
 
@@ -877,7 +817,7 @@ def create_compiled_task(self, name, node):
     :return: The task created
     :rtype: :py:class:`waflib.Task.Task`
     """
-    out = self.make_bld_node('.obj', node.parent, node.name[:node.name.rfind('.')]+'.o')
+    out = self.make_bld_node('obj', node.parent, node.name[:node.name.rfind('.')]+'.o')
     task = self.create_task(name, node, out)
     try:
         self.compiled_tasks.append(task)
@@ -891,7 +831,7 @@ def create_compiled_task(self, name, node):
 def create_kernel_namespace(self):
     kernels = getattr(self, 'kernels', [])
     if kernels:
-        out = self.make_bld_node('.src', None, 'namespace.cc')
+        out = self.make_bld_node('src', None, 'namespace.cc')
         self.create_task('namespace', [], [out])
         try:
             self.out_sources.append(out)
@@ -907,7 +847,7 @@ def rc_file(self, node):
     obj_ext = '.o'
     if self.env['WINRC_TGT_F'] == '/fo':
         obj_ext = '.res'
-    out = self.make_bld_node('.obj', node.parent, node.name[:node.name.rfind('.')]+obj_ext)
+    out = self.make_bld_node('obj', node.parent, node.name[:node.name.rfind('.')]+obj_ext)
     rctask = self.create_task('winrc', node, out)
     try:
         self.compiled_tasks.append(rctask)
@@ -923,12 +863,12 @@ def c_hook(self, node):
             if len(mastertask_c.inputs) <= 10:
                 mastertask_c.set_inputs([node])
             else:
-                output = self.make_bld_node('.src', None, 'master-c-%d.%s' % (len(self.mastertasks_c), self.objc and 'm' or 'c'))
+                output = self.make_bld_node('src', None, 'master-c-%d.%s' % (len(self.mastertasks_c), self.objc and 'm' or 'c'))
                 mastertask_c = self.create_task('master', [node], [output])
                 self.mastertasks_c.append(mastertask_c)
                 self.create_compiled_task('c', output)
         except:
-            output = self.make_bld_node('.src', None, 'master-c-0.%s' % (self.objc and 'm' or 'c'))
+            output = self.make_bld_node('src', None, 'master-c-0.%s' % (self.objc and 'm' or 'c'))
             mastertask_c = self.create_task('master', [node], [output])
             self.mastertasks_c = [mastertask_c]
             self.create_compiled_task('c', output)
@@ -943,7 +883,7 @@ def cc_hook(self, node):
             try:
                 self.instancetask_cxx.set_inputs([node])
             except:
-                output = self.make_bld_node('.src', None, 'instances-master-cxx.%s' % (self.objc and 'mm' or 'cc'))
+                output = self.make_bld_node('src', None, 'instances-master-cxx.%s' % (self.objc and 'mm' or 'cc'))
                 self.instancetask_cxx = self.create_task('master', [node], [output])
                 self.create_compiled_task('cxx', output)
         else:
@@ -952,12 +892,12 @@ def cc_hook(self, node):
                 if len(mastertask_cxx.inputs) <= 10:
                     mastertask_cxx.set_inputs([node])
                 else:
-                    output = self.make_bld_node('.src', None, 'master-cxx-%d.%s' % (len(self.mastertasks_cxx), self.objc and 'mm' or 'cc'))
+                    output = self.make_bld_node('src', None, 'master-cxx-%d.%s' % (len(self.mastertasks_cxx), self.objc and 'mm' or 'cc'))
                     mastertask_cxx = self.create_task('master', [node], [output])
                     self.mastertasks_cxx.append(mastertask_cxx)
                     self.create_compiled_task('cxx', output)
             except:
-                output = self.make_bld_node('.src', None, 'master-cxx-0.%s' % (self.objc and 'mm' or 'cc'))
+                output = self.make_bld_node('src', None, 'master-cxx-0.%s' % (self.objc and 'mm' or 'cc'))
                 mastertask_cxx = self.create_task('master', [node], [output])
                 self.mastertasks_cxx = [mastertask_cxx]
                 self.create_compiled_task('cxx', output)
@@ -986,7 +926,7 @@ def apply_link(self):
     if not pattern:
         pattern = '%s'
     path, name = os.path.split(self.target)
-    out_node = self.make_bld_node('.bin', None, os.path.join(path, pattern%name))
+    out_node = self.make_bld_node('bin', None, os.path.join(path, pattern%name))
     self.link_task.set_outputs(out_node)
 
 
@@ -994,3 +934,83 @@ def apply_link(self):
 @after_method('apply_link')
 def apply_implib(self):
     pass
+
+
+@feature('cprogram', 'cxxprogram', 'cshlib', 'cxxshlib')
+@after_method('apply_link')
+@before_method('install_step')
+def set_postlink_task(self):
+    self.postlink_task = self.link_task
+
+
+@feature('cprogram', 'cxxprogram', 'cshlib', 'cxxshlib')
+@after_method('set_postlink_task')
+def install_step(self):
+    pass
+
+
+def exec_command_objcopy(self, *k, **kw):
+    if isinstance(k[0], list):
+        lst = []
+        carry = ''
+        for a in k[0]:
+            if a[-1] == '=':
+                carry = a
+            else:
+                lst.append(carry + a)
+                carry = ''
+            k = [lst]
+    return self.generator.bld.exec_command(*k, **kw)
+
+
+Task.task_factory('dbg_copy',
+                  '${OBJCOPY} --only-keep-debug ${SRC} ${TGT[0].abspath()}',
+                  color='BLUE')
+Task.task_factory('dbg_strip',
+                  '${STRIP} ${STRIPFLAGS} -S -o ${TGT[0].abspath()} ${SRC[0].abspath()}',
+                  color='BLUE')
+dbg_link_cls = Task.task_factory('dbg_link',
+                        '${OBJCOPY} --add-gnu-debuglink=${SRC[0].path_from(tsk.inputs[1].parent)} ${SRC[1].abspath()} ${TGT[0].abspath()}',
+                        color='BLUE')
+dbg_link_cls.exec_command = exec_command_objcopy
+
+
+@feature('cprogram', 'cxxprogram', 'cshlib', 'cxxshlib')
+@before_method('install_step')
+@after_method('set_postlink_task')
+def strip_debug_info(self):
+    if not self.env.ENV_PREFIX:
+        if self.env.STRIP_BINARY and self.env.STRIP and self.env.OBJCOPY:
+            try:
+                optim = self.bld.optim
+            except AttributeError:
+                return
+            else:
+                self.full_link_task = self.link_task
+                full_link = self.full_link_task.outputs[0]
+                out_dir = full_link.parent.make_node('post-link')
+                out_dir.mkdir()
+                debug_prog = out_dir.make_node(full_link.name + '.debug')
+                stripped_prog = out_dir.make_node(full_link.name + '.stripped')
+                stripped_linked_prog = out_dir.make_node(full_link.name)
+
+                if 'plugin' in self.features:
+                    out_path = self.env.DEPLOY_PLUGINDIR
+                elif 'kernel' in self.features:
+                    out_path = self.env.DEPLOY_KERNELDIR
+                elif 'cshlib' in self.features or 'cxxshlib' in self.features:
+                    out_path = self.env.DEPLOY_RUNBINDIR
+                elif 'cprogram' in self.features or 'cxxprogram' in self.features:
+                    out_path = self.env.DEPLOY_BINDIR
+                else:
+                    return
+
+
+                self.dbg_copy_task = self.create_task('dbg_copy', [full_link], [debug_prog])
+                self.strip_task = self.create_task('dbg_strip', [full_link], [stripped_prog])
+                self.dbg_link_task = self.create_task('dbg_link', [debug_prog, stripped_prog], [stripped_linked_prog])
+                self.dbg_link_task.cwd = out_dir.abspath()
+                self.postlink_task = self.dbg_link_task
+                self.install_files(os.path.join(self.bld.env.PREFIX, self.bld.optim, out_path),
+                                   [debug_prog])
+
