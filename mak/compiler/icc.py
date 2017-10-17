@@ -46,6 +46,7 @@ class ICC(Configure.ConfigurationContext.GnuCompiler):
                     major = value[:-2]
                     version = '%s.%s%s' % (major, minor, patch if patch != '0' else '')
         self.target = '%s-%s' % (arch, platform)
+        self.targets = (self.target,)
         return version, platform, arch
 
     def set_optimisation_options(self, conf):

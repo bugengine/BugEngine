@@ -230,7 +230,7 @@ class GnuCompiler(Compiler):
                 if line.find('%s version ' % name.lower()) != -1:
                     words = line.split()
                     if 'Apple' in words:
-                        self.NAMES = ['Apple'+self.NAMES[0]] + list(self.NAMES)
+                        self.NAMES = ('Apple'+self.NAMES[0],) + self.NAMES
                     while words[0] != name.lower() and words[1] != 'version':
                         words.pop(0)
                     version = words[2].split('-')[0]
@@ -239,7 +239,7 @@ class GnuCompiler(Compiler):
                 while words[0] != 'Apple' and words[1] != 'LLVM' and words[2] != 'version':
                     words.pop(0)
                 version = words[3].split('-')[0]
-                self.NAMES = ['Apple'+self.NAMES[0]] + list(self.NAMES)
+                self.NAMES = ('Apple'+self.NAMES[0],) + self.NAMES
             if line.startswith('#define'):
                 macro = line.split()[1].strip()
                 macros.add(macro)
