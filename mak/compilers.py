@@ -107,7 +107,7 @@ class Compiler:
 
     def sort_name(self):
         compiler_name = self.__class__.__name__.lower()
-        return self.arch, compiler_name, self.platform, self.version_number, self.arch_name
+        return self.arch, compiler_name, self.version_number, self.arch_name, self.platform
 
     def name(self):
         compiler_name = self.NAMES[0]
@@ -245,6 +245,7 @@ class GnuCompiler(Compiler):
             if sysroot != -1:
                 sysroot = shlex.split(line[sysroot:].replace('\\', '\\\\'))[1]
                 self.sysroot = os.path.normpath(sysroot)
+                self.NAMES = ('cross_' + self.NAMES[0],) + self.NAMES
 
         best = 0
         for values, a in self.MACRO_ARCHS:
