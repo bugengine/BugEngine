@@ -73,6 +73,7 @@ class Windows_Clang(Windows):
         env.CFLAGS_console = ['-D_CONSOLE=1']
         env.CXXFLAGS_console = ['-D_CONSOLE=1']
         env.LINKFLAGS_console = ['-mconsole']
+        env.STRIP_BINARY = True
 
 
 class Windows_GCC(Windows):
@@ -91,6 +92,7 @@ class Windows_GCC(Windows):
         env.CFLAGS_console = ['-D_CONSOLE=1']
         env.CXXFLAGS_console = ['-D_CONSOLE=1']
         env.LINKFLAGS_console = ['-mconsole']
+        env.STRIP_BINARY = True
 
 
 class Windows_MSVC(Windows):
@@ -111,11 +113,3 @@ def options(opt):
 def configure(conf):
     conf.platforms.append(Windows())
 
-
-def build(bld):
-    bld.platforms.append(bld.external('3rdparty.system.win32'))
-    bld.platforms.append(bld.external('3rdparty.system.dbghelp'))
-
-
-def plugins(bld):
-    pass

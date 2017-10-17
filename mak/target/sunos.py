@@ -231,11 +231,3 @@ def configure(conf):
                         conf.variant = ''
                         Logs.pprint('GREEN', 'configured for toolchain %s' % (toolchain))
 
-
-
-def build(bld):
-    pass
-
-def plugins(bld):
-    pass
-

@@ -186,9 +186,10 @@ class GnuCompiler(Compiler):
         version, platform, arch = self.get_version(compiler_cxx, extra_args, extra_env)
         Compiler.__init__(self, compiler_c, compiler_cxx, version,
                           platform, arch, extra_args, extra_env)
-        target_dir = os.path.normpath(os.path.join(self.directories[0], '..', self.target, 'bin'))
-        if os.path.isdir(target_dir):
-            self.directories.append(target_dir)
+        for t in self.targets:
+            target_dir = os.path.normpath(os.path.join(self.directories[0], '..', t, 'bin'))
+            if os.path.isdir(target_dir):
+                self.directories.append(target_dir)
 
     def get_version(self, compiler_c, extra_args, extra_env):
         env = os.environ.copy()
@@ -201,6 +202,7 @@ class GnuCompiler(Compiler):
         platform = None
         result, out, err = self.run([compiler_c] + extra_args.get('c', []) + ['-dumpmachine'], env=env)
         self.target = out.strip()
+        self.targets = (self.target, self.target.replace('-unknown', ''), self.target.replace('--', '-'))
         if self.target.find('-') != -1:
             arch, platform = split_triple(self.target)
         else:
@@ -317,6 +319,19 @@ class GnuCompiler(Compiler):
         v.CXXFLAGS_warnall = ['-Wall', '-Wextra', '-Werror', '-Wno-sign-compare',
                               '-Woverloaded-virtual', '-Wno-invalid-offsetof', '-Wstrict-aliasing']
 
+    def find_target_program(self, conf, program, mandatory=False):
+        var = program.upper()
+        for t in self.targets:
+            if conf.find_program('%s-%s' % (t, program), var=var, path_list=self.directories, mandatory=False):
+                break
+        else:
+            for t in self.targets:
+                if conf.find_program('%s-%s' % (t, program), var=var, mandatory=False):
+                    break
+            else:
+                conf.find_program(program, var=var, path_list=self.directories, mandatory=mandatory)
+
+
     def load_in_env(self, conf, platform, sysroot=None):
         env = conf.env
         env.CC = self.compiler_c
@@ -334,12 +349,12 @@ class GnuCompiler(Compiler):
                 sys_dirs.append(pd)
             d, a = os.path.split(d)
 
-        if not conf.find_program(self.target+'-ar', var='AR', path_list=self.directories, mandatory=False):
-            conf.find_program('ar', var='AR', path_list=self.directories, mandatory=False)
-        conf.find_program('lldb', var='LLDB', path_list=sys_dirs, mandatory=False)
-        if not conf.find_program(self.target+'-gdb', var='GDB', mandatory=False):
-            if not conf.find_program('gdb', var='GDB', path_list=sys_dirs, mandatory=False):
-                conf.find_program('gdb', var='GDB', mandatory=False)
+        self.find_target_program(conf, 'ar')
+        self.find_target_program(conf, 'strip')
+        self.find_target_program(conf, 'objcopy')
+        self.find_target_program(conf, 'gdb')
+        if not conf.env.GDB:
+            conf.find_program('gdb', var='GDB', mandatory=False)
         env.COMPILER_NAME = self.__class__.__name__.lower()
         env.COMPILER_TARGET = self.arch + '-' + self.platform
         conf.load(self.TOOLS)

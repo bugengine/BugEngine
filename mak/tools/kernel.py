@@ -27,7 +27,7 @@ cls.scan = scan
 def kernel_generate(self):
     for kernel, sources in getattr(self, 'kernels', []):
         mak_node = self.bld.bugenginenode.find_node('mak')
-        out = self.make_bld_node('.src', None, '%s.script.hh' % (kernel))
+        out = self.make_bld_node('src', None, '%s.script.hh' % (kernel))
         self.source.append(out)
         tsk = self.create_task('kernel', sources, [out])
         tsk.env.KERNEL = self.bld.bugenginenode.find_node('mak/kernel.py').abspath()

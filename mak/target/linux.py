@@ -28,6 +28,7 @@ class Linux(Configure.ConfigurationContext.Platform):
         env.DEPLOY_PLUGINDIR = os.path.join('share', 'bugengine', 'plugin')
         env.DEPLOY_KERNELDIR = os.path.join('share', 'bugengine', 'kernel')
         env.pymodule_PATTERN = '%s.so'
+        env.STRIP_BINARY = True
 
         if 'SunCC' not in compiler.NAMES:
             env.append_unique('CFLAGS', ['-fPIC'])
@@ -44,12 +45,4 @@ def options(opt):
 
 def configure(conf):
     conf.platforms.append(Linux())
-
-
-def build(bld):
-    pass
-
-
-def plugins(bld):
-    pass
 
