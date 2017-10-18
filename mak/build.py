@@ -49,9 +49,9 @@ def filter(exe, lines):
     return result
 
 
-def exec_command(self, cmd, **kw):
+def exec_command(self, *k, **kw):
     kw['filter'] = filter
-    return old_exec_command(self, cmd, **kw)
+    return old_exec_command(self, *k, **kw)
 
 
 Task.Task.__str__ = to_string
