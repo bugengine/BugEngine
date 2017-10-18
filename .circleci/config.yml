@@ -1,0 +1,13 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: debian:stretch
+    steps:
+      - checkout
+      - run:
+          name: Install dependencies
+          command: sudo apt-get install ocl-icd-opencl-dev python2.7-dev python3.4-dev libfreetype6-dev libgl1-mesa-dev libgles2-mesa-dev libncurses5-dev zlib1g-dev libopenal-dev liblua5.2-dev libbullet-dev libogg-dev libvorbis-dev libminizip-dev
+      - run:
+          name: Configure
+          command: python waf configure
