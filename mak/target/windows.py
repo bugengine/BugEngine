@@ -24,7 +24,7 @@ class Windows(Configure.ConfigurationContext.Platform):
                     elif 'GCC' in c.NAMES:
                         result.append((c, [], Windows_GCC()))
                     elif 'msvc' in c.NAMES:
-                        if c.arch in 'amd64', 'x86':
+                        if c.arch in ('amd64', 'x86'):
                             result.append((c, [], Windows_MSVC()))
                     else:
                         result.append((c, [], self))
