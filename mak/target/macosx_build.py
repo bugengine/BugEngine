@@ -1,4 +1,4 @@
-from waflib import Task
+from waflib import Task, Context
 from waflib.TaskGen import feature, extension, before_method, after_method
 from waflib.Tools import gcc
 import os
