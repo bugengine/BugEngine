@@ -127,7 +127,7 @@ environment:
       TARGET_OS: windows_x86
       FLAVOR: profile
 
-    - COMPILER: msv
+    - COMPILER: msvc
       COMPILER_TARGET: x86
       COMPILER_VERSION: 12.0
       TARGET_OS: windows_x86
