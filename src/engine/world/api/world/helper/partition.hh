@@ -7,7 +7,8 @@
 #include    <world/stdafx.h>
 #include    <rtti/engine/propertyinfo.script.hh>
 #include    <rtti/value.hh>
-#include    <world/helper/outputstream.hh>
+#include    <scheduler/kernel/product.hh>
+#include    <scheduler/kernel/parameters/segments.hh>
 
 
 namespace BugEngine { namespace World
@@ -22,7 +23,7 @@ namespace Helper
 template< typename T, typename T2, typename TAIL >
 struct PartitionProductGetter
 {
-    static const Kernel::Product<T>& getProduct(const Partition<T2, TAIL>& partition)
+    static weak<const Kernel::Product< Kernel::Segments<T> > > getProduct(const Partition<T2, TAIL>& partition)
     {
         return PartitionProductGetter<T, typename TAIL::Type, typename TAIL::Tail>::getProduct(partition);
     }
@@ -31,9 +32,9 @@ struct PartitionProductGetter
 template< typename T, typename TAIL >
 struct PartitionProductGetter<T, T, TAIL>
 {
-    static const Kernel::Product<T>& getProduct(const Partition<T, TAIL>& partition)
+    static weak<const Kernel::Product< Kernel::Segments<T> > > getProduct(const Partition<T, TAIL>& partition)
     {
-        return partition.stream.product;
+        return partition.product;
     }
 };
 
@@ -45,10 +46,10 @@ struct Partition : public TAIL
     enum { Index = TAIL::Index+1 };
     typedef T Type;
     typedef TAIL Tail;
-    const OutputStream<T> stream;
+    ref< Kernel::Product< Kernel::Segments<T> > > product;
     Partition(weak<Task::ITask> task)
         :   TAIL(task)
-        ,   stream(task)
+        ,   product(ref<Kernel::Product< Kernel::Segments<T> > >::create(Arena::game(), ref< Kernel::Segments<T> >::create(Arena::game()), task))
     {
     }
 
@@ -86,9 +87,9 @@ public:
     enum { Index = 0 };
     typedef T Type;
     typedef void Tail;
-    const OutputStream<T> stream;
+    ref< Kernel::Product< Kernel::Segments<T> > > product;
     Partition(weak<Task::ITask> task)
-        :   stream(task)
+        :   product(ref<Kernel::Product< Kernel::Segments<T> > >::create(Arena::game(), ref< Kernel::Segments<T> >::create(Arena::game()), task))
     {
     }
     static const istring name();
@@ -97,7 +98,7 @@ public:
     {
         be_forceuse(isConst);
         const Partition* partition = static_cast<const Partition*>(from);
-        return RTTI::Value(RTTI::Value::ByRef(Helper::PartitionProductGetter<T2, T, Tail>::getProduct(*partition)));
+        return RTTI::Value(Helper::PartitionProductGetter<T2, T, Tail>::getProduct(*partition));
     }
     static void buildList(minitl::array< raw<const RTTI::Class> >::iterator index)
     {

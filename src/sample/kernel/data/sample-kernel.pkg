@@ -1,7 +1,0 @@
-load sample.kernel;
-load plugin.scripting.lua;
-
-luascript = plugin.scripting.lua.LuaScript
-(
-	script = <kernel-sample.lua>;
-)

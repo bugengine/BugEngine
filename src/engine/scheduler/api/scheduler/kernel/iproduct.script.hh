@@ -6,18 +6,32 @@
 /**************************************************************************************************/
 #include    <scheduler/stdafx.h>
 #include    <scheduler/task/itask.hh>
+#include    <scheduler/kernel/parameters/iparameter.script.hh>
 
 namespace BugEngine { namespace Kernel
 {
 
-struct IProduct
+class be_api(SCHEDULER) IProduct : public minitl::refcountable
 {
-public:
-    IProduct(weak<Task::ITask> producer)
-        :   producer(producer)
+protected:
+    ref<IParameter>     m_parameter;
+    weak<Task::ITask>   m_producer;
+protected:
+    IProduct(ref<IParameter> parameter, weak<Task::ITask> producer)
+        :   m_parameter(parameter)
+        ,   m_producer(producer)
     {
     }
-    weak<Task::ITask> const producer;
+
+    ~IProduct()
+    {
+    }
+
+public:
+    weak<Task::ITask> producer() const
+    {
+        return m_producer;
+    }
 };
 
 }}

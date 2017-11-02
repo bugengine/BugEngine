@@ -15,7 +15,8 @@ namespace BugEngine { namespace Resource
 class ILoader;
 class ResourceManager;
 
-class be_api(RESOURCE) Description : public minitl::refcountable, public minitl::intrusive_list<const Description, 2>::item
+class be_api(RESOURCE) Description : public minitl::refcountable,
+                                     public minitl::intrusive_list<const Description, 2>::item
 {
     friend class ResourceManager;
     BE_NOCOPY(Description);

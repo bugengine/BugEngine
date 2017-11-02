@@ -20,7 +20,6 @@
 # define    MINITLEXPORT         BE_IMPORT
 #endif
 
-#ifndef BE_BUILD_KERNEL
 namespace minitl
 {
 
@@ -58,7 +57,6 @@ T nextPowerOf2(T t)
 }
 
 }
-#endif
 
 /**************************************************************************************************/
 #endif

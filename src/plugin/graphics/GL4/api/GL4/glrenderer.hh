@@ -21,7 +21,7 @@ class IKernelScheduler;
 namespace OpenGL
 {
 
-class GLMemoryProvider;
+class GLMemoryHost;
 class GLWindow;
 struct ShaderExtensions;
 
@@ -32,7 +32,7 @@ class GLRenderer : public Windowing::Renderer
 private:
     class Context;
     scoped<Context>                     m_context;
-    scoped<GLMemoryProvider>            m_openGLMemoryProvider;
+    scoped<GLMemoryHost>                m_openGLMemoryHost;
     Plugin::Plugin<IKernelScheduler>    m_openCLScheduler;
 public:
     GLRenderer(const Plugin::Context& context);

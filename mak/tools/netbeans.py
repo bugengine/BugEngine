@@ -138,7 +138,8 @@ class Netbeans(Build.BuildContext):
                 env = bld_env
             platform_defines = env.SYSTEM_DEFINES
             platform_includes = env.SYSTEM_INCLUDES
-            platform_includes += [os.path.join(env.SYSROOT, 'usr', 'include')]
+            if env.SYSROOT:
+                platform_includes += [os.path.join(env.SYSROOT, 'usr', 'include')]
             options.append((platform_includes, platform_defines))
 
             for variant in bld.env.ALL_VARIANTS:

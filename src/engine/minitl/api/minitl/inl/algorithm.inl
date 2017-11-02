@@ -27,13 +27,6 @@ struct SortPredicate
 }
 
 
-template< typename T >
-void swap(T& a, T& b)
-{
-    T c = a; a = b; b = c;
-}
-
-
 template< typename ITERATOR, typename FUNCTOR >
 void for_each(ITERATOR first, ITERATOR last, FUNCTOR f)
 {

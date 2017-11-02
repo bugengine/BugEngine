@@ -5,7 +5,7 @@
 #define BE_MINITL_ITERATORS_HH_
 /**************************************************************************************************/
 #include    <minitl/stdafx.h>
-#include <stddef.h>
+#include    <stddef.h>
 
 //! \addtogroup minitl
 //! @{

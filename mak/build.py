@@ -259,7 +259,7 @@ def module(bld, name, module_path, depends,
                 kernelpath = kernelspath.make_node(kernel)
                 kernelsources = [kernelpath]
                 kernels = []
-                for env in bld.multiarch_envs:
+                """for env in bld.multiarch_envs:
                     target_prefix = (env.ENV_PREFIX + '.') if env.ENV_PREFIX else ''
                     kernel_name = kernel[:kernel.rfind('.')]
                     t = bld(
@@ -278,7 +278,7 @@ def module(bld, name, module_path, depends,
                     kernels.append(target_prefix + name + '.' + kernel_name)
                 if target_prefix:
                     internal_kernels.append((kernel_name, kernels, kernelsources))
-                preprocess.kernels.append((kernel_name, kernelsources))
+                preprocess.kernels.append((kernel_name, kernelsources))"""
     else:
         preprocess = None
 
@@ -567,7 +567,7 @@ def build(bld):
     bld.load('cpp_parser', tooldir=[os.path.join(bld.path.abspath(), 'tools')])
     bld.load('data', tooldir=[os.path.join(bld.path.abspath(), 'tools')])
     bld.load('kernel', tooldir=[os.path.join(bld.path.abspath(), 'tools')])
-    bld.load('kernel_preprocess', tooldir=[os.path.join(bld.path.abspath(), 'tools')])
+    bld.load('kernel_cpu', tooldir=[os.path.join(bld.path.abspath(), 'tools')])
     bld.env.STATIC = bld.env.STATIC or Options.options.static
     bld.env.DYNAMIC = Options.options.dynamic
     if bld.env.STATIC and bld.env.DYNAMIC:

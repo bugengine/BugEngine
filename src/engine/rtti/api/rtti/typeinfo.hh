@@ -54,10 +54,10 @@ struct be_typeid< T& >
 {
     static inline RTTI::Type  type()
     {
-        return RTTI::Type::makeType(be_typeid<T>::klass(),
-                                    RTTI::Type::Value,
-                                    RTTI::Type::Mutable,
-                                    RTTI::Type::Const);
+        RTTI::Type t = be_typeid<T>::type();
+        t.access = RTTI::Type::Mutable;
+        t.constness = RTTI::Type::Const;
+        return t;
     }
 };
 
@@ -66,10 +66,9 @@ struct be_typeid< const T& >
 {
     static inline RTTI::Type  type()
     {
-        return RTTI::Type::makeType(be_typeid<T>::klass(),
-                                    RTTI::Type::Value,
-                                    RTTI::Type::Const,
-                                    RTTI::Type::Const);
+        RTTI::Type t = be_typeid<T>::type();
+        t.access = RTTI::Type::Const;
+        return t;
     }
 };
 

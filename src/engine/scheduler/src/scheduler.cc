@@ -3,12 +3,15 @@
 
 #include    <scheduler/stdafx.h>
 #include    <scheduler/scheduler.hh>
-#include    <scheduler/kernel/ikernelscheduler.hh>
 #include    <scheduler/kernel/kernel.script.hh>
-#include    <scheduler/kernel/istream.hh>
+#include    <scheduler/kernel/ischeduler.hh>
+#include    <scheduler/kernel/imemorybuffer.hh>
+#include    <scheduler/kernel/ischeduler.hh>
 #include    <scheduler/task/kerneltask.hh>
 #include    <taskscheduler.hh>
+#include    <rtti/engine/namespace.hh>
 
+BE_REGISTER_NAMESPACE_2_NAMED(bugengine, BugEngine, Kernel)
 
 namespace BugEngine
 {
@@ -55,23 +58,16 @@ void Scheduler::queueTasks(Task::ITaskItem* head, Task::ITaskItem* tail, u32 cou
 }
 
 void Scheduler::queueKernel(weak<Task::KernelTask> task,
-                            const minitl::array< weak<const Kernel::IStream> >& parameters)
+                            const minitl::array< weak<Kernel::IParameter> >& parameters)
 {
     be_assert(m_kernelSchedulers.size() > 0, "no kernel scheduler installed");
     u32 paramCount = parameters.size();
-    minitl::array<Kernel::KernelParameter> kernelParams(Arena::temporary(), paramCount);
+    minitl::array< weak<const Kernel::IMemoryBuffer> > kernelParams(Arena::temporary(), paramCount);
     for (u32 i = 0; i < paramCount; ++i)
     {
-        weak<const Kernel::IMemoryBank> bank = parameters[i]->getCurrentBank();
-        if (bank)
-        {
-            kernelParams[i] = bank->getKernelParameter();
-        }
-        else
-        {
-            kernelParams[i].p1 = 0;
-            kernelParams[i].p2 = 0;
-        }
+        weak<const Kernel::IMemoryBuffer> bank = parameters[i]->getCurrentBank();
+        // todo: transfer
+        kernelParams[i] = bank;
     }
     m_kernelSchedulers[0]->run(task, task->m_kernel, kernelParams);
 }
@@ -88,14 +84,14 @@ void Scheduler::notifyEnd()
     m_taskScheduler->notifyEnd();
 }
 
-void Scheduler::addKernelScheduler(weak<Kernel::IKernelScheduler> scheduler)
+void Scheduler::addKernelScheduler(weak<Kernel::IScheduler> scheduler)
 {
     m_kernelSchedulers.push_back(scheduler);
 }
 
-void Scheduler::removeKernelScheduler(weak<Kernel::IKernelScheduler> scheduler)
+void Scheduler::removeKernelScheduler(weak<Kernel::IScheduler> scheduler)
 {
-    for (minitl::vector< weak<Kernel::IKernelScheduler> >::iterator it = m_kernelSchedulers.begin();
+    for (minitl::vector< weak<Kernel::IScheduler> >::iterator it = m_kernelSchedulers.begin();
          it != m_kernelSchedulers.end();
          ++it)
     {

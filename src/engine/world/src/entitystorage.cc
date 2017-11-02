@@ -4,6 +4,7 @@
 #include    <world/stdafx.h>
 #include    <world/entitystorage.script.hh>
 #include    <world/component.script.hh>
+#include    <world/kernel/memoryhost.hh>
 #include    <scheduler/task/method.hh>
 #include    <rtti/value.hh>
 #include    <componentgroup.hh>
@@ -182,6 +183,7 @@ EntityStorage::EntityStorage(const WorldComposition& composition)
     ,   m_componentGroups(Arena::game())
     ,   m_componentBackLinks(Arena::game())
     ,   m_components(Arena::game(), composition.components.size())
+    ,   m_segmentsMemoryHost(scoped<MemoryHost>::create(Arena::game(), m_allocator64k))
 {
     m_entityInfoBuffer[0] = 0;
     buildGroups(composition);

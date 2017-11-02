@@ -7,8 +7,9 @@
 #include    <world/stdafx.h>
 #include    <rtti/engine/propertyinfo.script.hh>
 #include    <rtti/value.hh>
-#include    <world/helper/outputstream.hh>
 #include    <world/helper/partitionlist.hh>
+#include    <scheduler/kernel/product.hh>
+#include    <scheduler/kernel/parameters/segments.hh>
 
 
 namespace BugEngine { namespace World
@@ -30,10 +31,10 @@ struct ComponentList : public TAIL
     enum { Index = TAIL::Index+1, Storage = (u32)STORAGE };
     typedef T Type;
     typedef TAIL Tail;
-    const OutputStream<T> stream;
+    ref< Kernel::Product< Kernel::Segments<T> > > product;
     ComponentList(weak<Task::ITask> task)
         :   TAIL(task)
-        ,   stream(task)
+        ,   product(ref<Kernel::Product< Kernel::Segments<T> > >::create(Arena::game(), ref< Kernel::Segments<T> >::create(Arena::game()), task))
     {
     }
     static void addComponent(minitl::array< minitl::tuple< raw<const RTTI::Class>, u32 > >& componentList, u32 count = 0)
@@ -54,9 +55,9 @@ struct ComponentList<T, STORAGE, void>
     enum { Index = 0, Storage = STORAGE };
     typedef T Type;
     typedef void Tail;
-    const OutputStream<T> stream;
+    ref< Kernel::Product< Kernel::Segments<T> > > product;
     ComponentList(weak<Task::ITask> task)
-        :   stream(task)
+        :   product(ref<Kernel::Product< Kernel::Segments<T> > >::create(Arena::game(), ref< Kernel::Segments<T> >::create(Arena::game()), task))
     {
     }
     static void addComponent(minitl::array< minitl::tuple< raw<const RTTI::Class>, u32 > >& componentList, u32 count = 0)
@@ -73,7 +74,7 @@ namespace Helper
 template< typename T, typename T2, StorageSize STORAGE, typename TAIL >
 struct ProductGetter
 {
-    static const Kernel::Product<T>& getProduct(const ComponentList<T2, STORAGE, TAIL>& list)
+    static weak< const Kernel::Product< Kernel::Segments<T> > > getProduct(const ComponentList<T2, STORAGE, TAIL>& list)
     {
         return ProductGetter<T, typename TAIL::Type, (StorageSize)TAIL::Storage, typename TAIL::Tail>::getProduct(list);
     }
@@ -82,9 +83,9 @@ struct ProductGetter
 template< typename T, StorageSize STORAGE, typename TAIL >
 struct ProductGetter<T, T, STORAGE, TAIL>
 {
-    static const Kernel::Product<T>& getProduct(const ComponentList<T, STORAGE, TAIL>& list)
+    static weak< const Kernel::Product< Kernel::Segments<T> > > getProduct(const ComponentList<T, STORAGE, TAIL>& list)
     {
-        return list.stream.product;
+        return list.product;
     }
 };
 

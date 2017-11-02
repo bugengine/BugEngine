@@ -1,64 +1,65 @@
 /* BugEngine <bugengine.devel@gmail.com> / 2008-2014
    see LICENSE for detail */
 
-#ifndef BE_SCHEDULER_KERNEL_PRODUCT_HH_
-#define BE_SCHEDULER_KERNEL_PRODUCT_HH_
+#ifndef BE_SCHEDULER_KERNEL_PRODUCT_FACTORY_HH_
+#define BE_SCHEDULER_KERNEL_PRODUCT_FACTORY_HH_
 /**************************************************************************************************/
 #include    <scheduler/stdafx.h>
-#include    <scheduler/kernel/iproduct.script.hh>
-#include    <scheduler/kernel/stream.factory.hh>
-#include    <rtti/engine/helper/staticarray.hh>
+#include    <scheduler/kernel/product.hh>
 #include    <rtti/typeinfo.hh>
-
-namespace BugEngine { namespace Kernel
-{
-
-template< typename T >
-struct Product : public IProduct
-{
-public:
-    Product(weak< Stream<T> > stream, weak<Task::ITask> producer)
-        :   IProduct(producer)
-        ,   stream(stream)
-    {
-    }
-    weak< Stream<T> > const stream;
-};
-
-}}
+#include    <rtti/classinfo.script.hh>
 
 namespace BugEngine
 {
 
 template< typename T >
-struct BE_EXPORT be_typeid< Kernel::Product<T> >
+struct be_typeid<  Kernel::Product<T> >
 {
-    static inline RTTI::Type  type()
-    {
-        return RTTI::Type::makeType(klass(), RTTI::Type::Value, RTTI::Type::Mutable, RTTI::Type::Mutable);
-    }
-    static raw<const RTTI::Class> klass()
-    {
-        static const RTTI::Class s_class = {
-            istring(minitl::format<1024u>("Product<%s>") | be_typeid<T>::klass()->name),
-            0,
-            0,
-            RTTI::ClassType_Object,
-            {0},
-            be_typeid<Kernel::IProduct>::klass(),
-            {0},
-            {0},
-            {0, 0},
-            {0, 0},
-            {0},
-            {0},
-            0,
-            0
-        };
-        raw<const RTTI::Class> result = { &s_class };
-        return result;
-    }
+    static BE_EXPORT istring name();
+    static BE_EXPORT raw<const RTTI::Class> klass();
+    static BE_EXPORT RTTI::Type  type();
 };
+
+template< typename T >
+BE_EXPORT
+istring be_typeid< Kernel::Product<T> >::name()
+{
+    static istring s_result = istring(minitl::format<256u>("Product<%s>") | be_typeid<T>::name());
+    return s_result;
+}
+
+
+template< typename T >
+BE_EXPORT
+raw<const RTTI::Class> be_typeid< Kernel::Product<T> >::klass()
+{
+    static const RTTI::Class s_class = {
+        name(),
+        u32(sizeof(Kernel::Product<T>)),
+        0,
+        RTTI::ClassType_Object,
+        {0},
+        {be_typeid< Kernel::IProduct >::klass().m_ptr},
+        {0},
+        { 0 },
+        { 0, 0 },
+        { 0, 0 },
+        { 0 },
+        { 0 },
+        0,
+        0
+    };
+    raw< const RTTI::Class > result = { &s_class };
+    return result;
+}
+
+template< typename T >
+BE_EXPORT
+RTTI::Type be_typeid<  Kernel::Product<T> >::type()
+{
+    return RTTI::Type::makeType(klass(), RTTI::Type::Value,
+                                RTTI::Type::Mutable, RTTI::Type::Mutable);
+}
 
 }
 

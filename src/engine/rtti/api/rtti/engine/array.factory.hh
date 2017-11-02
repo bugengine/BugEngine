@@ -83,7 +83,7 @@ RTTI::Value array_BugHelper<T>::trampoline_method_Index_overload_0(RTTI::Value* 
 {
     be_forceuse(parameters);
     be_forceuse(parameterCount);
-    return RTTI::Value(RTTI::Value::ByRef(parameters[0].as< minitl::array<T>& >().operator[](parameters[1].as< u32  >())));
+    return RTTI::Value(RTTI::Value::ByRef(parameters[0].as< const minitl::array<T>& >().operator[](parameters[1].as< u32  >())));
 }
 
 template< typename T >
@@ -91,7 +91,7 @@ RTTI::Value array_BugHelper<T>::trampoline_method_Index_overload_1(RTTI::Value* 
 {
     be_forceuse(parameters);
     be_forceuse(parameterCount);
-    return RTTI::Value(RTTI::Value::ByRef(parameters[0].as< const minitl::array<T>& >().operator[](parameters[1].as< u32  >())));
+    return RTTI::Value(RTTI::Value::ByRef(parameters[0].as< minitl::array<T>& >().operator[](parameters[1].as< u32  >())));
 }
 
 template< typename T >

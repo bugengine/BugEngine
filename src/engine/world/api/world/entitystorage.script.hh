@@ -15,6 +15,7 @@ namespace BugEngine { namespace World
 
 class World;
 class ComponentGroup;
+class MemoryHost;
 struct Bucket;
 struct Component;
 struct EntityInfo;
@@ -87,9 +88,10 @@ private:
     minitl::vector<ComponentGroup>      m_componentGroups;
     minitl::vector<ComponentStorage*>   m_componentBackLinks;
     minitl::array<ComponentStorage*>    m_components;
-published: //TODO: just for testing, move back to private
-    void start();
+    scoped<MemoryHost>                  m_segmentsMemoryHost;
+
 private:
+    void start();
     inline u32 getEntityInfoSize() const;
     EntityInfo& getRawEntityInfo(Entity e);
     const EntityInfo& getEntityInfo(Entity e) const;
