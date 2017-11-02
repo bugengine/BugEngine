@@ -7,6 +7,7 @@
 #include    <minitl/assert.hh>
 #include    <minitl/array.hh>
 #include    <minitl/algorithm.hh>
+#include    <minitl/cast.hh>
 
 namespace minitl
 {
@@ -90,6 +91,12 @@ template< typename T >
 u32 array<T>::size() const
 {
     return be_checked_numcast<u32>(m_array.count());
+}
+
+template< typename T >
+void array<T>::swap(array<T>& other)
+{
+    m_array.swap(other.m_array);
 }
 
 }

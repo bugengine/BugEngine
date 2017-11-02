@@ -4,7 +4,6 @@
 #include    <bugengine/stdafx.h>
 #include    <bugengine/application.hh>
 
-#include    <scheduler/kernel/ikernelscheduler.hh>
 #include    <scheduler/task/group.hh>
 #include    <scheduler/task/method.hh>
 #include    <resource/loader.hh>

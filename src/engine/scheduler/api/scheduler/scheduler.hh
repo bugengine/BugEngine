@@ -5,6 +5,7 @@
 #define BE_SCHEDULER_SCHEDULER_HH_
 /**************************************************************************************************/
 #include    <scheduler/stdafx.h>
+#include    <scheduler/kernel/parameters/iparameter.script.hh>
 #include    <minitl/array.hh>
 #include    <minitl/pool.hh>
 
@@ -17,7 +18,6 @@ namespace Task
     class KernelTask;
     class TaskGroup;
     class ITask;
-    class KernelTask;
     class ITaskItem;
     template< typename BODY > class Task;
     template< typename RANGE, typename BODY > class TaskItem;
@@ -25,9 +25,7 @@ namespace Task
 
 namespace Kernel
 {
-    class IKernelScheduler;
-    class IStream;
-    struct KernelParameter;
+    class IScheduler;
 }
 
 class be_api(SCHEDULER) Scheduler : public minitl::pointer
@@ -62,17 +60,18 @@ private:
     friend struct WorkItem;
 private:
     struct Buffer { char buffer[256]; };
-    i_u32                                               m_runningTasks;
-    i_bool                                              m_running;
-    minitl::pool<Buffer>                                m_taskPool;
-    scoped<Task::TaskScheduler>                         m_taskScheduler;
-    minitl::vector< weak<Kernel::IKernelScheduler> >    m_kernelSchedulers;
+    i_u32                                       m_runningTasks;
+    i_bool                                      m_running;
+    minitl::pool<Buffer>                        m_taskPool;
+    scoped<Task::TaskScheduler>                 m_taskScheduler;
+    minitl::vector< weak<Kernel::IScheduler> >  m_kernelSchedulers;
 private:
     void notifyEnd();
 private:
     void queueTasks(Task::ITaskItem* head, Task::ITaskItem* tail, u32 count, Priority priority);
     void queueTasks(Task::ITaskItem* head, Task::ITaskItem* tail, u32 count);
-    void queueKernel(weak<Task::KernelTask> task, const minitl::array< weak<const Kernel::IStream> >& parameters);
+    void queueKernel(weak<Task::KernelTask> task,
+                     const minitl::array< weak<Kernel::IParameter> >& parameters);
     void* allocate(size_t size);
     void  release(void* t, size_t size);
     template< typename T > inline void* allocateTask();
@@ -82,8 +81,8 @@ public:
     ~Scheduler();
 
     void mainThreadJoin();
-    void addKernelScheduler(weak<Kernel::IKernelScheduler> scheduler);
-    void removeKernelScheduler(weak<Kernel::IKernelScheduler> scheduler);
+    void addKernelScheduler(weak<Kernel::IScheduler> scheduler);
+    void removeKernelScheduler(weak<Kernel::IScheduler> scheduler);
     u32 workerCount() const;
 };
 

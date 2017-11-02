@@ -3,7 +3,7 @@
 
 #include    <GL4/stdafx.h>
 #include    <GL4/glrenderer.hh>
-#include    <GL4/glmemoryprovider.hh>
+#include    <GL4/glmemoryhost.hh>
 #include    <extensions.hh>
 
 
@@ -227,6 +227,7 @@ GLRenderer::GLRenderer(const Plugin::Context& context)
     ,   m_context(Windowing::Renderer::success()
                     ?   scoped<Context>::create(Arena::general(), static_cast<PlatformData*>(getPlatformData()))
                     :   scoped<Context>())
+    ,   m_openGLMemoryHost(scoped<GLMemoryHost>::create(Arena::general()))
     ,   m_openCLScheduler("plugin.kernel.opencl_gl", context)
 {
 }

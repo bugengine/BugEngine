@@ -44,11 +44,10 @@ public:
     {
         be_forceuse(isConst);
         const EntityStorageFactory* factory = static_cast<const EntityStorageFactory*>(from);
-        return RTTI::Value(RTTI::Value::ByRef(Helper::ProductGetter<
-                                              T,
-                                              typename COMPONENT_LIST::Type,
-                                              (StorageSize)COMPONENT_LIST::Storage,
-                                              typename COMPONENT_LIST::Tail>::getProduct(factory->m_list)));
+        return RTTI::Value(Helper::ProductGetter<T,
+                                                 typename COMPONENT_LIST::Type,
+                                                 (StorageSize)COMPONENT_LIST::Storage,
+                                                 typename COMPONENT_LIST::Tail>::getProduct(factory->m_list));
     }
     template< typename T >
     static RTTI::Value getPartition(void* from, bool isConst)

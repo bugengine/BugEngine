@@ -29,6 +29,8 @@ public:
     inline array(const array& other);
     inline ~array();
 
+    inline void swap(array& other);
+
     inline iterator begin();
     inline iterator end();
     inline const_iterator begin() const;

@@ -13,7 +13,7 @@ BE_REGISTER_NAMESPACE_2_NAMED(bugengine, BugEngine, World);
 namespace BugEngine { namespace World
 {
 
-World::World(weak<EntityStorage> storage, minitl::array<Kernel::IProduct> products)
+World::World(weak<EntityStorage> storage, minitl::array< weak<Kernel::IProduct> > products)
 :   m_task(ref<Task::TaskGroup>::create(Arena::task(), "world:update", Colors::make(89, 89, 180)))
 ,   m_storage(storage)
 ,   m_taskStart(Task::TaskGroup::TaskStartConnection(m_task, m_storage->initialTask()))
@@ -21,11 +21,11 @@ World::World(weak<EntityStorage> storage, minitl::array<Kernel::IProduct> produc
 ,   m_productEnds(Arena::task(), products.size())
 {
     minitl::array<Task::TaskGroup::TaskEndConnection>::iterator connection = m_productEnds.begin();
-    for (minitl::array<Kernel::IProduct>::const_iterator product = products.begin();
+    for (minitl::array< weak<Kernel::IProduct> >::const_iterator product = products.begin();
          product != products.end();
          ++product, ++connection)
     {
-        *connection = Task::TaskGroup::TaskEndConnection(m_task, product->producer);
+        *connection = Task::TaskGroup::TaskEndConnection(m_task, (*product)->producer());
     }
 }
 

@@ -13,8 +13,6 @@
 #include    <core/memory/allocators/system.hh>
 #include    <rtti/typeinfo.hh>
 
-
-
 namespace BugEngine { namespace World
 {
 
@@ -46,7 +44,7 @@ published:
     bool hasComponent(Entity e, raw<const RTTI::Class> metaclass) const;
     RTTI::Value getComponent(Entity e, raw<const RTTI::Class> metaclass) const;
 published:
-    World(weak<EntityStorage> storage, minitl::array<Kernel::IProduct> products);
+    World(weak<EntityStorage> storage, minitl::array< weak<Kernel::IProduct> > products);
     ~World();
 };
 

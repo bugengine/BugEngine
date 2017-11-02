@@ -6,11 +6,11 @@
 /**************************************************************************************************/
 #include    <scheduler/stdafx.h>
 #include    <scheduler/task/itask.hh>
-#include    <scheduler/kernel/istream.hh>
+#include    <scheduler/kernel/parameters/iparameter.script.hh>
 
 namespace BugEngine { namespace Kernel
 {
-class KernelDescription;
+class Kernel;
 }}
 
 namespace BugEngine
@@ -24,14 +24,14 @@ namespace BugEngine { namespace Task
 class be_api(SCHEDULER) KernelTask : public ITask
 {
     friend class ::BugEngine::Scheduler;
-    BE_NOCOPY(KernelTask);
+    BE_NOCOPY(KernelTask)
 private:
-    weak<const Kernel::KernelDescription> const         m_kernel;
-    minitl::array< weak<const Kernel::IStream> > const  m_parameters;
+    weak<const Kernel::Kernel> const                m_kernel;
+    minitl::array< weak<Kernel::IParameter> > const m_parameters;
 public:
     KernelTask(istring name, color32 color, Scheduler::Priority priority,
-               weak<const BugEngine::Kernel::KernelDescription> kernel,
-               minitl::array< weak<const Kernel::IStream> > parameters);
+               weak<const BugEngine::Kernel::Kernel> kernel,
+               minitl::array< weak<Kernel::IParameter> > parameters);
     ~KernelTask();
 
     virtual void schedule(weak<Scheduler> scheduler) override;

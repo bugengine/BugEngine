@@ -3,7 +3,7 @@
 """
 
 
-def externals(bld):
+def build_externals(bld):
     """
         Declares all external modules
     """
@@ -31,7 +31,7 @@ def externals(bld):
     bld.external('3rdparty.scripting.python')
 
 
-def bugengine(bld):
+def build_bugengine(bld):
     """
         Declares the main library and entry point
     """
@@ -69,7 +69,7 @@ def bugengine(bld):
     bld.engine('bugengine', ['engine.bugengine'], path='engine.main')
 
 
-def plugins(bld):
+def build_plugins(bld):
     """
         Declares all plugins
     """
@@ -136,13 +136,23 @@ def plugins(bld):
                        extra_defines=['PYTHON_LIBRARY="%s"' % bld.env['check_python%s_pylib'%short_version]],
                        features=['python%s'%version])
 
-    bld.plugin('plugin.kernel.cpu',
+    bld.plugin('plugin.compute.cpu',
                ['engine.bugengine'])
-    #bld.plugin('plugin.kernel.directcompute',
-    #		   ['engine.bugengine'])
-    bld.plugin('plugin.kernel.opencl',
-               ['engine.bugengine', '3rdparty.compute.OpenCL', '3rdparty.graphics.OpenGL'],
+    #bld.plugin('plugin.compute.glcompute',
+    #		   ['engine.bugengine', 'plugin.compute.cpu'])
+    #bld.plugin('plugin.compute.directcompute',
+    #		   ['engine.bugengine', 'plugin.compute.cpu'])
+    #bld.plugin('plugin.compute.cuda',
+    #		   ['engine.bugengine', 'plugin.compute.cpu'])
+    bld.plugin('plugin.compute.opencl',
+               ['engine.bugengine', '3rdparty.compute.OpenCL', '3rdparty.graphics.OpenGL',
+                'plugin.compute.cpu'],
                features=['OpenCL'])
+    bld.plugin('plugin.compute.opencl_gl',
+               ['engine.bugengine', 'plugin.graphics.GL4',
+                '3rdparty.graphics.OpenGL', '3rdparty.compute.OpenCL',
+                'plugin.compute.opencl', 'plugin.compute.cpu'],
+               features=['OpenGL', 'OpenCL', 'GUI'])
 
     bld.plugin('plugin.graphics.nullrender',
                ['engine.bugengine', 'plugin.graphics.3d',
@@ -158,11 +168,6 @@ def plugins(bld):
                ['engine.bugengine', 'plugin.graphics.windowing',
                 '3rdparty.graphics.OpenGL'],
                features=['OpenGL', 'GUI'])
-    bld.plugin('plugin.kernel.opencl_gl',
-               ['engine.bugengine', 'plugin.graphics.GL4',
-                '3rdparty.graphics.OpenGL', '3rdparty.compute.OpenCL',
-                'plugin.kernel.opencl'],
-               features=['OpenGL', 'OpenCL', 'GUI'])
     bld.plugin('plugin.graphics.Dx9',
                ['engine.bugengine', 'plugin.graphics.windowing',
                 '3rdparty.graphics.DirectX9'],
@@ -193,7 +198,7 @@ def plugins(bld):
                platforms=['pc'])
 
 
-def games(bld):
+def build_games(bld):
     """
         Declares all games/samples/tools/autotests
     """
@@ -202,7 +207,7 @@ def games(bld):
               'plugin.scripting.package'],
              path='tool.bugeditor.main',
              platforms=['pc'])
-    bld.game('sample.kernel',
+    bld.game('sample.particlerain',
              ['engine.bugengine', 'plugin.scripting.package'])
     bld.game('sample.text',
              ['engine.bugengine', 'plugin.scripting.package', 'plugin.graphics.3d'])
@@ -219,7 +224,7 @@ def build(bld):
     """
         Declares each bugengine module and their dependencies
     """
-    externals(bld)
-    bugengine(bld)
-    plugins(bld)
-    games(bld)
+    build_externals(bld)
+    build_bugengine(bld)
+    build_plugins(bld)
+    build_games(bld)

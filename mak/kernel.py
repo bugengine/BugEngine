@@ -38,9 +38,19 @@ def split_type(name):
         raise Exception('invalid kernel input type: %s' % name)
     template_name = name[0:template_begin].strip()
     type_name = name[template_begin+1:-1].strip()
-    if template_name not in ['segment']:
+    bugengine_names = {
+        'segment':      '::BugEngine::Kernel::Segment',
+        'segments':     '::BugEngine::Kernel::Segments',
+        'stream':       '::BugEngine::Kernel::Stream',
+        'texture1d':    '::BugEngine::Kernel::Texture1D',
+        'texture2d':    '::BugEngine::Kernel::Texture2D',
+        'texture3d':    '::BugEngine::Kernel::Texture3D',
+    }
+    try:
+        bugengine_name = bugengine_names[template_name]
+    except KeyError:
         raise Exception('invalid kernel input type: %s' % name)
-    return (template_name, type_name)
+    return (template_name, bugengine_name, type_name)
 
 
 template = """
@@ -52,7 +62,8 @@ template = """
 %(pch)s
 #include    <scheduler/kernel/kernel.script.hh>
 #include    <scheduler/task/itask.hh>
-#include    <scheduler/kernel/product.factory.hh>
+#include    <scheduler/kernel/product.hh>
+#include    <scheduler/kernel/parameters/parameters.hh>
 #include    <scheduler/task/kerneltask.hh>
 #include    <kernel/colors.hh>
 %(includes)s
@@ -67,9 +78,9 @@ private:
     scoped< BugEngine::Task::ITask > const m_kernelTask;
     %(callbacks)s
 private:
-    minitl::array< weak<const BugEngine::Kernel::IStream> > makeParameters() const
+    minitl::array< weak<BugEngine::Kernel::IKernelParameter> > makeParameters() const
     {
-        minitl::array< weak<const BugEngine::Kernel::IStream> > result(BugEngine::Arena::task(), %(argument_count)d);
+        minitl::array< weak<BugEngine::Kernel::IKernelParameter> > result(BugEngine::Arena::task(), %(argument_count)d);
         %(argument_result_assign)s
         return result;
     }
@@ -126,8 +137,8 @@ if __name__ == '__main__':
             if arg1.type.strip() != 'u32' and arg1.type.strip() != 'const u32':
                 raise Exception("invalid signature for method kmain")
             for arg in m.parameters[2:]:
-                template_name, type_name = split_type(arg.type)
-                args.append((arg.name, type_name, template_name))
+                template_name, bugengine_name, type_name = split_type(arg.type)
+                args.append((arg.name, type_name, bugengine_name, template_name))
 
             params = {
                 'name':     kernel_name,
@@ -139,29 +150,29 @@ if __name__ == '__main__':
                 'includes': '\n'.join(result.includes),
                 'argument_count': len(args),
                 'argument_field':
-                    '\n    '.join(('BugEngine::Kernel::Product< minitl::remove_const< %s >::type > const m_%s;' % (arg_type, arg_name)
-                                   for arg_name, arg_type, out_type in args)),
+                    '\n    '.join(('BugEngine::Kernel::Product< %s<minitl::remove_const< %s >::type> > const m_%s;' % (arg[2], arg[1], arg[0])
+                                   for arg in args)),
                 'callbacks':
-                    '\n    '.join(('BugEngine::Task::ITask::CallbackConnection const m_%sChain;' % (arg_name)
-                                   for arg_name, arg_type, out_type in args)),
+                    '\n    '.join(('BugEngine::Task::ITask::CallbackConnection const m_%sChain;' % (arg[0])
+                                   for arg in args)),
                 'argument_result_assign':
-                    '\n        '.join(('result[%d] = m_%s.stream;' % (i, arg[0])
-                                   for i, arg in enumerate(args) if arg[2] not in ('product'))),
+                    '\n        '.join(('result[%d] = m_%s.getProduct();' % (i, arg[0])
+                                   for i, arg in enumerate(args) if arg[3] not in ('product'))),
                 'argument_outs':
-                    '\n    '.join(('BugEngine::Kernel::Product< minitl::remove_const< %s >::type > const %s;' % (arg_type, arg_name)
-                                   for arg_name, arg_type, out_type in args)),
+                    '\n    '.join(('BugEngine::Kernel::Product< %s<minitl::remove_const< %s >::type> > const %s;' % (arg[2], arg[1], arg[0])
+                                   for arg in args)),
                 'argument_params':
-                    ', '.join(('const BugEngine::Kernel::Product< minitl::remove_const< %s >::type >& %s' % (arg_type, arg_name)
-                                   for arg_name, arg_type, out_type in args)),
+                    ', '.join(('const BugEngine::Kernel::Product< %s<minitl::remove_const< %s >::type> >& %s' % (arg[2], arg[1], arg[0])
+                                   for arg in args)),
                 'argument_assign':
-                    '\n        ,   '.join(('m_%s(%s)' % (arg_name, arg_name)
-                                           for arg_name, arg_type, out_type in args)),
+                    '\n        ,   '.join(('m_%s(%s)' % (arg[0], arg[0])
+                                           for arg in args)),
                 'callback_assign':
-                    '\n        ,   '.join(('m_%sChain(%s.producer, m_kernelTask->startCallback())' % (arg_name, arg_name)
-                                           for arg_name, arg_type, out_type in args)),
+                    '\n        ,   '.join(('m_%sChain(%s.producer, m_kernelTask->startCallback())' % (arg[0], arg[0])
+                                           for arg in args)),
                 'argument_out_assign':
-                    '\n        ,   '.join(('%s(%s.stream, m_kernelTask)' % (arg_name, arg_name)
-                                           for arg_name, arg_type, out_type in args if out_type not in ('product'))),
+                    '\n        ,   '.join(('%s(%s.getProduct(), m_kernelTask)' % (arg[0], arg[0])
+                                           for arg in args if arg[3] not in ('product'))),
             }
             with open(arguments[1], 'w') as out:
                 out.write(template % params)

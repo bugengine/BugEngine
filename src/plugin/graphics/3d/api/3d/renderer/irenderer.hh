@@ -19,7 +19,7 @@ class ITask;
 
 namespace Kernel
 {
-class KernelDescription;
+class Kernel;
 }
 
 class RenderSurfaceDescription;
@@ -42,8 +42,8 @@ protected:
     scoped< GPUResourceLoader<RenderSurfaceDescription> >   m_renderSurfaceLoader;
     scoped< GPUResourceLoader<RenderWindowDescription> >    m_renderWindowLoader;
     scoped< GPUResourceLoader<ShaderProgramDescription> >   m_shaderProgramLoader;
-    scoped<Kernel::KernelDescription>                       m_kernelSort;
-    scoped<Kernel::KernelDescription>                       m_kernelRender;
+    scoped<Kernel::Kernel>                                  m_kernelSort;
+    scoped<Kernel::Kernel>                                  m_kernelRender;
 protected:
     IRenderer(minitl::Allocator& allocator, weak<Resource::ResourceManager> manager, Scheduler::Affinity affinity = Scheduler::DontCare);
     virtual ~IRenderer();

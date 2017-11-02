@@ -6,7 +6,7 @@
 /**************************************************************************************************/
 #include    <minitl/stdafx.h>
 #include    <cstring>
-#include    <minitl/algorithm.hh>
+#include    <minitl/swap.hh>
 
 namespace minitl
 {
