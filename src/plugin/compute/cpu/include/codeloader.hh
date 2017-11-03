@@ -1,8 +1,8 @@
 /* BugEngine <bugengine.devel@gmail.com> / 2008-2014
    see LICENSE for detail */
 
-#ifndef BE_KERNEL_CPU_CODELOADER_HH_
-#define BE_KERNEL_CPU_CODELOADER_HH_
+#ifndef BE_COMPUTE_CPU_CODELOADER_HH_
+#define BE_COMPUTE_CPU_CODELOADER_HH_
 /**************************************************************************************************/
 #include    <stdafx.h>
 #include    <scheduler/kernel/icodeloader.hh>
