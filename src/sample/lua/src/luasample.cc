@@ -10,7 +10,10 @@ namespace BugEngine
 {
 
 LuaSample::LuaSample(const Plugin::Context& context)
-    :   Application(ref<DiskFolder>::create(Arena::game(), Environment::getEnvironment().getDataDirectory()), context.scheduler)
+    :   Application(ref<DiskFolder>::create(Arena::game(),
+                                            Environment::getEnvironment().getDataDirectory()),
+                    context.resourceManager,
+                    context.scheduler)
     ,   m_packageManager("plugin.scripting.package", pluginContext())
     ,   m_luaManager("plugin.scripting.lua", pluginContext())
     ,   m_mainPackage(ref<Package>::create(Arena::game(), pluginContext().dataFolder->openFile(istring("sample-lua.pkg"))))

@@ -13,6 +13,7 @@ namespace BugEngine { namespace ParticleRain
 ParticleRain::ParticleRain(const Plugin::Context& context)
     :   Application(ref<DiskFolder>::create(Arena::game(),
                                             Environment::getEnvironment().getDataDirectory()),
+                    context.resourceManager,
                     context.scheduler)
     ,   m_packageManager("plugin.scripting.package", pluginContext())
     ,   m_mainPackage(ref<Package>::create(Arena::game(), pluginContext().dataFolder->openFile(ifilename("particlerain/particlerain.pkg"))))

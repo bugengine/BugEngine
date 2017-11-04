@@ -151,9 +151,10 @@ int beMain(int argc, const char *argv[])
         ScopedLogListener file(scoped<FileLogListener>::create(Arena::debug(), home->createFile("log")));
         be_info("Running %s" | Environment::getEnvironment().getGame());
         scoped<Scheduler> scheduler = scoped<Scheduler>::create(Arena::task());
+        scoped<Resource::ResourceManager> manager = scoped<Resource::ResourceManager>::create(Arena::resource());;
         Plugin::Plugin<Application> app(
                 inamespace(Environment::getEnvironment().getGame()),
-                Plugin::Context(weak<Resource::ResourceManager>(), home, scheduler));
+                Plugin::Context(manager, home, scheduler));
 
         return app->run();
     }

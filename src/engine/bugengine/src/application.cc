@@ -38,12 +38,14 @@ Application::WorldResource::~WorldResource()
 {
 }
 
-Application::Application(ref<Folder> dataFolder, weak<Scheduler> scheduler)
-:   ILoader()
+Application::Application(ref<Folder> dataFolder,
+                         weak<Resource::ResourceManager> resourceManager,
+                         weak<Scheduler> scheduler)
+    :   ILoader()
     ,   m_dataFolder(dataFolder)
-    ,   m_resourceManager(scoped<Resource::ResourceManager>::create(Arena::game()))
     ,   m_scheduler(scheduler)
-    ,   m_pluginContext(m_resourceManager, m_dataFolder, m_scheduler)
+    ,   m_resourceManager(resourceManager)
+    ,   m_pluginContext(resourceManager, m_dataFolder, m_scheduler)
     ,   m_cpuKernelScheduler("plugin.kernel.cpu", m_pluginContext)
     ,   m_updateTask(ref< Task::TaskGroup >::create(Arena::task(), "applicationUpdate",
                                                     Colors::Yellow::Yellow))
