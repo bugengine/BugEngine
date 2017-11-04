@@ -11,7 +11,10 @@ namespace BugEngine { namespace Kernel
 {
 
 class be_api(SCHEDULER) Kernel : public Resource::Description
+                               , public minitl::intrusive_list<const Kernel, 1>::item
 {
+public:
+    typedef minitl::intrusive_list<const Kernel, 1> KernelList;
 protected:
     const inamespace   m_name;
 

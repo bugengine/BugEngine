@@ -131,7 +131,7 @@ struct PartitionPropertyInfo
             {0},
             be_typeid<T>::klass()->name,
             be_typeid<PARTITION>::type(),
-            be_typeid< const Kernel::Product<T>& >::type(),
+            be_typeid< weak< const Kernel::Product< Kernel::Segments<T> > > >::type(),
             &PARTITION::template getProduct<T>
         };
         new (&properties[INDEX]) RTTI::Property(property);
@@ -148,7 +148,7 @@ struct PartitionPropertyInfo<PARTITION, INDEX, T, void>
             {0},
             be_typeid<T>::name(),
             be_typeid<PARTITION>::type(),
-            be_typeid< const Kernel::Product<T>& >::type(),
+            be_typeid< weak< const Kernel::Product< Kernel::Segments<T> > > >::type(),
             &PARTITION::template getProduct<T>
         };
         new (&properties[INDEX]) RTTI::Property(property);

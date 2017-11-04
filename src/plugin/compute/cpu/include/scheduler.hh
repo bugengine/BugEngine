@@ -9,6 +9,7 @@
 #include    <scheduler/kernel/parameters/iparameter.script.hh>
 #include    <plugin/plugin.hh>
 
+
 namespace BugEngine { namespace Kernel { namespace CPU
 {
 

@@ -1,2 +1,19 @@
-load sample.partilerain;
+load sample.particlerain;
+
+storage = sample.particlerain.ParticleRain.Storage
+(
+)
+
+task = sample.particlerain.Kernels.Rain.ParticleTask
+(
+    particles = storage.Particle;
+    obstacles = storage.Obstacle;
+)
+
+world = bugengine.World.World
+(
+    storage = storage;
+    products = [task.particles];
+)
+
 

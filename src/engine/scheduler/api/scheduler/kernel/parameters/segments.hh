@@ -7,6 +7,7 @@
 #include    <scheduler/stdafx.h>
 #include    <scheduler/kernel/parameters/iparameter.script.hh>
 
+
 namespace BugEngine { namespace Kernel
 {
 
@@ -19,6 +20,8 @@ public:
 };
 
 }}
+
+#include    <scheduler/kernel/parameters/segments.factory.hh>
 
 /**************************************************************************************************/
 #endif
