@@ -37,7 +37,7 @@ void Object::setMethod(ref<Reference> reference)
     RTTI::Value v(RTTI::Value::ByRef(m_methodReference->getValue()));
     if (v)
     {
-        static const istring callName("?call");
+        static const istring callName(RTTI::Class::nameOperatorCall());
         RTTI::Value call = v[callName];
         if (call)
         {
@@ -59,6 +59,11 @@ void Object::setMethod(ref<Reference> reference)
                     minitl::sort(m_overloads.begin(),
                                  m_overloads.end(),
                                  minitl::less<OverloadMatch>());
+                    if (m_overloads[0].m_callInfo.conversion >= RTTI::ConversionCost::s_incompatible)
+                    {
+                        // error: param list incorrect
+                        be_unimplemented();
+                    }
                 }
                 else
                 {

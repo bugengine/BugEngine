@@ -9,6 +9,19 @@
 namespace BugEngine { namespace PackageBuilder { namespace Nodes
 {
 
+namespace
+{
+
+struct ArgumentSort
+{
+    bool operator()(const OverloadMatch::ArgInfo& arg1, const OverloadMatch::ArgInfo& arg2) const
+    {
+        return arg1.parameter < arg2.parameter;
+    }
+};
+
+}
+
 static RTTI::ConversionCost calculateConversion(ref<const Parameter> parameter,
                                                 const RTTI::Type& target)
 {
@@ -46,6 +59,12 @@ void OverloadMatch::update(const minitl::vector< ref<const Parameter> >& paramet
                                static_cast<const ArgInfo*>(0), 0,
                                &m_args[0],
                                be_checked_numcast<u32>(m_args.size()));
+    for (u32 i = 0; i < m_args.size(); ++i)
+    {
+        m_args[i].parameter = m_indices[i];
+    }
+    minitl::sort(m_args.begin(), m_args.end(), ArgumentSort());
+
 }
 
 RTTI::Value OverloadMatch::create(istring name) const

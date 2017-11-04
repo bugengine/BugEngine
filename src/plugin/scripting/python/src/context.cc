@@ -27,13 +27,13 @@ void Context::unload(Resource::Resource& /*handle*/)
 void Context::runBuffer(weak<const PythonScript> script, Resource::Resource& /*resource*/,
                         const minitl::Allocator::Block<u8>& block)
 {
-    runCode(reinterpret_cast<const char*>(block.begin()), script->getScriptName().str().name);
+    runCode(reinterpret_cast<const char*>(block.begin()), script->getScriptName());
 }
 
 void Context::reloadBuffer(weak<const PythonScript> script, Resource::Resource& /*resource*/,
                            const minitl::Allocator::Block<u8>& block)
 {
-    runCode(reinterpret_cast<const char*>(block.begin()), script->getScriptName().str().name);
+    runCode(reinterpret_cast<const char*>(block.begin()), script->getScriptName());
 }
 
 void Context::runCode(const char *buffer, const ifilename &filename)
