@@ -12,6 +12,7 @@ namespace BugEngine
 Help::Help(const Plugin::Context& context)
     :   Application(ref<DiskFolder>::create(Arena::game(),
                                             Environment::getEnvironment().getDataDirectory()),
+                    context.resourceManager,
                     context.scheduler)
     ,   m_packageManager("plugin.scripting.package", pluginContext())
     ,   m_ui("plugin.ui.console", pluginContext())

@@ -10,7 +10,10 @@ namespace BugEngine
 {
 
 TextSample::TextSample(const Plugin::Context& context)
-    :   Application(ref<DiskFolder>::create(Arena::game(), Environment::getEnvironment().getDataDirectory()), context.scheduler)
+    :   Application(ref<DiskFolder>::create(Arena::game(),
+                                            Environment::getEnvironment().getDataDirectory()),
+                    context.resourceManager,
+                    context.scheduler)
     ,   m_packageManager("plugin.scripting.package", pluginContext())
     ,   m_textManager("plugin.graphics.text", pluginContext())
     ,   m_3ddx("plugin.graphics.Dx9", pluginContext())
