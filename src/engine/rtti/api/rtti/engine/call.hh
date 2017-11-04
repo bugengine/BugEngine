@@ -188,16 +188,20 @@ Value call(CallInfo callInfo,
         {
             be_assert(p != callInfo.overload->params.end(),
                       "too many arguments passed to call");
-            be_assert(*(p->defaultValue), "Parameter does not have a default value");
+            be_assert(*(p->defaultValue), "Parameter %s does not have a default value"
+                                        | p->name);
             new (static_cast<void*>(&v[index])) Value(Value::ByRef(*(p->defaultValue)));
         }
+        be_assert(p->name == namedArguments[i].name,
+                  "Argument mismatch: %s expected, got %s" | p->name | namedArguments[i].name);
         be_assert(p != callInfo.overload->params.end(),
                   "too many arguments passed to call");
         convert(namedArguments[i].type, static_cast<void*>(&v[index]), p->type);
     }
     for (; p != callInfo.overload->params.end(); ++p, ++index)
     {
-        be_assert(p->defaultValue, "Parameter does not have a default value");
+        be_assert(p->defaultValue, "Parameter %s does not have a default value"
+                                 | p->name);
         new (static_cast<void*>(&v[index])) Value(Value::ByRef(*(p->defaultValue)));
     }
     for (u32 i = argumentCount - callInfo.variadicCount; i < argumentCount; ++i, ++index)
