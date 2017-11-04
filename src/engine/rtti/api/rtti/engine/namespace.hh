@@ -65,8 +65,8 @@ namespace BugEngine                                                             
     raw<BugEngine::RTTI::Class> be_##plugin##_Namespace_##n1##_##n2##_##n3();                                                                   \
     raw<BugEngine::RTTI::Class> be_##plugin##_Namespace_##n1##_##n2##_##n3##_##n4()                                                             \
     {                                                                                                                                           \
-        static RTTI::Class ci = { #n4, 0, 0, {be_##plugin##_Namespace_##n1##_##n2##_##n3().m_ptr}, {0},                                         \
-                                  RTTI::ClassType_Namespace, {0}, {0}, {0, 0}, {0, 0}, {0}, {0}, 0, 0 };                                        \
+        static RTTI::Class ci = { #n4, 0, 0, RTTI::ClassType_Namespace, {be_##plugin##_Namespace_##n1##_##n2##_##n3().m_ptr}, {0}, {0},         \
+                                  {0}, {0, 0}, {0, 0}, {0}, {0}, 0, 0 };                                                                        \
         raw<BugEngine::RTTI::Class> ptr = {&ci};                                                                                                \
         return ptr;                                                                                                                             \
     }                                                                                                                                           \
