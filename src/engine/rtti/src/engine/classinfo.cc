@@ -29,7 +29,7 @@ const istring Class::nameDestructor()
 
 const istring Class::nameOperatorCall()
 {
-    static const istring result = "?()";
+    static const istring result = "?call";
     return result;
 }
 
