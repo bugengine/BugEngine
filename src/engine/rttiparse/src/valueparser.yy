@@ -222,7 +222,7 @@ value:
             $$.value = reinterpret_cast< ref<Node>* >(malloc(sizeof(*$$.value)));
             new ($$.value) ref<Node>(ref<FileName>::create(*context->arena,
                                                            $1.location,
-                                                           $1.value));
+                                                           BugEngine::ifilename($1.value)));
             $$.location = $1.location;
             free($1.value);
         }

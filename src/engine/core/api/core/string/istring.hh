@@ -107,8 +107,8 @@ public:
     };
     ifilename();
     explicit ifilename(const istring& onlycomponent);
-    ifilename(const char *str);
-    ifilename(const ipath& path);
+    explicit ifilename(const char *str);
+    explicit ifilename(const ipath& path);
     ~ifilename() {}
 
     Filename str() const;
@@ -123,9 +123,9 @@ public:
         char name[MaxFilenameLength];
         operator const char*() const { return name; }
     };
-    explicit ipath(const istring& onlycomponent);
     ipath();
-    ipath(const char *str);
+    explicit ipath(const istring& onlycomponent);
+    explicit ipath(const char *str);
     ipath(const char *begin, const char *end);
     ~ipath() {}
 

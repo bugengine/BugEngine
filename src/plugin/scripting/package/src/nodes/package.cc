@@ -96,7 +96,7 @@ Package::Package(const ifilename& filename)
     ,   m_values(Arena::packageBuilder())
     ,   m_logger()
 {
-    m_rootNamespace->add(inamespace("game"), RTTI::Value(be_bugengine_Namespace()));
+    m_rootNamespace->add(inamespace("bugengine"), RTTI::Value(be_bugengine_Namespace()));
 }
 
 Package::~Package()
@@ -244,17 +244,17 @@ const ifilename& Package::filename() const
 
 void Package::info(u32 line, const char* message)
 {
-    m_logger.info(m_filename.str().name, line, message);
+    m_logger.info(m_filename, line, message);
 }
 
 void Package::warning(u32 line, const char* message)
 {
-    m_logger.warning(m_filename.str().name, line, message);
+    m_logger.warning(m_filename, line, message);
 }
 
 void Package::error(u32 line, const char* message)
 {
-    m_logger.error(m_filename.str().name, line, message);
+    m_logger.error(m_filename, line, message);
 }
 
 bool Package::success() const
