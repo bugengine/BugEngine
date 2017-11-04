@@ -2,6 +2,7 @@ from waflib import Task, Options, Build, Task, Utils, Errors, TaskGen
 from waflib.Configure import conf
 from waflib.TaskGen import feature, taskgen_method, extension, before_method, after_method
 import os
+import re
 import shutil
 from waflib.Tools import ccroot, c, cxx, winres
 
@@ -21,16 +22,23 @@ def to_string(self):
 
 def create_namespace_file(task):
     with open(task.outputs[0].abspath(), 'w') as f:
+        namespaces = []
+        for k_name, k in task.generator.kernels:
+            full_ns = ['Kernels']
+            full_ns += [n.capitalize() for n in k_name[:-1]]
+            print(full_ns)
+            for i in range(1, len(full_ns)+1):
+                ns = full_ns[0:i]
+                if ns not in namespaces:
+                    namespaces.append(ns)
         pch = getattr(task, 'pch', '')
         if pch:
             f.write('#include <%s>\n' % pch)
         f.write('#include <plugin/stdafx.h>\n')
         f.write('#include <rtti/engine/namespace.hh>\n')
-        namespace = [i.capitalize() for i in task.generator.target.split('.')[:-1]]
-        for i in range(1, len(namespace)+1):
-            ns = namespace[0:i]
-            f.write('BE_REGISTER_NAMESPACE_%d(%s);\n'%(len(ns), ', '.join(ns)))
-        f.write('BE_REGISTER_NAMESPACE_1(Kernels);\n')
+
+        for n in namespaces:
+            f.write('BE_REGISTER_NAMESPACE_%d(%s);\n'%(len(n), ', '.join(n)))
 NamespaceTask = Task.task_factory("namespace", create_namespace_file, color='CYAN')
 
 
@@ -255,30 +263,29 @@ def module(bld, name, module_path, depends,
         preprocess.env.PLUGIN = plugin_name
         if os.path.isdir(os.path.join(source_node.abspath(), 'kernels')):
             kernelspath = source_node.make_node('kernels')
-            for kernel in kernelspath.listdir():
-                kernelpath = kernelspath.make_node(kernel)
-                kernelsources = [kernelpath]
+            for kernel in kernelspath.ant_glob('**'):
                 kernels = []
-                """for env in bld.multiarch_envs:
-                    target_prefix = (env.ENV_PREFIX + '.') if env.ENV_PREFIX else ''
-                    kernel_name = kernel[:kernel.rfind('.')]
-                    t = bld(
-                        env = env.derive(),
-                        target = target_prefix + name + '.' + kernel_name,
-                        features = ['cxx', bld.env.STATIC and 'cxxobjects' or 'cxxshlib', 'kernel'],
-                        extra_use = extra_features,
-                        defines = static_defines + [
-                                'BE_BUILD_KERNEL=1',
-                                'BE_KERNELID=%s_%s'%(name.replace('.', '_'),kernel_name),
-                                'BE_KERNELNAME=%s.%s'%(name, kernel_name)],
-                        includes = api + include,
-                        kernel_source = kernelsources,
-                        use = [target_prefix + d for d in depends] + [target_prefix + name])
-                    t.env.PLUGIN = plugin_name
-                    kernels.append(target_prefix + name + '.' + kernel_name)
-                if target_prefix:
-                    internal_kernels.append((kernel_name, kernels, kernelsources))
-                preprocess.kernels.append((kernel_name, kernelsources))"""
+                kernel_name = os.path.splitext(kernel.path_from(kernelspath))[0]
+                kernel_name = re.split('[\\\\/]', kernel_name)
+                #for env in bld.multiarch_envs:
+                #    target_prefix = (env.ENV_PREFIX + '.') if env.ENV_PREFIX else ''
+                #    t = bld(
+                #        env = env.derive(),
+                #        target = target_prefix + name + '.' + kernel_name,
+                #        features = ['cxx', bld.env.STATIC and 'cxxobjects' or 'cxxshlib', 'kernel'],
+                #        extra_use = extra_features,
+                #        defines = static_defines + [
+                #                'BE_BUILD_KERNEL=1',
+                #                'BE_KERNELID=%s_%s'%(name.replace('.', '_'),kernel_name),
+                #                'BE_KERNELNAME=%s.%s'%(name, kernel_name)],
+                #        includes = api + include,
+                #        kernel_source = kernelsources,
+                #        use = [target_prefix + d for d in depends] + [target_prefix + name])
+                #    t.env.PLUGIN = plugin_name
+                #    kernels.append(target_prefix + name + '.' + kernel_name)
+                #if target_prefix:
+                #    internal_kernels.append((kernel_name, kernels, kernelsources))
+                preprocess.kernels.append((kernel_name, kernel))
     else:
         preprocess = None
 
