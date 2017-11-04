@@ -40,7 +40,7 @@ weak<File> Folder::openFile(istring name)
 weak<File> Folder::openFile(ifilename name)
 {
     istring s = name.pop_front();
-    if (name.size() > 1)
+    if (name.size() > 0)
     {
         weak<Folder> f = openFolder(s);
         if (f)
