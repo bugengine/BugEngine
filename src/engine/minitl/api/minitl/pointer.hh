@@ -36,7 +36,7 @@ class pointer
     template< typename T >  friend class weak;
     template< typename T >  friend class scoped;
 private:
-    Allocator* m_allocator;
+    mutable Allocator* m_allocator;
 #if BE_ENABLE_WEAKCHECK
     mutable i_u32 m_weakCount;
 #endif
