@@ -102,7 +102,7 @@ struct Property
             {0},
             be_typeid<T>::klass()->name,
             be_typeid<LIST>::type(),
-            be_typeid< const Kernel::Product<T>& >::type(),
+            be_typeid< weak< const Kernel::Product< Kernel::Segments<T> > > >::type(),
             &LIST::template getProduct<T>
         };
         new (&properties[INDEX]) RTTI::Property(property);
@@ -119,7 +119,7 @@ struct Property<LIST, INDEX, T, STORAGE, void>
             {0},
             be_typeid<T>::klass()->name,
             be_typeid<LIST>::type(),
-            be_typeid< const Kernel::Product<T>& >::type(),
+            be_typeid< weak< const Kernel::Product< Kernel::Segments<T> > > >::type(),
             &LIST::template getProduct<T>
         };
         new (&properties[INDEX]) RTTI::Property(property);

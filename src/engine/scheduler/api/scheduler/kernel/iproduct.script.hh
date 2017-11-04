@@ -8,6 +8,7 @@
 #include    <scheduler/task/itask.hh>
 #include    <scheduler/kernel/parameters/iparameter.script.hh>
 
+
 namespace BugEngine { namespace Kernel
 {
 

@@ -16,7 +16,8 @@ class Storage : public World::EntityStorageFactory<
     COMPONENT_LIST_2(
         (Particle, World::StorageSize_256k),
         (Obstacle, World::StorageSize_4k)),
-    BugEngine::World::MakePartitionList< BugEngine::World::MakePartition<Particle>::Result >::Result
+    BugEngine::World::MakePartitionList< BugEngine::World::MakePartition<Particle>::Result,
+                                         BugEngine::World::MakePartition<Obstacle>::Result>::Result
     >
 {
 published:

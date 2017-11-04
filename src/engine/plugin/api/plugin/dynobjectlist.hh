@@ -72,6 +72,7 @@ public:
     static void showList();
 };
 
+#define _BE_PLUGIN_VAR_EXPORT               extern
 #define _BE_PLUGIN_EXPORT                   static
 #define _BE_REGISTER_PLUGIN_(id, name)      BE_EXPORT BugEngine::Plugin::DynamicObjectList s_plugin_##id (#name);
 #define _BE_REGISTER_PLUGIN(id, name)       _BE_REGISTER_PLUGIN_(id, name)
@@ -80,6 +81,7 @@ public:
 
 #else
 
+#define _BE_PLUGIN_VAR_EXPORT               BE_EXPORT
 #define _BE_PLUGIN_EXPORT                   extern "C" BE_EXPORT
 #define _BE_REGISTER_PLUGIN(id, name)       
 #define _BE_REGISTER_METHOD(id, x)          

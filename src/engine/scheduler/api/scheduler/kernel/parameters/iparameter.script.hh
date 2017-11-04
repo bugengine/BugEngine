@@ -12,7 +12,7 @@ namespace BugEngine { namespace Kernel
 class IMemoryBuffer;
 class IMemoryHost;
 
-class IParameter : public minitl::refcountable
+class be_api(SCHEDULER)  IParameter : public minitl::refcountable
 {
 private:
     enum

@@ -9,10 +9,24 @@
 #include    <rtti/engine/objectinfo.script.hh>
 #include    <rtti/engine/helper/staticarray.hh>
 #include    <rtti/value.hh>
+#include    <scheduler/kernel/kernel.script.hh>
 
 
 namespace BugEngine { namespace Plugin
 {
+
+#ifdef BE_STATIC
+#define BE_PLUGIN_REGISTER_KERNELS_()                                                               \
+    extern BugEngine::Kernel::Kernel::KernelList&   getKernelList();
+#else
+#define BE_PLUGIN_REGISTER_KERNELS_()                                                               \
+    BugEngine::Kernel::Kernel::KernelList&   getKernelList()                                        \
+    {                                                                                               \
+        static BugEngine::Kernel::Kernel::KernelList s_result;                                      \
+        return s_result;                                                                            \
+    }
+
+#endif
 
 #define BE_PLUGIN_NAMESPACE_CREATE_(name)                                                           \
     namespace BugEngine                                                                             \
@@ -78,8 +92,13 @@ namespace BugEngine { namespace Plugin
 #define BE_PLUGIN_REGISTER_CREATE(create)                                                           \
     BE_PLUGIN_REGISTER_NAMED_(BE_PROJECTNAME, BE_PROJECTID, create)
 #define BE_PLUGIN_REGISTER(klass)                                                                   \
+    BE_PLUGIN_REGISTER_KERNELS_()                                                                   \
     static ref<klass> create(const BugEngine::Plugin::Context& context)                             \
     {                                                                                               \
+        for (BugEngine::Kernel::Kernel::KernelList::const_iterator it = getKernelList().begin();    \
+             it != getKernelList().end();                                                           \
+             ++it)                                                                                  \
+            context.resourceManager->load(weak<const BugEngine::Kernel::Kernel>(it.operator->()));  \
         return ref<klass>::create(BugEngine::Arena::game(), context);                               \
     }                                                                                               \
     BE_PLUGIN_REGISTER_CREATE(&create)
@@ -96,7 +115,7 @@ Plugin<T>::Plugin()
 template< typename T >
 Plugin<T>::Plugin(const inamespace& pluginName, PreloadType /*preload*/)
     :   m_name(pluginName)
-    ,   m_dynamicObject(new (Arena::general()) DynamicObject(pluginName, "plugin"))
+    ,   m_dynamicObject(new (Arena::general()) DynamicObject(pluginName, ipath("plugin")))
     ,   m_interface(0)
     ,   m_refCount(new (Arena::general()) i_u32(i_u32::One))
 {
@@ -105,7 +124,7 @@ Plugin<T>::Plugin(const inamespace& pluginName, PreloadType /*preload*/)
 template< typename T >
 Plugin<T>::Plugin(const inamespace& pluginName, const Context& context)
     :   m_name(pluginName)
-    ,   m_dynamicObject(new (Arena::general()) DynamicObject(pluginName, "plugin"))
+    ,   m_dynamicObject(new (Arena::general()) DynamicObject(pluginName, ipath("plugin")))
     ,   m_interface(0)
     ,   m_refCount(new (Arena::general()) i_u32(i_u32::One))
 {

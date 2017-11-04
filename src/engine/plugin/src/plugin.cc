@@ -7,6 +7,14 @@
 #include    <scheduler/scheduler.hh>
 #include    <resource/resourcemanager.hh>
 
+#ifdef BE_STATIC
+BugEngine::Kernel::Kernel::KernelList& getKernelList()
+{
+    static BugEngine::Kernel::Kernel::KernelList s_result;
+    return s_result;
+}
+#endif
+
 namespace BugEngine { namespace Plugin
 {
 

@@ -20,6 +20,11 @@ public:
     {
     }
 
+    Product(weak<const Product> other, weak<Task::ITask> producer)
+        :   IProduct(other->m_parameter, producer)
+    {
+    }
+
     ~Product()
     {
     }
