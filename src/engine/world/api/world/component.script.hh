@@ -6,18 +6,5 @@
 /**************************************************************************************************/
 #define     be_pod              struct
 
-namespace BugEngine { namespace World
-{
-
-class World;
-
-struct Component
-{
-    void created(World& /*world*/)      { }
-    void destroyed(World& /*world*/)    { }
-};
-
-}}
-
 /**************************************************************************************************/
 #endif

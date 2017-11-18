@@ -21,11 +21,11 @@ def options(opt):
     opt.add_option_group('3rd party libraries')
     opt.bugenginenode = opt.path.parent
 
-    opt.load('visualstudio', tooldir=[os.path.join(opt.path.abspath(), 'tools')])
-    opt.load('xcode', tooldir=[os.path.join(opt.path.abspath(), 'tools')])
-    opt.load('netbeans', tooldir=[os.path.join(opt.path.abspath(), 'tools')])
-    opt.load('eclipse', tooldir=[os.path.join(opt.path.abspath(), 'tools')])
-    opt.load('qtcreator', tooldir=[os.path.join(opt.path.abspath(), 'tools')])
+    opt.load('visualstudio', tooldir=[os.path.join(opt.path.abspath(), 'tools', 'waf')])
+    opt.load('xcode', tooldir=[os.path.join(opt.path.abspath(), 'tools', 'waf')])
+    opt.load('netbeans', tooldir=[os.path.join(opt.path.abspath(), 'tools', 'waf')])
+    opt.load('eclipse', tooldir=[os.path.join(opt.path.abspath(), 'tools', 'waf')])
+    opt.load('qtcreator', tooldir=[os.path.join(opt.path.abspath(), 'tools', 'waf')])
 
     opt.recurse('build.py')
     opt.recurse('hosts.py')
@@ -54,8 +54,8 @@ def configure(conf):
         directory = extra.make_node(extra_platform).abspath()
         if os.path.isdir(directory) and os.path.isfile(os.path.join(directory, 'wscript')):
             conf.recurse(extra.make_node(extra_platform).abspath(), name='host_configure')
-    conf.load('flex', tooldir=[os.path.join(conf.path.abspath(), 'tools')])
-    conf.load('bison', tooldir=[os.path.join(conf.path.abspath(), 'tools')])
+    conf.load('flex', tooldir=[os.path.join(conf.path.abspath(), 'tools', 'waf')])
+    conf.load('bison', tooldir=[os.path.join(conf.path.abspath(), 'tools', 'waf')])
     conf.recurse('compilers.py')
     conf.recurse('targets.py')
     conf.env.ALL_TOOLCHAINS.sort(key=lambda x: x.split('-'))

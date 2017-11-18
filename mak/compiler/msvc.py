@@ -55,13 +55,17 @@ class MSVC(Configure.ConfigurationContext.Compiler):
 
     def load_in_env(self, conf, platform):
         Configure.ConfigurationContext.Compiler.load_in_env(self, conf, platform)
+        env = conf.env
         version = '%s %s'%(self.NAMES[0], self.version)
-        conf.env.MSVC_VERSIONS = [version]
-        conf.env.MSVC_TARGETS = [self.arch_name]
-        conf.env.MSVC_BATFILE = [self.batfile, self.args]
-        conf.env.COMPILER_NAME='msvc'
-        conf.env.COMPILER_TARGET='windows-win32-msvc-%s'%version
-        conf.env.IDIRAFTER='/I'
+        env.MSVC_VERSIONS = [version]
+        env.MSVC_TARGETS = [self.arch_name]
+        env.MSVC_BATFILE = [self.batfile, self.args]
+        env.COMPILER_NAME='msvc'
+        env.COMPILER_TARGET='windows-win32-msvc-%s'%version
+        env.IDIRAFTER='/I'
+        env.CC_CPP = env.CC
+        env.CC_CPP_SRC_F = ''
+        env.CC_CPP_TGT_F = ['/TC', '/P', '/Fi']
         if os_platform().endswith('64'):
             conf.find_program('cdb64', var='CDB', mandatory=False)
         else:

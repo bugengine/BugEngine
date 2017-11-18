@@ -18,22 +18,26 @@ namespace BugEngine { namespace Kernel { namespace CPU
 Scheduler::Scheduler(const Plugin::Context& context)
     :   IScheduler("CPU", context.scheduler)
     ,   m_resourceManager(context.resourceManager)
-    ,   m_loader(scoped<CodeLoader>::create(Arena::task()))
+    ,   m_cpuLoader(scoped<CodeLoader>::create(Arena::task(), inamespace()))
+    ,   m_cpuLoaderNeon(scoped<CodeLoader>::create(Arena::task(), inamespace("neon")))
     ,   m_memoryHost(scoped<MemoryHost>::create(Arena::task()))
 {
-    m_resourceManager->attach<Kernel>(weak<Resource::ILoader>(m_loader));
+    m_resourceManager->attach<Kernel>(weak<Resource::ILoader>(m_cpuLoader));
+    m_resourceManager->attach<Kernel>(weak<Resource::ILoader>(m_cpuLoaderNeon));
 }
 
 Scheduler::~Scheduler()
 {
-    m_resourceManager->detach<Kernel>(weak<const Resource::ILoader>(m_loader));
+    m_resourceManager->detach<Kernel>(weak<const Resource::ILoader>(m_cpuLoaderNeon));
+    m_resourceManager->detach<Kernel>(weak<const Resource::ILoader>(m_cpuLoader));
 }
 
 void Scheduler::run(weak<Task::KernelTask> task,
                     weak<const Kernel> kernel,
                     const minitl::array< weak<const IMemoryBuffer> >& parameters)
 {
-    weak<KernelObject> object = kernel->getResource(m_loader).getRefHandle<KernelObject>();
+    /* TODO: set option to use Neon/AVX/SSE */
+    weak<KernelObject> object = kernel->getResource(m_cpuLoader).getRefHandle<KernelObject>();
     be_assert(object, "kernel is not loaded");
     CPUKernelTask& taskBody = object->m_task->body;
     taskBody.sourceTask = task;

@@ -214,7 +214,7 @@ GLRenderer::GLRenderer(const Plugin::Context& context)
     :   Windowing::Renderer(Arena::general(), context.resourceManager)
     ,   m_context(scoped<Context>::create(Arena::general(), this))
     ,   m_openGLMemoryHost(scoped<GLMemoryHost>::create(Arena::general()))
-    ,   m_openCLScheduler("plugin.kernel.opencl_gl", context)
+    ,   m_openCLScheduler("plugin.compute.opencl_gl", context)
 {
 }
 

@@ -61,7 +61,7 @@ class Windows(Configure.ConfigurationContext.Platform):
                                        mandatory=False)
         if not winres:
             winres = conf.find_program('windres', var='WINRC', mandatory=False)
-        conf.load('winres_patch', tooldir=[os.path.join(conf.bugenginenode.abspath(), 'mak', 'tools')])
+        conf.load('winres_patch', tooldir=[os.path.join(conf.bugenginenode.abspath(), 'mak', 'tools', 'waf')])
 
 
 

@@ -4,11 +4,11 @@ def options(opt):
     pass
 
 def configure(conf):
-    os.environ['PATH'] = os.pathsep.join([conf.bugenginenode.make_node("mak/win32/bin").abspath(),
+    os.environ['PATH'] = os.pathsep.join([conf.path.make_node("win32/bin").abspath(),
                                           os.environ['PATH']])
 
 def build(bld):
-    os.environ['PATH'] = os.pathsep.join([bld.bugenginenode.make_node("mak/win32/bin").abspath(),
+    os.environ['PATH'] = os.pathsep.join([bld.path.make_node("win32/bin").abspath(),
                                           os.environ['PATH']])
 
 def plugins(bld):

@@ -46,7 +46,7 @@ Application::Application(ref<Folder> dataFolder,
     ,   m_scheduler(scheduler)
     ,   m_resourceManager(resourceManager)
     ,   m_pluginContext(resourceManager, m_dataFolder, m_scheduler)
-    ,   m_cpuKernelScheduler("plugin.kernel.cpu", m_pluginContext)
+    ,   m_cpuKernelScheduler("plugin.compute.cpu", m_pluginContext)
     ,   m_updateTask(ref< Task::TaskGroup >::create(Arena::task(), "applicationUpdate",
                                                     Colors::Yellow::Yellow))
     ,   m_worldTask(ref< Task::TaskGroup >::create(Arena::task(), "worldUpdate",

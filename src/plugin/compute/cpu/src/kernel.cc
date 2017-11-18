@@ -63,7 +63,9 @@ KernelObject::~KernelObject()
 void KernelObject::run(const u32 index, const u32 total,
                        const minitl::array< weak<const IMemoryBuffer> >& params)
 {
-    (*m_entryPoint)(index, total, params);
+
+    if (m_entryPoint)
+        (*m_entryPoint)(index, total, params);
 }
 
 }}}

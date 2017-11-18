@@ -9,8 +9,9 @@
 namespace BugEngine { namespace Kernel { namespace CPU
 {
 
-CodeLoader::CodeLoader()
+CodeLoader::CodeLoader(const inamespace& cpuVariant)
     :   ICodeLoader()
+    ,   m_cpuVariant(inamespace("cpu") + cpuVariant)
 {
 }
 
@@ -24,6 +25,7 @@ void CodeLoader::load(weak<const Resource::Description> kernelDescription,
     be_info("loading CPU kernel %s"
           | be_checked_cast<const Kernel>(kernelDescription)->name());
     inamespace name = be_checked_cast<const Kernel>(kernelDescription)->name();
+    name += m_cpuVariant;
     resource.setRefHandle(ref<KernelObject>::create(Arena::task(), name));
 }
 

@@ -1,4 +1,4 @@
-from waflib import Options, Utils, Configure
+from waflib import Options, Utils, Configure, Logs
 from waflib.Configure import conf
 import os
 import re
@@ -26,6 +26,7 @@ class Compiler:
         'armv7a':   'armv7a',
         'armv7s':   'armv7s',
         'armv7k':   'armv7k',
+        'armv7l':   'armv7l',
         'arm64':    'arm64',
         'aarch64':  'arm64',
         'aarch32':  'aarch32',
@@ -40,6 +41,7 @@ class Compiler:
         'mips64el': 'mips64el',
         'mipsel64': 'mips64el',
     }
+    VECTORIZED_FLAGS = {}
 
     def __init__(self, compiler_c, compiler_cxx, version, platform, arch,
                  extra_args = {}, extra_env={}):
@@ -133,6 +135,28 @@ class GnuCompiler(Compiler):
     ARCH_FLAGS = {
             'arm':   ['-march=armv7-a'],
         }
+    VECTORIZED_FLAGS = {
+        'x86':      (('.sse3', ['-msse3', '-mssse3']),
+                     ('.sse4', ['-msse4.1', '-msse4.2',]),
+                     ('.avx', ['-mavx']),
+                     ('.avx2', ['-mavx2']),),
+        'amd64':    (('.sse3', ['-msse3', '-mssse3']),
+                     ('.sse4', ['-msse4.1', '-msse4.2',]),
+                     ('.avx', ['-mavx']),
+                     ('.avx2', ['-mavx2']),),
+
+        'ppc':      (('.altivec', ['-maltivec']),),
+        'ppc64':    (('.altivec', ['-maltivec']),),
+
+        'armv6k':   (('.neon', ['-mfpu=neon']),),
+        'armv7a':   (('.neon', ['-mfpu=neon']),),
+        'armv7s':   (('.neon', ['-mfpu=neon']),),
+        'armv7k':   (('.neon', ['-mfpu=neon']),),
+        'armv7l':   (('.neon', ['-mfpu=neon']),),
+        'arm64':    (('.neon', []),),
+
+
+    }
     MULTILIBS = {
         'x86':      ((['-m64'], 'amd64'),),
         'amd64':    ((['-m32'], 'x86'),),
@@ -280,12 +304,12 @@ class GnuCompiler(Compiler):
                     pass
             return result
 
-    def is_valid(self, conf):
+    def is_valid(self, conf, extra_flags = []):
         node = conf.bldnode.make_node('main.cxx')
         tgtnode = node.change_ext('')
         node.write('int main() {}\n')
         try:
-            result, out, err = self.run_cxx([node.abspath(), '-c', '-o', tgtnode.abspath()])
+            result, out, err = self.run_cxx([node.abspath(), '-c', '-o', tgtnode.abspath()] + extra_flags)
         except Exception as e:
             print(e)
             return False
@@ -340,6 +364,17 @@ class GnuCompiler(Compiler):
         env.IDIRAFTER = '-idirafter'
         Compiler.load_in_env(self, conf, platform)
 
+        conf.end_msg('')
+        conf.start_msg('      `- [cpu compute variants]')
+        for variant_name, flags in self.VECTORIZED_FLAGS.get(self.arch, []):
+            if self.is_valid(conf, flags + ['-Werror']):
+                conf.env.append_unique('KERNEL_OPTIM_VARIANTS', [variant_name])
+                conf.env['CFLAGS_%s' % variant_name] = flags
+                conf.env['CXXFLAGS_%s' % variant_name] = flags
+                Logs.pprint('GREEN', '+%s' % variant_name, sep=' ')
+            else:
+                Logs.pprint('YELLOW', '-%s' % variant_name, sep=' ')
+
 
         sys_dirs = self.directories + platform.directories
         d, a = os.path.split(self.directories[0])
@@ -357,6 +392,9 @@ class GnuCompiler(Compiler):
             conf.find_program('gdb', var='GDB', mandatory=False)
         env.COMPILER_NAME = self.__class__.__name__.lower()
         env.COMPILER_TARGET = self.arch + '-' + self.platform
+        env.CC_CPP = [env.CC, '-x', 'c', '-E']
+        env.CC_CPP_SRC_F = ''
+        env.CC_CPP_TGT_F = ['-o']
         conf.load(self.TOOLS)
         self.populate_useful_variables(conf)
 

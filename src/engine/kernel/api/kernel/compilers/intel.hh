@@ -60,7 +60,6 @@ typedef u8                      byte;
 
 # define BE_EXPORT              __declspec(dllexport)
 # define BE_IMPORT              __declspec(dllimport)
-# define BE_THREAD_LOCAL        __declspec(thread)
 # define BE_NOINLINE            __declspec(noinline)
 # define BE_ALWAYSINLINE        inline
 #define BE_SUPPORTS_EXCEPTIONS  1
