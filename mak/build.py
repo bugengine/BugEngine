@@ -250,12 +250,12 @@ def module(bld, name, module_path, depends,
 
     result = []
     internal_deps = []
-    internal_kernels = []
 
     if build and not bld.env.PROJECTS:
         preprocess = bld(
             env=bld.common_env.derive(),
             target = name + '.preprocess',
+            parent = name,
             features= ['preprocess'],
             pchstop = pchstop,
             source = preprocess_sources,
@@ -264,27 +264,8 @@ def module(bld, name, module_path, depends,
         if os.path.isdir(os.path.join(source_node.abspath(), 'kernels')):
             kernelspath = source_node.make_node('kernels')
             for kernel in kernelspath.ant_glob('**'):
-                kernels = []
                 kernel_name = os.path.splitext(kernel.path_from(kernelspath))[0]
                 kernel_name = re.split('[\\\\/]', kernel_name)
-                #for env in bld.multiarch_envs:
-                #    target_prefix = (env.ENV_PREFIX + '.') if env.ENV_PREFIX else ''
-                #    t = bld(
-                #        env = env.derive(),
-                #        target = target_prefix + name + '.' + kernel_name,
-                #        features = ['cxx', bld.env.STATIC and 'cxxobjects' or 'cxxshlib', 'kernel'],
-                #        extra_use = extra_features,
-                #        defines = static_defines + [
-                #                'BE_BUILD_KERNEL=1',
-                #                'BE_KERNELID=%s_%s'%(name.replace('.', '_'),kernel_name),
-                #                'BE_KERNELNAME=%s.%s'%(name, kernel_name)],
-                #        includes = api + include,
-                #        kernel_source = kernelsources,
-                #        use = [target_prefix + d for d in depends] + [target_prefix + name])
-                #    t.env.PLUGIN = plugin_name
-                #    kernels.append(target_prefix + name + '.' + kernel_name)
-                #if target_prefix:
-                #    internal_kernels.append((kernel_name, kernels, kernelsources))
                 preprocess.kernels.append((kernel_name, kernel))
     else:
         preprocess = None
@@ -328,9 +309,12 @@ def module(bld, name, module_path, depends,
             target_name = name,
             module_path = project_path,
             use = [target_prefix + d for d in depends],
-            features = features,
+            features = features + ['kernel_build'],
             extra_use = extra_features,
-            defines = ['building_%s' % safe_name(name.split('.')[-1]), 'BE_PROJECTID=%s'%name.replace('.', '_'), 'BE_PROJECTNAME=%s'%name] + extra_defines,
+            defines = ['building_%s' % safe_name(name.split('.')[-1]),
+                       'BE_PROJECTID=%s'%name.replace('.', '_'),
+                       'BE_PROJECTNAME=%s'%name,
+                       'BE_KERNEL_TARGET=cpp'] + extra_defines,
             export_defines = [] + extra_public_defines,
             includes = extra_includes + api + platform_api + include + platform_include + [bld.bugenginenode],
             libs = [],
@@ -340,15 +324,13 @@ def module(bld, name, module_path, depends,
             source = sources[:],
             pchstop = pchstop,
             preprocess = preprocess,
+            kernels = preprocess and preprocess.kernels or [],
             export_all=export_all,
             source_nodes = [source_node] + [e for _, e in extras])
         task_gen.env.PLUGIN = plugin_name
         result.append(task_gen)
         if target_prefix:
             internal_deps.append(target_prefix + name)
-    for kernel, kernel_deps, kernel_sources in internal_kernels:
-        if kernel_deps:
-            bld(target=name + '.' + kernel, features=['multiarch'], use=kernel_deps)
     if internal_deps:
         multiarch = bld(target=name, features=['multiarch'], use=internal_deps)
     else:
@@ -571,10 +553,11 @@ def plugin(bld, name, depends=[], features=[], platforms=[],
 
 
 def build(bld):
-    bld.load('cpp_parser', tooldir=[os.path.join(bld.path.abspath(), 'tools')])
-    bld.load('data', tooldir=[os.path.join(bld.path.abspath(), 'tools')])
-    bld.load('kernel', tooldir=[os.path.join(bld.path.abspath(), 'tools')])
-    bld.load('kernel_cpu', tooldir=[os.path.join(bld.path.abspath(), 'tools')])
+    bld.load('cpp_parser', tooldir=[os.path.join(bld.path.abspath(), 'tools', 'waf')])
+    bld.load('data', tooldir=[os.path.join(bld.path.abspath(), 'tools', 'waf')])
+    bld.load('kernel_task', tooldir=[os.path.join(bld.path.abspath(), 'tools','waf')])
+    bld.load('clc', tooldir=[os.path.join(bld.path.abspath(), 'tools', 'waf')])
+    bld.load('kernel_cpu', tooldir=[os.path.join(bld.path.abspath(), 'tools', 'waf')])
     bld.env.STATIC = bld.env.STATIC or Options.options.static
     bld.env.DYNAMIC = Options.options.dynamic
     if bld.env.STATIC and bld.env.DYNAMIC:

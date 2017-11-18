@@ -2,7 +2,7 @@
    see LICENSE for detail */
 
 #include    <stdafx.h>
-#include    <memorybuffer.hh>
+#include    <cpu/memorybuffer.hh>
 #include    <memoryhost.hh>
 
 namespace BugEngine { namespace Kernel { namespace CPU

@@ -498,7 +498,7 @@ void EntityStorage::unspawn(Entity e)
     -- m_entityCount;
 }
 
-void EntityStorage::addComponent(Entity e, const Component& component,
+void EntityStorage::addComponent(Entity e, const void* component,
                                  raw<const RTTI::Class> componentType)
 {
     EntityInfo& info = getEntityInfo(e);

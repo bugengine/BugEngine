@@ -24,24 +24,28 @@ static raw<const RTTI::Method::Overload> getMethodFromClass(raw<const RTTI::Clas
                                                             istring name)
 {
     raw<const RTTI::Method> method = type->getMethod(name);
-    be_assert_recover(method,
-                      "could not locate method \"%s\" for component %s" | name | type->fullname(),
-                      return raw<const RTTI::Method::Overload>());
-    RTTI::ArgInfo<RTTI::Type> args[2] = {
-        RTTI::ArgInfo<RTTI::Type>(RTTI::Type::makeType(type,
-                                                       RTTI::Type::RawPtr,
-                                                       RTTI::Type::Const,
-                                                       RTTI::Type::Mutable)),
-        RTTI::ArgInfo<RTTI::Type>(be_typeid<World&>::type())
-    };
-    RTTI::CallInfo info = RTTI::resolve(method, args, 2);
-    if (info.conversion < RTTI::ConversionCost::s_incompatible)
+    if (method)
     {
-        return info.overload;
+        RTTI::ArgInfo<RTTI::Type> args[2] = {
+            RTTI::ArgInfo<RTTI::Type>(RTTI::Type::makeType(type,
+                                                           RTTI::Type::RawPtr,
+                                                           RTTI::Type::Const,
+                                                           RTTI::Type::Mutable)),
+            RTTI::ArgInfo<RTTI::Type>(be_typeid<World&>::type())
+        };
+        RTTI::CallInfo info = RTTI::resolve(method, args, 2);
+        if (info.conversion < RTTI::ConversionCost::s_incompatible)
+        {
+            return info.overload;
+        }
+        else
+        {
+            be_error("%s::%s() overloaded: will not be called by entity manager" | type->fullname() | name);
+            return raw<const RTTI::Method::Overload>();
+        }
     }
     else
     {
-        be_error("%s::%s() overloaded: will not be called by entity manager" | type->fullname() | name);
         return raw<const RTTI::Method::Overload>();
     }
 }
@@ -547,14 +551,15 @@ void ComponentGroup::groupEntityOperations(weak<EntityStorage> storage, Operatio
     m_entityOperation = new (m_allocator.allocate()) OperationBuffer(0);
     m_entityOperationCurrent = m_entityOperation;
     minitl::Allocator::Block<byte> componentBuffer(Arena::stack(), m_componentsTotalSize);
-    minitl::Allocator::Block<u32> componentOffsets(Arena::stack(), m_components.size());
+    u32* componentOffsets = (u32*) malloca(m_components.size() * sizeof(u32));
     for (u32 o = 0, i = 0; i < m_components.size(); o += m_components[i].size, ++i)
     {
         componentOffsets[i] = o;
     }
 
-    TryMergeOperation merge(this, storage, deltas, componentBuffer.begin(), componentOffsets.begin());
+    TryMergeOperation merge(this, storage, deltas, componentBuffer.begin(), componentOffsets);
     oldBuffer->forEach(merge);
+    freea(componentOffsets);
 }
 
 ComponentGroup::OperationBuffer* ComponentGroup::sortEntityOperations(OperationDelta deltas[])
@@ -620,8 +625,9 @@ ComponentGroup::OperationBuffer* ComponentGroup::sortEntityOperations(OperationD
     }
 
     typedef minitl::tuple<OperationBuffer*, u32> CurrentBufferOffset;
-    minitl::Allocator::Block<CurrentBufferOffset> addOffsets(Arena::stack(), m_buckets.size());
-    minitl::Allocator::Block<CurrentBufferOffset> removeOffsets(Arena::stack(), m_buckets.size());
+    const u32 bufferSize = be_checked_numcast<u32>(m_buckets.size() * sizeof(CurrentBufferOffset));
+    CurrentBufferOffset* addOffsets = (CurrentBufferOffset*)malloca(bufferSize);
+    CurrentBufferOffset* removeOffsets = (CurrentBufferOffset*)malloca(bufferSize);
     for (u32 i = 0; i < m_buckets.size(); ++i)
     {
         be_assert(deltas[i].pageAdd != 0, "invalid page 0x0 for add bucket %d" | i);
@@ -659,6 +665,8 @@ ComponentGroup::OperationBuffer* ComponentGroup::sortEntityOperations(OperationD
             }
         }
     }
+    freea(addOffsets);
+    freea(removeOffsets);
 
     for (u32 i = 0; i < m_buckets.size() - 1; ++i)
     {
@@ -947,17 +955,22 @@ void ComponentGroup::repack(weak<EntityStorage> storage, u32 componentIndex, Buc
 void ComponentGroup::executeEntityOperations(weak<EntityStorage> storage,
                                              const OperationDelta deltas[])
 {
-    minitl::Allocator::Block< minitl::tuple<i32, u32, u32> > offsets(Arena::stack(), m_buckets.size()-1);
+    const u32 bucketSize = m_buckets.size();
+    typedef minitl::tuple<i32, u32, u32> Offsets;
+    const u32 offsetSize = be_checked_numcast<u32>(sizeof(Offsets) * bucketSize);
+    Offsets* offsets = (Offsets*)malloca(offsetSize);
+    u32* bucketsToProcess = (u32*)malloca(sizeof(u32) * bucketSize);
+    bool* bucketsProcessed = (bool*)malloca(sizeof(bool) * bucketSize);
     for (u32 componentIndex = 0; componentIndex < m_components.size(); ++componentIndex)
     {
         u32 absoluteComponentIndex = componentIndex + firstComponent;
         EntityStorage::ComponentStorage& componentStorage = *storage->m_components[absoluteComponentIndex];
         const u32 mask = 1 << componentIndex;
-        memset(offsets.begin(), 0, be_checked_numcast<size_t>(offsets.byteCount()));
+        memset(offsets, 0, offsetSize);
         i32 absoluteOffset = 0;
         u32 entityCount = 0;
         u32 entityCountAll = 0;
-        for (u32 bucket = 0; bucket < m_buckets.size()-1; ++bucket)
+        for (u32 bucket = 0; bucket < bucketSize-1; ++bucket)
         {
             offsets[bucket].first = absoluteOffset;
             offsets[bucket].second = entityCount;
@@ -973,22 +986,20 @@ void ComponentGroup::executeEntityOperations(weak<EntityStorage> storage,
         {
             componentStorage.reserve(absoluteOffset);
         }
-        minitl::array<u32> bucketsToProcess(Arena::stack(), m_buckets.size()-1);
-        minitl::array<bool> bucketsProcessed(Arena::stack(), m_buckets.size()-1);
-        for (u32 i = 0; i < bucketsProcessed.size(); ++i)
+        for (u32 i = 0; i < bucketSize - 1; ++i)
         {
             bucketsProcessed[i] = false;
         }
-        for (u32 done = 0; done != bucketsToProcess.size(); /*nothing*/)
+        for (u32 done = 0; done != bucketSize - 1; /*nothing*/)
         {
-            for (u32 i = 0; i < m_buckets.size()-1; ++i)
+            for (u32 i = 0; i < bucketSize-1; ++i)
             {
                 if (!bucketsProcessed[i])
                 {
                     bool spaceLeft = i == 0
                                   || bucketsProcessed[i-1]
                                   || offsets[i].first >= 0;
-                    bool spaceRight = i == m_buckets.size()-2
+                    bool spaceRight = i == bucketSize-2
                                    || bucketsProcessed[i+1]
                                    || offsets[i+1].first <= 0;
                     if (spaceLeft && spaceRight)
@@ -998,14 +1009,14 @@ void ComponentGroup::executeEntityOperations(weak<EntityStorage> storage,
                     }
                 }
             }
-            for (u32 i = bucketsToProcess.size(); i > 0; --i)
+            for (u32 i = bucketSize - 1; i > 0; --i)
             {
                 if (!bucketsProcessed[i-1])
                 {
                     bool spaceLeft = i == 1
                                   || bucketsProcessed[i-2]
                                   || offsets[i-1].first >= 0;
-                    bool spaceRight = i == m_buckets.size()-1
+                    bool spaceRight = i == bucketSize-1
                                    || bucketsProcessed[i]
                                    || offsets[i].first <= 0;
                     if (spaceLeft && spaceRight)
@@ -1016,10 +1027,10 @@ void ComponentGroup::executeEntityOperations(weak<EntityStorage> storage,
                 }
             }
         }
-        for (u32 i = 0; i < bucketsToProcess.size(); ++i)
+        for (u32 i = 0; i < bucketSize - 1; ++i)
         {
             u32 bucketToProcess = bucketsToProcess[i];
-            be_assert(bucketToProcess < m_buckets.size() - 1,
+            be_assert(bucketToProcess < bucketSize - 1,
                       "should not process last bucket");
             if (m_buckets[bucketToProcess].acceptMask & mask)
             {
@@ -1037,7 +1048,7 @@ void ComponentGroup::executeEntityOperations(weak<EntityStorage> storage,
     {
         i32 absoluteOffset = 0;
         u32 entityCount = 0;
-        for (u32 bucket = 0; bucket < m_buckets.size()-1; ++bucket)
+        for (u32 bucket = 0; bucket < bucketSize-1; ++bucket)
         {
             offsets[bucket].first = absoluteOffset;
             offsets[bucket].second = entityCount;
@@ -1050,22 +1061,20 @@ void ComponentGroup::executeEntityOperations(weak<EntityStorage> storage,
             storage->m_componentBackLinks[index]->reserve(absoluteOffset);
         }
 
-        minitl::array<u32> bucketsToProcess(Arena::stack(), m_buckets.size()-1);
-        minitl::array<bool> bucketsProcessed(Arena::stack(), m_buckets.size()-1);
-        for (u32 i = 0; i < bucketsProcessed.size(); ++i)
+        for (u32 i = 0; i < bucketSize - 1; ++i)
         {
             bucketsProcessed[i] = false;
         }
-        for (u32 done = 0; done != bucketsToProcess.size(); /*nothing*/)
+        for (u32 done = 0; done != bucketSize - 1; /*nothing*/)
         {
-            for (u32 i = 0; i < m_buckets.size() - 1; ++i)
+            for (u32 i = 0; i < bucketSize - 1; ++i)
             {
                 if (!bucketsProcessed[i])
                 {
                     bool spaceLeft = i == 0
                                   || bucketsProcessed[i-1]
                                   || offsets[i].first >= 0;
-                    bool spaceRight = i == m_buckets.size()-2
+                    bool spaceRight = i == bucketSize-2
                                    || bucketsProcessed[i+1]
                                    || offsets[i+1].first <= 0;
                     if (spaceLeft && spaceRight)
@@ -1075,14 +1084,14 @@ void ComponentGroup::executeEntityOperations(weak<EntityStorage> storage,
                     }
                 }
             }
-            for (u32 i = m_buckets.size() - 1; i > 0; --i)
+            for (u32 i = bucketSize - 1; i > 0; --i)
             {
                 if (!bucketsProcessed[i-1])
                 {
                     bool spaceLeft = i == 1
                                   || bucketsProcessed[i-2]
                                   || offsets[i-1].first >= 0;
-                    bool spaceRight = i == m_buckets.size() - 1
+                    bool spaceRight = i == bucketSize - 1
                                    || bucketsProcessed[i]
                                    || offsets[i].first <= 0;
                     if (spaceLeft && spaceRight)
@@ -1093,16 +1102,16 @@ void ComponentGroup::executeEntityOperations(weak<EntityStorage> storage,
                 }
             }
         }
-        for (u32 i = 0; i < bucketsToProcess.size(); ++i)
+        for (u32 i = 0; i < bucketSize - 1; ++i)
         {
             u32 bucketToProcess = bucketsToProcess[i];
-            be_assert(bucketToProcess < m_buckets.size() - 1,
+            be_assert(bucketToProcess < bucketSize - 1,
                       "should not process last bucket");
             repack(storage, lastComponent - firstComponent, m_buckets[bucketToProcess],
                    offsets[bucketToProcess].second, offsets[bucketToProcess].third,
                    deltas[bucketToProcess], offsets[bucketToProcess].first);
         }
-        for (u32 i = 0; i < m_buckets.size(); ++i)
+        for (u32 i = 0; i < bucketSize; ++i)
         {
             m_buckets[i].entityCount += deltas[i].added - deltas[i].removed;
         }
@@ -1111,6 +1120,9 @@ void ComponentGroup::executeEntityOperations(weak<EntityStorage> storage,
             storage->m_componentBackLinks[index]->shrink(absoluteOffset);
         }
     }
+    freea(bucketsProcessed);
+    freea(bucketsToProcess);
+    freea(offsets);
 }
 
 void ComponentGroup::clearBuffers(OperationBuffer *head) const
@@ -1126,18 +1138,19 @@ void ComponentGroup::clearBuffers(OperationBuffer *head) const
 
 void ComponentGroup::runEntityOperations(weak<EntityStorage> storage)
 {
-    minitl::Allocator::Block<OperationDelta> deltas(Arena::stack(), m_buckets.size());
-    memset(deltas.begin(), 0, sizeof(OperationDelta) * m_buckets.size());
-    groupEntityOperations(storage, deltas.begin());
-    OperationBuffer* newBuffer = sortEntityOperations(deltas.begin());
+    OperationDelta* deltas = (OperationDelta*)malloca(sizeof(OperationDelta) * m_buckets.size());
+    memset(deltas, 0, sizeof(OperationDelta) * m_buckets.size());
+    groupEntityOperations(storage, deltas);
+    OperationBuffer* newBuffer = sortEntityOperations(deltas);
 
     clearBuffers(m_entityOperation->m_next);
     m_entityOperation->m_next = 0;
     m_entityOperation->m_offset = 0;
     m_entityOperation->m_used = 0;
     m_entityOperationCurrent = m_entityOperation;
-    executeEntityOperations(storage, deltas.begin());
+    executeEntityOperations(storage, deltas);
     clearBuffers(newBuffer);
+    freea(deltas);
 }
 
 void ComponentGroup::freeBuffers()
@@ -1149,7 +1162,7 @@ void ComponentGroup::freeBuffers()
 }
 
 void ComponentGroup::addComponent(Entity e, u32 originalMask,
-                                  const Component& c, u32 componentIndex)
+                                  const void* c, u32 componentIndex)
 {
     const ComponentInfo& info = m_components[componentIndex];
     byte* operationBuffer = allocOperation(info.size);
@@ -1158,7 +1171,7 @@ void ComponentGroup::addComponent(Entity e, u32 originalMask,
     operation->maskBefore = originalMask;
     operation->maskAfter = originalMask | (1 << componentIndex);
     operation->size = static_cast<u32>(sizeof(EntityOperation) + info.size);
-    memcpy(operation->components(), &c, info.size);
+    memcpy(operation->components(), c, info.size);
 }
 
 void ComponentGroup::removeComponent(Entity e, u32 originalMask, u32 componentIndex)

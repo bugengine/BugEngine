@@ -76,7 +76,7 @@ public:
     void freeBuffers();
     void runEntityOperations(weak<EntityStorage> storage);
 
-    void addComponent(Entity e, u32 originalMask, const Component& c, u32 componentIndex);
+    void addComponent(Entity e, u32 originalMask, const void* c, u32 componentIndex);
     void removeComponent(Entity e, u32 originalMask, u32 componentIndex);
 };
 

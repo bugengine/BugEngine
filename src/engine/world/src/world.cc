@@ -48,36 +48,24 @@ void World::unspawn(Entity e)
     m_storage->unspawn(e);
 }
 
-void World::addComponent(Entity e, const Component& component, raw<const RTTI::Class> componentType)
+void World::addComponent(Entity e, const void* component, raw<const RTTI::Class> componentType)
 {
-    be_assert(componentType->isA(be_typeid<Component>::klass()),
-              "component of type %s is not a subclass of BugEngine::World::Component"
-            | componentType->name);
     m_storage->addComponent(e, component, componentType);
 }
 
 void World::removeComponent(Entity e, raw<const RTTI::Class> componentType)
 {
-    be_assert(componentType->isA(be_typeid<Component>::klass()),
-              "component of type %s is not a subclass of BugEngine::World::Component"
-            | componentType->name);
     m_storage->removeComponent(e, componentType);
 }
 
 bool World::hasComponent(Entity e, raw<const RTTI::Class> componentType) const
 {
-    be_assert(componentType->isA(be_typeid<Component>::klass()),
-              "component of type %s is not a subclass of BugEngine::World::Component"
-            | componentType->name);
     return m_storage->hasComponent(e, componentType);
 }
 
 void World::addComponent(Entity e, const RTTI::Value& component)
 {
-    be_assert(component.type().isA(be_typeid<const Component&>::type()),
-              "component of type %s is not a subclass of BugEngine::World::Component"
-            | component.type());
-    addComponent(e, component.as<const Component&>(), component.type().metaclass);
+    addComponent(e, component.as<const void*>(), component.type().metaclass);
 }
 
 RTTI::Value World::getComponent(Entity e, raw<const RTTI::Class> metaclass) const

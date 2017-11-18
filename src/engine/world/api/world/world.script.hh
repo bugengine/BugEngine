@@ -17,7 +17,6 @@ namespace BugEngine { namespace World
 {
 
 class EntityStorage;
-struct Component;
 
 class be_api(WORLD) World : public Resource::Description
 {
@@ -28,12 +27,12 @@ private:
     Task::TaskGroup::TaskEndConnection                  m_taskEnd;
     minitl::array<Task::TaskGroup::TaskEndConnection>   m_productEnds;
 private:
-    void addComponent(Entity e, const Component& component, raw<const RTTI::Class> metaclass);
+    void addComponent(Entity e, const void* component, raw<const RTTI::Class> metaclass);
 public:
     weak<Task::ITask> updateWorldTask() const;
     template< typename T > void addComponent(Entity e, const T& component)
     {
-        addComponent(e, component, be_typeid<T>::klass());
+        addComponent(e, &component, be_typeid<T>::klass());
     }
 published:
     Entity spawn();

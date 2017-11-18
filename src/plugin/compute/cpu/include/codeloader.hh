@@ -13,8 +13,10 @@ namespace BugEngine { namespace Kernel { namespace CPU
 
 class CodeLoader : public ICodeLoader
 {
+private:
+    const inamespace m_cpuVariant;
 public:
-    CodeLoader();
+    CodeLoader(const inamespace& cpuVariant);
     ~CodeLoader();
 
     virtual void load(weak<const Resource::Description> kernelDescription, Resource::Resource& resource) override;

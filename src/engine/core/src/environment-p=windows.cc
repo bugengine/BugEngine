@@ -33,7 +33,7 @@ Environment::Environment()
         (*function)(token, profile, &size);
         FreeLibrary(h);
     }
-    m_homeDirectory = profile;
+    m_homeDirectory = ipath(profile);
     m_homeDirectory.push_back(istring("bugengine"));
 }
 

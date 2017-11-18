@@ -17,7 +17,6 @@ class World;
 class ComponentGroup;
 class MemoryHost;
 struct Bucket;
-struct Component;
 struct EntityInfo;
 
 class be_api(WORLD) EntityStorage : public minitl::refcountable
@@ -106,7 +105,7 @@ private: // friend World/ComponentGroup
     Entity spawn();
     void unspawn(Entity e);
     EntityInfo& getEntityInfo(Entity e);
-    void addComponent(Entity e, const Component& c, raw<const RTTI::Class> componentType);
+    void addComponent(Entity e, const void* c, raw<const RTTI::Class> componentType);
     void removeComponent(Entity e, raw<const RTTI::Class> componentType);
     bool hasComponent(Entity e, raw<const RTTI::Class> componentType) const;
     RTTI::Value getComponent(Entity e, raw<const RTTI::Class> componentType) const;

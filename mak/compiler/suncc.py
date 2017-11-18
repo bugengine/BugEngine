@@ -110,6 +110,7 @@ class SunCC(Configure.ConfigurationContext.GnuCompiler):
         Configure.ConfigurationContext.GnuCompiler.load_in_env(self, conf, platform)
         v = conf.env
         v['RPATH_ST'] = '-R%s'
+        v.CC_CPP = [v.CC, '-E']
         if platform.NAME == 'Linux':
             v.IDIRAFTER = '-I'
             #v.STATIC = 1
