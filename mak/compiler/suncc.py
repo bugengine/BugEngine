@@ -16,6 +16,45 @@ class SunCC(Configure.ConfigurationContext.GnuCompiler):
         '__x86_64__': 'amd64',
     }
     TOOLS = 'suncc suncxx'
+    VECTORIZED_FLAGS = {
+        'x86':      (('.sse3', ['-xarch=sse3', '-xarch=ssse3',
+                                '-D__MMX__=1', '-D__SSE__=1', '-D__SSE2__=1',
+                                '-D__SSE3__=1', '-D__SSSE3__=1']),
+                     ('.sse4', ['-xarch=sse4_1', '-xarch=sse4_2',
+                                '-D__MMX__=1', '-DSSE__=1', '-DSSE2__=1',
+                                '-D__SSE3__=1', '-D__SSSE3__=1',
+                                '-D__SSE4_1__=1', '-D__SSE4_2__=1', '-D__POPCNT__=1']),
+                     ('.avx', ['-xarch=avx',
+                               '-D__MMX__=1', '-D__SSE__=1', '-D__SSE2__=1',
+                               '-D__SSE3__=1', '-D__SSSE3__=1',
+                                '-D__SSE4_1__=1', '-D__SSE4_2__=1', '-D__POPCNT__=1',
+                                '-D___AVX__=1', '-D__XSAVE__=1']),
+                     ('.avx2', ['-xarch=avx2',
+                                '-D__MMX__=1', '-D__SSE__=1', '-D__SSE2__=1',
+                                '-D__SSE3__=1', '-D__SSSE3__=1',
+                                '-D__SSE4_1__=1', '-D__SSE4_2__=1', '-D__POPCNT__=1',
+                                '-D__AVX__=1', '-D__XSAVE__=1',
+                                '-D__AVX2__=1',]),),
+        'amd64':    (('.sse3', ['-xarch=sse3', '-xarch=ssse3',
+                                '-D__MMX__=1', '-D__SSE__=1', '-D__SSE2__=1',
+                                '-D__SSE3__=1', '-D__SSSE3__=1']),
+                     ('.sse4', ['-xarch=sse4_1', '-xarch=sse4_2',
+                                '-D__MMX__=1', '-D__SSE__=1', '-D__SSE2__=1',
+                                '-D__SSE3__=1', '-D__SSSE3__=1',
+                                '-D__SSE4_1__=1', '-D__SSE4_2__=1', '-D__POPCNT__=1']),
+                     ('.avx', ['-xarch=avx',
+                               '-D__MMX__=1', '-D__SSE__=1', '-D__SSE2__=1',
+                               '-D__SSE3__=1', '-D__SSSE3__=1',
+                                '-D__SSE4_1__=1', '-D__SSE4_2__=1', '-D__POPCNT__=1',
+                                '-D___AVX__=1', '-D__XSAVE__=1']),
+                     ('.avx2', ['-xarch=avx2',
+                                '-D__MMX__=1', '-D__SSE__=1', '-D__SSE2__=1',
+                                '-D__SSE3__=1', '-D__SSSE3__=1',
+                                '-D__SSE4_1__=1', '-D__SSE4_2__=1', '-D__POPCNT__=1',
+                                '-D__AVX__=1', '-D__XSAVE__=1',
+                                '-D__AVX2__=1',]),),
+    }
+
 
     def __init__(self, suncc, sunCC, extra_args={}, extra_env={}):
         Configure.ConfigurationContext.GnuCompiler.__init__(self, suncc, sunCC, extra_args, extra_env)
@@ -93,17 +132,25 @@ class SunCC(Configure.ConfigurationContext.GnuCompiler):
                                  'reftotemp,truncwarn,badargtype2w,hidef,wemptydecl,notemsource,'
                                  'nonewline,inllargeuse']
 
-    def is_valid(self, conf):
+    def error_flag(self):
+        return ['-errwarn=%all']
+
+    def is_valid(self, conf, extra_flags=[]):
         node = conf.bldnode.make_node('main.cxx')
         tgtnode = node.change_ext('')
-        node.write('#define _GNU_SOURCE\n#include <cstdlib>\n#include <iostream>\nint main() {}\n')
+        node.write('#ifndef _GNU_SOURCE\n# define _GNU_SOURCE\n#endif\n#include <cstdlib>\n#include <iostream>\nint main() {}\n')
         try:
-            result, out, err = self.run_cxx([node.abspath(), '-c', '-o', tgtnode.abspath()])
+            result, out, err = self.run_cxx([node.abspath(), '-c', '-o', tgtnode.abspath()] + extra_flags)
         except Exception as e:
             return False
         finally:
             node.delete()
             tgtnode.delete()
+        err = err.split('\n')
+        if not result:
+            for e in err:
+                if e.find('illegal value ignored') != -1:
+                    result = 1
         return result == 0
 
     def load_in_env(self, conf, platform):
