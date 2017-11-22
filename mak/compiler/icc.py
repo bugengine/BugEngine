@@ -15,7 +15,16 @@ class ICC(Configure.ConfigurationContext.GnuCompiler):
         '__x86_64__': 'amd64',
     }
     TOOLS = 'icc icpc'
-
+    VECTORIZED_FLAGS = {
+        'x86':      (('.sse3', ['-mssse3']),
+                     ('.sse4', ['-msse4.2',]),
+                     ('.avx', ['-mavx']),
+                     ('.avx2', ['-march=core-avx2']),),
+        'amd64':    (('.sse3', ['-mssse3']),
+                     ('.sse4', ['-msse4.2',]),
+                     ('.avx', ['-mavx']),
+                     ('.avx2', ['-march=core-avx2']),),
+    }
     def __init__(self, icc, icpc, extra_args={}, extra_env={}):
         Configure.ConfigurationContext.GnuCompiler.__init__(self, icc, icpc, extra_args, extra_env)
 
@@ -77,17 +86,22 @@ class ICC(Configure.ConfigurationContext.GnuCompiler):
             v.CFLAGS_exportall = ['-fvisibility=default']
             v.CXXFLAGS_exportall = ['-fvisibility=default']
 
-    def is_valid(self, conf):
+    def is_valid(self, conf, extra_flags=[]):
         node = conf.bldnode.make_node('main.cxx')
         tgtnode = node.change_ext('')
         node.write('#include <iostream>\nint main() {}\n')
         try:
-            result, out, err = self.run_cxx([node.abspath(), '-c', '-o', tgtnode.abspath()])
+            result, out, err = self.run_cxx([node.abspath(), '-c', '-o', tgtnode.abspath()] + extra_flags)
         except Exception as e:
             return False
         finally:
             node.delete()
             tgtnode.delete()
+        if not result:
+            err = err.split('\n')
+            for e in err:
+                if e.find('command line warning') != -1:
+                    result = 1
         return result == 0
 
 def detect_icc(conf):

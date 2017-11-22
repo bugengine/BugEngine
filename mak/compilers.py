@@ -105,6 +105,7 @@ class Compiler:
         return self.run([self.compiler_c] + self.extra_args.get('c', []) + args, input, self.env)
 
     def run_cxx(self, args, input=None):
+        # print(' '.join([self.compiler_cxx] + self.extra_args.get('cxx', []) + args))
         return self.run([self.compiler_cxx] + self.extra_args.get('cxx', []) + args, input, self.env)
 
     def sort_name(self):
@@ -355,6 +356,8 @@ class GnuCompiler(Compiler):
             else:
                 conf.find_program(program, var=var, path_list=self.directories, mandatory=mandatory)
 
+    def error_flag(self):
+        return ['-Werror']
 
     def load_in_env(self, conf, platform, sysroot=None):
         env = conf.env
@@ -367,7 +370,7 @@ class GnuCompiler(Compiler):
         conf.end_msg('')
         conf.start_msg('      `- [cpu compute variants]')
         for variant_name, flags in self.VECTORIZED_FLAGS.get(self.arch, []):
-            if self.is_valid(conf, flags + ['-Werror']):
+            if self.is_valid(conf, flags + self.error_flag()):
                 conf.env.append_unique('KERNEL_OPTIM_VARIANTS', [variant_name])
                 conf.env['CFLAGS_%s' % variant_name] = flags
                 conf.env['CXXFLAGS_%s' % variant_name] = flags
