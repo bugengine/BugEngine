@@ -64,13 +64,14 @@
 
 
 #include <cstdlib>
-#include <cxxabi.h>
 #include <unwind.h>
+
+#include "cxxabi_defines.h"
 #include "dwarf_helper.h"
 #include "helper_func_internal.h"
 
 namespace __cxxabiv1 {
-#if __GXX_RTTI
+
 #ifdef __arm__
 extern "C" enum type_match_result {
   ctm_failed = 0,
@@ -113,16 +114,12 @@ __cxa_type_match(_Unwind_Exception* ucbp,
 namespace {
 
 void terminate_helper(std::terminate_handler t_handler) {
-#if __EXCEPTIONS
   try {
-#endif
     t_handler();
     abort();
-#if __EXCEPTIONS
   } catch (...) {
     abort();
   }
-#endif
 }
 
 void unexpected_helper(std::unexpected_handler u_handler) {
@@ -194,15 +191,11 @@ void unexpected_helper(std::unexpected_handler u_handler) {
 
     if (!native_exception) {
       __cxa_begin_catch(unwind_exception);    // unexpected is also a handler
-#if __EXCEPTIONS
       try {
-#endif
         std::unexpected();
-#if __EXCEPTIONS
       } catch (...) {
         std::terminate();
       }
-#endif
 
       return;
     }
@@ -214,11 +207,8 @@ void unexpected_helper(std::unexpected_handler u_handler) {
                             unwind_exception->barrier_cache.bitpattern[4]);
 
     __cxa_begin_catch(unwind_exception);    // unexpected is also a handler
-#if __EXCEPTIONS
     try {
-#endif
       unexpected_helper(header->unexpectedHandler);
-#if __EXCEPTIONS
     } catch (...) {
       // A new exception thrown when calling unexpected.
       bool allow_bad_exception = false;
@@ -254,7 +244,6 @@ void unexpected_helper(std::unexpected_handler u_handler) {
 
       terminate_helper(header->terminateHandler);
     }
-#endif
   }
 #else // ! __arm__
   extern "C" void __attribute__((visibility("default")))
@@ -284,11 +273,8 @@ void unexpected_helper(std::unexpected_handler u_handler) {
       u_handler = std::get_unexpected();
     }
 
-#if __EXCEPTIONS
     try {
-#endif
       unexpected_helper(u_handler);
-#if __EXCEPTIONS
     } catch (...) {
       // A new exception thrown when calling unexpected.
 
@@ -296,7 +282,7 @@ void unexpected_helper(std::unexpected_handler u_handler) {
         std::terminate();
       }
       uint8_t lpStartEncoding = *lsda++;
-      const uint8_t* lpStart = (const uint8_t*)readEncodedPointer(&lsda, lpStartEncoding);
+      readEncodedPointer(&lsda, lpStartEncoding);
       uint8_t ttypeEncoding = *lsda++;
       if (ttypeEncoding == DW_EH_PE_omit) {
         terminate_helper(t_handler);
@@ -338,11 +324,10 @@ void unexpected_helper(std::unexpected_handler u_handler) {
         throw std::bad_exception();
       }
     } // catch (...)
-#endif
 
     // Call terminate after unexpected normally done
     terminate_helper(t_handler);
   }
 #endif // __arm__
-#endif
+
 } // namespace __cxxabiv1

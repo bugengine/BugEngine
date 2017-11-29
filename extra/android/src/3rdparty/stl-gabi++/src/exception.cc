@@ -1,4 +1,4 @@
-// Copyright (C) 2011 The Android Open Source Project
+// Copyright (C) 2012 The Android Open Source Project
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -24,24 +24,45 @@
 // LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
 // OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 // SUCH DAMAGE.
-//
-// si_class_type_info.cc: Methods for __si_class_type_info.
+
+#include <exception>
+#include <typeinfo>
 
 #include "cxxabi_defines.h"
 
-namespace __cxxabiv1
-{
-  __si_class_type_info::~__si_class_type_info()
-  {
-  }
+namespace std {
 
-  bool __si_class_type_info::walk_to(const __class_type_info* base_type,
-                                     void*& adjustedPtr,
-                                     __UpcastInfo& info) const {
-    if (self_class_type_match(base_type, adjustedPtr, info)) {
-      return true;
-    }
+#if !defined(LIBCXXABI)
+exception::exception() _GABIXX_NOEXCEPT {
+}
+#endif // !defined(LIBCXXABI)
 
-    return __base_type->walk_to(base_type, adjustedPtr, info);
-  }
-} // namespace __cxxabiv1
+exception::~exception() _GABIXX_NOEXCEPT {
+}
+
+const char* exception::what() const _GABIXX_NOEXCEPT {
+  return "std::exception";
+}
+
+#if !defined(LIBCXXABI)
+bad_exception::bad_exception() _GABIXX_NOEXCEPT {
+}
+#endif // !defined(LIBCXXABI)
+
+bad_exception::~bad_exception() _GABIXX_NOEXCEPT {
+}
+
+const char* bad_exception::what() const _GABIXX_NOEXCEPT {
+  return "std::bad_exception";
+}
+
+#if !defined(LIBCXXABI)
+bool uncaught_exception() _GABIXX_NOEXCEPT {
+  using namespace __cxxabiv1;
+
+  __cxa_eh_globals* globals = __cxa_get_globals();
+  return globals->uncaughtExceptions != 0;
+}
+#endif // !defined(LIBCXXABI)
+
+}  // namespace std

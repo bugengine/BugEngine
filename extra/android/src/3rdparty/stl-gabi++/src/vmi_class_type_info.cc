@@ -28,11 +28,10 @@
 // vmi_class_type_info.cc: Methods for __vmi_class_type_info.
 
 #include <cassert>
-#include <cxxabi.h>
+#include "cxxabi_defines.h"
 
 namespace __cxxabiv1
 {
-#if __GXX_RTTI
   __vmi_class_type_info::~__vmi_class_type_info()
   {
   }
@@ -156,5 +155,4 @@ namespace __cxxabiv1
     // We need information in info unless we know nothing
     return info.status != __UpcastInfo::unknown;
   }
-#endif
 } // namespace __cxxabiv1

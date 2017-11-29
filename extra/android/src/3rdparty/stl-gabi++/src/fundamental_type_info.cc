@@ -27,11 +27,10 @@
 //
 // fundamental_type_info.cc: Methods for __fundamental_type_info.
 
-#include <cxxabi.h>
+#include "cxxabi_defines.h"
 
 namespace __cxxabiv1
 {
-#if __GXX_RTTI
   __fundamental_type_info::~__fundamental_type_info()
   {
   }
@@ -40,5 +39,4 @@ namespace __cxxabiv1
                                           void*& adjustedPtr) const {
     return *this == *thrown_type;
   }
-#endif
 } // namespace __cxxabiv1
