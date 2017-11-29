@@ -30,15 +30,11 @@
 namespace __cxxabiv1 {
 
   extern "C" void __cxa_bad_cast() {
-#if __EXCEPTIONS
     throw std::bad_cast();
-#endif
   }
 
   extern "C" void __cxa_bad_typeid() {
-#if __EXCEPTIONS
     throw std::bad_typeid();
-#endif
   }
 
 } // namespace __cxxabiv1

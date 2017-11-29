@@ -30,7 +30,7 @@
 #ifndef __GABIXX_NEW__
 #define __GABIXX_NEW__
 
-#if !defined(GABIXX_LIBCXX)
+#if !defined(LIBCXXABI)
 
 #include <cstddef>
 #include <exception>
@@ -48,8 +48,26 @@ public:
   virtual const char* what() const throw();
 };
 
+class bad_array_new_length : public bad_alloc {
+public:
+  bad_array_new_length() throw();
+  virtual ~bad_array_new_length() throw();
+  virtual const char* what() const throw();
+};
+
+#if __cplusplus > 201103L
+// C++14 stuff
+class bad_array_length : public bad_alloc {
+public:
+  bad_array_length() throw();
+  virtual ~bad_array_length() throw();
+  virtual const char* what() const throw();
+};
+#endif
+
 typedef void (*new_handler)();
 new_handler set_new_handler(new_handler) throw();
+new_handler get_new_handler() throw();
 
 }
 
@@ -68,6 +86,6 @@ inline void* operator new[](std::size_t, void* p) throw() { return p; }
 inline void  operator delete(void*, void*) throw() {}
 inline void  operator delete[](void*, void*) throw() {}
 
-#endif // !defined(GABIXX_LIBCXX)
+#endif // !defined(LIBCXXABI)
 
 #endif // __GABIXX_NEW__

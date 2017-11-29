@@ -27,11 +27,10 @@
 //
 // array_type_info.cc: Methods for __array_type_info.
 
-#include <cxxabi.h>
+#include "cxxabi_defines.h"
 
 namespace __cxxabiv1
 {
-#if __GXX_RTTI
   __array_type_info::~__array_type_info()
   {
   }
@@ -41,5 +40,4 @@ namespace __cxxabiv1
     // Thrown array will be decayed to pointer, we cannot convert it back
     return false;
   }
-#endif
 } // namespace __cxxabiv1

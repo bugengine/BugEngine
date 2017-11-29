@@ -27,19 +27,33 @@
 //
 // pbase_type_info.cc: Methods for __pbase_type_info.
 
-#include <cxxabi.h>
+#include "cxxabi_defines.h"
+#include "typeinfo"
+
+#if __cplusplus < 201103L
+extern "C" std::type_info _ZTIDn;
+#endif
 
 namespace __cxxabiv1
 {
-#if __GXX_RTTI
   __pbase_type_info::~__pbase_type_info()
   {
   }
 
   bool __pbase_type_info::can_catch(const __shim_type_info* thr_type,
                                     void*& adjustedPtr) const {
-    unsigned tracker = first_time_init;
-    return can_catch_typeinfo_wrapper(thr_type, adjustedPtr, tracker);
+    if (can_catch_typeinfo_wrapper(thr_type, adjustedPtr, first_time_init)) {
+      return true;
+    }
+
+#if __cplusplus >= 201103L
+    // In C++ 11, the type of nullptr is std::nullptr_t, but nullptr can be
+    // casted to every pointer types.  Thus, we can return true whenever
+    // the exception object is an instance of std::nullptr_t.
+    return (*thr_type == typeid(decltype(nullptr)));
+#else
+    return (*thr_type == _ZTIDn);
+#endif
   }
 
   bool __pbase_type_info::can_catch_typeinfo_wrapper(const __shim_type_info* thr_type,
@@ -102,5 +116,4 @@ namespace __cxxabiv1
       return __pointee->can_catch(thrown_type->__pointee, adjustedPtr);
     }
   }
-#endif
 } // namespace __cxxabiv1

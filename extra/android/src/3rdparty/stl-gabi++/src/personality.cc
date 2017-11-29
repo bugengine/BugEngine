@@ -40,17 +40,16 @@
 
 #include <cassert>
 #include <cstdlib>
-#include <cxxabi.h>
 #include <exception>
 #include <unwind.h>
 #include <typeinfo>
+#include "cxxabi_defines.h"
 #include "dwarf_helper.h"
 #include "helper_func_internal.h"
 
 
 namespace __cxxabiv1 {
 
-#if __GXX_RTTI
   /*
    * Personality Routine
    */
@@ -126,5 +125,4 @@ namespace __cxxabiv1 {
     return _URC_FATAL_PHASE1_ERROR;
   }
 
-#endif
 }  // namespace __cxxabiv1
