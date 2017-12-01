@@ -8,8 +8,8 @@ public class BugEngineLib {
     {
         System.loadLibrary("dl");
         System.loadLibrary("m");
-        System.loadLibrary("stdc++");
         System.loadLibrary("log");
+        System.loadLibrary("c++_shared");
         System.loadLibrary("bugengine");
      }
 

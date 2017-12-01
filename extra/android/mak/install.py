@@ -1,4 +1,4 @@
-from waflib import TaskGen, Utils, Context
+from waflib import TaskGen, Utils, Context, Errors
 from waflib.TaskGen import taskgen_method
 import os
 
@@ -17,9 +17,9 @@ def install_files(self, out_dir, file_list, chmod=Utils.O644):
         if not isinstance(file_list, list):
             file_list = [file_list]
         package_task = self.get_package_task()
-        root_path = os.path.join(self.bld.env.PREFIX, self.bld.__class__.optim)
+        root_path = os.path.join(self.env.PREFIX, self.bld.__class__.optim)
         if not out_dir.startswith(root_path):
-            raise Errors.WafError('Does not know how to deploy to %s'%dest)
+            return original_install_files(self, out_dir, file_list, chmod)
         out_dir = out_dir[len(root_path)+1:]
         for file in file_list:
             filename = file.path_from(self.bld.bldnode)
@@ -38,7 +38,7 @@ def install_files(self, out_dir, file_list, chmod=Utils.O644):
 def install_as(self, target_path, file, chmod=Utils.O644):
     if 'android' in self.env.VALID_PLATFORMS:
         package_task = self.get_package_task()
-        root_path = os.path.join(self.bld.env.PREFIX, self.bld.__class__.optim)
+        root_path = os.path.join(self.env.PREFIX, self.bld.__class__.optim)
         if not target_path.startswith(root_path):
             raise Errors.WafError('Does not know how to deploy to %s'%target_path)
         dest_node = self.bld.bldnode.find_or_declare(target_path[len(root_path)+1:])

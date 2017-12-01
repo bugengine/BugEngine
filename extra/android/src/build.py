@@ -2,7 +2,8 @@ import os
 from waflib.TaskGen import feature
 
 def build(bld):
-    bld.platforms.append(bld.external('3rdparty.stl-gabi++'))
+    #bld.platforms.append(bld.external('3rdparty.android.stl-gabi++'))
+    bld.platforms.append(bld.external('3rdparty.android.libc++'))
 
     root = bld.path.parent
     source_node = root.find_node('src/engine/launcher/src')
@@ -21,7 +22,7 @@ def build(bld):
                    destfile=root.find_or_declare('resources.apk'),
                    manifest=manifest)
     outdir = os.path.join(bld.env.PREFIX, bld.optim)
-    bld.install_files(outdir, bld.path.find_or_declare(launcher.destfile))
+    launcher.install_files(outdir, bld.path.find_or_declare(launcher.destfile))
 
 
 def plugin(bld):
