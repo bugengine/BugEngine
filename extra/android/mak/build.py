@@ -56,13 +56,20 @@ def build(bld):
 def apply_multiarch_android(self):
     pass
 
+@feature('cprogram', 'cxxprogram', 'cshlib', 'cxxshlib')
+@before_method('install_step')
+@after_method('set_postlink_task')
+def strip_debug_info(self):
+    if self.env.ENV_PREFIX:
+        self.strip_debug_info_impl()
 
 @feature('launcher')
 @after_method('install_step')
 def install_program_android(self):
     if 'android' in self.env.VALID_PLATFORMS:
         if self.env.ENV_PREFIX: #in multiarch, also install the lib
-            self.install_files(os.path.join(self.bld.env.PREFIX, self.bld.optim, self.bld.env.DEPLOY_BINDIR),
-                               [self.postlink_task.outputs[0]],
-                               chmod=Utils.O755)
+            self.install_as(os.path.join(self.env.PREFIX, self.bld.optim, self.env.DEPLOY_BINDIR,
+                                         self.env.cxxprogram_PATTERN%self.target_name),
+                            self.postlink_task.outputs[0],
+                            chmod=Utils.O755)
 

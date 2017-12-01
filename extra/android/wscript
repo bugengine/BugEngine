@@ -3,6 +3,7 @@
 import os
 import re
 import sys
+from copy import deepcopy
 from waflib import Configure, Context, Errors, Options
 
 
@@ -68,6 +69,48 @@ class AndroidPlatform(Configure.ConfigurationContext.Platform):
         }
         return archs.get(arch, arch)
 
+    def get_android_c_flags(self, compiler):
+        arch_flags = {
+            'gcc': {
+                'x86':      [],
+                'amd64':    [],
+                'armv7a':   ['-march=armv7-a', '-mfloat-abi=softfp', '-mfpu=vfpv3-d16'],
+                'arm64':    [],
+                'mipsel':   [],
+                'mips64el': [],
+            },
+            'clang': {
+                'x86':      [],
+                'amd64':    [],
+                'armv7a':   ['-fno-integrated-as', '-march=armv7-a', '-mfloat-abi=softfp', '-mfpu=vfpv3-d16'],
+                'arm64':    [],
+                'mipsel':   ['-fintegrated-as'],
+                'mips64el': ['-fintegrated-as'],
+            }
+        }
+        return arch_flags[compiler.NAMES[0].lower()][compiler.arch]
+
+    def get_android_ld_flags(self, compiler):
+        arch_flags = {
+            'gcc': {
+                'x86':      [],
+                'amd64':    [],
+                'armv7a':   ['Wl,--fix-cortex-a8',],
+                'arm64':    [],
+                'mipsel':   [],
+                'mips64el': [],
+            },
+            'clang': {
+                'x86':      [],
+                'amd64':    [],
+                'armv7a':   ['Wl,--fix-cortex-a8',],
+                'arm64':    [],
+                'mipsel':   [],
+                'mips64el': [],
+            }
+        }
+        return arch_flags[compiler.NAMES[0].lower()][compiler.arch]
+
     def load_in_env(self, conf, compiler):
         env = conf.env
         arch = compiler.arch
@@ -76,8 +119,8 @@ class AndroidPlatform(Configure.ConfigurationContext.Platform):
         env.VALID_PLATFORMS = ['android']
         appname = getattr(Context.g_module, Context.APPNAME, conf.srcnode.name)
         env.cxxprogram_PATTERN = 'lib%s.so'
-        env.append_unique('LINKFLAGS_cprogram', ['-shared'])
-        env.append_unique('LINKFLAGS_cxxprogram', ['-shared'])
+        env.append_unique('LINKFLAGS_cprogram', ['-shared', '-Wl,-z,defs', '-llog', '-lc'])
+        env.append_unique('LINKFLAGS_cxxprogram', ['-shared', '-Wl,-z,defs', '-llog', '-lc'])
         env.LINK_WITH_PROGRAM = True
         env.STRIP_BINARY = True
         env.CFLAGS_cxxshlib = []
@@ -85,13 +128,17 @@ class AndroidPlatform(Configure.ConfigurationContext.Platform):
         env.STATIC = True
 
         env.DEPLOY_ROOTDIR = appname
-        env.DEPLOY_BINDIR = os.path.join('lib', )
+        env.DEPLOY_BINDIR = os.path.join('lib', target_folder)
         env.DEPLOY_RUNBINDIR = os.path.join('lib', target_folder)
         env.DEPLOY_LIBDIR = os.path.join('lib', target_folder)
         env.DEPLOY_INCLUDEDIR = 'include'
         env.DEPLOY_DATADIR = os.path.join('assets')
         env.DEPLOY_PLUGINDIR = os.path.join('lib', target_folder)
         env.DEPLOY_KERNELDIR = os.path.join('lib', target_folder)
+
+        env.append_value('CFLAGS', self.get_android_c_flags(compiler))
+        env.append_value('CXXFLAGS', self.get_android_c_flags(compiler))
+        env.append_value('LDFLAGS', self.get_android_ld_flags(compiler))
 
         env.ANDROID_SDK = self.sdk_version
         env.ANDROID_SDK_PATH = self.sdk_path
@@ -101,22 +148,27 @@ class AndroidPlatform(Configure.ConfigurationContext.Platform):
                 ndk_root = n
                 break
         sysroot_options = []
-        if os.path.isdir(os.path.join(n, 'sysroot')):
-            sysroot_options += ['-isysroot', os.path.join(ndk_root, 'sysroot')]
-            sysroot_options += ['-isystem', os.path.join(ndk_root, 'sysroot', 'usr', 'include', compiler.target)]
-
         env.ANDROID_ARCH = self.get_android_arch(arch)
+        ndk_path = os.path.join(self.ndk_path, 'arch-%s'%env.ANDROID_ARCH)
+        conf.env.SYSROOT = ndk_path
+        compiler.sysroot = ndk_path
+        if os.path.isdir(os.path.join(n, 'sysroot')):
+            sysroot_ld_options = ['--sysroot', ndk_path]
+            sysroot_options = ['-D__ANDROID_API__=%s' % self.ndk_path.split('-')[-1],
+                               '-isystem', os.path.join(ndk_root, 'sysroot', 'usr', 'include'),
+                               '-isystem', os.path.join(ndk_root, 'sysroot', 'usr', 'include', compiler.target)]
+        else:
+            sysroot_ld_options = ['--sysroot', ndk_path]
+            sysroot_options = ['--sysroot', ndk_path]
         env.append_unique('JAVACFLAGS', ['-bootclasspath', os.path.join(self.sdk_path, 'android.jar')])
         env.append_unique('AAPTFLAGS', ['-I', os.path.join(self.sdk_path, 'android.jar')])
 
         if not os.path.isfile(os.path.join(self.ndk_path, '..', '..', 'prebuilt', 'android-%s'%env.ANDROID_ARCH, 'gdbserver', 'gdbserver')):
             raise Errors.WafError('could not find gdbserver for architecture %s' % env.ANDROID_ARCH)
-        ndk_path = os.path.join(self.ndk_path, 'arch-%s'%env.ANDROID_ARCH)
-        conf.env.SYSROOT = ndk_path
 
-        conf.env.append_value('CFLAGS', ['--sysroot', ndk_path] + sysroot_options)
-        conf.env.append_value('CXXFLAGS', ['--sysroot', ndk_path] + sysroot_options)
-        conf.env.append_unique('LINKFLAGS', ['--sysroot', ndk_path])
+        conf.env.append_value('CFLAGS', sysroot_options)
+        conf.env.append_value('CXXFLAGS', sysroot_options)
+        conf.env.append_value('LINKFLAGS', sysroot_ld_options)
 
 
 class AndroidLoader(Configure.ConfigurationContext.Platform):
@@ -141,6 +193,7 @@ class AndroidLoader(Configure.ConfigurationContext.Platform):
         conf.env.DEXCREATE = '--dex'
         conf.env.DEX_TGT_PATTERN = '--output=%s'
         conf.find_program('aapt', path_list=[sdk_build_tool_path])
+        conf.find_program('7z', var='_7Z', mandatory=False)
 
     def get_tools_paths(self, android_path):
         return [os.path.join(android_path, 'platform-tools'), os.path.join(android_path, 'tools')]
@@ -202,20 +255,26 @@ class AndroidLoader(Configure.ConfigurationContext.Platform):
         all_sdk_sdks = [p for p in os.listdir(platforms_sdk)]
         sdk_pairs = [(i, ndk_of_sdk(i, all_ndk_sdks)) for i in all_sdk_sdks]
         sdk_pairs = [(i, j) for i,j in sdk_pairs if j]
+        sdk_pairs = sorted(sdk_pairs, key=lambda x: alphanum_key(x[0]))
         if sdk_pairs:
-            sdk_pairs = sorted(sdk_pairs, key=lambda x: alphanum_key(x[0]))
-            sdk, ndk = sdk_pairs[0]
             prefered_sdk = Options.options.android_sdk
-            if prefered_sdk:
+            if prefered_sdk == 'all':
+                return [(os.path.join(platforms_ndk, ndk),
+                         os.path.join(platforms_sdk, sdk),
+                         valid_archs(platforms_ndk, ndk, archs),
+                         sdk.split('-')[1]) for sdk, ndk in sdk_pairs]
+            elif prefered_sdk:
                 if 'android-%s'%prefered_sdk in all_sdk_sdks:
                     sdk = 'android-%s'%prefered_sdk
                     ndk = dict(sdk_pairs)[sdk]
                 else:
                     warn('could not find android SDK version %s in path %s; using %s'%(favorite_sdk, path, sdk))
-            return (os.path.join(platforms_ndk, ndk),
-                    os.path.join(platforms_sdk, sdk),
-                    valid_archs(platforms_ndk, ndk, archs),
-                    sdk.split('-')[1])
+            else:
+                sdk, ndk = sdk_pairs[0]
+                return [(os.path.join(platforms_ndk, ndk),
+                        os.path.join(platforms_sdk, sdk),
+                        valid_archs(platforms_ndk, ndk, archs),
+                        sdk.split('-')[1])]
         else:
             raise Errors.WafError('no SDK for archs')
 
@@ -237,25 +296,63 @@ class AndroidLoader(Configure.ConfigurationContext.Platform):
                         subset[k] = [c]
                     break
 
+        def add_compiler_set(compilers):
+            print([c.sysroot for c in compilers])
+            archs = [c.arch for c in compilers]
+            try:
+                android_sdks =  self.find_android_sdk(k[2], Options.options.android_sdk_path, archs)
+            except Errors.WafError as e:
+                raise
+            else:
+                for ndk_root, sdk_root, archs, sdk_version in android_sdks:
+                    valid_compilers = [c for c in compilers if c.arch in archs]
+                    if len(valid_compilers) > 1:
+                        result.append((valid_compilers[0], valid_compilers, AndroidPlatform(self.conf, ndk_root, sdk_root, sdk_version)))
+                    else:
+                        result.append((valid_compilers[0], [], AndroidPlatform(self.conf, sdk_version)))
+
         # find all GCC targets
         seen = set([])
         all_gcc_compilers = sorted(compiler_sets['gcc'].items())
         for k, compilers in all_gcc_compilers:
             if (k[0], k[1]) in seen:
                 continue
-            archs = [c.arch for c in compilers]
             try:
-                ndk_root, sdk_root, archs, sdk_version = self.find_android_sdk(k[2], Options.options.android_sdk_path, archs)
+                add_compiler_set(compilers)
             except Errors.WafError as e:
                 print(e)
                 continue
             else:
                 seen.add((k[0], k[1]))
-                valid_compilers = [c for c in compilers if c.arch in archs]
-                if len(valid_compilers) > 1:
-                    result.append((valid_compilers[0], valid_compilers, AndroidPlatform(self.conf, ndk_root, sdk_root, sdk_version)))
+
+        for k, compilers in sorted(compiler_sets['clang'].items()):
+            if (k[0], k[1]) in seen:
+                continue
+            c = compilers[0]
+            clang_compilers = []
+            for gcc in all_gcc_compilers[-1][1]:
+                gcc_toolchain = os.path.dirname(os.path.dirname(gcc.compiler_c))
+                extra_args = deepcopy(c.extra_args)
+                extra_args['c'] += ['-target', gcc.target, '-gcc-toolchain', gcc_toolchain]
+                extra_args['cxx'] += ['-target', gcc.target, '-gcc-toolchain', gcc_toolchain]
+                extra_args['link'] += ['-target', gcc.target, '-gcc-toolchain', gcc_toolchain]
+                try:
+                    clang_compiler = c.__class__(c.compiler_c,
+                                                 c.compiler_cxx,
+                                                 extra_args)
+                except Exception:
+                    pass
                 else:
-                    result.append((valid_compilers[0], [], AndroidPlatform(self.conf, sdk_version)))
+                    clang_compiler.target = gcc.target
+                    clang_compilers.append(clang_compiler)
+            if clang_compilers:
+                try:
+                    add_compiler_set(clang_compilers)
+                except Errors.WafError as e:
+                    print(e)
+                    continue
+                else:
+                    seen.add((k[0], k[1]))
         return result
 
 
@@ -278,7 +375,7 @@ def options(opt):
                 ndk_paths.append(path)
     gr.add_option( '--android-sdk',
                     action='store',
-                    default='',
+                    default='all',
                     dest='android_sdk',
                     help='Version of the Android SDK to target')
     gr.add_option( '--android-sdk-path',
@@ -318,6 +415,17 @@ def configure(conf):
         conf.end_msg(str(e), color='YELLOW')
     else:
         conf.end_msg('done')
+
+
+def setup(conf):
+    conf.start_msg('      `- [android]')
+    category_node = conf.path.make_node('src/3rdparty/android')
+    for third_party in category_node.listdir():
+        conf.recurse('src/3rdparty/android/%s/%s.py'%(third_party, third_party),
+                     name='setup',
+                     once=False)
+    conf.end_msg('')
+
 
 def build(bld):
     bld.recurse('mak/build.py')

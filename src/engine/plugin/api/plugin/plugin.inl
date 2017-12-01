@@ -15,18 +15,12 @@
 namespace BugEngine { namespace Plugin
 {
 
-#ifdef BE_STATIC
-#define BE_PLUGIN_REGISTER_KERNELS_()                                                               \
-    extern BugEngine::Kernel::Kernel::KernelList&   getKernelList();
-#else
-#define BE_PLUGIN_REGISTER_KERNELS_()                                                               \
-    BugEngine::Kernel::Kernel::KernelList&   getKernelList()                                        \
+#define BE_PLUGIN_REGISTER_KERNELS_(id)                                                             \
+    BugEngine::Kernel::Kernel::KernelList&   getKernelList_##id()                                   \
     {                                                                                               \
         static BugEngine::Kernel::Kernel::KernelList s_result;                                      \
         return s_result;                                                                            \
     }
-
-#endif
 
 #define BE_PLUGIN_NAMESPACE_CREATE_(name)                                                           \
     namespace BugEngine                                                                             \
@@ -91,17 +85,22 @@ namespace BugEngine { namespace Plugin
     BE_PLUGIN_REGISTER_NAMED_(name, name, create)
 #define BE_PLUGIN_REGISTER_CREATE(create)                                                           \
     BE_PLUGIN_REGISTER_NAMED_(BE_PROJECTNAME, BE_PROJECTID, create)
-#define BE_PLUGIN_REGISTER(klass)                                                                   \
-    BE_PLUGIN_REGISTER_KERNELS_()                                                                   \
+#define BE_PLUGIN_REGISTER__(klass, project)                                                        \
+    BE_PLUGIN_REGISTER_KERNELS_(project)                                                            \
     static ref<klass> create(const BugEngine::Plugin::Context& context)                             \
     {                                                                                               \
-        for (BugEngine::Kernel::Kernel::KernelList::const_iterator it = getKernelList().begin();    \
-             it != getKernelList().end();                                                           \
+        const BugEngine::Kernel::Kernel::KernelList& kernelList = getKernelList_##project();        \
+        for (BugEngine::Kernel::Kernel::KernelList::const_iterator it = kernelList.begin();         \
+             it != kernelList.end();                                                                \
              ++it)                                                                                  \
             context.resourceManager->load(weak<const BugEngine::Kernel::Kernel>(it.operator->()));  \
         return ref<klass>::create(BugEngine::Arena::game(), context);                               \
     }                                                                                               \
     BE_PLUGIN_REGISTER_CREATE(&create)
+#define BE_PLUGIN_REGISTER_(klass, project)                                                         \
+    BE_PLUGIN_REGISTER__(klass, project)
+#define BE_PLUGIN_REGISTER(klass)                                                                   \
+    BE_PLUGIN_REGISTER_(klass, BE_PROJECTID)
 
 template< typename T >
 Plugin<T>::Plugin()

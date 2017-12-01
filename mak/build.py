@@ -26,7 +26,6 @@ def create_namespace_file(task):
         for k_name, k in task.generator.kernels:
             full_ns = ['Kernels']
             full_ns += [n.capitalize() for n in k_name[:-1]]
-            print(full_ns)
             for i in range(1, len(full_ns)+1):
                 ns = full_ns[0:i]
                 if ns not in namespaces:
@@ -58,7 +57,8 @@ def filter(exe, lines):
 
 
 def exec_command(self, *k, **kw):
-    kw['filter'] = filter
+    if 'filter' not in kw:
+        kw['filter'] = filter
     return old_exec_command(self, *k, **kw)
 
 
@@ -369,15 +369,12 @@ def external(bld, name):
 
 @conf
 def thirdparty(bld, name, feature='', path='.', var='', use=[]):
-    archs = bld.env.VALID_ARCHITECTURES
     platforms = bld.env.VALID_PLATFORMS
     platform_specific = platforms
-    arch_specific = archs + ['%s.%s'%(p,a) for p in platforms for a in archs]
     source_node = bld.path.make_node(path.replace('.', '/'))
     project_path = source_node.parent.path_from(bld.srcnode).replace('/', '.')
     project_path = '%s.%s' % (project_path, name.split('.')[-1])
     if not var: var = bld.path.name
-
 
     internal_deps = []
     supported = False
@@ -407,23 +404,29 @@ def thirdparty(bld, name, feature='', path='.', var='', use=[]):
                      source_nodes=[source_node],
                      use=[target_prefix+u for u in use])
             if target_prefix:
-                internal_deps.append(tg.name)
+                internal_deps.append(tg)
+            archs = env.VALID_ARCHITECTURES
+            arch_specific = archs + ['%s.%s'%(p,a) for p in platforms for a in archs]
+            bin_paths = [i for i in [source_node.make_node('bin.%s'%arch) for arch in arch_specific] if os.path.isdir(i.abspath())]
+            data_paths = [i for i in [source_node.make_node('data.%s'%arch) for arch in arch_specific] if os.path.isdir(i.abspath())]
+            for bin_path in bin_paths:
+                tg.deploy_directory(env, bin_path, '', 'DEPLOY_RUNBINDIR')
+            for data_path in data_paths:
+                tg.deploy_directory(env, data_path, '', 'DEPLOY_DATADIR')
+            if name not in bld.env.THIRDPARTIES_FIRST:
+                bin_paths = [i for i in [source_node.make_node('bin')] + [source_node.make_node('bin.%s'%platform) for platform in platform_specific] if os.path.isdir(i.abspath())]
+                for bin_path in bin_paths:
+                    tg.deploy_directory(env, bin_path, '', 'DEPLOY_RUNBINDIR')
+                bld.env.append_unique('THIRDPARTIES_FIRST', name)
+
     if supported:
         if internal_deps:
-            install_tg = bld(target=name, features=['multiarch'], use=internal_deps)
-        else:
-            install_tg = tg
+            tg = bld(target=name, features=['multiarch'], use=[d.name for d in internal_deps])
 
-        bin_paths = [i for i in [source_node.make_node('bin.%s'%arch) for arch in arch_specific] if os.path.isdir(i.abspath())]
-        data_paths = [i for i in [source_node.make_node('data.%s'%arch) for arch in arch_specific] if os.path.isdir(i.abspath())]
-        for bin_path in bin_paths:
-            install_tg.deploy_directory(bld.env, bin_path, '', 'DEPLOY_RUNBINDIR')
-        for data_path in data_paths:
-            install_tg.deploy_directory(bld.env, data_path, '', 'DEPLOY_DATADIR')
         if name not in bld.env.THIRDPARTIES_FIRST:
             bin_paths = [i for i in [source_node.make_node('bin')] + [source_node.make_node('bin.%s'%platform) for platform in platform_specific] if os.path.isdir(i.abspath())]
             for bin_path in bin_paths:
-                install_tg.deploy_directory(bld.env, bin_path, '', 'DEPLOY_RUNBINDIR')
+                tg.deploy_directory(bld.env, bin_path, '', 'DEPLOY_RUNBINDIR')
             bld.env.append_unique('THIRDPARTIES_FIRST', name)
     return supported
 
@@ -438,7 +441,7 @@ def library(bld, name, depends=[], features=[], platforms=[],
         for p in platforms:
             if p not in bld.env.VALID_PLATFORMS:
                 return None
-    module(bld, name, path, depends, platforms,
+    return module(bld, name, path, depends, platforms,
         bld.env.DYNAMIC and ['cxx', 'cxxshlib', 'shared_lib'] or ['cxx', 'cxxobjects'],
         features,
         extra_includes, extra_defines,
@@ -455,7 +458,7 @@ def headers(bld, name, depends=[], features=[], platforms=[],
         for p in platforms:
             if p not in bld.env.VALID_PLATFORMS:
                 return None
-    module(bld, name, path, depends, platforms,
+    return module(bld, name, path, depends, platforms,
         ['cxx'],
         features,
         [], [],
@@ -473,7 +476,7 @@ def static_library(bld, name, depends=[], features=[], platforms=[],
         for p in platforms:
             if p not in bld.env.VALID_PLATFORMS:
                 return None
-    module(bld, name, path, depends, platforms,
+    return module(bld, name, path, depends, platforms,
         ['cxx', 'cxxstlib'],
         features,
         extra_includes, extra_defines,
@@ -491,7 +494,7 @@ def shared_library(bld, name, depends=[], features=[], platforms=[],
         for p in platforms:
             if p not in bld.env.VALID_PLATFORMS:
                 return None
-    module(bld, name, path, depends, platforms,
+    return module(bld, name, path, depends, platforms,
         bld.env.STATIC and ['cxx', 'cxxobjects'] or ['cxx', 'cxxshlib', 'shared_lib'],
         features,
         extra_includes, extra_defines,
@@ -531,7 +534,7 @@ def game(bld, name, depends=[], features=[], platforms=[],
         for p in platforms:
             if p not in bld.env.VALID_PLATFORMS:
                 return None
-    module(bld, name, path, depends, platforms,
+    return module(bld, name, path, depends, platforms,
         ['cxx', bld.env.STATIC and 'cxxobjects' or 'cxxshlib', 'plugin', 'game'],
         features, extra_includes, extra_defines, extra_public_includes, extra_public_defines,
         use_master, warnings, False)
@@ -546,7 +549,7 @@ def plugin(bld, name, depends=[], features=[], platforms=[],
     for p in platforms:
         if p not in bld.env.VALID_PLATFORMS:
             return None
-    module(bld, name, path, depends, platforms,
+    return module(bld, name, path, depends, platforms,
         ['cxx', bld.env.STATIC and 'cxxobjects' or 'cxxshlib', 'plugin'],
         features, extra_includes, extra_defines, extra_public_includes, extra_public_defines,
         use_master, warnings, False)
@@ -964,43 +967,46 @@ dbg_link_cls = Task.task_factory('dbg_link',
                         color='BLUE')
 dbg_link_cls.exec_command = exec_command_objcopy
 
+@taskgen_method
+def strip_debug_info_impl(self):
+    if self.env.STRIP_BINARY and self.env.STRIP and self.env.OBJCOPY:
+        try:
+            optim = self.bld.optim
+        except AttributeError:
+            return
+        else:
+            self.full_link_task = self.link_task
+            full_link = self.full_link_task.outputs[0]
+            out_dir = full_link.parent.make_node('post-link')
+            out_dir.mkdir()
+            debug_prog = out_dir.make_node(full_link.name + '.debug')
+            stripped_prog = out_dir.make_node(full_link.name + '.stripped')
+            stripped_linked_prog = out_dir.make_node(full_link.name)
+
+            if 'plugin' in self.features:
+                out_path = self.env.DEPLOY_PLUGINDIR
+            elif 'kernel' in self.features:
+                out_path = self.env.DEPLOY_KERNELDIR
+            elif 'cshlib' in self.features or 'cxxshlib' in self.features:
+                out_path = self.env.DEPLOY_RUNBINDIR
+            elif 'cprogram' in self.features or 'cxxprogram' in self.features:
+                out_path = self.env.DEPLOY_BINDIR
+            else:
+                return
+
+
+            self.dbg_copy_task = self.create_task('dbg_copy', [full_link], [debug_prog])
+            self.strip_task = self.create_task('dbg_strip', [full_link], [stripped_prog])
+            self.dbg_link_task = self.create_task('dbg_link', [debug_prog, stripped_prog], [stripped_linked_prog])
+            self.dbg_link_task.cwd = out_dir.abspath()
+            self.postlink_task = self.dbg_link_task
+            self.install_files(os.path.join(self.bld.env.PREFIX, self.bld.optim, out_path),
+                               [debug_prog])
+
 
 @feature('cprogram', 'cxxprogram', 'cshlib', 'cxxshlib')
 @before_method('install_step')
 @after_method('set_postlink_task')
 def strip_debug_info(self):
     if not self.env.ENV_PREFIX:
-        if self.env.STRIP_BINARY and self.env.STRIP and self.env.OBJCOPY:
-            try:
-                optim = self.bld.optim
-            except AttributeError:
-                return
-            else:
-                self.full_link_task = self.link_task
-                full_link = self.full_link_task.outputs[0]
-                out_dir = full_link.parent.make_node('post-link')
-                out_dir.mkdir()
-                debug_prog = out_dir.make_node(full_link.name + '.debug')
-                stripped_prog = out_dir.make_node(full_link.name + '.stripped')
-                stripped_linked_prog = out_dir.make_node(full_link.name)
-
-                if 'plugin' in self.features:
-                    out_path = self.env.DEPLOY_PLUGINDIR
-                elif 'kernel' in self.features:
-                    out_path = self.env.DEPLOY_KERNELDIR
-                elif 'cshlib' in self.features or 'cxxshlib' in self.features:
-                    out_path = self.env.DEPLOY_RUNBINDIR
-                elif 'cprogram' in self.features or 'cxxprogram' in self.features:
-                    out_path = self.env.DEPLOY_BINDIR
-                else:
-                    return
-
-
-                self.dbg_copy_task = self.create_task('dbg_copy', [full_link], [debug_prog])
-                self.strip_task = self.create_task('dbg_strip', [full_link], [stripped_prog])
-                self.dbg_link_task = self.create_task('dbg_link', [debug_prog, stripped_prog], [stripped_linked_prog])
-                self.dbg_link_task.cwd = out_dir.abspath()
-                self.postlink_task = self.dbg_link_task
-                self.install_files(os.path.join(self.bld.env.PREFIX, self.bld.optim, out_path),
-                                   [debug_prog])
-
+        self.strip_debug_info_impl()
