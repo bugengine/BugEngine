@@ -1,4 +1,4 @@
-from ..cpp import tree
+from .. import tree
 
 
 def p_unit_start(p):
