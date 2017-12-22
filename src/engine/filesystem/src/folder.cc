@@ -29,6 +29,29 @@ Folder::~Folder()
 weak<File> Folder::openFile(istring name)
 {
     ScopedCriticalSection lock(m_lock);
+    return openFileNoLock(name);
+}
+
+weak<File> Folder::openFile(ifilename name)
+{
+    ScopedCriticalSection lock(m_lock);
+    return openFileNoLock(name);
+}
+
+weak<Folder> Folder::openFolder(istring name)
+{
+    ScopedCriticalSection lock(m_lock);
+    return openFolderNoLock(name);
+}
+
+weak<Folder> Folder::openFolder(ipath name)
+{
+    ScopedCriticalSection lock(m_lock);
+    return openFolderNoLock(name);
+}
+
+weak<File> Folder::openFileNoLock(istring name)
+{
     for (minitl::vector< minitl::tuple< istring, ref<File> > >::const_iterator it = m_files.begin(); it != m_files.end(); ++it)
     {
         if (it->first == name)
@@ -37,15 +60,15 @@ weak<File> Folder::openFile(istring name)
     return weak<File>();
 }
 
-weak<File> Folder::openFile(ifilename name)
+weak<File> Folder::openFileNoLock(ifilename name)
 {
     istring s = name.pop_front();
     if (name.size() > 0)
     {
-        weak<Folder> f = openFolder(s);
+        weak<Folder> f = openFolderNoLock(s);
         if (f)
         {
-            return f->openFile(name);
+            return f->openFileNoLock(name);
         }
         else
         {
@@ -54,13 +77,12 @@ weak<File> Folder::openFile(ifilename name)
     }
     else
     {
-        return openFile(s);
+        return openFileNoLock(s);
     }
 }
 
-weak<Folder> Folder::openFolder(istring name)
+weak<Folder> Folder::openFolderNoLock(istring name)
 {
-    ScopedCriticalSection lock(m_lock);
     for (minitl::vector< minitl::tuple< istring, ref<Folder> > >::const_iterator it = m_mounts.begin(); it != m_mounts.end(); ++it)
     {
         if (it->first == name)
@@ -74,15 +96,15 @@ weak<Folder> Folder::openFolder(istring name)
     return weak<Folder>();
 }
 
-weak<Folder> Folder::openFolder(ipath name)
+weak<Folder> Folder::openFolderNoLock(ipath name)
 {
     istring s = name.pop_front();
     if (name.size() > 0)
     {
-        weak<Folder> f = openFolder(s);
+        weak<Folder> f = openFolderNoLock(s);
         if (f)
         {
-            return f->openFolder(name);
+            return f->openFolderNoLock(name);
         }
         else
         {
@@ -91,7 +113,7 @@ weak<Folder> Folder::openFolder(ipath name)
     }
     else
     {
-        return openFolder(s);
+        return openFolderNoLock(s);
     }
 }
 

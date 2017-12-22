@@ -28,7 +28,7 @@ Environment::~Environment()
 
 void Environment::init(int argc, const char *argv[])
 {
-    m_game = istring("sample.lua");
+    m_game = istring("sample.particlerain");
     const char* filename = argv[0];
     while (*filename != 0)
     {

@@ -11,7 +11,7 @@ namespace BugEngine { namespace RTTI
 {
 
 template< typename T >
-ConversionCost calculateConversion(const RTTI::Type& targetType)
+ConversionCost calculateConversion(const Type& targetType)
 {
     return be_typeid<T>::type().calculateConversion(targetType);
 }

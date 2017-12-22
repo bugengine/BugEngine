@@ -1,4 +1,4 @@
-from mak.libs.cpp.tree import Namespace, AnonymousNamespace
+from ..tree import Namespace, AnonymousNamespace
 
 
 def p_namespace_header(p):

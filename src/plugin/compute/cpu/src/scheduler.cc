@@ -19,7 +19,7 @@ Scheduler::Scheduler(const Plugin::Context& context)
     :   IScheduler("CPU", context.scheduler)
     ,   m_resourceManager(context.resourceManager)
     ,   m_cpuLoader(scoped<CodeLoader>::create(Arena::task(), inamespace()))
-    ,   m_cpuLoaderNeon(scoped<CodeLoader>::create(Arena::task(), inamespace("neon")))
+    ,   m_cpuLoaderNeon(scoped<CodeLoader>::create(Arena::task(), inamespace("avx")))
     ,   m_memoryHost(scoped<MemoryHost>::create(Arena::task()))
 {
     m_resourceManager->attach<Kernel>(weak<Resource::ILoader>(m_cpuLoader));

@@ -86,7 +86,7 @@ class Clang(Configure.ConfigurationContext.GnuCompiler):
             result = Configure.ConfigurationContext.GnuCompiler.get_multilib_compilers(self)
         return result
 
-    def load_in_env(self, conf, platform, sysroot=None):
+    def load_in_env(self, conf, platform):
         Configure.ConfigurationContext.GnuCompiler.load_in_env(self, conf, platform)
         env = conf.env
         # Typedef of __float128 on older clangs

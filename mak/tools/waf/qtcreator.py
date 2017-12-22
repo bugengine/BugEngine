@@ -214,6 +214,7 @@ class QtToolchain(QtObject):
         ('ProjectExplorer.ToolChain.Autodetect', False),
         ('ProjectExplorer.ToolChain.DisplayName', True),
         ('ProjectExplorer.ToolChain.Id', False),
+        ('Qt4ProjectManager.Android.NDK_TC_VERION', False),
     ]
 
     def get_architecture(self, env):
@@ -289,13 +290,21 @@ class QtToolchain(QtObject):
                 self.ProjectExplorer_GccToolChain_TargetAbi = abi
                 self.ProjectExplorer_GccToolChain_PlatformCodeGenFlags = tuple(flags)
                 self.ProjectExplorer_GccToolChain_PlatformLinkerFlags = tuple()
-                toolchain_id =  'ProjectExplorer.ToolChain.Gcc:%s' % generateGUID('BugEngine:toolchain:%s:%d'%(env_name, language))
+                if platform == 'android':
+                    toolchain_id =  'Qt4ProjectManager.ToolChain.Android:%s' % generateGUID('BugEngine:toolchain:%s:%d'%(env_name, language))
+                    self.Qt4ProjectManager_Android_NDK_TC_VERION = env_name.split('-')[-1]
+                else:
+                    toolchain_id =  'ProjectExplorer.ToolChain.Gcc:%s' % generateGUID('BugEngine:toolchain:%s:%d'%(env_name, language))
             elif env.COMPILER_NAME in ('clang', 'llvm'):
                 self.ProjectExplorer_GccToolChain_Path = compiler
                 self.ProjectExplorer_GccToolChain_TargetAbi = abi
                 self.ProjectExplorer_GccToolChain_PlatformCodeGenFlags = tuple(flags)
                 self.ProjectExplorer_GccToolChain_PlatformLinkerFlags = tuple()
-                toolchain_id =  'ProjectExplorer.ToolChain.Clang:%s' % generateGUID('BugEngine:toolchain:%s:%d'%(env_name, language))
+                if platform == 'android':
+                    toolchain_id =  'Qt4ProjectManager.ToolChain.Android:%s' % generateGUID('BugEngine:toolchain:%s:%d'%(env_name, language))
+                    self.Qt4ProjectManager_Android_NDK_TC_VERION = env_name.split('-')[-1]
+                else:
+                    toolchain_id =  'ProjectExplorer.ToolChain.Clang:%s' % generateGUID('BugEngine:toolchain:%s:%d'%(env_name, language))
             elif env.COMPILER_NAME == 'icc':
                 self.ProjectExplorer_GccToolChain_Path = compiler
                 self.ProjectExplorer_GccToolChain_TargetAbi = abi
@@ -383,8 +392,12 @@ class QtPlatform(QtObject):
             assert(env)
             sysroot = env.SYSROOT or ''
             self.PE_Profile_AutoDetected = False
-            device = 'Desktop Device'
-            device_type = 'Desktop'
+            if 'android' in env.VALID_PLATFORMS:
+                device = 'Android Device'
+                device_type = 'Android.Device.Type'
+            else:
+                device = 'Desktop Device'
+                device_type = 'Desktop'
             self.PE_Profile_Data = [
                     ('Debugger.Information', debugger),
                     ('PE.Profile.Device', device),
@@ -910,7 +923,7 @@ class QtCreator(Build.BuildContext):
                                     ('ProjectExplorer.BuildConfiguration.ClearSystemEnvironment', False),
                                     ('ProjectExplorer.BuildConfiguration.UserEnvironmentChanges', tuple(
                                         '%s=%s'%(var_name, env[var_name.upper()])
-                                        for var_name in ('Toolchain', 'Prefix', 'Deploy_RootDir',
+                                        for var_name in ('Toolchain', 'Variant', 'Prefix', 'Deploy_RootDir',
                                                          'Deploy_BinDir', 'Deploy_RunBinDir',
                                                          'Deploy_LibDir', 'Deploy_IncludeDir',
                                                          'Deploy_DataDir')
@@ -924,6 +937,8 @@ class QtCreator(Build.BuildContext):
                                                                         bld_env.PREFIX, variant,
                                                                         env.DEPLOY_RUNBINDIR),
                                          'TERM=msys',
+                                         'Python="%s"' % sys.executable,
+                                         'SrcDir="%s"'% self.bld.srcnode.abspath(),
                                         )),
                                     ('ProjectExplorer.ProjectConfiguration.DefaultDisplayName', 'Default'),
                                     ('ProjectExplorer.ProjectConfiguration.DisplayName', variant),
@@ -934,6 +949,12 @@ class QtCreator(Build.BuildContext):
                         index = 0
                         for task_gen in task_gens:
                             if 'game' in task_gen.features:
+                                if 'android' in env.VALID_PLATFORMS:
+                                    executable = env.ADB
+                                    arguments = 'shell am start com.bugengine/.BugEngineActivity --es %s' % task_gen.target
+                                else:
+                                    arguments = task_gen.target
+                                    executable = to_var('OUT_NAME')
                                 run_configurations.append((
                                     'ProjectExplorer.Target.RunConfiguration.%d'%index, [
                                     ('Analyzer.Valgrind.AddedSuppressionFiles', ()),
@@ -956,8 +977,8 @@ class QtCreator(Build.BuildContext):
                                     ('Analyzer.Valgrind.VisibleErrorKinds', (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14)),
                                     ('PE.EnvironmentAspect.Base', 2),
                                     ('PE.EnvironmentAspect.Changes', ()),
-                                    ('ProjectExplorer.CustomExecutableRunConfiguration.Arguments', task_gen.target),
-                                    ('ProjectExplorer.CustomExecutableRunConfiguration.Executable', to_var('OUT_NAME')),
+                                    ('ProjectExplorer.CustomExecutableRunConfiguration.Arguments', arguments),
+                                    ('ProjectExplorer.CustomExecutableRunConfiguration.Executable', executable),
                                     ('ProjectExplorer.CustomExecutableRunConfiguration.UseTerminal', False),
                                     ('ProjectExplorer.CustomExecutableRunConfiguration.WorkingDirectory', to_var('OUT_DIR')),
                                     ('ProjectExplorer.ProjectConfiguration.DefaultDisplayName', 'Run %s' % task_gen.target),
@@ -1158,6 +1179,21 @@ class Qbs(QtCreator):
                 includes, defines = self.gather_includes_defines(p)
                 project_file.write('%sProduct {\n' % indent)
                 project_file.write('%s    Depends { name: "cpp" }\n' % (indent))
+                for env_name in self.env.ALL_TOOLCHAINS:
+                    env = self.all_envs[env_name]
+                    if env.SUB_TOOLCHAINS:
+                        env = self.all_envs[env.SUB_TOOLCHAINS[0]]
+                    if 'android' in env.VALID_PLATFORMS:
+                        ndk_root = os.path.dirname(os.path.dirname(env.ANDROID_NDK_PATH))
+                        host_name = os.path.split(os.path.dirname(os.path.dirname(env.CC)))[1]
+                        version = env_name.split('-')[-1]
+                        project_file.write('%s    Depends { name: "Android.ndk" }\n' % indent)
+                        project_file.write('%s    Android.ndk.hostArch: "%s"\n' % (indent, host_name))
+                        project_file.write('%s    Android.ndk.toolchainVersion: "%s"\n' % (indent, version))
+                        project_file.write('%s    Android.ndk.ndkDir: "%s"\n' % (indent, ndk_root))
+                        project_file.write('%s    Android.ndk.toolchainVersionNumber: "4.9.x"\n' % indent)
+                        break
+
                 project_file.write('%s    name: "%s"\n' % (indent, p.name))
                 project_file.write('%s    targetName: "%s"\n' % (indent, p.name.split('.')[-1]))
                 project_file.write('%s    cpp.includePaths: [\n' % (indent))

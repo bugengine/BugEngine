@@ -230,7 +230,8 @@ def run_commands():
 	while Options.commands:
 		cmd_name = Options.commands.pop(0)
 		ctx = run_command(cmd_name)
-		Logs.info('%r finished successfully (%s)' % (cmd_name, str(ctx.log_timer)))
+		if getattr(ctx, 'show_status', True):
+			Logs.info('%r finished successfully (%s)' % (cmd_name, str(ctx.log_timer)))
 	run_command('shutdown')
 
 ###########################################################################################

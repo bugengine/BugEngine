@@ -29,78 +29,78 @@ typedef _Kernel::array<u8, 4>       color32;
 typedef _Kernel::array<float, 4>    color128;
 
 
-typedef _Kernel::array<u8, 2> byte2;
-typedef _Kernel::array<u8, 3> byte3;
-typedef _Kernel::array<u8, 4> byte4;
-typedef _Kernel::array<u8, 8> byte8;
-typedef _Kernel::array<u8, 16> byte16;
+typedef _Kernel::array<u8, 2> ubyte2;
+typedef _Kernel::array<u8, 3> ubyte3;
+typedef _Kernel::array<u8, 4> ubyte4;
+typedef _Kernel::array<u8, 8> ubyte8;
+typedef _Kernel::array<u8, 16> ubyte16;
 
-static inline byte2 make_byte2(u8 x1, u8 x2)
+static inline ubyte2 make_ubyte2(u8 x1, u8 x2)
+{
+    ubyte2 result = {{x1, x2}};
+    return result;
+}
+static inline ubyte3 make_ubyte3(u8 x1, u8 x2, u8 x3)
+{
+    ubyte3 result = {{x1, x2, x3}};
+    return result;
+}
+static inline ubyte4 make_ubyte4(u8 x1, u8 x2, u8 x3, u8 x4)
+{
+    ubyte4 result = {{x1, x2, x3, x4}};
+    return result;
+}
+static inline ubyte8 make_ubyte8(u8 x1, u8 x2, u8 x3, u8 x4,
+                                 u8 x5, u8 x6, u8 x7, u8 x8)
+{
+    ubyte8 result = {{x1, x2, x3, x4, x5, x6, x7, x8}};
+    return result;
+}
+static inline ubyte16 make_ubyte16(u8 x1, u8 x2, u8 x3, u8 x4,
+                                   u8 x5, u8 x6, u8 x7, u8 x8,
+                                   u8 x9, u8 x10, u8 x11, u8 x12,
+                                   u8 x13, u8 x14, u8 x15, u8 x16)
+{
+    ubyte16 result = {{x1, x2, x3, x4, x5, x6, x7, x8,
+                       x9, x10, x11, x12, x13, x14, x15, x16}};
+    return result;
+}
+
+
+typedef _Kernel::array<i8, 2> byte2;
+typedef _Kernel::array<i8, 3> byte3;
+typedef _Kernel::array<i8, 4> byte4;
+typedef _Kernel::array<i8, 8> byte8;
+typedef _Kernel::array<i8, 16> byte16;
+
+static inline byte2 make_byte2(i8 x1, i8 x2)
 {
     byte2 result = {{x1, x2}};
     return result;
 }
-static inline byte3 make_byte3(u8 x1, u8 x2, u8 x3)
+static inline byte3 make_byte3(i8 x1, i8 x2, i8 x3)
 {
     byte3 result = {{x1, x2, x3}};
     return result;
 }
-static inline byte4 make_byte4(u8 x1, u8 x2, u8 x3, u8 x4)
+static inline byte4 make_byte4(i8 x1, i8 x2, i8 x3, i8 x4)
 {
     byte4 result = {{x1, x2, x3, x4}};
     return result;
 }
-static inline byte8 make_byte8(u8 x1, u8 x2, u8 x3, u8 x4,
-                               u8 x5, u8 x6, u8 x7, u8 x8)
+static inline byte8 make_byte8(i8 x1, i8 x2, i8 x3, i8 x4,
+                               i8 x5, i8 x6, i8 x7, i8 x8)
 {
     byte8 result = {{x1, x2, x3, x4, x5, x6, x7, x8}};
     return result;
 }
-static inline byte16 make_byte16(u8 x1, u8 x2, u8 x3, u8 x4,
-                                 u8 x5, u8 x6, u8 x7, u8 x8,
-                                 u8 x9, u8 x10, u8 x11, u8 x12,
-                                 u8 x13, u8 x14, u8 x15, u8 x16)
+static inline byte16 make_byte16(i8 x1, i8 x2, i8 x3, i8 x4,
+                                 i8 x5, i8 x6, i8 x7, i8 x8,
+                                 i8 x9, i8 x10, i8 x11, i8 x12,
+                                 i8 x13, i8 x14, i8 x15, i8 x16)
 {
     byte16 result = {{x1, x2, x3, x4, x5, x6, x7, x8,
                       x9, x10, x11, x12, x13, x14, x15, x16}};
-    return result;
-}
-
-
-typedef _Kernel::array<i8, 2> sbyte2;
-typedef _Kernel::array<i8, 3> sbyte3;
-typedef _Kernel::array<i8, 4> sbyte4;
-typedef _Kernel::array<i8, 8> sbyte8;
-typedef _Kernel::array<i8, 16> sbyte16;
-
-static inline sbyte2 make_sbyte2(i8 x1, i8 x2)
-{
-    sbyte2 result = {{x1, x2}};
-    return result;
-}
-static inline sbyte3 make_sbyte3(i8 x1, i8 x2, i8 x3)
-{
-    sbyte3 result = {{x1, x2, x3}};
-    return result;
-}
-static inline sbyte4 make_sbyte4(i8 x1, i8 x2, i8 x3, i8 x4)
-{
-    sbyte4 result = {{x1, x2, x3, x4}};
-    return result;
-}
-static inline sbyte8 make_sbyte8(i8 x1, i8 x2, i8 x3, i8 x4,
-                                 i8 x5, i8 x6, i8 x7, i8 x8)
-{
-    sbyte8 result = {{x1, x2, x3, x4, x5, x6, x7, x8}};
-    return result;
-}
-static inline sbyte16 make_sbyte16(i8 x1, i8 x2, i8 x3, i8 x4,
-                                   i8 x5, i8 x6, i8 x7, i8 x8,
-                                   i8 x9, i8 x10, i8 x11, i8 x12,
-                                   i8 x13, i8 x14, i8 x15, i8 x16)
-{
-    sbyte16 result = {{x1, x2, x3, x4, x5, x6, x7, x8,
-                       x9, x10, x11, x12, x13, x14, x15, x16}};
     return result;
 }
 

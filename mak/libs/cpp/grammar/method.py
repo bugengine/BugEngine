@@ -1,4 +1,4 @@
-from mak.libs.cpp.tree import Method, Operator, Constructor, Destructor, Parameter
+from ..tree import Method, Operator, Constructor, Destructor, Parameter
 
 
 def p_method_operator(p):

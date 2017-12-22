@@ -25,8 +25,8 @@ class GCC(Configure.ConfigurationContext.GnuCompiler):
             v = conf.env
             v.CXXFLAGS_warnall.append('-Wno-unused-local-typedefs')
 
-    def load_in_env(self, conf, platform, sysroot=None):
-        Configure.ConfigurationContext.GnuCompiler.load_in_env(self, conf, platform, sysroot)
+    def load_in_env(self, conf, platform):
+        Configure.ConfigurationContext.GnuCompiler.load_in_env(self, conf, platform)
         if self.version_number >= (4,):
             if platform.NAME != 'windows':
                 v = conf.env

@@ -22,7 +22,7 @@ private:
     u32                     m_currentOffset;
     u32                     m_totalOffset;
 public:
-    segments(u32 count, u32 segmentCount, segment<T>* segments)
+    segments(u32 count, u32 segmentCount, segments_part<T>* segments)
         :   m_count(count)
         ,   m_segmentCount(segmentCount)
         ,   m_segments(segments)
