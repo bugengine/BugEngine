@@ -13,6 +13,7 @@ namespace BugEngine { namespace Kernel { namespace CPU
 {
 
 class KernelObject;
+class Scheduler;
 
 struct CPUKernelTask
 {

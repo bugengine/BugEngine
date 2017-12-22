@@ -30,7 +30,7 @@ public:
     {
     }
 private:
-    virtual void onCompleted(weak<Scheduler> scheduler, weak<Task::ITask> task) override
+    virtual void onCompleted(weak<BugEngine::Scheduler> scheduler, weak<Task::ITask> task) override
     {
         be_checked_cast<Task::Task<CPUKernelTask> >(task)->body.sourceTask->completed(scheduler);
     }
