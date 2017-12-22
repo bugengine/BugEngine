@@ -50,7 +50,7 @@ def kernel_build_cpu_source(self):
             t.dep_nodes += self.bld.bugenginenode.find_node('mak/libs/cpp').ant_glob('**/*.py')
         else:
             raise Errors.WafError('Unknown file extension: %s' % source.path_from(self.bld.srcnode))
-        env = self.env
+        env = self.bld_env
         for variant in [''] + env.KERNEL_OPTIM_VARIANTS:
             target_prefix = (env.ENV_PREFIX + '/') if env.ENV_PREFIX else ''
             target_suffix = ['cpu'] + ([variant[1:]] if variant else [])

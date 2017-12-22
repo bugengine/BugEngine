@@ -305,6 +305,7 @@ def module(bld, name, module_path, depends,
                 features.remove('cxxstlib')
         task_gen = bld(
             env = env.derive(),
+            bld_env = env,
             target = target_prefix + name,
             target_name = name,
             module_path = project_path,
