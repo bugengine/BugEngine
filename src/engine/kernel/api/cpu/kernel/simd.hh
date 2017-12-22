@@ -25,7 +25,7 @@ struct array
 
 }
 
-namespace kernel
+namespace BugEngine
 {
 
 typedef _Kernel::array<u8, 4>       color32;

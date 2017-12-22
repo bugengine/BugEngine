@@ -10,6 +10,8 @@
 
 
 #if 0
+namespace BugEngine
+{
 
 be_tag(Index(BugEngine::RTTI::ClassType_Vector2
           + (BugEngine::RTTI::ClassIndex_i64 << 16)))
@@ -52,6 +54,7 @@ be_pod bigint16
     i64& operator[](u32);
 };
 
+}
 #endif
 
 /**************************************************************************************************/

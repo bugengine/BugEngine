@@ -157,7 +157,7 @@ value:
             $$.value = reinterpret_cast< ref<Node>* >(malloc(sizeof(*$$.value)));
             new ($$.value) ref<Node>(ref<Int2>::create(*context->arena,
                                                        $2.location,
-                                                       make_bigint2($2.value, $4.value)));
+                                                       BugEngine::make_bigint2($2.value, $4.value)));
             $$.location = $1.location;
         }
     |
@@ -166,7 +166,7 @@ value:
             $$.value = reinterpret_cast< ref<Node>* >(malloc(sizeof(*$$.value)));
             new ($$.value) ref<Node>(ref<Int3>::create(*context->arena,
                                                        $2.location,
-                                                       make_bigint3($2.value, $4.value, $6.value)));
+                                                       BugEngine::make_bigint3($2.value, $4.value, $6.value)));
             $$.location = $1.location;
         }
     |
@@ -175,8 +175,8 @@ value:
             $$.value = reinterpret_cast< ref<Node>* >(malloc(sizeof(*$$.value)));
             new ($$.value) ref<Node>(ref<Int4>::create(*context->arena,
                                                        $2.location,
-                                                       make_bigint4($2.value, $4.value,
-                                                                    $6.value, $8.value)));
+                                                       BugEngine::make_bigint4($2.value, $4.value,
+                                                                               $6.value, $8.value)));
             $$.location = $1.location;
         }
     |
@@ -194,7 +194,7 @@ value:
             $$.value = reinterpret_cast< ref<Node>* >(malloc(sizeof(*$$.value)));
             new ($$.value) ref<Node>(ref<Float2>::create(*context->arena,
                                                          $1.location,
-                                                         make_float2($2.value, $4.value)));
+                                                         BugEngine::make_float2($2.value, $4.value)));
             $$.location = $1.location;
         }
     |
@@ -203,7 +203,7 @@ value:
             $$.value = reinterpret_cast< ref<Node>* >(malloc(sizeof(*$$.value)));
             new ($$.value) ref<Node>(ref<Float3>::create(*context->arena,
                                                          $1.location,
-                                                         make_float3($2.value, $4.value, $6.value)));
+                                                         BugEngine::make_float3($2.value, $4.value, $6.value)));
             $$.location = $1.location;
         }
     |
@@ -212,8 +212,8 @@ value:
             $$.value = reinterpret_cast< ref<Node>* >(malloc(sizeof(*$$.value)));
             new ($$.value) ref<Node>(ref<Float4>::create(*context->arena,
                                                          $1.location,
-                                                         make_float4($2.value, $4.value,
-                                                                     $6.value, $8.value)));
+                                                         BugEngine::make_float4($2.value, $4.value,
+                                                                                $6.value, $8.value)));
             $$.location = $1.location;
         }
     |
