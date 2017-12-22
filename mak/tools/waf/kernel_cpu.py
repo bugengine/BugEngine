@@ -57,6 +57,7 @@ def kernel_build_cpu_source(self):
             t = self.bld(
                 env = env.derive(),
                 target = target_prefix + name + '.' + '.'.join(kernel) + ".cpu" + variant,
+                target_name = name,
                 features = ['cxx', self.bld.env.STATIC and 'cxxobjects' or 'cxxshlib', 'kernel'],
                 extra_use = self.extra_use,
                 defines = self.defines + [
