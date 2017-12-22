@@ -36,7 +36,7 @@ class Device:
     def get_status(self):
         try:
             with self.protocol.connect() as c:
-                return Status(*c.status(), '')
+                return Status(*(c.status() + ('',)))
         except Exception as e:
             return Status('error', None, None, None, str(e))
 
