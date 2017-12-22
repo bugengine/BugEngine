@@ -65,6 +65,7 @@ class MSVC(Configure.ConfigurationContext.Compiler):
 
     def load_in_env(self, conf, platform):
         Configure.ConfigurationContext.Compiler.load_in_env(self, conf, platform)
+        env = conf.env
         env.IDIRAFTER='/I'
         env.CC_CPP = env.CC
         env.CC_CPP_SRC_F = ''
