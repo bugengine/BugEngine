@@ -33,7 +33,8 @@ enum ClassType
     ClassType_Vector2,
     ClassType_Vector3,
     ClassType_Vector4,
-    ClassType_Matrix,
+    ClassType_Vector8,
+    ClassType_Vector16,
     ClassType_Variant
 };
 

@@ -6,7 +6,7 @@
 /**************************************************************************************************/
 #include    <stdafx.h>
 #include    <scheduler/kernel/imemorybuffer.hh>
-#include    <kernel/input/cpp/segment_part.hh>
+#include    <kernel/input/segment_part.hh>
 
 
 namespace BugEngine { namespace Kernel { namespace CPU

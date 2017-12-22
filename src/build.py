@@ -36,7 +36,12 @@ def build_bugengine(bld):
         Declares the main library and entry point
     """
     bld.headers('engine.kernel',
-                [])
+                [],
+                extra_public_includes=[bld.path.make_node('engine/kernel/api/cpu')])
+    bld.headers('engine.kernel.cpu',
+                [],
+                path='engine.kernel',
+                extra_public_includes=[bld.path.make_node('engine/kernel/api/cpu')])
     bld.library('engine.minitl',
                 bld.platforms+['engine.kernel'])
     bld.library('engine.core',
