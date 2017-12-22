@@ -23,7 +23,7 @@ class kernel_cpu(Task.Task):
                  --module ${PLUGIN}
                  --tmp ${TMPDIR}
                  ${SRC[0].path_from(bld.bldnode)}
-                 ${TGT[0].abspath()}""" % sys.executable
+                 ${TGT[0].abspath()}""" % sys.executable.replace('\\', '/')
     def scan(self):
         return ([], [])
 
