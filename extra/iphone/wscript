@@ -47,6 +47,10 @@ def configure(conf):
     conf.platforms.append(iOSSimulator(conf))
 
 
+def setup(conf):
+    pass
+
+
 def build(bld):
     bld.platforms.append(bld.external('3rdparty.system.cocoa'))
 
