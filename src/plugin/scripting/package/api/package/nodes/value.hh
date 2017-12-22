@@ -140,7 +140,7 @@ public:
 class Float2Value : public Value
 {
 private:
-    float2 m_value;
+    double2 m_value;
 public:
     Float2Value(double x, double y);
     ~Float2Value();
@@ -153,7 +153,7 @@ public:
 class Float3Value : public Value
 {
 private:
-    float3 m_value;
+    double3 m_value;
 public:
     Float3Value(double x, double y, double z);
     ~Float3Value();
@@ -166,7 +166,7 @@ public:
 class Float4Value : public Value
 {
 private:
-    float4 m_value;
+    double4 m_value;
 public:
     Float4Value(double x, double y, double z, double w);
     ~Float4Value();

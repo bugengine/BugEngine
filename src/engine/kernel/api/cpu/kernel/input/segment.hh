@@ -1,11 +1,11 @@
 /* BugEngine <bugengine.devel@gmail.com> / 2008-2014
    see LICENSE for detail */
 
-#ifndef BE_KERNEL_INPUT_CPP_SEGMENT_HH_
-#define BE_KERNEL_INPUT_CPP_SEGMENT_HH_
+#ifndef BE_KERNEL_INPUT_SEGMENT_HH_
+#define BE_KERNEL_INPUT_SEGMENT_HH_
 /**************************************************************************************************/
 #include    <kernel/stdafx.h>
-#include    <kernel/input/cpp/segment_part.hh>
+#include    <kernel/input/segment_part.hh>
 
 
 namespace Kernel
