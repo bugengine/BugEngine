@@ -1,6 +1,6 @@
 from waflib import Task, Context, Utils
 from waflib.TaskGen import feature, extension, before_method, after_method
-from waflib.Tools import gcc
+from waflib.Tools import gcc, ccroot
 import os
 
 
@@ -20,6 +20,7 @@ def install_plist(self, node):
 
 @feature('cshlib', 'cxxshlib')
 @after_method('apply_link')
+@after_method('process_use')
 def set_osx_shlib_name(self):
     if 'macosx' in self.env.VALID_PLATFORMS:
         if 'plugin' in self.features:
@@ -39,6 +40,7 @@ def set_osx_shlib_name(self):
 
 @feature('cprogram', 'cxxprogram')
 @after_method('apply_link')
+@after_method('process_use')
 def set_osx_program_name(self):
     if 'macosx' in self.env.VALID_PLATFORMS:
         self.env.append_unique('LINKFLAGS', [
@@ -55,6 +57,8 @@ Task.task_factory('lipo', lipo, color='BLUE')
 
 
 @feature('multiarch')
+@after_method('apply_link')
+@after_method('process_use')
 def apply_multiarch_darwin(self):
     if 'darwin' in self.env.VALID_PLATFORMS:
         appname = getattr(Context.g_module, Context.APPNAME, self.bld.srcnode.name)
