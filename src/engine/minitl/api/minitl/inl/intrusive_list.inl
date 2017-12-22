@@ -335,19 +335,19 @@ bool                                                        intrusive_list<T, IN
 template< typename T, int INDEX >
 void                                                        intrusive_list<T, INDEX>::push_front(const_reference r)
 {
-    r.intrusive_list<T, INDEX>::item::insert(m_root.m_previous->m_next);
+    static_cast<const intrusive_list<T, INDEX>::item&>(r).insert(m_root.m_previous->m_next);
 }
 
 template< typename T, int INDEX >
 void                                                        intrusive_list<T, INDEX>::push_back(const_reference r)
 {
-    r.intrusive_list<T, INDEX>::item::insert(m_root.m_previous);
+    static_cast<const intrusive_list<T, INDEX>::item&>(r).insert(m_root.m_previous);
 }
 
 template< typename T, int INDEX >
 typename intrusive_list<T, INDEX>::iterator                 intrusive_list<T, INDEX>::insert(typename intrusive_list<T, INDEX>::iterator after, const_reference r)
 {
-    r.intrusive_list<T, INDEX>::item::insert(after.m_iterator);
+    static_cast<const intrusive_list<T, INDEX>::item&>(r).insert(after.m_iterator);
     return ++after;
 }
 
