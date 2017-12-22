@@ -376,6 +376,7 @@ class GnuCompiler(Compiler):
         env.CXX = self.compiler_cxx
         env.IDIRAFTER = '-idirafter'
         Compiler.load_in_env(self, conf, platform)
+        env.SYSROOT = env.SYSROOT or self.sysroot
 
         conf.end_msg('')
         conf.start_msg('      `- [cpu compute variants]')
