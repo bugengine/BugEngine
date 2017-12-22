@@ -6,6 +6,9 @@
 /**************************************************************************************************/
 
 #include    <kernel/stdafx.h>
+#include    <kernel/simd.hh>
+using namespace kernel;
+
 #include    <minitl/stdafx.h>
 
 #include    <core/preproc.hh>
