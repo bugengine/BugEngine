@@ -937,6 +937,8 @@ class Root(Container):
 
         if self.objects:
             definition.write('\nnamespace BugEngine\n{\n')
+            definition.write('raw<RTTI::Class> '
+                             'be_%s_Namespace();\n' % (self.root_namespace))
             for object in self.objects:
                 object.declare_namespace(definition)
             definition.write('}\n')
