@@ -27,6 +27,7 @@ def options(opt):
     opt.load('eclipse', tooldir=[os.path.join(opt.path.abspath(), 'tools', 'waf')])
     opt.load('qtcreator', tooldir=[os.path.join(opt.path.abspath(), 'tools', 'waf')])
 
+    opt.recurse('devices.py')
     opt.recurse('build.py')
     opt.recurse('hosts.py')
     opt.recurse('compilers.py')
@@ -65,6 +66,7 @@ def setup(conf):
     "setup step before the build: recursively cals setup on every third party library"
     conf.recurse('../src/3rdparty/mak/mak.py', name='setup', once=False)
     third_party_node = conf.path.parent.make_node('src').make_node('3rdparty')
+    extra = conf.bugenginenode.make_node('extra')
     for category in third_party_node.listdir():
         if category != 'mak':
             conf.start_msg('      `- [%s]' % category)
@@ -74,6 +76,10 @@ def setup(conf):
                              name='setup',
                              once=False)
             conf.end_msg('')
+    if conf.env.VALID_PLATFORMS:
+        if os.path.isdir(os.path.join(conf.bugenginenode.abspath(), 'extra', conf.env.VALID_PLATFORMS[0])):
+            conf.recurse(os.path.join(conf.bugenginenode.abspath(), 'extra', conf.env.VALID_PLATFORMS[0]),
+                         name='setup', once=False)
 
 
 def build(bld):
@@ -215,7 +221,7 @@ def autoreconfigure(execute_method):
             Logs.warn('wscript files have changed; reconfiguring the project')
             Options.commands.insert(0, self.cmd)
             Options.commands.insert(0, 'reconfigure')
-            return
+            return "SKIP"
 
         return execute_method(self)
     return execute

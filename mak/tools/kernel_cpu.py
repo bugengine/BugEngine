@@ -36,10 +36,11 @@ template="""
 %(pch)s
 #include    <kernel/compilers.hh>
 #include    <kernel/simd.hh>
-#include    <kernel/input/cpp/input.hh>
+#include    <kernel/input/input.hh>
 #include    <plugin/dynobjectlist.hh>
 #include    <minitl/array.hh>
 #include    <cpu/memorybuffer.hh>
+#include    <scheduler/kernel/parameters/parameters.hh>
 
 using namespace Kernel;
 
@@ -52,7 +53,7 @@ struct Parameter
 };
 
 _BE_PLUGIN_EXPORT void _kmain(const u32 index, const u32 total,
-                              const minitl::array< minitl::weak<const BugEngine::Kernel::IMemoryBuffer> >& argv)
+                              const minitl::array< minitl::weak<const BugEngine::Kernel::IMemoryBuffer> >& /*argv*/)
 {
     kmain(index, total,
           %(args)s
@@ -95,21 +96,20 @@ if __name__ == '__main__':
                 name = arg.name
                 for t in arg.tags:
                     if t[0] == 'kernel_param':
-                        print(t[1])
                         bugengine_names = {
-                            'segment':      '::BugEngine::Kernel::Segment',
-                            'segments':     '::BugEngine::Kernel::Segments',
-                            'stream':       '::BugEngine::Kernel::Stream',
-                            'texture1d':    '::BugEngine::Kernel::Texture1D',
-                            'texture2d':    '::BugEngine::Kernel::Texture2D',
-                            'texture3d':    '::BugEngine::Kernel::Texture3D',
+                            'be_segment':      '::Kernel::segment',
+                            'be_segments':     '::Kernel::segments',
+                            'be_stream':       '::Kernel::stream',
+                            'be_texture1d':    '::Kernel::texture1d',
+                            'be_texture2d':    '::Kernel::texture2d',
+                            'be_texture3d':    '::Kernel::texture3d',
                         }
                         try:
-                            bugengine_name = bugengine_names[t[1][1]]
+                            bugengine_name = bugengine_names[t[1]]
                         except KeyError:
                             raise Exception('invalid kernel input type: %s:\n'
-                                            'type %s is not a valid kernel type' % (name, t[1][0]))
-                        args.append((arg.name, arg.type, bugengine_name, t[1][1], t[1][0]))
+                                            'type %s is not a valid kernel type' % (name, t[1]))
+                        args.append((arg.name, arg.type, bugengine_name, t[1]))
                         break
                 else:
                     raise Exception('invalid kernel input type: %s\n'
@@ -118,8 +118,8 @@ if __name__ == '__main__':
             params = {
                 'pch':      '#include <%s>\n'%options.pch if options.pch else '',
                 'source':   arguments[0],
-                'args':     ',\n          '.join('%s< %s >((%s*)argv[%d].begin, (%s*)argv[%d].end)'
-                                                 % (arg[2], arg[1], arg[1], i, arg[1], i)
+                'args':     ',\n          '.join('%s< %s >(0, 0, 0)'
+                                                 % (arg[2], arg[1])
                                                  for i, arg in enumerate(args))
             }
             with open(arguments[1], 'w') as out:

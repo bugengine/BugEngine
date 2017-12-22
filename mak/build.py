@@ -293,7 +293,7 @@ def module(bld, name, module_path, depends,
                 n = extra_source_node.make_node('include')
                 if os.path.isdir(n.abspath()):
                     include += [n]
-        target_prefix = (env.ENV_PREFIX + '.') if env.ENV_PREFIX else ''
+        target_prefix = (env.ENV_PREFIX + '/') if env.ENV_PREFIX else ''
 
         if not build:
             sources = []
@@ -379,7 +379,7 @@ def thirdparty(bld, name, feature='', path='.', var='', use=[]):
     internal_deps = []
     supported = False
     for env in bld.multiarch_envs:
-        target_prefix = (env.ENV_PREFIX + '.') if env.ENV_PREFIX else ''
+        target_prefix = (env.ENV_PREFIX + '/') if env.ENV_PREFIX else ''
         target_name = target_prefix + name
         if env['check_%s' % var] or env.PROJECTS:
             if feature:
@@ -655,7 +655,7 @@ def static_dependencies(self):
             for task_gen in g:
                 if not isinstance(task_gen, TaskGen.task_gen):
                     continue
-                if ('plugin' in task_gen.features or 'kernel' in task_gen.features) and 'cxx' in task_gen.features:
+                if ('plugin' in task_gen.features) and 'cxx' in task_gen.features:
                     if task_gen.env.TOOLCHAIN == self.env.TOOLCHAIN:
                         self.use.append(task_gen.target)
 

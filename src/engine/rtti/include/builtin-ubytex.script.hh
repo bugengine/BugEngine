@@ -1,8 +1,8 @@
 /* BugEngine <bugengine.devel@gmail.com> / 2008-2014
    see LICENSE for detail */
 
-#ifndef BE_RTTI_BUILTIN_SBYTEX_SCRIPT_HH_
-#define BE_RTTI_BUILTIN_SBYTEX_SCRIPT_HH_
+#ifndef BE_RTTI_BUILTIN_UBYTEX_SCRIPT_HH_
+#define BE_RTTI_BUILTIN_UBYTEX_SCRIPT_HH_
 /**************************************************************************************************/
 #include    <rtti/stdafx.h>
 #include    <rtti/classinfo.script.hh>
@@ -12,44 +12,44 @@
 #if 0
 
 be_tag(Index(BugEngine::RTTI::ClassType_Vector2
-          + (BugEngine::RTTI::ClassIndex_i8 << 16)))
-be_pod sbyte2
+          + (BugEngine::RTTI::ClassIndex_u8 << 16)))
+be_pod ubyte2
 {
-    i8 operator[](u32) const;
-    i8& operator[](u32);
+    u8 operator[](u32) const;
+    u8& operator[](u32);
 };
 
 
 be_tag(Index(BugEngine::RTTI::ClassType_Vector3
-          + (BugEngine::RTTI::ClassIndex_i8 << 16)))
-be_pod sbyte3
+          + (BugEngine::RTTI::ClassIndex_u8 << 16)))
+be_pod ubyte3
 {
-    i8 operator[](u32) const;
-    i8& operator[](u32);
+    u8 operator[](u32) const;
+    u8& operator[](u32);
 };
 
 be_tag(Index(BugEngine::RTTI::ClassType_Vector4
-          + (BugEngine::RTTI::ClassIndex_i8 << 16)))
-be_pod sbyte4
+          + (BugEngine::RTTI::ClassIndex_u8 << 16)))
+be_pod ubyte4
 {
-    i8 operator[](u32) const;
-    i8& operator[](u32);
+    u8 operator[](u32) const;
+    u8& operator[](u32);
 };
 
 be_tag(Index(BugEngine::RTTI::ClassType_Vector8
-          + (BugEngine::RTTI::ClassIndex_i8 << 16)))
-be_pod sbyte8
+          + (BugEngine::RTTI::ClassIndex_u8 << 16)))
+be_pod ubyte8
 {
-    i8 operator[](u32) const;
-    i8& operator[](u32);
+    u8 operator[](u32) const;
+    u8& operator[](u32);
 };
 
 be_tag(Index(BugEngine::RTTI::ClassType_Vector16
-          + (BugEngine::RTTI::ClassIndex_i8 << 16)))
-be_pod sbyte16
+          + (BugEngine::RTTI::ClassIndex_u8 << 16)))
+be_pod ubyte16
 {
-    i8 operator[](u32) const;
-    i8& operator[](u32);
+    u8 operator[](u32) const;
+    u8& operator[](u32);
 };
 
 #endif

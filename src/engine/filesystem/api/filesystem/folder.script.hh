@@ -52,6 +52,11 @@ protected:
     virtual void    doRefresh(ScanPolicy scanPolicy) = 0;
     virtual void    onChanged() = 0;
     void            refresh(ScanPolicy scanPolicy);
+
+    weak<File>      openFileNoLock(istring name);
+    weak<File>      openFileNoLock(ifilename name);
+    weak<Folder>    openFolderNoLock(istring name);
+    weak<Folder>    openFolderNoLock(ipath name);
 published:
     weak<File>      openFile(istring name);
     weak<File>      openFile(ifilename name);

@@ -1,4 +1,4 @@
-from mak.libs.cpp.tree import Parameter
+from ..tree import Parameter
 
 def p_kernel_method_inout(p):
     """

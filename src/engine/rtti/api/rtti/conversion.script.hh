@@ -9,6 +9,8 @@
 namespace BugEngine { namespace RTTI
 {
 
+struct Type;
+
 struct ConversionCost
 {
 public:
@@ -80,51 +82,51 @@ public:
 
 
 template< typename T >
-ConversionCost calculateConversion(const RTTI::Type& targetType);
+ConversionCost calculateConversion(const Type& targetType);
 
 template< >
 be_api(RTTI)
-ConversionCost calculateConversion<u8>(const RTTI::Type& targetType);
+ConversionCost calculateConversion<u8>(const Type& targetType);
 
 template< >
 be_api(RTTI)
-ConversionCost calculateConversion<i8>(const RTTI::Type& targetType);
+ConversionCost calculateConversion<i8>(const Type& targetType);
 
 template< >
 be_api(RTTI)
-ConversionCost calculateConversion<u16>(const RTTI::Type& targetType);
+ConversionCost calculateConversion<u16>(const Type& targetType);
 
 template< >
 be_api(RTTI)
-ConversionCost calculateConversion<i16>(const RTTI::Type& targetType);
+ConversionCost calculateConversion<i16>(const Type& targetType);
 
 template< >
 be_api(RTTI)
-ConversionCost calculateConversion<u32>(const RTTI::Type& targetType);
+ConversionCost calculateConversion<u32>(const Type& targetType);
 
 template< >
 be_api(RTTI)
-ConversionCost calculateConversion<i32>(const RTTI::Type& targetType);
+ConversionCost calculateConversion<i32>(const Type& targetType);
 
 template< >
 be_api(RTTI)
-ConversionCost calculateConversion<u64>(const RTTI::Type& targetType);
+ConversionCost calculateConversion<u64>(const Type& targetType);
 
 template< >
 be_api(RTTI)
-ConversionCost calculateConversion<i64>(const RTTI::Type& targetType);
+ConversionCost calculateConversion<i64>(const Type& targetType);
 
 template< >
 be_api(RTTI)
-ConversionCost calculateConversion<bool>(const RTTI::Type& targetType);
+ConversionCost calculateConversion<bool>(const Type& targetType);
 
 template< >
 be_api(RTTI)
-ConversionCost calculateConversion<float>(const RTTI::Type& targetType);
+ConversionCost calculateConversion<float>(const Type& targetType);
 
 template< >
 be_api(RTTI)
-ConversionCost calculateConversion<double>(const RTTI::Type& targetType);
+ConversionCost calculateConversion<double>(const Type& targetType);
 
 }}
 

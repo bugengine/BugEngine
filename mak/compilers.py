@@ -55,7 +55,10 @@ class Compiler:
                  try:
                      result[i] = int(d)
                  except ValueError:
-                     result[i] = int(re.match('\\d+', d).group())
+                    try:
+                        result[i] = int(re.match('\\d+', d).group())
+                    except AttributeError:
+                        pass
              return tuple(result)
         self.compiler_c = compiler_c
         self.compiler_cxx = compiler_cxx
@@ -71,6 +74,11 @@ class Compiler:
         for env_name, env_value in extra_env.items():
             self.env[env_name] = env_value
         self.directories = [os.path.dirname(compiler_c)]
+
+    def load_tools(self, conf):
+        conf.env.CC = self.compiler_c
+        conf.env.CXX = self.compiler_cxx
+        conf.load(self.TOOLS)
 
     def add_flags(self, compiler, flags):
         try:
@@ -331,6 +339,9 @@ class GnuCompiler(Compiler):
         v.ASFLAGS_profile = ['-pipe', '-g', '-DNDEBUG', '-O3']
         v.LINKFLAGS_profile = ['-pipe', '-g']
 
+        v.CXXFLAGS_exception = ['-fexceptions']
+        v.CXXFLAGS_rtti = ['-frtti']
+
         v.CFLAGS_final = ['-pipe', '-g', '-DNDEBUG', '-O3']
         v.CXXFLAGS_final = ['-pipe', '-Wno-unused-parameter', '-g', '-DNDEBUG', '-O3', '-fno-rtti', '-fno-exceptions']
         v.ASFLAGS_final = ['-pipe', '-g', '-DNDEBUG', '-O3']
@@ -359,11 +370,10 @@ class GnuCompiler(Compiler):
     def error_flag(self):
         return ['-Werror']
 
-    def load_in_env(self, conf, platform, sysroot=None):
+    def load_in_env(self, conf, platform):
         env = conf.env
         env.CC = self.compiler_c
         env.CXX = self.compiler_cxx
-        env.SYSROOT = sysroot or self.sysroot or []
         env.IDIRAFTER = '-idirafter'
         Compiler.load_in_env(self, conf, platform)
 
@@ -398,12 +408,12 @@ class GnuCompiler(Compiler):
         env.CC_CPP = [env.CC, '-x', 'c', '-E']
         env.CC_CPP_SRC_F = ''
         env.CC_CPP_TGT_F = ['-o']
-        conf.load(self.TOOLS)
-        self.populate_useful_variables(conf)
+        self.populate_useful_variables(conf, env.SYSROOT)
 
-    def populate_useful_variables(self, conf):
+    def populate_useful_variables(self, conf, sysroot):
         env = conf.env
-        result, out, err = self.run_cxx(['-x', 'c++', '-v', '-dM', '-E', '-'], '\n')
+        sysroot_flags = sysroot and ['--sysroot', sysroot] or []
+        result, out, err = self.run_cxx(sysroot_flags + ['-x', 'c++', '-v', '-dM', '-E', '-'], '\n')
         result = 0
         if result != 0:
             print('could not retrieve system includes: %s' % err)
@@ -428,7 +438,7 @@ class GnuCompiler(Compiler):
                     elif line in self.DEFINES:
                         conf.env.append_unique('SYSTEM_DEFINES', [line])
 
-        result, out, err = self.run_cxx(['-x', 'c++', '-print-search-dirs'])
+        result, out, err = self.run_cxx(sysroot_flags + ['-x', 'c++', '-print-search-dirs'])
         if result != 0:
             print('could not retrieve system defines: %s' % str(e))
         else:

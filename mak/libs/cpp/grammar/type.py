@@ -1,4 +1,4 @@
-from mak.libs.cpp.tree import Typedef
+from ..tree import Typedef
 
 def p_type_kw(p):
     """

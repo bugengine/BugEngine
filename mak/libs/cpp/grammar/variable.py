@@ -1,4 +1,4 @@
-from mak.libs.cpp.tree import Variable
+from ..tree import Variable
 
 def p_variable_array(p):
     """

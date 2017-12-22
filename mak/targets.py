@@ -6,7 +6,8 @@ from waflib.Configure import conf
 
 
 def add_build_command(toolchain, optimisation):
-    for command in (BuildContext, CleanContext, InstallContext, UninstallContext, ListContext):
+    c = {}
+    for command in (BuildContext, CleanContext, ListContext):
         name = command.__name__.replace('Context','').lower()
         class Command(command):
             optim = optimisation
@@ -16,7 +17,37 @@ def add_build_command(toolchain, optimisation):
             def get_variant_dir(self):
                 return os.path.join(self.out_dir, self.bugengine_variant)
             variant_dir = property(get_variant_dir, None)
+        c[command] = Command
+    class Deploy(c[BuildContext]):
+        cmd = 'deploy:%s:%s' %(toolchain, optimisation)
+        bugengine_variant = toolchain
 
+        def execute(self):
+            if super(Deploy, self).execute() == "SKIP":
+                return "SKIP"
+            else:
+                self.fun = 'deploy'
+                print(self.fun)
+
+    class Run(Deploy):
+        cmd = 'run:%s:%s' %(toolchain, optimisation)
+
+        def execute(self):
+            if super(Run, self).execute() == "SKIP":
+                return "SKIP"
+            else:
+                self.fun = 'run'
+                print(self.fun)
+
+    class Debug(Deploy):
+        cmd = 'debug:%s:%s' %(toolchain, optimisation)
+
+        def execute(self):
+            if super(Debug, self).execute() == "SKIP":
+                return "SKIP"
+            else:
+                self.fun = 'debug'
+                print(self.fun)
 
 @conf
 class Platform:
@@ -42,8 +73,10 @@ class Platform:
             conf.start_msg('    `- %s' % compiler.arch)
         try:
             conf.setenv(toolchain, conf.env)
-            compiler.load_in_env(conf, self)
+            compiler.load_tools(conf)
             self.load_in_env(conf, compiler)
+            if not sub_compilers:
+                compiler.load_in_env(conf, self)
             v = conf.env
             v.ARCH_NAME = compiler.arch
             v.TOOLCHAIN=toolchain

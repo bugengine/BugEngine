@@ -168,13 +168,17 @@ void DiskFolder::doRefresh(Folder::ScanPolicy scanPolicy)
 
                 for (minitl::vector<istring>::const_iterator it = subdirs.begin(); it != subdirs.end(); ++it)
                 {
-                    if (openFolder(ipath(*it)) == weak<Folder>())
+                    be_info("%s" | *it);
+                    if (openFolderNoLock(ipath(*it)) == weak<Folder>())
                     {
+                        be_info("> %s" | *it);
                         ipath path = relativePath;
                         path.push_back(*it);
                         m_folders.push_back(minitl::make_tuple(*it, ref<ZipFolder>::create(Arena::filesystem(), m_handle.ptrHandle, path, newPolicy)));
                     }
+                    be_info("%s" | *it);
                 }
+                be_info("test");
             }
         }
     }

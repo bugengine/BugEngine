@@ -1,4 +1,4 @@
-from mak.libs.cpp import tree
+from ..cpp import tree
 
 
 def p_unit_start(p):

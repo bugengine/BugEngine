@@ -1,4 +1,4 @@
-from mak.libs.ply import lex
+from ..ply import lex
 from .tokens import tokens, reserved
 import sys
 

@@ -53,8 +53,7 @@ class MSVC(Configure.ConfigurationContext.Compiler):
             conf.env.append_unique('CFLAGS_warnnone', ['/D_ALLOW_RTCc_IN_STL=1'])
             conf.env.append_unique('CXXFLAGS_warnnone', ['/D_ALLOW_RTCc_IN_STL=1'])
 
-    def load_in_env(self, conf, platform):
-        Configure.ConfigurationContext.Compiler.load_in_env(self, conf, platform)
+    def load_tools(self, conf, platform):
         env = conf.env
         version = '%s %s'%(self.NAMES[0], self.version)
         env.MSVC_VERSIONS = [version]
@@ -62,6 +61,10 @@ class MSVC(Configure.ConfigurationContext.Compiler):
         env.MSVC_BATFILE = [self.batfile, self.args]
         env.COMPILER_NAME='msvc'
         env.COMPILER_TARGET='windows-win32-msvc-%s'%version
+        conf.load('msvc')
+
+    def load_in_env(self, conf, platform):
+        Configure.ConfigurationContext.Compiler.load_in_env(self, conf, platform)
         env.IDIRAFTER='/I'
         env.CC_CPP = env.CC
         env.CC_CPP_SRC_F = ''
@@ -70,7 +73,6 @@ class MSVC(Configure.ConfigurationContext.Compiler):
             conf.find_program('cdb64', var='CDB', mandatory=False)
         else:
             conf.find_program('cdb', var='CDB', mandatory=False)
-        conf.load('msvc')
 
 
 def os_platform():

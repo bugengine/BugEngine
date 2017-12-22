@@ -83,14 +83,14 @@ template_cc = """
 %(pch)s
 #include "%(header)s"
 
-BugEngine::Kernel::Kernel::KernelList&  getKernelList();
+BugEngine::Kernel::Kernel::KernelList&  getKernelList_%(module)s();
 
 %(Namespace)s
 
 %(Name)sTask::Kernel::Kernel()
     :   BugEngine::Kernel::Kernel("%(plugin)s.%(kernel_full_name)s")
 {
-    getKernelList().push_back(*this);
+    getKernelList_%(module)s().push_back(*this);
 }
 
 %(Name)sTask::Kernel::~Kernel()
@@ -191,6 +191,7 @@ if __name__ == '__main__':
                 'kernel_full_name': '.'.join(kernel_full_name),
                 'pch':      '#include <%s>\n'%options.pch if options.pch else '',
                 'PLUGIN':   options.module.upper(),
+                'module':   options.module,
                 'plugin':   options.module.replace('_', '.'),
                 'includes': '\n'.join(result.includes),
                 'argument_count': len(args),

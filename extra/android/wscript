@@ -21,31 +21,31 @@ class AndroidPlatform(Configure.ConfigurationContext.Platform):
         versions = {
             '1': '1.0',
             '2': '1.1',
-            '3': 'Cupcake(1.5)',
-            '4': 'Donut(1.6',
-            '5': 'Eclair(2.0)',
-            '6': 'Eclair(2.0.1)',
-            '7': 'Eclair(2.1)',
-            '8': 'Froyo(2.2)',
-            '9': 'Gingerbread(2.3.2)',
-            '10': 'Gingerbread(2.3.7)',
-            '11': 'Honeycomb(3.0)',
-            '12': 'Honeycomb(3.1)',
-            '13': 'Honeycomb(3.2)',
-            '14': 'IceCreamSandwich(4.0)',
-            '15': 'IceCreamSandwich(4.0.3)',
-            '16': 'JellyBean(4.1)',
-            '17': 'JellyBean(4.2)',
-            '18': 'JellyBean(4.3)',
-            '19': 'KitKat(4.4)',
-            '20': 'KitKat(4.4W)',
-            '21': 'Lollipop(5.0)',
-            '22': 'Lollipop(5.1)',
-            '23': 'Marshmallow(6.0)',
-            '24': 'Nougat(7.0)',
-            '25': 'Nougat(7.1)',
-            '26': 'Oreo(8.0)',
-            '27': 'Oreo(8.1)'
+            '3': 'Cupcake_1.5',
+            '4': 'Donut_1.6',
+            '5': 'Eclair_2.0',
+            '6': 'Eclair_2.0.1',
+            '7': 'Eclair_2.1',
+            '8': 'Froyo_2.2',
+            '9': 'Gingerbread_2.3.2',
+            '10': 'Gingerbread_2.3.7',
+            '11': 'Honeycomb_3.0',
+            '12': 'Honeycomb_3.1',
+            '13': 'Honeycomb_3.2',
+            '14': 'IceCreamSandwich_4.0',
+            '15': 'IceCreamSandwich_4.0.3',
+            '16': 'JellyBean_4.1',
+            '17': 'JellyBean_4.2',
+            '18': 'JellyBean_4.3',
+            '19': 'KitKat_4.4',
+            '20': 'KitKat_4.4W',
+            '21': 'Lollipop_5.0',
+            '22': 'Lollipop_5.1',
+            '23': 'Marshmallow_6.0',
+            '24': 'Nougat_7.0',
+            '25': 'Nougat_7.1',
+            '26': 'Oreo_8.0',
+            '27': 'Oreo_8.1'
         }
         return versions.get(sdk_version, 'api'+sdk_version)
 
@@ -317,6 +317,10 @@ class AndroidLoader(Configure.ConfigurationContext.Platform):
         for k, compilers in all_gcc_compilers:
             if (k[0], k[1]) in seen:
                 continue
+            for c in compilers:
+                prebuilt = os.path.join(k[2], 'prebuilt')
+                for target in os.listdir(prebuilt):
+                    c.directories.append(os.path.join(prebuilt, target, 'bin'))
             try:
                 add_compiler_set(compilers)
             except Errors.WafError as e:
@@ -343,6 +347,9 @@ class AndroidLoader(Configure.ConfigurationContext.Platform):
                 except Exception:
                     pass
                 else:
+                    prebuilt = os.path.join(k[2], 'prebuilt')
+                    for target in os.listdir(prebuilt):
+                        clang_compiler.directories.append(os.path.join(prebuilt, target, 'bin'))
                     clang_compiler.target = gcc.target
                     clang_compilers.append(clang_compiler)
             if clang_compilers:
@@ -388,6 +395,7 @@ def options(opt):
                     default=','.join(ndk_paths),
                     dest='android_ndk_path',
                     help='Path to the root of the Android NDK (%s)' % (ndk_paths or 'none detected'))
+    opt.recurse('mak/device.py')
 
 
 def host_configure(conf):

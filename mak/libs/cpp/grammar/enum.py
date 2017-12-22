@@ -1,4 +1,4 @@
-from mak.libs.cpp.tree import Class, AnonymousClass, EnumValue
+from ..tree import Class, AnonymousClass, EnumValue
 
 def p_enum_value(p):
     """

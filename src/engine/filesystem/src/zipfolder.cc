@@ -13,6 +13,7 @@ ZipFolder::ZipFolder(void* handle, ipath path, Folder::ScanPolicy scanPolicy)
     :   m_handle(handle)
     ,   m_path(path)
 {
+    be_info("opening zip folder %s" | path);
     if (scanPolicy != Folder::ScanNone)
     {
         refresh(scanPolicy);
@@ -78,10 +79,10 @@ void ZipFolder::doRefresh(Folder::ScanPolicy scanPolicy)
                     }
                 }
             } while (unzGoToNextFile(m_handle) == UNZ_OK);
-            
+
             for (minitl::vector<istring>::const_iterator it = subdirs.begin(); it != subdirs.end(); ++it)
             {
-                if (openFolder(ipath(*it)) == weak<Folder>())
+                if (openFolderNoLock(ipath(*it)) == weak<Folder>())
                 {
                     ipath path = m_path;
                     path.push_back(*it);

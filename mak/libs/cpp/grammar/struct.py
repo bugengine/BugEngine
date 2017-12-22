@@ -1,4 +1,4 @@
-from mak.libs.cpp.tree import Class, AnonymousClass
+from ..tree import Class, AnonymousClass
 
 
 def p_struct_visibility(p):

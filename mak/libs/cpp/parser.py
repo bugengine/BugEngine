@@ -1,7 +1,7 @@
 from .tokens import tokens
 from . import lexer
 from .grammar import *
-from mak.libs.ply import lex, yacc
+from ..ply import lex, yacc
 import sys
 
 
