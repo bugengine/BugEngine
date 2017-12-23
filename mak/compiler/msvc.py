@@ -53,7 +53,7 @@ class MSVC(Configure.ConfigurationContext.Compiler):
             conf.env.append_unique('CFLAGS_warnnone', ['/D_ALLOW_RTCc_IN_STL=1'])
             conf.env.append_unique('CXXFLAGS_warnnone', ['/D_ALLOW_RTCc_IN_STL=1'])
 
-    def load_tools(self, conf):
+    def load_tools(self, conf, platform):
         env = conf.env
         version = '%s %s'%(self.NAMES[0], self.version)
         env.MSVC_VERSIONS = [version]

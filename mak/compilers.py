@@ -75,7 +75,7 @@ class Compiler:
             self.env[env_name] = env_value
         self.directories = [os.path.dirname(compiler_c)]
 
-    def load_tools(self, conf):
+    def load_tools(self, conf, platform):
         conf.env.CC = self.compiler_c
         conf.env.CXX = self.compiler_cxx
         conf.load(self.TOOLS)
@@ -355,25 +355,40 @@ class GnuCompiler(Compiler):
         v.CXXFLAGS_warnall = ['-Wall', '-Wextra', '-Werror', '-Wno-sign-compare',
                               '-Woverloaded-virtual', '-Wno-invalid-offsetof', '-Wstrict-aliasing']
 
-    def find_target_program(self, conf, program, mandatory=False):
+    def find_target_program(self, conf, platform, program, mandatory=False):
+        sys_dirs = self.directories + platform.directories
+        d, a = os.path.split(self.directories[0])
+        while a:
+            pd = os.path.join(d, 'bin')
+            if os.path.isdir(pd):
+                sys_dirs.append(pd)
+            d, a = os.path.split(d)
+
         var = program.upper()
         for t in self.targets:
-            if conf.find_program('%s-%s' % (t, program), var=var, path_list=self.directories, mandatory=False):
+            if conf.find_program('%s-%s' % (t, program), var=var, path_list=sys_dirs, mandatory=False):
                 break
         else:
             for t in self.targets:
                 if conf.find_program('%s-%s' % (t, program), var=var, mandatory=False):
                     break
             else:
-                conf.find_program(program, var=var, path_list=self.directories, mandatory=mandatory)
+                conf.find_program(program, var=var, path_list=sys_dirs, mandatory=mandatory)
 
     def error_flag(self):
         return ['-Werror']
 
+    def load_tools(self, conf, platform):
+        self.find_target_program(conf, platform, 'ar')
+        self.find_target_program(conf, platform, 'strip')
+        self.find_target_program(conf, platform, 'objcopy')
+        self.find_target_program(conf, platform, 'gdb')
+        if not conf.env.GDB:
+            conf.find_program('gdb', var='GDB', mandatory=False)
+        Compiler.load_tools(self, conf, platform)
+
     def load_in_env(self, conf, platform):
         env = conf.env
-        env.CC = self.compiler_c
-        env.CXX = self.compiler_cxx
         env.IDIRAFTER = '-idirafter'
         Compiler.load_in_env(self, conf, platform)
         env.SYSROOT = env.SYSROOT or self.sysroot
@@ -389,21 +404,6 @@ class GnuCompiler(Compiler):
             else:
                 Logs.pprint('YELLOW', '-%s' % variant_name, sep=' ')
 
-
-        sys_dirs = self.directories + platform.directories
-        d, a = os.path.split(self.directories[0])
-        while a:
-            pd = os.path.join(d, 'bin')
-            if os.path.isdir(pd):
-                sys_dirs.append(pd)
-            d, a = os.path.split(d)
-
-        self.find_target_program(conf, 'ar')
-        self.find_target_program(conf, 'strip')
-        self.find_target_program(conf, 'objcopy')
-        self.find_target_program(conf, 'gdb')
-        if not conf.env.GDB:
-            conf.find_program('gdb', var='GDB', mandatory=False)
         env.COMPILER_NAME = self.__class__.__name__.lower()
         env.COMPILER_TARGET = self.arch + '-' + self.platform
         env.CC_CPP = [env.CC, '-x', 'c', '-E']
