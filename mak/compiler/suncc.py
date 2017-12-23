@@ -185,7 +185,7 @@ class SunCC(Configure.ConfigurationContext.GnuCompiler):
             v.SHLIB_MARKER = '-Bdynamic'
             v.STLIB_MARKER = '-Bstatic'
 
-    def populate_useful_variables(self, conf):
+    def populate_useful_variables(self, conf, sysroot):
         pass
 
 

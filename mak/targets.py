@@ -73,7 +73,7 @@ class Platform:
             conf.start_msg('    `- %s' % compiler.arch)
         try:
             conf.setenv(toolchain, conf.env)
-            compiler.load_tools(conf)
+            compiler.load_tools(conf, self)
             self.load_in_env(conf, compiler)
             if not sub_compilers:
                 compiler.load_in_env(conf, self)
