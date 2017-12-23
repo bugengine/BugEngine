@@ -489,6 +489,8 @@ def configure(conf):
             if not compilers or path[:-3] in compilers:
                 conf.recurse('compiler/%s'%path)
     conf.compilers.sort(key = lambda x: x.sort_name())
+    for c in conf.compilers:
+        print(c.NAMES[0], c.compiler_c, c.version, c.target, c.arch)
 
 
 def build(bld):
