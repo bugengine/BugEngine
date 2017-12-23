@@ -191,96 +191,110 @@ environment:
       COMPILER_TARGET: amd64
       COMPILER_VERSION: 5.4.0
       TARGET_OS: windows_amd64
+      COMPILER_PATH: C:\cygwin64\bin
       FLAVOR: debug
 
     - COMPILER: gcc
       COMPILER_TARGET: amd64
       COMPILER_VERSION: 5.4.0
       TARGET_OS: windows_amd64
+      COMPILER_PATH: C:\cygwin64\bin
       FLAVOR: profile
 
     - COMPILER: gcc
       COMPILER_TARGET: amd64
       COMPILER_VERSION: 5.4.0
       TARGET_OS: windows_amd64
+      COMPILER_PATH: C:\cygwin64\bin
       FLAVOR: final
 
     - COMPILER: gcc
       COMPILER_TARGET: amd64
       COMPILER_VERSION: 6.3.0
       TARGET_OS: windows_amd64
+      COMPILER_PATH: C:\mingw-w64\x86_64-6.3.0-posix-seh-rt_v5-rev1\bin
       FLAVOR: debug
 
     - COMPILER: gcc
       COMPILER_TARGET: amd64
       COMPILER_VERSION: 6.3.0
       TARGET_OS: windows_amd64
+      COMPILER_PATH: C:\mingw-w64\x86_64-6.3.0-posix-seh-rt_v5-rev1\bin
       FLAVOR: profile
 
     - COMPILER: gcc
       COMPILER_TARGET: amd64
       COMPILER_VERSION: 6.3.0
       TARGET_OS: windows_amd64
+      COMPILER_PATH: C:\mingw-w64\x86_64-6.3.0-posix-seh-rt_v5-rev1\bin
       FLAVOR: final
 
     - COMPILER: gcc
       COMPILER_TARGET: x86
       COMPILER_VERSION: 5.3.0
       TARGET_OS: windows_x86
+      COMPILER_PATH: C:\MinGW\msys\1.0\bin;C:\MinGW\bin
       FLAVOR: debug
 
     - COMPILER: gcc
       COMPILER_TARGET: x86
       COMPILER_VERSION: 5.3.0
       TARGET_OS: windows_x86
+      COMPILER_PATH: C:\MinGW\msys\1.0\bin;C:\MinGW\bin
       FLAVOR: profile
 
     - COMPILER: gcc
       COMPILER_TARGET: x86
       COMPILER_VERSION: 5.3.0
       TARGET_OS: windows_x86
+      COMPILER_PATH: C:\MinGW\msys\1.0\bin;C:\MinGW\bin
       FLAVOR: final
 
     - COMPILER: gcc
       COMPILER_TARGET: x86
       COMPILER_VERSION: 5.4.0
       TARGET_OS: windows_x86
+      COMPILER_PATH: C:\cygwin\bin
       FLAVOR: debug
 
     - COMPILER: gcc
       COMPILER_TARGET: x86
       COMPILER_VERSION: 5.4.0
       TARGET_OS: windows_x86
+      COMPILER_PATH: C:\cygwin\bin
       FLAVOR: profile
 
     - COMPILER: gcc
       COMPILER_TARGET: x86
       COMPILER_VERSION: 5.4.0
       TARGET_OS: windows_x86
+      COMPILER_PATH: C:\cygwin\bin
       FLAVOR: final
 
     - COMPILER: gcc
       COMPILER_TARGET: x86
       COMPILER_VERSION: 6.3.0
       TARGET_OS: windows_x86
+      COMPILER_PATH: C:\mingw-w64\i686-6.3.0-posix-dwarf-rt_v5-rev1\bin
       FLAVOR: debug
 
     - COMPILER: gcc
       COMPILER_TARGET: x86
       COMPILER_VERSION: 6.3.0
       TARGET_OS: windows_x86
+      COMPILER_PATH: C:\mingw-w64\i686-6.3.0-posix-dwarf-rt_v5-rev1\bin
       FLAVOR: profile
 
     - COMPILER: gcc
       COMPILER_TARGET: x86
       COMPILER_VERSION: 6.3.0
       TARGET_OS: windows_x86
+      COMPILER_PATH: C:\mingw-w64\i686-6.3.0-posix-dwarf-rt_v5-rev1\bin
       FLAVOR: final
-
 
 
 build_script:
-  - set PATH=%PATH%;C:\msys64\usr\bin;C:\msys64\mingw32\bin;C:\msys64\mingw64\bin;C:\cygwin\bin;C:\cygwin64\bin;C:\MinGW\msys\1.0\bin;C:\MinGW\bin;C:\mingw-w64\i686-5.3.0-posix-dwarf-rt_v4-rev0\bin;C:\mingw-w64\i686-6.3.0-posix-dwarf-rt_v5-rev1\bin;C:\mingw-w64\x86_64-6.3.0-posix-seh-rt_v5-rev1\bin
+  - set PATH=%PATH%;%COMPILER_PATH%
   - set
   - python waf configure --compilers=%COMPILER%
   - python waf build:%TARGET_OS%-%COMPILER%_%COMPILER_TARGET%-%COMPILER_VERSION%:%FLAVOR%
