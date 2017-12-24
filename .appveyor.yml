@@ -5,21 +5,21 @@ environment:
       COMPILER_TARGET: amd64
       COMPILER_VERSION: 6.3.0
       TARGET_OS: windows_amd64
-      COMPILER_PATH: C:\mingw-w64\x86_64-6.3.0-posix-seh-rt_v5-rev1\bin;
+      COMPILER_PATH: C:\mingw-w64\x86_64-6.3.0-posix-seh-rt_v5-rev1\mingw64\bin
       FLAVOR: debug
 
     - COMPILER: gcc
       COMPILER_TARGET: amd64
       COMPILER_VERSION: 6.3.0
       TARGET_OS: windows_amd64
-      COMPILER_PATH: C:\mingw-w64\x86_64-6.3.0-posix-seh-rt_v5-rev1\bin
+      COMPILER_PATH: C:\mingw-w64\x86_64-6.3.0-posix-seh-rt_v5-rev1\mingw64\bin
       FLAVOR: profile
 
     - COMPILER: gcc
       COMPILER_TARGET: amd64
       COMPILER_VERSION: 6.3.0
       TARGET_OS: windows_amd64
-      COMPILER_PATH: C:\mingw-w64\x86_64-6.3.0-posix-seh-rt_v5-rev1\bin
+      COMPILER_PATH: C:\mingw-w64\x86_64-6.3.0-posix-seh-rt_v5-rev1\mingw64\bin
       FLAVOR: final
 
     - COMPILER: gcc
