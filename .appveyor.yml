@@ -103,10 +103,10 @@ environment:
 build_script:
   - set PATH=%COMPILER_PATH%;%PATH%
   - set
-  - dir C:\mingw-w64\
-  - dir C:\Program Files\LLVM\bin\
-  - dir C:\Libraries\llvm-4.0.0\
-  - dir C:\Libraries\llvm-5.0.0\
+  - dir C:\mingw-w64
+  - dir "C:/Program Files/LLVM/bin"
+  - dir "C:/Libraries/llvm-4.0.0"
+  - dir "C:/Libraries/llvm-5.0.0"
   - python waf configure --compilers=%COMPILER%
   - python waf build:%TARGET_OS%-%COMPILER%_%COMPILER_TARGET%-%COMPILER_VERSION%:%FLAVOR%
   - python waf build:%TARGET_OS%-%COMPILER%_%COMPILER_TARGET%-%COMPILER_VERSION%:%FLAVOR% --static
