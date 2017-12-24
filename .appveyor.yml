@@ -108,7 +108,6 @@ build_script:
   - dir "C:/Libraries/llvm-4.0.0"
   - dir "C:/Libraries/llvm-5.0.0"
   - dir "C:/mingw-w64/x86_64-6.3.0-posix-seh-rt_v5-rev1/mingw64"
-  - dir "C:/mingw-w64/x86_64-6.3.0-posix-seh-rt_v5-rev1/bin"
   - python waf configure --compilers=%COMPILER%
   - python waf build:%TARGET_OS%-%COMPILER%_%COMPILER_TARGET%-%COMPILER_VERSION%:%FLAVOR%
   - python waf build:%TARGET_OS%-%COMPILER%_%COMPILER_TARGET%-%COMPILER_VERSION%:%FLAVOR% --static
