@@ -329,31 +329,31 @@ class GnuCompiler(Compiler):
 
     def set_optimisation_options(self, conf):
         v = conf.env
-        v.CFLAGS_debug = ['-pipe', '-g', '-D_DEBUG']
-        v.CXXFLAGS_debug = ['-pipe', '-g', '-D_DEBUG']
-        v.ASFLAGS_debug = ['-pipe', '-g', '-D_DEBUG']
-        v.LINKFLAGS_debug = ['-pipe', '-g']
+        v.CFLAGS_debug = ['-pipe', '-g', '-D_DEBUG'] + v.CFLAGS_debug
+        v.CXXFLAGS_debug = ['-pipe', '-g', '-D_DEBUG'] + v.CXXFLAGS_debug
+        v.ASFLAGS_debug = ['-pipe', '-g', '-D_DEBUG'] + v.ASFLAGS_debug
+        v.LINKFLAGS_debug = ['-pipe', '-g'] + v.LINKFLAGS_debug
 
-        v.CFLAGS_profile = ['-pipe', '-g', '-DNDEBUG', '-O3']
-        v.CXXFLAGS_profile = ['-pipe', '-Wno-unused-parameter', '-g', '-DNDEBUG', '-O3', '-fno-rtti', '-fno-exceptions']
-        v.ASFLAGS_profile = ['-pipe', '-g', '-DNDEBUG', '-O3']
-        v.LINKFLAGS_profile = ['-pipe', '-g']
+        v.CFLAGS_profile = ['-pipe', '-g', '-DNDEBUG', '-O3'] + v.CFLAGS_profile
+        v.CXXFLAGS_profile = ['-pipe', '-Wno-unused-parameter', '-g', '-DNDEBUG', '-O3', '-fno-rtti', '-fno-exceptions'] + v.CXXFLAGS_profile
+        v.ASFLAGS_profile = ['-pipe', '-g', '-DNDEBUG', '-O3'] + v.ASFLAGS_profile
+        v.LINKFLAGS_profile = ['-pipe', '-g'] + v.LINKFLAGS_profile
 
         v.CXXFLAGS_exception = ['-fexceptions']
         v.CXXFLAGS_rtti = ['-frtti']
 
-        v.CFLAGS_final = ['-pipe', '-g', '-DNDEBUG', '-O3']
-        v.CXXFLAGS_final = ['-pipe', '-Wno-unused-parameter', '-g', '-DNDEBUG', '-O3', '-fno-rtti', '-fno-exceptions']
-        v.ASFLAGS_final = ['-pipe', '-g', '-DNDEBUG', '-O3']
-        v.LINKFLAGS_final = ['-pipe', '-g']
+        v.CFLAGS_final = ['-pipe', '-g', '-DNDEBUG', '-O3'] + v.CFLAGS_final
+        v.CXXFLAGS_final = ['-pipe', '-Wno-unused-parameter', '-g', '-DNDEBUG', '-O3', '-fno-rtti', '-fno-exceptions'] + v.CXXFLAGS_final
+        v.ASFLAGS_final = ['-pipe', '-g', '-DNDEBUG', '-O3'] + v.ASFLAGS_final
+        v.LINKFLAGS_final = ['-pipe', '-g'] + v.LINKFLAGS_final
 
     def set_warning_options(self, conf):
         v = conf.env
-        v.CFLAGS_warnnone = ['-w']
-        v.CXXFLAGS_warnnone = ['-w']
-        v.CFLAGS_warnall = ['-std=c99', '-Wall', '-Wextra', '-pedantic', '-Winline', '-Werror', '-Wstrict-aliasing']
+        v.CFLAGS_warnnone = ['-w'] + v.CFLAGS_warnnone
+        v.CXXFLAGS_warnnone = ['-w'] + v.CXXFLAGS_warnnone
+        v.CFLAGS_warnall = ['-std=c99', '-Wall', '-Wextra', '-pedantic', '-Winline', '-Werror', '-Wstrict-aliasing'] + v.CFLAGS_warnall
         v.CXXFLAGS_warnall = ['-Wall', '-Wextra', '-Werror', '-Wno-sign-compare',
-                              '-Woverloaded-virtual', '-Wno-invalid-offsetof', '-Wstrict-aliasing']
+                              '-Woverloaded-virtual', '-Wno-invalid-offsetof', '-Wstrict-aliasing'] + v.CXXFLAGS_warnall
 
     def find_target_program(self, conf, platform, program, mandatory=False):
         sys_dirs = self.directories + platform.directories
