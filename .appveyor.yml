@@ -44,13 +44,6 @@ environment:
       FLAVOR: final
 
     - COMPILER: gcc
-      COMPILER_TARGET: amd64
-      COMPILER_VERSION: 6.3.0
-      TARGET_OS: windows_amd64
-      COMPILER_PATH: C:\msys64\usr\bin;c:\msys64\mingw32\bin;c:\msys64\mingw64\bin
-      FLAVOR: debug
-
-    - COMPILER: gcc
       COMPILER_TARGET: x86
       COMPILER_VERSION: 5.3.0
       TARGET_OS: windows_x86
@@ -70,13 +63,6 @@ environment:
       TARGET_OS: windows_x86
       COMPILER_PATH: C:\MinGW\msys\1.0\bin;C:\MinGW\bin
       FLAVOR: final
-
-    - COMPILER: clang
-      COMPILER_TARGET: amd64
-      COMPILER_VERSION: 4.0.0
-      TARGET_OS: windows_amd64
-      COMPILER_PATH: C:\Program Files\LLVM\bin;C:\Libraries\llvm-4.0.0\bin;C:\Libraries\llvm-5.0.0\bin
-      FLAVOR: debug
 
     - COMPILER: gcc
       COMPILER_TARGET: amd64
@@ -118,18 +104,198 @@ environment:
       COMPILER_VERSION: 6.4.0
       TARGET_OS: windows_x86
       COMPILER_PATH: C:\cygwin\bin
+      FLAVOR: final
+
+    - COMPILER: msvc
+      COMPILER_TARGET: x86
+      COMPILER_VERSION: 15.0
+      TARGET_OS: windows_x86
+      FLAVOR: debug
+      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+
+    - COMPILER: msvc
+      COMPILER_TARGET: x86
+      COMPILER_VERSION: 15.0
+      TARGET_OS: windows_x86
+      FLAVOR: profile
+      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+
+    - COMPILER: msvc
+      COMPILER_TARGET: x86
+      COMPILER_VERSION: 15.0
+      TARGET_OS: windows_x86
+      FLAVOR: final
+      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+
+    - COMPILER: msvc
+      COMPILER_TARGET: x64
+      COMPILER_VERSION: 15.0
+      TARGET_OS: windows_amd64
+      FLAVOR: debug
+      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+
+    - COMPILER: msvc
+      COMPILER_TARGET: x64
+      COMPILER_VERSION: 15.0
+      TARGET_OS: windows_amd64
+      FLAVOR: profile
+      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+
+    - COMPILER: msvc
+      COMPILER_TARGET: x64
+      COMPILER_VERSION: 15.0
+      TARGET_OS: windows_amd64
+      FLAVOR: final
+      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+
+    - COMPILER: msvc
+      COMPILER_TARGET: x86
+      COMPILER_VERSION: 9.0
+      TARGET_OS: windows_x86
+      FLAVOR: debug
+
+    - COMPILER: msvc
+      COMPILER_TARGET: x86
+      COMPILER_VERSION: 9.0
+      TARGET_OS: windows_x86
+      FLAVOR: profile
+
+    - COMPILER: msvc
+      COMPILER_TARGET: x86
+      COMPILER_VERSION: 9.0
+      TARGET_OS: windows_x86
+      FLAVOR: final
+
+    - COMPILER: msvc
+      COMPILER_TARGET: x86
+      COMPILER_VERSION: 10.0
+      TARGET_OS: windows_x86
+      FLAVOR: debug
+
+    - COMPILER: msvc
+      COMPILER_TARGET: x86
+      COMPILER_VERSION: 10.0
+      TARGET_OS: windows_x86
+      FLAVOR: profile
+
+    - COMPILER: msvc
+      COMPILER_TARGET: x86
+      COMPILER_VERSION: 10.0
+      TARGET_OS: windows_x86
+      FLAVOR: final
+
+    - COMPILER: msvc
+      COMPILER_TARGET: x86
+      COMPILER_VERSION: 11.0
+      TARGET_OS: windows_x86
+      FLAVOR: debug
+
+    - COMPILER: msvc
+      COMPILER_TARGET: x86
+      COMPILER_VERSION: 11.0
+      TARGET_OS: windows_x86
+      FLAVOR: profile
+
+    - COMPILER: msvc
+      COMPILER_TARGET: x86
+      COMPILER_VERSION: 11.0
+      TARGET_OS: windows_x86
+      FLAVOR: final
+
+    - COMPILER: msvc
+      COMPILER_TARGET: x86_amd64
+      COMPILER_VERSION: 11.0
+      TARGET_OS: windows_amd64
+      FLAVOR: debug
+
+    - COMPILER: msvc
+      COMPILER_TARGET: x86_amd64
+      COMPILER_VERSION: 11.0
+      TARGET_OS: windows_amd64
+      FLAVOR: profile
+
+    - COMPILER: msvc
+      COMPILER_TARGET: x86_amd64
+      COMPILER_VERSION: 11.0
+      TARGET_OS: windows_amd64
+      FLAVOR: final
+
+    - COMPILER: msvc
+      COMPILER_TARGET: x86
+      COMPILER_VERSION: 12.0
+      TARGET_OS: windows_x86
+      FLAVOR: debug
+
+    - COMPILER: msvc
+      COMPILER_TARGET: x86
+      COMPILER_VERSION: 12.0
+      TARGET_OS: windows_x86
+      FLAVOR: profile
+
+    - COMPILER: msvc
+      COMPILER_TARGET: x86
+      COMPILER_VERSION: 12.0
+      TARGET_OS: windows_x86
+      FLAVOR: final
+
+    - COMPILER: msvc
+      COMPILER_TARGET: x64
+      COMPILER_VERSION: 12.0
+      TARGET_OS: windows_amd64
+      FLAVOR: debug
+
+    - COMPILER: msvc
+      COMPILER_TARGET: x64
+      COMPILER_VERSION: 12.0
+      TARGET_OS: windows_amd64
+      FLAVOR: profile
+
+    - COMPILER: msvc
+      COMPILER_TARGET: x64
+      COMPILER_VERSION: 12.0
+      TARGET_OS: windows_amd64
+      FLAVOR: final
+
+    - COMPILER: msvc
+      COMPILER_TARGET: x86
+      COMPILER_VERSION: 14.0
+      TARGET_OS: windows_x86
+      FLAVOR: debug
+
+    - COMPILER: msvc
+      COMPILER_TARGET: x86
+      COMPILER_VERSION: 14.0
+      TARGET_OS: windows_x86
+      FLAVOR: profile
+
+    - COMPILER: msvc
+      COMPILER_TARGET: x86
+      COMPILER_VERSION: 14.0
+      TARGET_OS: windows_x86
+      FLAVOR: final
+
+    - COMPILER: msvc
+      COMPILER_TARGET: x64
+      COMPILER_VERSION: 14.0
+      TARGET_OS: windows_amd64
+      FLAVOR: debug
+
+    - COMPILER: msvc
+      COMPILER_TARGET: x64
+      COMPILER_VERSION: 14.0
+      TARGET_OS: windows_amd64
+      FLAVOR: profile
+
+    - COMPILER: msvc
+      COMPILER_TARGET: x64
+      COMPILER_VERSION: 14.0
+      TARGET_OS: windows_amd64
       FLAVOR: final
 
 
 build_script:
   - set PATH=%COMPILER_PATH%;%PATH%
   - set
-  - dir C:\mingw-w64
-  - dir "C:/Program Files/LLVM/bin"
-  - dir "C:/Libraries/llvm-4.0.0"
-  - dir "C:/Libraries/llvm-5.0.0"
-  - dir "C:/mingw-w64/i686-5.3.0-posix-dwarf-rt_v4-rev0/"
-  - dir "C:/mingw-w64/i686-6.3.0-posix-dwarf-rt_v5-rev1/"
   - python waf configure --compilers=%COMPILER%
   - python waf build:%TARGET_OS%-%COMPILER%_%COMPILER_TARGET%-%COMPILER_VERSION%:%FLAVOR%
   - python waf build:%TARGET_OS%-%COMPILER%_%COMPILER_TARGET%-%COMPILER_VERSION%:%FLAVOR% --static
