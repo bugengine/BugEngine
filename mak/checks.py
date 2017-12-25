@@ -224,8 +224,10 @@ def run_pkg_config(conf, name):
     for l in lib_paths:
         config_file = os.path.join(l, 'pkgconfig', name+'.pc')
         if os.path.isfile(config_file):
+            print('pkg onfig for %s: %s' % (name, config_file))
             break
     else:
+        print('np pkg onfig for %s' % name)
         raise Errors.WafError('No pkg-config file for library %s'%name)
 
     if not sysroot:
@@ -237,6 +239,7 @@ def run_pkg_config(conf, name):
         lines = config.readlines()
         for line in lines:
             line = line.strip()
+            print(' %s: %s' % (name, line))
             if not line:
                 continue
             if line[0] == '#':
@@ -286,6 +289,7 @@ def run_pkg_config(conf, name):
 
 @conf
 def pkg_config(conf, name, var=''):
+    print('running pkg_config for %s' % name)
     if not var: var = conf.path.name
     cflags, libs, ldflags = conf.run_pkg_config(name)
     conf.env['check_%s' % var] = True
@@ -293,6 +297,7 @@ def pkg_config(conf, name, var=''):
     conf.env['check_%s_cxxflags'%var] += cflags
     conf.env['check_%s_ldflags'%var] += ldflags
     conf.env['check_%s_libs'%var] += libs
+    print('%s: done' % name)
 
 
 def configure(conf):
