@@ -1,6 +1,7 @@
 from waflib import Utils, ConfigSet, Errors, Logs
 from waflib.Configure import conf
 from waflib.TaskGen import feature, before_method, after_method
+import platform
 import os
 import sys
 
@@ -224,17 +225,19 @@ def run_pkg_config(conf, name):
     for l in lib_paths:
         config_file = os.path.join(l, 'pkgconfig', name+'.pc')
         if os.path.isfile(config_file):
-            print('pkg onfig for %s: %s' % (name, config_file))
             break
     else:
-        print('np pkg onfig for %s' % name)
         raise Errors.WafError('No pkg-config file for library %s'%name)
 
     if not sysroot:
-        sysroot = os.path.normpath(config_file)
-        sysroot, usr = os.path.split(sysroot)
-        while usr != 'usr' and sysroot:
-            sysroot, usr = os.path.split(sysroot)
+        os_name = platform.uname()[0].lower().split('-')[0]
+        if os_name == 'windows':
+            sysroot = os.path.dirname(config_file)
+            sysroot = os.path.dirname(sysroot)
+            sysroot = os.path.dirname(sysroot)
+            sysroot = os.path.dirname(sysroot)
+        else:
+            sysroot = ''
     with open(config_file, 'r') as config:
         lines = config.readlines()
         for line in lines:
@@ -289,7 +292,6 @@ def run_pkg_config(conf, name):
 
 @conf
 def pkg_config(conf, name, var=''):
-    print('running pkg_config for %s' % name)
     if not var: var = conf.path.name
     cflags, libs, ldflags = conf.run_pkg_config(name)
     conf.env['check_%s' % var] = True
@@ -297,7 +299,6 @@ def pkg_config(conf, name, var=''):
     conf.env['check_%s_cxxflags'%var] += cflags
     conf.env['check_%s_ldflags'%var] += ldflags
     conf.env['check_%s_libs'%var] += libs
-    print('%s: done' % name)
 
 
 def configure(conf):
