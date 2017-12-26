@@ -238,7 +238,6 @@ def run_pkg_config(conf, name):
             sysroot = os.path.dirname(sysroot)
             sysroot = os.path.dirname(sysroot)
             sysroot = os.path.dirname(sysroot)
-            print(sysroot)
         else:
             sysroot = ''
     with open(config_file, 'r') as config:
