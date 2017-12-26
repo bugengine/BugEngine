@@ -23,13 +23,6 @@ environment:
       FLAVOR: final
 
     - COMPILER: gcc
-      COMPILER_TARGET: amd64
-      COMPILER_VERSION: 7.2.0
-      TARGET_OS: windows_amd64
-      COMPILER_PATH: C:\msys64\mingw32\bin;C:\msys64\mingw64\bin;C:\msys64\usr\bin
-      FLAVOR: final
-
-    - COMPILER: gcc
       COMPILER_TARGET: x86
       COMPILER_VERSION: 6.3.0
       TARGET_OS: windows_x86
