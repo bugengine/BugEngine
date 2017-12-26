@@ -5,6 +5,7 @@ import platform
 import os
 import sys
 
+os_name = platform.uname()[0].lower().split('-')[0]
 USE_LIBRARY_CODE="""
 %(include)s
 #if defined(_WIN32) && !defined(__clang__)
@@ -236,13 +237,13 @@ def run_pkg_config(conf, name):
             sysroot = os.path.dirname(sysroot)
             sysroot = os.path.dirname(sysroot)
             sysroot = os.path.dirname(sysroot)
+            print(sysroot)
         else:
             sysroot = ''
     with open(config_file, 'r') as config:
         lines = config.readlines()
         for line in lines:
             line = line.strip()
-            print(' %s: %s' % (name, line))
             if not line:
                 continue
             if line[0] == '#':
@@ -257,6 +258,7 @@ def run_pkg_config(conf, name):
                     value = os.path.join(sysroot, value[1:])
                 value = value.replace('${', '{')
                 value = value.format(value, **expand)
+                print(var_name, value)
                 expand[var_name] = value
                 continue
             pos = line.find(':')
