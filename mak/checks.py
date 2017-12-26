@@ -225,6 +225,7 @@ def run_pkg_config(conf, name):
     lib_paths = [extend_lib_path(l) for l in lib_paths]
     for l in lib_paths:
         config_file = os.path.join(l, 'pkgconfig', name+'.pc')
+        config_file = os.path.normpath(config_file)
         if os.path.isfile(config_file):
             break
     else:
