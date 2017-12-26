@@ -259,7 +259,6 @@ def run_pkg_config(conf, name):
                     value = os.path.join(sysroot, value[1:])
                 value = value.replace('${', '{')
                 value = value.format(value, **expand)
-                print(var_name, value)
                 expand[var_name] = value
                 continue
             pos = line.find(':')
