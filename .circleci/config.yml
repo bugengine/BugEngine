@@ -1,6 +1,6 @@
 version: 2
 jobs:
-  build:
+  linux:
     docker:
       - image: bugengine/bugengine:latest
     steps:
@@ -80,3 +80,12 @@ jobs:
       - run:
           name: Build Clang Final without master
           command: python waf build:linux_amd64-clang_amd64-4.0.1:final --nomaster
+  macos:
+    macos:
+      xcode: "9.1.0"
+    steps:
+      - checkout
+      - run:
+          name: Configure
+          command: python waf configure
+
