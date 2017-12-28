@@ -95,7 +95,7 @@ BugEngine::Kernel::Kernel::KernelList&  getKernelList_%(module)s();
 
 %(Name)sTask::Kernel::~Kernel()
 {
-    this->KernelList::item::unhook();
+    KernelList::item::unhook();
 }
 
 ref<%(Name)sTask::Kernel> %(Name)sTask::s_kernel = ref<%(Name)sTask::Kernel>::create(BugEngine::Arena::game());
