@@ -89,3 +89,9 @@ jobs:
           name: Configure
           command: python waf configure
 
+workflows:
+  version: 2
+  build:
+    jobs:
+      - linux
+      - macos
