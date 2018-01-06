@@ -28,6 +28,8 @@ addons:
      - libogg-dev
      - libvorbis-dev
 
+before_script:
+  - /usr/local/android-sdk/tools/bin/sdkmanager "ndk-bundle"
 
 matrix:
   include:
