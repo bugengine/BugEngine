@@ -1,15 +1,6 @@
-language: android
+language: cpp
 
 sudo: false
-
-android:
-  components:
-    - tools
-    - platform-tools
-    - tools
-    - build-tools-27.0.3
-    - ndk-bundle
-    - android-26
 
 addons:
   apt:
@@ -28,9 +19,6 @@ addons:
      - libogg-dev
      - libvorbis-dev
 
-before_script:
-  - /usr/local/android-sdk/tools/bin/sdkmanager "ndk-bundle"
-
 matrix:
   include:
     - os: linux
@@ -40,10 +28,13 @@ matrix:
     - os: linux
       env: COMPILER=gcc_amd64 COMPILER_VERSION=4.8.4 TARGET_OS=linux_amd64 FLAVOR=final
     - os: linux
+      language: android
       env: COMPILER=clang_amd64 COMPILER_VERSION=3.9.0 TARGET_OS=linux_amd64 FLAVOR=debug
     - os: linux
+      language: android
       env: COMPILER=clang_amd64 COMPILER_VERSION=3.9.0 TARGET_OS=linux_amd64 FLAVOR=profile
     - os: linux
+      language: android
       env: COMPILER=clang_amd64 COMPILER_VERSION=3.9.0 TARGET_OS=linux_amd64 FLAVOR=final
     - os: linux
       env: COMPILER=gcc_x86 COMPILER_VERSION=4.2.1 TARGET_OS=windows_x86 FLAVOR=debug
