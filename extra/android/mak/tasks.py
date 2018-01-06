@@ -1,14 +1,77 @@
-from waflib import Task, Errors
+from waflib import Task, Errors, Context
 
 
-DEX_RE = '**/*.class'
+
+class android_manifest(Task.Task):
+    """
+    Create an apk file
+    """
+    color   = 'PINK'
+    def run(self):
+        MANIFEST_SKELETON = """<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.%(publisher)s.%(app)s"
+    android:versionCode="%(version_code)d"
+    android:versionName="%(version)s">
+    <application
+            android:label="@string/bugengine_activity"
+            android:debuggable="true">
+        <activity android:name="com.bugengine.BugEngineActivity"
+                  android:enabled="false"
+                  android:theme="@android:style/Theme.NoTitleBar.Fullscreen"
+                  android:launchMode="singleTask"
+                  android:configChanges="orientation|keyboardHidden">
+        </activity>
+        %(activities)s
+    </application>
+    <uses-feature android:glEsVersion="0x00020000"/>
+    <uses-sdk android:minSdkVersion="5"/>
+</manifest>
+"""
+
+        ACTIVITY_SKELETON = """<activity-alias android:label="%(task_gen)s"
+                android:name=".%(task_gen)s"
+                android:targetActivity="com.bugengine.BugEngineActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+            <meta-data android:name="app"
+                       android:value="%(task_gen)s" />
+        </activity-alias>"""
+
+
+        appname = getattr(Context.g_module, Context.APPNAME, self.generator.bld.srcnode.name)
+        publisher = getattr(Context.g_module, 'PUBLISHER', 'Unknown')
+        version = getattr(Context.g_module, Context.VERSION, '1.0')
+        version_code = 1 # TODO
+        apps = []
+        multiarch = len(self.generator.bld.multiarch_envs) > 1
+        for group in self.generator.bld.groups:
+            for task_gen in group:
+                if multiarch:
+                    if 'multiarch' in task_gen.features:
+                        if 'game' in self.generator.bld.get_tgen_by_name(task_gen.use[0]).features:
+                            apps.append(task_gen)
+                else:
+                    if 'game' in task_gen.features:
+                        apps.append(task_gen)
+        values = {
+            'app': appname.lower(),
+            'publisher': publisher.lower().replace(' ', ''),
+            'version': version,
+            'version_code': version_code,
+            'activities': '\n        '.join([ACTIVITY_SKELETON % {'task_gen':tg.name} for tg in apps])
+        }
+        self.outputs[0].write(MANIFEST_SKELETON % values)
+
 
 class aapt_create(Task.Task):
     """
     Create an apk file
     """
     color   = 'PINK'
-    run_str = '${AAPT} package ${AAPTFLAGS} -M ${MANIFEST} -S ${RESOURCE_PATH} -F ${TGT}'
+    run_str = '${AAPT} package -f ${AAPTFLAGS} -M ${MANIFEST} -S ${RESOURCE_PATH} -F ${TGT}'
 
 
 class copy(Task.Task):
@@ -75,6 +138,7 @@ class dex(Task.Task):
     """
     Create a dex file
     """
+    DEX_RE = '**/*.class'
     color   = 'GREEN'
     run_str = '${JAVA} -jar ${DEX} ${DEXCREATE} ${DEX_TGT_PATTERN:OUTPUT_FILES} ${DEXOPTS} ${INPUT_FILES}'
 
@@ -87,9 +151,8 @@ class dex(Task.Task):
             if not t.hasrun:
                 return Task.ASK_LATER
         if not self.inputs:
-            global DEX_RE
             try:
-                self.inputs = [x for x in self.outdir.ant_glob(DEX_RE, remove=False) if id(x) != id(self.outputs[0])]
+                self.inputs = [x for x in self.outdir.ant_glob(self.DEX_RE, remove=False) if id(x) != id(self.outputs[0])]
                 self.env.INPUT_FILES = [x.path_from(self.basedir) for x in self.inputs]
                 self.env.OUTPUT_FILES = [x.path_from(self.basedir) for x in self.outputs]
             except Exception:

@@ -9,16 +9,18 @@
 #include    <cstdlib>
 #include    <cstring>
 
+extern BE_IMPORT const char* s_dataDirectory;
 
 namespace BugEngine
 {
 
 Environment::Environment()
-:   m_homeDirectory("/data/data/com.bugengine")
+:   m_homeDirectory(s_dataDirectory)
 ,   m_dataDirectory(ipath("apk:/assets"))
 ,   m_game("")
 ,   m_user("android")
 {
+    be_assert(s_dataDirectory, "Data directory not set when Environment created");
     m_homeDirectory.push_back(".bugengine");
 }
 

@@ -392,7 +392,7 @@ class QtPlatform(QtObject):
             assert(env)
             sysroot = env.SYSROOT or ''
             self.PE_Profile_AutoDetected = False
-            if 'android' in env.VALID_PLATFORMS:
+            if False and 'android' in env.VALID_PLATFORMS:
                 device = 'Android Device'
                 device_type = 'Android.Device.Type'
             else:
@@ -408,8 +408,8 @@ class QtPlatform(QtObject):
                     ('QtPM4.mkSPecInformation', ''),
                     ('QtSupport.QtInformation', -1),
                 ]
-            icon_path = os.path.join(bld.bugenginenode.abspath(), 'mak', 'icons',
-                                     '%s.png'%env.VALID_PLATFORMS[0])
+            icon_path = os.path.join(bld.bugenginenode.abspath(), 'mak', 'target',
+                                     env.VALID_PLATFORMS[0], 'icon.png')
             icon_extra = os.path.join(bld.bugenginenode.abspath(), 'extra',
                                       env.VALID_PLATFORMS[0], 'icon.png')
             if os.path.isfile(icon_path):
@@ -845,6 +845,7 @@ class QtCreator(Build.BuildContext):
                         else:
                             env = bld_env
                         build_configurations = []
+                        deploy_configurations = []
                         build_configuration_index = 0
                         for variant in self.env.ALL_VARIANTS:
                             build_configurations.append((
@@ -922,8 +923,8 @@ class QtCreator(Build.BuildContext):
                                     ('ProjectExplorer.BuildConfiguration.BuildStepListCount', 2),
                                     ('ProjectExplorer.BuildConfiguration.ClearSystemEnvironment', False),
                                     ('ProjectExplorer.BuildConfiguration.UserEnvironmentChanges', tuple(
-                                        '%s=%s'%(var_name, env[var_name.upper()])
-                                        for var_name in ('Toolchain', 'Variant', 'Prefix', 'Deploy_RootDir',
+                                        '%s=%s'%(var_name, bld_env[var_name.upper()])
+                                        for var_name in ('Toolchain', 'Prefix', 'Deploy_RootDir',
                                                          'Deploy_BinDir', 'Deploy_RunBinDir',
                                                          'Deploy_LibDir', 'Deploy_IncludeDir',
                                                          'Deploy_DataDir')
@@ -938,7 +939,8 @@ class QtCreator(Build.BuildContext):
                                                                         env.DEPLOY_RUNBINDIR),
                                          'TERM=msys',
                                          'Python="%s"' % sys.executable,
-                                         'SrcDir="%s"'% self.bld.srcnode.abspath(),
+                                         'SrcDir="%s"'% self.srcnode.abspath(),
+                                         'Variant=%s' % variant,
                                         )),
                                     ('ProjectExplorer.ProjectConfiguration.DefaultDisplayName', 'Default'),
                                     ('ProjectExplorer.ProjectConfiguration.DisplayName', variant),
@@ -1040,8 +1042,25 @@ class QtCreator(Build.BuildContext):
                             ('ProjectExplorer.Target.ActiveRunConfiguration', 0),
                         ] + build_configurations + [
                             ('ProjectExplorer.Target.BuildConfigurationCount', len(build_configurations)),
-                            ('ProjectExplorer.Target.DeployConfiguration', []),
-                            ('ProjectExplorer.Target.DeployConfigurationCount', 0),
+                            ('ProjectExplorer.Target.DeployConfiguration.0', [
+                                ('ProjectExplorer.BuildConfiguration.BuildStepList.0', [
+                                    ('ProjectExplorer.BuildStepList.Step.0', [
+                                        ('ProjectExplorer.BuildStep.Enabled', True),
+                                        ('ProjectExplorer.ProcessStep.Arguments', '%s deploy:%%{CurrentBuild:Env:Toolchain}:%%{CurrentBuild:Env:Variant}' % sys.argv[0]),
+                                        ('ProjectExplorer.ProcessStep.Command', sys.executable),
+                                        ('ProjectExplorer.ProcessStep.WorkingDirectory', self.srcnode.abspath()),
+                                        ('ProjectExplorer.ProjectConfiguration.DefaultDisplayName', 'Custom Process Step'),
+                                        ('ProjectExplorer.ProjectConfiguration.DisplayName', ''),
+                                        ('ProjectExplorer.ProjectConfiguration.Id', 'ProjectExplorer.ProcessStep'),]),
+                                    ('ProjectExplorer.BuildStepList.StepsCount', 1),
+                                    ('ProjectExplorer.ProjectConfiguration.DefaultDisplayName', 'Deploy'),
+                                    ('ProjectExplorer.ProjectConfiguration.DisplayName', ''),
+                                    ('ProjectExplorer.ProjectConfiguration.Id', 'ProjectExplorer.BuildSteps.Deploy'),]),
+                                ('ProjectExplorer.BuildConfiguration.BuildStepListCount', 1),
+                                ('ProjectExplorer.ProjectConfiguration.DefaultDisplayName', 'Deploy locally'),
+                                ('ProjectExplorer.ProjectConfiguration.DisplayName', 'Qbs Install'),
+                                ('ProjectExplorer.ProjectConfiguration.Id', 'Qbs.Deploy'),]),
+                            ('ProjectExplorer.Target.DeployConfigurationCount', 1),
                             ('ProjectExplorer.Target.PluginSettings', [])
                         ] + run_configurations + [
                             ('ProjectExplorer.Target.RunConfigurationCount', len(run_configurations)),
@@ -1185,7 +1204,7 @@ class Qbs(QtCreator):
                         env = self.all_envs[env.SUB_TOOLCHAINS[0]]
                     if 'android' in env.VALID_PLATFORMS:
                         ndk_root = os.path.dirname(os.path.dirname(env.ANDROID_NDK_PATH))
-                        host_name = os.path.split(os.path.dirname(os.path.dirname(env.CC)))[1]
+                        host_name = os.path.split(os.path.dirname(os.path.dirname(env.CC[0])))[1]
                         version = env_name.split('-')[-1]
                         project_file.write('%s    Depends { name: "Android.ndk" }\n' % indent)
                         project_file.write('%s    Android.ndk.hostArch: "%s"\n' % (indent, host_name))

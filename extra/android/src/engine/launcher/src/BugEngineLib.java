@@ -16,7 +16,7 @@ public class BugEngineLib {
     /**
      * @param packagePath path to the APK
      */
-     public static native void setPaths(String packagePath, String dataDirectory);
+     public static native void setPaths(String packagePath, String dataDirectory, String plugin);
     /**
      * @param width the current view width
      * @param height the current view height

@@ -297,7 +297,6 @@ class AndroidLoader(Configure.ConfigurationContext.Platform):
                     break
 
         def add_compiler_set(compilers):
-            print([c.sysroot for c in compilers])
             archs = [c.arch for c in compilers]
             try:
                 android_sdks =  self.find_android_sdk(k[2], Options.options.android_sdk_path, archs)
@@ -363,8 +362,8 @@ class AndroidLoader(Configure.ConfigurationContext.Platform):
         return result
 
 
-def options(opt):
-    gr = opt.get_option_group('SDK paths and options')
+def options(option_context):
+    option_group = option_context.get_option_group('SDK paths and options')
 
     sdk_path = ''
     ndk_paths = []
@@ -380,25 +379,25 @@ def options(opt):
             p = os.path.join(path, 'ndk-build'+ext)
             if os.path.isfile(p):
                 ndk_paths.append(path)
-    gr.add_option( '--android-sdk',
-                    action='store',
-                    default='all',
-                    dest='android_sdk',
-                    help='Version of the Android SDK to target')
-    gr.add_option( '--android-sdk-path',
-                    action='store',
-                    default=sdk_path,
-                    dest='android_sdk_path',
-                    help='Path to the root of the Android SDK (%s)' % (sdk_path or 'none detected'))
-    gr.add_option( '--android-ndk-path',
-                    action='store',
-                    default=','.join(ndk_paths),
-                    dest='android_ndk_path',
-                    help='Path to the root of the Android NDK (%s)' % (ndk_paths or 'none detected'))
-    opt.recurse('mak/device.py')
+    option_group.add_option('--android-sdk',
+                            action='store',
+                            default='all',
+                            dest='android_sdk',
+                            help='Version of the Android SDK to target')
+    option_group.add_option('--android-sdk-path',
+                            action='store',
+                            default=sdk_path,
+                            dest='android_sdk_path',
+                            help='Path to the root of the Android SDK (%s)' % (sdk_path or 'none detected'))
+    option_group.add_option('--android-ndk-path',
+                            action='store',
+                            default=','.join(ndk_paths),
+                            dest='android_ndk_path',
+                            help='Path to the root of the Android NDK (%s)' % (ndk_paths or 'none detected'))
+    option_context.recurse('mak/device.py')
 
 
-def host_configure(conf):
+def host_configure(configuration_context):
     ndk_paths = Options.options.android_ndk_path.split(',')
     if ndk_paths:
         compiler_paths = []
@@ -410,36 +409,47 @@ def host_configure(conf):
                     if os.path.isdir(toolchain_path):
                         for platform in os.listdir(toolchain_path):
                             compiler_paths.append(os.path.join(toolchain_path, platform, 'bin'))
-        conf.env.append_unique('EXTRA_PATH', compiler_paths)
+        configuration_context.env.append_unique('EXTRA_PATH', compiler_paths)
 
 
-def configure(conf):
+def configure(configuration_context):
     if not Options.options.android_sdk_path or not Options.options.android_ndk_path:
         return
-    conf.start_msg('Checking for Android tools')
+    configuration_context.start_msg('Checking for Android tools')
     try:
-        conf.platforms.append(AndroidLoader(conf))
+        configuration_context.platforms.append(AndroidLoader(configuration_context))
     except Errors.WafError as e:
-        conf.end_msg(str(e), color='YELLOW')
+        configuration_context.end_msg(str(e), color='YELLOW')
     else:
-        conf.end_msg('done')
+        configuration_context.end_msg('done')
 
 
-def setup(conf):
-    conf.start_msg('      `- [android]')
-    category_node = conf.path.make_node('src/3rdparty/android')
+def setup(configuration_context):
+    configuration_context.start_msg('      `- [android]')
+    category_node = configuration_context.path.make_node('src/3rdparty/android')
     for third_party in category_node.listdir():
-        conf.recurse('src/3rdparty/android/%s/%s.py'%(third_party, third_party),
-                     name='setup',
-                     once=False)
-    conf.end_msg('')
+        configuration_context.recurse('src/3rdparty/android/%s/%s.py'%(third_party, third_party),
+                                      name='setup',
+                                      once=False)
+    configuration_context.end_msg('')
 
 
-def build(bld):
-    bld.recurse('mak/build.py')
-    bld.recurse('src/build.py')
+def build(build_context):
+    build_context.recurse('mak/build.py')
+    build_context.recurse('src/build.py')
 
 
-def plugins(bld):
-    bld.recurse('src/build.py')
+def plugins(build_context):
+    build_context.recurse('src/build.py')
 
+
+def deploy(build_context):
+    build_context.recurse('mak/deploy.py')
+
+
+def run(build_context):
+    build_context.recurse('mak/run.py')
+
+
+def debug(build_context):
+    build_context.recurse('mak/debug.py')

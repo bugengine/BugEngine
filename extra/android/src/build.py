@@ -15,12 +15,10 @@ def build(bld):
                    outdir=source_node.find_or_declare('jar'),
                    basedir=source_node.find_or_declare('jar'))
 
-    manifest = root.make_node('AndroidManifest.xml')
     resources = bld(target = 'engine.android.resource',
-                   features=['aapt_resource'],
-                   resource=resource_node,
-                   destfile=root.find_or_declare('resources.apk'),
-                   manifest=manifest)
+                    features=['aapt_resource'],
+                    resource=resource_node,
+                    destfile=root.find_or_declare('resources.apk'))
     outdir = os.path.join(bld.env.PREFIX, bld.optim)
     launcher.install_files(outdir, bld.path.find_or_declare(launcher.destfile))
 
