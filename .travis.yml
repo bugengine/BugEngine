@@ -23,7 +23,7 @@ matrix:
   include:
     - os: linux
       language: android
-      env: COMPILER=gcc_amd64 COMPILER_VERSION=4.8.4 TARGET_OS=linux_amd64 FLAVOR=debug
+      env: COMPILER=gcc COMPILER_VERSION=4.9.x TARGET_OS=android_nougat_7.1 FLAVOR=debug
            CONFIGURE_OPTIONS="--android-sdk-path=/usr/local/android-sdk/ --android-ndk-path=/usr/local/android-sdk/ndk-bundle"
       android:
         components:
@@ -36,7 +36,7 @@ matrix:
         - yes | /usr/local/android-sdk/tools/bin/sdkmanager "ndk-bundle"
     - os: linux
       language: android
-      env: COMPILER=gcc_amd64 COMPILER_VERSION=4.8.4 TARGET_OS=linux_amd64 FLAVOR=profile
+      env: COMPILER=gcc COMPILER_VERSION=4.9.x TARGET_OS=android_nougat_7.1 FLAVOR=profile
            CONFIGURE_OPTIONS="--android-sdk-path=/usr/local/android-sdk/ --android-ndk-path=/usr/local/android-sdk/ndk-bundle"
       android:
         components:
@@ -49,7 +49,124 @@ matrix:
         - yes | /usr/local/android-sdk/tools/bin/sdkmanager "ndk-bundle"
     - os: linux
       language: android
-      env: COMPILER=gcc_amd64 COMPILER_VERSION=4.8.4 TARGET_OS=linux_amd64 FLAVOR=final
+      env: COMPILER=gcc COMPILER_VERSION=4.9.x TARGET_OS=android_nougat_7.1 FLAVOR=final
+           CONFIGURE_OPTIONS="--android-sdk-path=/usr/local/android-sdk/ --android-ndk-path=/usr/local/android-sdk/ndk-bundle"
+      android:
+        components:
+          - tools
+          - platform-tools
+          - tools
+          - build-tools-27.0.3
+          - android-26
+      before_install:
+        - yes | /usr/local/android-sdk/tools/bin/sdkmanager "ndk-bundle"
+    - os: linux
+      language: android
+      env: COMPILER=gcc COMPILER_VERSION=4.9.x TARGET_OS=android_oreo_8.0 FLAVOR=debug
+           CONFIGURE_OPTIONS="--android-sdk-path=/usr/local/android-sdk/ --android-ndk-path=/usr/local/android-sdk/ndk-bundle"
+      android:
+        components:
+          - tools
+          - platform-tools
+          - tools
+          - build-tools-27.0.3
+          - android-26
+      before_install:
+        - yes | /usr/local/android-sdk/tools/bin/sdkmanager "ndk-bundle"
+    - os: linux
+      language: android
+      env: COMPILER=gcc COMPILER_VERSION=4.9.x TARGET_OS=android_oreo_8.0 FLAVOR=profile
+           CONFIGURE_OPTIONS="--android-sdk-path=/usr/local/android-sdk/ --android-ndk-path=/usr/local/android-sdk/ndk-bundle"
+      android:
+        components:
+          - tools
+          - platform-tools
+          - tools
+          - build-tools-27.0.3
+          - android-26
+      before_install:
+        - yes | /usr/local/android-sdk/tools/bin/sdkmanager "ndk-bundle"
+    - os: linux
+      language: android
+      env: COMPILER=gcc COMPILER_VERSION=4.9.x TARGET_OS=android_oreo_8.0 FLAVOR=final
+           CONFIGURE_OPTIONS="--android-sdk-path=/usr/local/android-sdk/ --android-ndk-path=/usr/local/android-sdk/ndk-bundle"
+      android:
+        components:
+          - tools
+          - platform-tools
+          - tools
+          - build-tools-27.0.3
+          - android-26
+      before_install:
+        - yes | /usr/local/android-sdk/tools/bin/sdkmanager "ndk-bundle"
+    - os: linux
+      language: android
+      env: COMPILER=clang COMPILER_VERSION=5.0.300080 TARGET_OS=android_nougat_7.1 FLAVOR=debug
+           CONFIGURE_OPTIONS="--android-sdk-path=/usr/local/android-sdk/ --android-ndk-path=/usr/local/android-sdk/ndk-bundle"
+      android:
+        components:
+          - tools
+          - platform-tools
+          - tools
+          - build-tools-27.0.3
+          - android-26
+      before_install:
+        - yes | /usr/local/android-sdk/tools/bin/sdkmanager "ndk-bundle"
+    - os: linux
+      language: android
+      env: COMPILER=clang COMPILER_VERSION=5.0.300080 TARGET_OS=android_nougat_7.1 FLAVOR=profile
+           CONFIGURE_OPTIONS="--android-sdk-path=/usr/local/android-sdk/ --android-ndk-path=/usr/local/android-sdk/ndk-bundle"
+      android:
+        components:
+          - tools
+          - platform-tools
+          - tools
+          - build-tools-27.0.3
+          - android-26
+      before_install:
+        - yes | /usr/local/android-sdk/tools/bin/sdkmanager "ndk-bundle"
+    - os: linux
+      language: android
+      env: COMPILER=clang COMPILER_VERSION=5.0.300080 TARGET_OS=android_nougat_7.1 FLAVOR=final
+           CONFIGURE_OPTIONS="--android-sdk-path=/usr/local/android-sdk/ --android-ndk-path=/usr/local/android-sdk/ndk-bundle"
+      android:
+        components:
+          - tools
+          - platform-tools
+          - tools
+          - build-tools-27.0.3
+          - android-26
+      before_install:
+        - yes | /usr/local/android-sdk/tools/bin/sdkmanager "ndk-bundle"
+    - os: linux
+      language: android
+      env: COMPILER=clang COMPILER_VERSION=5.0.300080 TARGET_OS=android_oreo_8.0 FLAVOR=debug
+           CONFIGURE_OPTIONS="--android-sdk-path=/usr/local/android-sdk/ --android-ndk-path=/usr/local/android-sdk/ndk-bundle"
+      android:
+        components:
+          - tools
+          - platform-tools
+          - tools
+          - build-tools-27.0.3
+          - android-26
+      before_install:
+        - yes | /usr/local/android-sdk/tools/bin/sdkmanager "ndk-bundle"
+    - os: linux
+      language: android
+      env: COMPILER=clang COMPILER_VERSION=5.0.300080 TARGET_OS=android_oreo_8.0 FLAVOR=profile
+           CONFIGURE_OPTIONS="--android-sdk-path=/usr/local/android-sdk/ --android-ndk-path=/usr/local/android-sdk/ndk-bundle"
+      android:
+        components:
+          - tools
+          - platform-tools
+          - tools
+          - build-tools-27.0.3
+          - android-26
+      before_install:
+        - yes | /usr/local/android-sdk/tools/bin/sdkmanager "ndk-bundle"
+    - os: linux
+      language: android
+      env: COMPILER=clang COMPILER_VERSION=5.0.300080 TARGET_OS=android_oreo_8.0 FLAVOR=final
            CONFIGURE_OPTIONS="--android-sdk-path=/usr/local/android-sdk/ --android-ndk-path=/usr/local/android-sdk/ndk-bundle"
       android:
         components:
