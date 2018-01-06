@@ -22,20 +22,47 @@ addons:
 matrix:
   include:
     - os: linux
+      language: android
+      env: COMPILER=gcc_amd64 COMPILER_VERSION=4.8.4 TARGET_OS=linux_amd64 FLAVOR=debug
+      android:
+        components:
+          - tools
+          - platform-tools
+          - tools
+          - build-tools-27.0.3
+          - android-26
+    - os: linux
+      language: android
+      env: COMPILER=gcc_amd64 COMPILER_VERSION=4.8.4 TARGET_OS=linux_amd64 FLAVOR=profile
+      android:
+        components:
+          - tools
+          - platform-tools
+          - tools
+          - build-tools-27.0.3
+          - android-26
+    - os: linux
+      language: android
+      env: COMPILER=gcc_amd64 COMPILER_VERSION=4.8.4 TARGET_OS=linux_amd64 FLAVOR=final
+      android:
+        components:
+          - tools
+          - platform-tools
+          - tools
+          - build-tools-27.0.3
+          - android-26
+    - os: linux
       env: COMPILER=gcc_amd64 COMPILER_VERSION=4.8.4 TARGET_OS=linux_amd64 FLAVOR=debug
     - os: linux
       env: COMPILER=gcc_amd64 COMPILER_VERSION=4.8.4 TARGET_OS=linux_amd64 FLAVOR=profile
     - os: linux
       env: COMPILER=gcc_amd64 COMPILER_VERSION=4.8.4 TARGET_OS=linux_amd64 FLAVOR=final
     - os: linux
-      language: android
-      env: COMPILER=clang_amd64 COMPILER_VERSION=3.9.0 TARGET_OS=linux_amd64 FLAVOR=debug
+      env: COMPILER=clang_amd64 COMPILER_VERSION=5.0.0 TARGET_OS=linux_amd64 FLAVOR=debug
     - os: linux
-      language: android
-      env: COMPILER=clang_amd64 COMPILER_VERSION=3.9.0 TARGET_OS=linux_amd64 FLAVOR=profile
+      env: COMPILER=clang_amd64 COMPILER_VERSION=5.0.0 TARGET_OS=linux_amd64 FLAVOR=profile
     - os: linux
-      language: android
-      env: COMPILER=clang_amd64 COMPILER_VERSION=3.9.0 TARGET_OS=linux_amd64 FLAVOR=final
+      env: COMPILER=clang_amd64 COMPILER_VERSION=5.0.0 TARGET_OS=linux_amd64 FLAVOR=final
     - os: linux
       env: COMPILER=gcc_x86 COMPILER_VERSION=4.2.1 TARGET_OS=windows_x86 FLAVOR=debug
     - os: linux
