@@ -92,8 +92,8 @@ matrix:
       env: COMPILER=appleclang COMPILER_VERSION=8.1.0 TARGET_OS=iphonesimulator10.3 FLAVOR=final
 
 script:
-  - CC= CXX= ./waf configure
-  - ./waf build:${TARGET_OS}-${COMPILER}-${COMPILER_VERSION}:${FLAVOR} ${CONFIGURE_OPTIONS}
+  - CC= CXX= ./waf configure ${CONFIGURE_OPTIONS}
+  - ./waf build:${TARGET_OS}-${COMPILER}-${COMPILER_VERSION}:${FLAVOR}
   - ./waf build:${TARGET_OS}-${COMPILER}-${COMPILER_VERSION}:${FLAVOR} --static
   - ./waf build:${TARGET_OS}-${COMPILER}-${COMPILER_VERSION}:${FLAVOR} --dynamic
   - ./waf build:${TARGET_OS}-${COMPILER}-${COMPILER_VERSION}:${FLAVOR} --nomaster
