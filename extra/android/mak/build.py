@@ -6,6 +6,8 @@ import os
 @feature('aapt_resource')
 def aapt_resource(self):
     if 'android' in self.env.VALID_PLATFORMS:
+        self.manifest = self.make_bld_node('src', '', 'AndroidManifest.xml')
+        self.manifest_task = self.create_task('android_manifest', [], self.manifest)
         self.resource_task = tsk = self.create_task('aapt_create', self.resource.ant_glob('**/*'), [self.destfile])
         tsk.env.MANIFEST = self.manifest.abspath()
         tsk.env.RESOURCE_PATH = self.resource.abspath()

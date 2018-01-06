@@ -21,24 +21,20 @@ def add_build_command(toolchain, optimisation):
     class Deploy(c[BuildContext]):
         cmd = 'deploy:%s:%s' %(toolchain, optimisation)
         bugengine_variant = toolchain
-
         def execute(self):
             if super(Deploy, self).execute() == "SKIP":
                 return "SKIP"
             else:
                 self.fun = 'deploy'
-                print(self.fun)
-
+                self.recurse(self.bugenginenode.make_node('mak').abspath())
     class Run(Deploy):
         cmd = 'run:%s:%s' %(toolchain, optimisation)
-
         def execute(self):
             if super(Run, self).execute() == "SKIP":
                 return "SKIP"
             else:
                 self.fun = 'run'
-                print(self.fun)
-
+                self.recurse(self.bugenginenode.make_node('mak').abspath())
     class Debug(Deploy):
         cmd = 'debug:%s:%s' %(toolchain, optimisation)
 
@@ -47,7 +43,7 @@ def add_build_command(toolchain, optimisation):
                 return "SKIP"
             else:
                 self.fun = 'debug'
-                print(self.fun)
+                self.recurse(self.bugenginenode.make_node('mak').abspath())
 
 @conf
 class Platform:
@@ -127,8 +123,7 @@ Configure.ConfigurationContext.Platform = Platform
 def options(opt):
     gr = opt.add_option_group('configure options')
     for target in opt.path.make_node('target').listdir():
-        if target.endswith('.py') and not target.endswith('_build.py'):
-            opt.recurse('target/%s'%target)
+        opt.recurse('target/%s/configure.py'%target)
     for extra in opt.bugenginenode.make_node('extra').listdir():
         if os.path.isfile(os.path.join(opt.bugenginenode.abspath(), 'extra', extra, 'wscript')):
             opt.recurse(os.path.join(opt.bugenginenode.abspath(), 'extra', extra))
@@ -146,9 +141,8 @@ def configure(conf):
     platforms = Options.options.platforms
     platforms = platforms.split(',') if platforms else []
     for target in conf.path.make_node('target').listdir():
-        if target.endswith('.py') and not target.endswith('_build.py'):
-            if not platforms or target[:-3] in platforms:
-                conf.recurse('target/%s'%target)
+        if not platforms or target in platforms:
+            conf.recurse('target/%s/configure.py'%target)
     for extra in conf.bugenginenode.make_node('extra').listdir():
         if not platforms or extra in platforms:
             if os.path.isfile(os.path.join(conf.bugenginenode.abspath(), 'extra', extra, 'wscript')):
@@ -162,20 +156,33 @@ def configure(conf):
     conf.env.store('.waf_toolchains.py')
 
 
-def build(bld):
-    if bld.env.VALID_PLATFORMS:
-        if os.path.isdir(os.path.join(bld.bugenginenode.abspath(), 'extra', bld.env.VALID_PLATFORMS[0])):
-            bld.recurse(os.path.join(bld.bugenginenode.abspath(), 'extra', bld.env.VALID_PLATFORMS[0]))
-        if os.path.isfile(os.path.join(bld.path.abspath(), 'target', bld.env.VALID_PLATFORMS[0]+'_build.py')):
-            bld.recurse('target/%s_build'%bld.env.VALID_PLATFORMS[0])
+def recurse_build(build_context, fun):
+    if build_context.env.VALID_PLATFORMS:
+        platform = build_context.env.VALID_PLATFORMS[0]
+        if os.path.isdir(os.path.join(build_context.bugenginenode.abspath(), 'extra', platform)):
+            build_context.recurse(os.path.join(build_context.bugenginenode.abspath(), 'extra', platform))
+        if os.path.isdir(os.path.join(build_context.path.abspath(), 'target', platform)):
+            build_context.recurse('target/%s/%s.py'%(platform, fun))
 
-def plugins(bld):
-    if bld.env.VALID_PLATFORMS:
-        extra = bld.bugenginenode.make_node('extra').make_node(bld.env.VALID_PLATFORMS[0])
-        if os.path.isdir(extra.abspath()):
-            bld.recurse(extra.abspath(), name='plugins')
-        if os.path.isfile(os.path.join(bld.path.abspath(), 'target', bld.env.VALID_PLATFORMS[0]+'_build.py')):
-            bld.recurse('target/%s_build.py'%bld.env.VALID_PLATFORMS[0], name='plugins')
+def build(build_context):
+    recurse_build(build_context, 'build')
+
+
+def plugins(build_context):
+    recurse_build(build_context, 'build')
+
+
+def deploy(build_context):
+    recurse_build(build_context, 'deploy')
+
+
+def run(build_context):
+    recurse_build(build_context, 'run')
+
+
+def debug(build_context):
+    recurse_build(build_context, 'debug')
+
 
 from waflib import ConfigSet
 try:

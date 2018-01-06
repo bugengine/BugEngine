@@ -10,6 +10,7 @@
 
 BE_EXPORT const char* s_packagePath = 0;
 BE_EXPORT const char* s_dataDirectory = 0;
+BE_EXPORT const char* s_plugin = 0;
 
 int beMain(int argc, const char *argv[]);
 
@@ -51,24 +52,27 @@ static intptr_t android_main(intptr_t /*width*/, intptr_t /*height*/)
 {
     BugEngine::ScopedLogListener android_listener(scoped<AndroidLogListener>::create(BugEngine::Arena::debug()));
     BugEngine::Plugin::DynamicObjectList::showList();
-    const char *args[] = { "BugEngine" };
-    return beMain(1, args);
+    const char *args[] = { "BugEngine", s_plugin };
+    return beMain(1 + (s_plugin != 0), args);
 }
 
 }}
 
 extern "C"
 {
-    JNIEXPORT void JNICALL Java_com_bugengine_BugEngineLib_setPaths(JNIEnv* env, jclass cls, jstring packagePath, jstring dataDirectory);
+    JNIEXPORT void JNICALL Java_com_bugengine_BugEngineLib_setPaths(JNIEnv* env, jclass cls,
+                                                                    jstring packagePath, jstring dataDirectory, jstring plugin);
     JNIEXPORT void JNICALL Java_com_bugengine_BugEngineLib_init(JNIEnv* env, jclass cls, jint width, jint height);
     JNIEXPORT void JNICALL Java_com_bugengine_BugEngineLib_step(JNIEnv* env, jclass cls);
 }
 
 static BugEngine::Thread* s_mainThread;
-JNIEXPORT void JNICALL Java_com_bugengine_BugEngineLib_setPaths(JNIEnv* env, jclass /*cls*/, jstring packagePath, jstring dataDirectory)
+JNIEXPORT void JNICALL Java_com_bugengine_BugEngineLib_setPaths(JNIEnv* env, jclass /*cls*/,
+                                                                jstring packagePath, jstring dataDirectory, jstring plugin)
 {
     s_packagePath = env->GetStringUTFChars(packagePath, 0);
     s_dataDirectory = env->GetStringUTFChars(dataDirectory, 0);
+    s_plugin = env->GetStringUTFChars(plugin, 0);
 }
 
 JNIEXPORT void JNICALL Java_com_bugengine_BugEngineLib_init(JNIEnv* /*env*/, jclass /*cls*/, jint width, jint height)

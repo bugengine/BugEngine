@@ -88,6 +88,12 @@ class AdbProtocol(Protocol):
         def start_shell(self):
             subprocess.Popen(('adb', '-s', self.device_name, 'shell')).communicate()
 
+        def install(self, package_file):
+            subprocess.Popen(('adb', '-s', self.device_name, 'install', '-r', package_file)).communicate()
+
+        def start_activity(self, task_gen):
+            pass
+
     def __init__(self, parameters):
         self.android_name = parameters
 

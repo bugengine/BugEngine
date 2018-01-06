@@ -110,6 +110,9 @@ def build(bld):
             TaskGen.task_gen.mappings['.rc'] = rc_hook
 
 
+def deploy(build_context):
+    build_context.recurse('targets.py')
+
 def plugins(bld):
     """
         Recursively calls plugins for host/target so each OS can declare their own platform-specific
