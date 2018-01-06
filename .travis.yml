@@ -24,6 +24,7 @@ matrix:
     - os: linux
       language: android
       env: COMPILER=gcc_amd64 COMPILER_VERSION=4.8.4 TARGET_OS=linux_amd64 FLAVOR=debug
+           CONFIGURE_OPTIONS="--android-sdk-path=/usr/local/android-sdk/ --android-ndk-path=/usr/local/android-sdk/ndk-bundle"
       android:
         components:
           - tools
@@ -31,9 +32,12 @@ matrix:
           - tools
           - build-tools-27.0.3
           - android-26
+      before_script:
+        - echo "y" | /usr/local/android-sdk/tools/bin/sdkmanager "ndk-bundle"
     - os: linux
       language: android
       env: COMPILER=gcc_amd64 COMPILER_VERSION=4.8.4 TARGET_OS=linux_amd64 FLAVOR=profile
+           CONFIGURE_OPTIONS="--android-sdk-path=/usr/local/android-sdk/ --android-ndk-path=/usr/local/android-sdk/ndk-bundle"
       android:
         components:
           - tools
@@ -41,9 +45,12 @@ matrix:
           - tools
           - build-tools-27.0.3
           - android-26
+      before_script:
+        - echo "y" | /usr/local/android-sdk/tools/bin/sdkmanager "ndk-bundle"
     - os: linux
       language: android
       env: COMPILER=gcc_amd64 COMPILER_VERSION=4.8.4 TARGET_OS=linux_amd64 FLAVOR=final
+           CONFIGURE_OPTIONS="--android-sdk-path=/usr/local/android-sdk/ --android-ndk-path=/usr/local/android-sdk/ndk-bundle"
       android:
         components:
           - tools
@@ -51,6 +58,8 @@ matrix:
           - tools
           - build-tools-27.0.3
           - android-26
+      before_script:
+        - echo "y" | /usr/local/android-sdk/tools/bin/sdkmanager "ndk-bundle"
     - os: linux
       env: COMPILER=gcc_amd64 COMPILER_VERSION=4.8.4 TARGET_OS=linux_amd64 FLAVOR=debug
     - os: linux
@@ -84,7 +93,7 @@ matrix:
 
 script:
   - CC= CXX= ./waf configure
-  - ./waf build:${TARGET_OS}-${COMPILER}-${COMPILER_VERSION}:${FLAVOR}
+  - ./waf build:${TARGET_OS}-${COMPILER}-${COMPILER_VERSION}:${FLAVOR} ${CONFIGURE_OPTIONS}
   - ./waf build:${TARGET_OS}-${COMPILER}-${COMPILER_VERSION}:${FLAVOR} --static
   - ./waf build:${TARGET_OS}-${COMPILER}-${COMPILER_VERSION}:${FLAVOR} --dynamic
   - ./waf build:${TARGET_OS}-${COMPILER}-${COMPILER_VERSION}:${FLAVOR} --nomaster
