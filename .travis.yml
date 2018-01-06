@@ -3,8 +3,10 @@ language: android
 sudo: false
 
 android:
-  - build-tools-27.0.3
-  - ndk-bundle
+  components:
+    - build-tools-27.0.3
+    - ndk-bundle
+    - android-26
 
 addons:
   apt:
