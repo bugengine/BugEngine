@@ -174,4 +174,3 @@ bool	btGjkConvexCast::calcTimeOfImpact(
 
 }
 
-#undef MAX_ITERATIONS

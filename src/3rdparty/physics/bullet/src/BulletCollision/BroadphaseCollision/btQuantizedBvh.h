@@ -78,8 +78,10 @@ ATTRIBUTE_ALIGNED16	(struct) btQuantizedBvhNode
 	int	getTriangleIndex() const
 	{
 		btAssert(isLeafNode());
+		unsigned int x=0;
+		unsigned int y = (~(x&0))<<(31-MAX_NUM_PARTS_IN_BITS);
 		// Get only the lower bits where the triangle index is stored
-		return (m_escapeIndexOrTriangleIndex&~((~0u)<<(31-MAX_NUM_PARTS_IN_BITS)));
+		return (m_escapeIndexOrTriangleIndex&~(y));
 	}
 	int	getPartId() const
 	{
@@ -167,7 +169,7 @@ typedef btAlignedObjectArray<btBvhSubtreeInfo>		BvhSubtreeInfoArray;
 
 
 ///The btQuantizedBvh class stores an AABB tree that can be quickly traversed on CPU and Cell SPU.
-///It is used by the btBvhTriangleMeshShape as midphase, and by the btMultiSapBroadphase.
+///It is used by the btBvhTriangleMeshShape as midphase.
 ///It is recommended to use quantization for better performance and lower memory requirements.
 ATTRIBUTE_ALIGNED16(class) btQuantizedBvh
 {

@@ -26,7 +26,7 @@ subject to the following restrictions:
 ///Note that when creating small shapes (derived from btConvexInternalShape), 
 ///you need to make sure to set a smaller collision margin, using the 'setMargin' API
 ///There is a automatic mechanism 'setSafeMargin' used by btBoxShape and btCylinderShape
-class btConvexInternalShape : public btConvexShape
+ATTRIBUTE_ALIGNED16(class) btConvexInternalShape : public btConvexShape
 {
 
 	protected:
@@ -44,7 +44,7 @@ class btConvexInternalShape : public btConvexShape
 
 public:
 
-	
+	BT_DECLARE_ALIGNED_ALLOCATOR();
 
 	virtual ~btConvexInternalShape()
 	{
@@ -171,6 +171,9 @@ SIMD_FORCE_INLINE	const char*	btConvexInternalShape::serialize(void* dataBuffer,
 	m_implicitShapeDimensions.serializeFloat(shapeData->m_implicitShapeDimensions);
 	m_localScaling.serializeFloat(shapeData->m_localScaling);
 	shapeData->m_collisionMargin = float(m_collisionMargin);
+
+	// Fill padding with zeros to appease msan.
+	shapeData->m_padding = 0;
 
 	return "btConvexInternalShapeData";
 }
