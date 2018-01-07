@@ -39,7 +39,7 @@ ATTRIBUTE_ALIGNED16(class) btBvhTriangleMeshShape : public btTriangleMeshShape
 
 	bool m_useQuantizedAabbCompression;
 	bool m_ownsBvh;
-#ifdef __clang__
+#if defined(__clang__) && (__clang_major__ > 3 || (__clang_major__ == 3 && __clang_minor__ > 3))
 	bool m_pad[11] __attribute__((unused));////need padding due to alignment
 #else
 	bool m_pad[11];////need padding due to alignment

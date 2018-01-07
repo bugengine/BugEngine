@@ -184,7 +184,7 @@ void	btSoftMultiBodyDynamicsWorld::debugDrawWorld()
 
 
 
-struct btSoftSingleRayCallback : public btBroadphaseRayCallback
+struct btSoftSingleMultiBodyRayCallback : public btBroadphaseRayCallback
 {
 	btVector3	m_rayFromWorld;
 	btVector3	m_rayToWorld;
@@ -195,7 +195,7 @@ struct btSoftSingleRayCallback : public btBroadphaseRayCallback
 	const btSoftMultiBodyDynamicsWorld*	m_world;
 	btCollisionWorld::RayResultCallback&	m_resultCallback;
 
-	btSoftSingleRayCallback(const btVector3& rayFromWorld,const btVector3& rayToWorld,const btSoftMultiBodyDynamicsWorld* world,btCollisionWorld::RayResultCallback& resultCallback)
+	btSoftSingleMultiBodyRayCallback(const btVector3& rayFromWorld,const btVector3& rayToWorld,const btSoftMultiBodyDynamicsWorld* world,btCollisionWorld::RayResultCallback& resultCallback)
 	:m_rayFromWorld(rayFromWorld),
 	m_rayToWorld(rayToWorld),
 	m_world(world),
@@ -266,7 +266,7 @@ void	btSoftMultiBodyDynamicsWorld::rayTest(const btVector3& rayFromWorld, const 
 	BT_PROFILE("rayTest");
 	/// use the broadphase to accelerate the search for objects, based on their aabb
 	/// and for each object with ray-aabb overlap, perform an exact ray test
-	btSoftSingleRayCallback rayCB(rayFromWorld,rayToWorld,this,resultCallback);
+	btSoftSingleMultiBodyRayCallback rayCB(rayFromWorld,rayToWorld,this,resultCallback);
 
 #ifndef USE_BRUTEFORCE_RAYBROADPHASE
 	m_broadphasePairCache->rayTest(rayFromWorld,rayToWorld,rayCB);
