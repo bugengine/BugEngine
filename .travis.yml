@@ -25,6 +25,7 @@ matrix:
       language: android
       env: COMPILER=gcc COMPILER_VERSION=4.9.x TARGET_OS=android_nougat_7.1 FLAVOR=debug
            CONFIGURE_OPTIONS="--android-sdk-path=/usr/local/android-sdk/ --android-ndk-path=/usr/local/android-sdk/ndk-bundle"
+           BUILD_DYNAMIC=no BUILD_STATIC=no
       android:
         components:
           - tools
@@ -38,6 +39,7 @@ matrix:
       language: android
       env: COMPILER=gcc COMPILER_VERSION=4.9.x TARGET_OS=android_nougat_7.1 FLAVOR=profile
            CONFIGURE_OPTIONS="--android-sdk-path=/usr/local/android-sdk/ --android-ndk-path=/usr/local/android-sdk/ndk-bundle"
+           BUILD_DYNAMIC=no BUILD_STATIC=no
       android:
         components:
           - tools
@@ -51,6 +53,7 @@ matrix:
       language: android
       env: COMPILER=gcc COMPILER_VERSION=4.9.x TARGET_OS=android_nougat_7.1 FLAVOR=final
            CONFIGURE_OPTIONS="--android-sdk-path=/usr/local/android-sdk/ --android-ndk-path=/usr/local/android-sdk/ndk-bundle"
+           BUILD_DYNAMIC=no BUILD_STATIC=no
       android:
         components:
           - tools
@@ -64,6 +67,7 @@ matrix:
       language: android
       env: COMPILER=gcc COMPILER_VERSION=4.9.x TARGET_OS=android_oreo_8.0 FLAVOR=debug
            CONFIGURE_OPTIONS="--android-sdk-path=/usr/local/android-sdk/ --android-ndk-path=/usr/local/android-sdk/ndk-bundle"
+           BUILD_DYNAMIC=no BUILD_STATIC=no
       android:
         components:
           - tools
@@ -77,6 +81,7 @@ matrix:
       language: android
       env: COMPILER=gcc COMPILER_VERSION=4.9.x TARGET_OS=android_oreo_8.0 FLAVOR=profile
            CONFIGURE_OPTIONS="--android-sdk-path=/usr/local/android-sdk/ --android-ndk-path=/usr/local/android-sdk/ndk-bundle"
+           BUILD_DYNAMIC=no BUILD_STATIC=no
       android:
         components:
           - tools
@@ -90,6 +95,7 @@ matrix:
       language: android
       env: COMPILER=gcc COMPILER_VERSION=4.9.x TARGET_OS=android_oreo_8.0 FLAVOR=final
            CONFIGURE_OPTIONS="--android-sdk-path=/usr/local/android-sdk/ --android-ndk-path=/usr/local/android-sdk/ndk-bundle"
+           BUILD_DYNAMIC=no BUILD_STATIC=no
       android:
         components:
           - tools
@@ -103,6 +109,7 @@ matrix:
       language: android
       env: COMPILER=clang COMPILER_VERSION=5.0.300080 TARGET_OS=android_nougat_7.1 FLAVOR=debug
            CONFIGURE_OPTIONS="--android-sdk-path=/usr/local/android-sdk/ --android-ndk-path=/usr/local/android-sdk/ndk-bundle"
+           BUILD_DYNAMIC=no BUILD_STATIC=no
       android:
         components:
           - tools
@@ -116,6 +123,7 @@ matrix:
       language: android
       env: COMPILER=clang COMPILER_VERSION=5.0.300080 TARGET_OS=android_nougat_7.1 FLAVOR=profile
            CONFIGURE_OPTIONS="--android-sdk-path=/usr/local/android-sdk/ --android-ndk-path=/usr/local/android-sdk/ndk-bundle"
+           BUILD_DYNAMIC=no BUILD_STATIC=no
       android:
         components:
           - tools
@@ -129,6 +137,7 @@ matrix:
       language: android
       env: COMPILER=clang COMPILER_VERSION=5.0.300080 TARGET_OS=android_nougat_7.1 FLAVOR=final
            CONFIGURE_OPTIONS="--android-sdk-path=/usr/local/android-sdk/ --android-ndk-path=/usr/local/android-sdk/ndk-bundle"
+           BUILD_DYNAMIC=no BUILD_STATIC=no
       android:
         components:
           - tools
@@ -142,6 +151,7 @@ matrix:
       language: android
       env: COMPILER=clang COMPILER_VERSION=5.0.300080 TARGET_OS=android_oreo_8.0 FLAVOR=debug
            CONFIGURE_OPTIONS="--android-sdk-path=/usr/local/android-sdk/ --android-ndk-path=/usr/local/android-sdk/ndk-bundle"
+           BUILD_DYNAMIC=no BUILD_STATIC=no
       android:
         components:
           - tools
@@ -155,6 +165,7 @@ matrix:
       language: android
       env: COMPILER=clang COMPILER_VERSION=5.0.300080 TARGET_OS=android_oreo_8.0 FLAVOR=profile
            CONFIGURE_OPTIONS="--android-sdk-path=/usr/local/android-sdk/ --android-ndk-path=/usr/local/android-sdk/ndk-bundle"
+           BUILD_DYNAMIC=no BUILD_STATIC=no
       android:
         components:
           - tools
@@ -168,6 +179,7 @@ matrix:
       language: android
       env: COMPILER=clang COMPILER_VERSION=5.0.300080 TARGET_OS=android_oreo_8.0 FLAVOR=final
            CONFIGURE_OPTIONS="--android-sdk-path=/usr/local/android-sdk/ --android-ndk-path=/usr/local/android-sdk/ndk-bundle"
+           BUILD_DYNAMIC=no BUILD_STATIC=no
       android:
         components:
           - tools
@@ -211,10 +223,10 @@ matrix:
 script:
   - CC= CXX= ./waf configure ${CONFIGURE_OPTIONS}
   - ./waf build:${TARGET_OS}-${COMPILER}-${COMPILER_VERSION}:${FLAVOR}
-  - ./waf build:${TARGET_OS}-${COMPILER}-${COMPILER_VERSION}:${FLAVOR} --static
-  - ./waf build:${TARGET_OS}-${COMPILER}-${COMPILER_VERSION}:${FLAVOR} --dynamic
-  - ./waf build:${TARGET_OS}-${COMPILER}-${COMPILER_VERSION}:${FLAVOR} --nomaster
-  - ./waf build:${TARGET_OS}-${COMPILER}-${COMPILER_VERSION}:${FLAVOR} --nomaster
+  - [ "x${BUILD_STATIC}" == "xno" ] || ./waf build:${TARGET_OS}-${COMPILER}-${COMPILER_VERSION}:${FLAVOR} --static
+  - [ "x${BUILD_DYNAMIC}" == "xno" ] || ./waf build:${TARGET_OS}-${COMPILER}-${COMPILER_VERSION}:${FLAVOR} --dynamic
+  - [ "x${BUILD_NOMASTER}" == "xno" ] || ./waf build:${TARGET_OS}-${COMPILER}-${COMPILER_VERSION}:${FLAVOR} --nomaster
+  - [ "x${BUILD_INCLUDED_LIBS}" == "xno" ] || ./waf build:${TARGET_OS}-${COMPILER}-${COMPILER_VERSION}:${FLAVOR} --nomaster
         --with-included-bullet --with-included-freetype --with-included-lua --with-included-squirrel
         --with-included-zlib --with-included-minizip --with-included-oggvorbis
 
