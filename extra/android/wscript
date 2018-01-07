@@ -349,6 +349,7 @@ class AndroidLoader(Configure.ConfigurationContext.Platform):
                     prebuilt = os.path.join(k[2], 'prebuilt')
                     for target in os.listdir(prebuilt):
                         clang_compiler.directories.append(os.path.join(prebuilt, target, 'bin'))
+                    clang_compiler.directories += gcc.directories
                     clang_compiler.target = gcc.target
                     clang_compilers.append(clang_compiler)
             if clang_compilers:
