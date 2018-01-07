@@ -78,8 +78,8 @@ int		btSimpleDynamicsWorld::stepSimulation( btScalar timeStep,int maxSubSteps, b
 		btContactSolverInfo infoGlobal;
 		infoGlobal.m_timeStep = timeStep;
 		m_constraintSolver->prepareSolve(0,numManifolds);
-		m_constraintSolver->solveGroup(&getCollisionObjectArray()[0],getNumCollisionObjects(),manifoldPtr, numManifolds,0,0,infoGlobal,m_debugDrawer, m_stackAlloc,m_dispatcher1);
-		m_constraintSolver->allSolved(infoGlobal,m_debugDrawer, m_stackAlloc);
+		m_constraintSolver->solveGroup(&getCollisionObjectArray()[0],getNumCollisionObjects(),manifoldPtr, numManifolds,0,0,infoGlobal,m_debugDrawer, m_dispatcher1);
+		m_constraintSolver->allSolved(infoGlobal,m_debugDrawer);
 	}
 
 	///integrate transforms
@@ -155,7 +155,7 @@ void	btSimpleDynamicsWorld::addRigidBody(btRigidBody* body)
 	}
 }
 
-void	btSimpleDynamicsWorld::addRigidBody(btRigidBody* body, short group, short mask)
+void	btSimpleDynamicsWorld::addRigidBody(btRigidBody* body, int group, int mask)
 {
 	body->setGravity(m_gravity);
 

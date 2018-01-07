@@ -19,13 +19,18 @@ subject to the following restrictions:
 #include "btMinMax.h"
 #include "btVector3.h"
 
-#ifndef _MSC_VER
+#ifdef __GNUC__
 	#include <stdint.h>
-#else
+#elif defined(_MSC_VER)
 	typedef __int32 int32_t;
 	typedef __int64 int64_t;
 	typedef unsigned __int32 uint32_t;
 	typedef unsigned __int64 uint64_t;
+#else
+	typedef int int32_t;
+	typedef long long int int64_t;
+	typedef unsigned int uint32_t;
+	typedef unsigned long long int uint64_t;
 #endif
 
 
@@ -1272,8 +1277,21 @@ void btConvexHullInternal::computeInternal(int start, int end, IntermediateHull&
 
 				return;
 			}
+			{
+				Vertex* v = originalVertices[start];
+							v->edges = NULL;
+							v->next = v;
+							v->prev = v;
+
+							result.minXy = v;
+							result.maxXy = v;
+							result.minYx = v;
+							result.maxYx = v;
+			}
+			
+			return;
 		}
-		// lint -fallthrough
+		
 		case 1:
 		{
 			Vertex* v = originalVertices[start];
@@ -1926,11 +1944,15 @@ void btConvexHullInternal::merge(IntermediateHull& h0, IntermediateHull& h1)
 	}
 }
 
-
-static bool pointCmp(const btConvexHullInternal::Point32& p, const btConvexHullInternal::Point32& q)
+class pointCmp
 {
-	return (p.y < q.y) || ((p.y == q.y) && ((p.x < q.x) || ((p.x == q.x) && (p.z < q.z))));
-}
+	public:
+
+    bool operator() ( const btConvexHullInternal::Point32& p, const btConvexHullInternal::Point32& q ) const
+		{
+			return (p.y < q.y) || ((p.y == q.y) && ((p.x < q.x) || ((p.x == q.x) && (p.z < q.z))));
+		}
+};
 
 void btConvexHullInternal::compute(const void* coords, bool doubleCoords, int stride, int count)
 {
@@ -2021,7 +2043,7 @@ void btConvexHullInternal::compute(const void* coords, bool doubleCoords, int st
 			points[i].index = i;
 		}
 	}
-	points.quickSort(&pointCmp);
+	points.quickSort(pointCmp());
 
 	vertexPool.reset();
 	vertexPool.setArraySize(count);

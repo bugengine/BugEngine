@@ -45,6 +45,7 @@ struct	btSoftBodyWorldInfo
 	btScalar				air_density;
 	btScalar				water_density;
 	btScalar				water_offset;
+	btScalar				m_maxDisplacement;
 	btVector3				water_normal;
 	btBroadphaseInterface*	m_broadphase;
 	btDispatcher*	m_dispatcher;
@@ -55,6 +56,7 @@ struct	btSoftBodyWorldInfo
 		:air_density((btScalar)1.2),
 		water_density(0),
 		water_offset(0),
+		m_maxDisplacement(1000.f),//avoid soft body from 'exploding' so use some upper threshold of maximum motion that a node can travel per frame
 		water_normal(0,0,0),
 		m_broadphase(0),
 		m_dispatcher(0),
@@ -69,7 +71,7 @@ struct	btSoftBodyWorldInfo
 class	btSoftBody : public btCollisionObject
 {
 public:
-	btAlignedObjectArray<class btCollisionObject*> m_collisionDisabledObjects;
+	btAlignedObjectArray<const class btCollisionObject*> m_collisionDisabledObjects;
 
 	// The solver object that handles this soft body
 	btSoftBodySolver *m_softBodySolver;
@@ -169,6 +171,7 @@ public:
 	/* ImplicitFn	*/ 
 	struct	ImplicitFn
 	{
+		virtual ~ImplicitFn() {}
 		virtual btScalar	Eval(const btVector3& x)=0;
 	};
 
@@ -182,7 +185,7 @@ public:
 	/* sCti is Softbody contact info	*/ 
 	struct	sCti
 	{
-		btCollisionObject*	m_colObj;		/* Rigid body			*/ 
+		const btCollisionObject*	m_colObj;		/* Rigid body			*/ 
 		btVector3		m_normal;	/* Outward normal		*/ 
 		btScalar		m_offset;	/* Offset from origin	*/ 
 	};	
@@ -229,15 +232,18 @@ public:
 		int						m_battach:1;	// Attached
 	};
 	/* Link			*/ 
-	struct	Link : Feature
+	ATTRIBUTE_ALIGNED16(struct)	Link : Feature
 	{
+		btVector3				m_c3;			// gradient
 		Node*					m_n[2];			// Node pointers
 		btScalar				m_rl;			// Rest length		
 		int						m_bbending:1;	// Bending link
 		btScalar				m_c0;			// (ima+imb)*kLST
 		btScalar				m_c1;			// rl^2
 		btScalar				m_c2;			// |gradient|^2/c0
-		btVector3				m_c3;			// gradient
+	
+		BT_DECLARE_ALIGNED_ALLOCATOR();
+
 	};
 	/* Face			*/ 
 	struct	Face : Feature
@@ -374,13 +380,13 @@ public:
 	{
 		Cluster*			m_soft;
 		btRigidBody*		m_rigid;
-		btCollisionObject*	m_collisionObject;
+		const btCollisionObject*	m_collisionObject;
 
 		Body() : m_soft(0),m_rigid(0),m_collisionObject(0)				{}
 		Body(Cluster* p) : m_soft(p),m_rigid(0),m_collisionObject(0)	{}
-		Body(btCollisionObject* colObj) : m_soft(0),m_collisionObject(colObj)
+		Body(const btCollisionObject* colObj) : m_soft(0),m_collisionObject(colObj)
 		{
-			m_rigid = btRigidBody::upcast(m_collisionObject);
+			m_rigid = (btRigidBody*)btRigidBody::upcast(m_collisionObject);
 		}
 
 		void						activate() const
@@ -526,6 +532,7 @@ public:
 	{
 		struct IControl
 		{
+			virtual ~IControl() {}
 			virtual void			Prepare(AJoint*)				{}
 			virtual btScalar		Speed(AJoint*,btScalar current) { return(current); }
 			static IControl*		Default()						{ static IControl def;return(&def); }
@@ -610,7 +617,7 @@ public:
 		RayFromToCaster(const btVector3& rayFrom,const btVector3& rayTo,btScalar mxt);
 		void					Process(const btDbvtNode* leaf);
 
-		static inline btScalar	rayFromToTriangle(const btVector3& rayFrom,
+		static /*inline*/ btScalar	rayFromToTriangle(const btVector3& rayFrom,
 			const btVector3& rayTo,
 			const btVector3& rayNormalizedDirection,
 			const btVector3& a,
@@ -671,6 +678,9 @@ public:
 	btTransform			m_initialWorldTransform;
 
 	btVector3			m_windVelocity;
+	
+	btScalar        m_restLengthScale;
+	
 	//
 	// Api
 	//
@@ -810,9 +820,15 @@ public:
 	void				rotate(	const btQuaternion& rot);
 	/* Scale																*/ 
 	void				scale(	const btVector3& scl);
+	/* Get link resting lengths scale										*/
+	btScalar			getRestLengthScale();
+	/* Scale resting length of all springs									*/
+	void				setRestLengthScale(btScalar restLength);
 	/* Set current state as pose											*/ 
 	void				setPose(		bool bvolume,
 		bool bframe);
+	/* Set current link lengths as resting lengths							*/ 
+	void				resetLinkRestLengths();
 	/* Return the volume													*/ 
 	btScalar			getVolume() const;
 	/* Cluster count														*/ 
@@ -867,7 +883,7 @@ public:
 	/* integrateMotion														*/ 
 	void				integrateMotion();
 	/* defaultCollisionHandlers												*/ 
-	void				defaultCollisionHandler(btCollisionObject* pco);
+	void				defaultCollisionHandler(const btCollisionObjectWrapper* pcoWrap);
 	void				defaultCollisionHandler(btSoftBody* psb);
 
 
@@ -949,11 +965,13 @@ public:
 		btScalar& mint,eFeature::_& feature,int& index,bool bcountonly) const;
 	void				initializeFaceTree();
 	btVector3			evaluateCom() const;
-	bool				checkContact(btCollisionObject* colObj,const btVector3& x,btScalar margin,btSoftBody::sCti& cti) const;
+	bool				checkContact(const btCollisionObjectWrapper* colObjWrap,const btVector3& x,btScalar margin,btSoftBody::sCti& cti) const;
 	void				updateNormals();
 	void				updateBounds();
 	void				updatePose();
 	void				updateConstants();
+	void				updateLinkConstants();
+	void				updateArea(bool averageArea = true);
 	void				initializeClusters();
 	void				updateClusters();
 	void				cleanupClusters();

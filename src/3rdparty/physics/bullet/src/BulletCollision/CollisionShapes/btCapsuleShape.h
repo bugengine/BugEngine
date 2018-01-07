@@ -23,7 +23,7 @@ subject to the following restrictions:
 ///The btCapsuleShape represents a capsule around the Y axis, there is also the btCapsuleShapeX aligned around the X axis and btCapsuleShapeZ around the Z axis.
 ///The total height is height+2*radius, so the height is just the height between the center of each 'sphere' of the capsule caps.
 ///The btCapsuleShape is a convex hull of two spheres. The btMultiSphereShape is a more general collision shape that takes the convex hull of multiple sphere, so it can also represent a capsule when just using two spheres.
-class btCapsuleShape : public btConvexInternalShape
+ATTRIBUTE_ALIGNED16(class) btCapsuleShape : public btConvexInternalShape
 {
 protected:
 	int	m_upAxis;
@@ -33,6 +33,9 @@ protected:
 	btCapsuleShape() : btConvexInternalShape() {m_shapeType = CAPSULE_SHAPE_PROXYTYPE;};
 
 public:
+	
+	BT_DECLARE_ALIGNED_ALLOCATOR();
+	
 	btCapsuleShape(btScalar radius,btScalar height);
 
 	///CollisionShape Interface
@@ -45,25 +48,17 @@ public:
 	
 	virtual void setMargin(btScalar collisionMargin)
 	{
-		//correct the m_implicitShapeDimensions for the margin
-		btVector3 oldMargin(getMargin(),getMargin(),getMargin());
-		btVector3 implicitShapeDimensionsWithMargin = m_implicitShapeDimensions+oldMargin;
-		
-		btConvexInternalShape::setMargin(collisionMargin);
-		btVector3 newMargin(getMargin(),getMargin(),getMargin());
-		m_implicitShapeDimensions = implicitShapeDimensionsWithMargin - newMargin;
-
+		//don't override the margin for capsules, their entire radius == margin
 	}
 
 	virtual void getAabb (const btTransform& t, btVector3& aabbMin, btVector3& aabbMax) const
 	{
 			btVector3 halfExtents(getRadius(),getRadius(),getRadius());
 			halfExtents[m_upAxis] = getRadius() + getHalfHeight();
-			halfExtents += btVector3(getMargin(),getMargin(),getMargin());
 			btMatrix3x3 abs_b = t.getBasis().absolute();  
 			btVector3 center = t.getOrigin();
-			btVector3 extent = btVector3(abs_b[0].dot(halfExtents),abs_b[1].dot(halfExtents),abs_b[2].dot(halfExtents));		  
-			
+            btVector3 extent = halfExtents.dot3(abs_b[0], abs_b[1], abs_b[2]);
+        
 			aabbMin = center - extent;
 			aabbMax = center + extent;
 	}
@@ -91,21 +86,28 @@ public:
 
 	virtual void	setLocalScaling(const btVector3& scaling)
 	{
-		btVector3 oldMargin(getMargin(),getMargin(),getMargin());
-		btVector3 implicitShapeDimensionsWithMargin = m_implicitShapeDimensions+oldMargin;
-		btVector3 unScaledImplicitShapeDimensionsWithMargin = implicitShapeDimensionsWithMargin / m_localScaling;
-
-		btConvexInternalShape::setLocalScaling(scaling);
-
-		m_implicitShapeDimensions = (unScaledImplicitShapeDimensionsWithMargin * m_localScaling) - oldMargin;
-
+		btVector3 unScaledImplicitShapeDimensions = m_implicitShapeDimensions / m_localScaling;
+                btConvexInternalShape::setLocalScaling(scaling);
+		m_implicitShapeDimensions = (unScaledImplicitShapeDimensions * scaling);
+		//update m_collisionMargin, since entire radius==margin
+		int radiusAxis = (m_upAxis+2)%3;
+		m_collisionMargin = m_implicitShapeDimensions[radiusAxis];
 	}
+
+	virtual btVector3	getAnisotropicRollingFrictionDirection() const
+	{
+		btVector3 aniDir(0,0,0);
+		aniDir[getUpAxis()]=1;
+		return aniDir;
+	}
+
 
 	virtual	int	calculateSerializeBufferSize() const;
 
 	///fills the dataBuffer and returns the struct name (and 0 on failure)
 	virtual	const char*	serialize(void* dataBuffer, btSerializer* serializer) const;
 
+	SIMD_FORCE_INLINE	void	deSerializeFloat(struct btCapsuleShapeData* dataBuffer);
 
 };
 
@@ -162,12 +164,27 @@ SIMD_FORCE_INLINE	int	btCapsuleShape::calculateSerializeBufferSize() const
 SIMD_FORCE_INLINE	const char*	btCapsuleShape::serialize(void* dataBuffer, btSerializer* serializer) const
 {
 	btCapsuleShapeData* shapeData = (btCapsuleShapeData*) dataBuffer;
-	
+
 	btConvexInternalShape::serialize(&shapeData->m_convexInternalShapeData,serializer);
 
 	shapeData->m_upAxis = m_upAxis;
-	
+
+	// Fill padding with zeros to appease msan.
+	shapeData->m_padding[0] = 0;
+	shapeData->m_padding[1] = 0;
+	shapeData->m_padding[2] = 0;
+	shapeData->m_padding[3] = 0;
+
 	return "btCapsuleShapeData";
+}
+
+SIMD_FORCE_INLINE	void	btCapsuleShape::deSerializeFloat(btCapsuleShapeData* dataBuffer)
+{
+	m_implicitShapeDimensions.deSerializeFloat(dataBuffer->m_convexInternalShapeData.m_implicitShapeDimensions);
+	m_collisionMargin = dataBuffer->m_convexInternalShapeData.m_collisionMargin;
+	m_localScaling.deSerializeFloat(dataBuffer->m_convexInternalShapeData.m_localScaling);
+	//it is best to already pre-allocate the matching btCapsuleShape*(X/Z) version to match m_upAxis
+	m_upAxis = dataBuffer->m_upAxis;
 }
 
 #endif //BT_CAPSULE_SHAPE_H

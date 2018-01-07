@@ -24,15 +24,18 @@ class btSerializer;
 
 
 ///The btCollisionShape class provides an interface for collision shapes that can be shared among btCollisionObjects.
-class btCollisionShape
+ATTRIBUTE_ALIGNED16(class) btCollisionShape
 {
 protected:
 	int m_shapeType;
 	void* m_userPointer;
+	int m_userIndex;
 
 public:
 
-	btCollisionShape() : m_shapeType (INVALID_SHAPE_PROXYTYPE), m_userPointer(0)
+	BT_DECLARE_ALIGNED_ALLOCATOR();
+
+	btCollisionShape() : m_shapeType (INVALID_SHAPE_PROXYTYPE), m_userPointer(0), m_userIndex(-1)
 	{
 	}
 
@@ -45,7 +48,7 @@ public:
 
 	virtual void	getBoundingSphere(btVector3& center,btScalar& radius) const;
 
-	///getAngularMotionDisc returns the maximus radius needed for Conservative Advancement to handle time-of-impact with rotations.
+	///getAngularMotionDisc returns the maximum radius needed for Conservative Advancement to handle time-of-impact with rotations.
 	virtual btScalar	getAngularMotionDisc() const;
 
 	virtual btScalar	getContactBreakingThreshold(btScalar defaultContactThresholdFactor) const;
@@ -107,6 +110,13 @@ public:
 
 	
 	int		getShapeType() const { return m_shapeType; }
+
+	///the getAnisotropicRollingFrictionDirection can be used in combination with setAnisotropicFriction
+	///See Bullet/Demos/RollingFrictionDemo for an example
+	virtual btVector3	getAnisotropicRollingFrictionDirection() const
+	{
+		return btVector3(1,1,1);
+	}
 	virtual void	setMargin(btScalar margin) = 0;
 	virtual btScalar	getMargin() const = 0;
 
@@ -121,6 +131,16 @@ public:
 	{
 		return m_userPointer;
 	}
+	void setUserIndex(int index)
+	{
+		m_userIndex = index;
+	}
+
+	int getUserIndex() const
+	{
+		return m_userIndex;
+	}
+
 
 	virtual	int	calculateSerializeBufferSize() const;
 
