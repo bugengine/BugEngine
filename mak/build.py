@@ -241,8 +241,12 @@ def module(bld, name, module_path, depends,
     else:
         pchstop = None
 
-    if use_master:
+    if use_master == 'folder':
+        features = features + ['master_folder']
+    elif use_master == True:
         features = features + ['master']
+    elif use_master != False:
+        raise Errors.WafError('unknown value for use_master: %s' % use_master)
     if warnings:
         extra_features = ['warnall', bld.__class__.optim] + (bld.env.STATIC and [] or ['dynamic'])
     else:
@@ -851,7 +855,21 @@ def rc_file(self, node):
 
 @extension('.c', '.m')
 def c_hook(self, node):
-    if 'master' in self.features and not Options.options.nomaster:
+    if 'master_folder' in self.features and not Options.options.nomaster:
+        try:
+            mastertask_c = self.mastertasks_c_folders[node.parent]
+            mastertask_c.set_inputs([node])
+        except AttributeError:
+            output = self.make_bld_node('src', None, 'master-c-%s-0.%s' % (node.parent.name, self.objc and 'm' or 'c'))
+            mastertask_c = self.create_task('master', [node], [output])
+            self.mastertasks_c_folders = { node.parent: mastertask_c }
+            self.create_compiled_task('c', output)
+        except KeyError:
+            output = self.make_bld_node('src', None, 'master-c-%s-%d.%s' % (node.parent.name, len(self.mastertasks_c_folders), self.objc and 'm' or 'c'))
+            mastertask_c = self.create_task('master', [node], [output])
+            self.mastertasks_c_folders[node.parent] = mastertask_c
+            self.create_compiled_task('c', output)
+    elif 'master' in self.features and not Options.options.nomaster:
         try:
             mastertask_c = self.mastertasks_c[-1]
             if len(mastertask_c.inputs) <= 10:
@@ -872,7 +890,21 @@ def c_hook(self, node):
 
 @extension('.cc', '.cxx', '.cpp', '.mm')
 def cc_hook(self, node):
-    if 'master' in self.features and not Options.options.nomaster:
+    if 'master_folder' in self.features and not Options.options.nomaster:
+        try:
+            mastertask_cxx = self.mastertasks_cxx_folders[node.parent]
+            mastertask_cxx.set_inputs([node])
+        except AttributeError:
+            output = self.make_bld_node('src', None, 'master-c-%s-0.%s' % (node.parent.name, self.objc and 'mm' or 'cc'))
+            mastertask_cxx = self.create_task('master', [node], [output])
+            self.mastertasks_cxx_folders = { node.parent: mastertask_cxx }
+            self.create_compiled_task('cxx', output)
+        except KeyError:
+            output = self.make_bld_node('src', None, 'master-c-%s-%d.%s' % (node.parent.name, len(self.mastertasks_cxx_folders), self.objc and 'mm' or 'cc'))
+            mastertask_cxx = self.create_task('master', [node], [output])
+            self.mastertasks_cxx_folders[node.parent] = mastertask_cxx
+            self.create_compiled_task('cxx', output)
+    elif 'master' in self.features and not Options.options.nomaster:
         if node.name.endswith('-instances.cc'):
             try:
                 self.instancetask_cxx.set_inputs([node])
@@ -898,6 +930,10 @@ def cc_hook(self, node):
     else:
         self.create_compiled_task('cxx', node)
 
+
+@feature('master', 'master_folder')
+def dummy_hook_master(self):
+    pass
 
 @feature('c', 'cxx')
 @after_method('process_source')
