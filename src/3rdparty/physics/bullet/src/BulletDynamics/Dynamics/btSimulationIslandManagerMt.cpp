@@ -71,14 +71,6 @@ inline	int	getIslandId(const btPersistentManifold* lhs)
 }
 
 
-SIMD_FORCE_INLINE	int	btGetConstraintIslandId( const btTypedConstraint* lhs )
-{
-    const btCollisionObject& rcolObj0 = lhs->getRigidBodyA();
-    const btCollisionObject& rcolObj1 = lhs->getRigidBodyB();
-    int islandId = rcolObj0.getIslandTag() >= 0 ? rcolObj0.getIslandTag() : rcolObj1.getIslandTag();
-    return islandId;
-}
-
 /// function object that routes calls to operator<
 class IslandBatchSizeSortPredicate
 {
