@@ -92,7 +92,7 @@ class aapt_package(Task.Task):
     color   = 'PINK'
 
     @staticmethod
-    def filter_output(prog, output):
+    def filter_aapt_output(prog, output):
         return [i for i in output if i[-3:] != '...']
 
     def run(self):
