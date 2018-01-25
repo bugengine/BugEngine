@@ -5,8 +5,8 @@ import re
 
 class FreeBSD(Configure.ConfigurationContext.Platform):
     NAME = 'FreeBSD'
-    SUPPORTED_TARGETS = (re.compile('.*-freebsd[0-9\.]*$'),
-                         re.compile('^freebsd[0-9\.]*$'),)
+    SUPPORTED_TARGETS = (re.compile('.*-freebsd[0-9\.]*'),
+                         re.compile('^freebsd[0-9\.]*'),)
 
     def __init__(self):
         Configure.ConfigurationContext.Platform.__init__(self)
@@ -30,7 +30,7 @@ class FreeBSD(Configure.ConfigurationContext.Platform):
 
         env.append_unique('CFLAGS', ['-fPIC'])
         env.append_unique('CXXFLAGS', ['-fPIC'])
-        env.RPATH = '$ORIGIN/../share/bugengine/plugin:$ORIGIN/../lib:$ORIGIN:$ORIGIN/../plugin'
+        env.RPATH = '$ORIGIN/../share/bugengine/plugin:$ORIGIN/../lib:$ORIGIN:$ORIGIN/../plugin:$ORIGIN/../../../lib'
         env.append_unique('LIB', ['rt', 'pthread', 'm'])
         env.append_unique('CFLAGS', ['-I%s/usr/local/include'%(compiler.sysroot or '')])
         env.append_unique('CXXFLAGS', ['-I%s/usr/local/include'%(compiler.sysroot or '')])
