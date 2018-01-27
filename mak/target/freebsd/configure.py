@@ -16,6 +16,18 @@ class FreeBSD(Configure.ConfigurationContext.Platform):
         env.DEST_OS = 'freebsd'
         env.ABI = 'elf'
         env.VALID_PLATFORMS = ['freebsd', 'posix', 'pc']
+        if 'Clang' in compiler.NAMES:
+            if compiler.arch.startswith('arm'):
+                env.append_unique('CXXFLAGS', ['-std=gnu++11', '-mfloat-abi=hard', '-mfpu=vfp'])
+                if compiler.version_number < (3,4):
+                    env.append_unique('CXXFLAGS', ['-std=gnu++11'])
+                if compiler.version_number < (3,5):
+                    env.append_unique('CFLAGS', ['-Wa,-meabi=5'])
+                    env.append_unique('CXXFLAGS', ['-Wa,-meabi=5'])
+                if '-target' not in env.CFLAGS and not env.SYSROOT and env.FREEBSD_HOST_TRIPLE:
+                    env.append_unique('CFLAGS', ['-target', env.FREEBSD_HOST_TRIPLE])
+                    env.append_unique('CXXFLAGS', ['-target', env.FREEBSD_HOST_TRIPLE])
+                    env.append_unique('LINKFLAGS', ['-target', env.FREEBSD_HOST_TRIPLE])
 
         env.DEPLOY_ROOTDIR = ''
         env.DEPLOY_BINDIR = 'bin'
