@@ -406,7 +406,7 @@ class GnuCompiler(Compiler):
 
         env.COMPILER_NAME = self.__class__.__name__.lower()
         env.COMPILER_TARGET = self.arch + '-' + self.platform
-        env.CC_CPP = [env.CC, '-x', 'c', '-E']
+        env.CC_CPP = Utils.to_list(env.CC) + ['-nostdinc', '-x', 'c', '-E']
         env.CC_CPP_SRC_F = ''
         env.CC_CPP_TGT_F = ['-o']
         self.populate_useful_variables(conf, env.SYSROOT)
