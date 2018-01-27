@@ -6,6 +6,14 @@
 /**************************************************************************************************/
 #include    <kernel/stdafx.h>
 
+#if defined(_ARM_V7)
+# define    DMB(x)             "       dmb\n"
+#elif defined(_ARM_V6)
+# define    DMB(x)             "       mcr p15, 0, %" #x ", c7, c10, 5\n"
+#else
+# error Unsupported ARM architecture;interlocked operations supported on ARM6 and above
+#endif
+
 /*
  * most implementations here from Hans Boehm's atomic ops
  * http://www.hpl.hp.com/research/linux/atomic_ops/
@@ -48,16 +56,16 @@ struct InterlockedType<4>
         value_t temp, flag;
         __asm__ __volatile__(
                 AO_THUMB_GO_ARM
-                "       dmb\n"
+                DMB(6)
                 "1:     ldrex   %0, [%5]\n"
                 "       add     %2, %0, %4\n"
                 "       strex   %1, %2, [%5]\n"
                 "       teq             %1, #0\n"
                 "       bne             1b\n"
-                "       dmb\n"
+                DMB(6)
                 AO_THUMB_RESTORE_MODE
             : "=&r"(old),"=&r"(flag),"=&r"(temp),"+m"(*p)
-            : "r"(incr), "r"(p)
+            : "r"(incr), "r"(p), "r"(0)
             : AO_THUMB_SWITCH_CLOBBERS "cc");
         return old;
     }
@@ -70,15 +78,15 @@ struct InterlockedType<4>
         value_t prev, flag;
         __asm__ __volatile__(
                 AO_THUMB_GO_ARM
-                "       dmb\n"
+                DMB(5)
                 "1:     ldrex   %0, [%3]\n"
                 "       strex   %1, %4, [%3]\n"
                 "       teq             %1, #0\n"
                 "       bne             1b\n"
-                "       dmb\n"
+                DMB(5)
                 AO_THUMB_RESTORE_MODE
             : "=&r"(prev),"=&r"(flag), "+m"(*p)
-            : "r"(p), "r"(v)
+            : "r"(p), "r"(v), "r"(0)
             : AO_THUMB_SWITCH_CLOBBERS "cc");
         return prev;
     }
@@ -87,7 +95,7 @@ struct InterlockedType<4>
         value_t result, old;
         __asm__ __volatile__ (
                 AO_THUMB_GO_ARM
-                "       dmb\n"
+                DMB(6)
                 "1:     mov             %0, #2\n"       /* store a flag */
                 "       ldrex   %1, [%3]\n"             /* get original */
                 "       teq             %1, %4\n"       /* see if match */
@@ -95,10 +103,10 @@ struct InterlockedType<4>
                 "       strexeq %0, %5, [%3]\n"         /* store new one if matched */
                 "       teq             %0, #1\n"
                 "       beq             1b\n"           /* if update failed, repeat */
-                "       dmb\n"
+                DMB(6)
                 AO_THUMB_RESTORE_MODE
             : "=&r"(result), "=&r"(old), "+m"(*p)
-            : "r"(p), "r"(condition), "r"(v)
+            : "r"(p), "r"(condition), "r"(v), "r"(0)
             : AO_THUMB_SWITCH_CLOBBERS "cc");
 
         return old;
@@ -137,11 +145,11 @@ struct InterlockedType<4>
         tagged_t::value_t result;
         __asm__ __volatile__ (
                 AO_THUMB_GO_ARM
-                "       dmb\n"
+                DMB(2)
                 "       ldrex   %0, [%1]\n"
                 AO_THUMB_RESTORE_MODE
             : "=r"(result)
-            : "r"(&p.m_value)
+            : "r"(&p.m_value),"r"(0)
             : AO_THUMB_SWITCH_CLOBBERS "cc");
         return result;
     }
@@ -153,10 +161,10 @@ struct InterlockedType<4>
         __asm__ __volatile__(
                 AO_THUMB_GO_ARM
                 "       strex %0, %2, [%3]\n"
-                "       dmb\n"
+                DMB(4)
                 AO_THUMB_RESTORE_MODE
             : "=&r"(result), "+m"(*p)
-            : "r"(v), "r"(p)
+            : "r"(v), "r"(p), "r"(0)
             : AO_THUMB_SWITCH_CLOBBERS "cc");
 
         return !(result);
