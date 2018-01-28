@@ -736,7 +736,7 @@ inline _LIBCPP_INLINE_VISIBILITY
 double
 abs(double __lcpp_x) _NOEXCEPT {return ::fabs(__lcpp_x);}
 
-inline _LIBCPP_INLINE_VISIBILITY
+//inline _LIBCPP_INLINE_VISIBILITY
 //long double
 //abs(long double __lcpp_x) _NOEXCEPT {return ::fabsl(__lcpp_x);}
 #endif // !(defined(_AIX) || defined(__sun__))
