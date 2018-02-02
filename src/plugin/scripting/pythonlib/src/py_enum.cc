@@ -83,6 +83,8 @@ PyTypeObject::Py3NumberMethods PyBugEnum::s_py3EnumNumber =
     0,
     0,
     0,
+    0,
+    0,
     0
 };
 

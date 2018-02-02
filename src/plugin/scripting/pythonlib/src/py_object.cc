@@ -101,6 +101,8 @@ static PyTypeObject::Py3NumberMethods s_py3ObjectNumber =
     0,
     0,
     0,
+    0,
+    0,
     0
 };
 
