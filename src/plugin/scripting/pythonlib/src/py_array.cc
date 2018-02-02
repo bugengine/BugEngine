@@ -84,6 +84,8 @@ static PyTypeObject::Py3NumberMethods s_py3ArrayNumber =
     0,
     0,
     0,
+    0,
+    0,
     0
 };
 
@@ -133,7 +135,7 @@ PyTypeObject PyBugArray::s_pyType =
     PyBugObject::s_methods,
     0,
     0,
-    0,
+    &PyBugObject::s_pyType,
     0,
     0,
     0,
