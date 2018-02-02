@@ -134,15 +134,19 @@ def detect_clang(conf):
         if clang and clangxx:
             clang = os.path.normpath(clang)
             clangxx = os.path.normpath(clangxx)
-            c = Clang(clang, clangxx)
-            if not c.is_valid(conf):
-                continue
             try:
-                seen[c.name()].add_sibling(c)
-            except KeyError:
-                seen[c.name()] = c
-                conf.compilers.append(c)
-                clangs.append(c)
+                c = Clang(clang, clangxx)
+            except Exception:
+                pass
+            else:
+                if not c.is_valid(conf):
+                    continue
+                try:
+                    seen[c.name()].add_sibling(c)
+                except KeyError:
+                    seen[c.name()] = c
+                    conf.compilers.append(c)
+                    clangs.append(c)
     for c in clangs:
         for multilib_compiler in c.get_multilib_compilers():
             if not multilib_compiler.is_valid(conf):
