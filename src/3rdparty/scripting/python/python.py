@@ -40,7 +40,7 @@ def python_config(conf, version, var=''):
         for lib in libs:
             if lib.startswith('python'):
                 lib_name = lib
-        conf.env['check_%s_pylib' % var] = lib_name
+        conf.env['check_%s_defines' % var] = ['PYTHON_LIBRARY="%s"' % lib_name]
     elif 'macosx' in conf.env.VALID_PLATFORMS:
         conf.recurse('../python%s/python%s.py' % (version_number, version_number), name='setup_python', once=False)
     elif 'windows' in conf.env.VALID_PLATFORMS:
