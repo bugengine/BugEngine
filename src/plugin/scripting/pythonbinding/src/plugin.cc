@@ -11,7 +11,7 @@
 static minitl::ref<BugEngine::Python::Context> create(const BugEngine::Plugin::Context &context)
 {
     using namespace BugEngine::Python;
-    ref<PythonLibrary> library = loadPython(PYTHON_LIBRARY);
+    ref<PythonLibrary> library = loadPython(BE_STRINGIZE(PYTHON_LIBRARY));
     if (!library)
     {
         return minitl::ref<Context>();
