@@ -138,7 +138,6 @@ def build_plugins(bld):
                        ['engine.bugengine', 'plugin.scripting.python',
                         '3rdparty.scripting.python%s'%short_version],
                        path='plugin.scripting.pythonbinding',
-                       extra_defines=['PYTHON_LIBRARY="%s"' % bld.env['check_python%s_pylib'%short_version]],
                        features=['python%s'%version])
 
     bld.plugin('plugin.compute.cpu',
