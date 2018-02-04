@@ -68,7 +68,8 @@ def kernel_build_cpu_source(self):
                         'BE_KERNEL_ARCH=%s' % variant],
                 includes = self.includes,
                 source = [source],
-                use = self.use + [target_prefix + 'plugin.compute.cpu'] + ([variant] if variant else []))
+                use = self.use + [target_prefix + 'plugin.compute.cpu'] + ([variant] if variant else []),
+                private_use = self.private_use)
             t.env.PLUGIN = self.env.PLUGIN
             if t.env.STATIC:
                 self.use.append(t.target)
