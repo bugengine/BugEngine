@@ -521,7 +521,7 @@ def engine(bld, name, depends=[], private_use=[], features=[], platforms=[],
                           extra_includes, extra_defines, extra_public_includes, extra_public_defines,
                           use_master, warnings, False)
     if 'windows' in bld.env.VALID_PLATFORMS:
-        module(bld, name+'w', path, depends, platforms, ['cxx', 'cxxprogram', 'launcher'],
+        module(bld, name+'w', path, depends, private_use, platforms, ['cxx', 'cxxprogram', 'launcher'],
                features, extra_includes, extra_defines, extra_public_includes, extra_public_defines,
                use_master, warnings, False)
 
