@@ -718,21 +718,22 @@ def process_use_flags(self):
 def process_use_link(self):
     link_task = getattr(self, 'link_task', None)
     if link_task:
-        dependencies = [self.bld.get_tgen_by_name(i) for i in self.use + getattr(self, 'private_use', [])]
+        dependencies = [(self.bld.get_tgen_by_name(i), True) for i in self.use + getattr(self, 'private_use', [])]
         all_deps = dependencies[::]
         seen = set([self])
         while dependencies:
-            dep = dependencies.pop(0)
+            dep, link_objects = dependencies.pop(0)
             if dep not in seen:
                 seen.add(dep)
                 dep.post()
+                link_objects = link_objects and not hasattr(dep, 'link_task')
                 new_deps = [self.bld.get_tgen_by_name(i) for i in dep.use + getattr(dep, 'private_use', [])]
                 for d in new_deps:
-                    try: all_deps.remove(d)
+                    try: all_deps.remove((d, link_objects))
                     except ValueError: pass
-                    all_deps.append(d)
-                dependencies += new_deps
-        for d in all_deps:
+                    all_deps.append((d, link_objects))
+                dependencies += [(i, link_objects) for i in new_deps]
+        for d, link_objects in all_deps:
             for var in 'LIB', 'LIBPATH', 'STLIB', 'STLIBPATH','LINKFLAGS', 'FRAMEWORK':
                 value = getattr(d, 'export_%s' % var.lower(), [])
                 self.env.append_value(var, Utils.to_list(value))
@@ -746,7 +747,7 @@ def process_use_link(self):
                 link_task.dep_nodes.extend(d.link_task.outputs)
                 tmp_path = d.link_task.outputs[0].parent.path_from(self.bld.bldnode)
                 self.env.append_value('LIBPATH', [tmp_path])
-            elif 'cxxobjects' in d.features or 'cobjects' in d.features:
+            elif link_objects and ('cxxobjects' in d.features or 'cobjects' in d.features):
                 self.add_objects_from_tgen(d)
 
 
