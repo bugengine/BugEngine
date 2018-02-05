@@ -700,14 +700,15 @@ def check_use_taskgens(self):
 
 @taskgen_method
 def process_use_flags(self):
-    dependencies = [self.bld.get_tgen_by_name(i) for i in self.use + getattr(self, 'private_use', [])]
+    dependencies = [self.bld.get_tgen_by_name(i) for i in getattr(self, 'use', [])
+                                                        + getattr(self, 'private_use', [])]
     seen = set([self])
     while dependencies:
         dep = dependencies.pop(0)
         if dep not in seen:
             seen.add(dep)
             dep.post()
-            dependencies += [self.bld.get_tgen_by_name(i) for i in dep.use]
+            dependencies += [self.bld.get_tgen_by_name(i) for i in getattr(dep, 'use', [])]
             for var in self.get_uselib_vars():
                 value = getattr(dep, 'export_%s' % var.lower(), [])
                 self.env.append_value(var, Utils.to_list(value))
