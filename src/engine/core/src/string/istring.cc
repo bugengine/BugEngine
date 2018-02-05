@@ -285,8 +285,7 @@ u32 StringInfo::unique(const char *val)
         u32 result = getCache().allocateStringInfo(len);
         StringInfo* cache = getCache().resolve(result);
         (void)(new(cache) StringInfo(len));
-        strncpy(cache->m_text, val, len);
-        cache->m_text[len] = 0;
+        strncpy(cache->m_text, val, len+1);
 
         minitl::tuple<StringIndex::iterator,bool> insertresult = g_strings.insert(cache->m_text, result);
         be_forceuse(insertresult);
