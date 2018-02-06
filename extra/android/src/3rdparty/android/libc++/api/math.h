@@ -736,16 +736,16 @@ inline _LIBCPP_INLINE_VISIBILITY
 double
 abs(double __lcpp_x) _NOEXCEPT {return ::fabs(__lcpp_x);}
 
-inline _LIBCPP_INLINE_VISIBILITY
-long double
-abs(long double __lcpp_x) _NOEXCEPT {return ::fabsl(__lcpp_x);}
+//inline _LIBCPP_INLINE_VISIBILITY
+//long double
+//abs(long double __lcpp_x) _NOEXCEPT {return ::fabsl(__lcpp_x);}
 #endif // !(defined(_AIX) || defined(__sun__))
 
 // acos
 
 #if !(defined(_AIX) || defined(__sun__))
 inline _LIBCPP_INLINE_VISIBILITY float       acos(float __lcpp_x) _NOEXCEPT       {return ::acosf(__lcpp_x);}
-inline _LIBCPP_INLINE_VISIBILITY long double acos(long double __lcpp_x) _NOEXCEPT {return ::acosl(__lcpp_x);}
+//inline _LIBCPP_INLINE_VISIBILITY long double acos(long double __lcpp_x) _NOEXCEPT {return ::acosl(__lcpp_x);}
 #endif
 
 template <class _A1>
@@ -757,7 +757,7 @@ acos(_A1 __lcpp_x) _NOEXCEPT {return ::acos((double)__lcpp_x);}
 
 #if !(defined(_AIX) || defined(__sun__))
 inline _LIBCPP_INLINE_VISIBILITY float       asin(float __lcpp_x) _NOEXCEPT       {return ::asinf(__lcpp_x);}
-inline _LIBCPP_INLINE_VISIBILITY long double asin(long double __lcpp_x) _NOEXCEPT {return ::asinl(__lcpp_x);}
+//inline _LIBCPP_INLINE_VISIBILITY long double asin(long double __lcpp_x) _NOEXCEPT {return ::asinl(__lcpp_x);}
 #endif
 
 template <class _A1>
@@ -769,7 +769,7 @@ asin(_A1 __lcpp_x) _NOEXCEPT {return ::asin((double)__lcpp_x);}
 
 #if !(defined(_AIX) || defined(__sun__))
 inline _LIBCPP_INLINE_VISIBILITY float       atan(float __lcpp_x) _NOEXCEPT       {return ::atanf(__lcpp_x);}
-inline _LIBCPP_INLINE_VISIBILITY long double atan(long double __lcpp_x) _NOEXCEPT {return ::atanl(__lcpp_x);}
+//inline _LIBCPP_INLINE_VISIBILITY long double atan(long double __lcpp_x) _NOEXCEPT {return ::atanl(__lcpp_x);}
 #endif
 
 template <class _A1>
@@ -781,7 +781,7 @@ atan(_A1 __lcpp_x) _NOEXCEPT {return ::atan((double)__lcpp_x);}
 
 #if !(defined(_AIX) || defined(__sun__))
 inline _LIBCPP_INLINE_VISIBILITY float       atan2(float __lcpp_y, float __lcpp_x) _NOEXCEPT             {return ::atan2f(__lcpp_y, __lcpp_x);}
-inline _LIBCPP_INLINE_VISIBILITY long double atan2(long double __lcpp_y, long double __lcpp_x) _NOEXCEPT {return ::atan2l(__lcpp_y, __lcpp_x);}
+//inline _LIBCPP_INLINE_VISIBILITY long double atan2(long double __lcpp_y, long double __lcpp_x) _NOEXCEPT {return ::atan2l(__lcpp_y, __lcpp_x);}
 #endif
 
 template <class _A1, class _A2>
@@ -804,7 +804,7 @@ atan2(_A1 __lcpp_y, _A2 __lcpp_x) _NOEXCEPT
 
 #if !(defined(_AIX) || defined(__sun__))
 inline _LIBCPP_INLINE_VISIBILITY float       ceil(float __lcpp_x) _NOEXCEPT       {return ::ceilf(__lcpp_x);}
-inline _LIBCPP_INLINE_VISIBILITY long double ceil(long double __lcpp_x) _NOEXCEPT {return ::ceill(__lcpp_x);}
+//inline _LIBCPP_INLINE_VISIBILITY long double ceil(long double __lcpp_x) _NOEXCEPT {return ::ceill(__lcpp_x);}
 #endif
 
 template <class _A1>
@@ -816,7 +816,7 @@ ceil(_A1 __lcpp_x) _NOEXCEPT {return ::ceil((double)__lcpp_x);}
 
 #if !(defined(_AIX) || defined(__sun__))
 inline _LIBCPP_INLINE_VISIBILITY float       cos(float __lcpp_x) _NOEXCEPT       {return ::cosf(__lcpp_x);}
-inline _LIBCPP_INLINE_VISIBILITY long double cos(long double __lcpp_x) _NOEXCEPT {return ::cosl(__lcpp_x);}
+//inline _LIBCPP_INLINE_VISIBILITY long double cos(long double __lcpp_x) _NOEXCEPT {return ::cosl(__lcpp_x);}
 #endif
 
 template <class _A1>
@@ -828,7 +828,7 @@ cos(_A1 __lcpp_x) _NOEXCEPT {return ::cos((double)__lcpp_x);}
 
 #if !(defined(_AIX) || defined(__sun__))
 inline _LIBCPP_INLINE_VISIBILITY float       cosh(float __lcpp_x) _NOEXCEPT       {return ::coshf(__lcpp_x);}
-inline _LIBCPP_INLINE_VISIBILITY long double cosh(long double __lcpp_x) _NOEXCEPT {return ::coshl(__lcpp_x);}
+//inline _LIBCPP_INLINE_VISIBILITY long double cosh(long double __lcpp_x) _NOEXCEPT {return ::coshl(__lcpp_x);}
 #endif
 
 template <class _A1>
@@ -840,7 +840,7 @@ cosh(_A1 __lcpp_x) _NOEXCEPT {return ::cosh((double)__lcpp_x);}
 
 #if !(defined(_AIX) || defined(__sun__))
 inline _LIBCPP_INLINE_VISIBILITY float       exp(float __lcpp_x) _NOEXCEPT       {return ::expf(__lcpp_x);}
-inline _LIBCPP_INLINE_VISIBILITY long double exp(long double __lcpp_x) _NOEXCEPT {return ::expl(__lcpp_x);}
+//inline _LIBCPP_INLINE_VISIBILITY long double exp(long double __lcpp_x) _NOEXCEPT {return ::expl(__lcpp_x);}
 #endif
 
 template <class _A1>
@@ -852,7 +852,7 @@ exp(_A1 __lcpp_x) _NOEXCEPT {return ::exp((double)__lcpp_x);}
 
 #if !(defined(_AIX) || defined(__sun__))
 inline _LIBCPP_INLINE_VISIBILITY float       fabs(float __lcpp_x) _NOEXCEPT       {return ::fabsf(__lcpp_x);}
-inline _LIBCPP_INLINE_VISIBILITY long double fabs(long double __lcpp_x) _NOEXCEPT {return ::fabsl(__lcpp_x);}
+//inline _LIBCPP_INLINE_VISIBILITY long double fabs(long double __lcpp_x) _NOEXCEPT {return ::fabsl(__lcpp_x);}
 #endif
 
 template <class _A1>
@@ -864,7 +864,7 @@ fabs(_A1 __lcpp_x) _NOEXCEPT {return ::fabs((double)__lcpp_x);}
 
 #if !(defined(_AIX) || defined(__sun__))
 inline _LIBCPP_INLINE_VISIBILITY float       floor(float __lcpp_x) _NOEXCEPT       {return ::floorf(__lcpp_x);}
-inline _LIBCPP_INLINE_VISIBILITY long double floor(long double __lcpp_x) _NOEXCEPT {return ::floorl(__lcpp_x);}
+//inline _LIBCPP_INLINE_VISIBILITY long double floor(long double __lcpp_x) _NOEXCEPT {return ::floorl(__lcpp_x);}
 #endif
 
 template <class _A1>
@@ -876,7 +876,7 @@ floor(_A1 __lcpp_x) _NOEXCEPT {return ::floor((double)__lcpp_x);}
 
 #if !(defined(_AIX) || defined(__sun__))
 inline _LIBCPP_INLINE_VISIBILITY float       fmod(float __lcpp_x, float __lcpp_y) _NOEXCEPT             {return ::fmodf(__lcpp_x, __lcpp_y);}
-inline _LIBCPP_INLINE_VISIBILITY long double fmod(long double __lcpp_x, long double __lcpp_y) _NOEXCEPT {return ::fmodl(__lcpp_x, __lcpp_y);}
+//inline _LIBCPP_INLINE_VISIBILITY long double fmod(long double __lcpp_x, long double __lcpp_y) _NOEXCEPT {return ::fmodl(__lcpp_x, __lcpp_y);}
 #endif
 
 template <class _A1, class _A2>
@@ -899,7 +899,7 @@ fmod(_A1 __lcpp_x, _A2 __lcpp_y) _NOEXCEPT
 
 #if !(defined(_AIX) || defined(__sun__))
 inline _LIBCPP_INLINE_VISIBILITY float       frexp(float __lcpp_x, int* __lcpp_e) _NOEXCEPT       {return ::frexpf(__lcpp_x, __lcpp_e);}
-inline _LIBCPP_INLINE_VISIBILITY long double frexp(long double __lcpp_x, int* __lcpp_e) _NOEXCEPT {return ::frexpl(__lcpp_x, __lcpp_e);}
+//inline _LIBCPP_INLINE_VISIBILITY long double frexp(long double __lcpp_x, int* __lcpp_e) _NOEXCEPT {return ::frexpl(__lcpp_x, __lcpp_e);}
 #endif
 
 template <class _A1>
@@ -911,7 +911,7 @@ frexp(_A1 __lcpp_x, int* __lcpp_e) _NOEXCEPT {return ::frexp((double)__lcpp_x, _
 
 #if !(defined(_AIX) || defined(__sun__))
 inline _LIBCPP_INLINE_VISIBILITY float       ldexp(float __lcpp_x, int __lcpp_e) _NOEXCEPT       {return ::ldexpf(__lcpp_x, __lcpp_e);}
-inline _LIBCPP_INLINE_VISIBILITY long double ldexp(long double __lcpp_x, int __lcpp_e) _NOEXCEPT {return ::ldexpl(__lcpp_x, __lcpp_e);}
+//inline _LIBCPP_INLINE_VISIBILITY long double ldexp(long double __lcpp_x, int __lcpp_e) _NOEXCEPT {return ::ldexpl(__lcpp_x, __lcpp_e);}
 #endif
 
 template <class _A1>
@@ -923,7 +923,7 @@ ldexp(_A1 __lcpp_x, int __lcpp_e) _NOEXCEPT {return ::ldexp((double)__lcpp_x, __
 
 #if !(defined(_AIX) || defined(__sun__))
 inline _LIBCPP_INLINE_VISIBILITY float       log(float __lcpp_x) _NOEXCEPT       {return ::logf(__lcpp_x);}
-inline _LIBCPP_INLINE_VISIBILITY long double log(long double __lcpp_x) _NOEXCEPT {return ::logl(__lcpp_x);}
+//inline _LIBCPP_INLINE_VISIBILITY long double log(long double __lcpp_x) _NOEXCEPT {return ::logl(__lcpp_x);}
 #endif
 
 template <class _A1>
@@ -935,7 +935,7 @@ log(_A1 __lcpp_x) _NOEXCEPT {return ::log((double)__lcpp_x);}
 
 #if !(defined(_AIX) || defined(__sun__))
 inline _LIBCPP_INLINE_VISIBILITY float       log10(float __lcpp_x) _NOEXCEPT       {return ::log10f(__lcpp_x);}
-inline _LIBCPP_INLINE_VISIBILITY long double log10(long double __lcpp_x) _NOEXCEPT {return ::log10l(__lcpp_x);}
+//inline _LIBCPP_INLINE_VISIBILITY long double log10(long double __lcpp_x) _NOEXCEPT {return ::log10l(__lcpp_x);}
 #endif
 
 template <class _A1>
@@ -947,14 +947,14 @@ log10(_A1 __lcpp_x) _NOEXCEPT {return ::log10((double)__lcpp_x);}
 
 #if !(defined(_AIX) || defined(__sun__))
 inline _LIBCPP_INLINE_VISIBILITY float       modf(float __lcpp_x, float* __lcpp_y) _NOEXCEPT             {return ::modff(__lcpp_x, __lcpp_y);}
-inline _LIBCPP_INLINE_VISIBILITY long double modf(long double __lcpp_x, long double* __lcpp_y) _NOEXCEPT {return ::modfl(__lcpp_x, __lcpp_y);}
+//inline _LIBCPP_INLINE_VISIBILITY long double modf(long double __lcpp_x, long double* __lcpp_y) _NOEXCEPT {return ::modfl(__lcpp_x, __lcpp_y);}
 #endif
 
 // pow
 
 #if !(defined(_AIX) || defined(__sun__))
 inline _LIBCPP_INLINE_VISIBILITY float       pow(float __lcpp_x, float __lcpp_y) _NOEXCEPT             {return ::powf(__lcpp_x, __lcpp_y);}
-inline _LIBCPP_INLINE_VISIBILITY long double pow(long double __lcpp_x, long double __lcpp_y) _NOEXCEPT {return ::powl(__lcpp_x, __lcpp_y);}
+//inline _LIBCPP_INLINE_VISIBILITY long double pow(long double __lcpp_x, long double __lcpp_y) _NOEXCEPT {return ::powl(__lcpp_x, __lcpp_y);}
 #endif
 
 template <class _A1, class _A2>
@@ -977,7 +977,7 @@ pow(_A1 __lcpp_x, _A2 __lcpp_y) _NOEXCEPT
 
 #if !(defined(_AIX) || defined(__sun__))
 inline _LIBCPP_INLINE_VISIBILITY float       sin(float __lcpp_x) _NOEXCEPT       {return ::sinf(__lcpp_x);}
-inline _LIBCPP_INLINE_VISIBILITY long double sin(long double __lcpp_x) _NOEXCEPT {return ::sinl(__lcpp_x);}
+//inline _LIBCPP_INLINE_VISIBILITY long double sin(long double __lcpp_x) _NOEXCEPT {return ::sinl(__lcpp_x);}
 #endif
 
 template <class _A1>
@@ -989,7 +989,7 @@ sin(_A1 __lcpp_x) _NOEXCEPT {return ::sin((double)__lcpp_x);}
 
 #if !(defined(_AIX) || defined(__sun__))
 inline _LIBCPP_INLINE_VISIBILITY float       sinh(float __lcpp_x) _NOEXCEPT       {return ::sinhf(__lcpp_x);}
-inline _LIBCPP_INLINE_VISIBILITY long double sinh(long double __lcpp_x) _NOEXCEPT {return ::sinhl(__lcpp_x);}
+//inline _LIBCPP_INLINE_VISIBILITY long double sinh(long double __lcpp_x) _NOEXCEPT {return ::sinhl(__lcpp_x);}
 #endif
 
 template <class _A1>
@@ -1001,7 +1001,7 @@ sinh(_A1 __lcpp_x) _NOEXCEPT {return ::sinh((double)__lcpp_x);}
 
 #if !(defined(_AIX) || defined(__sun__))
 inline _LIBCPP_INLINE_VISIBILITY float       sqrt(float __lcpp_x) _NOEXCEPT       {return ::sqrtf(__lcpp_x);}
-inline _LIBCPP_INLINE_VISIBILITY long double sqrt(long double __lcpp_x) _NOEXCEPT {return ::sqrtl(__lcpp_x);}
+//inline _LIBCPP_INLINE_VISIBILITY long double sqrt(long double __lcpp_x) _NOEXCEPT {return ::sqrtl(__lcpp_x);}
 #endif
 
 template <class _A1>
@@ -1013,7 +1013,7 @@ sqrt(_A1 __lcpp_x) _NOEXCEPT {return ::sqrt((double)__lcpp_x);}
 
 #if !(defined(_AIX) || defined(__sun__))
 inline _LIBCPP_INLINE_VISIBILITY float       tan(float __lcpp_x) _NOEXCEPT       {return ::tanf(__lcpp_x);}
-inline _LIBCPP_INLINE_VISIBILITY long double tan(long double __lcpp_x) _NOEXCEPT {return ::tanl(__lcpp_x);}
+//inline _LIBCPP_INLINE_VISIBILITY long double tan(long double __lcpp_x) _NOEXCEPT {return ::tanl(__lcpp_x);}
 #endif
 
 template <class _A1>
@@ -1025,7 +1025,7 @@ tan(_A1 __lcpp_x) _NOEXCEPT {return ::tan((double)__lcpp_x);}
 
 #if !(defined(_AIX) || defined(__sun__))
 inline _LIBCPP_INLINE_VISIBILITY float       tanh(float __lcpp_x) _NOEXCEPT       {return ::tanhf(__lcpp_x);}
-inline _LIBCPP_INLINE_VISIBILITY long double tanh(long double __lcpp_x) _NOEXCEPT {return ::tanhl(__lcpp_x);}
+//inline _LIBCPP_INLINE_VISIBILITY long double tanh(long double __lcpp_x) _NOEXCEPT {return ::tanhl(__lcpp_x);}
 #endif
 
 template <class _A1>
@@ -1036,7 +1036,7 @@ tanh(_A1 __lcpp_x) _NOEXCEPT {return ::tanh((double)__lcpp_x);}
 // acosh
 
 inline _LIBCPP_INLINE_VISIBILITY float       acosh(float __lcpp_x) _NOEXCEPT       {return ::acoshf(__lcpp_x);}
-inline _LIBCPP_INLINE_VISIBILITY long double acosh(long double __lcpp_x) _NOEXCEPT {return ::acoshl(__lcpp_x);}
+//inline _LIBCPP_INLINE_VISIBILITY long double acosh(long double __lcpp_x) _NOEXCEPT {return ::acoshl(__lcpp_x);}
 
 template <class _A1>
 inline _LIBCPP_INLINE_VISIBILITY
@@ -1046,7 +1046,7 @@ acosh(_A1 __lcpp_x) _NOEXCEPT {return ::acosh((double)__lcpp_x);}
 // asinh
 
 inline _LIBCPP_INLINE_VISIBILITY float       asinh(float __lcpp_x) _NOEXCEPT       {return ::asinhf(__lcpp_x);}
-inline _LIBCPP_INLINE_VISIBILITY long double asinh(long double __lcpp_x) _NOEXCEPT {return ::asinhl(__lcpp_x);}
+//inline _LIBCPP_INLINE_VISIBILITY long double asinh(long double __lcpp_x) _NOEXCEPT {return ::asinhl(__lcpp_x);}
 
 template <class _A1>
 inline _LIBCPP_INLINE_VISIBILITY
@@ -1056,7 +1056,7 @@ asinh(_A1 __lcpp_x) _NOEXCEPT {return ::asinh((double)__lcpp_x);}
 // atanh
 
 inline _LIBCPP_INLINE_VISIBILITY float       atanh(float __lcpp_x) _NOEXCEPT       {return ::atanhf(__lcpp_x);}
-inline _LIBCPP_INLINE_VISIBILITY long double atanh(long double __lcpp_x) _NOEXCEPT {return ::atanhl(__lcpp_x);}
+//inline _LIBCPP_INLINE_VISIBILITY long double atanh(long double __lcpp_x) _NOEXCEPT {return ::atanhl(__lcpp_x);}
 
 template <class _A1>
 inline _LIBCPP_INLINE_VISIBILITY
@@ -1066,7 +1066,7 @@ atanh(_A1 __lcpp_x) _NOEXCEPT {return ::atanh((double)__lcpp_x);}
 // cbrt
 
 inline _LIBCPP_INLINE_VISIBILITY float       cbrt(float __lcpp_x) _NOEXCEPT       {return ::cbrtf(__lcpp_x);}
-inline _LIBCPP_INLINE_VISIBILITY long double cbrt(long double __lcpp_x) _NOEXCEPT {return ::cbrtl(__lcpp_x);}
+//inline _LIBCPP_INLINE_VISIBILITY long double cbrt(long double __lcpp_x) _NOEXCEPT {return ::cbrtl(__lcpp_x);}
 
 template <class _A1>
 inline _LIBCPP_INLINE_VISIBILITY
@@ -1079,10 +1079,10 @@ inline _LIBCPP_INLINE_VISIBILITY float copysign(float __lcpp_x,
                                                 float __lcpp_y) _NOEXCEPT {
   return ::copysignf(__lcpp_x, __lcpp_y);
 }
-inline _LIBCPP_INLINE_VISIBILITY long double
-copysign(long double __lcpp_x, long double __lcpp_y) _NOEXCEPT {
-  return ::copysignl(__lcpp_x, __lcpp_y);
-}
+//inline _LIBCPP_INLINE_VISIBILITY long double
+//copysign(long double __lcpp_x, long double __lcpp_y) _NOEXCEPT {
+//  return ::copysignl(__lcpp_x, __lcpp_y);
+//}
 
 template <class _A1, class _A2>
 inline _LIBCPP_INLINE_VISIBILITY
@@ -1103,7 +1103,7 @@ copysign(_A1 __lcpp_x, _A2 __lcpp_y) _NOEXCEPT
 // erf
 
 inline _LIBCPP_INLINE_VISIBILITY float       erf(float __lcpp_x) _NOEXCEPT       {return ::erff(__lcpp_x);}
-inline _LIBCPP_INLINE_VISIBILITY long double erf(long double __lcpp_x) _NOEXCEPT {return ::erfl(__lcpp_x);}
+//inline _LIBCPP_INLINE_VISIBILITY long double erf(long double __lcpp_x) _NOEXCEPT {return ::erfl(__lcpp_x);}
 
 template <class _A1>
 inline _LIBCPP_INLINE_VISIBILITY
@@ -1113,7 +1113,7 @@ erf(_A1 __lcpp_x) _NOEXCEPT {return ::erf((double)__lcpp_x);}
 // erfc
 
 inline _LIBCPP_INLINE_VISIBILITY float       erfc(float __lcpp_x) _NOEXCEPT       {return ::erfcf(__lcpp_x);}
-inline _LIBCPP_INLINE_VISIBILITY long double erfc(long double __lcpp_x) _NOEXCEPT {return ::erfcl(__lcpp_x);}
+//inline _LIBCPP_INLINE_VISIBILITY long double erfc(long double __lcpp_x) _NOEXCEPT {return ::erfcl(__lcpp_x);}
 
 template <class _A1>
 inline _LIBCPP_INLINE_VISIBILITY
@@ -1123,7 +1123,7 @@ erfc(_A1 __lcpp_x) _NOEXCEPT {return ::erfc((double)__lcpp_x);}
 // exp2
 
 inline _LIBCPP_INLINE_VISIBILITY float       exp2(float __lcpp_x) _NOEXCEPT       {return ::exp2f(__lcpp_x);}
-inline _LIBCPP_INLINE_VISIBILITY long double exp2(long double __lcpp_x) _NOEXCEPT {return ::exp2l(__lcpp_x);}
+//inline _LIBCPP_INLINE_VISIBILITY long double exp2(long double __lcpp_x) _NOEXCEPT {return ::exp2l(__lcpp_x);}
 
 template <class _A1>
 inline _LIBCPP_INLINE_VISIBILITY
@@ -1133,7 +1133,7 @@ exp2(_A1 __lcpp_x) _NOEXCEPT {return ::exp2((double)__lcpp_x);}
 // expm1
 
 inline _LIBCPP_INLINE_VISIBILITY float       expm1(float __lcpp_x) _NOEXCEPT       {return ::expm1f(__lcpp_x);}
-inline _LIBCPP_INLINE_VISIBILITY long double expm1(long double __lcpp_x) _NOEXCEPT {return ::expm1l(__lcpp_x);}
+//inline _LIBCPP_INLINE_VISIBILITY long double expm1(long double __lcpp_x) _NOEXCEPT {return ::expm1l(__lcpp_x);}
 
 template <class _A1>
 inline _LIBCPP_INLINE_VISIBILITY
@@ -1143,7 +1143,7 @@ expm1(_A1 __lcpp_x) _NOEXCEPT {return ::expm1((double)__lcpp_x);}
 // fdim
 
 inline _LIBCPP_INLINE_VISIBILITY float       fdim(float __lcpp_x, float __lcpp_y) _NOEXCEPT             {return ::fdimf(__lcpp_x, __lcpp_y);}
-inline _LIBCPP_INLINE_VISIBILITY long double fdim(long double __lcpp_x, long double __lcpp_y) _NOEXCEPT {return ::fdiml(__lcpp_x, __lcpp_y);}
+//inline _LIBCPP_INLINE_VISIBILITY long double fdim(long double __lcpp_x, long double __lcpp_y) _NOEXCEPT {return ::fdiml(__lcpp_x, __lcpp_y);}
 
 template <class _A1, class _A2>
 inline _LIBCPP_INLINE_VISIBILITY
@@ -1164,7 +1164,7 @@ fdim(_A1 __lcpp_x, _A2 __lcpp_y) _NOEXCEPT
 // fma
 
 inline _LIBCPP_INLINE_VISIBILITY float       fma(float __lcpp_x, float __lcpp_y, float __lcpp_z) _NOEXCEPT                   {return ::fmaf(__lcpp_x, __lcpp_y, __lcpp_z);}
-inline _LIBCPP_INLINE_VISIBILITY long double fma(long double __lcpp_x, long double __lcpp_y, long double __lcpp_z) _NOEXCEPT {return ::fmal(__lcpp_x, __lcpp_y, __lcpp_z);}
+//inline _LIBCPP_INLINE_VISIBILITY long double fma(long double __lcpp_x, long double __lcpp_y, long double __lcpp_z) _NOEXCEPT {return ::fmal(__lcpp_x, __lcpp_y, __lcpp_z);}
 
 template <class _A1, class _A2, class _A3>
 inline _LIBCPP_INLINE_VISIBILITY
@@ -1187,7 +1187,7 @@ fma(_A1 __lcpp_x, _A2 __lcpp_y, _A3 __lcpp_z) _NOEXCEPT
 // fmax
 
 inline _LIBCPP_INLINE_VISIBILITY float       fmax(float __lcpp_x, float __lcpp_y) _NOEXCEPT             {return ::fmaxf(__lcpp_x, __lcpp_y);}
-inline _LIBCPP_INLINE_VISIBILITY long double fmax(long double __lcpp_x, long double __lcpp_y) _NOEXCEPT {return ::fmaxl(__lcpp_x, __lcpp_y);}
+//inline _LIBCPP_INLINE_VISIBILITY long double fmax(long double __lcpp_x, long double __lcpp_y) _NOEXCEPT {return ::fmaxl(__lcpp_x, __lcpp_y);}
 
 template <class _A1, class _A2>
 inline _LIBCPP_INLINE_VISIBILITY
@@ -1208,7 +1208,7 @@ fmax(_A1 __lcpp_x, _A2 __lcpp_y) _NOEXCEPT
 // fmin
 
 inline _LIBCPP_INLINE_VISIBILITY float       fmin(float __lcpp_x, float __lcpp_y) _NOEXCEPT             {return ::fminf(__lcpp_x, __lcpp_y);}
-inline _LIBCPP_INLINE_VISIBILITY long double fmin(long double __lcpp_x, long double __lcpp_y) _NOEXCEPT {return ::fminl(__lcpp_x, __lcpp_y);}
+//inline _LIBCPP_INLINE_VISIBILITY long double fmin(long double __lcpp_x, long double __lcpp_y) _NOEXCEPT {return ::fminl(__lcpp_x, __lcpp_y);}
 
 template <class _A1, class _A2>
 inline _LIBCPP_INLINE_VISIBILITY
@@ -1229,7 +1229,7 @@ fmin(_A1 __lcpp_x, _A2 __lcpp_y) _NOEXCEPT
 // hypot
 
 inline _LIBCPP_INLINE_VISIBILITY float       hypot(float __lcpp_x, float __lcpp_y) _NOEXCEPT             {return ::hypotf(__lcpp_x, __lcpp_y);}
-inline _LIBCPP_INLINE_VISIBILITY long double hypot(long double __lcpp_x, long double __lcpp_y) _NOEXCEPT {return ::hypotl(__lcpp_x, __lcpp_y);}
+//inline _LIBCPP_INLINE_VISIBILITY long double hypot(long double __lcpp_x, long double __lcpp_y) _NOEXCEPT {return ::hypotl(__lcpp_x, __lcpp_y);}
 
 template <class _A1, class _A2>
 inline _LIBCPP_INLINE_VISIBILITY
@@ -1250,7 +1250,7 @@ hypot(_A1 __lcpp_x, _A2 __lcpp_y) _NOEXCEPT
 // ilogb
 
 inline _LIBCPP_INLINE_VISIBILITY int ilogb(float __lcpp_x) _NOEXCEPT       {return ::ilogbf(__lcpp_x);}
-inline _LIBCPP_INLINE_VISIBILITY int ilogb(long double __lcpp_x) _NOEXCEPT {return ::ilogbl(__lcpp_x);}
+//inline _LIBCPP_INLINE_VISIBILITY int ilogb(long double __lcpp_x) _NOEXCEPT {return ::ilogbl(__lcpp_x);}
 
 template <class _A1>
 inline _LIBCPP_INLINE_VISIBILITY
@@ -1260,7 +1260,7 @@ ilogb(_A1 __lcpp_x) _NOEXCEPT {return ::ilogb((double)__lcpp_x);}
 // lgamma
 
 inline _LIBCPP_INLINE_VISIBILITY float       lgamma(float __lcpp_x) _NOEXCEPT       {return ::lgammaf(__lcpp_x);}
-inline _LIBCPP_INLINE_VISIBILITY long double lgamma(long double __lcpp_x) _NOEXCEPT {return ::lgammal(__lcpp_x);}
+//inline _LIBCPP_INLINE_VISIBILITY long double lgamma(long double __lcpp_x) _NOEXCEPT {return ::lgammal(__lcpp_x);}
 
 template <class _A1>
 inline _LIBCPP_INLINE_VISIBILITY
@@ -1270,7 +1270,7 @@ lgamma(_A1 __lcpp_x) _NOEXCEPT {return ::lgamma((double)__lcpp_x);}
 // llrint
 
 inline _LIBCPP_INLINE_VISIBILITY long long llrint(float __lcpp_x) _NOEXCEPT       {return ::llrintf(__lcpp_x);}
-inline _LIBCPP_INLINE_VISIBILITY long long llrint(long double __lcpp_x) _NOEXCEPT {return ::llrintl(__lcpp_x);}
+//inline _LIBCPP_INLINE_VISIBILITY long long llrint(long double __lcpp_x) _NOEXCEPT {return ::llrintl(__lcpp_x);}
 
 template <class _A1>
 inline _LIBCPP_INLINE_VISIBILITY
@@ -1280,7 +1280,7 @@ llrint(_A1 __lcpp_x) _NOEXCEPT {return ::llrint((double)__lcpp_x);}
 // llround
 
 inline _LIBCPP_INLINE_VISIBILITY long long llround(float __lcpp_x) _NOEXCEPT       {return ::llroundf(__lcpp_x);}
-inline _LIBCPP_INLINE_VISIBILITY long long llround(long double __lcpp_x) _NOEXCEPT {return ::llroundl(__lcpp_x);}
+//inline _LIBCPP_INLINE_VISIBILITY long long llround(long double __lcpp_x) _NOEXCEPT {return ::llroundl(__lcpp_x);}
 
 template <class _A1>
 inline _LIBCPP_INLINE_VISIBILITY
@@ -1290,7 +1290,7 @@ llround(_A1 __lcpp_x) _NOEXCEPT {return ::llround((double)__lcpp_x);}
 // log1p
 
 inline _LIBCPP_INLINE_VISIBILITY float       log1p(float __lcpp_x) _NOEXCEPT       {return ::log1pf(__lcpp_x);}
-inline _LIBCPP_INLINE_VISIBILITY long double log1p(long double __lcpp_x) _NOEXCEPT {return ::log1pl(__lcpp_x);}
+//inline _LIBCPP_INLINE_VISIBILITY long double log1p(long double __lcpp_x) _NOEXCEPT {return ::log1pl(__lcpp_x);}
 
 template <class _A1>
 inline _LIBCPP_INLINE_VISIBILITY
@@ -1310,7 +1310,7 @@ log1p(_A1 __lcpp_x) _NOEXCEPT {return ::log1p((double)__lcpp_x);}
 // logb
 
 inline _LIBCPP_INLINE_VISIBILITY float       logb(float __lcpp_x) _NOEXCEPT       {return ::logbf(__lcpp_x);}
-inline _LIBCPP_INLINE_VISIBILITY long double logb(long double __lcpp_x) _NOEXCEPT {return ::logbl(__lcpp_x);}
+//inline _LIBCPP_INLINE_VISIBILITY long double logb(long double __lcpp_x) _NOEXCEPT {return ::logbl(__lcpp_x);}
 
 template <class _A1>
 inline _LIBCPP_INLINE_VISIBILITY
@@ -1320,7 +1320,7 @@ logb(_A1 __lcpp_x) _NOEXCEPT {return ::logb((double)__lcpp_x);}
 // lrint
 
 inline _LIBCPP_INLINE_VISIBILITY long lrint(float __lcpp_x) _NOEXCEPT       {return ::lrintf(__lcpp_x);}
-inline _LIBCPP_INLINE_VISIBILITY long lrint(long double __lcpp_x) _NOEXCEPT {return ::lrintl(__lcpp_x);}
+//inline _LIBCPP_INLINE_VISIBILITY long lrint(long double __lcpp_x) _NOEXCEPT {return ::lrintl(__lcpp_x);}
 
 template <class _A1>
 inline _LIBCPP_INLINE_VISIBILITY
@@ -1330,7 +1330,7 @@ lrint(_A1 __lcpp_x) _NOEXCEPT {return ::lrint((double)__lcpp_x);}
 // lround
 
 inline _LIBCPP_INLINE_VISIBILITY long lround(float __lcpp_x) _NOEXCEPT       {return ::lroundf(__lcpp_x);}
-inline _LIBCPP_INLINE_VISIBILITY long lround(long double __lcpp_x) _NOEXCEPT {return ::lroundl(__lcpp_x);}
+//inline _LIBCPP_INLINE_VISIBILITY long lround(long double __lcpp_x) _NOEXCEPT {return ::lroundl(__lcpp_x);}
 
 template <class _A1>
 inline _LIBCPP_INLINE_VISIBILITY
@@ -1342,7 +1342,7 @@ lround(_A1 __lcpp_x) _NOEXCEPT {return ::lround((double)__lcpp_x);}
 // nearbyint
 
 inline _LIBCPP_INLINE_VISIBILITY float       nearbyint(float __lcpp_x) _NOEXCEPT       {return ::nearbyintf(__lcpp_x);}
-inline _LIBCPP_INLINE_VISIBILITY long double nearbyint(long double __lcpp_x) _NOEXCEPT {return ::nearbyintl(__lcpp_x);}
+//inline _LIBCPP_INLINE_VISIBILITY long double nearbyint(long double __lcpp_x) _NOEXCEPT {return ::nearbyintl(__lcpp_x);}
 
 template <class _A1>
 inline _LIBCPP_INLINE_VISIBILITY
@@ -1352,7 +1352,7 @@ nearbyint(_A1 __lcpp_x) _NOEXCEPT {return ::nearbyint((double)__lcpp_x);}
 // nextafter
 
 inline _LIBCPP_INLINE_VISIBILITY float       nextafter(float __lcpp_x, float __lcpp_y) _NOEXCEPT             {return ::nextafterf(__lcpp_x, __lcpp_y);}
-inline _LIBCPP_INLINE_VISIBILITY long double nextafter(long double __lcpp_x, long double __lcpp_y) _NOEXCEPT {return ::nextafterl(__lcpp_x, __lcpp_y);}
+//inline _LIBCPP_INLINE_VISIBILITY long double nextafter(long double __lcpp_x, long double __lcpp_y) _NOEXCEPT {return ::nextafterl(__lcpp_x, __lcpp_y);}
 
 template <class _A1, class _A2>
 inline _LIBCPP_INLINE_VISIBILITY
@@ -1372,18 +1372,18 @@ nextafter(_A1 __lcpp_x, _A2 __lcpp_y) _NOEXCEPT
 
 // nexttoward
 
-inline _LIBCPP_INLINE_VISIBILITY float       nexttoward(float __lcpp_x, long double __lcpp_y) _NOEXCEPT       {return ::nexttowardf(__lcpp_x, __lcpp_y);}
-inline _LIBCPP_INLINE_VISIBILITY long double nexttoward(long double __lcpp_x, long double __lcpp_y) _NOEXCEPT {return ::nexttowardl(__lcpp_x, __lcpp_y);}
+//inline _LIBCPP_INLINE_VISIBILITY float       nexttoward(float __lcpp_x, long double __lcpp_y) _NOEXCEPT       {return ::nexttowardf(__lcpp_x, __lcpp_y);}
+//inline _LIBCPP_INLINE_VISIBILITY long double nexttoward(long double __lcpp_x, long double __lcpp_y) _NOEXCEPT {return ::nexttowardl(__lcpp_x, __lcpp_y);}
 
-template <class _A1>
-inline _LIBCPP_INLINE_VISIBILITY
-typename std::enable_if<std::is_integral<_A1>::value, double>::type
-nexttoward(_A1 __lcpp_x, long double __lcpp_y) _NOEXCEPT {return ::nexttoward((double)__lcpp_x, __lcpp_y);}
+//template <class _A1>
+//inline _LIBCPP_INLINE_VISIBILITY
+//typename std::enable_if<std::is_integral<_A1>::value, double>::type
+//nexttoward(_A1 __lcpp_x, long double __lcpp_y) _NOEXCEPT {return ::nexttoward((double)__lcpp_x, __lcpp_y);}
 
 // remainder
 
 inline _LIBCPP_INLINE_VISIBILITY float       remainder(float __lcpp_x, float __lcpp_y) _NOEXCEPT             {return ::remainderf(__lcpp_x, __lcpp_y);}
-inline _LIBCPP_INLINE_VISIBILITY long double remainder(long double __lcpp_x, long double __lcpp_y) _NOEXCEPT {return ::remainderl(__lcpp_x, __lcpp_y);}
+//inline _LIBCPP_INLINE_VISIBILITY long double remainder(long double __lcpp_x, long double __lcpp_y) _NOEXCEPT {return ::remainderl(__lcpp_x, __lcpp_y);}
 
 template <class _A1, class _A2>
 inline _LIBCPP_INLINE_VISIBILITY
@@ -1404,7 +1404,7 @@ remainder(_A1 __lcpp_x, _A2 __lcpp_y) _NOEXCEPT
 // remquo
 
 inline _LIBCPP_INLINE_VISIBILITY float       remquo(float __lcpp_x, float __lcpp_y, int* __lcpp_z) _NOEXCEPT             {return ::remquof(__lcpp_x, __lcpp_y, __lcpp_z);}
-inline _LIBCPP_INLINE_VISIBILITY long double remquo(long double __lcpp_x, long double __lcpp_y, int* __lcpp_z) _NOEXCEPT {return ::remquol(__lcpp_x, __lcpp_y, __lcpp_z);}
+//inline _LIBCPP_INLINE_VISIBILITY long double remquo(long double __lcpp_x, long double __lcpp_y, int* __lcpp_z) _NOEXCEPT {return ::remquol(__lcpp_x, __lcpp_y, __lcpp_z);}
 
 template <class _A1, class _A2>
 inline _LIBCPP_INLINE_VISIBILITY
@@ -1425,7 +1425,7 @@ remquo(_A1 __lcpp_x, _A2 __lcpp_y, int* __lcpp_z) _NOEXCEPT
 // rint
 
 inline _LIBCPP_INLINE_VISIBILITY float       rint(float __lcpp_x) _NOEXCEPT       {return ::rintf(__lcpp_x);}
-inline _LIBCPP_INLINE_VISIBILITY long double rint(long double __lcpp_x) _NOEXCEPT {return ::rintl(__lcpp_x);}
+//inline _LIBCPP_INLINE_VISIBILITY long double rint(long double __lcpp_x) _NOEXCEPT {return ::rintl(__lcpp_x);}
 
 template <class _A1>
 inline _LIBCPP_INLINE_VISIBILITY
@@ -1435,7 +1435,7 @@ rint(_A1 __lcpp_x) _NOEXCEPT {return ::rint((double)__lcpp_x);}
 // round
 
 inline _LIBCPP_INLINE_VISIBILITY float       round(float __lcpp_x) _NOEXCEPT       {return ::roundf(__lcpp_x);}
-inline _LIBCPP_INLINE_VISIBILITY long double round(long double __lcpp_x) _NOEXCEPT {return ::roundl(__lcpp_x);}
+//inline _LIBCPP_INLINE_VISIBILITY long double round(long double __lcpp_x) _NOEXCEPT {return ::roundl(__lcpp_x);}
 
 template <class _A1>
 inline _LIBCPP_INLINE_VISIBILITY
@@ -1445,7 +1445,7 @@ round(_A1 __lcpp_x) _NOEXCEPT {return ::round((double)__lcpp_x);}
 // scalbln
 
 inline _LIBCPP_INLINE_VISIBILITY float       scalbln(float __lcpp_x, long __lcpp_y) _NOEXCEPT       {return ::scalblnf(__lcpp_x, __lcpp_y);}
-inline _LIBCPP_INLINE_VISIBILITY long double scalbln(long double __lcpp_x, long __lcpp_y) _NOEXCEPT {return ::scalblnl(__lcpp_x, __lcpp_y);}
+//inline _LIBCPP_INLINE_VISIBILITY long double scalbln(long double __lcpp_x, long __lcpp_y) _NOEXCEPT {return ::scalblnl(__lcpp_x, __lcpp_y);}
 
 template <class _A1>
 inline _LIBCPP_INLINE_VISIBILITY
@@ -1455,7 +1455,7 @@ scalbln(_A1 __lcpp_x, long __lcpp_y) _NOEXCEPT {return ::scalbln((double)__lcpp_
 // scalbn
 
 inline _LIBCPP_INLINE_VISIBILITY float       scalbn(float __lcpp_x, int __lcpp_y) _NOEXCEPT       {return ::scalbnf(__lcpp_x, __lcpp_y);}
-inline _LIBCPP_INLINE_VISIBILITY long double scalbn(long double __lcpp_x, int __lcpp_y) _NOEXCEPT {return ::scalbnl(__lcpp_x, __lcpp_y);}
+//inline _LIBCPP_INLINE_VISIBILITY long double scalbn(long double __lcpp_x, int __lcpp_y) _NOEXCEPT {return ::scalbnl(__lcpp_x, __lcpp_y);}
 
 template <class _A1>
 inline _LIBCPP_INLINE_VISIBILITY
@@ -1465,7 +1465,7 @@ scalbn(_A1 __lcpp_x, int __lcpp_y) _NOEXCEPT {return ::scalbn((double)__lcpp_x, 
 // tgamma
 
 inline _LIBCPP_INLINE_VISIBILITY float       tgamma(float __lcpp_x) _NOEXCEPT       {return ::tgammaf(__lcpp_x);}
-inline _LIBCPP_INLINE_VISIBILITY long double tgamma(long double __lcpp_x) _NOEXCEPT {return ::tgammal(__lcpp_x);}
+//inline _LIBCPP_INLINE_VISIBILITY long double tgamma(long double __lcpp_x) _NOEXCEPT {return ::tgammal(__lcpp_x);}
 
 template <class _A1>
 inline _LIBCPP_INLINE_VISIBILITY
@@ -1475,7 +1475,7 @@ tgamma(_A1 __lcpp_x) _NOEXCEPT {return ::tgamma((double)__lcpp_x);}
 // trunc
 
 inline _LIBCPP_INLINE_VISIBILITY float       trunc(float __lcpp_x) _NOEXCEPT       {return ::truncf(__lcpp_x);}
-inline _LIBCPP_INLINE_VISIBILITY long double trunc(long double __lcpp_x) _NOEXCEPT {return ::truncl(__lcpp_x);}
+//inline _LIBCPP_INLINE_VISIBILITY long double trunc(long double __lcpp_x) _NOEXCEPT {return ::truncl(__lcpp_x);}
 
 template <class _A1>
 inline _LIBCPP_INLINE_VISIBILITY

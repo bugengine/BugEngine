@@ -84,6 +84,8 @@ PyTypeObject::Py3NumberMethods PyBugNumber<T>::s_py3NumberNumber =
     0,
     0,
     0,
+    0,
+    0,
     0
 };
 

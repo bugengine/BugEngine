@@ -17,13 +17,16 @@ PythonLibrary::PythonLibrary(const char* pythonLibraryName)
                     ?   dlopen(minitl::format<1024u>("lib%s.dylib") | m_pythonLibraryName,
                         RTLD_LAZY | RTLD_GLOBAL)
                     :   RTLD_DEFAULT)
-    ,   m_status(dlerror() == 0)
+    ,   m_status(m_handle != 0)
     ,   m_api(1013)
     ,   m_version(0)
 {
-    if (!m_status)
+    if (!m_handle)
     {
-        be_error("unable to load library %s: %s" | pythonLibraryName | dlerror());
+        const char* error = dlerror();
+        be_error("unable to load library %s: %s"
+                    | pythonLibraryName
+                    | (error ? error : "unknown error"));
     }
     else
     {

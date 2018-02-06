@@ -16,8 +16,13 @@ class FreeBSD(Configure.ConfigurationContext.Platform):
         env.DEST_OS = 'freebsd'
         env.ABI = 'elf'
         env.VALID_PLATFORMS = ['freebsd', 'posix', 'pc']
-        if 'Clang' in compiler.NAMES:
-            if compiler.arch.startswith('arm'):
+        if compiler.arch.startswith('arm') and compiler.arch != 'arm64':
+            if 'GCC' in compiler.NAMES:
+                env.append_value('CXXFLAGS', ['-nostdinc++', '-isystem', '/usr/include/c++/v1'])
+                env.LINK_CC = ['/usr/bin/cc']
+                env.LINK_CXX = ['/usr/bin/c++']
+            elif 'Clang' in compiler.NAMES:
+                env.append_unique('CFLAGS', ['-mfloat-abi=hard', '-mfpu=vfp'])
                 env.append_unique('CXXFLAGS', ['-std=gnu++11', '-mfloat-abi=hard', '-mfpu=vfp'])
                 if compiler.version_number < (3,4):
                     env.append_unique('CXXFLAGS', ['-std=gnu++11'])

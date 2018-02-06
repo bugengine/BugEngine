@@ -26,7 +26,6 @@ class clt(Task.Task):
         return ([], [])
 
 
-
 @feature('cpu')
 @extension('.ii')
 def kernel_build_cpu_source(self, source):

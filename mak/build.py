@@ -177,7 +177,7 @@ def add_feature(self, feature, env = None):
 
 
 @conf
-def module(bld, name, module_path, depends,
+def module(bld, name, module_path, depends, private_depends,
            valid_platforms, features,
            build_features,
            extra_includes, extra_defines,
@@ -314,6 +314,7 @@ def module(bld, name, module_path, depends,
             target_name = name,
             module_path = project_path,
             use = [target_prefix + d for d in depends],
+            private_use = [target_prefix + d for d in private_depends],
             features = features,
             extra_use = extra_features,
             defines = ['building_%s' % safe_name(name.split('.')[-1]),
@@ -407,7 +408,7 @@ def external(bld, name):
 
 
 @conf
-def thirdparty(bld, name, feature='', path='.', var='', use=[]):
+def thirdparty(bld, name, feature='', path='.', var='', use=[], private_use=[]):
     platforms = bld.env.VALID_PLATFORMS
     platform_specific = platforms
     source_node = bld.path.make_node(path.replace('.', '/'))
@@ -424,24 +425,20 @@ def thirdparty(bld, name, feature='', path='.', var='', use=[]):
             if feature:
                 bld.add_feature(feature, env)
             supported = True
-            includes = env['check_%s_includes' % var]
-            lib_paths = env['check_%s_libpath' % var]
-            libs = env['check_%s_libs' % var]
-            frameworks = env['check_%s_frameworks' % var]
-            defines = env['check_%s_defines' % var]
-            tg = bld(target=target_name,
-                     features=['cxx'],
-                     module_path=project_path,
-                     export_includes=includes,
-                     export_defines=defines,
-                     export_libpath=lib_paths,
-                     export_lib=libs,
-                     export_framework=frameworks,
-                     export_cflags = env['check_%s_cflags' % var],
-                     export_cxxflags = env['check_%s_cxxflags' % var],
-                     export_linkflags = env['check_%s_ldflags' % var],
-                     source_nodes=[source_node],
-                     use=[target_prefix+u for u in use])
+            tg = bld(target             = target_name,
+                     features           =['cxx'],
+                     module_path        = project_path,
+                     export_includes    = env['check_%s_includes' % var],
+                     export_defines     = env['check_%s_defines' % var],
+                     export_libpath     = env['check_%s_libpath' % var],
+                     export_lib         = env['check_%s_libs' % var],
+                     export_framework   = env['check_%s_frameworks' % var],
+                     export_cflags      = env['check_%s_cflags' % var],
+                     export_cxxflags    = env['check_%s_cxxflags' % var],
+                     export_linkflags   = env['check_%s_ldflags' % var],
+                     source_nodes       = [source_node],
+                     use                = [target_prefix+u for u in use],
+                     private_use        = [target_prefix+u for u in private_use])
             if target_prefix:
                 internal_deps.append(tg)
             archs = env.VALID_ARCHITECTURES
@@ -471,7 +468,7 @@ def thirdparty(bld, name, feature='', path='.', var='', use=[]):
 
 
 @conf
-def library(bld, name, depends=[], features=[], platforms=[],
+def library(bld, name, depends=[], private_use=[], features=[], platforms=[],
         extra_includes=[], extra_defines=[],
         extra_public_includes=[], extra_public_defines=[],
         path='', use_master=True, warnings=True, export_all=False):
@@ -480,7 +477,7 @@ def library(bld, name, depends=[], features=[], platforms=[],
         for p in platforms:
             if p not in bld.env.VALID_PLATFORMS:
                 return None
-    return module(bld, name, path, depends, platforms,
+    return module(bld, name, path, depends, private_use, platforms,
         bld.env.DYNAMIC and ['cxx', 'cxxshlib', 'shared_lib'] or ['cxx', 'cxxobjects'],
         features,
         extra_includes, extra_defines,
@@ -489,7 +486,7 @@ def library(bld, name, depends=[], features=[], platforms=[],
 
 
 @conf
-def headers(bld, name, depends=[], features=[], platforms=[],
+def headers(bld, name, depends=[], private_use=[], features=[], platforms=[],
             extra_public_includes=[], extra_public_defines=[],
             path='', use_master=True, warnings=True, export_all=False):
     if not path: path=name
@@ -497,7 +494,7 @@ def headers(bld, name, depends=[], features=[], platforms=[],
         for p in platforms:
             if p not in bld.env.VALID_PLATFORMS:
                 return None
-    return module(bld, name, path, depends, platforms,
+    return module(bld, name, path, depends, private_use, platforms,
         ['cxx'],
         features,
         [], [],
@@ -506,7 +503,7 @@ def headers(bld, name, depends=[], features=[], platforms=[],
 
 
 @conf
-def static_library(bld, name, depends=[], features=[], platforms=[],
+def static_library(bld, name, depends=[], private_use=[], features=[], platforms=[],
         extra_includes=[], extra_defines=[],
         extra_public_includes=[], extra_public_defines=[],
         path='', use_master=True, warnings=True):
@@ -515,7 +512,7 @@ def static_library(bld, name, depends=[], features=[], platforms=[],
         for p in platforms:
             if p not in bld.env.VALID_PLATFORMS:
                 return None
-    return module(bld, name, path, depends, platforms,
+    return module(bld, name, path, depends, private_use, platforms,
         ['cxx', 'cxxstlib'],
         features,
         extra_includes, extra_defines,
@@ -524,7 +521,7 @@ def static_library(bld, name, depends=[], features=[], platforms=[],
 
 
 @conf
-def shared_library(bld, name, depends=[], features=[], platforms=[],
+def shared_library(bld, name, depends=[], private_use=[], features=[], platforms=[],
         extra_includes=[], extra_defines=[],
         extra_public_includes=[], extra_public_defines=[],
         path='', use_master=True, warnings=True, export_all=False):
@@ -533,7 +530,7 @@ def shared_library(bld, name, depends=[], features=[], platforms=[],
         for p in platforms:
             if p not in bld.env.VALID_PLATFORMS:
                 return None
-    return module(bld, name, path, depends, platforms,
+    return module(bld, name, path, depends, private_use, platforms,
         bld.env.STATIC and ['cxx', 'cxxobjects'] or ['cxx', 'cxxshlib', 'shared_lib'],
         features,
         extra_includes, extra_defines,
@@ -542,7 +539,7 @@ def shared_library(bld, name, depends=[], features=[], platforms=[],
 
 
 @conf
-def engine(bld, name, depends=[], features=[], platforms=[],
+def engine(bld, name, depends=[], private_use=[], features=[], platforms=[],
            extra_includes=[], extra_defines=[],
            extra_public_includes=[], extra_public_defines=[],
            path='', use_master=True, warnings=True):
@@ -553,18 +550,18 @@ def engine(bld, name, depends=[], features=[], platforms=[],
         for p in platforms:
             if p not in bld.env.VALID_PLATFORMS:
                 return None
-    bld.launcher = module(bld, name, path, depends + ['3rdparty.system.console'], platforms,
+    bld.launcher = module(bld, name, path, depends + ['3rdparty.system.console'], private_use, platforms,
                           ['cxx', 'cxxprogram', 'launcher'], features,
                           extra_includes, extra_defines, extra_public_includes, extra_public_defines,
                           use_master, warnings, False)
     if 'windows' in bld.env.VALID_PLATFORMS:
-        module(bld, name+'w', path, depends, platforms, ['cxx', 'cxxprogram', 'launcher'],
+        module(bld, name+'w', path, depends, private_use, platforms, ['cxx', 'cxxprogram', 'launcher'],
                features, extra_includes, extra_defines, extra_public_includes, extra_public_defines,
                use_master, warnings, False)
 
 
 @conf
-def game(bld, name, depends=[], features=[], platforms=[],
+def game(bld, name, depends=[], private_use=[], features=[], platforms=[],
          extra_includes=[], extra_defines=[],
          extra_public_includes=[], extra_public_defines=[],
          path='', use_master=True, warnings=True):
@@ -573,14 +570,14 @@ def game(bld, name, depends=[], features=[], platforms=[],
         for p in platforms:
             if p not in bld.env.VALID_PLATFORMS:
                 return None
-    return module(bld, name, path, depends, platforms,
+    return module(bld, name, path, depends, private_use, platforms,
         ['cxx', bld.env.STATIC and 'cxxobjects' or 'cxxshlib', 'plugin', 'game'],
         features, extra_includes, extra_defines, extra_public_includes, extra_public_defines,
         use_master, warnings, False)
 
 
 @conf
-def plugin(bld, name, depends=[], features=[], platforms=[],
+def plugin(bld, name, depends=[], private_use=[], features=[], platforms=[],
            extra_includes=[], extra_defines=[],
            extra_public_includes=[], extra_public_defines=[],
            path='', use_master=True, warnings=True):
@@ -588,7 +585,7 @@ def plugin(bld, name, depends=[], features=[], platforms=[],
     for p in platforms:
         if p not in bld.env.VALID_PLATFORMS:
             return None
-    return module(bld, name, path, depends, platforms,
+    return module(bld, name, path, depends, private_use, platforms,
         ['cxx', bld.env.STATIC and 'cxxobjects' or 'cxxshlib', 'plugin'],
         features, extra_includes, extra_defines, extra_public_includes, extra_public_defines,
         use_master, warnings, False)
@@ -643,22 +640,6 @@ def install_as(self, target_path, file, chmod=Utils.O644):
     install_task.install_step.append((file, target_path, chmod))
 
 
-@feature('*')
-def check_use_taskgens(self):
-    """
-    Checks all names in 'use' are valid task generators, or move them to uselib
-    """
-    use = getattr(self, 'use', [])
-    for name in use:
-        try:
-            y = self.bld.get_tgen_by_name(name)
-        except:
-            try:
-                self.uselib.append(name)
-            except AttributeError:
-                self.uselib = [name]
-
-
 @feature('c', 'cxx')
 def set_optim_define(self):
     o = getattr(self.bld, 'optim', None)
@@ -685,7 +666,7 @@ def set_building_name_inherits(self):
                 self.env.append_unique('DEFINES', 'building_%s' % y.target_name.split('.')[-1])
 
 
-@feature('launcher')
+@feature('launcher', 'python_module')
 @before_method('apply_link')
 @before_method('process_use')
 def static_dependencies(self):
@@ -731,6 +712,90 @@ def set_extra_flags(self):
         self.env.append_unique('CFLAGS', self.env['CFLAGS_%s'%f])
         self.env.append_unique('CXXFLAGS', self.env['CXXFLAGS_%s'%f])
         self.env.append_unique('LINKFLAGS', self.env['LINKFLAGS_%s'%f])
+
+
+@taskgen_method
+def check_use_taskgens(self):
+    """
+    Checks all names in 'use' are valid task generators, or move them to uselib
+    """
+    for var in 'use', 'private_use':
+        use = getattr(self, var, [])
+        for name in use[:]:
+            try:
+                y = self.bld.get_tgen_by_name(name)
+            except:
+                use.remove(name)
+                try:
+                    self.uselib.append(name)
+                except AttributeError:
+                    self.uselib = [name]
+
+
+@taskgen_method
+def process_use_flags(self):
+    dependencies = [self.bld.get_tgen_by_name(i) for i in getattr(self, 'use', [])
+                                                        + getattr(self, 'private_use', [])]
+    seen = set([self])
+    while dependencies:
+        dep = dependencies.pop(0)
+        if dep not in seen:
+            seen.add(dep)
+            dep.post()
+            dependencies += [self.bld.get_tgen_by_name(i) for i in getattr(dep, 'use', [])]
+            for var in self.get_uselib_vars():
+                value = getattr(dep, 'export_%s' % var.lower(), [])
+                self.env.append_value(var, Utils.to_list(value))
+
+
+@taskgen_method
+def process_use_link(self):
+    link_task = getattr(self, 'link_task', None)
+    if link_task:
+        dependencies = [(self.bld.get_tgen_by_name(i), True) for i in self.use + getattr(self, 'private_use', [])]
+        all_deps = dependencies[::]
+        seen = set([self])
+        while dependencies:
+            dep, link_objects = dependencies.pop(0)
+            if dep not in seen:
+                seen.add(dep)
+                dep.post()
+                link_objects = link_objects and not hasattr(dep, 'link_task')
+                new_deps = [self.bld.get_tgen_by_name(i) for i in dep.use + getattr(dep, 'private_use', [])]
+                for d in new_deps:
+                    try: all_deps.remove((d, link_objects))
+                    except ValueError: pass
+                    all_deps.append((d, link_objects))
+                dependencies += [(i, link_objects) for i in new_deps]
+        for d, link_objects in all_deps:
+            for var in 'LIB', 'LIBPATH', 'STLIB', 'STLIBPATH','LINKFLAGS', 'FRAMEWORK':
+                value = getattr(d, 'export_%s' % var.lower(), [])
+                self.env.append_value(var, Utils.to_list(value))
+            if 'cxxstlib' in d.features or 'cstlib' in d.features:
+                self.env.append_value('STLIB', [os.path.basename(d.target)])
+                link_task.dep_nodes.extend(d.link_task.outputs)
+                tmp_path = d.link_task.outputs[0].parent.path_from(self.bld.bldnode)
+                self.env.append_value('STLIBPATH', [tmp_path])
+            elif 'cxxshlib' in d.features or 'cshlib' in d.features:
+                self.env.append_value('LIB', [os.path.basename(d.target)])
+                link_task.dep_nodes.extend(d.link_task.outputs)
+                tmp_path = d.link_task.outputs[0].parent.path_from(self.bld.bldnode)
+                self.env.append_value('LIBPATH', [tmp_path])
+            elif link_objects and ('cxxobjects' in d.features or 'cobjects' in d.features):
+                self.add_objects_from_tgen(d)
+
+
+@taskgen_method
+def process_use(self):
+    self.check_use_taskgens()
+    self.process_use_flags()
+    self.process_use_link()
+    self.uselib = Utils.to_list(getattr(self, 'uselib', []))
+    for x in getattr(self, 'use', []):
+        y = self.bld.get_tgen_by_name(x)
+        for k in self.to_list(getattr(y, 'uselib', [])):
+            if not self.env['STLIB_' + k] and not k in self.uselib:
+                self.uselib.append(k)
 
 
 @feature('cxx')

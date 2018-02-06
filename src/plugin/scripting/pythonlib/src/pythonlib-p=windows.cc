@@ -261,12 +261,28 @@ PythonLibrary::~PythonLibrary()
 
 void PythonLibrary::platformInitialize()
 {
+    ifilename programPath = Environment::getEnvironment().getProgramPath();
+    programPath.pop_back();
+    programPath.push_back("lib");
+    programPath.push_back(istring(minitl::format<32u>("python%d") | m_version));
+    if (m_version < 30)
+    {
+        static ifilename::Filename f = programPath.str();
+        (*m_Py_SetPythonHome2)(f.name);
+    }
+    else
+    {
+        static wchar_t s_programPath[1024];
+        mbstowcs(s_programPath, programPath.str(), sizeof(s_programPath));
+        (*m_Py_SetPythonHome3)(s_programPath);
+    }
 }
 
 void PythonLibrary::setupPath()
 {
     ifilename programPath = Environment::getEnvironment().getProgramPath();
     programPath.pop_back();
+    programPath.push_back("lib");
     (*m_PyRun_SimpleString)(minitl::format<4096>("import sys; sys.path.append(\"%s\")")
                                                | programPath.str().name);
 }
