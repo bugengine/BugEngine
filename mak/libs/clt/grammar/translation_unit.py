@@ -1,9 +1,13 @@
+from .. import cl_ast
+
+
 def p_translation_unit_start(p):
     """
         translation_unit_start :
     """
-    p[0] = p.parser.cl_ast.Scope((0, 0))
+    p[0] = cl_ast.Scope((0, 0))
     p.lexer.push_scope(p[0])
+
 
 def p_translation_unit_end(p):
     """
@@ -11,8 +15,15 @@ def p_translation_unit_end(p):
     """
     p.lexer.pop_scope()
 
+
 def p_translation_unit(p):
     """
         translation_unit_or_empty : translation_unit_start external_declarations translation_unit_end
     """
     p[0] = p[1]
+
+#def p_translation_unit(p):
+#    """
+#        translation_unit_or_empty : object_name
+#    """
+#    p[0] = p[1]

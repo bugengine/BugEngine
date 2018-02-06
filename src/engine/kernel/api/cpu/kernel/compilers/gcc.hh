@@ -27,6 +27,7 @@
 # define be_break()
 #endif
 
+#ifndef _CLC
 #include <stdint.h>
 #include <stdlib.h>
 typedef int8_t                  i8;
@@ -38,6 +39,7 @@ typedef uint16_t                u16;
 typedef uint32_t                u32;
 typedef uint64_t                u64;
 typedef u8                      byte;
+#endif
 
 #if __GXX_EXPERIMENTAL_CXX0X__
 # define BE_HAS_MOVE_SEMANTICS

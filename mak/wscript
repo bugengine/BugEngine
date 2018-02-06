@@ -77,9 +77,9 @@ def setup(conf):
                              once=False)
             conf.end_msg('')
     if conf.env.VALID_PLATFORMS:
-        if os.path.isdir(os.path.join(conf.bugenginenode.abspath(), 'extra', conf.env.VALID_PLATFORMS[0])):
-            conf.recurse(os.path.join(conf.bugenginenode.abspath(), 'extra', conf.env.VALID_PLATFORMS[0]),
-                         name='setup', once=False)
+        extra_dir = os.path.join(conf.bugenginenode.abspath(), 'extra', conf.env.VALID_PLATFORMS[0])
+        if os.path.isdir(extra_dir):
+            conf.recurse(extra_dir, name='setup', once=False)
 
 
 def build(bld):

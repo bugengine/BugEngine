@@ -42,8 +42,8 @@ ide_format = {
 class ClLexer:
     def __init__(self, filename, error_format):
         self.lexer = lex.lex(object=self)
-        self.lexer.filename = filename
-        self.lexer.error_count = 0
+        self.filename = filename
+        self.error_count = 0
         self.last_token = None
         self.scopes = []
         self.current_scope = None
@@ -84,12 +84,13 @@ class ClLexer:
     def token(self):
         new_token = self.lexer.token()
         if new_token:
+            new_token.lexer = self
             new_token.endlexpos = new_token.lexpos + len(new_token.value)
-        if new_token and new_token.type == 'SCOPE':
-            if self.last_token:
-                self.current_scope = getattr(self.last_token, 'found_object', self.scopes[0])
-        elif self.last_token and self.last_token.type != 'SCOPE':
-            self.current_scope = None
+            if new_token.type == 'SCOPE':
+                if self.last_token:
+                    self.current_scope = getattr(self.last_token, 'found_object', self.scopes[0])
+            elif self.last_token and self.last_token.type != 'SCOPE':
+                self.current_scope = None
         self.last_token = new_token
         return new_token
 
@@ -110,11 +111,10 @@ class ClLexer:
             offset -= 1
         while end < len(self.lexer.lexdata) and self.lexer.lexdata[end] != '\n':
             end += 1
-        location = self.error_format % { 'f': self.lexer.filename, 'l': lineno, 'c': pos[1] - offset + 1 }
+        location = self.error_format % { 'f': self.filename, 'l': lineno, 'c': pos[1] - offset + 1 }
         sys.stderr.write('%s%s%s%s %s:%s %s%s%s\n' % (color_filename, location, color_off,
                                                        color_error_type, error_type, color_off,
                                                        color_msg, msg, color_off))
-
         sys.stderr.write(self.lexer.lexdata[offset:end+1])
         sys.stderr.write('%s%s%s%s\n' % (' '*(pos[1] - offset), color_caret, '^'*(pos[2]-pos[1]), color_off))
 
@@ -128,27 +128,28 @@ class ClLexer:
         self._msg('warning', msg, pos)
 
     def _error(self, msg, pos):
-        self.lexer.error_count += 1
+        self.error_count += 1
         self._msg('error', msg, pos)
 
     # Lexer rules ##
     forbidden_keywords = (
         # raise errors when encountered
-        'char', 'short', 'int', 'long', 'unsigned', 'uchar', 'ushort', 'uint', 'ulong',
+        'char', 'short', 'long', 'unsigned', 'uchar', 'ushort', 'uint', 'ulong',
     )
     keywords = (
         # use these types instead
         'i8', 'u8', 'i16', 'u16', 'i32', 'u32', 'i64', 'u64', 'float', 'half', 'double',
-        'bool', 'size_t', 'ptrdiff_t', 'intptr_t', 'uintptr_t', 'void',
+        'bool', 'size_t', 'ptrdiff_t', 'intptr_t', 'uintptr_t', 'void', 'int',
 
         'const', 'global', '__global', 'local', '__local',
         'constant', '__constant', 'private', '__private',
         'restrict', 'volatile', 'static', 'inline', 'return',
         'do', 'while', 'for', 'switch', 'case', 'default', 'break', 'continue', 'if', 'else',
-        'enum', 'struct', 'union', 'typedef',
+        'enum', 'struct', 'union', 'typedef', 'sizeof',
 
         # BugEngine additions
         'template', 'namespace', 'typename', 'using',
+        'published', 'public', 'protected',
     ) + tuple('%s%d' % (t, n) for t in ('byte', 'ubyte', 'short', 'ushort',
                                         'int', 'uint', 'bigint', 'biguint',
                                         'float', 'double')
@@ -311,10 +312,9 @@ class ClLexer:
             self.lexer.skip(1)
         else:
             self.lexer.lineno = int(self.pp_line)
-
             if self.pp_filename is not None:
-                self.lexer.filename = self.pp_filename
-
+                self.filename = self.pp_filename
+        self.pp_line = None
         t.lexer.begin('INITIAL')
 
     def t_ppline_PPLINE(self, t):
@@ -470,6 +470,8 @@ class ClLexer:
             t.type = self.keyword_map.get(t.value, "ID")
             if t.type == 'ID':
                 self.lookup(t)
+            if t.type[0:2] == '__':
+                t.type = t.type[2:]
             return t
 
     def t_error(self, t):

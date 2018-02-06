@@ -69,7 +69,7 @@ class MSVC(Configure.ConfigurationContext.Compiler):
         env.IDIRAFTER='/I'
         env.CC_CPP = env.CC
         env.CC_CPP_SRC_F = ''
-        env.CC_CPP_TGT_F = ['/TC', '/P', '/Fi']
+        env.CC_CPP_TGT_F = ['/TC', '-X', '/P', '/Fi']
         if os_platform().endswith('64'):
             conf.find_program('cdb64', var='CDB', mandatory=False)
         else:
