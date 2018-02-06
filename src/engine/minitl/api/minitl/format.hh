@@ -81,13 +81,13 @@ void format<SIZE>::put(const char *value) const
     if (m_firstFormat+s-m_buffer < SIZE)
     {
         memmove(m_firstFormat+s, m_firstFormat+2, SIZE-(m_firstFormat+s-m_buffer));
-        strncpy(m_firstFormat, value, s);
+        memcpy(m_firstFormat, value, s);
         m_firstFormat += s;
         findToken();
     }
     else
     {
-        strncpy(m_firstFormat, value, SIZE-(m_firstFormat-m_buffer));
+        memcpy(m_firstFormat, value, SIZE-(m_firstFormat-m_buffer));
         m_firstFormat = m_buffer + SIZE;
     }
 }

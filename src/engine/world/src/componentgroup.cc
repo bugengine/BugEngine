@@ -966,7 +966,8 @@ void ComponentGroup::executeEntityOperations(weak<EntityStorage> storage,
         u32 absoluteComponentIndex = componentIndex + firstComponent;
         EntityStorage::ComponentStorage& componentStorage = *storage->m_components[absoluteComponentIndex];
         const u32 mask = 1 << componentIndex;
-        memset(offsets, 0, offsetSize);
+        for (u32 i = 0; i < bucketSize; ++i)
+            new (&offsets[i]) Offsets;
         i32 absoluteOffset = 0;
         u32 entityCount = 0;
         u32 entityCountAll = 0;
@@ -1122,6 +1123,8 @@ void ComponentGroup::executeEntityOperations(weak<EntityStorage> storage,
     }
     freea(bucketsProcessed);
     freea(bucketsToProcess);
+    for (u32 i = 0; i < bucketSize; ++i)
+        offsets[i].~Offsets();
     freea(offsets);
 }
 

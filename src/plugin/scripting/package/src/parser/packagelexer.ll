@@ -37,8 +37,7 @@ static char *be_strdup(const char *src)
 {
     size_t x = strlen(src);
     char* result = (char*)malloc(x+1);
-    strncpy(result, src, x);
-    result[x] = 0;
+    strncpy(result, src, x+1);
     return result;
 }
 

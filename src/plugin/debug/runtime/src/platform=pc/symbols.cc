@@ -25,9 +25,12 @@ SymbolResolver::~SymbolResolver()
 
 void SymbolResolver::fillSymbol(Symbol& symbol, u64 address, const char *module, const char *filename, const char *function, int line)
 {
-    strncpy(symbol.m_module, module, sizeof(symbol.m_module));
-    strncpy(symbol.m_filename, filename, sizeof(symbol.m_filename));
-    strncpy(symbol.m_function, function, sizeof(symbol.m_function));
+    strncpy(symbol.m_module, module, sizeof(symbol.m_module)-1);
+    symbol.m_module[sizeof(symbol.m_module)-1] = 0;
+    strncpy(symbol.m_filename, filename, sizeof(symbol.m_filename)-1);
+    symbol.m_filename[sizeof(symbol.m_filename)-1] = 0;
+    strncpy(symbol.m_function, function, sizeof(symbol.m_function)-1);
+    symbol.m_function[sizeof(symbol.m_function)-1] = 0;
     symbol.m_address = address;
     symbol.m_line = line;
 }
