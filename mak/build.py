@@ -253,7 +253,7 @@ def module(bld, name, module_path, depends, private_depends,
         extra_features = ['warnnone', bld.__class__.optim] + (bld.env.STATIC and [] or ['dynamic'])
 
     result = []
-    internal_deps = []
+    internal_deps = {}
 
     if build and not bld.env.PROJECTS:
         preprocess = bld(
@@ -333,7 +333,10 @@ def module(bld, name, module_path, depends, private_depends,
             source_nodes = [source_node] + [e for _, e in extras])
         result.append(task_gen)
         if target_prefix:
-            internal_deps[''].append(target_prefix + name)
+            try:
+                internal_deps[''].append(target_prefix + name)
+            except KeyError:
+                internal_deps[''] = [target_prefix + name]
         for kernel_type, toolchain in env.KERNEL_TOOLCHAINS:
             kernels = preprocess and preprocess.kernels or []
             kernel_env = bld.all_envs[toolchain]
@@ -341,8 +344,6 @@ def module(bld, name, module_path, depends, private_depends,
                 for variant in [''] + kernel_env.KERNEL_OPTIM_VARIANTS:
                     target_suffix = '.'.join([kernel_type] + ([variant[1:]] if variant else []))
                     kernel_target = name + '.' + '.'.join(kernel) + '.' + target_suffix
-                    if target_prefix:
-                        internal_deps[kernel_target] = []
                     kernel_task_gen = bld(
                             env = env.derive(),
                             bld_env = env,
@@ -364,7 +365,10 @@ def module(bld, name, module_path, depends, private_depends,
                         )
                     kernel_task_gen.env.PLUGIN = plugin_name
                     if target_prefix:
-                        internal_deps[kernel_target].append(target_prefix + name)
+                        try:
+                            internal_deps[kernel_target].append(target_prefix + name)
+                        except KeyError:
+                            internal_deps[kernel_target] = [target_prefix + name]
     if internal_deps:
         multiarch = bld(target=name, features=['multiarch'], use=internal_deps[''])
         for kernel_type, toolchain in env.KERNEL_TOOLCHAINS:

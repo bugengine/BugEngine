@@ -136,3 +136,6 @@ def configure(conf):
     detect_icc(conf)
     conf.end_msg('done')
 
+
+def build(bld):
+    pass

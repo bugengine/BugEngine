@@ -1,5 +1,6 @@
 from waflib import Configure
 from waflib.TaskGen import feature, before_method, after_method
+from waflib.Tools import msvc
 import os
 
 
@@ -117,7 +118,7 @@ def configure(conf):
 
 
 def build(bld):
-    pass
+    msvc.wrap_class('cpp')
 
 
 @feature('c', 'cxx')
