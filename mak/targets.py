@@ -81,6 +81,7 @@ class Platform:
                 v.ENV_PREFIX = compiler.arch
             if not sub_compilers:
                 conf.recurse(conf.bugenginenode.abspath()+'/mak/arch/%s'%compiler.arch, once=False)
+                self.add_kernel_toolchains(conf)
 
         except Exception as e:
             conf.end_msg(e, color='RED')
@@ -105,6 +106,9 @@ class Platform:
                     add_build_command(toolchain, optim)
                 conf.env.append_unique('ALL_TOOLCHAINS', toolchain)
             return toolchain
+
+    def add_kernel_toolchains(self, conf):
+        conf.env.KERNEL_TOOLCHAINS += [('cpu', conf.env.TOOLCHAIN)]
 
     def add_multiarch_toolchain(self, toolchain):
         e = self.env

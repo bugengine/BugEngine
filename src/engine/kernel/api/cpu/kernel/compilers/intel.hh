@@ -5,10 +5,11 @@
 #define BE_KERNEL_COMPILERS_INTEL_HH_
 /**************************************************************************************************/
 
-#include <stdint.h>
 #define be_alignof(t)           __alignof(t)
 #define be_break()              /*__asm("int $3")*/
 
+#ifndef _CLC
+#include <stdint.h>
 typedef signed __int8           i8;
 typedef signed __int16          i16;
 typedef signed __int32          i32;
@@ -36,6 +37,7 @@ typedef u8                      byte;
 #pragma warning disable 810     // conversion from X to Y may lose significant bits
 #pragma warning disable 1572    // floating-point equality and inequality comparisons are unreliable
 #pragma warning disable 1419    // external declaration in primary source file
+#endif
 
 #ifdef NDEBUG
 # pragma warning disable 869
@@ -43,7 +45,10 @@ typedef u8                      byte;
 
 #ifndef _WIN32
 
+#ifndef _CLC
 # include <unistd.h>
+#endif
+
 # define override
 # define BE_NOINLINE            __attribute__((noinline))
 # define BE_ALWAYSINLINE        __attribute__((always_inline))

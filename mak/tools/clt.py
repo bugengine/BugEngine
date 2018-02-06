@@ -28,12 +28,15 @@ if __name__ == '__main__':
         try:
             parser = cl_parser.ClParser(os.path.join(options.tmp_dir, 'cl_grammar.pickle'))
             result = parser.parse(options.error_format, args[0])
-            result.dump()
-            with open(args[1], 'wb') as out_file:
-                pickle.dump(result, out_file)
-            sys.exit(result.error_count)
+            if not result:
+                sys.exit(254)
+            elif result.error_count > 0:
+                sys.exit(result.error_count)
+            else:
+                with open(args[1], 'wb') as out_file:
+                    out_file.write(b'\n')
         except Exception as e:
             print(e)
             traceback.print_exc()
-            sys.exit(1)
+            sys.exit(255)
 

@@ -314,12 +314,11 @@ def module(bld, name, module_path, depends,
             target_name = name,
             module_path = project_path,
             use = [target_prefix + d for d in depends],
-            features = features + ['kernel_build'],
+            features = features,
             extra_use = extra_features,
             defines = ['building_%s' % safe_name(name.split('.')[-1]),
                        'BE_PROJECTID=%s'%name.replace('.', '_'),
-                       'BE_PROJECTNAME=%s'%name,
-                       'BE_KERNEL_TARGET=cpp'] + extra_defines,
+                       'BE_PROJECTNAME=%s'%name] + extra_defines,
             export_defines = [] + extra_public_defines,
             includes = extra_includes + api + platform_api + include + platform_include + [bld.bugenginenode],
             libs = [],
@@ -329,15 +328,50 @@ def module(bld, name, module_path, depends,
             source = sources[:],
             pchstop = pchstop,
             preprocess = preprocess,
-            kernels = preprocess and preprocess.kernels or [],
             export_all=export_all,
             source_nodes = [source_node] + [e for _, e in extras])
-        task_gen.env.PLUGIN = plugin_name
         result.append(task_gen)
         if target_prefix:
-            internal_deps.append(target_prefix + name)
+            internal_deps[''].append(target_prefix + name)
+        for kernel_type, toolchain in env.KERNEL_TOOLCHAINS:
+            kernels = preprocess and preprocess.kernels or []
+            kernel_env = bld.all_envs[toolchain]
+            for kernel, kernel_source in kernels:
+                for variant in [''] + kernel_env.KERNEL_OPTIM_VARIANTS:
+                    target_suffix = '.'.join([kernel_type] + ([variant[1:]] if variant else []))
+                    kernel_target = name + '.' + '.'.join(kernel) + '.' + target_suffix
+                    if target_prefix:
+                        internal_deps[kernel_target] = []
+                    kernel_task_gen = bld(
+                            env = env.derive(),
+                            bld_env = env,
+                            kernel_env = kernel_env,
+                            target = target_prefix + kernel_target,
+                            target_name = target_prefix + name,
+                            kernel = kernel,
+                            features = ['cxx', bld.env.STATIC and 'cxxobjects' or 'cxxshlib', 'kernel'],
+                            extra_use = task_gen.extra_use,
+                            defines = task_gen.defines + [
+                                    'BE_BUILD_KERNEL=1',
+                                    'BE_KERNEL_ID=%s_%s'%(name.replace('.', '_'), kernel_target.replace('.', '_')),
+                                    'BE_KERNEL_NAME=%s.%s'%(name, kernel_target),
+                                    'BE_KERNEL_TARGET=%s' % kernel_type,
+                                    'BE_KERNEL_ARCH=%s' % variant],
+                            includes = task_gen.includes,
+                            source = [kernel_source],
+                            use = task_gen.use + ([variant] if variant else []),
+                        )
+                    kernel_task_gen.env.PLUGIN = plugin_name
+                    if target_prefix:
+                        internal_deps[kernel_target].append(target_prefix + name)
     if internal_deps:
-        multiarch = bld(target=name, features=['multiarch'], use=internal_deps)
+        multiarch = bld(target=name, features=['multiarch'], use=internal_deps[''])
+        for kernel_type, toolchain in env.KERNEL_TOOLCHAINS:
+            for kernel, kernel_source in kernels:
+                for variant in [''] + target_env.KERNEL_OPTIM_VARIANTS:
+                    target_suffix = '.'.join([kernel_type] + ([variant[1:]] if variant else []))
+                    kernel_target = name + '.' + '.'.join(kernel) + '.' + target_suffix,
+                    bld(target=kernel_target, feature=['multiarch'], use=internal_deps[kernel_target])
     else:
         multiarch = None
 
