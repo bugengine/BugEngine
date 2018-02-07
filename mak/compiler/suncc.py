@@ -103,16 +103,19 @@ class SunCC(Configure.ConfigurationContext.GnuCompiler):
 
     def set_optimisation_options(self, conf):
         v = conf.env
+        v['CPPFLAGS_debug'] = ['-D_DEBUG']
         v['CFLAGS_debug'] = ['-g', '-D_DEBUG']
         v['CXXFLAGS_debug'] = ['-g', '-D_DEBUG']
         v['LINKFLAGS_debug'] = ['-g']
 
+        v['CPPFLAGS_profile'] = ['-DNDEBUG']
         v['CFLAGS_profile'] = ['-g', '-DNDEBUG', '-fast']
         v['CXXFLAGS_profile'] = ['-g', '-DNDEBUG', '-fast',
                                 '-features=mutable',
                                 '-features=localfor', '-features=bool', '-features=no%split_init']
         v['LINKFLAGS_profile'] = ['-g']
 
+        v['CPPFLAGS_final'] = ['-DNDEBUG']
         v['CFLAGS_final'] = ['-g', '-DNDEBUG', '-fast']
         v['CXXFLAGS_final'] = ['-g', '-DNDEBUG', '-fast',
                                 '-features=mutable',
@@ -157,7 +160,7 @@ class SunCC(Configure.ConfigurationContext.GnuCompiler):
         Configure.ConfigurationContext.GnuCompiler.load_in_env(self, conf, platform)
         v = conf.env
         v['RPATH_ST'] = '-R%s'
-        v.CC_CPP = [v.CC, '-E', '-library=no%Cstd']
+        v.CC_CPP = Utils.to_list(env.CC) + ['-E', '-library=no%Cstd']
         if platform.NAME == 'Linux':
             v.IDIRAFTER = '-I'
             #v.STATIC = 1
