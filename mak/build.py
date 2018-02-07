@@ -334,9 +334,9 @@ def module(bld, name, module_path, depends, private_depends,
         result.append(task_gen)
         if target_prefix:
             try:
-                internal_deps[''].append(target_prefix + name)
+                internal_deps[name].append(target_prefix + name)
             except KeyError:
-                internal_deps[''] = [target_prefix + name]
+                internal_deps[name] = [target_prefix + name]
         for kernel_type, toolchain in env.KERNEL_TOOLCHAINS:
             kernels = preprocess and preprocess.kernels or []
             kernel_env = bld.all_envs[toolchain]
@@ -366,19 +366,14 @@ def module(bld, name, module_path, depends, private_depends,
                     kernel_task_gen.env.PLUGIN = plugin_name
                     if target_prefix:
                         try:
-                            internal_deps[kernel_target].append(target_prefix + name)
+                            internal_deps[kernel_target].append(target_prefix + kernel_target)
                         except KeyError:
-                            internal_deps[kernel_target] = [target_prefix + name]
-    if internal_deps:
-        multiarch = bld(target=name, features=['multiarch'], use=internal_deps[''])
-        for kernel_type, toolchain in env.KERNEL_TOOLCHAINS:
-            for kernel, kernel_source in kernels:
-                for variant in [''] + target_env.KERNEL_OPTIM_VARIANTS:
-                    target_suffix = '.'.join([kernel_type] + ([variant[1:]] if variant else []))
-                    kernel_target = name + '.' + '.'.join(kernel) + '.' + target_suffix,
-                    bld(target=kernel_target, feature=['multiarch'], use=internal_deps[kernel_target])
-    else:
-        multiarch = None
+                            internal_deps[kernel_target] = [target_prefix + kernel_target]
+    multiarch = None
+    for multiarch_target, deps in internal_deps.items():
+        tgt = bld(target=multiarch_target, features=['multiarch'], use=deps)
+        if multiarch_target == name:
+            multiarch = tgt
 
     if multiarch or result:
         install_tg = multiarch if multiarch else result[0]
@@ -713,6 +708,7 @@ def process_export_all_flag(self):
 @before_method('process_source')
 def set_extra_flags(self):
     for f in getattr(self, 'extra_use', []):
+        self.env.append_unique('CPPFLAGS', self.env['CPPFLAGS_%s'%f])
         self.env.append_unique('CFLAGS', self.env['CFLAGS_%s'%f])
         self.env.append_unique('CXXFLAGS', self.env['CXXFLAGS_%s'%f])
         self.env.append_unique('LINKFLAGS', self.env['LINKFLAGS_%s'%f])

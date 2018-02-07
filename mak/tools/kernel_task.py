@@ -1,7 +1,7 @@
 import os
 import sys
 sys.path.append(os.path.split(os.path.split(os.path.dirname(os.path.realpath(__file__)))[0])[0])
-from mak.libs.cpp import parser
+from mak.libs.cpp import parser, tree
 from optparse import OptionParser
 import traceback
 try:
@@ -141,7 +141,7 @@ if __name__ == '__main__':
             kernel_name = kernel_namespace[-1]
             kernel_full_name = kernel_namespace[1:]
             for m in result.objects:
-                if m.name_cpp == 'kmain':
+                if isinstance(m, tree.OverloadedMethod) and m.name_cpp == 'kmain':
                     break
             else:
                 raise Exception("could not locate method kmain in kernel")

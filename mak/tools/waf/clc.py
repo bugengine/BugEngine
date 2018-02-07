@@ -9,7 +9,7 @@ from waflib.Tools import c_preproc
 
 class cpp(Task.Task):
     "Preprocesses files"
-    run_str = '${CC_CPP} ${ARCH_ST:ARCH} ${CFLAGS} ${CPPFLAGS} ${FRAMEWORKPATH_ST:FRAMEWORKPATH} ${CPPPATH_ST:INCPATHS} ${DEFINES_ST:DEFINES} -D_CLC=1 ${CC_CPP_SRC_F}${SRC} ${CC_CPP_TGT_F}${TGT}'
+    run_str = '${CC_CPP} ${ARCH_ST:ARCH} ${CPPFLAGS} ${FRAMEWORKPATH_ST:FRAMEWORKPATH} ${CPPPATH_ST:INCPATHS} ${DEFINES_ST:DEFINES} -D_CLC=1 ${CC_CPP_SRC_F}${SRC} ${CC_CPP_TGT_F}${TGT}'
     vars    = ['CCDEPS']
     ext_out = ['.i']
     scan    = c_preproc.scan
