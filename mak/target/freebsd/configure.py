@@ -22,6 +22,7 @@ class FreeBSD(Configure.ConfigurationContext.Platform):
                 env.LINK_CC = ['/usr/bin/cc']
                 env.LINK_CXX = ['/usr/bin/c++']
             elif 'Clang' in compiler.NAMES:
+                env.append_unique('CPPFLAGS', ['-mfloat-abi=hard', '-mfpu=vfp'])
                 env.append_unique('CFLAGS', ['-mfloat-abi=hard', '-mfpu=vfp'])
                 env.append_unique('CXXFLAGS', ['-std=gnu++11', '-mfloat-abi=hard', '-mfpu=vfp'])
                 if compiler.version_number < (3,4):
@@ -30,6 +31,7 @@ class FreeBSD(Configure.ConfigurationContext.Platform):
                     env.append_unique('CFLAGS', ['-Wa,-meabi=5'])
                     env.append_unique('CXXFLAGS', ['-Wa,-meabi=5'])
                 if '-target' not in env.CFLAGS and not env.SYSROOT and env.FREEBSD_HOST_TRIPLE:
+                    env.append_unique('CPPFLAGS', ['-target', env.FREEBSD_HOST_TRIPLE])
                     env.append_unique('CFLAGS', ['-target', env.FREEBSD_HOST_TRIPLE])
                     env.append_unique('CXXFLAGS', ['-target', env.FREEBSD_HOST_TRIPLE])
                     env.append_unique('LINKFLAGS', ['-target', env.FREEBSD_HOST_TRIPLE])
@@ -45,6 +47,7 @@ class FreeBSD(Configure.ConfigurationContext.Platform):
         env.pymodule_PATTERN = '%s.so'
         env.STRIP_BINARY = True
 
+        env.append_unique('CPPFLAGS', ['-fPIC'])
         env.append_unique('CFLAGS', ['-fPIC'])
         env.append_unique('CXXFLAGS', ['-fPIC'])
         env.RPATH = '$ORIGIN/../share/bugengine/plugin:$ORIGIN/../lib:$ORIGIN:$ORIGIN/../plugin:$ORIGIN/../../../lib'
