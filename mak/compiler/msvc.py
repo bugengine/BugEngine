@@ -18,6 +18,8 @@ class MSVC(Configure.ConfigurationContext.Compiler):
         self.target = self.platform
 
     def set_optimisation_options(self, conf):
+        conf.env.append_unique('CPPFLAGS_debug', ['/Od', '/Ob1', '/EHsc', '/RTC1', '/RTCc', '/Zi',
+                                                  '/MTd', '/D_DEBUG'])
         conf.env.append_unique('CFLAGS_debug', ['/Od', '/Ob1', '/EHsc', '/RTC1', '/RTCc', '/Zi',
                                                 '/MTd', '/D_DEBUG'])
         conf.env.append_unique('CXXFLAGS_debug', ['/Od', '/Ob1', '/EHsc', '/RTC1', '/RTCc', '/Zi',
@@ -25,6 +27,9 @@ class MSVC(Configure.ConfigurationContext.Compiler):
         conf.env.append_unique('LINKFLAGS_debug', ['/DEBUG', '/INCREMENTAL:no'])
         conf.env.append_unique('ARFLAGS_debug', [])
 
+        conf.env.append_unique('CPPFLAGS_profile', ['/DNDEBUG', '/MT', '/Ox', '/Ob2', '/Oi', '/Ot',
+                                                    '/Oy', '/GT', '/GL', '/GF', '/FD', '/GS-', '/Gy',
+                                                    '/GR-'])
         conf.env.append_unique('CFLAGS_profile', ['/DNDEBUG', '/MT', '/Ox', '/Ob2', '/Oi', '/Ot',
                                                   '/Oy', '/GT', '/GL', '/GF', '/FD', '/GS-', '/Gy',
                                                   '/GR-'])
@@ -34,6 +39,9 @@ class MSVC(Configure.ConfigurationContext.Compiler):
         conf.env.append_unique('LINKFLAGS_profile', ['/DEBUG', '/LTCG', '/INCREMENTAL:no'])
         conf.env.append_unique('ARFLAGS_profile', ['/LTCG'])
 
+        conf.env.append_unique('CPPFLAGS_final', ['/DNDEBUG', '/MT', '/Ox', '/Ob2', '/Oi', '/Ot',
+                                                  '/Oy', '/GT', '/GL', '/GF', '/FD', '/GS-', '/Gy',
+                                                  '/GR-'])
         conf.env.append_unique('CFLAGS_final', ['/DNDEBUG', '/MT', '/Ox', '/Ob2', '/Oi', '/Ot',
                                                 '/Oy', '/GT', '/GL', '/GF', '/FD', '/GS-', '/Gy',
                                                 '/GR-'])
