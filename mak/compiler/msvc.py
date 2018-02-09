@@ -1,4 +1,4 @@
-from waflib import Configure
+from waflib import Configure, Utils
 from waflib.TaskGen import feature, before_method, after_method
 from waflib.Tools import msvc
 import os
@@ -76,9 +76,9 @@ class MSVC(Configure.ConfigurationContext.Compiler):
         Configure.ConfigurationContext.Compiler.load_in_env(self, conf, platform)
         env = conf.env
         env.IDIRAFTER='/I'
-        env.CC_CPP = env.CC
+        env.CC_CPP = Utils.to_list(env.CC) + ['/TC', '/X', '/E']
         env.CC_CPP_SRC_F = ''
-        env.CC_CPP_TGT_F = ['/TC', '-X', '/P', '/Fi']
+        env.CC_CPP_TGT_F = ['/Fo'] # will actually be ignored
         if os_platform().endswith('64'):
             conf.find_program('cdb64', var='CDB', mandatory=False)
         else:
@@ -88,10 +88,10 @@ class MSVC(Configure.ConfigurationContext.Compiler):
 def os_platform():
     true_platform = os.environ['PROCESSOR_ARCHITECTURE']
     try:
-            true_platform = os.environ["PROCESSOR_ARCHITEW6432"]
+        true_platform = os.environ["PROCESSOR_ARCHITEW6432"]
     except KeyError:
-            pass
-            #true_platform not assigned to if this does not exist
+        pass
+        #true_platform not assigned to if this does not exist
     return true_platform
 
 
@@ -126,7 +126,16 @@ def configure(conf):
 
 
 def build(bld):
-    msvc.wrap_class('cpp')
+    cls = msvc.wrap_class('cpp')
+    derived = type('cpp', (cls,), {})
+    def exec_command_stdout(self, *k, **kw):
+        if self.env.CC_NAME == 'msvc':
+            with open(self.outputs[0].abspath(), 'w') as out:
+                kw['stdout'] = out
+                return super(derived, self).exec_command(*k, **kw)
+        else:
+            return super(derived, self).exec_command(*k, **kw)
+    derived.exec_command = exec_command_stdout
 
 
 @feature('c', 'cxx')
