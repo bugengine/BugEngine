@@ -4,11 +4,8 @@ from . import Command
 class PullCommand(Command):
     name = 'pull'
 
-    def __init__(self, devices):
-        self.devices = devices
-
     def run(self, device, device_file, destination):
-        for d in self.devices:
+        for d in self.all_devices():
             if d.name == device:
                 with d.connect() as connection:
                     connection.pull(device_file, destination)

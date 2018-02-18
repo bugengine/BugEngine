@@ -3,37 +3,54 @@ import sys
 from mak.libs import device
 from waflib import Configure, Context, Options, Errors, Logs
 from mak.libs.device.command import Command
+try:
+    import cPickle as pickle
+except ImportError:
+    import pickle
+
 
 @Configure.conf
 def load_device_list(self):
-    self.devices = []
-    self.devices.append(device.Device('localhost', 'localhost://'))
+    self.devices = {}
     device_dir = os.path.join(Context.top_dir, '.devices')
     try:
         os.mkdir(device_dir, 0o700)
     except OSError:
         pass
+    localhost = False
     for device_file in os.listdir(device_dir):
         try:
-            with open(os.path.join(device_dir, device_file), 'r') as device_file_object:
-                name = device_file_object.readline().strip()
-                url = device_file_object.readline().strip()
-                self.devices.append(device.Device(name, url))
+            with open(os.path.join(device_dir, device_file), 'rb') as device_file_object:
+                d = pickle.load(device_file_object)
+        except Exception as e:
+            Logs.warn('device file %s could not be opened: %s' % (device_file, e))
         except IOError:
-            Logs.pprint.warn('device file %s could not be opened' % device_file)
+            Logs.warn('device file %s could not be opened' % device_file)
         else:
-            pass
+            try:
+                self.devices[d.platform.__class__.__name__].append(d)
+            except KeyError:
+                self.devices[d.platform.__class__.__name__] = [d]
+            localhost = localhost or (d.name == 'localhost')
+    if not localhost:
+        localhost = device.Device('localhost', 'localhost://')
+        try:
+            self.devices[localhost.platform.__class__.__name__].append(localhost)
+        except KeyError:
+            self.devices[localhost.platform.__class__.__name__] = [localhost]
 
 
 @Configure.conf
 def save_device_list(self):
     device_dir = os.path.join(Context.top_dir, '.devices')
-    for d in self.devices:
-        with open(os.path.join(device_dir, d.name), 'w') as device_file_object:
-            device_file_object.write(d.name)
-            device_file_object.write('\n')
-            device_file_object.write(d.url)
-
+    for platform, devices in self.devices.items():
+        for d in devices:
+            try:
+                with open(os.path.join(device_dir, d.name), 'wb') as device_file_object:
+                    pickle.dump(d, device_file_object)
+            except pickle.PicklingError:
+                os.unlink(os.path.join(device_dir, d.name))
+                raise
 
 
 class DeviceContext(Context.Context):
@@ -82,5 +99,9 @@ class DeviceContext(Context.Context):
 
 
 def options(option_context):
-    pass
+    option_context.add_option('--device',
+                              action='store',
+                              default='clamps',
+                              dest='device',
+                              help='Default device to deploy to')
 

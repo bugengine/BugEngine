@@ -1,22 +1,28 @@
+import os
 import sys
 import subprocess
 from mak.libs.device.protocol import Protocol
 from mak.libs.device.platform import Platform
+from waflib import Options
 
 class AdbProtocol(Protocol):
     name = 'adb'
 
     class Connection:
         def __init__(self, device_name):
+            if Options.options.android_sdk_path:
+                self.adb = os.path.join(Options.options.android_sdk_path, 'platform-tools', 'adb')
+            else:
+                self.adb = 'adb'
             self.device_name = device_name
 
         def __enter__(self):
-            p = subprocess.Popen(['adb', 'connect', self.device_name],
+            p = subprocess.Popen([self.adb, 'connect', self.device_name],
                                  stdin=subprocess.PIPE,
                                  stdout=subprocess.PIPE,
                                  stderr=subprocess.PIPE)
             out, err = p.communicate()
-            p = subprocess.Popen(['adb', 'devices'],
+            p = subprocess.Popen([self.adb, 'devices'],
                                  stdin=subprocess.PIPE,
                                  stdout=subprocess.PIPE,
                                  stderr=subprocess.PIPE)
@@ -45,7 +51,7 @@ class AdbProtocol(Protocol):
 
         def _run(self, *command):
             try:
-                p = subprocess.Popen(('adb', '-s', self.device_name, 'shell') + command,
+                p = subprocess.Popen((self.adb, '-s', self.device_name, 'shell') + command,
                                      stdin=subprocess.PIPE,
                                      stdout=subprocess.PIPE,
                                      stderr=subprocess.PIPE)
@@ -86,10 +92,10 @@ class AdbProtocol(Protocol):
             pass
 
         def start_shell(self):
-            subprocess.Popen(('adb', '-s', self.device_name, 'shell')).communicate()
+            subprocess.Popen((self.adb, '-s', self.device_name, 'shell')).communicate()
 
         def install(self, package_file):
-            subprocess.Popen(('adb', '-s', self.device_name, 'install', '-r', package_file)).communicate()
+            subprocess.Popen((self.adb, '-s', self.device_name, 'install', '-r', package_file)).communicate()
 
         def start_activity(self, task_gen):
             pass
@@ -107,11 +113,12 @@ class AdbProtocol(Protocol):
 
 
 class AndroidPlatform(Platform):
-    name = 'android'
+    names = ('android',)
 
     @classmethod
     def help(self, out):
         out.write('    supports Android devices through ADB\n')
+
 
 def options(option_context):
     pass

@@ -5,11 +5,9 @@ from . import Command
 class RemoveCommand(Command):
     name = 'remove'
 
-    def __init__(self, devices):
-        self.devices = devices
-
     def run(self, name):
         print('unregistering device %s' % name)
+        raise Exception('not implemented')
 
     @classmethod
     def help(self, out):

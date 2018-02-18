@@ -8,11 +8,8 @@ class StatusCommand(Command):
         'error':    u'\x1b[01;31m\u25cf\x1b[0m',
         'unknown':  u'\x1b[01;33m\u25cf\x1b[0m'
     }
-    def __init__(self, devices):
-        self.devices = devices
-
     def get_device(self, name):
-        for d in self.devices:
+        for d in self.all_devices():
             if d.name == name:
                 return d
 
@@ -20,7 +17,7 @@ class StatusCommand(Command):
         if kw:
             devices = [(n, self.get_device(n)) for n in kw]
         else:
-            devices = [(d.name, d) for d in self.devices]
+            devices = [(d.name, d) for d in self.all_devices()]
         device_name_length = max([len(name) for name, device in devices])
         for name, device in devices:
             if device:
