@@ -10,7 +10,7 @@ BE_REGISTER_NAMESPACE_2_(bugengine, BugEngine, Resource);
 namespace BugEngine { namespace Resource
 {
 
-static const Handle s_nullHandle = { 0, {0} };
+static const Handle s_nullHandle = { {0}, 0 };
 Resource::Resource()
     :   m_handle(s_nullHandle)
 {
@@ -19,6 +19,17 @@ Resource::Resource()
 Resource::~Resource()
 {
     be_assert(m_handle.id.intId == 0, "resource handle destroyed but hasn't been properly unloaded");
+}
+
+Resource::Resource(const Resource& other)
+{
+    m_handle = other.m_handle;
+}
+
+Resource& Resource::operator=(const Resource& other)
+{
+    m_handle = other.m_handle;
+    return *this;
 }
 
 Resource& Resource::null()
