@@ -9,36 +9,72 @@ namespace BugEngine { namespace Resource
 {
 
 Description::Description()
+    :   m_resourceCount(0)
+    ,   m_resourceCache()
 {
 }
 
 Description::~Description()
 {
+    Resource* resources = getResourceBuffer();
+    for(int i = 0; i < m_resourceCount; ++i)
+    {
+        resources[i].~Resource();
+    }
+    if (m_resourceCount > MaxResourceCount)
+    {
+        Arena::resource().free(resources);
+    }
 }
 
 void Description::load(weak<ILoader> loader) const
 {
-    for(int i = 0; i < MaxResourceCount; ++i)
+    Resource* resources = getResourceBuffer();
+    if (++m_resourceCount > MaxResourceCount)
     {
-        if (!m_resources[i].m_handle.owner)
+        u64 bufferSize = m_resourceCount * sizeof(Resource);
+        Resource* resourceBuffer = static_cast<Resource*>(Arena::resource().alloc(bufferSize));
+        for (u32 i = 0; i < m_resourceCount-1; ++i)
         {
-            m_resources[i].m_handle.owner = loader->m_id;
-            loader->load(this, m_resources[i]);
-            return;
+            new (&resourceBuffer[i]) Resource(resources[i]);
+            resources[i].m_handle.id.ptrId = 0;
+            resources[i].m_handle.owner = 0;
+            resources[i].~Resource();
         }
+        if (m_resourceCount > MaxResourceCount+1)
+        {
+            Arena::resource().free(resources);
+        }
+        m_resourceCache.m_resourcePointer = resources = resourceBuffer;
     }
-    be_notreached();
+    new (&resources[m_resourceCount-1]) Resource;
+    resources[m_resourceCount-1].m_handle.owner = loader->m_id;
+    loader->load(this, resources[m_resourceCount-1]);
 }
 
 void Description::unload(weak<ILoader> loader) const
 {
-    for(int i = 0; i < MaxResourceCount; ++i)
+    Resource* resources = getResourceBuffer();
+    for(int i = 0; i < m_resourceCount; ++i)
     {
-        if (m_resources[i].m_handle.owner == loader->m_id)
+        if (resources[i].m_handle.owner == loader->m_id)
         {
-            loader->unload(m_resources[i]);
-            m_resources[i].m_handle.owner = 0;
-            m_resources[i].m_handle.id.ptrId = 0;
+            loader->unload(resources[i]);
+            resources[i] = resources[m_resourceCount-1];
+            resources[m_resourceCount-1].m_handle.id.ptrId = 0;
+            resources[m_resourceCount-1].m_handle.owner = 0;
+            resources[m_resourceCount-1].~Resource();
+            --m_resourceCount;
+            Resource* newBuffer = getResourceBuffer();
+            if (newBuffer != resources)
+            {
+                for (u32 i = 0; i < m_resourceCount; ++i)
+                {
+                    new (&newBuffer[i]) Resource(resources[i]);
+                    resources[i].~Resource();
+                }
+                Arena::resource().free(resources);
+            }
             return;
         }
     }
@@ -47,11 +83,12 @@ void Description::unload(weak<ILoader> loader) const
 
 Resource& Description::getResourceForWriting(weak<const ILoader> owner) const
 {
-    for(int i = 0; i < MaxResourceCount; ++i)
+    Resource* resources = getResourceBuffer();
+    for(int i = 0; i < m_resourceCount; ++i)
     {
-        if (m_resources[i].m_handle.owner == owner->m_id)
+        if (resources[i].m_handle.owner == owner->m_id)
         {
-            return m_resources[i];
+            return resources[i];
         }
     }
     return Resource::null();
@@ -59,14 +96,27 @@ Resource& Description::getResourceForWriting(weak<const ILoader> owner) const
 
 const Resource& Description::getResource(weak<const ILoader> owner) const
 {
-    for(int i = 0; i < MaxResourceCount; ++i)
+    Resource* resources = getResourceBuffer();
+    for(int i = 0; i < m_resourceCount; ++i)
     {
-        if (m_resources[i].m_handle.owner == owner->m_id)
+        if (resources[i].m_handle.owner == owner->m_id)
         {
-            return m_resources[i];
+            return resources[i];
         }
     }
     return Resource::null();
+}
+
+Resource* Description::getResourceBuffer() const
+{
+    if (m_resourceCount <= MaxResourceCount)
+    {
+        return reinterpret_cast<Resource*>(m_resourceCache.m_resourceBuffer);
+    }
+    else
+    {
+        return m_resourceCache.m_resourcePointer;
+    }
 }
 
 }}

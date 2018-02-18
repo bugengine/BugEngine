@@ -22,13 +22,11 @@ Scheduler::Scheduler(const Plugin::Context& context)
     ,   m_cpuLoaders(Arena::task(), s_cpuVariantCount+1)
     ,   m_memoryHost(scoped<MemoryHost>::create(Arena::task()))
 {
-    m_cpuLoaders.push_back(ref<CodeLoader>::create(Arena::task(), inamespace()));
-    m_resourceManager->attach<Kernel>(m_cpuLoaders[0]);
     for (i32 i = 0; i < s_cpuVariantCount; ++i)
     {
         be_info("registering optimised CPU kernel loader for %s" | s_cpuVariants[i]);
         m_cpuLoaders.push_back(ref<CodeLoader>::create(Arena::task(), inamespace(s_cpuVariants[i])));
-        m_resourceManager->attach<Kernel>(m_cpuLoaders[i+1]);
+        m_resourceManager->attach<Kernel>(m_cpuLoaders[i]);
     }
 }
 

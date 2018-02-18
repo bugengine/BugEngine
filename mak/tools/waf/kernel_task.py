@@ -32,8 +32,9 @@ class kernel_optim_header(Task.Task):
     def run(self):
         with open(self.outputs[0].abspath(), 'w') as out:
             out.write("static const char* s_cpuVariants[] = { %s };\n"
-                      "static const i32 s_cpuVariantCount = %d;\n" % (', '.join('"%s"'%o for o in self.env.KERNEL_OPTIM_VARIANTS),
-                                                            len(self.env.KERNEL_OPTIM_VARIANTS)))
+                      "static const i32 s_cpuVariantCount = %d;\n"
+                      "" % (', '.join('"%s"'%o for o in [''] + [v[1:] for v in self.env.KERNEL_OPTIM_VARIANTS]),
+                            1 + len(self.env.KERNEL_OPTIM_VARIANTS)))
 
 @feature('generate_cpu_variants')
 @before_method('process_source')
