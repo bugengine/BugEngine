@@ -14,10 +14,12 @@ old_exec_command = Task.Task.exec_command
 def to_string(self):
     bld = self.generator.bld
     if self.outputs:
-        tgt_str = ' '.join([a.path_from(bld.bldnode) for a in self.outputs][:1])
+        tgt_str = ' '.join([a.name for a in self.outputs][:1])
     else:
-        tgt_str = ' '.join([a.path_from(bld.srcnode) for a in self.inputs][:1])
-    return '(%s) %s\n' % (self.__class__.__name__.replace('_task', ''), tgt_str)
+        tgt_str = ' '.join([a.name for a in self.inputs][:1])
+    return '(%s) %s->%s\n' % (self.__class__.__name__.replace('_task', ''),
+                               self.generator.target,
+                               tgt_str)
 
 
 def create_namespace_file(task):
