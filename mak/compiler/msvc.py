@@ -1,5 +1,6 @@
-from waflib import Configure
+from waflib import Configure, Utils
 from waflib.TaskGen import feature, before_method, after_method
+from waflib.Tools import msvc
 import os
 
 
@@ -17,6 +18,8 @@ class MSVC(Configure.ConfigurationContext.Compiler):
         self.target = self.platform
 
     def set_optimisation_options(self, conf):
+        conf.env.append_unique('CPPFLAGS_debug', ['/Od', '/Ob1', '/EHsc', '/RTC1', '/RTCc', '/Zi',
+                                                  '/MTd', '/D_DEBUG'])
         conf.env.append_unique('CFLAGS_debug', ['/Od', '/Ob1', '/EHsc', '/RTC1', '/RTCc', '/Zi',
                                                 '/MTd', '/D_DEBUG'])
         conf.env.append_unique('CXXFLAGS_debug', ['/Od', '/Ob1', '/EHsc', '/RTC1', '/RTCc', '/Zi',
@@ -24,6 +27,9 @@ class MSVC(Configure.ConfigurationContext.Compiler):
         conf.env.append_unique('LINKFLAGS_debug', ['/DEBUG', '/INCREMENTAL:no'])
         conf.env.append_unique('ARFLAGS_debug', [])
 
+        conf.env.append_unique('CPPFLAGS_profile', ['/DNDEBUG', '/MT', '/Ox', '/Ob2', '/Oi', '/Ot',
+                                                    '/Oy', '/GT', '/GL', '/GF', '/FD', '/GS-', '/Gy',
+                                                    '/GR-'])
         conf.env.append_unique('CFLAGS_profile', ['/DNDEBUG', '/MT', '/Ox', '/Ob2', '/Oi', '/Ot',
                                                   '/Oy', '/GT', '/GL', '/GF', '/FD', '/GS-', '/Gy',
                                                   '/GR-'])
@@ -33,6 +39,9 @@ class MSVC(Configure.ConfigurationContext.Compiler):
         conf.env.append_unique('LINKFLAGS_profile', ['/DEBUG', '/LTCG', '/INCREMENTAL:no'])
         conf.env.append_unique('ARFLAGS_profile', ['/LTCG'])
 
+        conf.env.append_unique('CPPFLAGS_final', ['/DNDEBUG', '/MT', '/Ox', '/Ob2', '/Oi', '/Ot',
+                                                  '/Oy', '/GT', '/GL', '/GF', '/FD', '/GS-', '/Gy',
+                                                  '/GR-'])
         conf.env.append_unique('CFLAGS_final', ['/DNDEBUG', '/MT', '/Ox', '/Ob2', '/Oi', '/Ot',
                                                 '/Oy', '/GT', '/GL', '/GF', '/FD', '/GS-', '/Gy',
                                                 '/GR-'])
@@ -67,9 +76,9 @@ class MSVC(Configure.ConfigurationContext.Compiler):
         Configure.ConfigurationContext.Compiler.load_in_env(self, conf, platform)
         env = conf.env
         env.IDIRAFTER='/I'
-        env.CC_CPP = env.CC
+        env.CC_CPP = Utils.to_list(env.CC) + ['/TC', '/X', '/E']
         env.CC_CPP_SRC_F = ''
-        env.CC_CPP_TGT_F = ['/TC', '/P', '/Fi']
+        env.CC_CPP_TGT_F = ['/Fo'] # will actually be ignored
         if os_platform().endswith('64'):
             conf.find_program('cdb64', var='CDB', mandatory=False)
         else:
@@ -79,10 +88,10 @@ class MSVC(Configure.ConfigurationContext.Compiler):
 def os_platform():
     true_platform = os.environ['PROCESSOR_ARCHITECTURE']
     try:
-            true_platform = os.environ["PROCESSOR_ARCHITEW6432"]
+        true_platform = os.environ["PROCESSOR_ARCHITEW6432"]
     except KeyError:
-            pass
-            #true_platform not assigned to if this does not exist
+        pass
+        #true_platform not assigned to if this does not exist
     return true_platform
 
 
@@ -117,7 +126,16 @@ def configure(conf):
 
 
 def build(bld):
-    pass
+    cls = msvc.wrap_class('cpp')
+    derived = type('cpp', (cls,), {})
+    def exec_command_stdout(self, *k, **kw):
+        if self.env.CC_NAME == 'msvc':
+            with open(self.outputs[0].abspath(), 'w') as out:
+                kw['stdout'] = out
+                return super(derived, self).exec_command(*k, **kw)
+        else:
+            return super(derived, self).exec_command(*k, **kw)
+    derived.exec_command = exec_command_stdout
 
 
 @feature('c', 'cxx')

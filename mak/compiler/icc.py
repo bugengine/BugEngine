@@ -73,6 +73,7 @@ class ICC(Configure.ConfigurationContext.GnuCompiler):
                 v.append_unique('SYSTEM_LIBPATHS', ['=/usr/lib/i386-linux-gnu'])
             elif self.arch == 'amd64':
                 v.append_unique('SYSTEM_LIBPATHS', ['=/usr/lib/x86_64-linux-gnu'])
+        v.append_unique('CPPFLAGS', ['-fPIC'])
         v.append_unique('CFLAGS', ['-fPIC'])
         v.append_unique('CXXFLAGS', ['-fPIC'])
         if platform.NAME != 'windows':
@@ -136,3 +137,6 @@ def configure(conf):
     detect_icc(conf)
     conf.end_msg('done')
 
+
+def build(bld):
+    pass

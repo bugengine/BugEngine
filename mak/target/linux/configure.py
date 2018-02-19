@@ -31,6 +31,7 @@ class Linux(Configure.ConfigurationContext.Platform):
         env.STRIP_BINARY = True
 
         if 'SunCC' not in compiler.NAMES:
+            env.append_unique('CPPFLAGS', ['-fPIC'])
             env.append_unique('CFLAGS', ['-fPIC'])
             env.append_unique('CXXFLAGS', ['-fPIC'])
         env.append_unique('DEFINES', ['_GNU_SOURCE'])

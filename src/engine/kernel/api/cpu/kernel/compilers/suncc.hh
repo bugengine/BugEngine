@@ -12,6 +12,7 @@
 # error Platform not supported
 #endif
 
+#ifndef _CLC
 # include <stdint.h>
 # include <stdlib.h>
 # include <alloca.h>
@@ -25,13 +26,6 @@ typedef uint32_t                u32;
 typedef uint64_t                u64;
 typedef u8                      byte;
 
-#define    override
-#define BE_NOINLINE
-#define BE_ALWAYSINLINE         inline
-
-#define BE_EXPORT               __global
-#define BE_IMPORT
-
 #ifndef alloca
 # define alloca(x) __builtin_alloca(x)
 extern "C" void* __builtin_alloca(size_t);
@@ -39,6 +33,17 @@ extern "C" void* __builtin_alloca(size_t);
 
 #undef __REDIRECT
 #include <cerrno>
+
+#endif
+
+#define    override
+#define BE_NOINLINE
+#define BE_ALWAYSINLINE         inline
+
+#define BE_EXPORT               __global
+#define BE_IMPORT
+
+
 
 /**************************************************************************************************/
 #endif

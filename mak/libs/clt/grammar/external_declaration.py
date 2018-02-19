@@ -1,8 +1,102 @@
+from .. import cl_ast
+
+
+def p_template_parameter_name_opt(p):
+    """
+        template_parameter_name_opt :   ID
+                                    |   NAMESPACE_ID_SHADOW
+                                    |   STRUCT_ID_SHADOW
+                                    |   TYPENAME_ID_SHADOW
+                                    |   VARIABLE_ID_SHADOW
+                                    |   METHOD_ID_SHADOW
+                                    |
+    """
+
+
+def p_template_parameter_default_value_opt(p):
+    """
+        template_parameter_default_value_opt :  EQUALS expression   %prec PRIO11
+                                             |  EQUALS type
+                                             |
+    """
+
+
+def p_template_parameter_value(p):
+    """
+        template_parameter : type template_parameter_name_opt template_parameter_default_value_opt
+    """
+
+
+def p_template_parameter_typename(p):
+    """
+        template_parameter : TYPENAME template_parameter_name_opt template_parameter_default_value_opt
+    """
+
+
+def p_template_parameter_list(p):
+    """
+        template_parameter_list : template_parameter_list COMMA template_parameter
+                                | template_parameter
+    """
+
+
+def p_template_parameters(p):
+    """
+        template_parameters : template_parameter_list
+    """
+    p[0] = p[1]
+
+
+def p_template_parameters_none(p):
+    """
+        template_parameters :
+    """
+    p[0] = []
+
+
+def p_template_specifier(p):
+    """
+        template_specifier_opt : TEMPLATE LT template_parameters GT
+    """
+    pass
+
+
+def p_template_specifier_opt(p):
+    """
+        template_specifier_opt :
+    """
+    pass
+
+
+def p_declaration_specifier(p):
+    """
+        declaration_specifier : STATIC
+                              | INLINE
+    """
+    p[0] = cl_ast.Specifier(p[1], p.position(1))
+
+
+def p_declaration_specifier_list_end(p):
+    """
+        declaration_specifier_list :
+    """
+    p[0] = []
+
+
+def p_declaration_specifier_list(p):
+    """
+        declaration_specifier_list : declaration_specifier_list declaration_specifier
+    """
+    p[0] = p[1] + [p[2]]
+    p.set_position(0, 2)
+
+
 def p_external_declarations_end(p):
     """
         external_declarations :
     """
     p[0] = []
+
 
 def p_external_declarations(p):
     """
@@ -10,29 +104,50 @@ def p_external_declarations(p):
     """
     p[0] = p[1] + (p[2] and [p[2]] or [])
 
+
 def p_external_declaration_namespace(p):
     """
         external_declaration : namespace_declaration
     """
     p[0] = p[1]
 
+
 def p_external_declaration_empty(p):
     """
-        external_declaration : SEMI
+        external_declaration : template_specifier_opt declaration_specifier_list SEMI
     """
     p[0] = None
 
+
 def p_external_declaration_type(p):
     """
-        external_declaration : type SEMI
+        external_declaration : template_specifier_opt declaration_specifier_list type SEMI
     """
-    p[0] = p[1]
+    p[0] = p[3]
+    for s in p[2]:
+        p.lexer._warning('specifier ignored', s.position)
 
-def p_external_declaration(p):
+
+def p_external_declaration_variable(p):
     """
-        external_declaration : variable_declaration SEMI
+        external_declaration : template_specifier_opt variable_declaration SEMI
     """
-    p[0] = p[1]
+    p[0] = p[2]
+
+
+def p_external_declaration_method(p):
+    """
+        external_declaration : template_specifier_opt method_declaration SEMI
+    """
+    pass
+
+
+def p_external_declaration_method_definition(p):
+    """
+        external_declaration : template_specifier_opt method_definition
+    """
+    pass
+
 
 def p_external_declaration_error(p):
     """

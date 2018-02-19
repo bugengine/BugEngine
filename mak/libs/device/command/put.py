@@ -4,9 +4,6 @@ from . import Command
 class PutCommand(Command):
     name = 'put'
 
-    def __init__(self, devices):
-        self.devices = devices
-
     def _copy_directory(self, connection, dir, destination):
         for root, dirs, files in os.walk(dir):
             relpath = os.path.relpath(root, dir)
@@ -40,7 +37,7 @@ class PutCommand(Command):
 
     def run(self, device, arg1, arg2, *kw):
         args = (arg1, arg2,) + kw
-        for d in self.devices:
+        for d in self.all_devices():
             if d.name == device:
                 try:
                     self.do_copy(d, args[-1], args[:-1])

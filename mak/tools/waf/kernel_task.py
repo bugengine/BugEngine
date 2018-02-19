@@ -24,6 +24,30 @@ cls = Task.task_factory('kernel_task', kernel_task, [], 'PINK', ext_out=['.scrip
 cls.scan = scan
 
 
+class kernel_optim_header(Task.Task):
+    color = 'PINK'
+    scan = scan
+    vars = ['KERNEL_OPTIM_VARIANTS']
+
+    def run(self):
+        with open(self.outputs[0].abspath(), 'w') as out:
+            out.write("static const char* s_cpuVariants[] = { %s };\n"
+                      "static const i32 s_cpuVariantCount = %d;\n"
+                      "" % (', '.join('"%s"'%o for o in [''] + [v[1:] for v in self.env.KERNEL_OPTIM_VARIANTS]),
+                            1 + len(self.env.KERNEL_OPTIM_VARIANTS)))
+
+@feature('generate_cpu_variants')
+@before_method('process_source')
+def generate_cpu_variants(self):
+    for kernel_name, toolchain in self.env.KERNEL_TOOLCHAINS:
+        if kernel_name == 'cpu':
+            env = self.bld.all_envs[toolchain]
+            out_header = self.make_bld_node('include', None, 'kernel_optims.hh')
+            task = self.create_task('kernel_optim_header', [], [out_header])
+            task.env = env
+            self.env.append_unique('INCLUDES', [out_header.parent.abspath()])
+
+
 @feature('preprocess')
 @before_method('process_source')
 def kernel_generate(self):

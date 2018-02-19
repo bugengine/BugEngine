@@ -11,6 +11,7 @@
 #include    <scheduler/scheduler.hh>
 #include    <scheduler/task/itask.hh>
 #include    <scheduler/kernel/kernel.script.hh>
+#include    <kernel_optims.hh>
 
 namespace BugEngine { namespace Kernel { namespace CPU
 {
@@ -18,18 +19,25 @@ namespace BugEngine { namespace Kernel { namespace CPU
 Scheduler::Scheduler(const Plugin::Context& context)
     :   IScheduler("CPU", context.scheduler)
     ,   m_resourceManager(context.resourceManager)
-    ,   m_cpuLoader(scoped<CodeLoader>::create(Arena::task(), inamespace()))
-    ,   m_cpuLoaderNeon(scoped<CodeLoader>::create(Arena::task(), inamespace("avx")))
+    ,   m_cpuLoaders(Arena::task(), s_cpuVariantCount+1)
     ,   m_memoryHost(scoped<MemoryHost>::create(Arena::task()))
 {
-    m_resourceManager->attach<Kernel>(weak<Resource::ILoader>(m_cpuLoader));
-    m_resourceManager->attach<Kernel>(weak<Resource::ILoader>(m_cpuLoaderNeon));
+    for (i32 i = 0; i < s_cpuVariantCount; ++i)
+    {
+        be_info("registering optimised CPU kernel loader for %s" | s_cpuVariants[i]);
+        m_cpuLoaders.push_back(ref<CodeLoader>::create(Arena::task(), inamespace(s_cpuVariants[i])));
+        m_resourceManager->attach<Kernel>(m_cpuLoaders[i]);
+    }
 }
 
 Scheduler::~Scheduler()
 {
-    m_resourceManager->detach<Kernel>(weak<const Resource::ILoader>(m_cpuLoaderNeon));
-    m_resourceManager->detach<Kernel>(weak<const Resource::ILoader>(m_cpuLoader));
+    for (minitl::vector< ref<CodeLoader> >::const_iterator it = m_cpuLoaders.rbegin();
+         it != m_cpuLoaders.rend();
+         ++it)
+    {
+        m_resourceManager->detach<Kernel>(*it);
+    }
 }
 
 void Scheduler::run(weak<Task::KernelTask> task,
@@ -37,7 +45,7 @@ void Scheduler::run(weak<Task::KernelTask> task,
                     const minitl::array< weak<const IMemoryBuffer> >& parameters)
 {
     /* TODO: set option to use Neon/AVX/SSE */
-    weak<KernelObject> object = kernel->getResource(m_cpuLoader).getRefHandle<KernelObject>();
+    weak<KernelObject> object = kernel->getResource(m_cpuLoaders[0]).getRefHandle<KernelObject>();
     be_assert(object, "kernel is not loaded");
     CPUKernelTask& taskBody = object->m_task->body;
     taskBody.sourceTask = task;

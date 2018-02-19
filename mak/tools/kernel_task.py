@@ -1,7 +1,7 @@
 import os
 import sys
 sys.path.append(os.path.split(os.path.split(os.path.dirname(os.path.realpath(__file__)))[0])[0])
-from mak.libs.cpp import parser
+from mak.libs.cpp import parser, tree
 from optparse import OptionParser
 import traceback
 try:
@@ -101,15 +101,12 @@ BugEngine::Kernel::Kernel::KernelList&  getKernelList_%(module)s();
 ref<%(Name)sTask::Kernel> %(Name)sTask::s_kernel = ref<%(Name)sTask::Kernel>::create(BugEngine::Arena::game());
 
 %(Name)sTask::%(Name)sTask(%(argument_params)s)
-    :   %(argument_assign)s
-    ,   m_task(ref<BugEngine::Task::KernelTask>::create(BugEngine::Arena::task(),
+    :   %(argument_assign)sm_task(ref<BugEngine::Task::KernelTask>::create(BugEngine::Arena::task(),
                                                         "%(kernel_full_name)s",
                                                         BugEngine::Colors::Red::Red,
                                                         BugEngine::Scheduler::High,
                                                         s_kernel,
-                                                        makeParameters()))
-    ,   %(callback_assign)s
-    ,   %(argument_out_assign)s
+                                                        makeParameters()))%(callback_assign)s%(argument_out_assign)s
 {
 }
 
@@ -144,7 +141,7 @@ if __name__ == '__main__':
             kernel_name = kernel_namespace[-1]
             kernel_full_name = kernel_namespace[1:]
             for m in result.objects:
-                if m.name_cpp == 'kmain':
+                if isinstance(m, tree.OverloadedMethod) and m.name_cpp == 'kmain':
                     break
             else:
                 raise Exception("could not locate method kmain in kernel")
@@ -181,6 +178,11 @@ if __name__ == '__main__':
                     raise Exception('invalid kernel input type: %s\n'
                                     'mark it with be_in, be_out or be_inout' % name)
 
+            argument_assign = '\n    ,   '.join(('m_%s(%s)' % (arg[0], arg[0]) for arg in args))
+            callback_assign = '\n    ,   '.join(('m_%sChain(%s->producer(), m_task->startCallback())' % (arg[0], arg[0])
+                                                for arg in args))
+            argument_out_assign = '\n    ,   '.join(('%s(ref< const BugEngine::Kernel::Product< %s<minitl::remove_const< %s >::type> > >::create(BugEngine::Arena::task(), %s, m_task))' % (arg[0], arg[2], arg[1], arg[0])
+                                                    for arg in args))
             params = {
                 'header': arguments[3],
                 'Namespace':' { '.join('namespace %s' % n.capitalize() for n in kernel_namespace[:-1]) + '\n{\n',
@@ -210,15 +212,9 @@ if __name__ == '__main__':
                 'argument_params':
                     ', '.join(('weak< const BugEngine::Kernel::Product< %s<minitl::remove_const< %s >::type> > > %s' % (arg[2], arg[1], arg[0])
                                    for arg in args)),
-                'argument_assign':
-                    '\n    ,   '.join(('m_%s(%s)' % (arg[0], arg[0])
-                                           for arg in args)),
-                'callback_assign':
-                    '\n    ,   '.join(('m_%sChain(%s->producer(), m_task->startCallback())' % (arg[0], arg[0])
-                                           for arg in args)),
-                'argument_out_assign':
-                    '\n    ,   '.join(('%s(ref< const BugEngine::Kernel::Product< %s<minitl::remove_const< %s >::type> > >::create(BugEngine::Arena::task(), %s, m_task))' % (arg[0], arg[2], arg[1], arg[0])
-                                           for arg in args)),
+                'argument_assign': argument_assign and (argument_assign + '\n    ,   ') or '/* no arguments */\n        ',
+                'callback_assign': callback_assign and ('\n    ,   ' + callback_assign) or '\n        /* no callbacks */',
+                'argument_out_assign': argument_out_assign and ('\n    ,   ' + argument_out_assign) or '\n        /* no arguments out */',
             }
             with open(arguments[2], 'w') as out:
                 out.write(template_cc % params)

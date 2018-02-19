@@ -3,11 +3,8 @@ from . import Command
 class ShellCommand(Command):
     name = 'shell'
 
-    def __init__(self, devices):
-        self.devices = devices
-
     def run(self, device):
-        for d in self.devices:
+        for d in self.all_devices():
             if d.name == device:
                 try:
                     with d.connect() as connection:

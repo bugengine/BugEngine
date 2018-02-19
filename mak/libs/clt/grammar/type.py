@@ -1,3 +1,5 @@
+from .. import cl_ast
+
 def p_type_builtin(p):
     """
         type :  I8
@@ -8,6 +10,7 @@ def p_type_builtin(p):
              |  U32
              |  I64
              |  U64
+             |  INT
              |  FLOAT
              |  DOUBLE
              |  HALF
@@ -16,7 +19,6 @@ def p_type_builtin(p):
              |  PTRDIFF_T
              |  INTPTR_T
              |  UINTPTR_T
-             |  VOID
              |  BYTE2
              |  BYTE3
              |  BYTE4
@@ -68,5 +70,20 @@ def p_type_builtin(p):
              |  DOUBLE8
              |  DOUBLE16
     """
-    p[0] = p.parser.cl_ast.Builtin(p[1])
+    p[0] = cl_ast.Builtin(p[1], p.position(1))
+
+
+def p_type_ptr(p):
+    """
+        type : type TIMES
+             | typedecl TIMES
+    """
+    p[0] = cl_ast.Pointer(p[1], p.position(2))
+
+
+def p_type_void_ptr(p):
+    """
+        type : VOID TIMES
+    """
+    p[0] = cl_ast.Pointer(cl_ast.Builtin(p[1]), p.position(2))
 

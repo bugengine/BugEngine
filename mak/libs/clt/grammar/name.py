@@ -1,61 +1,110 @@
-
-def p_root_namespace_begin(p):
-    """
-        root_namespace_begin : SCOPE
-    """
-    p[0] = p.lexer.scopes[0]
-
-def p_qualfied_name_lookup(p):
-    """
-        qualified_type_name_lookup : root_namespace_begin unqualified_type_name_lookup
-    """
-    p[0] = p[1]
-
-def p_namespace_begin(p):
-    """
-        namespace_begin : NAMESPACE_ID SCOPE
-                        | NAMESPACE_ID_SHADOW SCOPE
-    """
-    p[0] = p.slice[1].found_object
-
-def p_namespace_lookup_opt(p):
-    """
-        namespace_lookup_opt : namespace_begin namespace_lookup_opt
-                             |
-    """
-    pass
-
+# Type lookup
 def p_type_name(p):
     """
         type_name : STRUCT_ID
-                  | STRUCT_ID_SHADOW
                   | TYPENAME_ID
+                  | STRUCT_ID_SHADOW
                   | TYPENAME_ID_SHADOW
-    """
-    p[0] = p.slice[1].found_object
 
-def p_type_name_list_last(p):
+        type_name_id_qualified : STRUCT_ID
+                               | TYPENAME_ID
     """
-        type_name_list : type_name
-    """
-    p[0] = p[1]
+    p[0] = (p[1], p.slice[1].found_object)
 
-def p_type_name_list(p):
-    """
-        type_name_list : type_name SCOPE type_name_list
-    """
-    p[0] = p[1]
 
-def p_unqualfied_name_lookup_typename(p):
+def p_type_name_namespace(p):
     """
-        unqualified_type_name_lookup : namespace_lookup_opt type_name_list
+        type_name : NAMESPACE_ID SCOPE type_name_qualified
+                  | NAMESPACE_ID_SHADOW SCOPE type_name_qualified
+                  | STRUCT_ID SCOPE type_name_struct_qualified
+                  | STRUCT_ID_SHADOW SCOPE type_name_struct_qualified
+    """
+    p[0] = p[3]
+
+
+def p_type_name_namespace_root(p):
+    """
+        type_name : SCOPE type_name_qualified
     """
     p[0] = p[2]
 
-def p_decl_type(p):
+
+
+def p_type_name_qualified(p):
     """
-        type : unqualified_type_name_lookup
-             | qualified_type_name_lookup
+        type_name_qualified : NAMESPACE_ID SCOPE type_name_qualified
+                            | type_name_struct_qualified
+
+        type_name_struct_qualified : STRUCT_ID SCOPE type_name_struct_qualified
+                                   | type_name_id_qualified
     """
-    p[0] = p[1]
+    if len(p) > 2:
+        p[0] = p[3]
+    else:
+        p[0] = p[1]
+
+
+# Object lookup
+def p_object_name_namespace(p):
+    """
+        object_name : NAMESPACE_ID SCOPE object_name_qualified
+                    | NAMESPACE_ID_SHADOW SCOPE object_name_qualified
+                    | STRUCT_ID SCOPE object_name_struct_qualified
+                    | STRUCT_ID_SHADOW SCOPE object_name_struct_qualified
+    """
+    p[0] = ((p[1],) + p[3][1], True, p[3][2])
+
+
+def p_object_name_struct_qualified(p):
+    """
+        object_name_qualified : NAMESPACE_ID SCOPE object_name_qualified
+                              | object_name_struct_qualified
+        object_name_struct_qualified : STRUCT_ID SCOPE object_name_struct_qualified
+                                     | object_name_id_qualified
+    """
+    if len(p) > 2:
+        p[0] = ((p[1],) + p[3][1], True, p[3][2])
+    else:
+        p[0] = p[1]
+
+
+def p_object_name_namespace_root(p):
+    """
+        object_name : SCOPE object_name_qualified
+    """
+    p[0] = ((None,) + p[2][1], True, p[2][2])
+
+
+def p_object_name(p):
+    """
+        object_name : NAMESPACE_ID
+                    | STRUCT_ID
+                    | TYPENAME_ID
+                    | METHOD_ID
+                    | VARIABLE_ID
+
+        object_name_id_qualified : STRUCT_ID
+                                 | TYPENAME_ID
+                                 | METHOD_ID
+                                 | VARIABLE_ID
+    """
+    p[0] = (p[1], True, p.slice[1].found_object)
+
+
+def p_object_name_shadow(p):
+    """
+        object_name : NAMESPACE_ID_SHADOW
+                    | STRUCT_ID_SHADOW
+                    | TYPENAME_ID_SHADOW
+                    | METHOD_ID_SHADOW
+                    | VARIABLE_ID_SHADOW
+    """
+    p[0] = (p[1], True, p.slice[1].found_object)
+
+
+def p_object_name_id(p):
+    """
+        object_name : ID
+    """
+    p[0] = (p[1], False, None)
 
