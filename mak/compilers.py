@@ -127,6 +127,7 @@ class Compiler:
         return []
 
     def load_in_env(self, conf, platform):
+        conf.env.append_unique('CPPFLAGS', self.extra_args.get('c', []))
         conf.env.append_unique('CFLAGS', self.extra_args.get('c', []))
         conf.env.append_unique('CXXFLAGS', self.extra_args.get('cxx', []))
         conf.env.append_unique('LINKFLAGS', self.extra_args.get('link', []))
@@ -328,11 +329,13 @@ class GnuCompiler(Compiler):
 
     def set_optimisation_options(self, conf):
         v = conf.env
+        v.CPPFLAGS_debug = ['-D_DEBUG'] + v.CPPFLAGS_debug
         v.CFLAGS_debug = ['-pipe', '-g', '-D_DEBUG'] + v.CFLAGS_debug
         v.CXXFLAGS_debug = ['-pipe', '-g', '-D_DEBUG'] + v.CXXFLAGS_debug
         v.ASFLAGS_debug = ['-pipe', '-g', '-D_DEBUG'] + v.ASFLAGS_debug
         v.LINKFLAGS_debug = ['-pipe', '-g'] + v.LINKFLAGS_debug
 
+        v.CPPFLAGS_profile = ['-DNDEBUG'] + v.CPPFLAGS_profile
         v.CFLAGS_profile = ['-pipe', '-g', '-DNDEBUG', '-O3'] + v.CFLAGS_profile
         v.CXXFLAGS_profile = ['-pipe', '-Wno-unused-parameter', '-g', '-DNDEBUG', '-O3', '-fno-rtti', '-fno-exceptions'] + v.CXXFLAGS_profile
         v.ASFLAGS_profile = ['-pipe', '-g', '-DNDEBUG', '-O3'] + v.ASFLAGS_profile
@@ -341,6 +344,7 @@ class GnuCompiler(Compiler):
         v.CXXFLAGS_exception = ['-fexceptions']
         v.CXXFLAGS_rtti = ['-frtti']
 
+        v.CPPFLAGS_final = ['-DNDEBUG'] + v.CPPFLAGS_final
         v.CFLAGS_final = ['-pipe', '-g', '-DNDEBUG', '-O3'] + v.CFLAGS_final
         v.CXXFLAGS_final = ['-pipe', '-Wno-unused-parameter', '-g', '-DNDEBUG', '-O3', '-fno-rtti', '-fno-exceptions'] + v.CXXFLAGS_final
         v.ASFLAGS_final = ['-pipe', '-g', '-DNDEBUG', '-O3'] + v.ASFLAGS_final
@@ -405,7 +409,7 @@ class GnuCompiler(Compiler):
 
         env.COMPILER_NAME = self.__class__.__name__.lower()
         env.COMPILER_TARGET = self.arch + '-' + self.platform
-        env.CC_CPP = [env.CC, '-x', 'c', '-E']
+        env.CC_CPP = Utils.to_list(env.CC) + ['-nostdinc', '-x', 'c', '-E']
         env.CC_CPP_SRC_F = ''
         env.CC_CPP_TGT_F = ['-o']
         self.populate_useful_variables(conf, env.SYSROOT)

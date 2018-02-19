@@ -78,6 +78,7 @@ class Darwin(Configure.ConfigurationContext.Platform):
         conf.env.MACOSX_SDK = os.path.splitext(os.path.basename(self.sdk[1]))[0]
         conf.env.XCODE_SDK_PATH = self.sdk[1]
         conf.env.SYSROOT = self.sdk[1]
+        conf.env.append_unique('CPPFLAGS', ['-m%s-version-min=%s'%(self.OS_NAME, self.sdk[0]), '-isysroot', self.sdk[1]])
         conf.env.append_unique('CFLAGS', ['-m%s-version-min=%s'%(self.OS_NAME, self.sdk[0]), '-isysroot', self.sdk[1]])
         conf.env.append_unique('CXXFLAGS', ['-m%s-version-min=%s'%(self.OS_NAME, self.sdk[0]),
                                             '-isysroot', self.sdk[1]])

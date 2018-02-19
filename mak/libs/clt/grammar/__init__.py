@@ -4,6 +4,8 @@ from .namespace_declaration import *
 from .struct_declaration import *
 from .variable_declaration import *
 from .method_declaration import *
+from .statement import *
+from .expression import *
 from .type import *
 from .name import *
 from .error import *

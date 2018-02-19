@@ -12,9 +12,6 @@ class ListCommand(Command):
         'platforms': Platform,
     }
 
-    def __init__(self, devices):
-        self.devices = devices
-
     def run(self, category):
         try:
             cls = self.categories[category]

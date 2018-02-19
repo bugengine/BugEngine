@@ -1,7 +1,7 @@
 import os
 import sys
 sys.path.append(os.path.split(os.path.split(os.path.dirname(os.path.realpath(__file__)))[0])[0])
-from mak.libs.cpp import parser
+from mak.libs.clt import cl_parser
 from optparse import OptionParser
 import traceback
 try:
@@ -74,8 +74,8 @@ if __name__ == '__main__':
         sys.exit(1)
     else:
         try:
-            result = parser.parse(arguments[0], os.path.join(options.tmp_dir, 'cpp_grammar.pickle'),
-                                  options.macro_file, options.module)
+            parser = cl_parser.ClParser(os.path.join(options.tmp_dir, 'clt_grammar.pickle'))
+            result = parser.parse('gcc', arguments[0])
             kernel_name = os.path.splitext(os.path.basename(arguments[0]))[0]
             for m in result.objects:
                 if m.name_cpp == 'kmain':

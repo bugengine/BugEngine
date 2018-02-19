@@ -35,6 +35,7 @@ class Namespace(Scope):
         if self.name == name:
             return self
 
+
 class AnonymousNamespace(Scope):
     def __init__(self, position):
         Scope.__init__(self, position)
@@ -51,6 +52,7 @@ class AnonymousNamespace(Scope):
     def find_nonrecursive(self, name):
         o = self.find(name)
         return o
+
 
 class Struct:
     class Definition:
@@ -93,12 +95,75 @@ class Struct:
     def type_name(self):
         return self.name
 
+
+class Method:
+    def __init__(self, method_name, return_type):
+        self.name = method_name
+        self.return_type = return_type
+        self.definition = None
+
+    def define(self, definition):
+        self.definition = definition
+
+    def get_token_type(self):
+        return 'METHOD_ID'
+
+    def find_nonrecursive(self, name):
+        if self.name == name:
+            return self
+
+
+class TypeRef:
+    def __init__(self, struct_ref):
+        self.struct_ref = struct_ref
+        self.position = self.struct_ref.position
+
+    def type_name(self):
+        return "%s %s" % (self.struct_ref.struct_type, self.struct_ref.name)
+
+    def original_type(self):
+        return self
+
+
 class Builtin:
-    def __init__(self, typename):
+    def __init__(self, typename, position):
         self.typename = typename
+        self.position = position
 
     def type_name(self):
         return self.typename
+
+    def original_type(self):
+        return self
+
+
+class Pointer:
+    def __init__(self, pointer_to, position):
+        self.pointer_to = pointer_to
+        self.position = position
+
+    def type_name(self):
+        return self.pointer_to.type_name() + '*'
+
+    def original_type(self):
+        return self.pointer_to.original_type()
+
+
+class Array:
+    def __init__(self, array_type, count, position):
+        self.array_type = array_type
+        self.count = count
+        self.position = position
+
+    def type_name(self):
+        if self.count:
+            return '%s[%s]' % (self.array_type.type_name(), self.count.write_expr())
+        else:
+            return '%s[]' % (self.array_type.type_name())
+
+    def original_type(self):
+        return self.array_type.original_type()
+
 
 class Variable:
     def __init__(self, type, name, value, attributes, position):
@@ -119,3 +184,8 @@ class Variable:
         print('%s%s%s %s%s;' % (indent, ' '.join(self.attributes) + (self.attributes and ' ' or ''),
                                 self.type.type_name(), self.name, self.value and (' = %s' % self.value.str()) or ''))
 
+
+class Specifier:
+    def __init__(self, specifier, position):
+        self.specifier = specifier
+        self.position = position

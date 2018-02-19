@@ -7,12 +7,13 @@ from ..protocol import Protocol
 class AddCommand(Command):
     name = 'add'
 
-    def __init__(self, devices):
-        self.devices = devices
-
     def run(self, name, url):
         print('registering device %s (%s)' % (name, url))
-        self.devices.append(Device(name, url))
+        device = Device(name, url)
+        try:
+            self.devices[device.__class__.__name__].append(device)
+        except KeyError:
+            self.devices[device.__class__.__name__] = [device]
 
     @classmethod
     def help(self, out):
