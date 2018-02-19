@@ -268,6 +268,8 @@ class ClLexer:
     states = (
         # ppline: preprocessor line directives
         ('ppline', 'exclusive'),
+        # ppline: preprocessor ident directives
+        ('ppident', 'exclusive'),
     )
 
     ##
@@ -281,9 +283,22 @@ class ClLexer:
         t.lexer.lineno += t.value.count("\n")
 
     ##
+    ## Rules for the ppident state
+    ##
+    @lex.TOKEN(r'\#[ \t]*ident')
+    def t_PREPROC_IDENT(self, t):
+        self.lexer.begin('ppident')
+
+    t_ppident_ignore = r'[^\n]'
+
+    def t_ppident_NEWLINE(self, t):
+        r'\n'
+        t.lexer.begin('INITIAL')
+
+    ##
     ## Rules for the ppline state
     ##
-    @lex.TOKEN(r'\#')
+    @lex.TOKEN(r'\#[ \t]*line')
     def t_PREPROC_LINE(self, t):
         self.lexer.begin('ppline')
 
@@ -311,15 +326,9 @@ class ClLexer:
             self.lexer.skip(1)
         else:
             self.lexer.lineno = int(self.pp_line)
-
             if self.pp_filename is not None:
                 self.lexer.filename = self.pp_filename
-
         t.lexer.begin('INITIAL')
-
-    def t_ppline_PPLINE(self, t):
-        r'line'
-        pass
 
     t_ppline_ignore = ' \t'
 
