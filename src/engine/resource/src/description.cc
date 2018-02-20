@@ -17,7 +17,7 @@ Description::Description()
 Description::~Description()
 {
     Resource* resources = getResourceBuffer();
-    for(int i = 0; i < m_resourceCount; ++i)
+    for(u32 i = 0; i < m_resourceCount; ++i)
     {
         resources[i].~Resource();
     }
@@ -55,7 +55,7 @@ void Description::load(weak<ILoader> loader) const
 void Description::unload(weak<ILoader> loader) const
 {
     Resource* resources = getResourceBuffer();
-    for(int i = 0; i < m_resourceCount; ++i)
+    for(u32 i = 0; i < m_resourceCount; ++i)
     {
         if (resources[i].m_handle.owner == loader->m_id)
         {
@@ -68,10 +68,10 @@ void Description::unload(weak<ILoader> loader) const
             Resource* newBuffer = getResourceBuffer();
             if (newBuffer != resources)
             {
-                for (u32 i = 0; i < m_resourceCount; ++i)
+                for (u32 j = 0; j < m_resourceCount; ++j)
                 {
-                    new (&newBuffer[i]) Resource(resources[i]);
-                    resources[i].~Resource();
+                    new (&newBuffer[j]) Resource(resources[j]);
+                    resources[j].~Resource();
                 }
                 Arena::resource().free(resources);
             }
@@ -84,7 +84,7 @@ void Description::unload(weak<ILoader> loader) const
 Resource& Description::getResourceForWriting(weak<const ILoader> owner) const
 {
     Resource* resources = getResourceBuffer();
-    for(int i = 0; i < m_resourceCount; ++i)
+    for(u32 i = 0; i < m_resourceCount; ++i)
     {
         if (resources[i].m_handle.owner == owner->m_id)
         {
@@ -97,7 +97,7 @@ Resource& Description::getResourceForWriting(weak<const ILoader> owner) const
 const Resource& Description::getResource(weak<const ILoader> owner) const
 {
     Resource* resources = getResourceBuffer();
-    for(int i = 0; i < m_resourceCount; ++i)
+    for(u32 i = 0; i < m_resourceCount; ++i)
     {
         if (resources[i].m_handle.owner == owner->m_id)
         {
