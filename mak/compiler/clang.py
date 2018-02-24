@@ -22,6 +22,8 @@ class Clang(Configure.ConfigurationContext.GnuCompiler):
             if self.version_number >= (6, 1):
                 conf.env.CXXFLAGS_warnall.append('-Wno-unused-local-typedefs')
         else:
+            if self.version_number >= (6, 0):
+                conf.env.CXXFLAGS_warnall.append('-Wno-deprecated-register')
             if self.version_number >= (3, 6):
                 conf.env.CXXFLAGS_warnall.append('-Wno-unused-local-typedefs')
 
