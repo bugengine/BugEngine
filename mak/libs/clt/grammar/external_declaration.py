@@ -128,6 +128,15 @@ def p_external_declaration_type(p):
         p.lexer._warning('specifier ignored', s.position)
 
 
+def p_external_declaration_typedecl(p):
+    """
+        external_declaration : template_specifier_opt declaration_specifier_list typedecl SEMI
+    """
+    p[0] = p[3]
+    for s in p[2]:
+        p.lexer._warning('specifier ignored', s.position)
+
+
 def p_external_declaration_variable(p):
     """
         external_declaration : template_specifier_opt variable_declaration SEMI

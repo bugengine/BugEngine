@@ -31,6 +31,7 @@ class ClParser:
             result = self.parser.parse(input.read(), lexer=self.lexer)
 
         if result:
+            result.dump()
             result.error_count = self.lexer.error_count
         return result
 
