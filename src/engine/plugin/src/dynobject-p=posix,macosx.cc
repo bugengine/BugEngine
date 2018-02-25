@@ -16,12 +16,14 @@
 # define    PLUGIN_EXT ".so"
 #endif
 
+#define PLUGIN_FILE_NAME PLUGIN_PREFIX "%s" PLUGIN_EXT
+
 namespace BugEngine { namespace Plugin
 {
 
 DynamicObject::Handle DynamicObject::load(const inamespace &pluginName, const ipath& pluginPath)
 {
-    const minitl::format<1024u> pluginFile = minitl::format<1024u>(PLUGIN_PREFIX "%s" PLUGIN_EXT) | pluginName;
+    const minitl::format<1024u> pluginFile = minitl::format<1024u>(PLUGIN_FILE_NAME) | pluginName;
     const ipath& pluginDir = Environment::getEnvironment().getDataDirectory();
     ifilename::Filename fullPath = (pluginDir + pluginPath + ifilename(pluginFile.c_str())).str();
     be_info("loading dynamic object %s (from %s)" | pluginName | fullPath.name);
