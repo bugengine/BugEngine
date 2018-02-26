@@ -24,7 +24,7 @@ cls = Task.task_factory('kernel_task', kernel_task, [], 'PINK', ext_out=['.scrip
 cls.scan = scan
 
 
-class kernel_optim_header(Task.Task):
+class cpu_header(Task.Task):
     color = 'PINK'
     scan = scan
     vars = ['KERNEL_OPTIM_VARIANTS']
@@ -43,7 +43,7 @@ def generate_cpu_variants(self):
         if kernel_name == 'cpu':
             env = self.bld.all_envs[toolchain]
             out_header = self.make_bld_node('include', None, 'kernel_optims.hh')
-            task = self.create_task('kernel_optim_header', [], [out_header])
+            task = self.create_task('cpu_header', [], [out_header])
             task.env = env
             self.env.append_unique('INCLUDES', [out_header.parent.abspath()])
 
