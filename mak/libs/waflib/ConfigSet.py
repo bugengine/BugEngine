@@ -283,7 +283,7 @@ class ConfigSet(object):
 			pass
 		merged_table = self.get_merged_dict()
 		with open(filename, 'wb') as f:
-			pickle.dump(merged_table, f, protocol=pickle.HIGHEST_PROTOCOL)
+			pickle.dump(merged_table, f, protocol=2)
 		#buf = []
 		#keys = list(merged_table.keys())
 		#keys.sort()
