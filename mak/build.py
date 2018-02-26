@@ -17,9 +17,11 @@ def to_string(self):
         tgt_str = ' '.join([a.name for a in self.outputs][:1])
     else:
         tgt_str = ' '.join([a.name for a in self.inputs][:1])
-    return '(%s) %s->%s\n' % (self.__class__.__name__.replace('_task', ''),
-                               self.generator.target,
-                               tgt_str)
+    task_name = self.__class__.__name__.replace('_task', '')
+    return '{%s}%s%s/%s\n' % (task_name,
+                              (11-len(task_name))*' ',
+                              self.generator.target,
+                              tgt_str)
 
 
 def create_namespace_file(task):
