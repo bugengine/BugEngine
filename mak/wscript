@@ -75,7 +75,7 @@ def setup(conf):
                 conf.recurse('../src/3rdparty/%s/%s/%s.py'%(category, third_party, third_party),
                              name='setup',
                              once=False)
-            conf.end_msg('')
+            conf.end_msg(' ')
     if conf.env.VALID_PLATFORMS:
         extra_dir = os.path.join(conf.bugenginenode.abspath(), 'extra', conf.env.VALID_PLATFORMS[0])
         if os.path.isdir(extra_dir):

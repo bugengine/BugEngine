@@ -1,7 +1,16 @@
 from waflib import Utils, Logs, Configure
+from waflib.Tools import c_config, gcc
 import os
 import sys
 
+
+@Configure.conf
+def check_gcc_o_space(self, mode='c'):
+    pass
+
+@Configure.conf
+def gcc_modifier_platform(conf):
+    pass
 
 class GCC(Configure.ConfigurationContext.GnuCompiler):
     DEFINES = ['__GNUC__', '__GNUG__']
