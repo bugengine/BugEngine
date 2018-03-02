@@ -3,7 +3,6 @@
 # harald at klimachs.de
 
 import re
-from waflib import Utils
 from waflib.Tools import fc, fc_config, fc_scan
 from waflib.Configure import conf
 
@@ -14,7 +13,6 @@ fc_compiler['linux'].append('fc_cray')
 def find_crayftn(conf):
 	"""Find the Cray fortran compiler (will look in the environment variable 'FC')"""
 	fc = conf.find_program(['crayftn'], var='FC')
-	fc = conf.cmd_to_list(fc)
 	conf.get_crayftn_version(fc)
 	conf.env.FC_NAME = 'CRAY'
 	conf.env.FC_MOD_CAPITALIZATION = 'UPPER.mod'
@@ -35,8 +33,10 @@ def get_crayftn_version(conf, fc):
 		version_re = re.compile(r"Cray Fortran\s*:\s*Version\s*(?P<major>\d*)\.(?P<minor>\d*)", re.I).search
 		cmd = fc + ['-V']
 		out,err = fc_config.getoutput(conf, cmd, stdin=False)
-		if out: match = version_re(out)
-		else: match = version_re(err)
+		if out:
+			match = version_re(out)
+		else:
+			match = version_re(err)
 		if not match:
 				conf.fatal('Could not determine the Cray Fortran compiler version.')
 		k = match.groupdict()

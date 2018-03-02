@@ -95,7 +95,7 @@ class AndroidPlatform(Configure.ConfigurationContext.Platform):
             'gcc': {
                 'x86':      [],
                 'amd64':    [],
-                'armv7a':   ['Wl,--fix-cortex-a8',],
+                'armv7a':   ['-Wl,--fix-cortex-a8',],
                 'arm64':    [],
                 'mipsel':   [],
                 'mips64el': [],
@@ -103,7 +103,7 @@ class AndroidPlatform(Configure.ConfigurationContext.Platform):
             'clang': {
                 'x86':      [],
                 'amd64':    [],
-                'armv7a':   ['Wl,--fix-cortex-a8',],
+                'armv7a':   ['-Wl,--fix-cortex-a8',],
                 'arm64':    [],
                 'mipsel':   [],
                 'mips64el': [],
@@ -330,39 +330,39 @@ class AndroidLoader(Configure.ConfigurationContext.Platform):
                 continue
             else:
                 seen.add((k[0], k[1]))
-
-        for k, compilers in sorted(compiler_sets.get('clang', {}).items()):
-            if (k[0], k[1]) in seen:
-                continue
-            c = compilers[0]
-            clang_compilers = []
-            for gcc in all_gcc_compilers[-1][1]:
-                gcc_toolchain = os.path.dirname(os.path.dirname(gcc.compiler_c))
-                extra_args = deepcopy(c.extra_args)
-                extra_args['c'] += ['-target', gcc.target, '-gcc-toolchain', gcc_toolchain]
-                extra_args['cxx'] += ['-target', gcc.target, '-gcc-toolchain', gcc_toolchain]
-                extra_args['link'] += ['-target', gcc.target, '-gcc-toolchain', gcc_toolchain]
-                try:
-                    clang_compiler = c.__class__(c.compiler_c,
-                                                 c.compiler_cxx,
-                                                 extra_args)
-                except Exception:
-                    pass
-                else:
-                    prebuilt = os.path.join(k[2], 'prebuilt')
-                    for target in os.listdir(prebuilt):
-                        clang_compiler.directories.append(os.path.join(prebuilt, target, 'bin'))
-                    clang_compiler.directories += gcc.directories
-                    clang_compiler.target = gcc.target
-                    clang_compilers.append(clang_compiler)
-            if clang_compilers:
-                try:
-                    add_compiler_set(clang_compilers)
-                except Errors.WafError as e:
-                    print(e)
+        if all_gcc_compilers:
+            for k, compilers in sorted(compiler_sets.get('clang', {}).items()):
+                if (k[0], k[1]) in seen:
                     continue
-                else:
-                    seen.add((k[0], k[1]))
+                c = compilers[0]
+                clang_compilers = []
+                for gcc in all_gcc_compilers[-1][1]:
+                    gcc_toolchain = os.path.dirname(os.path.dirname(gcc.compiler_c))
+                    extra_args = deepcopy(c.extra_args)
+                    extra_args['c'] += ['-target', gcc.target, '-gcc-toolchain', gcc_toolchain]
+                    extra_args['cxx'] += ['-target', gcc.target, '-gcc-toolchain', gcc_toolchain]
+                    extra_args['link'] += ['-target', gcc.target, '-gcc-toolchain', gcc_toolchain]
+                    try:
+                        clang_compiler = c.__class__(c.compiler_c,
+                                                     c.compiler_cxx,
+                                                     extra_args)
+                    except Exception:
+                        pass
+                    else:
+                        prebuilt = os.path.join(k[2], 'prebuilt')
+                        for target in os.listdir(prebuilt):
+                            clang_compiler.directories.append(os.path.join(prebuilt, target, 'bin'))
+                        clang_compiler.directories += gcc.directories
+                        clang_compiler.target = gcc.target
+                        clang_compilers.append(clang_compiler)
+                if clang_compilers:
+                    try:
+                        add_compiler_set(clang_compilers)
+                    except Errors.WafError as e:
+                        print(e)
+                        continue
+                    else:
+                        seen.add((k[0], k[1]))
         return result
 
 
@@ -444,7 +444,7 @@ def setup(configuration_context):
         configuration_context.recurse('src/3rdparty/android/%s/%s.py'%(third_party, third_party),
                                       name='setup',
                                       once=False)
-    configuration_context.end_msg('')
+    configuration_context.end_msg(' ')
 
 
 def build(build_context):

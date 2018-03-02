@@ -69,12 +69,11 @@ class Windows_Clang(Windows):
     def load_in_env(self, conf, compiler):
         Windows.load_in_env(self, conf, compiler)
         env = conf.env
-        env.append_unique('LINKFLAGS', ['-static-libgcc', '-static-libstdc++'])
+        env.append_unique('LINKFLAGS', ['-static-libgcc', '-static-libstdc++', '-lpthread'])
         env.append_unique('STLIB', ['pthread'])
         env.append_unique('CXXFLAGS_warnall', ['-Wno-unknown-pragmas', '-Wno-comment'])
         self.find_winres(conf, compiler)
-        env.CFLAGS_console = ['-D_CONSOLE=1']
-        env.CXXFLAGS_console = ['-D_CONSOLE=1']
+        conf.env.DEFINES_console = ['_CONSOLE=1']
         env.LINKFLAGS_console = ['-mconsole']
         env.STRIP_BINARY = True
 
@@ -85,15 +84,14 @@ class Windows_GCC(Windows):
         env = conf.env
         env.append_unique('CFLAGS', ['-static-libgcc'])
         env.append_unique('CXXFLAGS', ['-static-libgcc'])
-        env.append_unique('LINKFLAGS', ['-static-libgcc'])
+        env.append_unique('LINKFLAGS', ['-static-libgcc', '-lpthread'])
         env.append_unique('CXXFLAGS_warnall', ['-Wno-unknown-pragmas', '-Wno-comment'])
         if compiler.version_number >= (4, 5):
             env.append_unique('CFLAGS', ['-static-libstdc++'])
             env.append_unique('CXXFLAGS', ['-static-libstdc++'])
             env.append_unique('LINKFLAGS', ['-static-libstdc++'])
         self.find_winres(conf, compiler)
-        env.CFLAGS_console = ['-D_CONSOLE=1']
-        env.CXXFLAGS_console = ['-D_CONSOLE=1']
+        env.DEFINES_console = ['_CONSOLE=1']
         env.LINKFLAGS_console = ['-mconsole']
         env.STRIP_BINARY = True
 
@@ -105,8 +103,7 @@ class Windows_MSVC(Windows):
             conf.env.CPPFLAGS.append('/D_ARM_WINAPI_PARTITION_DESKTOP_SDK_AVAILABLE=1')
             conf.env.CFLAGS.append('/D_ARM_WINAPI_PARTITION_DESKTOP_SDK_AVAILABLE=1')
             conf.env.CXXFLAGS.append('/D_ARM_WINAPI_PARTITION_DESKTOP_SDK_AVAILABLE=1')
-        conf.env.CFLAGS_console = ['/D_CONSOLE=1']
-        conf.env.CXXFLAGS_console = ['/D_CONSOLE=1']
+        conf.env.DEFINES_console = ['_CONSOLE=1']
         conf.env.LINKFLAGS_console = ['/SUBSYSTEM:console']
 
 

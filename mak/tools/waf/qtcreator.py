@@ -110,6 +110,7 @@ def write_value(node, value, key=''):
     if key:
         attrs.append(('key', key))
     if isinstance(value, tuple):
+        print(key)
         with XmlNode(node, 'valuelist', strvalue, attrs) as value_list:
             for v in value:
                 write_value(value_list, v)
@@ -187,6 +188,7 @@ class QtObject:
             for (var_name, user_edit) in self.__class__.published_vars:
                 value = getattr(self, var_name.replace('.', '_'), None)
                 if value != None:
+                    print(var_name)
                     write_value(variant_map, value, key=var_name)
 
 
@@ -366,7 +368,6 @@ class QtDebugger(QtObject):
             abi = getattr(toolchain, 'ProjectExplorer_CustomToolChain_TargetAbi', None)
             abi = abi or getattr(toolchain, 'ProjectExplorer_GccToolChain_TargetAbi', None)
             abi = abi or getattr(toolchain, 'ProjectExplorer_MsvcToolChain_TargetAbi', None)
-            self.Abis = tuple([abi])
             self.AutoDetected = False
             self.DisplayName = 'BugEngine:debugger:'+env_name
             self.Id = generateGUID('BugEngine:debugger:%s'%env_name)

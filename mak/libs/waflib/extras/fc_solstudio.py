@@ -15,7 +15,6 @@ def find_solstudio(conf):
 	"""Find the Solaris Studio compiler (will look in the environment variable 'FC')"""
 
 	fc = conf.find_program(['sunf95', 'f95', 'sunf90', 'f90'], var='FC')
-	fc = conf.cmd_to_list(fc)
 	conf.get_solstudio_version(fc)
 	conf.env.FC_NAME = 'SOL'
 
@@ -44,8 +43,10 @@ def get_solstudio_version(conf, fc):
 	cmd = fc + ['-V']
 
 	out, err = fc_config.getoutput(conf,cmd,stdin=False)
-	if out: match = version_re(out)
-	else: match = version_re(err)
+	if out:
+		match = version_re(out)
+	else:
+		match = version_re(err)
 	if not match:
 		conf.fatal('Could not determine the Sun Studio Fortran version.')
 	k = match.groupdict()

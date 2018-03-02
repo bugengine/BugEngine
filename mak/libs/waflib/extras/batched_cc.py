@@ -1,45 +1,50 @@
 #!/usr/bin/env python
 # encoding: utf-8
-# Thomas Nagy, 2006-2010 (ita)
+# Thomas Nagy, 2006-2015 (ita)
 
 """
-Batched builds - compile faster
-instead of compiling object files one by one, c/c++ compilers are often able to compile at once:
+Instead of compiling object files one by one, c/c++ compilers are often able to compile at once:
 cc -c ../file1.c ../file2.c ../file3.c
 
 Files are output on the directory where the compiler is called, and dependencies are more difficult
 to track (do not run the command on all source files if only one file changes)
-
 As such, we do as if the files were compiled one by one, but no command is actually run:
 replace each cc/cpp Task by a TaskSlave. A new task called TaskMaster collects the
 signatures from each slave and finds out the command-line to run.
 
-It is only necessary to import this module in the configuration (no other change required)
+Just import this module to start using it:
+def build(bld):
+	bld.load('batched_cc')
+
+Note that this is provided as an example, unity builds are recommended
+for best performance results (fewer tasks and fewer jobs to execute).
+See waflib/extras/unity.py.
 """
 
-import os
-from waflib import TaskGen, Task, Build, Logs
-from waflib.TaskGen import extension, feature, before_method, after_method
+from waflib import Task, Utils
+from waflib.TaskGen import extension, feature, after_method
+from waflib.Tools import c, cxx
 
 MAX_BATCH = 50
 
-c_str = '${CC} ${CFLAGS} ${CPPFLAGS} ${FRAMEWORKPATH_ST:FRAMEWORKPATH} ${CPPPATH_ST:INCPATHS} ${DEFINES_ST:DEFINES} -c ${SRCLST}'
-#c_str = '${CC} ${CCFLAGS} ${CPPFLAGS} ${_CCINCFLAGS} ${_CCDEFFLAGS} -c ${SRCLST}'
+c_str = '${CC} ${ARCH_ST:ARCH} ${CFLAGS} ${FRAMEWORKPATH_ST:FRAMEWORKPATH} ${tsk.batch_incpaths()} ${DEFINES_ST:DEFINES} -c ${SRCLST} ${CXX_TGT_F_BATCHED} ${CPPFLAGS}'
 c_fun, _ = Task.compile_fun_noshell(c_str)
 
-cxx_str = '${CXX} ${CXXFLAGS} ${CPPFLAGS} ${FRAMEWORKPATH_ST:FRAMEWORKPATH} ${CPPPATH_ST:INCPATHS} ${DEFINES_ST:DEFINES} -c ${SRCLST}'
-#cxx_str = '${CXX} ${CXXFLAGS} ${CPPFLAGS} ${_CXXINCFLAGS} ${_CXXDEFFLAGS} -c ${SRCLST}'
+cxx_str = '${CXX} ${ARCH_ST:ARCH} ${CXXFLAGS} ${FRAMEWORKPATH_ST:FRAMEWORKPATH} ${tsk.batch_incpaths()} ${DEFINES_ST:DEFINES} -c ${SRCLST} ${CXX_TGT_F_BATCHED} ${CPPFLAGS}'
 cxx_fun, _ = Task.compile_fun_noshell(cxx_str)
 
 count = 70000
-class batch_task(Task.Task):
-	color = 'RED'
+class batch(Task.Task):
+	color = 'PINK'
 
 	after = ['c', 'cxx']
 	before = ['cprogram', 'cshlib', 'cstlib', 'cxxprogram', 'cxxshlib', 'cxxstlib']
 
+	def uid(self):
+		return Utils.h_list([Task.Task.uid(self), self.generator.idx, self.generator.path.abspath(), self.generator.target])
+
 	def __str__(self):
-		return '(batch compilation for %d slaves)\n' % len(self.slaves)
+		return 'Batch compilation for %d slaves' % len(self.slaves)
 
 	def __init__(self, *k, **kw):
 		Task.Task.__init__(self, *k, **kw)
@@ -67,8 +72,14 @@ class batch_task(Task.Task):
 
 		return Task.SKIP_ME
 
+	def get_cwd(self):
+		return self.slaves[0].outputs[0].parent
+
+	def batch_incpaths(self):
+		st = self.env.CPPPATH_ST
+		return [st % node.abspath() for node in self.generator.includes_nodes]
+
 	def run(self):
-		outputs = []
 		self.outputs = []
 
 		srclst = []
@@ -79,7 +90,6 @@ class batch_task(Task.Task):
 				srclst.append(t.inputs[0].abspath())
 
 		self.env.SRCLST = srclst
-		self.cwd = slaves[0].inputs[0].parent.get_bld().abspath()
 
 		if self.slaves[0].__class__.__name__ == 'c':
 			ret = c_fun(self)
@@ -92,11 +102,23 @@ class batch_task(Task.Task):
 		for t in slaves:
 			t.old_post_run()
 
-from waflib.Tools import c, cxx
-
-def hook(name):
+def hook(cls_type):
 	def n_hook(self, node):
-		task = self.create_task(name, node, node.change_ext('.o'))
+
+		ext = '.obj' if self.env.CC_NAME == 'msvc' else '.o'
+		name = node.name
+		k = name.rfind('.')
+		if k >= 0:
+			basename = name[:k] + ext
+		else:
+			basename = name + ext
+
+		outdir = node.parent.get_bld().make_node('%d' % self.idx)
+		outdir.mkdir()
+		out = outdir.find_or_declare(basename)
+
+		task = self.create_task(cls_type, node, out)
+
 		try:
 			self.compiled_tasks.append(task)
 		except AttributeError:
@@ -106,15 +128,20 @@ def hook(name):
 			self.masters = {}
 			self.allmasters = []
 
+		def fix_path(tsk):
+			if self.env.CC_NAME == 'msvc':
+				tsk.env.append_unique('CXX_TGT_F_BATCHED', '/Fo%s\\' % outdir.abspath())
+
 		if not node.parent in self.masters:
 			m = self.masters[node.parent] = self.master = self.create_task('batch')
+			fix_path(m)
 			self.allmasters.append(m)
 		else:
 			m = self.masters[node.parent]
 			if len(m.slaves) > MAX_BATCH:
 				m = self.masters[node.parent] = self.master = self.create_task('batch')
+				fix_path(m)
 				self.allmasters.append(m)
-
 		m.add_slave(task)
 		return task
 	return n_hook
@@ -129,33 +156,18 @@ def link_after_masters(self):
 		for m in self.allmasters:
 			self.link_task.set_run_after(m)
 
-# Modify the c and cxx task classes - in theory it would be better to
+# Modify the c and cxx task classes - in theory it would be best to
 # create subclasses and to re-map the c/c++ extensions
-#
-for x in ['c', 'cxx']:
+for x in ('c', 'cxx'):
 	t = Task.classes[x]
 	def run(self):
 		pass
 
 	def post_run(self):
-		#self.executed=1
 		pass
 
-	def can_retrieve_cache(self):
-		if self.old_can_retrieve_cache():
-			for m in self.generator.allmasters:
-				try:
-					m.slaves.remove(self)
-				except ValueError:
-					pass #this task wasn't included in that master
-			return 1
-		else:
-			return None
-
-	setattr(t, 'oldrun', t.__dict__['run'])
+	setattr(t, 'oldrun', getattr(t, 'run', None))
 	setattr(t, 'run', run)
 	setattr(t, 'old_post_run', t.post_run)
 	setattr(t, 'post_run', post_run)
-	setattr(t, 'old_can_retrieve_cache', t.can_retrieve_cache)
-	setattr(t, 'can_retrieve_cache', can_retrieve_cache)
 
