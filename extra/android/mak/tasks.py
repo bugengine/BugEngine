@@ -91,10 +91,6 @@ class aapt_package(Task.Task):
     """
     color   = 'PINK'
 
-    @staticmethod
-    def filter_aapt_output(prog, output):
-        return [i for i in output if i[-3:] != '...']
-
     def run(self):
         bld = self.generator.bld
         root = bld.bldnode
@@ -107,7 +103,7 @@ class aapt_package(Task.Task):
                 return self.exec_command(cmd, stdout=stdout)
         else:
             cmd = [self.env.AAPT, 'add', self.outputs[0].abspath()] + [i.path_from(root).replace('\\', '/') for i in self.inputs[1:]]
-            return self.exec_command(cmd, filter=self.filter_aapt_output)
+            return self.exec_command(cmd)
 
 
 class jarsigner(Task.Task):

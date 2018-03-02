@@ -8,10 +8,9 @@ Experimental F# stuff
 FSC="mono /path/to/fsc.exe" waf configure build
 """
 
-from waflib import Utils, Task, Options, Logs, Errors
+from waflib import Utils, Task
 from waflib.TaskGen import before_method, after_method, feature
 from waflib.Tools import ccroot, cs
-from waflib.Configure import conf
 
 ccroot.USELIB_VARS['fsc'] = set(['CSFLAGS', 'ASSEMBLIES', 'RESOURCES'])
 
@@ -36,7 +35,7 @@ def apply_fsc(self):
 	if inst_to:
 		# note: we are making a copy, so the files added to cs_task.outputs won't be installed automatically
 		mod = getattr(self, 'chmod', bintype=='exe' and Utils.O755 or Utils.O644)
-		self.install_task = self.bld.install_files(inst_to, self.cs_task.outputs[:], env=self.env, chmod=mod)
+		self.install_task = self.add_install_files(install_to=inst_to, install_from=self.cs_task.outputs[:], chmod=mod)
 
 feature('fs')(cs.use_cs)
 after_method('apply_fsc')(cs.use_cs)
@@ -56,7 +55,6 @@ def configure(conf):
 	Find a F# compiler, set the variable FSC for the compiler and FS_NAME (mono or fsc)
 	"""
 	conf.find_program(['fsc.exe', 'fsharpc'], var='FSC')
-	conf.env.FSC = conf.cmd_to_list(conf.env.FSC)
 	conf.env.ASS_ST = '/r:%s'
 	conf.env.RES_ST = '/resource:%s'
 

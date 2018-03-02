@@ -20,7 +20,7 @@ What this tool does is:
   It has a few idiosyncracies, such as not giving the liberty of the .o file names
 - automatically activate them when using the TI compiler
 - handle the tconf tool
-  The tool 
+  The tool
 
 TODO:
 
@@ -32,34 +32,27 @@ TODO:
 
 import os, re
 
-from waflib import Configure, Options, Utils, Task, TaskGen
+from waflib import Options, Utils, Task, TaskGen
 from waflib.Tools import c, ccroot, c_preproc
 from waflib.Configure import conf
-from waflib.TaskGen import feature, before_method, taskgen_method
-from waflib.Tools.ccroot import link_task, stlink_task
+from waflib.TaskGen import feature, before_method
 from waflib.Tools.c import cprogram
 
 opj = os.path.join
 
 @conf
 def find_ticc(conf):
-	cc = conf.find_program(['cl6x'], var='CC', path_list=opj(getattr(Options.options, 'ti-cgt-dir', ""), 'bin'))
-	cc = conf.cmd_to_list(cc)
+	conf.find_program(['cl6x'], var='CC', path_list=opj(getattr(Options.options, 'ti-cgt-dir', ""), 'bin'))
 	conf.env.CC_NAME = 'ticc'
-	conf.env.CC = cc
 
 @conf
 def find_tild(conf):
-	ld = conf.find_program(['lnk6x'], var='LINK_CC', path_list=opj(getattr(Options.options, 'ti-cgt-dir', ""), 'bin'))
-	ld = conf.cmd_to_list(ld)
+	conf.find_program(['lnk6x'], var='LINK_CC', path_list=opj(getattr(Options.options, 'ti-cgt-dir', ""), 'bin'))
 	conf.env.LINK_CC_NAME = 'tild'
-	conf.env.LINK_CC = ld
 
 @conf
 def find_tiar(conf):
-	ar = conf.find_program(['ar6x'], var='AR', path_list=opj(getattr(Options.options, 'ti-cgt-dir', ""), 'bin'))
-	ar = conf.cmd_to_list(ar)
-	conf.env.AR = ar
+	conf.find_program(['ar6x'], var='AR', path_list=opj(getattr(Options.options, 'ti-cgt-dir', ""), 'bin'))
 	conf.env.AR_NAME = 'tiar'
 	conf.env.ARFLAGS = 'qru'
 
@@ -67,7 +60,8 @@ def find_tiar(conf):
 def ticc_common_flags(conf):
 	v = conf.env
 
-	if not v['LINK_CC']: v['LINK_CC'] = v['CC']
+	if not v['LINK_CC']:
+		v['LINK_CC'] = v['CC']
 	v['CCLNK_SRC_F']	 = []
 	v['CCLNK_TGT_F']	 = ['-o']
 	v['CPPPATH_ST']	  = '-I%s'
@@ -99,16 +93,16 @@ def configure(conf):
 	conf.cc_load_tools()
 	conf.cc_add_flags()
 	conf.link_add_flags()
-	v.TCONF = conf.cmd_to_list(conf.find_program(['tconf'], var='TCONF', path_list=v.TI_XDCTOOLS_DIR))
-	
+	conf.find_program(['tconf'], var='TCONF', path_list=v.TI_XDCTOOLS_DIR)
+
 	conf.env.TCONF_INCLUDES += [
 	 opj(conf.env.TI_DSPBIOS_DIR, 'packages'),
 	]
-	
+
 	conf.env.INCLUDES += [
 	 opj(conf.env.TI_CGT_DIR, 'include'),
 	]
-	
+
 	conf.env.LIBPATH += [
 	 opj(conf.env.TI_CGT_DIR, "lib"),
 	]
@@ -116,7 +110,7 @@ def configure(conf):
 	conf.env.INCLUDES_DSPBIOS += [
 	 opj(conf.env.TI_DSPBIOS_DIR, 'packages', 'ti', 'bios', 'include'),
 	]
-	
+
 	conf.env.LIBPATH_DSPBIOS += [
 	 opj(conf.env.TI_DSPBIOS_DIR, 'packages', 'ti', 'bios', 'lib'),
 	]
@@ -124,7 +118,7 @@ def configure(conf):
 	conf.env.INCLUDES_DSPLINK += [
 	 opj(conf.env.TI_DSPLINK_DIR, 'dsplink', 'dsp', 'inc'),
 	]
-	
+
 @conf
 def ti_set_debug(cfg, debug=1):
 	"""
@@ -158,10 +152,10 @@ def ti_dsplink_set_platform_flags(cfg, splat, dsp, dspbios_ver, board):
 	 opj(cfg.env.TI_DSPLINK_DIR, 'dsplink', 'dsp', 'inc', dsp),
 	 d,
 	]
-	
+
 	cfg.env.LINKFLAGS_DSPLINK += [
 	 opj(cfg.env.TI_DSPLINK_DIR, 'dsplink', 'dsp', 'export', 'BIN', 'DspBios', splat, board+'_0', 'RELEASE', 'dsplink%s.lib' % x)
-	 for x in ['', 'pool', 'mpcs', 'mplist', 'msg', 'data', 'notify', 'ringio']
+	 for x in ('', 'pool', 'mpcs', 'mplist', 'msg', 'data', 'notify', 'ringio')
 	]
 
 
@@ -200,7 +194,7 @@ class ti_c(Task.Task):
 
 	"""
 	"Compile C files into object files"
-	run_str = '${CC} ${ARCH_ST:ARCH} ${CFLAGS} ${CPPFLAGS} ${FRAMEWORKPATH_ST:FRAMEWORKPATH} ${CPPPATH_ST:INCPATHS} ${DEFINES_ST:DEFINES} ${SRC} -c ${OUT}'
+	run_str = '${CC} ${ARCH_ST:ARCH} ${CFLAGS} ${FRAMEWORKPATH_ST:FRAMEWORKPATH} ${CPPPATH_ST:INCPATHS} ${DEFINES_ST:DEFINES} ${SRC} -c ${OUT} ${CPPFLAGS}'
 	vars    = ['CCDEPS'] # unused variable to depend on, just in case
 	ext_in  = ['.h'] # set the build order easily by using ext_out=['.h']
 	scan    = c_preproc.scan
@@ -267,7 +261,7 @@ def apply_tconf(self):
 	 target_node.change_ext("cfg.cmd"),
 	]
 
-	s62task = create_compiled_task(self, 'ti_c', task.outputs[1])
+	create_compiled_task(self, 'ti_c', task.outputs[1])
 	ctask = create_compiled_task(self, 'ti_c', task.outputs[0])
 	ctask.env = self.env.derive()
 

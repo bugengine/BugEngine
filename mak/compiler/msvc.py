@@ -1,4 +1,4 @@
-from waflib import Configure, Utils
+from waflib import Configure, Utils, Task
 from waflib.TaskGen import feature, before_method, after_method
 from waflib.Tools import msvc
 import os
@@ -111,22 +111,25 @@ def configure(conf):
     except Exception as e:
         pass
     else:
-        for version, targets in versions:
+        for version, targets in sorted(versions.items()):
             name, version = version.split()
-            for target_name, target in targets:
-                arch, flags = target
-                batfile, args, path, includes, libdirs = flags
-                cl = conf.detect_executable(name == 'intel' and 'icl' or 'cl', path)
-                c = MSVC(cl, name, version, target_name, arch, batfile, args, path, includes, libdirs)
-                if c.name() in seen:
-                    continue
-                seen.add(c.name())
-                conf.compilers.append(c)
+            for target_name, target_compiler in sorted(targets.items()):
+                target_compiler.evaluate()
+                print(target_compiler.is_valid, target_compiler)
+                if target_compiler.is_valid:
+                    cl = conf.detect_executable(name == 'intel' and 'icl' or 'cl', target_compiler.bindirs)
+                    c = MSVC(cl, name, version, target_name,
+                             target_compiler.cpu, target_compiler.bat, target_compiler.bat_target,
+                             target_compiler.bindirs, target_compiler.incdirs, target_compiler.libdirs)
+                    if c.name() in seen:
+                        continue
+                    seen.add(c.name())
+                    conf.compilers.append(c)
     conf.end_msg('done')
 
 
 def build(bld):
-    cls = msvc.wrap_class('cpp')
+    cls = Task.classes.get('cpp', None)
     derived = type('cpp', (cls,), {})
     def exec_command_stdout(self, *k, **kw):
         if self.env.CC_NAME == 'msvc':

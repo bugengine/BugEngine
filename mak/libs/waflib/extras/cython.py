@@ -1,13 +1,10 @@
 #! /usr/bin/env python
 # encoding: utf-8
-# Thomas Nagy, 2010
+# Thomas Nagy, 2010-2015
 
 import re
-
-import waflib
-import waflib.Logs as _msg
-from waflib import Task
-from waflib.TaskGen import extension, feature, before_method, after_method
+from waflib import Task, Logs
+from waflib.TaskGen import extension
 
 cy_api_pat = re.compile(r'\s*?cdef\s*?(public|api)\w*')
 re_cyt = re.compile(r"""
@@ -68,6 +65,15 @@ class cython(Task.Task):
 				self.outputs.append(self.inputs[0].parent.find_or_declare(x.replace('header:', '')))
 		return super(cython, self).runnable_status()
 
+	def post_run(self):
+		for x in self.outputs:
+			if x.name.endswith('.h'):
+				if not x.exists():
+					if Logs.verbose:
+						Logs.warn('Expected %r', x.abspath())
+					x.write('')
+		return Task.Task.post_run(self)
+
 	def scan(self):
 		"""
 		Return the dependent files (.pxd) by looking in the include folders.
@@ -76,7 +82,8 @@ class cython(Task.Task):
 
 			$ waf clean build --zones=deps
 		"""
-		txt = self.inputs[0].read()
+		node = self.inputs[0]
+		txt = node.read()
 
 		mods = []
 		for m in re_cyt.finditer(txt):
@@ -85,10 +92,10 @@ class cython(Task.Task):
 			else:
 				mods.append(m.group(2))
 
-		_msg.debug("cython: mods %r" % mods)
+		Logs.debug('cython: mods %r', mods)
 		incs = getattr(self.generator, 'cython_includes', [])
 		incs = [self.generator.path.find_dir(x) for x in incs]
-		incs.append(self.inputs[0].parent)
+		incs.append(node.parent)
 
 		found = []
 		missing = []
@@ -100,7 +107,13 @@ class cython(Task.Task):
 					break
 			else:
 				missing.append(x)
-		_msg.debug("cython: found %r" % found)
+
+		# the cython file implicitly depends on a pxd file that might be present
+		implicit = node.parent.find_resource(node.name[:-3] + 'pxd')
+		if implicit:
+			found.append(implicit)
+
+		Logs.debug('cython: found %r', found)
 
 		# Now the .h created - store them in bld.raw_deps for later use
 		has_api = False
@@ -111,7 +124,7 @@ class cython(Task.Task):
 					has_api = True
 				if ' public ' in l:
 					has_public = True
-		name = self.inputs[0].name.replace('.pyx', '')
+		name = node.name.replace('.pyx', '')
 		if has_api:
 			missing.append('header:%s_api.h' % name)
 		if has_public:

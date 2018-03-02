@@ -2,37 +2,29 @@
 # encoding: utf-8
 # Jérôme Carretero, 2011 (zougloub)
 
-from waflib import Configure, Options, Utils
+from waflib import Options
 from waflib.Tools import ccroot
 from waflib.Configure import conf
 
 @conf
 def find_dcc(conf):
-	cc = conf.find_program(['dcc'], var='CC', path_list=getattr(Options.options, 'diabbindir', ""))
-	cc = conf.cmd_to_list(cc)
+	conf.find_program(['dcc'], var='CC', path_list=getattr(Options.options, 'diabbindir', ""))
 	conf.env.CC_NAME = 'dcc'
-	conf.env.CC = cc
 
 @conf
 def find_dld(conf):
-	ld = conf.find_program(['dld'], var='LINK_CC', path_list=getattr(Options.options, 'diabbindir', ""))
-	ld = conf.cmd_to_list(ld)
+	conf.find_program(['dld'], var='LINK_CC', path_list=getattr(Options.options, 'diabbindir', ""))
 	conf.env.LINK_CC_NAME = 'dld'
-	conf.env.LINK_CC = ld
 
 @conf
 def find_dar(conf):
-	ar = conf.find_program(['dar'], var='DAR', path_list=getattr(Options.options, 'diabbindir', ""))
-	ar = conf.cmd_to_list(ar)
-	conf.env.AR = ar
+	conf.find_program(['dar'], var='AR', path_list=getattr(Options.options, 'diabbindir', ""))
 	conf.env.AR_NAME = 'dar'
 	conf.env.ARFLAGS = 'rcs'
 
 @conf
 def find_ddump(conf):
-	prg = conf.find_program(['ddump'], var='DDUMP', path_list=getattr(Options.options, 'diabbindir', ""))
-	prg = conf.cmd_to_list(prg)
-	conf.env.DDUMP = prg
+	conf.find_program(['ddump'], var='DDUMP', path_list=getattr(Options.options, 'diabbindir', ""))
 
 @conf
 def dcc_common_flags(conf):
@@ -41,7 +33,8 @@ def dcc_common_flags(conf):
 	v['CC_TGT_F']            = ['-c', '-o']
 
 	# linker
-	if not v['LINK_CC']: v['LINK_CC'] = v['CC']
+	if not v['LINK_CC']:
+		v['LINK_CC'] = v['CC']
 	v['CCLNK_SRC_F']         = []
 	v['CCLNK_TGT_F']         = ['-o']
 	v['CPPPATH_ST']          = '-I%s'

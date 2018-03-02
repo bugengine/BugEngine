@@ -6,7 +6,7 @@ import sys
 class Clang(Configure.ConfigurationContext.GnuCompiler):
     DEFINES = ['__clang__', '__GNUC__', '__GNUG__']
     NAMES = ('Clang',)
-    TOOLS = 'gcc gxx'
+    TOOLS = 'clang clangxx'
 
     def __init__(self, clang, clangxx, extra_args = {}):
         Configure.ConfigurationContext.GnuCompiler.__init__(self, clang, clangxx, extra_args)

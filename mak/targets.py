@@ -82,13 +82,12 @@ class Platform:
             if not sub_compilers:
                 conf.recurse(conf.bugenginenode.abspath()+'/mak/arch/%s'%compiler.arch, once=False)
                 self.add_kernel_toolchains(conf)
-
         except Exception as e:
             conf.end_msg(e, color='RED')
             conf.variant = ''
             return None
         else:
-            conf.end_msg('')
+            conf.end_msg(' ')
             if not sub_compilers:
                 conf.recurse(conf.bugenginenode.abspath()+'/mak', name='setup', once=False)
             if v.STATIC:

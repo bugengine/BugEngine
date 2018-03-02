@@ -23,9 +23,7 @@ To use::
 		conf.load('c_dumbpreproc')
 """
 
-import re, sys, os, string, traceback
-from waflib import Logs, Build, Utils, Errors
-from waflib.Logs import debug, error
+import re
 from waflib.Tools import c_preproc
 
 re_inc = re.compile(
@@ -35,7 +33,8 @@ re_inc = re.compile(
 def lines_includes(node):
 	code = node.read()
 	if c_preproc.use_trigraphs:
-		for (a, b) in c_preproc.trig_def: code = code.split(a).join(b)
+		for (a, b) in c_preproc.trig_def:
+			code = code.split(a).join(b)
 	code = c_preproc.re_nl.sub('', code)
 	code = c_preproc.re_cpp.sub(c_preproc.repl, code)
 	return [(m.group(2), m.group(3)) for m in re.finditer(re_inc, code)]
@@ -46,9 +45,21 @@ class dumb_parser(parser):
 		if node in self.nodes[:-1]:
 			return
 		self.currentnode_stack.append(node.parent)
-		self.lines = lines_includes(node) + [(c_preproc.POPFILE, '')] +  self.lines
+
+		# Avoid reading the same files again
+		try:
+			lines = self.parse_cache[node]
+		except KeyError:
+			lines = self.parse_cache[node] = lines_includes(node)
+
+		self.lines = lines + [(c_preproc.POPFILE, '')] +  self.lines
 
 	def start(self, node, env):
+		try:
+			self.parse_cache = node.ctx.parse_cache
+		except AttributeError:
+			self.parse_cache = node.ctx.parse_cache = {}
+
 		self.addlines(node)
 		while self.lines:
 			(x, y) = self.lines.pop(0)

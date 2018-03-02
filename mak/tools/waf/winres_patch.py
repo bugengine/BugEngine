@@ -13,4 +13,10 @@ winres.winrc.exec_command = exec_command_winrc
 
 def configure(conf):
     conf.load('winres')
-
+    v = conf.env
+    if v.CC_NAME=='msvc':
+        v.WINRC_TGT_F='/fo'
+        v.WINRC_SRC_F=''
+    else:
+        v.WINRC_TGT_F='-o'
+        v.WINRC_SRC_F='-i'
