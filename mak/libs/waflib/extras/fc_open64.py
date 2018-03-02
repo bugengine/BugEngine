@@ -15,7 +15,6 @@ def find_openf95(conf):
 	"""Find the Open64 Fortran Compiler (will look in the environment variable 'FC')"""
 
 	fc = conf.find_program(['openf95', 'openf90'], var='FC')
-	fc = conf.cmd_to_list(fc)
 	conf.get_open64_version(fc)
 	conf.env.FC_NAME = 'OPEN64'
 	conf.env.FC_MOD_CAPITALIZATION = 'UPPER.mod'
@@ -40,8 +39,10 @@ def get_open64_version(conf, fc):
 	cmd = fc + ['-version']
 
 	out, err = fc_config.getoutput(conf,cmd,stdin=False)
-	if out: match = version_re(out)
-	else: match = version_re(err)
+	if out:
+		match = version_re(out)
+	else:
+		match = version_re(err)
 	if not match:
 		conf.fatal('Could not determine the Open64 version.')
 	k = match.groupdict()

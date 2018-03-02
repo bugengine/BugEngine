@@ -24,9 +24,9 @@ import waflib.Tools.cxx
 def cxx_hook(self, node):
 	self.create_compiled_task('cxx_qt', node)
 
-class cxx_qt(waflib.Tools.cxx.cxx):
+class cxx_qt(Task.classes['cxx']):
 	def runnable_status(self):
-		ret = waflib.Tools.cxx.cxx.runnable_status(self)
+		ret = Task.classes['cxx'].runnable_status(self)
 		if ret != Task.ASK_LATER and not getattr(self, 'moc_done', None):
 
 			try:
@@ -63,7 +63,7 @@ class cxx_qt(waflib.Tools.cxx.cxx):
 						# moc is trying to be too smart but it is too dumb:
 						# why forcing the #include when Q_OBJECT is in the cpp file?
 						gen = self.generator.bld.producer
-						gen.outstanding.insert(0, tsk)
+						gen.outstanding.append(tsk)
 						gen.total += 1
 						self.set_run_after(tsk)
 					else:
@@ -79,11 +79,12 @@ class cxx_qt(waflib.Tools.cxx.cxx):
 
 						try:
 							link = self.generator.link_task
-						except:
+						except AttributeError:
 							pass
 						else:
 							link.set_run_after(cxxtsk)
 							link.inputs.extend(cxxtsk.outputs)
+							link.inputs.sort(key=lambda x: x.abspath())
 
 			self.moc_done = True
 

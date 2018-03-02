@@ -6,7 +6,7 @@ import re
 import shutil
 from waflib.Tools import ccroot, c, cxx, winres
 
-
+Build.PROTOCOL = 2
 old_log_display = Task.Task.log_display
 old_exec_command = Task.Task.exec_command
 
@@ -50,32 +50,16 @@ def log_display(self, bld):
         old_log_display(self, bld)
 
 
-def filter(exe, lines):
-    result = []
-    for line in lines:
-        i1 = line.find('skipping incompatible ')
-        i2 = line.find('when searching for')
-        if i1 == -1 or i2 == -1:
-            result.append(line)
-    return result
-
-
-def exec_command(self, *k, **kw):
-    if 'filter' not in kw:
-        kw['filter'] = filter
-    return old_exec_command(self, *k, **kw)
-
-
 Task.Task.__str__ = to_string
 Task.Task.log_display = log_display
-Task.Task.exec_command = exec_command
+Task.Task.keyword = (lambda self: '')
 
 
-class install_task(Task.Task):
+class install(Task.Task):
     color = 'CYAN'
 
     def runnable_status(self):
-        ret = super(install_task, self).runnable_status()
+        ret = super(install, self).runnable_status()
         if ret != Task.ASK_LATER:
             for source, target, chmod in self.install_step:
                 d, _ = os.path.split(target)
@@ -194,7 +178,10 @@ def module(bld, name, module_path, depends, private_depends,
         if p in platforms:
             build = True
 
-    source_node = bld.path.make_node(module_path.replace('.', '/'))
+    if module_path != '.':
+        source_node = bld.path.make_node(module_path.replace('.', '/'))
+    else:
+        source_node = bld.path
     project_path = source_node.path_from(bld.srcnode).replace('/', '.')
     if 'plugin' in features:
         plugin_name = name.replace('.', '_')

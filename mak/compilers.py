@@ -396,7 +396,7 @@ class GnuCompiler(Compiler):
         Compiler.load_in_env(self, conf, platform)
         env.SYSROOT = env.SYSROOT or self.sysroot
 
-        conf.end_msg('')
+        conf.end_msg(' ')
         conf.start_msg('      `- [cpu compute variants]')
         for variant_name, flags in self.VECTORIZED_FLAGS.get(self.arch, []):
             if self.is_valid(conf, flags + self.error_flag()):
@@ -468,7 +468,7 @@ def detect_executable(conf, program_name, path_list=[]):
     program = conf.find_program(program_name, var='TEMP_PROGRAM',
                             path_list=path_list, mandatory=False)
     del conf.env['TEMP_PROGRAM']
-    return program
+    return isinstance(program, list) and program[0] or program
 
 
 def options(opt):
