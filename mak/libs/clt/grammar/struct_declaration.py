@@ -25,22 +25,23 @@ def p_struct_declaration(p):
                 p.lexer._note('previously declared here', p[2][2].position)
             raise SyntaxError()
         else:
-            p[0] = (p[2][2], True)
+            p[0] = (p[2][2], None)
     elif p[2][2] and p[2][2].get_token_type() == 'STRUCT_ID':
         # optimistically use provided declaration, but if definition, it will be overriden
-        p[0] = (p[2][2], False)
+        p[0] = (p[2][2], cl_ast.Struct(p[1], p[2][0][0], p.position(2)))
     else:
         # No previously delcared type, declare one here
-        p[0] = (cl_ast.Struct(p[1], p[2][0][0], p.position(2)), True)
-    p.lexer.scopes[-1].add(p[0])
+        p[0] = (None, cl_ast.Struct(p[1], p[2][0][0], p.position(2)))
 
 
 def p_struct_push(p):
     """
         struct_push :
     """
-    #p[-3].define(p[-2])
-    #p.lexer.scopes.append(p[-3])
+    p[0] = p[-3][1] or p[-3][0]
+    p[0].define(p[-2])
+    p.lexer.scopes[-1].add(p[0])
+    p.lexer.scopes.append(p[0])
 
 
 def p_struct_pop(p):
@@ -63,14 +64,15 @@ def p_struct_definition(p):
     """
         struct_definition : struct_header struct_parent_opt LBRACE struct_push struct_declaration_list RBRACE struct_pop
     """
-    p[0] = p[1]
+    p[0] = p[4]
 
 
 def p_type_struct_declaration(p):
     """
         typedecl : struct_header
     """
-    p[0] = cl_ast.TypeRef(p[1][0])
+    p[0] = cl_ast.TypeRef(p[1][0] or p[1][1])
+    p.lexer.scopes[-1].add(p[0].struct_ref)
 
 
 def p_type_struct_definition(p):
@@ -78,6 +80,7 @@ def p_type_struct_definition(p):
         typedecl : struct_definition
     """
     p[0] = cl_ast.TypeRef(p[1])
+    p.lexer.scopes[-1].add(p[0].struct_ref)
 
 
 def p_struct_declaration_list(p):

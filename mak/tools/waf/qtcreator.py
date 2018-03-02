@@ -942,6 +942,7 @@ class QtCreator(Build.BuildContext):
                                          'Python="%s"' % sys.executable,
                                          'SrcDir="%s"'% self.srcnode.abspath(),
                                          'Variant=%s' % variant,
+                                         'PATH=%s' % os.environ['PATH']
                                         )),
                                     ('ProjectExplorer.ProjectConfiguration.DefaultDisplayName', 'Default'),
                                     ('ProjectExplorer.ProjectConfiguration.DisplayName', variant),
