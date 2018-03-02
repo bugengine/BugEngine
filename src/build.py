@@ -146,7 +146,8 @@ def build_plugins(bld):
                        features=['python%s'%version])
 
     bld.plugin('plugin.compute.cpu',
-               ['engine.bugengine'])
+               ['engine.bugengine'],
+               extra_tasks=['generate_cpu_variants'])
     #bld.plugin('plugin.compute.glcompute',
     #		   ['engine.bugengine', 'plugin.compute.cpu'])
     #bld.plugin('plugin.compute.directcompute',

@@ -20,10 +20,9 @@ class MemoryHost;
 class Scheduler : public IScheduler
 {
 private:
-    weak<Resource::ResourceManager> m_resourceManager;
-    scoped<CodeLoader>              m_cpuLoader;
-    scoped<CodeLoader>              m_cpuLoaderNeon;
-    scoped<MemoryHost>              m_memoryHost;
+    weak<Resource::ResourceManager>     m_resourceManager;
+    minitl::vector< ref<CodeLoader> >   m_cpuLoaders;
+    scoped<MemoryHost>                  m_memoryHost;
 public:
     Scheduler(const Plugin::Context& context);
     ~Scheduler();

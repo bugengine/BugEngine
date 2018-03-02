@@ -73,6 +73,13 @@ def p_type_builtin(p):
     p[0] = cl_ast.Builtin(p[1], p.position(1))
 
 
+def p_type_type_name(p):
+    """
+        type : type_name
+    """
+    p[0] = p[1][1]
+
+
 def p_type_ptr(p):
     """
         type : type TIMES

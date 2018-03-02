@@ -1,13 +1,13 @@
 # Type lookup
 def p_type_name(p):
     """
-        type_name : STRUCT_ID
-                  | TYPENAME_ID
-                  | STRUCT_ID_SHADOW
-                  | TYPENAME_ID_SHADOW
+        type_name : STRUCT_ID                                                           %prec PRIO0
+                  | TYPENAME_ID                                                         %prec PRIO0
+                  | STRUCT_ID_SHADOW                                                    %prec PRIO0
+                  | TYPENAME_ID_SHADOW                                                  %prec PRIO0
 
-        type_name_id_qualified : STRUCT_ID
-                               | TYPENAME_ID
+        type_name_id_qualified : STRUCT_ID                                              %prec PRIO0
+                               | TYPENAME_ID                                            %prec PRIO0
     """
     p[0] = (p[1], p.slice[1].found_object)
 

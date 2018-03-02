@@ -18,8 +18,8 @@ struct be_api(RESOURCE) Handle
         void*   ptrId;
         u32     intId;
     };
-    u32 owner;
     Id  id;
+    u32 owner;
 };
 
 }}

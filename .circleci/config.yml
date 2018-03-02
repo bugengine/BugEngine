@@ -10,40 +10,40 @@ jobs:
           command: python waf configure
       - run:
           name: Build GCC Debug
-          command: python waf build:linux_amd64-gcc_amd64-7.2.1:debug
+          command: python waf build:linux_amd64-gcc_amd64-7.3.1:debug
       - run:
           name: Build GCC Debug static
-          command: python waf build:linux_amd64-gcc_amd64-7.2.1:debug --static
+          command: python waf build:linux_amd64-gcc_amd64-7.3.1:debug --static
       - run:
           name: Build GCC Debug dynamic
-          command: python waf build:linux_amd64-gcc_amd64-7.2.1:debug --dynamic
+          command: python waf build:linux_amd64-gcc_amd64-7.3.1:debug --dynamic
       - run:
           name: Build GCC Debug without master
-          command: python waf build:linux_amd64-gcc_amd64-7.2.1:debug --nomaster
+          command: python waf build:linux_amd64-gcc_amd64-7.3.1:debug --nomaster
       - run:
           name: Build GCC Profile
-          command: python waf build:linux_amd64-gcc_amd64-7.2.1:profile
+          command: python waf build:linux_amd64-gcc_amd64-7.3.1:profile
       - run:
           name: Build GCC Profile static
-          command: python waf build:linux_amd64-gcc_amd64-7.2.1:profile --static
+          command: python waf build:linux_amd64-gcc_amd64-7.3.1:profile --static
       - run:
           name: Build GCC Profile dynamic
-          command: python waf build:linux_amd64-gcc_amd64-7.2.1:profile --dynamic
+          command: python waf build:linux_amd64-gcc_amd64-7.3.1:profile --dynamic
       - run:
           name: Build GCC Profile without master
-          command: python waf build:linux_amd64-gcc_amd64-7.2.1:profile --nomaster
+          command: python waf build:linux_amd64-gcc_amd64-7.3.1:profile --nomaster
       - run:
           name: Build GCC Final
-          command: python waf build:linux_amd64-gcc_amd64-7.2.1:final
+          command: python waf build:linux_amd64-gcc_amd64-7.3.1:final
       - run:
           name: Build GCC Final static
-          command: python waf build:linux_amd64-gcc_amd64-7.2.1:final --static
+          command: python waf build:linux_amd64-gcc_amd64-7.3.1:final --static
       - run:
           name: Build GCC Final dynamic
-          command: python waf build:linux_amd64-gcc_amd64-7.2.1:final --dynamic
+          command: python waf build:linux_amd64-gcc_amd64-7.3.1:final --dynamic
       - run:
           name: Build GCC Final without master
-          command: python waf build:linux_amd64-gcc_amd64-7.2.1:final --nomaster
+          command: python waf build:linux_amd64-gcc_amd64-7.3.1:final --nomaster
       - run:
           name: Build Clang Debug
           command: python waf build:linux_amd64-clang_amd64-4.0.1:debug

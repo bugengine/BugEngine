@@ -23,11 +23,18 @@ class be_api(RESOURCE) Description : public minitl::refcountable,
 private:
     enum
     {
-        MaxResourceCount = 4
+        MaxResourceCount = 2
     };
-    mutable Resource m_resources[MaxResourceCount];
+    union ResourceCache
+    {
+        Resource*   m_resourcePointer;
+        u8          m_resourceBuffer[MaxResourceCount*sizeof(Resource)];
+    };
+    mutable u32             m_resourceCount;
+    mutable ResourceCache   m_resourceCache;
 private:
-    Resource& getResourceForWriting(weak<const ILoader> owner) const;
+    Resource*   getResourceBuffer() const;
+    Resource&   getResourceForWriting(weak<const ILoader> owner) const;
     void load(weak<ILoader> loader) const;
     void unload(weak<ILoader> loader) const;
 protected:

@@ -14,10 +14,12 @@ old_exec_command = Task.Task.exec_command
 def to_string(self):
     bld = self.generator.bld
     if self.outputs:
-        tgt_str = ' '.join([a.path_from(bld.bldnode) for a in self.outputs][:1])
+        tgt_str = ' '.join([a.name for a in self.outputs][:1])
     else:
-        tgt_str = ' '.join([a.path_from(bld.srcnode) for a in self.inputs][:1])
-    return '(%s) %s' % (self.__class__.__name__.replace('_task', ''), tgt_str)
+        tgt_str = ' '.join([a.name for a in self.inputs][:1])
+    return '(%s) %s/%s' % (self.__class__.__name__.replace('_task', ''),
+                           self.generator.target,
+                           tgt_str)
 
 
 def create_namespace_file(task):
@@ -455,16 +457,17 @@ def thirdparty(bld, name, feature='', path='.', var='', use=[], private_use=[]):
 
 @conf
 def library(bld, name, depends=[], private_use=[], features=[], platforms=[],
-        extra_includes=[], extra_defines=[],
-        extra_public_includes=[], extra_public_defines=[],
-        path='', use_master=True, warnings=True, export_all=False):
+            extra_includes=[], extra_defines=[],
+            extra_public_includes=[], extra_public_defines=[],
+            extra_tasks=[],
+            path='', use_master=True, warnings=True, export_all=False):
     if not path: path=name
     if not bld.env.PROJECTS:
         for p in platforms:
             if p not in bld.env.VALID_PLATFORMS:
                 return None
     return module(bld, name, path, depends, private_use, platforms,
-        bld.env.DYNAMIC and ['cxx', 'cxxshlib', 'shared_lib'] or ['cxx', 'cxxobjects'],
+        extra_tasks + (bld.env.DYNAMIC and ['cxx', 'cxxshlib', 'shared_lib'] or ['cxx', 'cxxobjects']),
         features,
         extra_includes, extra_defines,
         extra_public_includes, extra_public_defines,
@@ -474,6 +477,7 @@ def library(bld, name, depends=[], private_use=[], features=[], platforms=[],
 @conf
 def headers(bld, name, depends=[], private_use=[], features=[], platforms=[],
             extra_public_includes=[], extra_public_defines=[],
+            extra_tasks=[],
             path='', use_master=True, warnings=True, export_all=False):
     if not path: path=name
     if not bld.env.PROJECTS:
@@ -481,7 +485,7 @@ def headers(bld, name, depends=[], private_use=[], features=[], platforms=[],
             if p not in bld.env.VALID_PLATFORMS:
                 return None
     return module(bld, name, path, depends, private_use, platforms,
-        ['cxx'],
+        extra_tasks + ['cxx'],
         features,
         [], [],
         extra_public_includes, extra_public_defines,
@@ -490,16 +494,17 @@ def headers(bld, name, depends=[], private_use=[], features=[], platforms=[],
 
 @conf
 def static_library(bld, name, depends=[], private_use=[], features=[], platforms=[],
-        extra_includes=[], extra_defines=[],
-        extra_public_includes=[], extra_public_defines=[],
-        path='', use_master=True, warnings=True):
+                   extra_includes=[], extra_defines=[],
+                   extra_public_includes=[], extra_public_defines=[],
+                   extra_tasks=[],
+                   path='', use_master=True, warnings=True):
     if not path: path=name
     if not bld.env.PROJECTS:
         for p in platforms:
             if p not in bld.env.VALID_PLATFORMS:
                 return None
     return module(bld, name, path, depends, private_use, platforms,
-        ['cxx', 'cxxstlib'],
+        extra_tasks + ['cxx', 'cxxstlib'],
         features,
         extra_includes, extra_defines,
         extra_public_includes, extra_public_defines,
@@ -508,16 +513,17 @@ def static_library(bld, name, depends=[], private_use=[], features=[], platforms
 
 @conf
 def shared_library(bld, name, depends=[], private_use=[], features=[], platforms=[],
-        extra_includes=[], extra_defines=[],
-        extra_public_includes=[], extra_public_defines=[],
-        path='', use_master=True, warnings=True, export_all=False):
+                   extra_includes=[], extra_defines=[],
+                   extra_public_includes=[], extra_public_defines=[],
+                   extra_tasks=[],
+                   path='', use_master=True, warnings=True, export_all=False):
     if not path: path=name
     if not bld.env.PROJECTS:
         for p in platforms:
             if p not in bld.env.VALID_PLATFORMS:
                 return None
     return module(bld, name, path, depends, private_use, platforms,
-        bld.env.STATIC and ['cxx', 'cxxobjects'] or ['cxx', 'cxxshlib', 'shared_lib'],
+        extra_tasks + (bld.env.STATIC and ['cxx', 'cxxobjects'] or ['cxx', 'cxxshlib', 'shared_lib']),
         features,
         extra_includes, extra_defines,
         extra_public_includes, extra_public_defines,
@@ -528,6 +534,7 @@ def shared_library(bld, name, depends=[], private_use=[], features=[], platforms
 def engine(bld, name, depends=[], private_use=[], features=[], platforms=[],
            extra_includes=[], extra_defines=[],
            extra_public_includes=[], extra_public_defines=[],
+           extra_tasks=[],
            path='', use_master=True, warnings=True):
     if getattr(bld, 'launcher', None) != None:
         raise Errors.WafError('Only one engine can be defined')
@@ -537,11 +544,11 @@ def engine(bld, name, depends=[], private_use=[], features=[], platforms=[],
             if p not in bld.env.VALID_PLATFORMS:
                 return None
     bld.launcher = module(bld, name, path, depends + ['3rdparty.system.console'], private_use, platforms,
-                          ['cxx', 'cxxprogram', 'launcher'], features,
+                          extra_tasks + ['cxx', 'cxxprogram', 'launcher'], features,
                           extra_includes, extra_defines, extra_public_includes, extra_public_defines,
                           use_master, warnings, False)
     if 'windows' in bld.env.VALID_PLATFORMS:
-        module(bld, name+'w', path, depends, private_use, platforms, ['cxx', 'cxxprogram', 'launcher'],
+        module(bld, name+'w', path, depends, private_use, platforms, extra_tasks + ['cxx', 'cxxprogram', 'launcher'],
                features, extra_includes, extra_defines, extra_public_includes, extra_public_defines,
                use_master, warnings, False)
 
@@ -550,6 +557,7 @@ def engine(bld, name, depends=[], private_use=[], features=[], platforms=[],
 def game(bld, name, depends=[], private_use=[], features=[], platforms=[],
          extra_includes=[], extra_defines=[],
          extra_public_includes=[], extra_public_defines=[],
+         extra_tasks=[],
          path='', use_master=True, warnings=True):
     if not path: path=name
     if not bld.env.PROJECTS:
@@ -557,7 +565,7 @@ def game(bld, name, depends=[], private_use=[], features=[], platforms=[],
             if p not in bld.env.VALID_PLATFORMS:
                 return None
     return module(bld, name, path, depends, private_use, platforms,
-        ['cxx', bld.env.STATIC and 'cxxobjects' or 'cxxshlib', 'plugin', 'game'],
+        extra_tasks + ['cxx', bld.env.STATIC and 'cxxobjects' or 'cxxshlib', 'plugin', 'game'],
         features, extra_includes, extra_defines, extra_public_includes, extra_public_defines,
         use_master, warnings, False)
 
@@ -566,13 +574,14 @@ def game(bld, name, depends=[], private_use=[], features=[], platforms=[],
 def plugin(bld, name, depends=[], private_use=[], features=[], platforms=[],
            extra_includes=[], extra_defines=[],
            extra_public_includes=[], extra_public_defines=[],
+           extra_tasks=[],
            path='', use_master=True, warnings=True):
     if not path: path=name
     for p in platforms:
         if p not in bld.env.VALID_PLATFORMS:
             return None
     return module(bld, name, path, depends, private_use, platforms,
-        ['cxx', bld.env.STATIC and 'cxxobjects' or 'cxxshlib', 'plugin'],
+        extra_tasks + ['cxx', bld.env.STATIC and 'cxxobjects' or 'cxxshlib', 'plugin'],
         features, extra_includes, extra_defines, extra_public_includes, extra_public_defines,
         use_master, warnings, False)
 
