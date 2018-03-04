@@ -108,6 +108,7 @@ private:
 public:
     base_iterator();
     explicit base_iterator(item_ptr it);
+    base_iterator(const base_iterator<typename POLICY::mutable_policy>& other);
     ~base_iterator();
 public:
     bool operator==(const base_iterator<POLICY>& other) const;
@@ -135,11 +136,6 @@ public:
         m_iterator = POLICY::previous(m_iterator);
         return p;
     }
-    operator base_iterator<typename POLICY::const_policy>() const
-    {
-        return base_iterator<typename POLICY::const_policy>(m_iterator);
-    }
-
     typename POLICY::pointer    operator->() const;
     typename POLICY::reference  operator*() const;
 };
@@ -155,6 +151,13 @@ template< typename T, int INDEX >
 template< typename POLICY >
 intrusive_list<T, INDEX>::base_iterator<POLICY>::base_iterator(item_ptr it)
 :   m_iterator(it)
+{
+}
+
+template< typename T, int INDEX >
+template< typename POLICY >
+intrusive_list<T, INDEX>::base_iterator<POLICY>::base_iterator(const base_iterator<typename POLICY::mutable_policy>& other)
+:   m_iterator(other.m_iterator)
 {
 }
 
@@ -203,6 +206,7 @@ struct intrusive_list<T, INDEX>::iterator_policy
     typedef typename intrusive_list<T, INDEX>::size_type                size_type;
     typedef typename intrusive_list<T, INDEX>::difference_type          difference_type;
     typedef typename intrusive_list<T, INDEX>::item const*              item_pointer;
+    typedef typename intrusive_list<T, INDEX>::iterator_policy          mutable_policy;
     typedef typename intrusive_list<T, INDEX>::const_iterator_policy    const_policy;
     static item_pointer next(item_pointer i) { return i->m_next; }
     static item_pointer previous(item_pointer i) { return i->m_previous; }
@@ -218,6 +222,7 @@ struct intrusive_list<T, INDEX>::const_iterator_policy
     typedef typename intrusive_list<T, INDEX>::size_type                size_type;
     typedef typename intrusive_list<T, INDEX>::difference_type          difference_type;
     typedef typename intrusive_list<T, INDEX>::item const*              item_pointer;
+    typedef typename intrusive_list<T, INDEX>::iterator_policy          mutable_policy;
     typedef typename intrusive_list<T, INDEX>::const_iterator_policy    const_policy;
     static item_pointer next(item_pointer i) { return i->m_next; }
     static item_pointer previous(item_pointer i) { return i->m_previous; }
@@ -233,6 +238,7 @@ struct intrusive_list<T, INDEX>::reverse_iterator_policy
     typedef typename intrusive_list<T, INDEX>::size_type                        size_type;
     typedef typename intrusive_list<T, INDEX>::difference_type                  difference_type;
     typedef typename intrusive_list<T, INDEX>::item const*                      item_pointer;
+    typedef typename intrusive_list<T, INDEX>::reverse_iterator_policy          mutable_policy;
     typedef typename intrusive_list<T, INDEX>::const_reverse_iterator_policy    const_policy;
     static item_pointer next(item_pointer i) { return i->m_previous; }
     static item_pointer previous(item_pointer i) { return i->m_next; }
@@ -248,6 +254,7 @@ struct intrusive_list<T, INDEX>::const_reverse_iterator_policy
     typedef typename intrusive_list<T, INDEX>::size_type                        size_type;
     typedef typename intrusive_list<T, INDEX>::difference_type                  difference_type;
     typedef typename intrusive_list<T, INDEX>::item const*                      item_pointer;
+    typedef typename intrusive_list<T, INDEX>::reverse_iterator_policy          mutable_policy;
     typedef typename intrusive_list<T, INDEX>::const_reverse_iterator_policy    const_policy;
     static item_pointer next(item_pointer i) { return i->m_previous; }
     static item_pointer previous(item_pointer i) { return i->m_next; }
