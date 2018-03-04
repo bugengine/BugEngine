@@ -234,7 +234,14 @@ class GnuCompiler(Compiler):
         arch = None
         platform = None
         result, out, err = self.run([compiler_c] + extra_args.get('c', []) + ['-dumpmachine'], env=env)
-        self.target = out.strip()
+        if result == 0:
+            self.target = out.strip()
+        else:
+            result, out, err = self.run([compiler_c] + extra_args.get('c', []) + ['-v'], env=env)
+            for line in err.split('\n') + out.split('\n'):
+                line = line.strip()
+                if line.startswith('Target: '):
+                    self.target = line[len('Target: '):]
         self.targets = (self.target, self.target.replace('-unknown', ''), self.target.replace('--', '-'))
         if self.target.find('-') != -1:
             arch, platform = split_triple(self.target)
