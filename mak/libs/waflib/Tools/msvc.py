@@ -537,6 +537,7 @@ def gather_icl_versions(conf, versions):
 			break
 		index += 1
 		if not version_pattern.match(version):
+			print(version)
 			continue
 		targets = {}
 		for target,arch in all_icl_platforms:
@@ -834,7 +835,8 @@ def find_msvc(conf):
 	version = v.MSVC_VERSION
 
 	compiler_name, linker_name, lib_name = _get_prog_names(conf, compiler)
-	v.MSVC_MANIFEST = (compiler == 'msvc' and version >= 8) or (compiler == 'wsdk' and version >= 6) or (compiler == 'intel' and version >= 11)
+	if v.MSVC_MANIFEST == []:
+		v.MSVC_MANIFEST = (compiler == 'msvc' and version >= 8) or (compiler == 'wsdk' and version >= 6) or (compiler == 'intel' and version >= 11)
 
 	# compiler
 	cxx = conf.find_program(compiler_name, var='CXX', path_list=path)
