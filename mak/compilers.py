@@ -116,7 +116,7 @@ class Compiler:
         return self.run([self.compiler_cxx] + self.extra_args.get('cxx', []) + args, input, self.env)
 
     def sort_name(self):
-        compiler_name = self.__class__.__name__.lower()
+        compiler_name = self.NAMES[0].lower()
         return self.arch, compiler_name, self.version_number, self.arch_name, self.platform
 
     def name(self):
