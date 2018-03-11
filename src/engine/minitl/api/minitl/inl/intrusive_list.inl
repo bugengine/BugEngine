@@ -157,7 +157,7 @@ intrusive_list<T, INDEX>::base_iterator<POLICY>::base_iterator(item_ptr it)
 template< typename T, int INDEX >
 template< typename POLICY >
 intrusive_list<T, INDEX>::base_iterator<POLICY>::base_iterator(const base_iterator<typename POLICY::mutable_policy>& other)
-:   m_iterator(other.m_iterator)
+:   m_iterator(other.operator->())
 {
 }
 

@@ -14,7 +14,7 @@ def setup(conf):
                        includes=[include],
                        libpath=libpath,
                        includepath=[os.path.join(conf.path.abspath(), 'api')],
-                       functions=['clGetDeviceInfo'])
+                       functions=['clGetDeviceInfo']) or pprint('YELLOW', '-OpenCL', sep=' ')
     else:
         try:
             conf.pkg_config('OpenCL')
