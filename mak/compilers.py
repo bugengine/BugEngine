@@ -336,7 +336,6 @@ class GnuCompiler(Compiler):
 
     def set_optimisation_options(self, conf):
         v = conf.env
-        v.append_unique('CFLAGS', ['-fno-threadsafe-statics'])
         v.append_unique('CXXFLAGS', ['-fno-threadsafe-statics'])
         v.CPPFLAGS_debug = ['-D_DEBUG'] + v.CPPFLAGS_debug
         v.CFLAGS_debug = ['-pipe', '-g', '-D_DEBUG'] + v.CFLAGS_debug
