@@ -4,6 +4,7 @@ from waflib import Configure, Options, Context, Errors, Utils
 from waflib.Configure import conf
 import os
 import re
+from copy import copy
 
 
 class Darwin(Configure.ConfigurationContext.Platform):
@@ -19,7 +20,6 @@ class Darwin(Configure.ConfigurationContext.Platform):
         if sdk:
             self.NAME = self.__class__.NAME + sdk[0]
             self.directories += sdk[2]
-
 
     def get_available_compilers(self, compiler_list):
         result = []
@@ -49,13 +49,14 @@ class Darwin(Configure.ConfigurationContext.Platform):
     def load_in_env(self, conf, compiler):
         self.CFLAGS_cshlib = ['-fPIC']
         platform = self.SDK_NAME.lower()
-        p1 = os.path.join(self.sdk[1], 'usr', 'bin')
-        p2 = os.path.dirname(compiler.compiler_c)
-        conf.find_program('lipo')
-        if not conf.find_program('dsymutil', path_list=[p1, p2], mandatory=False):
+        compiler.find_target_program(conf, self, 'lipo', mandatory=False)
+        if not conf.env.LIPO:
+            conf.find_program('lipo')
+        compiler.find_target_program(conf, self, 'dsymutil', mandatory=False)
+        if not conf.env.DSYMUTIL:
             conf.find_program('dsymutil')
-        if not conf.find_program('strip', path_list = [p1, p2], mandatory=False):
-            conf.find_program('strip')
+        conf.env.env = copy(getattr(conf, 'environ', os.environ))
+        conf.env.env['PATH'] = os.path.pathsep.join(self.directories + compiler.directories + [conf.env.env['PATH']])
         conf.env.ABI = 'mach_o'
         conf.env.VALID_PLATFORMS = self.PLATFORMS + ['darwin']
         conf.env.XCODE_SDKROOT = platform
@@ -124,7 +125,6 @@ class Darwin(Configure.ConfigurationContext.Platform):
                 return False
         return True
 
-
     def get_best_compilers_sdk(self, compilers):
         all_archs = []
         for compiler in sorted(compilers, key = lambda x: x.name()):
@@ -163,12 +163,25 @@ class Darwin(Configure.ConfigurationContext.Platform):
                         os.path.normpath(os.path.join(sdk_path, 'usr', 'bin')),
                         os.path.normpath(os.path.join(sdk_path, '..', '..', 'usr', 'bin')),
                         os.path.normpath(os.path.join(sdk_path, '..', '..', '..', '..', '..', 'usr', 'bin')),
+                        os.path.normpath(os.path.join(sdk_path, '..', '..', '..', '..', '..', 'Toolchains', 'XcodeDefault.xctoolchain', 'usr', 'bin')),
                     ] if os.path.isdir(i) and i != '/usr/bin']
                 for a in sdk_archs:
                     for c in compilers:
                         if self.match(c, sdk_path, all_sdks) and c.arch == a:
-                            r, out, err = c.run_cxx([sdk_option, '-Wl,-rpath,.', '-x', 'c++', '-isysroot', sdk_path, '-'],
-                                                    '#include <stdio.h>\n#include <iostream>\nint main() { printf(0); return 0; }\n')
+                            env = copy(os.environ)
+                            env['PATH'] = os.path.pathsep.join(sdk_bin_paths + c.directories + [env['PATH']])
+                            r, out, err = c.run_cxx([sdk_option, '-Wl,-rpath,.', '-framework', 'Foundation',
+                                                    '-x', 'objective-c++', '-isysroot', sdk_path, '-'],
+                                                    '#include <stdio.h>\n'
+                                                    '#include <iostream>\n'
+                                                    '#include <Foundation/NSArray.h>\n'
+                                                    'int main()\n'
+                                                    '{\n'
+                                                    '    [[NSMutableArray alloc] init];\n'
+                                                    '    printf(0);\n'
+                                                    '    return 0;\n'
+                                                    '}\n',
+                                                    env)
                             if r == 0:
                                 sdk_compilers.append(c)
                                 break
@@ -185,7 +198,9 @@ class Darwin(Configure.ConfigurationContext.Platform):
             else:
                 raise Errors.WafError('No SDK for compiler %s' % compilers[0].compiler_c)
 
+
 Configure.ConfigurationContext.Darwin = Darwin
+
 
 class MacOSX(Darwin):
     NAME = 'MacOSX'
@@ -195,7 +210,6 @@ class MacOSX(Darwin):
 
     def __init__(self, conf, sdk = None):
         Darwin.__init__(self, conf, sdk)
-
 
 
 def options(opt):
@@ -212,7 +226,5 @@ def options(opt):
                     help='Maximum version of the MacOS X SDK to target')
 
 
-
 def configure(conf):
     conf.platforms.append(MacOSX(conf))
-
