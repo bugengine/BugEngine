@@ -126,7 +126,8 @@ class Clang(Configure.ConfigurationContext.GnuCompiler):
 
 
 def detect_clang(conf):
-    bindirs = os.environ['PATH'].split(os.pathsep) + conf.env.EXTRA_PATH
+    environ = getattr(conf, 'environ', os.environ)
+    bindirs = environ['PATH'].split(os.pathsep) + conf.env.EXTRA_PATH
     libdirs = []
     clangs = []
     for bindir in bindirs:
