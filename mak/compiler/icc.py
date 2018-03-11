@@ -106,7 +106,8 @@ class ICC(Configure.ConfigurationContext.GnuCompiler):
         return result == 0
 
 def detect_icc(conf):
-    bindirs = os.environ['PATH'].split(os.pathsep) + conf.env.EXTRA_PATH
+    environ = getattr(conf, 'environ', os.environ)
+    bindirs = environ['PATH'].split(os.pathsep) + conf.env.EXTRA_PATH
     seen = set([])
     for bindir in bindirs:
         icc = conf.detect_executable('icc', path_list=[bindir])

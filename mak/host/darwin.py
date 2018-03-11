@@ -97,7 +97,7 @@ def configure(conf):
                 sdk_version = sdk_version.split('.')
                 dylib = os.path.join(sdk_path, 'usr', 'lib', 'libc.dylib')
                 if os.path.isfile(dylib):
-                    r, out, err = run_command([conf.env.FILE, dylib])
+                    r, out, err = run_command(conf.env.FILE + [dylib])
                     for line in out.split('\n'):
                         line = line.strip()
                         if not line:
