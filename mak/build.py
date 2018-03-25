@@ -1,4 +1,4 @@
-from waflib import Task, Options, Build, Task, Utils, Errors, TaskGen
+from waflib import Task, Options, Build, Logs, Utils, Errors, TaskGen
 from waflib.Configure import conf
 from waflib.TaskGen import feature, taskgen_method, extension, before_method, after_method
 import os
@@ -97,6 +97,7 @@ class install(Task.Task):
                     Logs.error('File %r does not exist' % source.abspath())
                     return 1
                 Logs.error('Could not install the file %r' % target)
+                return 1
         return 0
 
 
@@ -230,10 +231,13 @@ def module(bld, name, module_path, depends, private_depends,
     else:
         pchstop = None
 
+    master_includes = []
     if use_master == 'folder':
         features = features + ['master_folder']
+        master_includes.append(bld.bldnode)
     elif use_master == True:
         features = features + ['master']
+        master_includes.append(bld.bldnode)
     elif use_master != False:
         raise Errors.WafError('unknown value for use_master: %s' % use_master)
     if warnings:
@@ -310,7 +314,7 @@ def module(bld, name, module_path, depends, private_depends,
                        'BE_PROJECTID=%s'%name.replace('.', '_'),
                        'BE_PROJECTNAME=%s'%name] + extra_defines,
             export_defines = [] + extra_public_defines,
-            includes = extra_includes + api + platform_api + include + platform_include + [bld.bugenginenode],
+            includes = extra_includes + api + platform_api + include + platform_include + master_includes,
             libs = [],
             lib_paths = lib_paths,
             export_includes = api + platform_api + extra_public_includes,
@@ -884,7 +888,7 @@ def filter_sources(self):
 def create_master_file(task):
     with open(task.outputs[0].abspath(), 'w') as f:
         for src in task.inputs:
-            f.write('#include "%s"\n' % src.path_from(task.generator.bld.bugenginenode).replace('\\','/'))
+            f.write('#include "%s"\n' % src.path_from(task.generator.bld.bldnode).replace('\\','/'))
 
 
 def master_sig_deps(task):

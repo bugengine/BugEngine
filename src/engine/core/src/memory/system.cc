@@ -9,8 +9,8 @@ namespace BugEngine
 
 SystemAllocator::SystemAllocator(BlockSize size, u32 initialCount)
     :   m_head(0)
-    ,   m_capacity(i_u32::Zero)
-    ,   m_used(i_u32::Zero)
+    ,   m_capacity(i_u32::create(0))
+    ,   m_used(i_u32::create(0))
     ,   m_blockSize(size)
 {
     grow(initialCount);

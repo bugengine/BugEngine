@@ -6,25 +6,32 @@
 /**************************************************************************************************/
 #include    <kernel/stdafx.h>
 
+#if defined(__ICL) && __ICL < 1010
 extern "C"
 {
 long  __cdecl _InterlockedCompareExchange(long volatile* Dest, long Exchange, long Comp);
 long  __cdecl _InterlockedExchange(long volatile* Target, long Value);
 long  __cdecl _InterlockedExchangeAdd(long volatile* Addend, long Value);
-__int64 __cdecl _InterlockedCompareExchange64(__int64 volatile* Dest,
-                                              __int64 Exchange, __int64 Comp);
-#pragma intrinsic(_InterlockedExchange)
-#pragma intrinsic(_InterlockedExchangeAdd)
-#pragma intrinsic(_InterlockedCompareExchange)
-#if _MSC_VER >= 1400
-# pragma intrinsic(_InterlockedCompareExchange64)
-#else
-# define WIN32_LEAN_AND_MEAN
-# define NOMINMAX
-# include <windows.h>
-# define _InterlockedCompareExchange64 InterlockedCompareExchange64
-#endif
 }
+# pragma intrinsic(_InterlockedExchange)
+# pragma intrinsic(_InterlockedExchangeAdd)
+# pragma intrinsic(_InterlockedCompareExchange)
+# define BE_HAS_INTERLOCKED64 0
+#elif _MSC_VER >= 1400
+# include <intrin.h>
+# define BE_HAS_INTERLOCKED64 1
+#else
+extern "C"
+{
+long  __cdecl _InterlockedCompareExchange(long volatile* Dest, long Exchange, long Comp);
+long  __cdecl _InterlockedExchange(long volatile* Target, long Value);
+long  __cdecl _InterlockedExchangeAdd(long volatile* Addend, long Value);
+}
+# pragma intrinsic(_InterlockedExchange)
+# pragma intrinsic(_InterlockedExchangeAdd)
+# pragma intrinsic(_InterlockedCompareExchange)
+# define BE_HAS_INTERLOCKED64 0
+#endif
 
 #pragma warning(push)
 #pragma warning(disable:4521) //multiple copy constructor
@@ -104,13 +111,21 @@ struct InterlockedType<4>
     {
         return p;
     }
+#if BE_HAS_INTERLOCKED64
     static inline bool set_conditional(tagged_t *p, tagged_t::value_t v,
                                        const tagged_t::tag_t& condition)
     {
         tagged_t r(condition.taggedvalue.tag+1, v);
         return _InterlockedCompareExchange64(&(p->asLongLong), r.asLongLong,
                                              condition.asLongLong) == condition.asLongLong;
-    /*    bool result;
+    }
+#else
+# pragma warning(push)
+# pragma warning(disable:4731)
+    static inline bool set_conditional(tagged_t *p, tagged_t::value_t v,
+                                       const tagged_t::tag_t& condition)
+    {
+        bool result;
         _asm
         {
             mov         edi,ebp
@@ -129,10 +144,12 @@ struct InterlockedType<4>
             _emit 0x0E
             setz        [result];
             mov         ebp, edi
-            pop         ebx;
+            pop         ebx
         }
-        return result;*/
+        return result;
     }
+# pragma warning(pop)
+#endif
 };
 template<>
 struct InterlockedType<1> : public InterlockedType<4>

@@ -1,5 +1,4 @@
-from waflib import Configure, Utils, Task
-from waflib.TaskGen import feature, before_method, after_method
+from waflib import Configure, Utils
 from waflib.Configure import conf
 from waflib.Tools import msvc
 import os
@@ -16,7 +15,7 @@ class MSVC(Configure.ConfigurationContext.Compiler):
         self.path = path
         self.args = args
         self.arch_name = target_arch
-        self.includes = includes
+        self.includes = [os.path.join(i, target_arch) for i in includes if os.path.isdir(os.path.join(i, target_arch))] + includes
         self.libdirs = libdirs
         self.target = self.platform
 
@@ -55,9 +54,17 @@ class MSVC(Configure.ConfigurationContext.Compiler):
         conf.env.append_unique('ARFLAGS_final', ['/LTCG'])
 
     def set_warning_options(self, conf):
-        conf.env.append_unique('CFLAGS_warnall', ['/D_CRT_SECURE_NO_WARNINGS=1', '/W4', '/WX'])
+        if self.NAMES[0] == 'intel':
+            conf.env.append_unique('CXXFLAGS', ['/Zc:forScope'])
+            if self.version_number >= (11,):
+                warning = ['/W4', '/Qdiag-disable:remark']
+            else:
+                warning = ['/W3']
+        else:
+            warning = ['/W4']
+        conf.env.append_unique('CFLAGS_warnall', warning + ['/D_CRT_SECURE_NO_WARNINGS=1', '/WX'])
         conf.env.append_unique('CFLAGS_warnnone', ['/D_CRT_SECURE_NO_WARNINGS=1', '/W0'])
-        conf.env.append_unique('CXXFLAGS_warnall', ['/D_CRT_SECURE_NO_WARNINGS=1', '/W4', '/WX'])
+        conf.env.append_unique('CXXFLAGS_warnall', warning + ['/D_CRT_SECURE_NO_WARNINGS=1', '/WX'])
         conf.env.append_unique('CXXFLAGS_warnnone', ['/D_CRT_SECURE_NO_WARNINGS=1', '/W0'])
         if self.NAMES[0] == 'msvc' and self.version_number >= (14,):
             conf.env.append_unique('CFLAGS_warnall', ['/D_ALLOW_RTCc_IN_STL=1'])
@@ -93,6 +100,7 @@ class MSVC(Configure.ConfigurationContext.Compiler):
         env.CC_CPP = Utils.to_list(env.CC) + ['/TC', '/X', '/E']
         env.CC_CPP_SRC_F = ''
         env.CC_CPP_TGT_F = ['/Fo'] # will actually be ignored
+        env.append_unique('STLIB', [conf.bugenginenode.make_node('mak/compiler/msvc/set_conditional').abspath()])
         if os_platform().endswith('64'):
             conf.find_program('cdb64', var='CDB', mandatory=False)
         else:
@@ -235,26 +243,3 @@ def configure(conf):
                     seen.add(c.name())
                     conf.compilers.append(c)
     conf.end_msg('done')
-
-
-def build(bld):
-    cls = Task.classes.get('cpp', None)
-    derived = type('cpp', (cls,), {})
-    def exec_command_stdout(self, *k, **kw):
-        if self.env.CC_NAME == 'msvc':
-            with open(self.outputs[0].abspath(), 'w') as out:
-                kw['stdout'] = out
-                return super(derived, self).exec_command(*k, **kw)
-        else:
-            return super(derived, self).exec_command(*k, **kw)
-    derived.exec_command = exec_command_stdout
-
-
-@feature('c', 'cxx')
-@after_method('process_source')
-def apply_pdb_flag(self):
-    if self.env.CC_NAME == 'msvc':
-        for task in getattr(self, 'compiled_tasks', []):
-            if task:
-                task.env.append_unique('CFLAGS', '/Fd%s'%task.outputs[0].change_ext('.pdb').abspath())
-                task.env.append_unique('CXXFLAGS', '/Fd%s'%task.outputs[0].change_ext('.pdb').abspath())

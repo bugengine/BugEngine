@@ -107,7 +107,7 @@ Plugin<T>::Plugin()
     :   m_name("")
     ,   m_dynamicObject()
     ,   m_interface(0)
-    ,   m_refCount(new (Arena::general()) i_u32(i_u32::One))
+    ,   m_refCount(new (Arena::general()) i_u32(i_u32::create(1)))
 {
 }
 
@@ -116,7 +116,7 @@ Plugin<T>::Plugin(const inamespace& pluginName, PreloadType /*preload*/)
     :   m_name(pluginName)
     ,   m_dynamicObject(new (Arena::general()) DynamicObject(pluginName, ipath("plugin")))
     ,   m_interface(0)
-    ,   m_refCount(new (Arena::general()) i_u32(i_u32::One))
+    ,   m_refCount(new (Arena::general()) i_u32(i_u32::create(1)))
 {
 }
 
@@ -125,7 +125,7 @@ Plugin<T>::Plugin(const inamespace& pluginName, const Context& context)
     :   m_name(pluginName)
     ,   m_dynamicObject(new (Arena::general()) DynamicObject(pluginName, ipath("plugin")))
     ,   m_interface(0)
-    ,   m_refCount(new (Arena::general()) i_u32(i_u32::One))
+    ,   m_refCount(new (Arena::general()) i_u32(i_u32::create(1)))
 {
     if (*m_dynamicObject)
     {

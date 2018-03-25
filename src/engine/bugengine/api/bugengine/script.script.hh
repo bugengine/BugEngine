@@ -13,7 +13,7 @@ namespace BugEngine
 
 template< typename T >
 class ScriptEngine;
-class BE_EXPORT Script : public Resource::Description
+class be_api(BUGENGINE) Script : public Resource::Description
 {
     template< typename T >
     friend class ScriptEngine;

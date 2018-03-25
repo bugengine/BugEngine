@@ -137,7 +137,3 @@ def configure(conf):
     conf.start_msg('Looking for intel compilers')
     detect_icc(conf)
     conf.end_msg('done')
-
-
-def build(bld):
-    pass

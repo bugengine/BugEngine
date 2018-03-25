@@ -33,8 +33,8 @@ void  Scheduler::release(void* task, size_t size)
 }
 
 Scheduler::Scheduler()
-    :   m_runningTasks(i_u32::Zero)
-    ,   m_running(i_bool::One)
+    :   m_runningTasks(i_u32::create(0))
+    ,   m_running(i_bool::create(true))
     ,   m_taskPool(Arena::task(), 65535, 16)
     ,   m_taskScheduler(scoped<Task::TaskScheduler>::create(Arena::task(), this))
     ,   m_kernelSchedulers(Arena::task())

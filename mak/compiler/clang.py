@@ -178,7 +178,3 @@ def configure(conf):
     conf.start_msg('Looking for clang compilers')
     detect_clang(conf)
     conf.end_msg('done')
-
-
-def build(bld):
-    pass

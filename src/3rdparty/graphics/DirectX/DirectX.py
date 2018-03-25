@@ -43,7 +43,11 @@ def setup(conf):
         from waflib import Options
         if Options.options.dx_sdk:
             includes=[os.path.join(Options.options.dx_sdk, 'Include')]
-            libdirs=[os.path.join(Options.options.dx_sdk, 'Lib', 'x86'), os.path.join(Options.options.dx_sdk, 'Lib', 'x64'), os.path.join(Options.options.dx_sdk, 'Lib', 'arm')]
+            libdirs = []
+            for arch in conf.env.VALID_ARCHITECTURES:
+                p = os.path.join(Options.options.dx_sdk, 'Lib', arch)
+                if os.path.isdir(p):
+                    libdirs.append(p)
         else:
             includes=[]
             libdirs=[]
