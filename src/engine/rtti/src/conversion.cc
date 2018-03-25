@@ -8,9 +8,7 @@
 namespace BugEngine { namespace RTTI
 {
 
-be_api(RTTI)
 const ConversionCost ConversionCost::s_incompatible(0, 0, 0, 0, 1);
-be_api(RTTI)
 const ConversionCost ConversionCost::s_variant(0, 0, 0, 1, 0);
 
 template< >

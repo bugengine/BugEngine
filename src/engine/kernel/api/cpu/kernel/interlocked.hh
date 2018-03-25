@@ -48,14 +48,13 @@ class interlocked
 private:
     typedef InterlockedType< sizeof(T) >  impl;
     typedef typename impl::value_t        value_t;
-public:
+private:
     value_t m_value;
 public:
-    static const interlocked<T> Zero;
-    static const interlocked<T> One;
     static interlocked<T> create(T value)
     {
-        interlocked<T> result = { value_t(value) };
+        interlocked<T> result;
+        result.m_value = value_t(value);
         return result;
     }
 
@@ -110,11 +109,6 @@ public:
         return static_cast<T>(impl::set_conditional(&m_value, value, condition));
     }
 };
-
-template< typename T >
-const interlocked<T> interlocked<T>::Zero = { 0 };
-template< typename T >
-const interlocked<T> interlocked<T>::One = { 1 };
 
 }
 

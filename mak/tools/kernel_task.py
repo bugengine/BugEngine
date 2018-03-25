@@ -98,8 +98,6 @@ BugEngine::Kernel::Kernel::KernelList&  getKernelList_%(module)s();
     KernelList::item::unhook();
 }
 
-ref<%(Name)sTask::Kernel> %(Name)sTask::s_kernel = ref<%(Name)sTask::Kernel>::create(BugEngine::Arena::game());
-
 %(Name)sTask::%(Name)sTask(%(argument_params)s)
     :   %(argument_assign)sm_task(ref<BugEngine::Task::KernelTask>::create(BugEngine::Arena::task(),
                                                         "%(kernel_full_name)s",
@@ -120,6 +118,8 @@ minitl::array< weak<BugEngine::Kernel::IParameter> > %(Name)sTask::makeParameter
     %(argument_result_assign)s
     return result;
 }
+
+ref< %(Name)sTask::Kernel > %(Name)sTask::s_kernel = ref< %(Name)sTask::Kernel >::create(BugEngine::Arena::game());
 
 %(end_Namespace)s
 """

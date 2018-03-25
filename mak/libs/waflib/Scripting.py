@@ -87,7 +87,7 @@ def waf_entry_point(current_directory, version, wafdir):
 					if not x:
 						continue
 					if Utils.is_win32:
-						if cur == x:
+						if os.path.normpath(cur) == os.path.normpath(x):
 							load = True
 							break
 					else:

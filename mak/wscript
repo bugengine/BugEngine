@@ -14,7 +14,6 @@ except ImportError:
     import pickle
 
 
-
 def options(opt):
     "Creates main option groups and load options for the host and all targets"
     opt.add_option_group('SDK paths and options')
@@ -152,11 +151,7 @@ class ConfigurationContext(Configure.ConfigurationContext):
             loaded during the build step only will not cause a reconfigure, which is the
             desired behaviour.
         """
-        Options.options.path = os.environ['PATH']
-        Options.options.include = os.environ.get('INCLUDE', '')
-        Options.options.libpath = os.environ.get('LIBPATH', '')
-        Options.options.lib = os.environ.get('LIB', '')
-        Options.options.pwd = os.environ.get('PWD', '')
+        Options.options.environ = dict(os.environ)
         node = self.bldnode.make_node('options.pickle')
         pickle.dump(Options.options, open(node.abspath(), 'wb'), protocol=2)
 
@@ -188,12 +183,9 @@ class ReconfigurationContext(Configure.ConfigurationContext):
         try:
             node = self.bldnode.make_node('options.pickle')
             Options.options = pickle.load(open(node.abspath(), 'rb'))
-            #pylint: disable=no-member
-            os.environ['PATH'] = self.environ['PATH'] = Options.options.path
-            os.environ['LIBPATH'] = self.environ['LIBPATH'] = Options.options.libpath
-            os.environ['LIB'] = self.environ['LIB'] = Options.options.lib
-            os.environ['INCLUDE'] = self.environ['INCLUDE'] = Options.options.include
-            os.environ['PWD'] = self.environ['PWD'] = Options.options.pwd
+            os.environ.clear()
+            os.environ.update(Options.options.environ)
+            self.environ = dict(os.environ)
         except IOError:
             raise Errors.WafError('Option file not found; configure the project first')
 

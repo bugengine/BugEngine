@@ -332,11 +332,22 @@ class Context(ctx):
 
 		if self.logger:
 			self.logger.info(cmd)
+			self.logger.info('env: ', 'env' in kw and kw['env'] or os.environ)
 
 		if 'stdout' not in kw:
 			kw['stdout'] = subprocess.PIPE
 		if 'stderr' not in kw:
 			kw['stderr'] = subprocess.PIPE
+		if 'filter_stdout' in kw:
+			filter_stdout = kw['filter_stdout']
+			del kw['filter_stdout']
+		else:
+			filter_stdout = lambda x: x
+		if 'filter_stderr' in kw:
+			filter_stderr = kw['filter_stderr']
+			del kw['filter_stderr']
+		else:
+			filter_stderr = lambda x: x
 
 		if Logs.verbose and not kw['shell'] and not Utils.check_exe(cmd[0]):
 			raise Errors.WafError('Program %s not found!' % cmd[0])
@@ -366,17 +377,23 @@ class Context(ctx):
 		if out:
 			if not isinstance(out, str):
 				out = out.decode(sys.stdout.encoding or 'latin-1', errors='replace')
+			out = out.replace('\r\n', '\n').split('\n')
 			if self.logger:
-				self.logger.debug('out: %s', out)
+				self.logger.debug('out: %s', '\n'.join(out))
 			else:
-				Logs.info(out, extra={'stream':sys.stdout, 'c1': ''})
+				out = '\n'.join(filter_stdout(out))
+				if out:
+					Logs.info(out, extra={'stream':sys.stdout, 'c1': ''})
 		if err:
 			if not isinstance(err, str):
 				err = err.decode(sys.stdout.encoding or 'latin-1', errors='replace')
+			err = err.replace('\r\n', '\n').split('\n')
 			if self.logger:
 				self.logger.error('err: %s' % err)
 			else:
-				Logs.info(err, extra={'stream':sys.stdout, 'c1': ''})
+				err = '\n'.join(filter_stderr(err))
+				if err:
+					Logs.info(err, extra={'stream':sys.stdout, 'c1': ''})
 
 		return ret
 
@@ -426,6 +443,7 @@ class Context(ctx):
 		kw['stdout'] = kw['stderr'] = subprocess.PIPE
 		if quiet is None:
 			self.to_log(cmd)
+			self.to_log('env: ' + str('env' in kw and kw['env'] or dict(os.environ)))
 
 		cargs = {}
 		if 'timeout' in kw:

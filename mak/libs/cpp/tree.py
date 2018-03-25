@@ -372,7 +372,7 @@ class OverloadedMethod(CppObject):
     def write_object(self, owner, struct_owners, prefix, namespace, object_name, definition, instance):
         prefix = prefix + '_method_%s' % self.name_cpp
         method_ptr = self.write_method(owner, struct_owners, prefix, definition)
-        definition.write('const %sraw<const ::BugEngine::RTTI::Method> %ss%s_ptr = {&%s};\n'
+        definition.write('%sconst raw<const ::BugEngine::RTTI::Method> %ss%s_ptr = {&%s};\n'
                          '%sconst ::BugEngine::RTTI::ObjectInfo %ss%s_object = {\n'
                          '    %s,\n'
                          '    {0},\n'

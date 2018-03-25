@@ -81,7 +81,7 @@ static void setThreadName(const istring& name)
 unsigned long WINAPI WatchThread::doWatchFolders(void* params)
 {
     WatchThread* watchThread = reinterpret_cast<WatchThread*>(params);
-    static i_u32 s_threadIndex = i_u32::Zero;
+    static i_u32 s_threadIndex = i_u32::create(0);
     setThreadName(istring(minitl::format<1024u>("FileSystem watch %d") | s_threadIndex++));
 
     while (true)

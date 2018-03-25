@@ -81,7 +81,7 @@ public:
     }
 };
 
-Thread::ThreadSpecificData Thread::s_threadData;
+be_api(CORE) Thread::ThreadSpecificData Thread::s_threadData;
 
 Thread::ThreadParams::ThreadParams(const istring& name, ThreadFunction f, intptr_t p1, intptr_t p2)
 :   m_name(name)

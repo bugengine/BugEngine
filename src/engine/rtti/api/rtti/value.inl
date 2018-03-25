@@ -98,7 +98,7 @@ const T Value::as() const
 }
 
 template< typename T >
-typename minitl::remove_const<T>::type Value::as()
+T Value::as()
 {
     typedef typename minitl::remove_reference<T>::type REALTYPE;
     Type ti = be_typeid<T>::type();

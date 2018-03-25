@@ -201,7 +201,3 @@ def configure(conf):
     conf.start_msg('Looking for gcc compilers')
     detect_gcc(conf)
     conf.end_msg('done')
-
-
-def build(bld):
-    pass

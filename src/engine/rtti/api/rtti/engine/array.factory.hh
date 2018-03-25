@@ -43,7 +43,6 @@ struct array_BugHelper
     static RTTI::Value trampoline_method_Index_overload_1(RTTI::Value* parameters, u32 parameterCount);
     static const RTTI::Method::Parameter s_method_Index_overload_1_params[];
     static const RTTI::Method::Overload s_method_Index_overloads[];
-    static const RTTI::Method s_methods[];
     static const RTTI::ObjectInfo s_prop_value_type_object_value_type;
     static const RTTI::ScriptingArrayAPI scriptingArrayAPI;
     static const RTTI::ScriptingAPI scriptingAPI;
@@ -198,25 +197,6 @@ const RTTI::Method::Overload array_BugHelper<T>::s_method_Index_overloads[] = {
 };
 
 template< typename T >
-const RTTI::Method array_BugHelper<T>::s_methods[3] = {
-    {
-        istring("array"),
-        { 1, s_method_array_overloads },
-        {&s_methods[0]}
-    },
-    {
-        istring("size"),
-        { 1, s_method_size_overloads },
-        {&s_methods[1]}
-    },
-    {
-        istring("Index"),
-        { 2, s_method_Index_overloads },
-        {&s_methods[2]}
-    }
-};
-
-template< typename T >
 const RTTI::ScriptingArrayAPI array_BugHelper<T>::scriptingArrayAPI = {
     value_type,
     &array_size,
@@ -235,6 +215,27 @@ template< typename T >
 BE_EXPORT
 raw<const RTTI::Class> be_typeid< minitl::array<T> >::klass()
 {
+    /* work around Intel compiler issue
+     * internal error: assertion failed: adjust_cleanup_state_for_aggregate_init: NULL dip
+     * (shared/edgcpfe/lower_init.c, line 6280)
+     */
+    static const RTTI::Method s_methods[3] = {
+        {
+            istring("array"),
+            { 1, array_BugHelper<T>::s_method_array_overloads },
+            {&s_methods[0]}
+        },
+        {
+            istring("size"),
+            { 1, array_BugHelper<T>::s_method_size_overloads },
+            {&s_methods[1]}
+        },
+        {
+            istring("Index"),
+            { 2, array_BugHelper<T>::s_method_Index_overloads },
+            {&s_methods[2]}
+        }
+    };
     static const RTTI::Class s_class = {
         "array",
         u32(sizeof(minitl::array<T>)),
@@ -245,8 +246,8 @@ raw<const RTTI::Class> be_typeid< minitl::array<T> >::klass()
         {0},
         { 0 },
         { 0, 0 },
-        { 3, array_BugHelper<T>::s_methods },
-        {array_BugHelper<T>::s_methods},
+        { 3, s_methods },
+        {s_methods},
         {&array_BugHelper<T>::scriptingAPI},
         &RTTI::wrapCopy< minitl::array<T> >,
         &RTTI::wrapDestroy< minitl::array<T> >

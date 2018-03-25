@@ -226,7 +226,3 @@ def configure(conf):
     conf.start_msg('Looking for suncc compilers')
     detect_suncc(conf)
     conf.end_msg('done')
-
-
-def build(bld):
-    pass
