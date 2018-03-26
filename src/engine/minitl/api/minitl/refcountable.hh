@@ -20,7 +20,7 @@ private: /* friend ref */
     mutable i_u32   m_refCount;
 public:
     refcountable()
-    :   m_refCount(i_u32::Zero)
+    :   m_refCount(i_u32::create(0))
     {}
     inline virtual ~refcountable()
     {

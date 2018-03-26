@@ -108,15 +108,15 @@ class Compiler:
                 err = err.decode(sys.stderr.encoding, errors='ignore')
             return (p.returncode, out, err)
 
-    def run_c(self, args, input=None):
-        return self.run([self.compiler_c] + self.extra_args.get('c', []) + args, input, self.env)
+    def run_c(self, args, input=None, env=None):
+        return self.run([self.compiler_c] + self.extra_args.get('c', []) + args, input, env or self.env)
 
-    def run_cxx(self, args, input=None):
+    def run_cxx(self, args, input=None, env=None):
         # print(' '.join([self.compiler_cxx] + self.extra_args.get('cxx', []) + args))
-        return self.run([self.compiler_cxx] + self.extra_args.get('cxx', []) + args, input, self.env)
+        return self.run([self.compiler_cxx] + self.extra_args.get('cxx', []) + args, input, env or self.env)
 
     def sort_name(self):
-        compiler_name = self.__class__.__name__.lower()
+        compiler_name = self.NAMES[0].lower()
         return self.arch, compiler_name, self.version_number, self.arch_name, self.platform
 
     def name(self):
@@ -234,7 +234,14 @@ class GnuCompiler(Compiler):
         arch = None
         platform = None
         result, out, err = self.run([compiler_c] + extra_args.get('c', []) + ['-dumpmachine'], env=env)
-        self.target = out.strip()
+        if result == 0:
+            self.target = out.strip()
+        else:
+            result, out, err = self.run([compiler_c] + extra_args.get('c', []) + ['-v'], env=env)
+            for line in err.split('\n') + out.split('\n'):
+                line = line.strip()
+                if line.startswith('Target: '):
+                    self.target = line[len('Target: '):]
         self.targets = (self.target, self.target.replace('-unknown', ''), self.target.replace('--', '-'))
         if self.target.find('-') != -1:
             arch, platform = split_triple(self.target)
@@ -329,6 +336,7 @@ class GnuCompiler(Compiler):
 
     def set_optimisation_options(self, conf):
         v = conf.env
+        v.append_unique('CXXFLAGS', ['-fno-threadsafe-statics'])
         v.CPPFLAGS_debug = ['-D_DEBUG'] + v.CPPFLAGS_debug
         v.CFLAGS_debug = ['-pipe', '-g', '-D_DEBUG'] + v.CFLAGS_debug
         v.CXXFLAGS_debug = ['-pipe', '-g', '-D_DEBUG'] + v.CXXFLAGS_debug
@@ -358,15 +366,14 @@ class GnuCompiler(Compiler):
         v.CXXFLAGS_warnall = ['-Wall', '-Wextra', '-Werror', '-Wno-sign-compare',
                               '-Woverloaded-virtual', '-Wno-invalid-offsetof', '-Wstrict-aliasing'] + v.CXXFLAGS_warnall
 
-    def find_target_program(self, conf, platform, program, mandatory=False):
-        sys_dirs = self.directories + platform.directories
+    def find_target_program(self, conf, platform, program, mandatory=True):
+        sys_dirs = platform.directories + self.directories
         d, a = os.path.split(self.directories[0])
         while a:
             pd = os.path.join(d, 'bin')
             if os.path.isdir(pd):
                 sys_dirs.append(pd)
             d, a = os.path.split(d)
-
         var = program.upper()
         for t in self.targets:
             if conf.find_program('%s-%s' % (t, program), var=var, path_list=sys_dirs, mandatory=False):
@@ -384,11 +391,13 @@ class GnuCompiler(Compiler):
     def load_tools(self, conf, platform):
         self.find_target_program(conf, platform, 'ar')
         self.find_target_program(conf, platform, 'strip')
-        self.find_target_program(conf, platform, 'objcopy')
-        self.find_target_program(conf, platform, 'gdb')
+        self.find_target_program(conf, platform, 'objcopy', mandatory=False)
+        self.find_target_program(conf, platform, 'gdb', mandatory=False)
         if not conf.env.GDB:
             conf.find_program('gdb', var='GDB', mandatory=False)
         Compiler.load_tools(self, conf, platform)
+        conf.env.CCLNK_TGT_F = ['-o', '']
+        conf.env.CXXLNK_TGT_F = ['-o', '']
 
     def load_in_env(self, conf, platform):
         env = conf.env
@@ -479,7 +488,7 @@ def options(opt):
                     dest='compilers',
                     help='List of compilers to configure for')
     for path in opt.path.make_node('compiler').listdir():
-        if path.endswith('.py'):
+        if path.endswith('.py') and not path.endswith('_build.py'):
             opt.recurse('compiler/%s'%path)
 
 
@@ -488,7 +497,7 @@ def configure(conf):
     compilers = Options.options.compilers
     compilers = compilers.split(',') if compilers else []
     for path in conf.path.make_node('compiler').listdir():
-        if path.endswith('.py'):
+        if path.endswith('.py') and not path.endswith('_build.py'):
             if not compilers or path[:-3] in compilers:
                 conf.recurse('compiler/%s'%path)
     conf.compilers.sort(key = lambda x: x.sort_name())
@@ -498,6 +507,6 @@ def build(bld):
     compilers = Options.options.compilers
     compilers = compilers.split(',') if compilers else []
     for path in bld.path.make_node('compiler').listdir():
-        if path.endswith('.py'):
-            if not compilers or path[:-3] in compilers:
+        if path.endswith('_build.py'):
+            if not compilers or path[:-9] in compilers:
                 bld.recurse('compiler/%s'%path)

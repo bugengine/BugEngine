@@ -14,9 +14,9 @@ static i_u32 s_contextUseCount;
 IOContext::IOContext()
     :   m_availableTickets(0)
     ,   m_freeSlots(SlotCount)
-    ,   m_firstFreeSlot(i_u32::Zero)
-    ,   m_firstUsedSlot(i_u32::Zero)
-    ,   m_ioDone(i_u8::Zero)
+    ,   m_firstFreeSlot(i_u32::create(0))
+    ,   m_firstUsedSlot(i_u32::create(0))
+    ,   m_ioDone(i_u8::create(0))
     ,   m_ioThread("IOThread", &IOContext::ioProcess, reinterpret_cast<intptr_t>(this), 0, Thread::Highest)
 {
 }

@@ -95,6 +95,15 @@ class Clang(Configure.ConfigurationContext.GnuCompiler):
         if self.version_number < (3, 9):
             env.append_unique('CXXFLAGS', ['-include', os.path.join(conf.bugenginenode.abspath(),
                                                                     'mak/compiler/clang/float128.h')])
+        # Add multiarch directories
+        sysroot = env.SYSROOT or '/'
+        for target in self.targets:
+            include_path = os.path.join(sysroot, 'usr', 'include', target)
+            if os.path.isdir(include_path):
+                env.append_unique('INCLUDES', [include_path])
+            lib_path = os.path.join(sysroot, 'usr', 'lib', target)
+            if os.path.isdir(lib_path):
+                env.append_unique('SYSTEM_LIBPATHS', [lib_path])
         # Template export was fixed in Clang 3.2
         if self.version_number >= (3, 2):
             if platform.NAME != 'windows':
@@ -117,7 +126,8 @@ class Clang(Configure.ConfigurationContext.GnuCompiler):
 
 
 def detect_clang(conf):
-    bindirs = os.environ['PATH'].split(os.pathsep) + conf.env.EXTRA_PATH
+    environ = getattr(conf, 'environ', os.environ)
+    bindirs = environ['PATH'].split(os.pathsep) + conf.env.EXTRA_PATH
     libdirs = []
     clangs = []
     for bindir in bindirs:
@@ -125,8 +135,8 @@ def detect_clang(conf):
             if os.path.isdir(libdir):
                 for x in os.listdir(libdir):
                     if x.startswith('llvm'):
-                        b = os.path.join(libdir, x, 'bin')
-                        if os.path.isdir(b):
+                        b = os.path.normpath(os.path.join(libdir, x, 'bin'))
+                        if os.path.isdir(b) and b not in libdirs:
                             libdirs.append(b)
 
     seen = {}
@@ -168,7 +178,3 @@ def configure(conf):
     conf.start_msg('Looking for clang compilers')
     detect_clang(conf)
     conf.end_msg('done')
-
-
-def build(bld):
-    pass

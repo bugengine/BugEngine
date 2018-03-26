@@ -49,7 +49,8 @@ def run_command(cmd, input=None, env=None):
 
 
 def configure(conf):
-    os.environ['PATH'] = '/System/Library/Frameworks/OpenCL.framework/Libraries:'+os.environ['PATH']
+    environ = getattr(conf, 'environ', os.environ)
+    environ['PATH'] = '/System/Library/Frameworks/OpenCL.framework/Libraries:'+environ['PATH']
     conf.darwin_sdks = {}
     os_sdk_paths = []
     os_sdk_regexp = re.compile('([a-zA-Z]+)([0-9\\.]+)u?\\.sdk')
@@ -58,14 +59,14 @@ def configure(conf):
             os_sdk_paths.append(os.path.normpath(os.path.join(p, 'SDKs')))
         try:
             for platform in os.listdir(os.path.join(p, 'Platforms')):
-                os.environ['PATH'] = os.pathsep.join((os.path.join(p, 'Platforms', platform, 'Developer', 'usr', 'bin'),
-                                                      os.environ['PATH']))
+                environ['PATH'] = os.pathsep.join((os.path.join(p, 'Platforms', platform, 'Developer', 'usr', 'bin'),
+                                                   environ['PATH']))
                 s_path = os.path.normpath(os.path.join(p, 'Platforms', platform, 'Developer', 'SDKs'))
                 if os.path.isdir(s_path):
                     os_sdk_paths.append(s_path)
         except OSError:
             pass
-        os.environ['PATH'] = ('%s/Toolchains/XcodeDefault.xctoolchain/usr/bin:%s/usr/bin:'%(p,p))+os.environ['PATH']
+        environ['PATH'] = ('%s/Toolchains/XcodeDefault.xctoolchain/usr/bin:%s/usr/bin:'%(p,p))+environ['PATH']
     conf.find_program('file')
 
     archs = {
@@ -96,7 +97,7 @@ def configure(conf):
                 sdk_version = sdk_version.split('.')
                 dylib = os.path.join(sdk_path, 'usr', 'lib', 'libc.dylib')
                 if os.path.isfile(dylib):
-                    r, out, err = run_command([conf.env.FILE, dylib])
+                    r, out, err = run_command(conf.env.FILE + [dylib])
                     for line in out.split('\n'):
                         line = line.strip()
                         if not line:
@@ -133,13 +134,14 @@ def configure(conf):
 
 
 def build(bld):
+    environ = getattr(bld, 'environ', os.environ)
     for p in Options.options.xcode_sdks.split(',')[::-1]:
         try:
             for platform in os.listdir(os.path.join(p, 'Platforms')):
-                os.environ['PATH'] = ('%s/Platforms/%s/Developer/usr/bin:'%(p, platform))+os.environ['PATH']
+                environ['PATH'] = ('%s/Platforms/%s/Developer/usr/bin:'%(p, platform))+environ['PATH']
         except:
             pass
-        os.environ['PATH'] = ('%s/Toolchains/XcodeDefault.xctoolchain/usr/bin:%s/usr/bin:'%(p,p))+os.environ['PATH']
+        environ['PATH'] = ('%s/Toolchains/XcodeDefault.xctoolchain/usr/bin:%s/usr/bin:'%(p,p))+environ['PATH']
 
 
 def plugins(bld):

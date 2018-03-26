@@ -30,7 +30,7 @@ static SQInteger _system_getenv(HSQUIRRELVM v)
     return 0;
 }
 
-
+#if 0
 static SQInteger _system_system(HSQUIRRELVM v)
 {
     const SQChar *s;
@@ -40,7 +40,7 @@ static SQInteger _system_system(HSQUIRRELVM v)
     }
     return sq_throwerror(v,_SC("wrong param"));
 }
-
+#endif
 
 static SQInteger _system_clock(HSQUIRRELVM v)
 {
@@ -120,7 +120,9 @@ static SQInteger _system_date(HSQUIRRELVM v)
 #define _DECL_FUNC(name,nparams,pmask) {_SC(#name),_system_##name,nparams,pmask}
 static const SQRegFunction systemlib_funcs[]={
     _DECL_FUNC(getenv,2,_SC(".s")),
+#if 0
     _DECL_FUNC(system,2,_SC(".s")),
+#endif
     _DECL_FUNC(clock,0,NULL),
     _DECL_FUNC(time,1,NULL),
     _DECL_FUNC(date,-1,_SC(".nn")),

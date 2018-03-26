@@ -86,8 +86,8 @@ struct ComponentGroup::OperationBuffer
     OperationBuffer(OperationBuffer* previous)
         :   m_next(0)
         ,   m_prev(previous)
-        ,   m_offset(i_u32::Zero)
-        ,   m_used(i_u32::Zero)
+        ,   m_offset(i_u32::create(0))
+        ,   m_used(i_u32::create(0))
         ,   m_data()
     {
     }

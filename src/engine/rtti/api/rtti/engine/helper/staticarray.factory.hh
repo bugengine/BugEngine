@@ -44,7 +44,6 @@ struct staticarray_BugHelper
     static const RTTI::Method::Overload s_method_index_overloads[2];
     static const RTTI::Method::Parameter s_size_params[1];
     static const RTTI::Method::Overload s_method_size_overloads[1];
-    static const RTTI::Method s_methods[2];
     static const RTTI::ScriptingArrayAPI scriptingArrayAPI;
     static const RTTI::ScriptingAPI scriptingAPI;
 };
@@ -162,19 +161,6 @@ const RTTI::Method::Overload staticarray_BugHelper<T>::s_method_size_overloads[1
     }
 };
 
-template< typename T >
-const RTTI::Method staticarray_BugHelper<T>::s_methods[2] = {
-    {
-        RTTI::Class::nameOperatorIndex(),
-        {2, s_method_index_overloads},
-        {&s_methods[0]}
-    },
-    {
-        istring("size"),
-        {1, s_method_size_overloads},
-        {&s_methods[1]}
-    }
-};
 
 template< typename T >
 const RTTI::ScriptingArrayAPI staticarray_BugHelper<T>::scriptingArrayAPI = {
@@ -193,6 +179,22 @@ template< typename T >
 BE_EXPORT
 raw<const RTTI::Class> be_typeid< RTTI::staticarray<T> >::klass()
 {
+    /* work around Intel compiler issue
+     * internal error: assertion failed: adjust_cleanup_state_for_aggregate_init: NULL dip
+     * (shared/edgcpfe/lower_init.c, line 6280)
+     */
+    static const RTTI::Method s_methods[2] = {
+        {
+            RTTI::Class::nameOperatorIndex(),
+            {2, staticarray_BugHelper<T>::s_method_index_overloads},
+            {&s_methods[0]}
+        },
+        {
+            istring("size"),
+            {1, staticarray_BugHelper<T>::s_method_size_overloads},
+            {&s_methods[1]}
+        }
+    };
     static const ::BugEngine::RTTI::Class s_class = {
         istring(minitl::format<1024u>("staticarray<%s>") | be_typeid<T>::klass()->name),
         u32(sizeof(RTTI::staticarray<T>)),
@@ -203,7 +205,7 @@ raw<const RTTI::Class> be_typeid< RTTI::staticarray<T> >::klass()
         {0},
         {0},
         {0, 0},
-        {2, staticarray_BugHelper<T>::s_methods},
+        {2, s_methods},
         {0},
         {&staticarray_BugHelper<T>::scriptingAPI},
         &RTTI::wrapCopy< RTTI::staticarray<T> >,

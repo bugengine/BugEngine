@@ -50,28 +50,29 @@ def unique(seq):
     return [ x for x in seq if x not in seen and not seen_add(x)]
 
 def gather_includes_defines(task_gen):
-    defines = getattr(task_gen, 'defines', [])
-    includes = getattr(task_gen, 'includes', [])
-    seen = []
-    use = getattr(task_gen, 'use', [])[:]
+    defines = getattr(task_gen, 'defines', []) + getattr(task_gen, 'export_defines', [])
+    includes = getattr(task_gen, 'includes', []) + getattr(task_gen, 'export_includes', [])
+    seen = set([])
+    use = getattr(task_gen, 'use', []) + getattr(task_gen, 'private_use', [])
     while use:
         name = use.pop()
         if name not in seen:
+            seen.add(name)
             try:
                 t = task_gen.bld.get_tgen_by_name(name)
             except:
                 pass
             else:
                 use = use + getattr(t, 'use', [])
-                includes = includes + getattr(t, 'includes ', [])
-                defines = defines + getattr(t, 'defines ', [])
+                includes = includes + getattr(t, 'includes', []) + getattr(t, 'export_includes', [])
+                defines = defines + getattr(t, 'defines', []) + getattr(t, 'export_defines', [])
     return unique(includes), unique(defines)
 
 def path_from(path, bld):
     if isinstance(path, str):
-        return path
+        return path.replace('/', '\\')
     else:
-        return '$(SolutionDir)%s' % path.path_from(bld.srcnode)
+        return '$(SolutionDir)%s' % path.path_from(bld.srcnode).replace('/', '\\')
 
 class XmlFile:
     def __init__(self):
@@ -191,7 +192,7 @@ class VcprojNode:
             with XmlNode(xml, 'Filter', {'Name': name}) as filter:
                 sub.write(filter, src_node)
         for file in sorted(self.files, key = lambda x: x.name):
-            XmlNode(xml, 'File', {'RelativePath': '$(SolutionDir)%s'%file.path_from(src_node)}).close()
+            XmlNode(xml, 'File', {'RelativePath': '$(SolutionDir)%s'%file.path_from(src_node).replace('/', '\\')}).close()
 
 class VCproj:
     extensions = ['vcproj']
@@ -238,7 +239,7 @@ class VCproj:
                                 tool['CleanCommandLine'] = 'cd $(SolutionDir) && %s %s clean:%s:%s --targets=%s' % (sys.executable, sys.argv[0], toolchain, variant, task_gen.target)
                                 tool['ReBuildCommandLine'] = 'cd $(SolutionDir) && %s %s clean:%s:%s instal:%s:%s --targets=%s' % (sys.executable, sys.argv[0], toolchain, variant, toolchain, variant, task_gen.target)
                             if 'cxxprogram' in task_gen.features:
-                                tool['Output'] = os.path.join('$(OutDir)', env.DEPLOY_BINDIR, sub_env.cxxprogram_PATTERN%task_gen.target)
+                                tool['Output'] = '$(OutDir)\\%s\\%s' % (env.DEPLOY_BINDIR, sub_env.cxxprogram_PATTERN%task_gen.target)
                             elif 'game' in task_gen.features:
                                 deps = task_gen.use[:]
                                 seen = set([])
@@ -255,11 +256,11 @@ class VCproj:
                                             except:
                                                 pass
                                 if program:
-                                    tool['Output'] = os.path.join('$(OutDir)', env.DEPLOY_BINDIR, sub_env.cxxprogram_PATTERN%program.target)
+                                    tool['Output'] = '$(OutDir)\\%s\\%s' % (env.DEPLOY_BINDIR, sub_env.cxxprogram_PATTERN%program.target)
                                     debug_command = '$(NMakeOutput)'
                                     debug_command_arguments = task_gen.target
                                 else:
-                                    tool['Output'] = os.path.join('$(OutDir)', env.DEPLOY_BINDIR, sub_env.cxxprogram_PATTERN%task_gen.bld.launcher[0][0].target)
+                                    tool['Output'] = '$(OutDir)\\%s\\%s' % (env.DEPLOY_BINDIR, sub_env.cxxprogram_PATTERN%task_gen.bld.launcher[0][0].target)
                             if float(version_project) >= 8:
                                 tool['PreprocessorDefinitions'] = ';'.join(defines + sub_env.DEFINES + sub_env.SYSTEM_DEFINES)
                                 tool['IncludeSearchPath'] = ';'.join([path_from(p, task_gen.bld) for p in includes + sub_env.INCLUDES + sub_env.SYSTEM_INCLUDES + [os.path.join(sub_env.SYSROOT, 'usr', 'include')]])
@@ -374,9 +375,9 @@ class VCxproj:
                     self.vcxproj._add(properties, 'NMakeReBuildCommandLine', 'cd $(SolutionDir) && %s %s clean:%s:%s build:%s:%s --targets=%s' % (sys.executable, sys.argv[0], toolchain, variant, toolchain, variant, task_gen.target))
                     self.vcxproj._add(properties, 'NMakeCleanCommandLine', 'cd $(SolutionDir) && %s %s clean:%s:%s --targets=%s' % (sys.executable, sys.argv[0], toolchain, variant, task_gen.target))
                     if 'cxxprogram' in task_gen.features:
-                        self.vcxproj._add(properties, 'NMakeOutput', '%s' % os.path.join('$(OutDir)', env.DEPLOY_BINDIR, sub_env.cxxprogram_PATTERN%task_gen.target))
+                        self.vcxproj._add(properties, 'NMakeOutput', '$(OutDir)\\%s\\%s' % (env.DEPLOY_BINDIR, sub_env.cxxprogram_PATTERN%task_gen.target))
                     elif 'game' in task_gen.features:
-                        self.vcxproj._add(properties, 'NMakeOutput', '%s' % os.path.join('$(OutDir)', env.DEPLOY_BINDIR, sub_env.cxxprogram_PATTERN%task_gen.bld.launcher[0][0].target))
+                        self.vcxproj._add(properties, 'NMakeOutput', '$(OutDir)\\%s\\%s' % (env.DEPLOY_BINDIR, sub_env.cxxprogram_PATTERN%task_gen.bld.launcher[0][0].target))
                         self.vcxproj._add(properties, 'LocalDebuggerCommand', '$(NMakeOutput)')
                         self.vcxproj._add(properties, 'LocalDebuggerCommandArguments', task_gen.target)
                     self.vcxproj._add(properties, 'NMakePreprocessorDefinitions', ';'.join(defines + sub_env.DEFINES + sub_env.SYSTEM_DEFINES))
@@ -407,19 +408,19 @@ class VCxproj:
         path = node.abspath()
         if os.path.isdir(path):
             if project_node != node:
-                path = node.path_from(root_node)
+                path = node.path_from(root_node).replace('/', '\\')
                 try:
                     filter = self.filters[path]
                 except KeyError:
                     filter = generateGUID(path)
-                    n = self.vcxfilters._add(self.filter_nodes, 'Filter', {'Include':node.path_from(project_node)})
+                    n = self.vcxfilters._add(self.filter_nodes, 'Filter', {'Include':node.path_from(project_node).replace('/', '\\')})
                     self.vcxfilters._add(n, 'UniqueIdentifier', filter)
             for subdir in node.listdir():
                 self.add_node(root_node, project_node, node.make_node(subdir), files)
         elif os.path.isfile(path):
-            self.vcxproj._add(files, 'None', {'Include':  '$(SolutionDir)%s' % node.path_from(root_node)})
-            n = self.vcxfilters._add(self.file_nodes, 'None', {'Include':  '$(SolutionDir)%s' % node.path_from(root_node)})
-            self.vcxfilters._add(n, 'Filter', node.parent.path_from(project_node))
+            self.vcxproj._add(files, 'None', {'Include':  '$(SolutionDir)%s' % node.path_from(root_node).replace('/', '\\')})
+            n = self.vcxfilters._add(self.file_nodes, 'None', {'Include':  '$(SolutionDir)%s' % node.path_from(root_node).replace('/', '\\')})
+            self.vcxfilters._add(n, 'Filter', node.parent.path_from(project_node).replace('/', '\\'))
 
 
 class vs2003(Build.BuildContext):

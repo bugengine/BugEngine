@@ -11,8 +11,23 @@ class Windows(Configure.ConfigurationContext.Platform):
                          re.compile('.*windows-intel'),
                          re.compile('.*windows-wsdk'))
 
-    def __init__(self):
+    def is_valid(self, compiler):
+        node = self.conf.bldnode.make_node('main.cxx')
+        tgtnode = node.change_ext('')
+        node.write('#include <cstdio>\nint main() {}\n')
+        try:
+            result, out, err = compiler.run_cxx([node.abspath(), '-x', 'c++',  '-o', tgtnode.abspath()])
+        except Exception as e:
+            #print(e)
+            return False
+        finally:
+            node.delete()
+            tgtnode.delete()
+        return result == 0
+
+    def __init__(self, conf=None):
         Configure.ConfigurationContext.Platform.__init__(self)
+        self.conf = conf
 
     def get_available_compilers(self, compiler_list):
         result = []
@@ -20,9 +35,11 @@ class Windows(Configure.ConfigurationContext.Platform):
             for regexp in self.SUPPORTED_TARGETS:
                 if regexp.match(c.platform):
                     if 'Clang' in c.NAMES:
-                        result.append((c, [], Windows_Clang()))
+                        if self.is_valid(c):
+                            result.append((c, [], Windows_Clang()))
                     elif 'GCC' in c.NAMES:
-                        result.append((c, [], Windows_GCC()))
+                        if self.is_valid(c):
+                            result.append((c, [], Windows_GCC()))
                     elif 'msvc' in c.NAMES:
                         if c.arch in ('amd64', 'x86'):
                             result.append((c, [], Windows_MSVC()))
@@ -69,8 +86,7 @@ class Windows_Clang(Windows):
     def load_in_env(self, conf, compiler):
         Windows.load_in_env(self, conf, compiler)
         env = conf.env
-        env.append_unique('LINKFLAGS', ['-static-libgcc', '-static-libstdc++', '-lpthread'])
-        env.append_unique('STLIB', ['pthread'])
+        env.append_unique('LINKFLAGS', ['-static-libgcc'])
         env.append_unique('CXXFLAGS_warnall', ['-Wno-unknown-pragmas', '-Wno-comment'])
         self.find_winres(conf, compiler)
         conf.env.DEFINES_console = ['_CONSOLE=1']
@@ -84,7 +100,7 @@ class Windows_GCC(Windows):
         env = conf.env
         env.append_unique('CFLAGS', ['-static-libgcc'])
         env.append_unique('CXXFLAGS', ['-static-libgcc'])
-        env.append_unique('LINKFLAGS', ['-static-libgcc', '-lpthread'])
+        env.append_unique('LINKFLAGS', ['-static-libgcc'])
         env.append_unique('CXXFLAGS_warnall', ['-Wno-unknown-pragmas', '-Wno-comment'])
         if compiler.version_number >= (4, 5):
             env.append_unique('CFLAGS', ['-static-libstdc++'])
@@ -112,5 +128,5 @@ def options(opt):
 
 
 def configure(conf):
-    conf.platforms.append(Windows())
+    conf.platforms.append(Windows(conf))
 

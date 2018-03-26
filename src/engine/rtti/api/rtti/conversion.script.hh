@@ -11,7 +11,7 @@ namespace BugEngine { namespace RTTI
 
 struct Type;
 
-struct ConversionCost
+struct be_api(RTTI) ConversionCost
 {
 public:
     u8      incompatible;
@@ -76,8 +76,8 @@ public:
         return *this;
     }
 
-    static be_api(RTTI) const ConversionCost s_incompatible;
-    static be_api(RTTI) const ConversionCost s_variant;
+    static const ConversionCost s_incompatible;
+    static const ConversionCost s_variant;
 };
 
 

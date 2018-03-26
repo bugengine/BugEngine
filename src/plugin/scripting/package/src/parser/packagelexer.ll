@@ -131,6 +131,7 @@ as                                                      { update(be_package_leng
 #if (YY_FLEX_MINOR_VERSION < 5) || (YY_FLEX_MINOR_VERSION == 5 && YY_FLEX_SUBMINOR_VERSION < 5)
 int be_package_lex_destroy()
 {
+    yy_delete_buffer(yy_current_buffer);
     return 0;
 }
 #endif

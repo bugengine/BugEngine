@@ -3,7 +3,6 @@
 
 #include    <core/stdafx.h>
 #include    <core/environment.hh>
-#include    <userenv.h>
 #include    <stdlib.h>
 
 typedef BOOL (WINAPI *GetUserProfileDirectoryFunction)(HANDLE hToken, LPSTR lpProfileDir, LPDWORD lpcchSize);

@@ -102,7 +102,8 @@ def detect_gcc_from_path(conf, path, seen):
                         try:
                             c = cls(cc, cxx)
                         except Exception as e:
-                            Logs.pprint('YELLOW', '%s: %s' % (cc, e))
+                            #Logs.pprint('YELLOW', '%s: %s' % (cc, e))
+                            pass
                         else:
                             if not c.is_valid(conf):
                                 return
@@ -161,7 +162,8 @@ def get_native_gcc(conf, seen):
 
 
 def detect_gcc(conf):
-    bindirs = os.environ['PATH'].split(os.pathsep) + conf.env.EXTRA_PATH
+    environ = getattr(conf, 'environ', os.environ)
+    bindirs = environ['PATH'].split(os.pathsep) + conf.env.EXTRA_PATH
     paths = [os.path.normpath(os.path.join(path, '..', 'lib')) for path in bindirs]
     paths = set([path for path in paths if os.path.isdir(path)])
     for bindir in bindirs:
@@ -199,7 +201,3 @@ def configure(conf):
     conf.start_msg('Looking for gcc compilers')
     detect_gcc(conf)
     conf.end_msg('done')
-
-
-def build(bld):
-    pass
