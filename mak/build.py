@@ -18,10 +18,10 @@ def to_string(self):
     else:
         tgt_str = ' '.join([a.name for a in self.inputs][:1])
     task_name = self.__class__.__name__.replace('_task', '')
-    return '{%s}%s%s/%s\n' % (task_name,
-                              (11-len(task_name))*' ',
-                              self.generator.target,
-                              tgt_str)
+    return '{%s}%s%s/%s' % (task_name,
+                            (11-len(task_name))*' ',
+                            self.generator.target,
+                            tgt_str)
 
 
 def create_namespace_file(task):
@@ -316,7 +316,7 @@ def module(bld, name, module_path, depends, private_depends,
                        'BE_PROJECTID=%s'%name.replace('.', '_'),
                        'BE_PROJECTNAME=%s'%name] + extra_defines,
             export_defines = [] + extra_public_defines,
-            includes = extra_includes + api + platform_api + include + platform_include + master_includes,
+            includes = extra_includes + api + platform_api + include + platform_include + master_includes + [bld.bugenginenode],
             libs = [],
             lib_paths = lib_paths,
             export_includes = api + platform_api + extra_public_includes,
