@@ -18,10 +18,10 @@ File::Ticket::Ticket(minitl::Allocator& arena, weak<const File> file, i64 offset
     :   action(Read)
     ,   file(file)
     ,   buffer(arena, 0)
-    ,   processed(i_u32::Zero)
+    ,   processed(i_u32::create(0))
     ,   offset(offset)
     ,   total(size)
-    ,   error(i_bool::Zero)
+    ,   error(i_bool::create(false))
     ,   text(text)
 {
     file->addref();
@@ -31,10 +31,10 @@ File::Ticket::Ticket(minitl::Allocator& arena, weak<const File> file, i64 offset
     :   action(Write)
     ,   file(file)
     ,   buffer(arena, size)
-    ,   processed(i_u32::Zero)
+    ,   processed(i_u32::create(0))
     ,   offset(offset)
     ,   total(size)
-    ,   error(i_bool::Zero)
+    ,   error(i_bool::create(false))
     ,   text(text)
 {
     memcpy(buffer.data(), data, size);

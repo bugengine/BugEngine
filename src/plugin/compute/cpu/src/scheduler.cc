@@ -32,7 +32,7 @@ Scheduler::Scheduler(const Plugin::Context& context)
 
 Scheduler::~Scheduler()
 {
-    for (minitl::vector< ref<CodeLoader> >::const_iterator it = m_cpuLoaders.rbegin();
+    for (minitl::vector< ref<CodeLoader> >::const_reverse_iterator it = m_cpuLoaders.rbegin();
          it != m_cpuLoaders.rend();
          ++it)
     {

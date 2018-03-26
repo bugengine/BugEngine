@@ -194,7 +194,8 @@ class SunCC(Configure.ConfigurationContext.GnuCompiler):
 
 def detect_suncc(conf):
     seen = set([])
-    bindirs = os.environ['PATH'].split(os.pathsep) + conf.env.EXTRA_PATH
+    environ = getattr(conf, 'environ', os.environ)
+    bindirs = environ['PATH'].split(os.pathsep) + conf.env.EXTRA_PATH
     paths = [os.path.normpath(os.path.join(path, '..', 'lib')) for path in bindirs]
     paths = set([path for path in paths if os.path.isdir(path)])
     for bindir in bindirs:
@@ -225,7 +226,3 @@ def configure(conf):
     conf.start_msg('Looking for suncc compilers')
     detect_suncc(conf)
     conf.end_msg('done')
-
-
-def build(bld):
-    pass

@@ -23,7 +23,7 @@ def set_sunos_options(self):
     self.env.DEPLOY_KERNELDIR = os.path.join('share', 'bugengine', 'kernel')
     self.env.pymodule_PATTERN = '%s.so'
 
-    self.env.RPATH = '$ORIGIN/../plugin'
+    self.env.RPATH = ['$ORIGIN/../plugin']
     for i in os.environ['PATH'].split(':'):
         self.env.append_unique('RPATH', [os.path.join(os.path.dirname(i), 'lib')])
     self.env.append_unique('LIB', ['dl', 'rt', 'pthread', 'm'])

@@ -16,7 +16,7 @@ GeneralAllocator::GeneralAllocator()
 #if BE_ENABLE_MEMORY_TRACKING
 # ifdef BE_COMPILER_MSVC
         _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF|_CRTDBG_LEAK_CHECK_DF);
-        //_crtBreakAlloc = 711;
+        _crtBreakAlloc = 1166;
 # endif
 #endif
 }

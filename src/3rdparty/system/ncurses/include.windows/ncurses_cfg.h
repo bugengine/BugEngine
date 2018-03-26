@@ -119,6 +119,11 @@
 #define HAVE_STRDUP 1
 #define HAVE_STRSTR 1
 #define HAVE_VSNPRINTF 1
+#if defined(__ICL) && __ICL < 1000
+# define HAVE_VSNPRINTF 0
+#elif defined(_MSC_VER) && _MSC_VER < 1400
+# define HAVE_VSNPRINTF 0
+#endif
 #define HAVE_ISASCII 1
 #define HAVE_VSSCANF 1
 #define RETSIGTYPE void

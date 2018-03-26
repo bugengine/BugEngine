@@ -20,7 +20,7 @@ def find_clang(conf):
 
 def configure(conf):
 	conf.find_clang()
-	conf.find_program(['llvm-ar', 'ar'], var='AR')
+	conf.find_program(['ar'], var='AR')
 	conf.find_ar()
 	conf.gcc_common_flags()
 	conf.gcc_modifier_platform()

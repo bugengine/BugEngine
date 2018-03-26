@@ -44,7 +44,7 @@ public:
     pointer()
     :   m_allocator(0)
 #if BE_ENABLE_WEAKCHECK
-    ,   m_weakCount(i_u32::Zero)
+    ,   m_weakCount(i_u32::create(0))
 #endif
     {}
     inline virtual ~pointer()

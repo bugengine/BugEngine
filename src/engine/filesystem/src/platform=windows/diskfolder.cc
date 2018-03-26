@@ -49,7 +49,7 @@ static void createDirectory(const ipath& path, Folder::CreatePolicy policy)
 
 }
 
-static i_u32 s_diskIndex = i_u32::Zero;
+static i_u32 s_diskIndex = i_u32::create(0);
 
 DiskFolder::DiskFolder(const ipath& diskpath, Folder::ScanPolicy scanPolicy, Folder::CreatePolicy createPolicy)
     :   m_path(diskpath)

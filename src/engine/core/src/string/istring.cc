@@ -136,7 +136,7 @@ private:
 
 private:
     StringInfo(u32 len)
-        :   m_refCount(i_u32::Zero)
+        :   m_refCount(i_u32::create(0))
         ,   m_length(len)
         ,   m_text()
     {
@@ -150,7 +150,7 @@ public:
 };
 
 StringInfo::StringInfoBuffer::StringInfoBuffer()
-    :   m_used(i_u32::Zero)
+    :   m_used(i_u32::create(0))
 {
 }
 
@@ -184,7 +184,7 @@ StringInfo::StringInfoBufferCache& StringInfo::getCache()
 
 StringInfo::StringInfoBufferCache::StringInfoBufferCache()
     :   m_buffers(reinterpret_cast< iptr<StringInfo::StringInfoBuffer>* >(Arena::string().allocate()))
-    ,   m_bufferCount(i_u32::Zero)
+    ,   m_bufferCount(i_u32::create(0))
 {
     m_buffers[0] = 0;
     allocate(0);

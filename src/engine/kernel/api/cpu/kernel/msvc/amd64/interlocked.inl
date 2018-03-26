@@ -5,19 +5,34 @@
 #define BE_KERNEL_MSVC_AMD64_INTERLOCKED_INL_
 /**************************************************************************************************/
 #include    <kernel/stdafx.h>
-#include    <intrin.h>
+
+
+#if defined(__ICL) && __ICL < 1100
+extern "C"
+{
+	long _InterlockedExchange(long volatile *, long);
+	__int64 _InterlockedExchange64(__int64 volatile *, __int64);
+	long _InterlockedExchangeAdd(long volatile *, long);
+	__int64 _InterlockedExchangeAdd64(__int64 volatile *, __int64);
+	long _InterlockedCompareExchange(long volatile *, long, long);
+	__int64 _InterlockedCompareExchange64(__int64 volatile *, __int64, __int64);
+}
 #pragma intrinsic(_InterlockedExchange)
 #pragma intrinsic(_InterlockedExchangeAdd)
 #pragma intrinsic(_InterlockedCompareExchange)
 #pragma intrinsic(_InterlockedExchange64)
 #pragma intrinsic(_InterlockedExchangeAdd64)
 #pragma intrinsic(_InterlockedCompareExchange64)
-#if _MSC_VER >= 1500
 # define TAG_LONG 1
-# pragma intrinsic(_InterlockedCompareExchange128)
+extern "C" char _set_conditional_128(volatile i64* p, i64 nvalue, i64 oldvalue, i64 tag);
+#elif _MSC_VER >= 1500
+# include <intrin.h>
+# define TAG_LONG 1
+# define be_InterlockedCompareExchange128(addr, v1, v2, c)   \
+        return _InterlockedCompareExchange128(addr, v1, v2, c) != 0
 #else
+# include <intrin.h>
 # define TAG_SHORT 1
-# pragma intrinsic(_InterlockedCompare64Exchange128)
 #endif
 
 
@@ -140,17 +155,26 @@ struct InterlockedType<8>
             return p.m_tag;
         #endif
     }
+#if defined(__ICL) && __ICL < 1100
+    static bool set_conditional(volatile tagged_t *p, tagged_t::value_t v,
+                                const tagged_t::tag_t& condition)
+    {
+        return _set_conditional_128((i64*)p, (i64)v, condition.m_tag,
+                                    (i64)condition.m_value);
+    }
+#else
     static inline bool set_conditional(volatile tagged_t *p, tagged_t::value_t v,
                                        const tagged_t::tag_t& condition)
     {
         #ifdef TAG_LONG
-            return _InterlockedCompareExchange128((volatile i64*)p, (i64)v,
-                                                  p->m_tag+1, (i64*)&condition) != 0;
+            be_InterlockedCompareExchange128((volatile i64*)p, (i64)v,
+                                             p->m_tag+1, (i64*)&condition);
         #else
             return _InterlockedCompare64Exchange128((volatile i64*)p, (i64)v, condition+1,
                                                     condition) == condition;
         #endif
     }
+#endif
 };
 
 }

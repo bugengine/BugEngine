@@ -38,6 +38,15 @@ def set_osx_shlib_name(self):
                 ])
 
 
+@feature('cprogram', 'cxxprogram', 'cshlib', 'cxxshlib')
+@after_method('apply_link')
+def add_objc_lib(self):
+    if 'darwin' in self.env.VALID_PLATFORMS:
+        self.env.append_unique('LINKFLAGS', [
+                '-lobjc',
+            ])
+
+
 @feature('cprogram', 'cxxprogram')
 @after_method('apply_link')
 @after_method('process_use')

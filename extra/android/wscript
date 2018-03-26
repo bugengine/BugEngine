@@ -189,7 +189,9 @@ class AndroidLoader(Configure.ConfigurationContext.Platform):
         sdk_build_tool_path = self.get_build_tool_path(Options.options.android_sdk_path)
         sdk_tools_paths = self.get_tools_paths(Options.options.android_sdk_path)
         adb = conf.find_program('adb', path_list=sdk_tools_paths)
-        conf.find_program('dx', var='DEX', exts='.jar', path_list=[os.path.join(sdk_build_tool_path, 'lib')])
+        conf.env.DEX = os.path.join(sdk_build_tool_path, 'lib', 'dx.jar')
+        if not os.path.isfile(conf.env.DEX):
+            raise Errors.WafError('Unable to locate dx.jar')
         conf.find_program('zipalign', var='ZIPALIGN', path_list=sdk_tools_paths+[sdk_build_tool_path])
         conf.env.DEXCREATE = '--dex'
         conf.env.DEX_TGT_PATTERN = '--output=%s'

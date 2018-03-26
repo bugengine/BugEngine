@@ -122,7 +122,13 @@ typedef char SQChar;
 #define scstrtol    strtol
 #endif
 #define scstrtoul   strtoul
-#define scvsprintf  vsnprintf
+#if defined(__ICL) and __ICL < 1000
+# define scvsprintf(b, l, fmt, ap) vsprintf(b, fmt, ap);	/* ANSI */
+#elif defined(_MSC_VER) and _MSC_VER < 1400
+# define scvsprintf(b, l, fmt, ap) vsprintf(b, fmt, ap);	/* ANSI */
+#else
+# define scvsprintf vsnprintf
+#endif
 #define scstrstr    strstr
 #define scisspace   isspace
 #define scisdigit   isdigit

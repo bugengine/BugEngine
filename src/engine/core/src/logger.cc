@@ -11,7 +11,7 @@
 namespace BugEngine
 {
 
-const char* ILogListener::s_logNames[] =
+be_api(CORE) const char* ILogListener::s_logNames[] =
 {
     " SPAM  ",
     " DEBUG ",

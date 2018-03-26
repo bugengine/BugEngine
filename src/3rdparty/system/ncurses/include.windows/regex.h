@@ -23,6 +23,7 @@
 #define _REGEX_H 1
 
 #include <sys/types.h>
+#include <stdlib.h>
 
 /* Allow the use in C++ code.  */
 #ifdef __cplusplus

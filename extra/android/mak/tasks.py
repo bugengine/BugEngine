@@ -97,12 +97,12 @@ class aapt_package(Task.Task):
         self.outputs[0].write(self.inputs[0].read())
         if self.env._7Z:
             compression_level = 2 if bld.__class__.optim != 'final' else 9
-            cmd = [self.env._7Z, 'a', '-tzip', '-mx%d'%compression_level,
+            cmd = self.env._7Z + ['a', '-tzip', '-mx%d'%compression_level,
                    self.outputs[0].abspath()] + [i.path_from(root).replace('\\', '/') for i in self.inputs[1:]]
             with open(self.outputs[0].change_ext('.tmp').abspath(), 'w') as stdout:
                 return self.exec_command(cmd, stdout=stdout)
         else:
-            cmd = [self.env.AAPT, 'add', self.outputs[0].abspath()] + [i.path_from(root).replace('\\', '/') for i in self.inputs[1:]]
+            cmd = self.env.AAPT + ['add', self.outputs[0].abspath()] + [i.path_from(root).replace('\\', '/') for i in self.inputs[1:]]
             return self.exec_command(cmd)
 
 
@@ -114,8 +114,8 @@ class jarsigner(Task.Task):
     #run_str = '${JARSIGNER} ${JARSIGNER_FLAGS} -signedjar ${TGT} ${SRC} ${JARSIGNER_KEY}'
 
     def run(self):
-        cmd = [self.env.JARSIGNER] + self.env.JARSIGNER_FLAGS + ['-signedjar', self.outputs[0].abspath(),
-                                                                 self.inputs[0].abspath(), self.env.JARSIGNER_KEY]
+        cmd = self.env.JARSIGNER + self.env.JARSIGNER_FLAGS + ['-signedjar', self.outputs[0].abspath(),
+                                                               self.inputs[0].abspath(), self.env.JARSIGNER_KEY]
         with open(self.outputs[0].change_ext('.tmp').abspath(), 'w') as stdout:
             return self.exec_command(cmd, stdout=stdout)
 
