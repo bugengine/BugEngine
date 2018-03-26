@@ -96,7 +96,7 @@ class XmlFile:
             xml = node.read()
         except IOError:
             xml = ''
-        newxml = self.document.toxml()
+        newxml = self.document.toprettyxml()
         if xml != newxml:
             Logs.pprint('NORMAL', 'writing %s' % node.name)
             node.write(newxml)
@@ -225,8 +225,8 @@ class VCproj:
                         platform = task_gen.bld.get_platform(env.MS_PROJECT_PLATFORM)
                         with XmlNode(configurations, 'Configuration',
                                             {'Name': '%s-%s|%s'%(toolchain, variant, platform),
-                                            'OutputDirectory': '$(SolutionDir)build/%s/%s/' % (toolchain, variant),
-                                            'IntermediateDirectory': '$(SolutionDir)build/%s/%s/' % (toolchain, variant),
+                                            'OutputDirectory': '$(SolutionDir)%s\\%s\\' % (sub_env.PREFIX, variant),
+                                            'IntermediateDirectory': '$(SolutionDir)%s\\%s\\' % (sub_env.PREFIX, variant),
                                             'ConfigurationType': '0',
                                             'CharacterSet': '2'}) as configuration:
                             tool = {'Name': 'VCNMakeTool'}
@@ -235,7 +235,7 @@ class VCproj:
                                 command = command % {'toolchain':toolchain, 'variant':variant}
                                 tool['BuildCommandLine'] = 'cd $(SolutionDir) && %s %s %s' % (sys.executable, sys.argv[0], command)
                             else:
-                                tool['BuildCommandLine'] = 'cd $(SolutionDir) && %s %s build:%s:%s --targets=%s' % (sys.executable, toolchain, variant, task_gen.target)
+                                tool['BuildCommandLine'] = 'cd $(SolutionDir) && %s %s build:%s:%s --targets=%s' % (sys.executable, sys.argv[0], toolchain, variant, task_gen.target)
                                 tool['CleanCommandLine'] = 'cd $(SolutionDir) && %s %s clean:%s:%s --targets=%s' % (sys.executable, sys.argv[0], toolchain, variant, task_gen.target)
                                 tool['ReBuildCommandLine'] = 'cd $(SolutionDir) && %s %s clean:%s:%s instal:%s:%s --targets=%s' % (sys.executable, sys.argv[0], toolchain, variant, toolchain, variant, task_gen.target)
                             if 'cxxprogram' in task_gen.features:
@@ -263,7 +263,7 @@ class VCproj:
                                     tool['Output'] = '$(OutDir)\\%s\\%s' % (env.DEPLOY_BINDIR, sub_env.cxxprogram_PATTERN%task_gen.bld.launcher[0][0].target)
                             if float(version_project) >= 8:
                                 tool['PreprocessorDefinitions'] = ';'.join(defines + sub_env.DEFINES + sub_env.SYSTEM_DEFINES)
-                                tool['IncludeSearchPath'] = ';'.join([path_from(p, task_gen.bld) for p in includes + sub_env.INCLUDES + sub_env.SYSTEM_INCLUDES + [os.path.join(sub_env.SYSROOT, 'usr', 'include')]])
+                                tool['IncludeSearchPath'] = ';'.join([path_from(p, task_gen.bld) for p in includes + sub_env.INCLUDES + sub_env.SYSTEM_INCLUDES + [os.path.join(sub_env.SYSROOT or '', 'usr', 'include')]])
                             XmlNode(configuration, 'Tool', tool).close()
             XmlNode(project, 'References').close()
             with XmlNode(project, 'Files') as files:
@@ -343,7 +343,7 @@ class VCxproj:
 
         configuration = self.vcxproj._add(project, 'PropertyGroup', {'Label': 'Configuration'})
         self.vcxproj._add(configuration, 'ConfigurationType', 'Makefile')
-        #self.vcxproj._add(configuration, 'PlatformToolset', 'v%d'% (float(version_project[1])*10))
+        self.vcxproj._add(configuration, 'PlatformToolset', 'v%d'% (float(version_project[1])*10))
         self.vcxproj._add(configuration, 'OutDir', '$(SolutionDir)$(Prefix)\\$(Variant)\\')
         self.vcxproj._add(configuration, 'IntDir', '$(TmpDir)\\$(Variant)\\')
 
@@ -382,7 +382,7 @@ class VCxproj:
                         self.vcxproj._add(properties, 'LocalDebuggerCommandArguments', task_gen.target)
                     self.vcxproj._add(properties, 'NMakePreprocessorDefinitions', ';'.join(defines + sub_env.DEFINES + sub_env.SYSTEM_DEFINES))
                     if sub_env.SYS_ROOT:
-                        includes.append('%s/usr/include' % sub_env.SYSROOT)
+                        includes.append('%s/usr/include' % sub_env.SYSROOT or '')
                     self.vcxproj._add(properties, 'NMakeIncludeSearchPath', ';'.join([path_from(i, task_gen.bld) for i in includes] + sub_env.INCLUDES + sub_env.SYSTEM_INCLUDES))
         files = self.vcxproj._add(project, 'ItemGroup')
 
@@ -429,7 +429,7 @@ class vs2003(Build.BuildContext):
     fun = 'build'
     optim = 'debug'
     version = (('Visual Studio .NET 2003', '8.00', False, None), (VCproj, '7.10'))
-    platforms = ['Win32', 'x64']
+    platforms = ['Win32']
 
     def get_platform(self, platform_name):
         return platform_name if platform_name in self.__class__.platforms else self.__class__.platforms[0]
@@ -484,7 +484,7 @@ class vs2003(Build.BuildContext):
             nodes = [projects.make_node("%s.%s" % (target, ext)) for ext in klass.extensions]
             project = klass(task_gen, version, version_project, folders)
             project.write(nodes)
-            solution.add(task_gen, project, nodes[0].path_from(self.srcnode), do_build)
+            solution.add(task_gen, project, nodes[0].path_from(self.srcnode).replace('/', '\\'), do_build)
 
         for g in self.groups:
             for tg in g:
@@ -496,7 +496,7 @@ class vs2003(Build.BuildContext):
                     nodes = [projects.make_node("%s.%s" % (tg.target, ext)) for ext in klass.extensions]
                     project = klass(tg, version, version_project, folders)
                     project.write(nodes)
-                    solution.add(tg, project, nodes[0].path_from(self.srcnode))
+                    solution.add(tg, project, nodes[0].path_from(self.srcnode).replace('/', '\\'))
 
         solution.write(solution_node)
 
