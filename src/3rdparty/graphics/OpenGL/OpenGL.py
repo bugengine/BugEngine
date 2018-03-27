@@ -9,12 +9,12 @@ def options(opt):
 def setup(conf):
     if 'darwin' in conf.env.VALID_PLATFORMS:
         conf.check_framework('OpenGL',
-                             includepath=[os.path.join(conf.path.abspath(), 'api')])
+                             includepath=[os.path.join(conf.path.abspath(), 'api')]) or pprint('YELLOW', '-GL', sep=' ')
     elif 'windows' in conf.env.VALID_PLATFORMS:
         conf.check_lib(['opengl32', 'gdi32'],
-                       includes=['GL/gl.h'],
+                       includes=['windows.h', 'GL/gl.h'],
                        includepath=[os.path.join(conf.path.abspath(), 'api')],
-                       functions=['glBegin'])
+                       functions=['glBegin']) or pprint('YELLOW', '-GL', sep=' ')
     else:
         try:
             conf.pkg_config('gl', var='OpenGL')
