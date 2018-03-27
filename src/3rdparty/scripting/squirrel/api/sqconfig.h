@@ -122,9 +122,9 @@ typedef char SQChar;
 #define scstrtol    strtol
 #endif
 #define scstrtoul   strtoul
-#if defined(__ICL) and __ICL < 1000
+#if defined(__ICL) && __ICL < 1000
 # define scvsprintf(b, l, fmt, ap) vsprintf(b, fmt, ap);	/* ANSI */
-#elif defined(_MSC_VER) and _MSC_VER < 1400
+#elif defined(_MSC_VER) &&_MSC_VER < 1400
 # define scvsprintf(b, l, fmt, ap) vsprintf(b, fmt, ap);	/* ANSI */
 #else
 # define scvsprintf vsnprintf
