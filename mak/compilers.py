@@ -209,6 +209,7 @@ class GnuCompiler(Compiler):
         (('__arm__', '__ARM_ARCH_7A__', '__ARM_ARCH_7K__'), 'armv7k'),
         (('__arm__', '__ARM_ARCH_7S__'),                    'armv7s'),
     )
+    ARCHIVER = 'ar'
 
     def __init__(self, compiler_c, compiler_cxx, extra_args={}, extra_env={}):
         extra_env = dict(extra_env)
@@ -336,7 +337,8 @@ class GnuCompiler(Compiler):
 
     def set_optimisation_options(self, conf):
         v = conf.env
-        v.append_unique('CXXFLAGS', ['-fno-threadsafe-statics'])
+        if 'ICC' not in self.NAMES:
+            v.append_unique('CXXFLAGS', ['-fno-threadsafe-statics'])
         v.CPPFLAGS_debug = ['-D_DEBUG'] + v.CPPFLAGS_debug
         v.CFLAGS_debug = ['-pipe', '-g', '-D_DEBUG'] + v.CFLAGS_debug
         v.CXXFLAGS_debug = ['-pipe', '-g', '-D_DEBUG'] + v.CXXFLAGS_debug
@@ -366,7 +368,7 @@ class GnuCompiler(Compiler):
         v.CXXFLAGS_warnall = ['-Wall', '-Wextra', '-Werror', '-Wno-sign-compare',
                               '-Woverloaded-virtual', '-Wno-invalid-offsetof', '-Wstrict-aliasing'] + v.CXXFLAGS_warnall
 
-    def find_target_program(self, conf, platform, program, mandatory=True):
+    def find_target_program(self, conf, platform, program, mandatory=True, os_paths=[]):
         sys_dirs = platform.directories + self.directories
         d, a = os.path.split(self.directories[0])
         while a:
@@ -383,16 +385,17 @@ class GnuCompiler(Compiler):
                 if conf.find_program('%s-%s' % (t, program), var=var, mandatory=False):
                     break
             else:
-                conf.find_program(program, var=var, path_list=sys_dirs, mandatory=mandatory)
+                conf.find_program(program, var=var, path_list=sys_dirs + os_paths, mandatory=mandatory)
 
     def error_flag(self):
         return ['-Werror']
 
     def load_tools(self, conf, platform):
-        self.find_target_program(conf, platform, 'ar')
-        self.find_target_program(conf, platform, 'strip')
-        self.find_target_program(conf, platform, 'objcopy', mandatory=False)
-        self.find_target_program(conf, platform, 'gdb', mandatory=False)
+        os_paths = os.environ['PATH'].split(os.pathsep)
+        self.find_target_program(conf, platform, self.ARCHIVER, os_paths=os_paths)
+        self.find_target_program(conf, platform, 'strip', os_paths=os_paths)
+        self.find_target_program(conf, platform, 'objcopy', mandatory=False, os_paths=os_paths)
+        self.find_target_program(conf, platform, 'gdb', mandatory=False, os_paths=os_paths)
         if not conf.env.GDB:
             conf.find_program('gdb', var='GDB', mandatory=False)
         Compiler.load_tools(self, conf, platform)

@@ -25,6 +25,7 @@ class ICC(Configure.ConfigurationContext.GnuCompiler):
                      ('.avx', ['-mavx']),
                      ('.avx2', ['-march=core-avx2']),),
     }
+    ARCHIVER = 'xiar'
     def __init__(self, icc, icpc, extra_args={}, extra_env={}):
         Configure.ConfigurationContext.GnuCompiler.__init__(self, icc, icpc, extra_args, extra_env)
 
@@ -71,8 +72,10 @@ class ICC(Configure.ConfigurationContext.GnuCompiler):
         if platform.NAME == 'Linux':
             if self.arch == 'x86':
                 v.append_unique('SYSTEM_LIBPATHS', ['=/usr/lib/i386-linux-gnu'])
+                v.append_unique('INCLUDES', ['/usr/include/i386-linux-gnu'])
             elif self.arch == 'amd64':
                 v.append_unique('SYSTEM_LIBPATHS', ['=/usr/lib/x86_64-linux-gnu'])
+                v.append_unique('INCLUDES', ['/usr/include/x86_64-linux-gnu'])
         v.append_unique('CPPFLAGS', ['-fPIC'])
         v.append_unique('CFLAGS', ['-fPIC'])
         v.append_unique('CXXFLAGS', ['-fPIC'])
