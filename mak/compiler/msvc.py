@@ -108,13 +108,13 @@ class MSVC(Configure.ConfigurationContext.Compiler):
 
 
 all_icl_platforms = (
-    ('intel64', 'amd64'),
-    ('em64t', 'amd64'),
-    ('em64t_native', 'amd64'),
-    ('ia32e', 'amd64'),
-    ('ia32', 'x86'),
-    ('itanium', 'ia64'),
-    ('ia64', 'ia64'),
+    ('intel64', 'intel64', 'amd64'),
+    ('em64t', 'em64t', 'amd64'),
+    ('em64t_native', 'intel64', 'amd64'),
+    ('ia32e', 'ia32e', 'amd64'),
+    ('ia32', 'ia32', 'x86'),
+    ('itanium', 'itanium', 'ia64'),
+    ('ia64', 'ia64', 'ia64'),
 )
 @conf
 def gather_icl_versions(conf, versions):
@@ -126,7 +126,6 @@ def gather_icl_versions(conf, versions):
     """
     version_pattern = re.compile('^...?.?\....?.?')
     version_pattern_old = re.compile('^..')
-    version_pattern_suite = re.compile('^...?.?\..?.?')
     try:
         all_versions = Utils.winreg.OpenKey(Utils.winreg.HKEY_LOCAL_MACHINE, r'SOFTWARE\Wow6432node\Intel\Compilers\C++')
     except OSError:
@@ -148,7 +147,7 @@ def gather_icl_versions(conf, versions):
         else:
             continue
         targets = {}
-        for target,arch in all_icl_platforms:
+        for target, target_arg, arch in all_icl_platforms:
             try:
                 icl_version = Utils.winreg.OpenKey(all_versions, version+'\\'+target)
                 path,type = Utils.winreg.QueryValueEx(icl_version,'ProductDir')
@@ -157,9 +156,13 @@ def gather_icl_versions(conf, versions):
             else:
                 batch_file=os.path.join(path,'bin','iclvars.bat')
                 if os.path.isfile(batch_file):
-                    targets[target] = msvc.target_compiler(conf, 'intel', arch, version_str, target, batch_file)
+                    targets[target_arg] = msvc.target_compiler(conf, 'intel', arch, version_str, target_arg, batch_file)
         versions['intel ' + version_str] = targets
 
+
+@conf
+def gather_intel_composer_versions(conf, versions):
+    version_pattern_suite = re.compile('^...?.?\..?.?')
     try:
         all_versions = Utils.winreg.OpenKey(Utils.winreg.HKEY_LOCAL_MACHINE, r'SOFTWARE\Wow6432node\Intel\Suites')
     except OSError:
@@ -188,19 +191,19 @@ def gather_icl_versions(conf, versions):
             else:
                 minor_index += 1
                 targets = {}
-                for target,arch in all_icl_platforms:
+                for target, target_arg, arch in all_icl_platforms:
                     try:
                         # check if target is installed
-                        Utils.winreg.OpenKey(all_minor_versions, os.path.join(minor_version, 'C++', target))
+                        Utils.winreg.OpenKey(all_minor_versions, '%s\\C++\\%s' % (minor_version, target))
                         # retrieve ProductDir
-                        icl_version = Utils.winreg.OpenKey(all_minor_versions, os.path.join(minor_version, 'C++'))
+                        icl_version = Utils.winreg.OpenKey(all_minor_versions, '%s\\C++' % minor_version)
                         path,type = Utils.winreg.QueryValueEx(icl_version,'ProductDir')
                     except OSError:
                         continue
                     else:
                         batch_file=os.path.join(path,'bin','iclvars.bat')
                         if os.path.isfile(batch_file):
-                            targets[target] = msvc.target_compiler(conf, 'intel', arch, version_str, target, batch_file)
+                            targets[target_arg] = msvc.target_compiler(conf, 'intel', arch, version_str, target_arg, batch_file)
                 versions['intel ' + version_str] = targets
 
 def os_platform():
