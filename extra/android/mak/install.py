@@ -50,7 +50,7 @@ def install_as(self, target_path, file, chmod=Utils.O644):
 
 def build(bld):
     appname = getattr(Context.g_module, Context.APPNAME, bld.srcnode.name)
-    root = bld.path.parent
+    root = bld.path.parent.find_or_declare(bld.bugengine_variant).find_or_declare(bld.optim)
     tg = TaskGen.task_gen(bld=bld)
 
     package_unsigned = root.find_or_declare(appname + '.unsigned.apk')
