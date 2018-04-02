@@ -52,11 +52,11 @@ def setup(conf):
 
 
 def build(bld):
-    bld.platforms.append(bld.external('3rdparty.system.cocoa'))
+    bld.recurse(os.path.join(bld.bugenginenode.abspath(), 'mak', 'target', 'macosx', 'build.py'))
 
 
 def plugins(bld):
-    pass
+    bld.recurse(os.path.join(bld.bugenginenode.abspath(), 'mak', 'target', 'macosx', 'build.py'))
 
 
 @feature('cxxshlib', 'cshlib')
