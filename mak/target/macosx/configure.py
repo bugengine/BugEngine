@@ -225,8 +225,10 @@ class Darwin(Configure.ConfigurationContext.Platform):
                                                              '-o', exe_node.abspath(), '-L%s'%os.path.join(sdk_path, 'usr', 'lib'),
                                                              '-isysroot', sdk_path, obj_node.abspath(), '-lobjc'], env=env)
                                     if r == 0:
-                                        sdk_compilers.append(c)
-                                        break
+                                        r, out, err = c.run([strip, '-S', exe_node.abspath()], env=env)
+                                        if r == 0:
+                                            sdk_compilers.append(c)
+                                            break
                 if len(sdk_compilers) > len(best_sdk[2]):
                     best_sdk = ('.'.join(sdk_version), sdk_path, sdk_compilers, sdk_bin_paths)
             if best_sdk[2]:
