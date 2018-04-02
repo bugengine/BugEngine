@@ -33,19 +33,23 @@ class Darwin(Configure.ConfigurationContext.Platform):
                     except KeyError:
                         compiler_sets[k] = [c]
                     break
-        self.conf.start_msg('Looking for %s SDKs' % self.SDK_NAME)
-        for k in sorted(compiler_sets.keys()):
-            compilers = compiler_sets[k]
-            try:
-                compilers, sdk = self.get_best_compilers_sdk(compilers)
-            except Errors.WafError as e:
-                continue
-            else:
-                if len(compilers) > 1:
-                    result.append((compilers[0], compilers, self.__class__(self.conf, sdk)))
+        if compiler_sets:
+            self.conf.start_msg('Looking for %s SDKs' % self.SDK_NAME)
+            for k in sorted(compiler_sets.keys()):
+                compilers = compiler_sets[k]
+                try:
+                    compilers, sdk = self.get_best_compilers_sdk(compilers)
+                except Errors.WafError as e:
+                    continue
                 else:
-                    result.append((compilers[0], [], self.__class__(self.conf, sdk)))
-        self.conf.end_msg('done')
+                    if len(compilers) > 1:
+                        result.append((compilers[0], compilers, self.__class__(self.conf, sdk)))
+                    else:
+                        result.append((compilers[0], [], self.__class__(self.conf, sdk)))
+            if result:
+                self.conf.end_msg('done')
+            else:
+                self.conf.end_msg('none', color='YELLOW')
         return result
 
     def load_in_env(self, conf, compiler):
