@@ -4,7 +4,7 @@ from waflib.TaskGen import feature, taskgen_method, extension, before_method, af
 import os
 import re
 import shutil
-from waflib.Tools import ccroot, c, cxx, winres
+from waflib.Tools import ccroot, c, cxx, winres, c_osx
 
 Build.PROTOCOL = 2
 old_log_display = Task.Task.log_display
@@ -1077,6 +1077,11 @@ def set_postlink_task(self):
 @feature('cprogram', 'cxxprogram', 'cshlib', 'cxxshlib')
 @after_method('set_postlink_task')
 def install_step(self):
+    pass
+
+
+@feature('c', 'cxx')
+def set_macosx_deployment_target(self):
     pass
 
 
