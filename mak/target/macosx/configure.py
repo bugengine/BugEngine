@@ -33,6 +33,7 @@ class Darwin(Configure.ConfigurationContext.Platform):
                     except KeyError:
                         compiler_sets[k] = [c]
                     break
+        self.conf.start_msg('Looking for %s SDKs' % self.SDK_NAME)
         for k in sorted(compiler_sets.keys()):
             compilers = compiler_sets[k]
             try:
@@ -44,6 +45,7 @@ class Darwin(Configure.ConfigurationContext.Platform):
                     result.append((compilers[0], compilers, self.__class__(self.conf, sdk)))
                 else:
                     result.append((compilers[0], [], self.__class__(self.conf, sdk)))
+        self.conf.end_msg('done')
         return result
 
     def load_in_env(self, conf, compiler):
@@ -55,8 +57,8 @@ class Darwin(Configure.ConfigurationContext.Platform):
         compiler.find_target_program(conf, self, 'dsymutil', mandatory=False)
         if not conf.env.DSYMUTIL:
             conf.find_program('dsymutil')
-        conf.env.env = copy(getattr(conf, 'environ', os.environ))
-        conf.env.env['PATH'] = os.path.pathsep.join(self.directories + compiler.directories + [conf.env.env['PATH']])
+        environ = getattr(conf, 'environ', os.environ)
+        conf.env.PATH = os.path.pathsep.join(self.directories + compiler.directories + [environ['PATH']])
         conf.env.ABI = 'mach_o'
         conf.env.VALID_PLATFORMS = self.PLATFORMS + ['darwin']
         conf.env.XCODE_SDKROOT = platform
@@ -87,6 +89,8 @@ class Darwin(Configure.ConfigurationContext.Platform):
                                              '-isysroot', self.sdk[1], '-L%s/usr/lib'%self.sdk[1]])
         conf.env.CFLAGS_cshlib = ['-fPIC']
         conf.env.CXXFLAGS_cxxshlib = ['-fPIC']
+        conf.env.env = dict(os.environ)
+
 
     platform_sdk_re = re.compile('.*/Platforms/\w*\.platform/Developer/SDKs/[\.\w]*\.sdk')
     old_sdk_re = re.compile('.*/SDKs/[\.\w]*\.sdk')
@@ -126,6 +130,41 @@ class Darwin(Configure.ConfigurationContext.Platform):
         return True
 
     def get_best_compilers_sdk(self, compilers):
+        src_node = self.conf.bldnode.make_node('test.mm')
+        src_node.write('#include <stdio.h>\n'
+                       '#include <iostream>\n'
+                       '#include <Foundation/NSObject.h>\n'
+                       '#include <CoreFoundation/CoreFoundation.h>\n'
+                       '@interface BugObject : NSObject {\n'
+                       '}\n'
+                       '- (id) init;\n'
+                       '@end\n'
+                       '@implementation BugObject\n'
+                       '- (id) init {\n'
+                       ' self = [super init];\n'
+                       ' return self;\n'
+                       '}\n'
+                       '@end\n'
+                       'int main(int argc, char* argv[])\n'
+                       '{\n'
+                       '    [[BugObject alloc] init];\n'
+                       '    switch(argc) {\n'
+                       '    case 6:\n'
+                       '        return printf("%s\\n", argv[5]);\n'
+                       '    case 5:\n'
+                       '        return printf("%s\\n", argv[4]);\n'
+                       '    case 4:\n'
+                       '        return printf("%s\\n", argv[3]);\n'
+                       '    case 3:\n'
+                       '        return printf("%s\\n", argv[2]);\n'
+                       '    case 2:\n'
+                       '        return printf("%s\\n", argv[1]);\n'
+                       '    default:\n'
+                       '        return printf("%s\\n", argv[0]);\n'
+                       '    }\n'
+                       '}\n')
+        obj_node = src_node.change_ext('')
+        exe_node = src_node.change_ext('')
         all_archs = []
         for compiler in sorted(compilers, key = lambda x: x.name()):
             if compiler.arch not in all_archs:
@@ -165,32 +204,29 @@ class Darwin(Configure.ConfigurationContext.Platform):
                         os.path.normpath(os.path.join(sdk_path, '..', '..', '..', '..', '..', 'usr', 'bin')),
                         os.path.normpath(os.path.join(sdk_path, '..', '..', '..', '..', '..', 'Toolchains', 'XcodeDefault.xctoolchain', 'usr', 'bin')),
                     ] if os.path.isdir(i) and i != '/usr/bin']
+                strip = self.conf.detect_executable('strip', path_list=sdk_bin_paths)
                 for a in sdk_archs:
                     for c in compilers:
                         if self.match(c, sdk_path, all_sdks) and c.arch == a:
+                            try: obj_node.delete()
+                            except Exception: pass
+                            try: exe_node.delete()
+                            except Exception: pass
                             env = copy(os.environ)
                             env['PATH'] = os.path.pathsep.join(sdk_bin_paths + c.directories + [env['PATH']])
-                            r, out, err = c.run_cxx([sdk_option, '-Wl,-rpath,.', '-framework', 'Foundation',
-                                                    '-x', 'objective-c++', '-isysroot', sdk_path, '-'],
-                                                    '#include <stdio.h>\n'
-                                                    '#include <iostream>\n'
-                                                    '#include <Foundation/NSArray.h>\n'
-                                                    'int main()\n'
-                                                    '{\n'
-                                                    '    [[NSMutableArray alloc] init];\n'
-                                                    '    printf(0);\n'
-                                                    '    return 0;\n'
-                                                    '}\n',
-                                                    env)
+                            r, out, err = c.run_cxx([sdk_option,
+                                                     '-c', '-o', obj_node.abspath(),
+                                                     '-isysroot', sdk_path, src_node.abspath()], env=env)
                             if r == 0:
-                                sdk_compilers.append(c)
-                                break
-                            else:
-                                #print(err)
-                                pass
-                    else:
-                        #print('no compiler for arch %s'%a)
-                        pass
+                                r, out, err = c.run([strip, '-S', obj_node.abspath()], env=env)
+                                if r == 0:
+                                    r, out, err = c.run_cxx([sdk_option,
+                                                             '-framework', 'Foundation', '-framework', 'CoreFoundation',
+                                                             '-o', exe_node.abspath(), '-L%s'%os.path.join(sdk_path, 'usr', 'lib'),
+                                                             '-isysroot', sdk_path, obj_node.abspath(), '-lobjc'], env=env)
+                                    if r == 0:
+                                        sdk_compilers.append(c)
+                                        break
                 if len(sdk_compilers) > len(best_sdk[2]):
                     best_sdk = ('.'.join(sdk_version), sdk_path, sdk_compilers, sdk_bin_paths)
             if best_sdk[2]:
