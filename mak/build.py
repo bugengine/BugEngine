@@ -258,7 +258,8 @@ def module(bld, name, module_path, depends, private_depends,
             features= ['preprocess'],
             pchstop = pchstop,
             source = preprocess_sources,
-            kernels = [])
+            kernels = [],
+            source_nodes = [source_node] + [e for _, e in extras])
         preprocess.env.PLUGIN = plugin_name
         if os.path.isdir(os.path.join(source_node.abspath(), 'kernels')):
             kernelspath = source_node.make_node('kernels')
@@ -810,12 +811,26 @@ def gather_extra_source(self):
 
 
 @taskgen_method
-def make_bld_node_common(self, node, path, name):
+def make_bld_node(self, category, path, name):
+    """
+        constructs a path from the build node:
+            build_node/variant/optim/target/category/path/name
+    """
+    if 'preprocess' in self.features:
+        bldnode = self.bld.bldnode.make_node('_any_').make_node('preprocess')
+    else:
+        try:
+            bldnode = self.bld.bldnode.make_node(self.bld.bugengine_variant).make_node(self.bld.optim)
+        except AttributeError:
+            bldnode = self.bld.bldnode.make_node('_any_').make_node('_any_')
+    node = bldnode.make_node(self.target).make_node(category)
     if not path:
         node = node.make_node(name)
     elif path.is_child_of(self.bld.bldnode):
         out_dir = path.path_from(self.bld.bldnode)
         # skip variant
+        out_dir = out_dir[out_dir.find(os.path.sep)+1:]
+        # skip optim
         out_dir = out_dir[out_dir.find(os.path.sep)+1:]
         # skip target
         out_dir = out_dir[out_dir.find(os.path.sep)+1:]
@@ -831,15 +846,6 @@ def make_bld_node_common(self, node, path, name):
         node = node.make_node(name)
     node.parent.mkdir()
     return node
-
-
-@taskgen_method
-def make_bld_node(self, category, path, name):
-    try:
-        node = self.bld.bldnode.make_node(self.bld.optim).make_node(self.target).make_node(category)
-    except AttributeError:
-        node = self.bld.bldnode.make_node('_any_').make_node(self.target).make_node(category)
-    return self.make_bld_node_common(node, path, name)
 
 
 @taskgen_method

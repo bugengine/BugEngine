@@ -13,10 +13,6 @@ def add_build_command(toolchain, optimisation):
             optim = optimisation
             cmd = name + ':' + toolchain + ':' + optimisation
             bugengine_variant = toolchain
-
-            def get_variant_dir(self):
-                return os.path.join(self.out_dir, self.bugengine_variant)
-            variant_dir = property(get_variant_dir, None)
         c[command] = Command
     class Deploy(c[BuildContext]):
         cmd = 'deploy:%s:%s' %(toolchain, optimisation)

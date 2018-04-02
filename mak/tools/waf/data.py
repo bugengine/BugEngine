@@ -54,9 +54,10 @@ def datagen(self, node):
     tsk.dep_nodes = [self.bld.bugenginenode.find_node('mak/tools/ddf.py')]
     tsk.dep_nodes += self.bld.bugenginenode.find_node('mak/libs/cpp').ant_glob('**/*.py')
     try:
-        self.out_sources += outs
+        self.out_sources += outs[:2]
     except:
-        self.out_sources = outs[:]
+        self.out_sources = outs[:2]
+    self.source.append(out_node.change_ext('.doc'))
 
 
 @extension('.doc')
