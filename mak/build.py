@@ -1,4 +1,4 @@
-from waflib import Task, Options, Build, Logs, Utils, Errors, TaskGen
+from waflib import Task, Options, Build, Logs, Utils, Errors, TaskGen, Node
 from waflib.Configure import conf
 from waflib.TaskGen import feature, taskgen_method, extension, before_method, after_method
 import os
@@ -826,23 +826,27 @@ def make_bld_node(self, category, path, name):
     node = bldnode.make_node(self.target).make_node(category)
     if not path:
         node = node.make_node(name)
-    elif path.is_child_of(self.bld.bldnode):
-        out_dir = path.path_from(self.bld.bldnode)
-        # skip variant
-        out_dir = out_dir[out_dir.find(os.path.sep)+1:]
-        # skip optim
-        out_dir = out_dir[out_dir.find(os.path.sep)+1:]
-        # skip target
-        out_dir = out_dir[out_dir.find(os.path.sep)+1:]
-        # skip category
-        out_dir = out_dir[out_dir.find(os.path.sep)+1:]
-        node = node.make_node(out_dir)
-        node = node.make_node(name)
-    else:
-        out_dir = path.path_from(self.path)
-        while out_dir[0] == '.':
+    elif isinstance(path, Node.Node):
+        if path.is_child_of(self.bld.bldnode):
+            out_dir = path.path_from(self.bld.bldnode)
+            # skip variant
             out_dir = out_dir[out_dir.find(os.path.sep)+1:]
-        node = node.make_node(out_dir)
+            # skip optim
+            out_dir = out_dir[out_dir.find(os.path.sep)+1:]
+            # skip target
+            out_dir = out_dir[out_dir.find(os.path.sep)+1:]
+            # skip category
+            out_dir = out_dir[out_dir.find(os.path.sep)+1:]
+            node = node.make_node(out_dir)
+            node = node.make_node(name)
+        else:
+            out_dir = path.path_from(self.path)
+            while out_dir[0] == '.':
+                out_dir = out_dir[out_dir.find(os.path.sep)+1:]
+            node = node.make_node(out_dir)
+            node = node.make_node(name)
+    else:
+        node = node.make_node(path)
         node = node.make_node(name)
     node.parent.mkdir()
     return node
