@@ -21,6 +21,13 @@ def aapt_resource(self):
                 tsk.dep_nodes.append(node)
 
 
+@feature('javac')
+@before_method('apply_java')
+def set_dirs(self):
+    self.basedir = self.make_bld_node('jar', '', '')
+    self.outdir = self.basedir
+
+
 @feature('dex')
 @after_method('apply_java')
 @before_method('process_source')
@@ -29,20 +36,16 @@ def dex_files(self):
     Create a dex task. There can be only one dex task by task generator.
     """
     if 'android' in self.env.VALID_PLATFORMS:
-        destfile = self.destfile
         dexopts = getattr(self, 'dexopts', [])
-        basedir = self.basedir
-        outdir = self.outdir
+        destfile = self.outdir.find_or_declare(self.destfile)
 
         self.dex_task = tsk = self.create_task('dex')
-        if not isinstance(destfile, Node.Node):
-            destfile = self.path.find_or_declare(destfile)
-        if not destfile:
-            self.bld.fatal('invalid destfile %r for %r' % (destfile, self))
         tsk.set_outputs(destfile)
-        tsk.basedir = basedir
-        tsk.outdir = outdir
-        tsk.cwd = outdir.abspath()
+        tsk.basedir = self.basedir
+        tsk.outdir = self.outdir
+        tsk.cwd = self.outdir.abspath()
+
+        self.install_files(os.path.join(self.bld.env.PREFIX, self.bld.optim), [destfile])
 
         if getattr(self, 'javac_task', None):
             tsk.set_run_after(self.javac_task)

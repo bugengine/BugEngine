@@ -93,17 +93,19 @@ class aapt_package(Task.Task):
 
     def run(self):
         bld = self.generator.bld
-        root = bld.bldnode
+        root = bld.bldnode.make_node(bld.bugengine_variant)
+        root = root.make_node(bld.optim)
+        root = root.make_node('zip')
         self.outputs[0].write(self.inputs[0].read())
         if self.env._7Z:
             compression_level = 2 if bld.__class__.optim != 'final' else 9
             cmd = self.env._7Z + ['a', '-tzip', '-mx%d'%compression_level,
                    self.outputs[0].abspath()] + [i.path_from(root).replace('\\', '/') for i in self.inputs[1:]]
             with open(self.outputs[0].change_ext('.tmp').abspath(), 'w') as stdout:
-                return self.exec_command(cmd, stdout=stdout)
+                return self.exec_command(cmd, cwd=root.abspath(), stdout=stdout)
         else:
             cmd = self.env.AAPT + ['add', self.outputs[0].abspath()] + [i.path_from(root).replace('\\', '/') for i in self.inputs[1:]]
-            return self.exec_command(cmd)
+            return self.exec_command(cmd, cwd=root.abspath())
 
 
 class jarsigner(Task.Task):
@@ -149,8 +151,8 @@ class dex(Task.Task):
         if not self.inputs:
             try:
                 self.inputs = [x for x in self.outdir.ant_glob(self.DEX_RE, remove=False) if id(x) != id(self.outputs[0])]
-                self.env.INPUT_FILES = [x.path_from(self.basedir) for x in self.inputs]
-                self.env.OUTPUT_FILES = [x.path_from(self.basedir) for x in self.outputs]
+                self.env.INPUT_FILES = [x.path_from(self.outdir) for x in self.inputs]
+                self.env.OUTPUT_FILES = [x.path_from(self.outdir) for x in self.outputs]
             except Exception:
                 raise Errors.WafError('Could not find the basedir %r for %r' % (self.basedir, self))
         return super(dex, self).runnable_status()
