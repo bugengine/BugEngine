@@ -321,7 +321,6 @@ class VCxproj:
         self.vcxproj._add(globals, 'RootNamespace', task_gen.target)
         self.vcxproj._add(globals, 'ProjectName', self.name)
         self.vcxproj._add(project, 'Import', {'Project': '$(VCTargetsPath)\\Microsoft.Cpp.Default.props'})
-        self.vcxproj._add(project, 'Import', {'Project': '$(VCTargetsPath)\\Microsoft.Cpp.props'})
         for toolchain in task_gen.bld.env.ALL_TOOLCHAINS:
             env = task_gen.bld.all_envs[toolchain]
             if env.SUB_TOOLCHAINS:
@@ -384,6 +383,7 @@ class VCxproj:
                     if sub_env.SYS_ROOT:
                         includes.append('%s/usr/include' % sub_env.SYSROOT or '')
                     self.vcxproj._add(properties, 'NMakeIncludeSearchPath', ';'.join([path_from(i, task_gen.bld) for i in includes] + sub_env.INCLUDES + sub_env.SYSTEM_INCLUDES))
+        self.vcxproj._add(project, 'Import', {'Project': '$(VCTargetsPath)\\Microsoft.Cpp.props'})
         files = self.vcxproj._add(project, 'ItemGroup')
 
         self.filters = {}
