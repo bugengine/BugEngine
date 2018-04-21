@@ -952,7 +952,7 @@ class QtCreator(Build.BuildContext):
                         for task_gen in task_gens:
                             if 'game' in task_gen.features:
                                 if 'android' in env.VALID_PLATFORMS:
-                                    executable = env.ADB
+                                    executable = env.ADB[0]
                                     arguments = 'shell am start com.bugengine/.BugEngineActivity --es %s' % task_gen.target
                                 else:
                                     arguments = task_gen.target
