@@ -230,8 +230,9 @@ def t_ANY_error(t):
 
 
 class Lexer(lex.Lexer):
+    parent = lex.Lexer
     def __init__(self):
-        super(Lexer, self).__init__()
+        self.parent.__init__(self)
         self.macros = {
                 "__declspec": True,
                 "__attribute__": True,

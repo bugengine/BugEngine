@@ -21,7 +21,6 @@ class ClParser:
     grammar.tokens = cl_lexer.ClLexer.tokens
 
     def __init__(self, tmp_dir):
-        print(os.path.join(tmp_dir, 'parser.out'))
         self.parser = yacc.yacc(module = self.grammar,
                                 start = 'translation_unit_or_empty',
                                 picklefile = os.path.join(tmp_dir, 'cl_grammar.pickle'),

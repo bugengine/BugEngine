@@ -332,7 +332,7 @@ class Context(ctx):
 
 		if self.logger:
 			self.logger.info(cmd)
-			self.logger.info('env: ', 'env' in kw and kw['env'] or os.environ)
+			self.logger.info('env: %s', ('env' in kw) and kw['env'] or os.environ)
 
 		if 'stdout' not in kw:
 			kw['stdout'] = subprocess.PIPE
