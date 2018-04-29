@@ -166,11 +166,13 @@ class ClLexer:
         'NAMESPACE_ID',
         'METHOD_ID',
         'VARIABLE_ID',
+        'TEMPLATE_ID',
         'STRUCT_ID_SHADOW',
         'TYPENAME_ID_SHADOW',
         'NAMESPACE_ID_SHADOW',
         'METHOD_ID_SHADOW',
         'VARIABLE_ID_SHADOW',
+        'TEMPLATE_ID_SHADOW',
 
         # constants
         'INT_CONST_DEC', 'INT_CONST_OCT', 'INT_CONST_HEX', 'INT_CONST_BIN',

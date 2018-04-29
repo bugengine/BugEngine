@@ -92,5 +92,17 @@ def p_type_void_ptr(p):
     """
         type : VOID TIMES
     """
-    p[0] = cl_ast.Pointer(cl_ast.Builtin(p[1]), p.position(2))
+    p[0] = cl_ast.Pointer(cl_ast.Builtin(p[1], p.position(1)), p.position(2))
 
+def p_type_const(p):
+    """
+        type : type CONST
+    """
+    p[0] = cl_ast.Const(p[1], p.position(2))
+
+
+def p_type_const(p):
+    """
+        type : CONST type
+    """
+    p[0] = cl_ast.Const(p[2], p.position(1))

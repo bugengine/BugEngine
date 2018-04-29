@@ -8,7 +8,7 @@ def p_template_parameter_name_opt(p):
                                     |   TYPENAME_ID_SHADOW
                                     |   VARIABLE_ID_SHADOW
                                     |   METHOD_ID_SHADOW
-                                    |
+                                    |   TEMPLATE_ID_SHADOW
     """
     if len(p) > 1:
         p[0] = p[1]

@@ -55,7 +55,7 @@ def p_variable_declaration(p):
                              | declaration_specifier_list typedecl object_name variable_array_specifier_opt variable_initial_value_opt
     """
     if p[3][1]:
-        p[0] = [p[3][1]]
+        p[0] = [p[3][2]]
         # todo: check specifiers
     else:
         p[0] = [cl_ast.Variable(p[4], p[3][0], p[5], p[1], p.position(3))]
@@ -77,7 +77,7 @@ def p_variable_declaration_cted(p):
         variable_declaration : variable_declaration COMMA extract_original_type type_modifier_opt object_name variable_array_specifier_opt variable_initial_value_opt
     """
     if p[5][1]:
-        p[0] = p[1] + [p[5][1]]
+        p[0] = p[1] + [p[5][2]]
         # todo: check specifiers
     else:
         p[0] = p[1] + [cl_ast.Variable(p[6], p[5][0], p[7], p[1][0].attributes, p.position(5))]
