@@ -54,6 +54,52 @@ class AnonymousNamespace(Scope):
         return o
 
 
+class Typename:
+    def __init__(self, name, default_value):
+        self.name = name
+        self.default_value = default_value
+
+    def get_token_type(self):
+        return 'TYPENAME_ID'
+
+    def find_nonrecursive(self, name):
+        if self.name == name:
+            return self
+
+    def type_name(self):
+        return self.name
+
+
+class Template:
+    def __init__(self, parameters):
+        self.parameters = parameters
+        self.definitions = []
+        self.name = None
+
+    def get_token_type(self):
+        return 'TEMPLATE_ID'
+
+    def find_nonrecursive(self, name):
+        if self.name == name:
+            return self
+
+    def find(self, name):
+        for p in self.parameters:
+            if p.name == name:
+                return p
+
+    def instantiate(self, values):
+        pass
+
+    def add(self, definition):
+        if not self.name:
+            self.name = definition.name
+        self.definitions.append(([], definition))
+        
+    def specialize(self, values, definition):
+        self.definitions.append((values, definition))
+
+
 class Struct:
     class Definition:
         def __init__(self, parent):

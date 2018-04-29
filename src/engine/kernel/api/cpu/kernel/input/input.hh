@@ -8,9 +8,6 @@
 #include    <kernel/input/segment.hh>
 #include    <kernel/input/segments.hh>
 
-#define be_segment(p) Kernel::segment<p>
-#define be_segments(p) Kernel::segments<p>
-
 /**************************************************************************************************/
 #endif
 
