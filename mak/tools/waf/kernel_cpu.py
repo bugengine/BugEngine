@@ -34,7 +34,7 @@ def kernel_build_cpu_source(self, source):
     t = self.create_task('clt', [source], [preprocessed])
     t.path = self.bld.variant_dir
     t.env.KERNEL_CLT = self.bld.bugenginenode.find_node('mak/tools/clt.py').abspath()
-    t.env.TMPDIR = self.bld.bldnode.parent.abspath()
+    t.env.TMPDIR = self.bld.bldnode.abspath()
     t.dep_nodes = [self.bld.bugenginenode.find_node('mak/tools/clt.py')]
     t.dep_nodes += self.bld.bugenginenode.find_node('mak/libs/clt').ant_glob('**/*.py')
     t.dep_nodes += self.bld.bugenginenode.find_node('mak/libs/ply').ant_glob('**/*.py')
