@@ -82,11 +82,13 @@ def p_object_name(p):
                     | TYPENAME_ID
                     | METHOD_ID
                     | VARIABLE_ID
+                    | TEMPLATE_ID
 
         object_name_id_qualified : STRUCT_ID
                                  | TYPENAME_ID
                                  | METHOD_ID
                                  | VARIABLE_ID
+                                 | TEMPLATE_ID
     """
     p[0] = (p[1], True, p.slice[1].found_object)
 
@@ -98,6 +100,7 @@ def p_object_name_shadow(p):
                     | TYPENAME_ID_SHADOW
                     | METHOD_ID_SHADOW
                     | VARIABLE_ID_SHADOW
+                    | TEMPLATE_ID_SHADOW
     """
     p[0] = (p[1], True, p.slice[1].found_object)
 

@@ -1,5 +1,6 @@
 from . import cl_lexer
 from ..ply import yacc
+import os
 
 
 def set_position(p, s1, s2):
@@ -19,15 +20,18 @@ class ClParser:
     from . import grammar
     grammar.tokens = cl_lexer.ClLexer.tokens
 
-    def __init__(self, pickle_file):
+    def __init__(self, tmp_dir):
+        print(os.path.join(tmp_dir, 'parser.out'))
         self.parser = yacc.yacc(module = self.grammar,
                                 start = 'translation_unit_or_empty',
-                                picklefile = pickle_file,
+                                picklefile = os.path.join(tmp_dir, 'cl_grammar.pickle'),
+                                debugfile = os.path.join(tmp_dir, 'cl_grammar.debug'),
                                 debug = 1)
 
     def parse(self, error_format, filename):
         with open(filename, 'r') as input:
             self.lexer = cl_lexer.ClLexer(filename, error_format)
+            self.lexer.parser = self.parser
             result = self.parser.parse(input.read(), lexer=self.lexer)
 
         if result:

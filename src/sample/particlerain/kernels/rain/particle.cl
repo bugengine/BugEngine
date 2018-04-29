@@ -1,4 +1,4 @@
-typedef unsigned int u32;
+//#include    <kernel/input/input.hh>
 
 void kmain(u32 index, u32 total)
 {

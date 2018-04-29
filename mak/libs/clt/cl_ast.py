@@ -69,6 +69,9 @@ class Typename:
     def type_name(self):
         return self.name
 
+    #TODO: delete
+    def original_type(self):
+        return self
 
 class Template:
     def __init__(self, parameters):
@@ -95,7 +98,7 @@ class Template:
         if not self.name:
             self.name = definition.name
         self.definitions.append(([], definition))
-        
+
     def specialize(self, values, definition):
         self.definitions.append((values, definition))
 
@@ -193,6 +196,18 @@ class Pointer:
 
     def original_type(self):
         return self.pointer_to.original_type()
+
+
+class Const:
+    def __init__(self, const_to, position):
+        self.const_to = const_to
+        self.position = position
+
+    def type_name(self):
+        return self.const_to.type_name() + 'const'
+
+    def original_type(self):
+        return self.const_to.original_type()
 
 
 class Array:

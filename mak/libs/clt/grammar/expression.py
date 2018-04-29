@@ -17,6 +17,13 @@ def p_value(p):
     """
     pass
 
+def p_value_error(p):
+    """
+        expression : ID
+    """
+    p.lexer._error('Unknown object: %s' % p[1], p.position(1))
+
+
 
 def p_any_id(p):
     """
@@ -36,6 +43,7 @@ def p_any_id(p):
 
 
 precedence = (
+    ('nonassoc','CONST'),
     ('nonassoc','IFX'),
     ('nonassoc','ELSE'),
     ('left',    'PRIO14'),

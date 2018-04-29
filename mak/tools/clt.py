@@ -26,7 +26,7 @@ if __name__ == '__main__':
         sys.exit(1)
     else:
         try:
-            parser = cl_parser.ClParser(os.path.join(options.tmp_dir, 'cl_grammar.pickle'))
+            parser = cl_parser.ClParser(options.tmp_dir)
             result = parser.parse(options.error_format, args[0])
             if not result:
                 sys.exit(254)
