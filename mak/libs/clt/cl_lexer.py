@@ -145,7 +145,7 @@ class ClLexer:
         'constant', '__constant', 'private', '__private',
         'restrict', 'volatile', 'static', 'inline', 'return',
         'do', 'while', 'for', 'switch', 'case', 'default', 'break', 'continue', 'if', 'else',
-        'enum', 'struct', 'union', 'typedef', 'sizeof',
+        'enum', 'struct', 'union', 'typedef', 'sizeof', 'true', 'false',
 
         # BugEngine additions
         'template', 'namespace', 'typename', 'using',

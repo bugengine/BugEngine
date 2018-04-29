@@ -90,9 +90,77 @@ def p_statement_for(p):
     """
     pass
 
+
 def p_statement_flow(p):
     """
         statement : BREAK SEMI
                   | CONTINUE SEMI
     """
     pass
+
+
+def p_switch_statement(p):
+    """
+        switch_statement : DEFAULT COLON statement_list
+                         | CASE expression COLON statement_list
+    """
+    pass
+
+def p_switch_statements(p):
+    """
+        switch_statements : switch_statement switch_statements
+                          |
+    """
+    pass
+
+
+def p_statement_switch(p):
+    """
+        statement : SWITCH LPAREN expression RPAREN LBRACE switch_statements RBRACE
+    """
+    pass
+
+def p_statement_if(p):
+    """
+        statement : IF LPAREN expression RPAREN statement ELSE statement
+                  | IF LPAREN expression RPAREN statement                   %prec IFX
+    """
+
+
+def p_statement_if_error(p):
+    """
+        statement : IF LPAREN error RPAREN statement ELSE statement
+                  | IF LPAREN error RPAREN statement                        %prec IFX
+    """
+
+
+
+def p_statement_return(p):
+    """
+        statement : RETURN SEMI
+                  | RETURN expression SEMI
+    """
+
+
+def p_statement_while(p):
+    """
+        statement : WHILE LPAREN expression LPAREN statement
+    """
+
+
+def p_statement_while_error(p):
+    """
+        statement : WHILE LPAREN error LPAREN statement
+    """
+
+
+def p_statemen_do_while(p):
+    """
+        statement : DO statement WHILE LPAREN expression LPAREN SEMI
+    """
+
+
+def p_statemen_do_while_error(p):
+    """
+        statement : DO statement WHILE LPAREN error LPAREN SEMI
+    """

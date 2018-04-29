@@ -1,4 +1,5 @@
 from .translation_unit import *
+from .template import *
 from .external_declaration import *
 from .namespace_declaration import *
 from .struct_declaration import *

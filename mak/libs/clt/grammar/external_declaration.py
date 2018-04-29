@@ -11,6 +11,8 @@ def p_template_parameter_name_opt(p):
                                     |   METHOD_ID_SHADOW
                                     |
     """
+    if len(p) > 1:
+        p[0] = p[1]
 
 
 def p_template_parameter_default_value_opt(p):
@@ -19,18 +21,22 @@ def p_template_parameter_default_value_opt(p):
                                              |  EQUALS type
                                              |
     """
+    if len(p) > 1:
+        p[0] = p[1]
 
 
 def p_template_parameter_value(p):
     """
         template_parameter : type template_parameter_name_opt template_parameter_default_value_opt
     """
+    p[0] = cl_ast.Variable(p[1], p[2], p[3])
 
 
 def p_template_parameter_typename(p):
     """
         template_parameter : TYPENAME template_parameter_name_opt template_parameter_default_value_opt
     """
+    p[0] = cl_ast.Typename(p[2], p[3])
 
 
 def p_template_parameter_list(p):
@@ -38,6 +44,10 @@ def p_template_parameter_list(p):
         template_parameter_list : template_parameter_list COMMA template_parameter
                                 | template_parameter
     """
+    if len(p) > 2:
+        p[0] = p[1] + [p[3]]
+    else:
+        p[0] = [p[1]]
 
 
 def p_template_parameters(p):
@@ -58,7 +68,10 @@ def p_template_specifier(p):
     """
         template_specifier_opt : TEMPLATE LT template_parameters GT
     """
-    pass
+    p[0] = cl_ast.Template(p[3])
+    p.set_position(0, 2)
+    p.lexer.scopes[-1].add(p[0])
+    p.lexer.scopes.append(p[0])
 
 
 def p_template_specifier_opt(p):
@@ -117,6 +130,8 @@ def p_external_declaration_empty(p):
         external_declaration : template_specifier_opt declaration_specifier_list SEMI
     """
     p[0] = None
+    if p[1]:
+        p.lexer.scopes.pop(-1)
 
 
 def p_external_declaration_type(p):
@@ -126,6 +141,8 @@ def p_external_declaration_type(p):
     p[0] = p[3]
     for s in p[2]:
         p.lexer._warning('specifier ignored', s.position)
+    if p[1]:
+        p.lexer.scopes.pop(-1)
 
 
 def p_external_declaration_typedecl(p):
@@ -135,6 +152,8 @@ def p_external_declaration_typedecl(p):
     p[0] = p[3]
     for s in p[2]:
         p.lexer._warning('specifier ignored', s.position)
+    if p[1]:
+        p.lexer.scopes.pop(-1)
 
 
 def p_external_declaration_variable(p):
@@ -142,20 +161,26 @@ def p_external_declaration_variable(p):
         external_declaration : template_specifier_opt variable_declaration SEMI
     """
     p[0] = p[2]
+    if p[1]:
+        for variable in p[2]:
+            p.lexer._error('Variable %s declared as a template' % variable.name, variable.position)
+        p.lexer.scopes.pop(-1)
 
 
 def p_external_declaration_method(p):
     """
         external_declaration : template_specifier_opt method_declaration SEMI
     """
-    pass
+    if p[1]:
+        p.lexer.scopes.pop(-1)
 
 
 def p_external_declaration_method_definition(p):
     """
         external_declaration : template_specifier_opt method_definition
     """
-    pass
+    if p[1]:
+        p.lexer.scopes.pop(-1)
 
 
 def p_external_declaration_error(p):

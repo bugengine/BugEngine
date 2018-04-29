@@ -12,6 +12,8 @@ def p_value(p):
                    | WSTRING_LITERAL
                    | VARIABLE_ID
                    | VARIABLE_ID_SHADOW
+                   | TRUE
+                   | FALSE
     """
     pass
 
@@ -32,9 +34,14 @@ def p_any_id(p):
     """
     p[0] = p[1]
 
+
 precedence = (
-    ('left',   'PRIO12'),
-    ('right',   'PRIO11'),
+    ('nonassoc','IFX'),
+    ('nonassoc','ELSE'),
+    ('left',    'PRIO14'),
+    ('right',   'PRIO13'),
+    ('left',    'PRIO12'),
+    ('left',    'PRIO11'),
     ('left',    'PRIO10'),
     ('left',    'PRIO9'),
     ('left',    'PRIO8'),
@@ -48,6 +55,7 @@ precedence = (
     ('left',    'PRIO0'),
     ('left',    'SCOPE'),
 )
+
 
 def p_operator_expr(p):
     """
@@ -84,23 +92,26 @@ def p_operator_expr(p):
                    | expression AND expression                          %prec PRIO8
                    | expression XOR expression                          %prec PRIO9
                    | expression OR expression                           %prec PRIO10
-                   | expression CONDOP expression_list COLON expression %prec PRIO11
-                   | expression EQUALS expression                       %prec PRIO11
-                   | expression TIMESEQUAL expression                   %prec PRIO11
-                   | expression DIVEQUAL expression                     %prec PRIO11
-                   | expression MODEQUAL expression                     %prec PRIO11
-                   | expression PLUSEQUAL expression                    %prec PRIO11
-                   | expression MINUSEQUAL expression                   %prec PRIO11
-                   | expression LSHIFTEQUAL expression                  %prec PRIO11
-                   | expression RSHIFTEQUAL expression                  %prec PRIO11
-                   | expression ANDEQUAL expression                     %prec PRIO11
-                   | expression OREQUAL expression                      %prec PRIO11
-                   | expression XOREQUAL expression                     %prec PRIO11
+                   | expression LAND expression                         %prec PRIO11
+                   | expression LOR expression                          %prec PRIO12
+                   | expression CONDOP expression_list COLON expression %prec PRIO13
+                   | expression EQUALS expression                       %prec PRIO13
+                   | expression TIMESEQUAL expression                   %prec PRIO13
+                   | expression DIVEQUAL expression                     %prec PRIO13
+                   | expression MODEQUAL expression                     %prec PRIO13
+                   | expression PLUSEQUAL expression                    %prec PRIO13
+                   | expression MINUSEQUAL expression                   %prec PRIO13
+                   | expression LSHIFTEQUAL expression                  %prec PRIO13
+                   | expression RSHIFTEQUAL expression                  %prec PRIO13
+                   | expression ANDEQUAL expression                     %prec PRIO13
+                   | expression OREQUAL expression                      %prec PRIO13
+                   | expression XOREQUAL expression                     %prec PRIO13
     """
     pass
 
+
 def p_expression_list(p):
     """
-        expression_list : expression_list COMMA expression_list         %prec PRIO12
+        expression_list : expression_list COMMA expression_list         %prec PRIO14
                         | expression                                    %prec PRIO0
     """
