@@ -80,16 +80,16 @@ def p_type_struct_declaration(p):
     """
         typedecl : struct_header
     """
-    p[0] = cl_ast.TypeRef(p[1][0] or p[1][1])
-    p.lexer.scopes[-1].add(p[0].struct_ref)
+    p[0] = p[1][0] or p[1][1]
+    p.lexer.scopes[-1].add(p[0])
 
 
 def p_type_struct_definition(p):
     """
         typedecl : struct_definition
     """
-    p[0] = cl_ast.TypeRef(p[1])
-    p.lexer.scopes[-1].add(p[0].struct_ref)
+    p[0] = p[1]
+    p.lexer.scopes[-1].add(p[0])
 
 
 def p_struct_declaration_list(p):

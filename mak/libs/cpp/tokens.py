@@ -40,6 +40,12 @@ reserved = {
     'be_segment':  'BE_SEGMENT',
     'be_segments':  'BE_SEGMENTS',
     'be_stream':  'BE_STREAM',
+    '__constant': '__CONSTANT',
+    '__private': '__PRIVATE',
+    '__local': '__LOCAL',
+    '__global': '__GLOBAL',
+    'restrict': 'RESTRICT',
+    '__restrict': '__RESTRICT'
 }
 
 tokens=[

@@ -20,8 +20,8 @@ class clt(Task.Task):
     run_str = """%s
                  ${KERNEL_CLT}
                  --tmp ${TMPDIR}
-                 ${SRC[0].path_from(bld.bldnode)}
-                 ${TGT[0].abspath()}""" % sys.executable.replace('\\', '/')
+                 ${SRC[0].abspath()}
+                 ${TGT[0].path_from(bld.bldnode)}""" % sys.executable.replace('\\', '/')
     def scan(self):
         return ([], [])
 

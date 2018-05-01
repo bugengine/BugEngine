@@ -52,7 +52,6 @@ def p_variable_array_specifier_opt_error(p):
 def p_variable_declaration(p):
     """
         variable_declaration : declaration_specifier_list type object_name variable_array_specifier_opt variable_initial_value_opt
-                             | declaration_specifier_list typedecl object_name variable_array_specifier_opt variable_initial_value_opt
     """
     if p[3][1]:
         p[0] = [p[3][2]]

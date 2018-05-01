@@ -90,7 +90,6 @@ def p_method_attributes(p):
 def p_method_declaration(p):
     """
         method_declaration : declaration_specifier_list type object_name LPAREN push_method_scope method_parameters RPAREN method_attributes pop_method_scope
-                           | declaration_specifier_list typedecl object_name LPAREN push_method_scope method_parameters RPAREN method_attributes pop_method_scope
                            | declaration_specifier_list VOID object_name LPAREN push_method_scope method_parameters RPAREN method_attributes pop_method_scope
     """
 

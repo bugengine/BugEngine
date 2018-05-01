@@ -132,24 +132,21 @@ class ClLexer:
         self._msg('error', msg, pos)
 
     # Lexer rules ##
-    forbidden_keywords = (
-        # raise errors when encountered
-        'char', 'short', 'long', 'unsigned', 'uchar', 'ushort', 'uint', 'ulong',
-    )
     keywords = (
+        # raise warnings when encountered
+        'signed', 'char', 'short', 'long', 'unsigned', 'uchar', 'ushort', 'uint', 'ulong',
         # use these types instead
         'i8', 'u8', 'i16', 'u16', 'i32', 'u32', 'i64', 'u64', 'float', 'half', 'double',
         'bool', 'size_t', 'ptrdiff_t', 'intptr_t', 'uintptr_t', 'void', 'int',
 
-        'const', 'global', '__global', 'local', '__local',
-        'constant', '__constant', 'private', '__private',
-        'restrict', 'volatile', 'static', 'inline', 'return',
+        'const', '__global', '__local', '__constant', '__private',
+        'restrict', '__restrict', 'volatile', 'static', 'inline', 'return',
         'do', 'while', 'for', 'switch', 'case', 'default', 'break', 'continue', 'if', 'else',
         'enum', 'struct', 'union', 'typedef', 'sizeof', 'true', 'false',
 
         # BugEngine additions
         'template', 'namespace', 'typename', 'using',
-        'published', 'public', 'protected',
+        'published', 'public', 'protected', 'private',
     ) + tuple('%s%d' % (t, n) for t in ('byte', 'ubyte', 'short', 'ushort',
                                         'int', 'uint', 'bigint', 'biguint',
                                         'float', 'double')
@@ -159,7 +156,7 @@ class ClLexer:
     for keyword in keywords:
         keyword_map[keyword] = keyword.upper()
 
-    tokens = tuple(kw.upper() for kw in forbidden_keywords) + tuple(kw.upper() for kw in keywords) + (
+    tokens = tuple(kw.upper() for kw in keywords) + (
         'ID',
         'STRUCT_ID',
         'TYPENAME_ID',
@@ -215,8 +212,8 @@ class ClLexer:
         'COMMA', 'PERIOD',          # . ,
         'SEMI', 'COLON',            # ; :
 
-        # Ellipsis (...)
-        'ELLIPSIS',
+        # Ellipsis (...) is not supported
+        # 'ELLIPSIS',
     )
 
     identifier = r'[a-zA-Z_][0-9a-zA-Z_]*'
@@ -412,7 +409,7 @@ class ClLexer:
     t_PERIOD            = r'\.'
     t_SEMI              = r';'
     t_COLON             = r':'
-    t_ELLIPSIS          = r'\.\.\.'
+    #t_ELLIPSIS          = r'\.\.\.'
 
     t_STRING_LITERAL = string_literal
 
@@ -488,16 +485,10 @@ class ClLexer:
 
     @lex.TOKEN(identifier)
     def t_ID(self, t):
-        if t.value in self.forbidden_keywords:
-            self._error('Deprecated type: %s, use the BugEngine types instead' % t.value, self._position(t))
-            self.lexer.skip(1)
-        else:
-            t.type = self.keyword_map.get(t.value, "ID")
-            if t.type == 'ID':
-                self.lookup(t)
-            if t.type[0:2] == '__':
-                t.type = t.type[2:]
-            return t
+        t.type = self.keyword_map.get(t.value, "ID")
+        if t.type == 'ID':
+            self.lookup(t)
+        return t
 
     def t_error(self, t):
         self._error('Illegal character %s' % repr(t.value[0]), self._position(t))

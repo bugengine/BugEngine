@@ -162,18 +162,6 @@ class Method:
             return self
 
 
-class TypeRef:
-    def __init__(self, struct_ref):
-        self.struct_ref = struct_ref
-        self.position = self.struct_ref.position
-
-    def type_name(self):
-        return "%s %s" % (self.struct_ref.struct_type, self.struct_ref.name)
-
-    def original_type(self):
-        return self
-
-
 class Builtin:
     def __init__(self, typename, position):
         self.typename = typename
@@ -186,6 +174,21 @@ class Builtin:
         return self
 
 
+class Type:
+    def __init__(self, base_type):
+        self.base_type = type
+        self.modifier = []
+
+    def add_modifier(self, modifier, position):
+        self.modifier.append((modifier, position))
+
+    def type_name(self):
+        return ' '.join([self.base_type.type_name()] + self.modifier)
+
+    def original_type(self):
+        return self.base_type.original_type()
+
+
 class Pointer:
     def __init__(self, pointer_to, position):
         self.pointer_to = pointer_to
@@ -196,18 +199,6 @@ class Pointer:
 
     def original_type(self):
         return self.pointer_to.original_type()
-
-
-class Const:
-    def __init__(self, const_to, position):
-        self.const_to = const_to
-        self.position = position
-
-    def type_name(self):
-        return self.const_to.type_name() + 'const'
-
-    def original_type(self):
-        return self.const_to.original_type()
 
 
 class Array:
