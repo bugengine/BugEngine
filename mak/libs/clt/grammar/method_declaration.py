@@ -1,3 +1,5 @@
+from .. import cl_ast
+
 
 def p_parameter_name_none(p):
     """
@@ -14,11 +16,55 @@ def p_parameter_name(p):
                        | NAMESPACE_ID_SHADOW
                        | METHOD_ID_SHADOW
                        | VARIABLE_ID_SHADOW
-                       | TEMPLATE_ID_SHADOW
+                       | TEMPLATE_STRUCT_ID_SHADOW
+                       | TEMPLATE_METHOD_ID_SHADOW
     """
     p[0] = p[1]
     p.set_position(0, 1)
 
+
+def p_operator_name(p):
+    """
+        operator_name : OPERATOR PLUS
+                      | OPERATOR MINUS
+                      | OPERATOR TIMES
+                      | OPERATOR DIVIDE
+                      | OPERATOR MOD
+                      | OPERATOR OR
+                      | OPERATOR AND
+                      | OPERATOR NOT
+                      | OPERATOR XOR
+                      | OPERATOR LSHIFT
+                      | OPERATOR RSHIFT
+                      | OPERATOR LOR
+                      | OPERATOR LAND
+                      | OPERATOR LNOT
+                      | OPERATOR LT
+                      | OPERATOR LE
+                      | OPERATOR GT
+                      | OPERATOR GE
+                      | OPERATOR EQ
+                      | OPERATOR NE
+                      | OPERATOR EQUALS
+                      | OPERATOR TIMESEQUAL
+                      | OPERATOR DIVEQUAL
+                      | OPERATOR MODEQUAL
+                      | OPERATOR PLUSEQUAL
+                      | OPERATOR MINUSEQUAL
+                      | OPERATOR LSHIFTEQUAL
+                      | OPERATOR RSHIFTEQUAL
+                      | OPERATOR ANDEQUAL
+                      | OPERATOR XOREQUAL
+                      | OPERATOR OREQUAL
+                      | OPERATOR PLUSPLUS
+                      | OPERATOR MINUSMINUS
+                      | OPERATOR ARROW
+                      | OPERATOR LPAREN RPAREN
+                      | OPERATOR LBRACKET RBRACKET
+                      | OPERATOR PERIOD
+                      | OPERATOR COMMA
+    """
+    p[0] = p[2]
 
 def p_parameter_name_invalid(p):
     """
@@ -27,7 +73,8 @@ def p_parameter_name_invalid(p):
                        | NAMESPACE_ID
                        | METHOD_ID
                        | VARIABLE_ID
-                       | TEMPLATE_ID
+                       | TEMPLATE_STRUCT_ID
+                       | TEMPLATE_METHOD_ID
     """
     p.lexer._error("redefinition of '%s' as different kind of symbol" % (p[1]), p.position(1))
     p.lexer._note("previous definition is here", p.slice[1].found_object.position)
@@ -44,14 +91,16 @@ def p_method_parameter_type(p):
 
 def p_method_parameter_list_last(p):
     """
-        method_parameter_list : method_parameter_type parameter_name
+        method_parameter_list : method_parameter_type parameter_name variable_initial_value_opt
     """
+    p.lexer.scopes[-1].add(cl_ast.Variable(p[1], p[2], p[3], [], p.position(2)))
 
 
 def p_method_parameter_list(p):
     """
-        method_parameter_list : method_parameter_type parameter_name COMMA method_parameter_list
+        method_parameter_list : method_parameter_type parameter_name variable_initial_value_opt COMMA method_parameter_list
     """
+    p.lexer.scopes[-1].add(cl_ast.Variable(p[1], p[2], p[3], [], p.position(2)))
 
 
 def p_method_parameters(p):
@@ -62,16 +111,47 @@ def p_method_parameters(p):
     """
 
 
+def p_create_method_scope(p):
+    """
+        create_method_scope :
+    """
+    p[0] = cl_ast.Method(p[-2], p[-3], p[-4], p.position(-1))
+
+
+def p_create_constructor_scope(p):
+    """
+        create_constructor_scope :
+    """
+    p[0] = cl_ast.Method(p[-2], p[-2], [p[-3]], p.position(-1))
+
+
+def p_create_castop_scope(p):
+    """
+        create_castop_scope :
+    """
+    p[0] = cl_ast.Method(p[-2], p[-2], [p[-4]], p.position(-1))
+
+
+def p_create_method_definition(p):
+    """
+        create_method_definition :
+    """
+    p[0] = cl_ast.Scope(p.position(-1))
+    p.lexer.scopes[-1].define(p[0])
+
+
 def p_push_method_scope(p):
     """
         push_method_scope :
     """
+    p.lexer.scopes.append(p[-1])
 
 
 def p_pop_method_scope(p):
     """
         pop_method_scope :
     """
+    p.lexer.scopes.pop(-1)
 
 
 def p_method_attribute(p):
@@ -87,15 +167,52 @@ def p_method_attributes(p):
     """
 
 
+def p_initializer(p):
+    """
+        initializer : object_name LPAREN expression_list RPAREN
+    """
+
+
+def p_initializer_list(p):
+    """
+        initializer_list : initializer
+                         | initializer COMMA initializer_list
+    """
+
+def p_initializer_list_opt(p):
+    """
+        initializer_list_opt : COLON initializer_list
+                             |
+    """
+
 def p_method_declaration(p):
     """
-        method_declaration : declaration_specifier_list type object_name LPAREN push_method_scope method_parameters RPAREN method_attributes pop_method_scope
-                           | declaration_specifier_list VOID object_name LPAREN push_method_scope method_parameters RPAREN method_attributes pop_method_scope
+        method_declaration : declaration_specifier_list type object_name LPAREN create_method_scope push_method_scope method_parameters RPAREN method_attributes pop_method_scope
+                           | declaration_specifier_list VOID object_name LPAREN create_method_scope push_method_scope method_parameters RPAREN method_attributes pop_method_scope
+                           | declaration_specifier_list type operator_name LPAREN create_method_scope push_method_scope method_parameters RPAREN method_attributes pop_method_scope
+                           | declaration_specifier_list VOID operator_name LPAREN create_method_scope push_method_scope method_parameters RPAREN method_attributes pop_method_scope
     """
+    p[0] = p[5]
+
+
+def p_method_declaration_constructor(p):
+    """
+        method_declaration : declaration_specifier_list STRUCT_ID_SHADOW LPAREN create_constructor_scope push_method_scope method_parameters RPAREN method_attributes pop_method_scope
+                           | declaration_specifier_list TEMPLATE_STRUCT_ID_SHADOW LPAREN create_constructor_scope push_method_scope method_parameters RPAREN method_attributes pop_method_scope
+    """
+    p[0] = p[4]
+
+
+
+def p_method_declaration_typecast(p):
+    """
+        method_declaration : declaration_specifier_list OPERATOR type LPAREN create_castop_scope push_method_scope method_parameters RPAREN method_attributes pop_method_scope
+    """
+    p[0] = p[5]
 
 
 def p_method_definition(p):
     """
-        method_definition : method_declaration statement_block
+        method_definition : method_declaration push_method_scope create_method_definition initializer_list_opt statement_block pop_method_scope
     """
 

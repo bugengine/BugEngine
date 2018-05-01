@@ -49,21 +49,35 @@ def p_object_name(p):
 
         type_name : STRUCT_ID                                                           %prec PRIO0
                   | TYPENAME_ID                                                         %prec PRIO0
-                  | STRUCT_ID_SHADOW                                                    %prec PRIO0
-                  | TYPENAME_ID_SHADOW                                                  %prec PRIO0
 
         type_name_id_qualified : STRUCT_ID                                              %prec PRIO0
                                | TYPENAME_ID                                            %prec PRIO0
     """
     p[0] = ((p[1],), True, p.slice[1].found_object)
+    p.set_position(0, 1)
 
 
 def p_object_name_shadow(p):
     """
         object_name : METHOD_ID_SHADOW                                                  %prec PRIO0
                     | VARIABLE_ID_SHADOW                                                %prec PRIO0
+        type_name : STRUCT_ID_SHADOW                                                    %prec PRIO0
+                  | TYPENAME_ID_SHADOW                                                  %prec PRIO0
+                  | TEMPLATE_STRUCT_ID_SHADOW                                           %prec PRIO0
+                  | TEMPLATE_STRUCT_ID                                                  %prec PRIO0
     """
     p[0] = ((p[1],), False, p.slice[1].found_object)
+    p.set_position(0, 1)
+
+
+def p_object_name_template(p):
+    """
+        object_name : TEMPLATE_METHOD_ID_SHADOW template_arguments                      %prec PRIO0
+                    | TEMPLATE_METHOD_ID template_arguments                             %prec PRIO0
+        type_name : TEMPLATE_STRUCT_ID_SHADOW template_arguments                        %prec PRIO0
+                  | TEMPLATE_STRUCT_ID template_arguments                               %prec PRIO0
+    """
+    p[0] = ((p[1],), False, None) # TODO
 
 
 def p_object_name_id(p):
@@ -71,4 +85,5 @@ def p_object_name_id(p):
         object_name : ID                                                                %prec PRIO0
     """
     p[0] = ((p[1],), False, None)
+    p.set_position(0, 1)
 

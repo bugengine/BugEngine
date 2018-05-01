@@ -152,11 +152,19 @@ def p_type_ptr(p):
     p[0] = cl_ast.Type(cl_ast.Pointer(p[1], p.position(2)))
 
 
+def p_type_reference(p):
+    """
+        type : type AND
+    """
+    p[0] = cl_ast.Type(cl_ast.Reference(p[1], p.position(2)))
+
+
 def p_type_void_ptr(p):
     """
         type : VOID TIMES
     """
     p[0] = cl_ast.Type(cl_ast.Pointer(cl_ast.Builtin(p[1], p.position(1)), p.position(2)))
+
 
 def p_type_const(p):
     """

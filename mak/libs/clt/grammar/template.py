@@ -1,5 +1,36 @@
 from .. import cl_ast
 
+
+def p_template_argument(p):
+    """
+        template_argument : expression                                              %prec PRIO6
+                          | type
+    """
+    p[0] = []
+
+
+def p_template_argument_list(p):
+    """
+        template_argument_list : template_argument_list COMMA template_argument
+                               | template_argument
+    """
+    p[0] = []
+
+
+def p_template_arguments(p):
+    """
+        template_arguments : LT template_argument_list GT                           %prec TEMPLATEGT
+    """
+    p[0] = []
+
+
+def p_template_arguments_empty(p):
+    """
+        template_arguments : LT GT
+    """
+    p[0] = []
+
+
 def p_template_parameter_name_opt(p):
     """
         template_parameter_name_opt :   ID
@@ -8,7 +39,8 @@ def p_template_parameter_name_opt(p):
                                     |   TYPENAME_ID_SHADOW
                                     |   VARIABLE_ID_SHADOW
                                     |   METHOD_ID_SHADOW
-                                    |   TEMPLATE_ID_SHADOW
+                                    |   TEMPLATE_STRUCT_ID_SHADOW
+                                    |   TEMPLATE_METHOD_ID_SHADOW
     """
     if len(p) > 1:
         p[0] = p[1]

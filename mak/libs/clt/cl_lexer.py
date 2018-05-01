@@ -145,8 +145,9 @@ class ClLexer:
         'enum', 'struct', 'union', 'typedef', 'sizeof', 'true', 'false',
 
         # BugEngine additions
-        'template', 'namespace', 'typename', 'using',
-        'published', 'public', 'protected', 'private',
+        'template', 'namespace', 'typename', 'using', 'friend', 'this',
+        'published', 'public', 'protected', 'private', 'operator',
+        'static_cast', 'dynamic_cast', 'reinterpret_cast', 'const_cast',
     ) + tuple('%s%d' % (t, n) for t in ('byte', 'ubyte', 'short', 'ushort',
                                         'int', 'uint', 'bigint', 'biguint',
                                         'float', 'double')
@@ -163,13 +164,15 @@ class ClLexer:
         'NAMESPACE_ID',
         'METHOD_ID',
         'VARIABLE_ID',
-        'TEMPLATE_ID',
+        'TEMPLATE_STRUCT_ID',
+        'TEMPLATE_METHOD_ID',
         'STRUCT_ID_SHADOW',
         'TYPENAME_ID_SHADOW',
         'NAMESPACE_ID_SHADOW',
         'METHOD_ID_SHADOW',
         'VARIABLE_ID_SHADOW',
-        'TEMPLATE_ID_SHADOW',
+        'TEMPLATE_STRUCT_ID_SHADOW',
+        'TEMPLATE_METHOD_ID_SHADOW',
 
         # constants
         'INT_CONST_DEC', 'INT_CONST_OCT', 'INT_CONST_HEX', 'INT_CONST_BIN',
