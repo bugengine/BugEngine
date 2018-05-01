@@ -10,36 +10,17 @@ def p_value(p):
                    | WCHAR_CONST
                    | STRING_LITERAL
                    | WSTRING_LITERAL
-                   | VARIABLE_ID
-                   | VARIABLE_ID_SHADOW
                    | TRUE
                    | FALSE
     """
     pass
 
-def p_value_error(p):
+def p_value_object(p):
     """
-        expression : ID
+        expression : object_name
     """
-    p.lexer._error('Unknown object: %s' % p[1], p.position(1))
+    p.lexer._error('Unknown object: %s' % p[1][0], p.position(1))
 
-
-
-def p_any_id(p):
-    """
-        any_id : ID
-               | STRUCT_ID
-               | TYPENAME_ID
-               | NAMESPACE_ID
-               | METHOD_ID
-               | VARIABLE_ID
-               | STRUCT_ID_SHADOW
-               | TYPENAME_ID_SHADOW
-               | NAMESPACE_ID_SHADOW
-               | METHOD_ID_SHADOW
-               | VARIABLE_ID_SHADOW
-    """
-    p[0] = p[1]
 
 
 precedence = (
@@ -70,9 +51,10 @@ def p_operator_expr(p):
         expression : LPAREN expression_list RPAREN                      %prec PRIO0
                    | expression PLUSPLUS                                %prec PRIO1
                    | expression MINUSMINUS                              %prec PRIO1
+                   | expression LPAREN expression_list RPAREN           %prec PRIO1
                    | expression LBRACKET expression_list RBRACKET       %prec PRIO1
-                   | expression PERIOD any_id                           %prec PRIO1
-                   | expression ARROW any_id                            %prec PRIO1
+                   | expression PERIOD object_name                      %prec PRIO1
+                   | expression ARROW object_name                       %prec PRIO1
                    | PLUSPLUS expression                                %prec PRIO2
                    | MINUSMINUS expression                              %prec PRIO2
                    | PLUS expression                                    %prec PRIO2

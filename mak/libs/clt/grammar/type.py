@@ -77,7 +77,7 @@ def p_type_type_name(p):
     """
         type : type_name
     """
-    p[0] = p[1][1]
+    p[0] = p[1][2]
 
 
 def p_type_ptr(p):
@@ -101,7 +101,7 @@ def p_type_const(p):
     p[0] = cl_ast.Const(p[1], p.position(2))
 
 
-def p_type_const(p):
+def p_type_const_pre(p):
     """
         type : CONST type
     """
