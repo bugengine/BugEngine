@@ -119,11 +119,11 @@ def p_external_declarations(p):
     p[0] = p[1] + (p[2] and [p[2]] or [])
 
 
-def p_external_declaration_namespace(p):
+def p_external_declarations_namespace(p):
     """
-        external_declaration : namespace_declaration
+        external_declarations : external_declarations namespace_declaration
     """
-    p[0] = p[1]
+    p[0] = p[1] + (p[2] and [p[2]] or [])
 
 
 def p_external_declaration_empty(p):

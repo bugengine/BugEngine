@@ -49,9 +49,10 @@ def p_statement_variable_declaration(p):
 
 def p_statement_expression(p):
     """
-        statement : expression SEMI
+        statement : declaration_specifier_list expression SEMI
     """
-    pass
+    for s in p[1]:
+        p.lexer._error('Unexpected specifier: %s' % s.specifier, s.position)
 
 
 def p_variable_declaration_opt(p):
@@ -144,7 +145,7 @@ def p_statement_return(p):
 
 def p_statement_while(p):
     """
-        statement : WHILE LPAREN expression LPAREN statement
+        statement : WHILE LPAREN expression_list LPAREN statement
     """
 
 
@@ -156,7 +157,7 @@ def p_statement_while_error(p):
 
 def p_statemen_do_while(p):
     """
-        statement : DO statement WHILE LPAREN expression LPAREN SEMI
+        statement : DO statement WHILE LPAREN expression_list LPAREN SEMI
     """
 
 

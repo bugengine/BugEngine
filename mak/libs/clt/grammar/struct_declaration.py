@@ -12,7 +12,8 @@ def p_struct_keyword(p):
 
 def p_struct_declaration(p):
     """
-        struct_header : struct_keyword object_name
+        struct_header : struct_keyword type_name
+                      | struct_keyword object_name
     """
     if p[2][1]:
         # qualified name
@@ -57,12 +58,20 @@ def p_struct_parent(p):
                           |
     """
     if len(p) > 1:
-        p[0] = p[2].found_object
+        p[0] = p[2][2]
+
+
+def p_struct_parent_error(p):
+    """
+        struct_parent_opt : COLON object_name
+    """
+    p.lexer._error('expected class name', p.position(2))
 
 
 def p_struct_definition(p):
     """
         struct_definition : struct_header struct_parent_opt LBRACE struct_push struct_declaration_list RBRACE struct_pop
+        struct_definition : struct_header error LBRACE struct_push struct_declaration_list RBRACE struct_pop
     """
     p[0] = p[4]
 
@@ -85,7 +94,8 @@ def p_type_struct_definition(p):
 
 def p_struct_declaration_list(p):
     """
-        struct_declaration_list : struct_declaration struct_declaration_list
+        struct_declaration_list : external_declaration struct_declaration_list
+                                | struct_declaration struct_declaration_list
     """
     pass
 
@@ -97,27 +107,6 @@ def p_struct_declaration_list_end(p):
     pass
 
 
-def p_struct_declaration_empty(p):
-    """
-        struct_declaration : declaration_specifier_list SEMI
-    """
-    p[0] = None
-
-
-def p_struct_declaration_type(p):
-    """
-        struct_declaration : declaration_specifier_list type SEMI
-    """
-    p[0] = p[1]
-
-
-def p_struct_declaration_variable(p):
-    """
-        struct_declaration : variable_declaration SEMI
-    """
-    p[0] = p[1]
-
-
 def p_struct_declaration_scope(p):
     """
         struct_declaration : PUBLISHED COLON
@@ -127,17 +116,3 @@ def p_struct_declaration_scope(p):
     """
     pass
 
-
-def p_struct_declaration_method(p):
-    """
-        struct_declaration : method_declaration SEMI
-                           | method_definition
-    """
-    p[0] = p[1]
-
-
-def p_struct_declaration_error(p):
-    """
-        struct_declaration : error SEMI
-    """
-    pass
