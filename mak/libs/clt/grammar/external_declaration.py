@@ -9,7 +9,8 @@ def p_template_parameter_name_opt(p):
                                     |   TYPENAME_ID_SHADOW
                                     |   VARIABLE_ID_SHADOW
                                     |   METHOD_ID_SHADOW
-                                    |   TEMPLATE_ID_SHADOW
+                                    |   TEMPLATE_STRUCT_ID_SHADOW
+                                    |   TEMPLATE_METHOD_ID_SHADOW
                                     |
     """
     if len(p) > 1:
@@ -30,7 +31,7 @@ def p_template_parameter_value(p):
     """
         template_parameter : type template_parameter_name_opt template_parameter_default_value_opt
     """
-    p[0] = cl_ast.Variable(p[1], p[2], p[3])
+    p[0] = cl_ast.Constant(p[1], p[2], p[3])
 
 
 def p_template_parameter_typename(p):

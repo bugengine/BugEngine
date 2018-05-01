@@ -1,3 +1,6 @@
+from .. import cl_ast
+
+
 def p_statement_list_end(p):
     """
         statement_list :
@@ -58,6 +61,7 @@ def p_statement_expression(p):
 def p_variable_declaration_opt(p):
     """
         variable_declaration_opt : variable_declaration
+                                 | declaration_specifier_list expression_list
                                  |
     """
     pass
@@ -75,14 +79,15 @@ def p_push_for_scope(p):
     """
         push_for_scope :
     """
-    pass
+    p[0] = cl_ast.ForStatement(p.position(-1))
+    p.lexer.scopes.append(p[0])
 
 
 def p_pop_for_scope(p):
     """
         pop_for_scope :
     """
-    pass
+    p.lexer.scopes.pop(-1)
 
 
 def p_statement_for(p):
@@ -90,6 +95,18 @@ def p_statement_for(p):
         statement : FOR push_for_scope LPAREN variable_declaration_opt SEMI expression_opt SEMI expression_opt RPAREN statement pop_for_scope
     """
     pass
+
+
+def p_statement_for_error(p):
+    """
+        statement : FOR push_for_scope LPAREN error SEMI expression_opt SEMI expression_opt RPAREN statement pop_for_scope
+                  | FOR push_for_scope LPAREN variable_declaration_opt SEMI error SEMI expression_opt RPAREN statement pop_for_scope
+                  | FOR push_for_scope LPAREN variable_declaration_opt SEMI expression_opt SEMI error RPAREN statement pop_for_scope
+                  | FOR push_for_scope LPAREN error SEMI error SEMI expression_opt RPAREN statement pop_for_scope
+                  | FOR push_for_scope LPAREN error SEMI expression_opt SEMI error RPAREN statement pop_for_scope
+                  | FOR push_for_scope LPAREN variable_declaration_opt SEMI error SEMI error RPAREN statement pop_for_scope
+                  | FOR push_for_scope LPAREN error SEMI error SEMI error RPAREN statement pop_for_scope
+    """
 
 
 def p_statement_flow(p):
@@ -145,23 +162,23 @@ def p_statement_return(p):
 
 def p_statement_while(p):
     """
-        statement : WHILE LPAREN expression_list LPAREN statement
+        statement : WHILE LPAREN expression RPAREN statement
     """
 
 
 def p_statement_while_error(p):
     """
-        statement : WHILE LPAREN error LPAREN statement
+        statement : WHILE LPAREN error RPAREN statement
     """
 
 
 def p_statemen_do_while(p):
     """
-        statement : DO statement WHILE LPAREN expression_list LPAREN SEMI
+        statement : DO statement WHILE LPAREN expression RPAREN SEMI
     """
 
 
 def p_statemen_do_while_error(p):
     """
-        statement : DO statement WHILE LPAREN error LPAREN SEMI
+        statement : DO statement WHILE LPAREN error RPAREN SEMI
     """

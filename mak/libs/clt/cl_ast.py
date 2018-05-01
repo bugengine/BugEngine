@@ -80,7 +80,7 @@ class Template:
         self.name = None
 
     def get_token_type(self):
-        return 'TEMPLATE_ID'
+        return 'TEMPLATE_' + self.definitions[0][1].get_token_type()
 
     def find_nonrecursive(self, name):
         if self.name == name:
@@ -145,10 +145,12 @@ class Struct:
         return self.name
 
 
-class Method:
-    def __init__(self, method_name, return_type):
+class Method(Scope):
+    def __init__(self, method_name, return_type, attributes, position):
+        Scope.__init__(self, position)
         self.name = method_name
         self.return_type = return_type
+        self.attributes = attributes
         self.definition = None
 
     def define(self, definition):
@@ -201,6 +203,18 @@ class Pointer:
         return self.pointer_to.original_type()
 
 
+class Reference:
+    def __init__(self, pointer_to, position):
+        self.pointer_to = pointer_to
+        self.position = position
+
+    def type_name(self):
+        return self.pointer_to.type_name() + '*'
+
+    def original_type(self):
+        return self.pointer_to.original_type()
+
+
 class Array:
     def __init__(self, array_type, count, position):
         self.array_type = array_type
@@ -215,6 +229,25 @@ class Array:
 
     def original_type(self):
         return self.array_type.original_type()
+
+
+class Constant:
+    def __init__(self, type, name, value):
+        self.type = type
+        self.name = name
+        self.value = value
+
+    def find_nonrecursive(self, name):
+        if self.name == name:
+            return self
+
+    def get_token_type(self):
+        return 'VARIABLE_ID'
+
+    def dump(self, indent=''):
+        print('%s%s%s %s%s;' % (indent, ' '.join(self.attributes) + (self.attributes and ' ' or ''),
+                                self.type.type_name(), self.name, self.value and (' = %s' % self.value.str()) or ''))
+
 
 
 class Variable:
@@ -241,3 +274,11 @@ class Specifier:
     def __init__(self, specifier, position):
         self.specifier = specifier
         self.position = position
+
+
+class ForStatement(Scope):
+    def __init__(self, position):
+        Scope.__init__(self, position)
+
+    def set_init(self, init):
+        self.init = init

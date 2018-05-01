@@ -57,7 +57,7 @@ def p_variable_declaration(p):
         p[0] = [p[3][2]]
         # todo: check specifiers
     else:
-        p[0] = [cl_ast.Variable(p[4], p[3][0], p[5], p[1], p.position(3))]
+        p[0] = [cl_ast.Variable(p[4], p[3][0][0], p[5], p[1], p.position(3))]
         p.lexer.scopes[-1].add(p[0][0])
         for s in p[1]:
             if s.specifier == 'inline':
@@ -79,5 +79,5 @@ def p_variable_declaration_cted(p):
         p[0] = p[1] + [p[5][2]]
         # todo: check specifiers
     else:
-        p[0] = p[1] + [cl_ast.Variable(p[6], p[5][0], p[7], p[1][0].attributes, p.position(5))]
+        p[0] = p[1] + [cl_ast.Variable(p[6], p[5][0][0], p[7], p[1][0].attributes, p.position(5))]
         p.lexer.scopes[-1].add(p[0][-1])

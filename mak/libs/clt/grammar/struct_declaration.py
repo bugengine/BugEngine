@@ -19,9 +19,9 @@ def p_struct_declaration(p):
         # qualified name
         if not p[2][2] or p[2][2].get_token_type() != 'STRUCT_ID':
             if len(p[2][0]) > 1:
-                p.lexer._error('qualified name %s does not name a struct' % p[2][0], p.position(2))
+                p.lexer._error('qualified name %s does not name a struct' % '::'.join(p[2][0]), p.position(2))
             else:
-                p.lexer._error('name %s does not name a struct' % p[2][0], p.position(2))
+                p.lexer._error('name %s does not name a struct' % '::'.join(p[2][0]), p.position(2))
             if p[2][2]:
                 p.lexer._note('previously declared here', p[2][2].position)
             raise SyntaxError()
@@ -113,6 +113,7 @@ def p_struct_declaration_scope(p):
                            | PUBLIC COLON
                            | PROTECTED COLON
                            | PRIVATE COLON
+                           | FRIEND type SEMI
     """
     pass
 

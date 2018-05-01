@@ -21,9 +21,3 @@ def p_translation_unit(p):
         translation_unit_or_empty : translation_unit_start external_declarations translation_unit_end
     """
     p[0] = p[1]
-
-#def p_translation_unit(p):
-#    """
-#        translation_unit_or_empty : object_name
-#    """
-#    p[0] = p[1]
