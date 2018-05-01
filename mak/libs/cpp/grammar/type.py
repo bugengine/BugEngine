@@ -27,6 +27,12 @@ def p_type_attribute(p):
     """
         type_attribute : CONST
                        | VOLATILE
+                       | __CONSTANT
+                       | __PRIVATE
+                       | __LOCAL
+                       | __GLOBAL
+                       | __RESTRICT
+                       | RESTRICT
     """
     p[0] = p[1]
 

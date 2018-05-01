@@ -24,7 +24,6 @@ def p_value_object(p):
 
 
 precedence = (
-    ('nonassoc','CONST'),
     ('nonassoc','IFX'),
     ('nonassoc','ELSE'),
     ('left',    'PRIO14'),
@@ -43,6 +42,7 @@ precedence = (
     ('left',    'PRIO1'),
     ('left',    'PRIO0'),
     ('left',    'SCOPE'),
+    ('nonassoc','TYPEMODIFIER'),
 )
 
 

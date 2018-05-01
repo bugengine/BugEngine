@@ -10,7 +10,6 @@ def p_type_builtin(p):
              |  U32
              |  I64
              |  U64
-             |  INT
              |  FLOAT
              |  DOUBLE
              |  HALF
@@ -70,39 +69,120 @@ def p_type_builtin(p):
              |  DOUBLE8
              |  DOUBLE16
     """
-    p[0] = cl_ast.Builtin(p[1], p.position(1))
+    p[0] = cl_ast.Type(cl_ast.Builtin(p[1], p.position(1)))
+
+
+def p_type_builtin_modifier_list_deprecated(p):
+    """
+        type_modifier_deprecated : CHAR
+                                 | SHORT
+                                 | INT
+                                 | LONG
+                                 | UCHAR
+                                 | USHORT
+                                 | UINT
+                                 | ULONG
+                                 | SIGNED
+                                 | UNSIGNED
+    """
+    p[0] = (p[1], p.position(1))
+    p.set_position(0, 1)
+
+
+def p_type_builtin_deprecated(p):
+    """
+        type_modifier_list_deprecated : type_modifier_deprecated type_modifier_list_deprecated
+                                      | type_modifier_deprecated
+    """
+    p[0] = [p[1]]
+    p.set_position(0, 1)
+    if len(p) > 2:
+        p[0] += p[2]
+
+
+def p_type_deprecated(p):
+    """
+        type : type_modifier_list_deprecated
+    """
+    result = 'i32'
+    kw_data = {
+        'char':     ('%(r)s8',  ['char', 'short', 'int', 'long', 'uchar', 'ushort', 'uint', 'ulong']),
+        'short':    ('%(r)s16', ['char', 'short', 'long', 'uchar', 'ushort', 'uint', 'ulong']),
+        'int':      ('%(r)s%(b)s',['char', 'int', 'uchar', 'ushort', 'uint', 'ulong']),
+        'long':     ('%(r)s64', ['char', 'short', 'uchar', 'ushort', 'uint', 'ulong']),
+        'uchar':    ('%(r)s8',  ['char', 'short', 'int', 'long', 'uchar', 'ushort', 'uint', 'ulong', 'signed', 'unsigned']),
+        'ushort':   ('%(r)s16', ['char', 'short', 'int', 'long', 'uchar', 'ushort', 'uint', 'ulong', 'signed', 'unsigned']),
+        'uint':     ('%(r)s32', ['char', 'short', 'int', 'long', 'uchar', 'ushort', 'uint', 'ulong', 'signed', 'unsigned']),
+        'ulong':    ('%(r)s64', ['char', 'short', 'int', 'long', 'uchar', 'ushort', 'uint', 'ulong', 'signed', 'unsigned']),
+        'signed':   ('i%(b)s',  ['uchar', 'ushort', 'uint', 'ulong', 'unsigned']),
+        'unsigned': ('u%(b)s',  ['uchar', 'ushort', 'uint', 'ulong', 'signed']),
+    }
+    if len(p[1]) > 1 or p[1][0][0] != 'int':
+        p.lexer._warning("old style C type", p.position(1))
+    for s in p[1]:
+        rebuild = { 'r': result[:1], 'b': result[1:]}
+        rebuild_pattern, incompatible_kw = kw_data[s[0]]
+        for s2 in p[1]:
+            if s2 == s:
+                break
+            if s2[0] in incompatible_kw:
+                p.lexer._error("cannot combine with previous '%s' declaration specifier" % s2[0], s[1])
+        result = rebuild_pattern%rebuild
+    p[0] = cl_ast.Type(cl_ast.Builtin(result, p.position(1)))
 
 
 def p_type_type_name(p):
     """
         type : type_name
     """
-    p[0] = p[1][2]
+    p[0] = cl_ast.Type(p[1][2])
+
+
+def p_type_type_decl(p):
+    """
+        type : typedecl
+    """
+    p[0] = cl_ast.Type(p[1])
 
 
 def p_type_ptr(p):
     """
         type : type TIMES
-             | typedecl TIMES
     """
-    p[0] = cl_ast.Pointer(p[1], p.position(2))
+    p[0] = cl_ast.Type(cl_ast.Pointer(p[1], p.position(2)))
 
 
 def p_type_void_ptr(p):
     """
         type : VOID TIMES
     """
-    p[0] = cl_ast.Pointer(cl_ast.Builtin(p[1], p.position(1)), p.position(2))
+    p[0] = cl_ast.Type(cl_ast.Pointer(cl_ast.Builtin(p[1], p.position(1)), p.position(2)))
 
 def p_type_const(p):
     """
-        type : type CONST
+        type : type CONST                                                       %prec TYPEMODIFIER
+             | type __CONSTANT                                                  %prec TYPEMODIFIER
+             | type __GLOBAL                                                    %prec TYPEMODIFIER
+             | type __LOCAL                                                     %prec TYPEMODIFIER
+             | type __PRIVATE                                                   %prec TYPEMODIFIER
+             | type RESTRICT                                                    %prec TYPEMODIFIER
+             | type __RESTRICT                                                  %prec TYPEMODIFIER
+             | type VOLATILE                                                    %prec TYPEMODIFIER
     """
-    p[0] = cl_ast.Const(p[1], p.position(2))
+    p[0] = p[1]
+    p[1].add_modifier(p[2], p.position(2))
 
 
 def p_type_const_pre(p):
     """
-        type : CONST type
+        type : CONST type                                                       %prec TYPEMODIFIER
+             | __CONSTANT type                                                  %prec TYPEMODIFIER
+             | __GLOBAL type                                                    %prec TYPEMODIFIER
+             | __LOCAL type                                                     %prec TYPEMODIFIER
+             | __PRIVATE type                                                   %prec TYPEMODIFIER
+             | RESTRICT type                                                    %prec TYPEMODIFIER
+             | __RESTRICT type                                                  %prec TYPEMODIFIER
+             | VOLATILE type                                                    %prec TYPEMODIFIER
     """
-    p[0] = cl_ast.Const(p[2], p.position(1))
+    p[0] = p[2]
+    p[2].add_modifier(p[1], p.position(1))
