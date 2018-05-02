@@ -21,7 +21,7 @@
 # define BE_COMPILER_GCC        1
 # define BE_COMPILER_NAME       "gcc"
 # include <kernel/compilers/gcc.hh>
-#elif defined(__SUNPRO_CC)
+#elif defined(__SUNPRO_C) || defined(__SUNPRO_CC)
 # define BE_COMPILER_SUNCC      1
 # define BE_COMPILER_NAME       "suncc"
 # include <kernel/compilers/suncc.hh>
