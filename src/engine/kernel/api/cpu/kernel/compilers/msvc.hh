@@ -7,6 +7,7 @@
 
 #define be_alignof(t)           __alignof(t&)
 
+#ifndef _CLC
 typedef signed __int8           i8;
 typedef signed __int16          i16;
 typedef signed __int32          i32;
@@ -16,6 +17,7 @@ typedef unsigned __int16        u16;
 typedef unsigned __int32        u32;
 typedef unsigned __int64        u64;
 typedef u8                      byte;
+#endif
 
 #pragma warning(default:4263)   // member function does not override any base class virtual member function
 #pragma warning(default:4264)   // no override available for virtual member function from base 'class'; function is hidden

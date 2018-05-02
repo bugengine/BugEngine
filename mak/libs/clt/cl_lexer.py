@@ -273,6 +273,8 @@ class ClLexer:
         ('ppline', 'exclusive'),
         # ppident: preprocessor ident directives
         ('ppident', 'exclusive'),
+        # pppragma: preprocessor pragma directives
+        ('pppragma', 'exclusive'),
     )
 
     ##
@@ -305,6 +307,29 @@ class ClLexer:
     def t_ppident_error(self, t):
         self._error('invalid #ident directive', self._position(t))
         self.lexer.skip(1)
+
+
+    ##
+    ## Rules for the pppragma state
+    ##
+    @lex.TOKEN(r'\#[ \t]*pragma')
+    def t_PREPROC_PRAGMA(self, t):
+        self.lexer.begin('pppragma')
+
+    t_pppragma_ignore = ' \t'
+
+    def t_pppragma_PRAGMA(self, t):
+        r'[^\n]+'
+        pass
+
+    def t_pppragma_NEWLINE(self, t):
+        r'\n'
+        t.lexer.begin('INITIAL')
+
+    def t_pppragma_error(self, t):
+        self._error('invalid #pragma directive', self._position(t))
+        self.lexer.skip(1)
+
 
     ##
     ## Rules for the ppline state
