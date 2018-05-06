@@ -1,7 +1,9 @@
 #include    <kernel/input/input.hh>
 
 
-template< bool X >
+struct Y;
+
+template< bool X, int Y >
 struct A
 {
 };

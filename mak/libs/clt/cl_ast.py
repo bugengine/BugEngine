@@ -74,8 +74,8 @@ class Typename:
         return self
 
 class Template:
-    def __init__(self, parameters):
-        self.parameters = parameters
+    def __init__(self):
+        self.parameters = []
         self.definitions = []
         self.name = None
 
@@ -85,6 +85,9 @@ class Template:
     def find_nonrecursive(self, name):
         if self.name == name:
             return self
+
+    def add_template_parameter(self, parameter):
+        self.parameters.append(parameter)
 
     def find(self, name):
         for p in self.parameters:
@@ -232,10 +235,11 @@ class Array:
 
 
 class Constant:
-    def __init__(self, type, name, value):
+    def __init__(self, type, name, value, position):
         self.type = type
         self.name = name
         self.value = value
+        self.position = position
 
     def find_nonrecursive(self, name):
         if self.name == name:

@@ -76,6 +76,8 @@ def p_object_name_template(p):
                     | TEMPLATE_METHOD_ID template_arguments                             %prec PRIO0
         type_name : TEMPLATE_STRUCT_ID_SHADOW template_arguments                        %prec PRIO0
                   | TEMPLATE_STRUCT_ID template_arguments                               %prec PRIO0
+                  | TEMPLATE_TYPENAME_ID_SHADOW template_arguments                      %prec PRIO0
+                  | TEMPLATE_TYPENAME_ID template_arguments                             %prec PRIO0
     """
     p[0] = ((p[1],), False, None) # TODO
 

@@ -11,6 +11,7 @@ def p_new_namespace_name(p):
                            | VARIABLE_ID_SHADOW
                            | TEMPLATE_STRUCT_ID_SHADOW
                            | TEMPLATE_METHOD_ID_SHADOW
+                           | TEMPLATE_TYPENAME_ID_SHADOW
     """
     p[0] = p[1]
     p.set_position(0, 1)
@@ -31,6 +32,7 @@ def p_new_namespace_name_invalid(p):
                            | VARIABLE_ID
                            | TEMPLATE_STRUCT_ID
                            | TEMPLATE_METHOD_ID
+                           | TEMPLATE_TYPENAME_ID
     """
     p.lexer._error("redefinition of '%s' as different kind of symbol" % (p[1]), p.position(1))
     p.lexer._note("previous definition is here", p.slice[1].found_object.position)

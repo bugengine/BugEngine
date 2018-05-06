@@ -1,88 +1,6 @@
 from .. import cl_ast
 
 
-def p_template_parameter_name_opt(p):
-    """
-        template_parameter_name_opt :   ID
-                                    |   NAMESPACE_ID_SHADOW
-                                    |   STRUCT_ID_SHADOW
-                                    |   TYPENAME_ID_SHADOW
-                                    |   VARIABLE_ID_SHADOW
-                                    |   METHOD_ID_SHADOW
-                                    |   TEMPLATE_STRUCT_ID_SHADOW
-                                    |   TEMPLATE_METHOD_ID_SHADOW
-                                    |
-    """
-    if len(p) > 1:
-        p[0] = p[1]
-
-
-def p_template_parameter_default_value_opt(p):
-    """
-        template_parameter_default_value_opt :  EQUALS expression   %prec PRIO11
-                                             |  EQUALS type
-                                             |
-    """
-    if len(p) > 1:
-        p[0] = p[1]
-
-
-def p_template_parameter_value(p):
-    """
-        template_parameter : type template_parameter_name_opt template_parameter_default_value_opt
-    """
-    p[0] = cl_ast.Constant(p[1], p[2], p[3])
-
-
-def p_template_parameter_typename(p):
-    """
-        template_parameter : TYPENAME template_parameter_name_opt template_parameter_default_value_opt
-    """
-    p[0] = cl_ast.Typename(p[2], p[3])
-
-
-def p_template_parameter_list(p):
-    """
-        template_parameter_list : template_parameter_list COMMA template_parameter
-                                | template_parameter
-    """
-    if len(p) > 2:
-        p[0] = p[1] + [p[3]]
-    else:
-        p[0] = [p[1]]
-
-
-def p_template_parameters(p):
-    """
-        template_parameters : template_parameter_list
-    """
-    p[0] = p[1]
-
-
-def p_template_parameters_none(p):
-    """
-        template_parameters :
-    """
-    p[0] = []
-
-
-def p_template_specifier(p):
-    """
-        template_specifier_opt : TEMPLATE LT template_parameters GT
-    """
-    p[0] = cl_ast.Template(p[3])
-    p.set_position(0, 2)
-    p.lexer.scopes[-1].add(p[0])
-    p.lexer.scopes.append(p[0])
-
-
-def p_template_specifier_opt(p):
-    """
-        template_specifier_opt :
-    """
-    pass
-
-
 def p_declaration_specifier(p):
     """
         declaration_specifier : STATIC
@@ -172,6 +90,52 @@ def p_external_declaration_method_definition(p):
     """
     if p[1]:
         p.lexer.scopes.pop(-1)
+
+
+def p_external_declaration_using(p):
+    """
+        external_declaration : USING object_name SEMI
+                             | USING NAMESPACE object_name SEMI
+    """
+
+
+def p_typedef_name(p):
+    """
+        typedef_name : ID
+                     | STRUCT_ID_SHADOW
+                     | TYPENAME_ID_SHADOW
+                     | NAMESPACE_ID_SHADOW
+                     | METHOD_ID_SHADOW
+                     | VARIABLE_ID_SHADOW
+                     | TEMPLATE_STRUCT_ID_SHADOW
+                     | TEMPLATE_METHOD_ID_SHADOW
+                     | TEMPLATE_TYPENAME_ID_SHADOW
+    """
+    p[0] = p[1]
+    p.set_position(0, 1)
+
+
+def p_typedef_name_error(p):
+    """
+        typedef_name : STRUCT_ID
+                     | TYPENAME_ID
+                     | NAMESPACE_ID
+                     | METHOD_ID
+                     | VARIABLE_ID
+                     | TEMPLATE_STRUCT_ID
+                     | TEMPLATE_METHOD_ID
+                     | TEMPLATE_TYPENAME_ID
+    """
+    p.lexer._error("redefinition of '%s' as different kind of symbol" % (p[1]), p.position(1))
+    p.lexer._note("previous definition is here", p.slice[1].found_object.position)
+    p[0] = p[1]
+    p.set_position(0, 1)
+
+
+def p_external_declaration_typedef(p):
+    """
+        external_declaration : TYPEDEF type typedef_name SEMI
+    """
 
 
 def p_external_declaration_error(p):
