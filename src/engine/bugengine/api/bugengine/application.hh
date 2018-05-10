@@ -50,6 +50,7 @@ private:
     Task::ITask::CallbackConnection             m_worldLoop;
     size_t                                      m_resourceLoadingCount;
     u32                                         m_worldCount;
+    bool                                        m_runLoop;
 private:
     void frameUpdate();
     void updateResources();
