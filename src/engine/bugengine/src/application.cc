@@ -57,6 +57,7 @@ Application::Application(ref<Folder> dataFolder,
     ,   m_worldLoop(m_worldTask, m_updateTask->startCallback())
     ,   m_resourceLoadingCount(0)
     ,   m_worldCount(0)
+    ,   m_runLoop(true)
 {
     m_resourceManager->attach<World::World>(this);
     addTask(ref< Task::Task< Task::MethodCaller<Application, &Application::updateResources> > >::create(
@@ -127,6 +128,7 @@ void Application::unload(Resource::Resource& resource)
     m_worldCount--;
     if (m_worldCount == 0)
     {
+        be_info("Last World destroyed - stopping application");
         m_updateLoop = Task::ITask::CallbackConnection();
     }
     resource.clearRefHandle();
@@ -141,9 +143,13 @@ void Application::updateResources()
     }
     else if (resourceCount != 0 && m_resourceLoadingCount == 0)
     {
-        m_forceContinue = Task::ITask::CallbackConnection(m_updateTask, m_worldTask->startCallback());
+        m_forceContinue = Task::ITask::CallbackConnection(m_worldTask, m_updateTask->startCallback());
     }
     m_resourceLoadingCount = resourceCount;
+    if (!m_runLoop)
+    {
+        m_worldLoop = Task::ITask::CallbackConnection();
+    }
 }
 
 void Application::frameUpdate()
@@ -180,7 +186,7 @@ void Application::frameUpdate()
 
 void Application::finish()
 {
-    m_updateLoop = Task::ITask::CallbackConnection();
+    m_runLoop = false;
 }
 
 }

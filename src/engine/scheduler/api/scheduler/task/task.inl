@@ -26,9 +26,9 @@ template< typename Body >
 void Task< Body >::schedule(weak<Scheduler> sc)
 {
     be_assert(m_taskCount == m_taskCompleted,
-              "task is scheduled again without having completed the previous run: "
+              "task %s is scheduled again without having completed the previous run: "
               "%d/%d parts completed"
-              | m_taskCompleted | m_taskCount);
+              | name | m_taskCompleted | m_taskCount);
     m_taskCount = 0;
     m_taskCompleted = 0;
 

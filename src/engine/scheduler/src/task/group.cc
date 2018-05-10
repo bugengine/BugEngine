@@ -144,27 +144,24 @@ TaskGroup::TaskStartConnection::~TaskStartConnection()
 }
 
 TaskGroup::TaskEndConnection::TaskEndConnection()
-:   m_group()
-,   m_task()
-,   m_callback()
+    :   m_group()
+    ,   m_task()
+    ,   m_callback()
 {
 }
 
 TaskGroup::TaskEndConnection::TaskEndConnection(weak<TaskGroup> group, weak<ITask> task)
-:   m_group(group)
-,   m_task(task)
-,   m_callback(task, group->m_completionCallback)
+    :   m_group(group)
+    ,   m_task(task)
+    ,   m_callback(task, group->m_completionCallback)
 {
-    if (m_group)
-    {
-        m_group->m_endTaskCount++;
-    }
+    m_group->m_endTaskCount++;
 }
 
 TaskGroup::TaskEndConnection::TaskEndConnection(const TaskEndConnection& other)
-:   m_group(other.m_group)
-,   m_task(other.m_task)
-,   m_callback(other.m_callback)
+    :   m_group(other.m_group)
+    ,   m_task(other.m_task)
+    ,   m_callback(other.m_callback)
 {
     if (m_group)
     {
@@ -174,16 +171,17 @@ TaskGroup::TaskEndConnection::TaskEndConnection(const TaskEndConnection& other)
 
 TaskGroup::TaskEndConnection& TaskGroup::TaskEndConnection::operator =(const TaskEndConnection& other)
 {
-    if (m_group)
-    {
-        m_group->m_endTaskCount--;
-    }
+    weak<TaskGroup> previousGroup = m_group;
     m_group = other.m_group;
     m_task = other.m_task;
     m_callback = other.m_callback;
     if (m_group)
     {
         m_group->m_endTaskCount++;
+    }
+    if (previousGroup)
+    {
+        previousGroup->m_endTaskCount--;
     }
     return *this;
 }
