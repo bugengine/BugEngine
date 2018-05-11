@@ -2,7 +2,7 @@ from waflib import Task, Errors, Context
 
 
 
-class android_manifest(Task.Task):
+class android_mft(Task.Task):
     """
     Create an apk file
     """
@@ -85,7 +85,7 @@ class copy(Task.Task):
         return 0
 
 
-class aapt_package(Task.Task):
+class aapt_pkg(Task.Task):
     """
     Store files in an apk file
     """
