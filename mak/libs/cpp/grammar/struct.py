@@ -47,6 +47,7 @@ def p_struct_optional_id(p):
     """
         struct_optional_id : ID
                            |
+                           | ID LESS_THAN skip_template_args GREATER_THAN
     """
     if len(p) == 2:
         p[0] = p[1]

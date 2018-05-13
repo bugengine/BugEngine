@@ -6,6 +6,29 @@
 /**************************************************************************************************/
 #include    <scheduler/stdafx.h>
 
+namespace BugEngine { namespace Kernel
+{
+
+template< typename T >
+struct ParamTypeToKernelType
+{
+    //typedef TODO Type;
+};
+
+template< typename T >
+struct ParamTypeToKernelType<T*>
+{
+    //typedef TODO Type;
+};
+
+template< typename T >
+struct ParamTypeToKernelType<T&>
+{
+    //typedef TODO Type;
+};
+
+}}
+
 #include    <scheduler/kernel/parameters/segment.hh>
 #include    <scheduler/kernel/parameters/segments.hh>
 #include    <scheduler/kernel/parameters/stream.hh>
