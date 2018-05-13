@@ -22,7 +22,7 @@ public:
 };
 
 template< typename T >
-struct ParamTypeToKernelType<::Kernel::segments<T> >
+struct ParamTypeToKernelType< ::Kernel::segments<T> >
 {
     typedef Segments<typename minitl::remove_const<T>::type> Type;
 };
