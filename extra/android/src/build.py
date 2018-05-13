@@ -5,7 +5,7 @@ import os
 
 def build(bld):
     root = bld.path.parent
-    tg = task_gen(bld=bld)
+    tg = task_gen(bld=bld, target='package')
 
     source_node = root.find_node('src/engine/launcher/src')
     resource_node = root.find_node('src/engine/launcher/res')
@@ -24,7 +24,7 @@ def build(bld):
     package_unaligned = tg.make_bld_node('apk', '', appname + '.unaligned.apk')
     package_final = tg.make_bld_node('apk', '', appname + '.apk')
 
-    bld.android_package_task = tg.create_task('aapt_package', [resources.destfile], [package_unsigned])
+    bld.android_package_task = tg.create_task('aapt_pkg', [resources.destfile], [package_unsigned])
     sign_task = tg.create_task('jarsigner', [package_unsigned], [package_unaligned])
     align_task = tg.create_task('zipalign', [package_unaligned], [package_final])
 
