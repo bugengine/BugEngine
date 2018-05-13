@@ -137,6 +137,8 @@ if __name__ == '__main__':
         try:
             result = parser.parse(arguments[1], os.path.join(options.tmp_dir, 'cpp_grammar.pickle'),
                                   options.macro_file, options.module)
+            if not result:
+                sys.exit(1)
             kernel_namespace = ['Kernels'] + arguments[0].split('.')
             kernel_name = kernel_namespace[-1]
             kernel_full_name = kernel_namespace[1:]
@@ -156,32 +158,12 @@ if __name__ == '__main__':
             if arg1.type.strip() != 'u32' and arg1.type.strip() != 'const u32':
                 raise Exception("invalid signature for method kmain")
             for arg in m.parameters[2:]:
-                name = arg.name
-                for t in arg.tags:
-                    if t[0] == 'kernel_param':
-                        bugengine_names = {
-                            'be_segment':      '::BugEngine::Kernel::Segment',
-                            'be_segments':     '::BugEngine::Kernel::Segments',
-                            'be_stream':       '::BugEngine::Kernel::Stream',
-                            'be_texture1d':    '::BugEngine::Kernel::Texture1D',
-                            'be_texture2d':    '::BugEngine::Kernel::Texture2D',
-                            'be_texture3d':    '::BugEngine::Kernel::Texture3D',
-                        }
-                        try:
-                            bugengine_name = bugengine_names[t[1]]
-                        except KeyError:
-                            raise Exception('invalid kernel input type: %s:\n'
-                                            'type %s is not a valid kernel type' % (name, t[1]))
-                        args.append((arg.name, arg.type, bugengine_name, t[1]))
-                        break
-                else:
-                    raise Exception('invalid kernel input type: %s\n'
-                                    'mark it with be_in, be_out or be_inout' % name)
+                args.append((arg.name, arg.type))
 
             argument_assign = '\n    ,   '.join(('m_%s(%s)' % (arg[0], arg[0]) for arg in args))
             callback_assign = '\n    ,   '.join(('m_%sChain(%s->producer(), m_task->startCallback())' % (arg[0], arg[0])
                                                 for arg in args))
-            argument_out_assign = '\n    ,   '.join(('%s(ref< const BugEngine::Kernel::Product< %s<minitl::remove_const< %s >::type> > >::create(BugEngine::Arena::task(), %s, m_task))' % (arg[0], arg[2], arg[1], arg[0])
+            argument_out_assign = '\n    ,   '.join(('%s(ref< const BugEngine::Kernel::Product< BugEngine::Kernel::ParamTypeToKernelType< %s >::Type > >::create(BugEngine::Arena::task(), %s, m_task))' % (arg[0], arg[1], arg[0])
                                                     for arg in args))
             params = {
                 'header': arguments[3],
@@ -198,19 +180,18 @@ if __name__ == '__main__':
                 'includes': '\n'.join(result.includes),
                 'argument_count': len(args),
                 'argument_field':
-                    '\n    '.join(('weak< const BugEngine::Kernel::Product< %s<minitl::remove_const< %s >::type> > > const m_%s;' % (arg[2], arg[1], arg[0])
+                    '\n    '.join(('weak< const BugEngine::Kernel::Product< BugEngine::Kernel::ParamTypeToKernelType< %s >::Type > > const m_%s;' % (arg[1], arg[0])
                                    for arg in args)),
                 'callbacks':
                     '\n    '.join(('BugEngine::Task::ITask::CallbackConnection const m_%sChain;' % (arg[0])
                                    for arg in args)),
                 'argument_result_assign':
-                    '\n    '.join(('result[%d] = m_%s->parameter();' % (i, arg[0])
-                                   for i, arg in enumerate(args) if arg[3] not in ('product'))),
+                    '\n    '.join(('result[%d] = m_%s->parameter();' % (i, arg[0]) for i, arg in enumerate(args))),
                 'argument_outs':
-                    '\n    '.join(('ref< const BugEngine::Kernel::Product< %s<minitl::remove_const< %s >::type> > > const %s;' % (arg[2], arg[1], arg[0])
+                    '\n    '.join(('ref< const BugEngine::Kernel::Product< BugEngine::Kernel::ParamTypeToKernelType< %s >::Type > > const %s;' % (arg[1], arg[0])
                                    for arg in args)),
                 'argument_params':
-                    ', '.join(('weak< const BugEngine::Kernel::Product< %s<minitl::remove_const< %s >::type> > > %s' % (arg[2], arg[1], arg[0])
+                    ', '.join(('weak< const BugEngine::Kernel::Product< BugEngine::Kernel::ParamTypeToKernelType< %s >::Type > > %s' % (arg[1], arg[0])
                                    for arg in args)),
                 'argument_assign': argument_assign and (argument_assign + '\n    ,   ') or '/* no arguments */\n        ',
                 'callback_assign': callback_assign and ('\n    ,   ' + callback_assign) or '\n        /* no callbacks */',

@@ -9,7 +9,7 @@ def p_object_name_namespace(p):
                   | STRUCT_ID SCOPE type_name_struct_qualified
                   | STRUCT_ID_SHADOW SCOPE type_name_struct_qualified
     """
-    p[0] = ((p[1],) + p[3][1], True, p[3][2])
+    p[0] = ((p[1],) + p[3][0], True, p[3][2])
 
 
 def p_object_name_struct_qualified(p):
@@ -26,7 +26,7 @@ def p_object_name_struct_qualified(p):
                                    | type_name_id_qualified
     """
     if len(p) > 2:
-        p[0] = ((p[1],) + p[3][1], True, p[3][2])
+        p[0] = ((p[1],) + p[3][0], True, p[3][2])
     else:
         p[0] = p[1]
 
@@ -36,7 +36,7 @@ def p_object_name_namespace_root(p):
         object_name : SCOPE object_name_qualified
         type_name : SCOPE type_name_qualified
     """
-    p[0] = ((None,) + p[2][1], True, p[2][2])
+    p[0] = ((None,) + p[2][0], True, p[2][2])
 
 
 def p_object_name(p):
@@ -64,7 +64,6 @@ def p_object_name_shadow(p):
         type_name : STRUCT_ID_SHADOW                                                    %prec PRIO0
                   | TYPENAME_ID_SHADOW                                                  %prec PRIO0
                   | TEMPLATE_STRUCT_ID_SHADOW                                           %prec PRIO0
-                  | TEMPLATE_STRUCT_ID                                                  %prec PRIO0
     """
     p[0] = ((p[1],), False, p.slice[1].found_object)
     p.set_position(0, 1)
@@ -74,10 +73,19 @@ def p_object_name_template(p):
     """
         object_name : TEMPLATE_METHOD_ID_SHADOW template_arguments                      %prec PRIO0
                     | TEMPLATE_METHOD_ID template_arguments                             %prec PRIO0
+
+        object_name_id_qualified : TEMPLATE_METHOD_ID_SHADOW template_arguments         %prec PRIO0
+                                 | TEMPLATE_METHOD_ID template_arguments                %prec PRIO0
+
         type_name : TEMPLATE_STRUCT_ID_SHADOW template_arguments                        %prec PRIO0
                   | TEMPLATE_STRUCT_ID template_arguments                               %prec PRIO0
                   | TEMPLATE_TYPENAME_ID_SHADOW template_arguments                      %prec PRIO0
                   | TEMPLATE_TYPENAME_ID template_arguments                             %prec PRIO0
+
+        type_name_id_qualified : TEMPLATE_STRUCT_ID_SHADOW template_arguments           %prec PRIO0
+                               | TEMPLATE_STRUCT_ID template_arguments                  %prec PRIO0
+                               | TEMPLATE_TYPENAME_ID_SHADOW template_arguments         %prec PRIO0
+                               | TEMPLATE_TYPENAME_ID template_arguments                %prec PRIO0
     """
     p[0] = ((p[1],), False, None) # TODO
 
