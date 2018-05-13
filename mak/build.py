@@ -19,7 +19,7 @@ def to_string(self):
         tgt_str = ' '.join([a.name for a in self.inputs][:1])
     task_name = self.__class__.__name__.replace('_task', '')
     return '{%s}%s%s/%s' % (task_name,
-                            (11-len(task_name))*' ',
+                            (12-len(task_name))*' ',
                             self.generator.target,
                             tgt_str)
 
