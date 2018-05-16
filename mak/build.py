@@ -183,6 +183,10 @@ def module(bld, name, module_path, depends, private_depends,
         source_node = bld.path.make_node(module_path.replace('.', '/'))
     else:
         source_node = bld.path
+    try:
+        bld.recurse(os.path.join(source_node.path_from(bld.path), 'build.py'))
+    except Errors.WafError:
+        pass
     project_path = source_node.path_from(bld.srcnode).replace('/', '.')
     if 'plugin' in features:
         plugin_name = name.replace('.', '_')
