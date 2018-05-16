@@ -12,9 +12,11 @@ class Scope:
     def add(self, member):
         self.members.append(member)
 
-    def dump(self, indent=''):
-        for m in self.members:
-            m.dump(indent)
+
+class Root(Scope):
+    def write_to(self, writer):
+        writer.begin_document()
+        writer.end_document()
 
 
 class Namespace(Scope):
@@ -42,12 +44,6 @@ class AnonymousNamespace(Scope):
 
     def get_token_type(self):
         return 'NAMESPACE_ID'
-
-    def dump(self, indent=''):
-        print('namespace\n{')
-        for m in self.members:
-            m.dump(indent)
-        print('}')
 
     def find_nonrecursive(self, name):
         o = self.find(name)
@@ -133,12 +129,6 @@ class Struct:
 
     def get_token_type(self):
         return 'STRUCT_ID'
-
-    def dump(self, indent=''):
-        print('%s%s %s\n{' % (indent, self.struct_type, self.name))
-        for m in self.definition.members:
-            m.dump(indent+' ')
-        print('};')
 
     def find_nonrecursive(self, name):
         if self.name == name:
@@ -248,11 +238,6 @@ class Constant:
     def get_token_type(self):
         return 'VARIABLE_ID'
 
-    def dump(self, indent=''):
-        print('%s%s%s %s%s;' % (indent, ' '.join(self.attributes) + (self.attributes and ' ' or ''),
-                                self.type.type_name(), self.name, self.value and (' = %s' % self.value.str()) or ''))
-
-
 
 class Variable:
     def __init__(self, type, name, value, attributes, position):
@@ -268,10 +253,6 @@ class Variable:
 
     def get_token_type(self):
         return 'VARIABLE_ID'
-
-    def dump(self, indent=''):
-        print('%s%s%s %s%s;' % (indent, ' '.join(self.attributes) + (self.attributes and ' ' or ''),
-                                self.type.type_name(), self.name, self.value and (' = %s' % self.value.str()) or ''))
 
 
 class Specifier:
