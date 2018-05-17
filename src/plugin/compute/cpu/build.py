@@ -56,12 +56,13 @@ def kernel_build_cpu_source(self, source):
     t.dep_nodes = [self.bld.bugenginenode.find_node('mak/tools/clt.py')]
     t.dep_nodes += self.bld.bugenginenode.find_node('mak/libs/clt').ant_glob('**/*.py')
     t.dep_nodes += self.bld.bugenginenode.find_node('mak/libs/ply').ant_glob('**/*.py')
-    t.dep_nodes += self.bld.env.KERNEL_CLT_TARGET.ant_glob('**/*.py')
+    t.dep_nodes += self.bld_env.KERNEL_CLT_TARGET.ant_glob('**/*.py')
     self.source.append(preprocessed)
 
 
 def build(build_context):
-    for kernel_name, toolchain in build_context.env.KERNEL_TOOLCHAINS:
-        if kernel_name == 'cpu':
-            env = build_context.all_envs[toolchain]
-            env.KERNEL_CLT_TARGET = build_context.path.find_node('mak/clc_cwriter')
+    for env in build_context.multiarch_envs:
+        for kernel_name, toolchain in env.KERNEL_TOOLCHAINS:
+            if kernel_name == 'cpu':
+                env = build_context.all_envs[toolchain]
+                env.KERNEL_CLT_TARGET = build_context.path.find_node('mak/clc_cwriter')
