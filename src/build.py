@@ -37,7 +37,7 @@ def build_bugengine(bld):
     """
     bld.headers('engine.kernel',
                 [],
-                extra_public_includes=[bld.path.make_node('engine/kernel/api/cpu')])
+                extra_public_includes=[bld.path.make_node('engine/kernel/api/generic')])
     bld.headers('engine.kernel.cpu',
                 [],
                 path='engine.kernel',

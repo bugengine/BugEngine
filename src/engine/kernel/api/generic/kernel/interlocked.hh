@@ -43,7 +43,7 @@ namespace _Kernel
 {
 
 template< typename T >
-class interlocked
+struct interlocked
 {
 private:
     typedef InterlockedType< sizeof(T) >  impl;
@@ -114,7 +114,7 @@ public:
 
 
 template< typename T >
-class iptr
+struct iptr
 {
 private:
     typedef _Kernel::InterlockedType< sizeof(T*) >   impl;
@@ -159,7 +159,7 @@ public:
 };
 
 template< typename T >
-class itaggedptr
+struct itaggedptr
 {
 private:
     typedef _Kernel::InterlockedType< sizeof(T*) > impl;

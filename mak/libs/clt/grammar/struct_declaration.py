@@ -8,6 +8,7 @@ def p_struct_keyword(p):
                        | ENUM
     """
     p[0] = p[1]
+    p.set_position(0, 1)
 
 
 def p_struct_declaration(p):
@@ -42,19 +43,20 @@ def p_struct_push(p):
     p[0] = p[-3][1] or p[-3][0]
     p[0].define(p[-2])
     p.lexer.scopes[-1].add(p[0])
-    p.lexer.scopes.append(p[0])
+    p.lexer.push_scope(p[0])
 
 
 def p_struct_pop(p):
     """
         struct_pop :
     """
-    p.lexer.scopes.pop(-1)
+    p.lexer.pop_scope()
 
 
 def p_struct_parent(p):
     """
         struct_parent_opt : COLON type_name
+                          | COLON PUBLIC type_name
                           |
     """
     if len(p) > 1:
@@ -74,6 +76,23 @@ def p_struct_definition(p):
         struct_definition : struct_header error LBRACE struct_push struct_declaration_list RBRACE struct_pop
     """
     p[0] = p[4]
+
+
+def p_struct_header_anonymous(p):
+    """
+        struct_header_anonymous : struct_keyword LBRACE
+    """
+    p[0] = cl_ast.Struct(p[1], None, p.position(1))
+    p[0].define(None)
+    p.lexer.scopes[-1].add(p[0])
+    p.lexer.push_scope(p[0])
+
+
+def p_struct_definition_anonymous(p):
+    """
+        struct_definition : struct_header_anonymous struct_declaration_list RBRACE struct_pop
+    """
+    p[0] = p[1]
 
 
 def p_type_struct_declaration(p):

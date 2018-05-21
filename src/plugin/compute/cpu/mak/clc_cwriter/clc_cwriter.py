@@ -3,7 +3,7 @@ class ClcCWriter:
         self.out_file = out_file
 
     def begin_document(self):
-        pass
+        self.out_file.write(b'#include <kernel/stdafx.h>')
 
     def end_document(self):
         self.out_file.write(b'\n')

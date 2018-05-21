@@ -6,7 +6,7 @@ def p_template_argument(p):
         template_argument : expression                                              %prec PRIO6
                           | type
     """
-    p[0] = []
+    p[0] = p[1]
 
 
 def p_template_argument_list(p):
@@ -14,14 +14,17 @@ def p_template_argument_list(p):
         template_argument_list : template_argument_list COMMA template_argument
                                | template_argument
     """
-    p[0] = []
+    if len(p) > 3:
+        p[0] = p[1] + [p[3]]
+    else:
+        p[0] = [p[1]]
 
 
 def p_template_arguments(p):
     """
         template_arguments : LT template_argument_list GT                           %prec TEMPLATEGT
     """
-    p[0] = []
+    p[0] = p[2]
 
 
 def p_template_arguments_empty(p):
@@ -91,7 +94,7 @@ def p_template_parameter_typename_template(p):
     """
     p[0] = cl_ast.Typename(p[3], p[4])
     if p[1]:
-        p.lexer.scopes.pop(-1)
+        p.lexer.pop_scope()
     p.lexer.scopes[-1].add_template_parameter(p[0])
 
 
@@ -127,7 +130,7 @@ def p_template_push(p):
     p[0] = cl_ast.Template()
     p.set_position(0, -1)
     p.lexer.scopes[-1].add(p[0])
-    p.lexer.scopes.append(p[0])
+    p.lexer.push_scope(p[0])
 
 
 def p_template_specifier(p):

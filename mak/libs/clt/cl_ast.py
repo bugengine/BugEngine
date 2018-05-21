@@ -12,6 +12,9 @@ class Scope:
     def add(self, member):
         self.members.append(member)
 
+    def instantiate(self, template_arguments):
+        return self
+
 
 class Root(Scope):
     def write_to(self, writer):
@@ -50,6 +53,33 @@ class AnonymousNamespace(Scope):
         return o
 
 
+class Typedef:
+    def __init__(self, name, type, position):
+        self.name = name
+        self.type = type
+        self.position = position
+
+    def get_token_type(self):
+        return 'TYPENAME_ID'
+
+    def find_nonrecursive(self, name):
+        if self.name == name:
+            return self
+
+    def type_name(self):
+        return self.name
+
+    def find(self, name):
+        return None
+
+    #TODO: delete
+    def original_type(self):
+        return self
+
+    def instantiate(self, template_arguments):
+        return Typedef(self.name, self.type.instantiate(params), self.position)
+
+
 class Typename:
     def __init__(self, name, default_value):
         self.name = name
@@ -69,14 +99,18 @@ class Typename:
     def original_type(self):
         return self
 
+    def instantiate(self, template_arguments):
+        return template_arguments.get(self.name, self)
+
+
 class Template:
     def __init__(self):
         self.parameters = []
-        self.definitions = []
+        self.specializations = []
         self.name = None
 
     def get_token_type(self):
-        return 'TEMPLATE_' + self.definitions[0][1].get_token_type()
+        return 'TEMPLATE_' + self.specializations[0][1].get_token_type()
 
     def find_nonrecursive(self, name):
         if self.name == name:
@@ -90,16 +124,27 @@ class Template:
             if p.name == name:
                 return p
 
-    def instantiate(self, values):
-        pass
+    def create_instance(self, arguments):
+        template_arguments = {}
+        return self.specializations[0][1].instantiate(template_arguments)
 
-    def add(self, definition):
+    def instantiate(self, template_arguments):
+        result = Template()
+        for p in self.parameters:
+            result.add_template_parameter(p.instantiate(template_arguments))
+        for params, s in self.specializations:
+            result.add((p.instantiate(template_values) for p in params), s.instantiate(template_values))
+        return result
+
+    def add(self, specialization):
         if not self.name:
-            self.name = definition.name
-        self.definitions.append(([], definition))
+            self.name = specialization.name
+        self.specializations.append(([], specialization))
 
-    def specialize(self, values, definition):
-        self.definitions.append((values, definition))
+    def specialize(self, parameters, template_specialization):
+        if self.name == template_specialization.name:
+            self.specializations.append((parameters, template_specialization))
+            return True
 
 
 class Struct:
@@ -126,6 +171,9 @@ class Struct:
 
     def define(self, parent):
         self.definition = Struct.Definition(parent)
+
+    def instantiate(self, template_arguments):
+        return self
 
     def get_token_type(self):
         return 'STRUCT_ID'

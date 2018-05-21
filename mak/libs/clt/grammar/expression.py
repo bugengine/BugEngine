@@ -14,7 +14,8 @@ def p_value(p):
                    | FALSE
                    | THIS
     """
-    pass
+    p[0] = p[1]
+
 
 def p_value_object(p):
     """
@@ -22,6 +23,7 @@ def p_value_object(p):
     """
     if not p[1][2]:
         p.lexer._error('Unknown object: %s' % p[1][0], p.position(1))
+    p[0] = p[1]
 
 
 
