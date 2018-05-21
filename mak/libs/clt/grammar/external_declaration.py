@@ -51,7 +51,7 @@ def p_external_declaration_empty(p):
     """
     p[0] = None
     if p[1]:
-        p.lexer.scopes.pop(-1)
+        p.lexer.pop_scope()
 
 
 def p_external_declaration_type(p):
@@ -62,7 +62,7 @@ def p_external_declaration_type(p):
     for s in p[2]:
         p.lexer._warning('specifier ignored', s.position)
     if p[1]:
-        p.lexer.scopes.pop(-1)
+        p.lexer.pop_scope()
 
 
 def p_external_declaration_variable(p):
@@ -73,7 +73,7 @@ def p_external_declaration_variable(p):
     if p[1]:
         for variable in p[2]:
             p.lexer._error('Variable %s declared as a template' % variable.name, variable.position)
-        p.lexer.scopes.pop(-1)
+        p.lexer.pop_scope()
 
 
 def p_external_declaration_method(p):
@@ -81,7 +81,7 @@ def p_external_declaration_method(p):
         external_declaration : template_specifier_opt method_declaration SEMI
     """
     if p[1]:
-        p.lexer.scopes.pop(-1)
+        p.lexer.pop_scope()
 
 
 def p_external_declaration_method_definition(p):
@@ -89,7 +89,7 @@ def p_external_declaration_method_definition(p):
         external_declaration : template_specifier_opt method_definition
     """
     if p[1]:
-        p.lexer.scopes.pop(-1)
+        p.lexer.pop_scope()
 
 
 def p_external_declaration_using(p):
@@ -136,6 +136,7 @@ def p_external_declaration_typedef(p):
     """
         external_declaration : TYPEDEF type typedef_name SEMI
     """
+    p.lexer.scopes[-1].add(cl_ast.Typedef(p[3], p[2], p.position(3)))
 
 
 def p_external_declaration_error(p):

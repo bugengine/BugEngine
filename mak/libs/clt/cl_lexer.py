@@ -59,6 +59,10 @@ class ClLexer:
     def push_scope(self, scope):
         self.scopes.append(scope)
 
+    def set_search_scope_ifn(self, scope):
+        if self.last_token.type == 'SCOPE':
+            self.current_scope = scope
+
     def pop_scope(self):
         self.scopes.pop(-1)
 
@@ -523,4 +527,3 @@ class ClLexer:
     def t_error(self, t):
         self._error('Illegal character %s' % repr(t.value[0]), self._position(t))
         self.lexer.skip(1)
-

@@ -67,6 +67,7 @@ def p_operator_name(p):
     """
     p[0] = p[2]
 
+
 def p_parameter_name_invalid(p):
     """
         parameter_name : STRUCT_ID
@@ -117,21 +118,21 @@ def p_create_method_scope(p):
     """
         create_method_scope :
     """
-    p[0] = cl_ast.Method(p[-2], p[-3], p[-4], p.position(-1))
+    p[0] = cl_ast.Method(p[-3], p[-4], p[-5], p.position(-1))
 
 
 def p_create_constructor_scope(p):
     """
         create_constructor_scope :
     """
-    p[0] = cl_ast.Method(p[-2], p[-2], [p[-3]], p.position(-1))
+    p[0] = cl_ast.Method(p[-3], p[-3], [p[-4]], p.position(-1))
 
 
 def p_create_castop_scope(p):
     """
         create_castop_scope :
     """
-    p[0] = cl_ast.Method(p[-2], p[-2], [p[-4]], p.position(-1))
+    p[0] = cl_ast.Method(p[-1], p[-1], [p[-3]], p.position(-1))
 
 
 def p_create_method_definition(p):
@@ -146,14 +147,15 @@ def p_push_method_scope(p):
     """
         push_method_scope :
     """
-    p.lexer.scopes.append(p[-1])
+    p.lexer.push_scope(p[-1])
+    p[0] = p[-1]
 
 
 def p_pop_method_scope(p):
     """
         pop_method_scope :
     """
-    p.lexer.scopes.pop(-1)
+    p.lexer.pop_scope()
 
 
 def p_method_attribute(p):
@@ -181,40 +183,43 @@ def p_initializer_list(p):
                          | initializer COMMA initializer_list
     """
 
+
 def p_initializer_list_opt(p):
     """
         initializer_list_opt : COLON initializer_list
                              |
     """
 
-def p_method_declaration(p):
-    """
-        method_declaration : declaration_specifier_list type object_name LPAREN create_method_scope push_method_scope method_parameters RPAREN method_attributes pop_method_scope
-                           | declaration_specifier_list VOID object_name LPAREN create_method_scope push_method_scope method_parameters RPAREN method_attributes pop_method_scope
-                           | declaration_specifier_list type operator_name LPAREN create_method_scope push_method_scope method_parameters RPAREN method_attributes pop_method_scope
-                           | declaration_specifier_list VOID operator_name LPAREN create_method_scope push_method_scope method_parameters RPAREN method_attributes pop_method_scope
-    """
-    p[0] = p[5]
 
-
-def p_method_declaration_constructor(p):
+def p_method_declaration_prefix(p):
     """
-        method_declaration : declaration_specifier_list STRUCT_ID_SHADOW LPAREN create_constructor_scope push_method_scope method_parameters RPAREN method_attributes pop_method_scope
-                           | declaration_specifier_list TEMPLATE_STRUCT_ID_SHADOW LPAREN create_constructor_scope push_method_scope method_parameters RPAREN method_attributes pop_method_scope
+        method_declaration_prefix : declaration_specifier_list type object_name create_method_scope
+                                  | declaration_specifier_list VOID object_name create_method_scope
+                                  | declaration_specifier_list type operator_name create_method_scope
+                                  | declaration_specifier_list VOID operator_name create_method_scope
+                                  | declaration_specifier_list OPERATOR type create_castop_scope
     """
     p[0] = p[4]
 
 
+def p_method_declaration_prefix_ctor(p):
+    """
+        method_declaration_prefix : declaration_specifier_list STRUCT_ID_SHADOW create_constructor_scope
+                                  | declaration_specifier_list TEMPLATE_STRUCT_ID_SHADOW create_constructor_scope
+    """
+    p[0] = p[3]
 
-def p_method_declaration_typecast(p):
+
+def p_method_declaration(p):
     """
-        method_declaration : declaration_specifier_list OPERATOR type LPAREN create_castop_scope push_method_scope method_parameters RPAREN method_attributes pop_method_scope
+        method_declaration : method_declaration_prefix push_method_scope LPAREN method_parameters RPAREN method_attributes pop_method_scope
     """
-    p[0] = p[5]
+    p[0] = p[2]
 
 
 def p_method_definition(p):
     """
         method_definition : method_declaration push_method_scope create_method_definition initializer_list_opt statement_block pop_method_scope
     """
+    p[0] = p[1]
 
