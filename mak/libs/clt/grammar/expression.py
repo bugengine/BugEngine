@@ -21,8 +21,8 @@ def p_value_object(p):
     """
         expression : object_name
     """
-    if not p[1][2]:
-        p.lexer._error('Unknown object: %s' % p[1][0], p.position(1))
+    if not p[1].target and not p[1].dependent:
+        p.lexer._error('Unknown object: %s' % ('::'.join(p[1].name)), p[1].position)
     p[0] = p[1]
 
 

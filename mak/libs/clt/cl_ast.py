@@ -92,6 +92,9 @@ class Typename:
         if self.name == name:
             return self
 
+    def find(self, name):
+        return None
+
     def type_name(self):
         return self.name
 
@@ -218,9 +221,10 @@ class Builtin:
 
 
 class Type:
-    def __init__(self, base_type):
+    def __init__(self, base_type, position):
         self.base_type = type
         self.modifier = []
+        self.position = position
 
     def add_modifier(self, modifier, position):
         self.modifier.append((modifier, position))
