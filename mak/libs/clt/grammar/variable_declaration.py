@@ -53,11 +53,11 @@ def p_variable_declaration(p):
     """
         variable_declaration : declaration_specifier_list type object_name variable_array_specifier_opt variable_initial_value_opt
     """
-    if p[3][1]:
-        p[0] = [p[3][2]]
+    if p[3].qualified:
+        p[0] = [p[3].target]
         # todo: check specifiers
     else:
-        p[0] = [cl_ast.Variable(p[4], p[3][0][0], p[5], p[1], p.position(3))]
+        p[0] = [cl_ast.Variable(p[4], p[3].name[0], p[5], p[1], p[3].position)]
         p.lexer.scopes[-1].add(p[0][0])
         for s in p[1]:
             if s.specifier == 'inline':
@@ -75,9 +75,9 @@ def p_variable_declaration_cted(p):
     """
         variable_declaration : variable_declaration COMMA extract_original_type type_modifier_opt object_name variable_array_specifier_opt variable_initial_value_opt
     """
-    if p[5][1]:
-        p[0] = p[1] + [p[5][2]]
+    if p[5].qualified:
+        p[0] = p[1] + [p[5].target]
         # todo: check specifiers
     else:
-        p[0] = p[1] + [cl_ast.Variable(p[6], p[5][0][0], p[7], p[1][0].attributes, p.position(5))]
+        p[0] = p[1] + [cl_ast.Variable(p[6], p[5].name[0], p[7], p[1][0].attributes, p[5].position)]
         p.lexer.scopes[-1].add(p[0][-1])
