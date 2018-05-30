@@ -96,14 +96,14 @@ def p_method_parameter_list_last(p):
     """
         method_parameter_list : method_parameter_type parameter_name variable_initial_value_opt
     """
-    p.lexer.scopes[-1].add(cl_ast.Variable(p[1], p[2], p[3], [], p.position(2)))
+    p.lexer.scopes[-1].add(cl_ast.methods.Parameter(p[1], p[2], p[3], [], p.position(2)))
 
 
 def p_method_parameter_list(p):
     """
         method_parameter_list : method_parameter_type parameter_name variable_initial_value_opt COMMA method_parameter_list
     """
-    p.lexer.scopes[-1].add(cl_ast.Variable(p[1], p[2], p[3], [], p.position(2)))
+    p.lexer.scopes[-1].add(cl_ast.methods.Parameter(p[1], p[2], p[3], [], p.position(2)))
 
 
 def p_method_parameters(p):
@@ -118,28 +118,28 @@ def p_create_method_scope(p):
     """
         create_method_scope :
     """
-    p[0] = cl_ast.Method(p[-3], p[-4], p[-5], p.position(-1))
+    p[0] = cl_ast.methods.Method(p[-3], p[-4], p[-5], p.position(-1))
 
 
 def p_create_constructor_scope(p):
     """
         create_constructor_scope :
     """
-    p[0] = cl_ast.Method(p[-3], p[-3], [p[-4]], p.position(-1))
+    p[0] = cl_ast.methods.Method(p[-3], p[-3], [p[-4]], p.position(-1))
 
 
 def p_create_castop_scope(p):
     """
         create_castop_scope :
     """
-    p[0] = cl_ast.Method(p[-1], p[-1], [p[-3]], p.position(-1))
+    p[0] = cl_ast.methods.Method(p[-1], p[-1], [p[-3]], p.position(-1))
 
 
 def p_create_method_definition(p):
     """
         create_method_definition :
     """
-    p[0] = cl_ast.Scope(p.position(-1))
+    p[0] = cl_ast.methods.Body(p.position(-1))
     p.lexer.scopes[-1].define(p[0])
 
 

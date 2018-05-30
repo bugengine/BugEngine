@@ -393,7 +393,7 @@ class Context(ctx):
 			else:
 				err = '\n'.join(filter_stderr(err))
 				if err:
-					Logs.info(err, extra={'stream':sys.stdout, 'c1': ''})
+					Logs.info(err, extra={'stream':sys.stderr, 'c1': ''})
 
 		return ret
 

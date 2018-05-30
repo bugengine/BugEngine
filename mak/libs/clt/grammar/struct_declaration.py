@@ -30,10 +30,10 @@ def p_struct_declaration(p):
             p[0] = (p[2].target, None)
     elif p[2].target and p[2].target.get_token_type() == 'STRUCT_ID':
         # optimistically use provided declaration, but if definition, it will be overriden
-        p[0] = (p[2].target, cl_ast.Struct(p[1], p[2].name[0], p[2].position))
+        p[0] = (p[2].target, cl_ast.types.Struct(p[1], p[2].name[0], p[2].position))
     else:
         # No previously delcared type, declare one here
-        p[0] = (None, cl_ast.Struct(p[1], p[2].name[0], p[2].position))
+        p[0] = (None, cl_ast.types.Struct(p[1], p[2].name[0], p[2].position))
     p.set_position_absolute(0, p[2].position)
 
 
@@ -71,7 +71,10 @@ def p_struct_parent(p):
                           |
     """
     if len(p) > 1:
-        p[0] = p[3].target
+        if p[3].dependent:
+            p[0] = cl_ast.types.DependentTypeName(p[3])
+        else:
+            p[0] = p[3].target
 
 
 def p_struct_parent_error(p):
@@ -94,7 +97,7 @@ def p_struct_header_anonymous(p):
     """
         struct_header_anonymous : struct_keyword LBRACE
     """
-    p[0] = cl_ast.Struct(p[1], None, p.position(1))
+    p[0] = cl_ast.types.Struct(p[1], None, p.position(1))
     p[0].define(None)
     p.set_position(0, 1)
     p.lexer.scopes[-1].add(p[0])

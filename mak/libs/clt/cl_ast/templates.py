@@ -1,9 +1,19 @@
+try:
+    from itertools import zip_longest
+except ImportError:
+    from itertools import izip_longest as zip_longest
+
 
 class Template:
-    def __init__(self):
+    class InstanciationError(Exception):
+        def __init__(self, msg):
+            self.msg = msg
+
+    def __init__(self, position):
         self.parameters = []
         self.specializations = []
         self.name = None
+        self.position = position
 
     def get_token_type(self):
         return 'TEMPLATE_' + self.specializations[0][1].get_token_type()
@@ -21,8 +31,8 @@ class Template:
                 return p
 
     def create_instance(self, arguments):
-        template_arguments = {}
-        return self.specializations[0][1].instantiate(template_arguments)
+        specialization, template_arguments = self.find_specialization(arguments)
+        return specialization.instantiate(template_arguments)
 
     def instantiate(self, template_arguments):
         result = Template()
@@ -41,3 +51,22 @@ class Template:
         if self.name == template_specialization.name:
             self.specializations.append((parameters, template_specialization))
             return True
+
+    def find_specialization(self, arguments):
+        template_arguments = { }
+        for parameter, argument in zip_longest(self.parameters, arguments):
+            if not argument:
+                raise Template.InstanciationError('Too many template parameters')
+            if not parameter:
+                if not agument.default_value:
+                    raise Template.InstanciationError('Too few template parameters')
+                else:
+                    argument = parameter.default_value
+            if not argument.is_valid(parameter):
+                if parameter.name:
+                    raise Template.InstanciationError('%s: Invalid template parameter' % parameter.name)
+                else:
+                    raise Template.InstanciationError('Invalid template parameter')
+            if parameter.name:
+                template_arguments[parameter.name] = { argument }
+        return self.specializations[0][1], template_arguments
