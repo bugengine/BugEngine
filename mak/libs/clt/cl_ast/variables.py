@@ -3,7 +3,7 @@ class Variable:
     def __init__(self, type, name, value, attributes, position):
         self.type = type
         self.name = name
-        self.value = value
+        self.default_value = value
         self.attributes = attributes
         self.position = position
 

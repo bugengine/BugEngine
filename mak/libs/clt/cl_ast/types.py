@@ -52,6 +52,31 @@ class Typename:
         return template_arguments.get(self.name, self)
 
 
+class DependentTypeName:
+    def __init__(self, name):
+        self.name = name
+        self.resolved_to = None
+
+    def get_token_type(self):
+        return 'TYPENAME_ID'
+
+    def find_nonrecursive(self, name):
+        if self.name == name:
+            return self
+
+    def find(self, name):
+        return None
+
+    def type_name(self):
+        return self.name
+
+    def original_type(self):
+        return self.resolved_to
+
+    def instantiate(self, template_arguments):
+        return template_arguments.get(self.name, self)
+
+
 class Struct:
     class Definition:
         def __init__(self, parent):
@@ -117,6 +142,9 @@ class Type:
 
     def original_type(self):
         return self.base_type.original_type()
+
+    def is_valid(self, type):
+        return isinstance(type, Typename)
 
 
 class Pointer:

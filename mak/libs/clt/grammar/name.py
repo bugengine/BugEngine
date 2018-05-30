@@ -1,3 +1,6 @@
+from .. import cl_ast
+
+
 class Name:
     def __init__(self, lexer, name, position, target = None, qualified = False,
                        dependent = False, resolved = True):
@@ -18,6 +21,7 @@ class Name:
                     qualified = True,
                     dependent = self.dependent or other.dependent,
                     resolved = self.resolved and other.resolved)
+
 
 def p_id(p):
     """
@@ -69,11 +73,17 @@ def p_template_struct_id(p):
         typename_id : TEMPLATE_TYPENAME_ID template_arguments
         typename_id_shadow : TEMPLATE_TYPENAME_ID_SHADOW template_arguments
     """
-    target = p.slice[1].found_object.create_instance(p[2])
+    try:
+        target = p.slice[1].found_object.create_instance(p[2])
+    except cl_ast.templates.Template.InstanciationError as e:
+        target = None
+        p.lexer._error(e.msg, p.position(2))
+        p.lexer._note('Template %s declared here' % p[1], p.slice[1].found_object.position)
     p[0] = Name(p.lexer, (p[1],), p.position(1), target,
                 qualified = not p.slice[1].type.endswith('SHADOW'),
                 resolved = (p.slice[1].type.find('TYPENAME') == -1))
-    p.lexer.set_search_scope_ifn(target)
+    if target:
+        p.lexer.set_search_scope_ifn(target)
 
 
 def p_object_name_namespace(p):

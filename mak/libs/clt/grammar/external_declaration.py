@@ -6,7 +6,7 @@ def p_declaration_specifier(p):
         declaration_specifier : STATIC
                               | INLINE
     """
-    p[0] = cl_ast.Specifier(p[1], p.position(1))
+    p[0] = cl_ast.expressions.Specifier(p[1], p.position(1))
 
 
 def p_declaration_specifier_list_end(p):
@@ -136,7 +136,7 @@ def p_external_declaration_typedef(p):
     """
         external_declaration : TYPEDEF type typedef_name SEMI
     """
-    p.lexer.scopes[-1].add(cl_ast.Typedef(p[3], p[2], p.position(3)))
+    p.lexer.scopes[-1].add(cl_ast.types.Typedef(p[3], p[2], p.position(3)))
 
 
 def p_external_declaration_error(p):

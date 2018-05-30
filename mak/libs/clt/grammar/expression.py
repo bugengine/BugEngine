@@ -1,3 +1,6 @@
+from .. import cl_ast
+
+
 def p_value(p):
     """
         expression : FLOAT_CONST
@@ -21,9 +24,12 @@ def p_value_object(p):
     """
         expression : object_name
     """
-    if not p[1].target and not p[1].dependent:
-        p.lexer._error('Unknown object: %s' % ('::'.join(p[1].name)), p[1].position)
-    p[0] = p[1]
+    if p[1].dependent:
+        p[0] = cl_ast.values.DependentValueName(p[1])
+    else:
+        p[0] = p[1].target
+        if not p[0]:
+            p.lexer._error('Unknown object: %s' % ('::'.join(p[1].name)), p[1].position)
 
 
 

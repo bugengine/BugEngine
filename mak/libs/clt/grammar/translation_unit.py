@@ -5,7 +5,7 @@ def p_translation_unit_start(p):
     """
         translation_unit_start :
     """
-    p[0] = cl_ast.Root((0, 0))
+    p[0] = cl_ast.namespaces.Root((0, 0))
     p.lexer.push_scope(p[0])
 
 
