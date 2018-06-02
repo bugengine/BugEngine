@@ -24,27 +24,6 @@ def to_string(self):
                             tgt_str)
 
 
-def create_namespace_file(task):
-    with open(task.outputs[0].abspath(), 'w') as f:
-        namespaces = []
-        for k_name, k in task.generator.kernels:
-            full_ns = ['Kernels']
-            full_ns += [n.capitalize() for n in k_name[:-1]]
-            for i in range(1, len(full_ns)+1):
-                ns = full_ns[0:i]
-                if ns not in namespaces:
-                    namespaces.append(ns)
-        pch = getattr(task, 'pch', '')
-        if pch:
-            f.write('#include <%s>\n' % pch)
-        f.write('#include <plugin/stdafx.h>\n')
-        f.write('#include <rtti/engine/namespace.hh>\n')
-
-        for n in namespaces:
-            f.write('BE_REGISTER_NAMESPACE_%d(%s);\n'%(len(n), ', '.join(n)))
-NamespaceTask = Task.task_factory("namespace", create_namespace_file, color='CYAN')
-
-
 def log_display(self, bld):
     if not Options.options.silent:
         old_log_display(self, bld)
@@ -937,19 +916,6 @@ def create_compiled_task(self, name, node):
     except AttributeError:
         self.compiled_tasks = [task]
     return task
-
-
-@feature('preprocess')
-@before_method('process_source')
-def create_kernel_namespace(self):
-    kernels = getattr(self, 'kernels', [])
-    if kernels:
-        out = self.make_bld_node('src', None, 'namespace.cc')
-        self.create_task('namespace', [], [out])
-        try:
-            self.out_sources.append(out)
-        except:
-            self.out_sources = [out]
 
 
 @extension('.rc')
