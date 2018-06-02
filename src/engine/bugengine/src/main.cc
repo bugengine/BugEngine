@@ -19,8 +19,6 @@
 #include    <cstdlib>
 #include    <unistd.h>
 
-BE_REGISTER_NAMESPACE_2_NAMED(bugengine, BugEngine, MainSettings);
-
 namespace
 {
     class FileLogListener : public BugEngine::ILogListener

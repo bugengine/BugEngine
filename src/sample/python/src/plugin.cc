@@ -8,4 +8,3 @@
 #include    <bugengine/application.hh>
 
 BE_PLUGIN_REGISTER(BugEngine::PythonSample);
-BE_REGISTER_NAMESPACE_2(BugEngine, TestCases)

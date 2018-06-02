@@ -6,5 +6,4 @@
 #include    <plugin/plugin.hh>
 #include    <rtti/engine/namespace.hh>
 
-BE_REGISTER_NAMESPACE_2(BugEngine, ParticleRain);
 BE_PLUGIN_REGISTER(BugEngine::ParticleRain::ParticleRain);
