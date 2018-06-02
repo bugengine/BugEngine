@@ -119,7 +119,7 @@ minitl::array< weak<BugEngine::Kernel::IParameter> > %(Name)sTask::makeParameter
     return result;
 }
 
-ref< %(Name)sTask::Kernel > %(Name)sTask::s_kernel = ref< %(Name)sTask::Kernel >::create(BugEngine::Arena::game());
+ref< %(Name)sTask::Kernel > %(Name)sTask::s_kernel = ref< %(Name)sTask::Kernel >::create(BugEngine::Arena::task());
 
 %(end_Namespace)s
 """
