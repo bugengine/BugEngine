@@ -41,6 +41,7 @@ namespace BugEngine { namespace Plugin
         }                                                                                           \
     }
 #define BE_PLUGIN_NAMESPACE_REGISTER_NAMED__(name, id)                                              \
+    BE_PLUGIN_REGISTER_KERNELS_(id)                                                                 \
     BE_PLUGIN_NAMESPACE_CREATE_(id)                                                                 \
     _BE_PLUGIN_EXPORT const BugEngine::RTTI::Class* be_pluginNamespace()                            \
     {                                                                                               \
