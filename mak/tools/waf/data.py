@@ -44,7 +44,6 @@ class docgen(Task.Task):
 
 class nsdef(Task.Task):
     def run(self):
-        print(self.generator.env.PLUGIN)
         seen = set(['BugEngine'])
         with open(self.outputs[0].abspath(), 'w') as namespace_file:
             pch = getattr(self, 'pch', '')
