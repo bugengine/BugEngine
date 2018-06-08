@@ -129,7 +129,7 @@ void Application::unload(Resource::Resource& resource)
     if (m_worldCount == 0)
     {
         be_info("Last World destroyed - stopping application");
-        m_updateLoop = Task::ITask::CallbackConnection();
+        m_worldLoop = Task::ITask::CallbackConnection();
     }
     resource.clearRefHandle();
 }

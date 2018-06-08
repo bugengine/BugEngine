@@ -1,3 +1,9 @@
+try:
+    import cPickle
+except ImportError:
+    import pickle as cPickle
+
+
 def helper_name(struct_owners):
     if struct_owners:
         return '::'.join(i.helper_name() for i in struct_owners) + '::'
@@ -72,6 +78,9 @@ class CppObject(object):
 
     def write_object(self, owner, struct_owners, prefix,namespace, object_name, definition, instance):
         return object_name
+
+    def write_namespaces(self, namespace_buffer):
+        pass
 
 
 class Parameter(CppObject):
@@ -869,6 +878,11 @@ class Namespace(Container):
     def write_object(self, owner, struct_owner, prefix, namespace, object_name, definition, instance):
         return object_name
 
+    def write_namespaces(self, namespace_buffer):
+        cPickle.dump(self.name, namespace_buffer, protocol=0)
+        for o in self.objects:
+            o.write_namespaces(namespace_buffer)
+
 
 class AnonymousNamespace(Container):
     def __init__(self):
@@ -951,3 +965,7 @@ class Root(Container):
                 next_object = object.write_object(self, [], '', [], next_object, definition, instance)
             instance.write('}\n\n')
         definition.write('\n\n')
+
+    def write_namespaces(self, namespace_buffer):
+        for o in self.objects:
+            o.write_namespaces(namespace_buffer)

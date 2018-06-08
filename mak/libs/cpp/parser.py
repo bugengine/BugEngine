@@ -28,6 +28,7 @@ def parse(filename, pickle_file, macro_files, module_name):
 
         result = parser.parse(input.read(), lexer=lexer.lexer)
 
-    result.error_count = lexer.lexer.error_count
-    result.includes = lexer.lexer.includes
+    if result:
+        result.error_count = lexer.lexer.error_count
+        result.includes = lexer.lexer.includes
     return result

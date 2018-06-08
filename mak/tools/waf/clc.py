@@ -9,8 +9,8 @@ from waflib.Tools import c_preproc
 
 class cpp(Task.Task):
     "Preprocesses files"
-    run_str = '${CC_CPP} ${ARCH_ST:ARCH} ${CPPFLAGS} ${FRAMEWORKPATH_ST:FRAMEWORKPATH} ${CPPPATH_ST:INCPATHS} ${DEFINES_ST:DEFINES} -D_CLC=1 ${CC_CPP_SRC_F}${SRC[0].abspath()} ${CC_CPP_TGT_F}${TGT}'
-    vars    = ['CCDEPS']
+    run_str = '${CC_CPP} ${ARCH_ST:ARCH} ${CPPFLAGS} ${FRAMEWORKPATH_ST:FRAMEWORKPATH} ${CPPPATH_ST:INCPATHS} ${DEFINES_ST:DEFINES} -D_CLC=1 -D__attribute__(x)= ${CC_CPP_SRC_F}${SRC[0].abspath()} ${CC_CPP_TGT_F}${TGT}'
+    vars    = ['CLCDEPS']
     ext_out = ['.i']
     scan    = c_preproc.scan
     color   = 'PINK'

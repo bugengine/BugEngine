@@ -5,7 +5,6 @@
 #include    <resource/resource.hh>
 #include    <rtti/engine/namespace.hh>
 
-BE_REGISTER_NAMESPACE_2_(bugengine, BugEngine, Resource);
 
 namespace BugEngine { namespace Resource
 {

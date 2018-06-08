@@ -379,7 +379,7 @@ class QtDevice(QtObject):
 class QtPlatform(QtObject):
     published_vars = [
         ('PE.Profile.AutoDetected', False),
-        ('PE.Profile.Data', True),
+        ('PE.Profile.Data', False),
         ('PE.Profile.Icon', True),
         ('PE.Profile.Id', False),
         ('PE.Profile.MutableInfo', True),
@@ -404,6 +404,7 @@ class QtPlatform(QtObject):
                     ('PE.Profile.SysRoot', sysroot),
                     ('PE.Profile.ToolChain', toolchain_c),
                     ('PE.Profile.ToolChains', [('C', toolchain_c), ('Cxx', toolchain_cxx)]),
+                    ('PE.Profile.ToolChainsV3', [('C', toolchain_c), ('Cxx', toolchain_cxx)]),
                     ('QtPM4.mkSPecInformation', ''),
                     ('QtSupport.QtInformation', -1),
                 ]
@@ -571,10 +572,14 @@ class QtCreator(Build.BuildContext):
                     else:
                         platform = QtPlatform(self, '')
                         platform.load_from_node(data.getElementsByTagName('valuemap')[0])
-                        platform.guid = platform.PE_Profile_Id
-                        self.platforms.append((platform.PE_Profile_Id, platform))
-                        if platform.PE_Profile_Name.startswith('BugEngine:'):
-                            self.platforms_to_remove.append(platform)
+                        try:
+                            platform.guid = platform.PE_Profile_Id
+                        except AttributeError:
+                            pass
+                        else:
+                            self.platforms.append((platform.PE_Profile_Id, platform))
+                            if platform.PE_Profile_Name.startswith('BugEngine:'):
+                                self.platforms_to_remove.append(platform)
 
 
     def build_platform_list(self):

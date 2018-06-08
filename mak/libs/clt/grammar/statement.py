@@ -79,15 +79,15 @@ def p_push_for_scope(p):
     """
         push_for_scope :
     """
-    p[0] = cl_ast.ForStatement(p.position(-1))
-    p.lexer.scopes.append(p[0])
+    p[0] = cl_ast.statements.ForStatement(p.position(-1))
+    p.lexer.push_scope(p[0])
 
 
 def p_pop_for_scope(p):
     """
         pop_for_scope :
     """
-    p.lexer.scopes.pop(-1)
+    p.lexer.pop_scope()
 
 
 def p_statement_for(p):

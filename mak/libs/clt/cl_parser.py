@@ -7,12 +7,15 @@ def set_position(p, s1, s2):
     p.slice[s1].lineno = p.lineno(s2)
     p.slice[s1].lexpos, p.slice[s1].endlexpos = p.lexspan(s2)
 
+def set_position_absolute(p, s1, position):
+    p.slice[s1].lineno, p.slice[s1].lexpos, p.slice[s1].endlexpos = position
 
 def position(p, s):
     return (p.lineno(s),) + p.lexspan(s)
 
 
 yacc.YaccProduction.set_position = set_position
+yacc.YaccProduction.set_position_absolute = set_position_absolute
 yacc.YaccProduction.position = position
 
 
