@@ -97,12 +97,12 @@ if __name__ == '__main__':
                 for t in arg.tags:
                     if t[0] == 'kernel_param':
                         bugengine_names = {
-                            'be_segment':      '::Kernel::segment',
-                            'be_segments':     '::Kernel::segments',
-                            'be_stream':       '::Kernel::stream',
-                            'be_texture1d':    '::Kernel::texture1d',
-                            'be_texture2d':    '::Kernel::texture2d',
-                            'be_texture3d':    '::Kernel::texture3d',
+                            'be_segment':      '::Kernel::Segment',
+                            'be_segments':     '::Kernel::Segments',
+                            'be_stream':       '::Kernel::Stream',
+                            'be_texture1d':    '::Kernel::Texture1d',
+                            'be_texture2d':    '::Kernel::Texture2d',
+                            'be_texture3d':    '::Kernel::Texture3d',
                         }
                         try:
                             bugengine_name = bugengine_names[t[1]]

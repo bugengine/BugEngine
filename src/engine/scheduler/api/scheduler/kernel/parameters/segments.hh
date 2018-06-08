@@ -6,6 +6,8 @@
 /**************************************************************************************************/
 #include    <scheduler/stdafx.h>
 #include    <scheduler/kernel/parameters/iparameter.script.hh>
+#include    <scheduler/kernel/parameters/parameters.hh>
+#include    <kernel/input/segments.hh>
 
 
 namespace BugEngine { namespace Kernel
@@ -17,6 +19,12 @@ class Segments : public IParameter
 public:
     Segments() {}
     ~Segments() {}
+};
+
+template< typename T >
+struct ParamTypeToKernelType< ::Kernel::segments<T> >
+{
+    typedef Segments<typename minitl::remove_const<T>::type> Type;
 };
 
 }}

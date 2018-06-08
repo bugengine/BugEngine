@@ -6,4 +6,3 @@
 #include    <rtti/engine/namespace.hh>
 
 BE_PLUGIN_NAMESPACE_REGISTER();
-BE_REGISTER_NAMESPACE_2(BugEngine, Double);

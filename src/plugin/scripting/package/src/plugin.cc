@@ -7,4 +7,3 @@
 #include    <rtti/engine/namespace.hh>
 
 BE_PLUGIN_REGISTER(BugEngine::PackageManager::PackageLoader);
-BE_REGISTER_NAMESPACE_2(BugEngine, PackageManager);

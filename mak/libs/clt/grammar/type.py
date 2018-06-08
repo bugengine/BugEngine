@@ -69,7 +69,7 @@ def p_type_builtin(p):
              |  DOUBLE8
              |  DOUBLE16
     """
-    p[0] = cl_ast.Type(cl_ast.Builtin(p[1], p.position(1)))
+    p[0] = cl_ast.types.Type(cl_ast.types.Builtin(p[1], p.position(1)), p.position(1))
 
 
 def p_type_builtin_modifier_list_deprecated(p):
@@ -128,42 +128,55 @@ def p_type_deprecated(p):
             if s2[0] in incompatible_kw:
                 p.lexer._error("cannot combine with previous '%s' declaration specifier" % s2[0], s[1])
         result = rebuild_pattern%rebuild
-    p[0] = cl_ast.Type(cl_ast.Builtin(result, p.position(1)))
+    p[0] = cl_ast.types.Type(cl_ast.types.Builtin(result, p.position(1)), p.position(1))
 
 
 def p_type_type_name(p):
     """
         type : type_name
     """
-    p[0] = cl_ast.Type(p[1][2])
+    if p[1].dependent:
+        p[0] = cl_ast.types.Type(cl_ast.types.DependentTypeName(p[1]), p[1].position)
+    else:
+        p[0] = cl_ast.types.Type(p[1].target, p[1].position)
+
+
+def p_type_type_name_typename(p):
+    """
+        type : TYPENAME object_name
+    """
+    if not p[2].dependent:
+        p.lexer._error('Use of typename in non-dependent name %s' % ('::'.join(p[2].name)),
+                       p[2].position)
+    p[0] = cl_ast.types.Type(cl_ast.types.DependentTypeName(p[2]), p[2].position) #TODO
 
 
 def p_type_type_decl(p):
     """
         type : typedecl
     """
-    p[0] = cl_ast.Type(p[1])
+    p[0] = cl_ast.types.Type(p[1], p.position(1))
 
 
 def p_type_ptr(p):
     """
         type : type TIMES
     """
-    p[0] = cl_ast.Type(cl_ast.Pointer(p[1], p.position(2)))
+    p[0] = cl_ast.types.Type(cl_ast.types.Pointer(p[1], p.position(2)), p.position(2))
 
 
 def p_type_reference(p):
     """
         type : type AND
     """
-    p[0] = cl_ast.Type(cl_ast.Reference(p[1], p.position(2)))
+    p[0] = cl_ast.types.Type(cl_ast.types.Reference(p[1], p.position(2)), p.position(2))
 
 
 def p_type_void_ptr(p):
     """
         type : VOID TIMES
     """
-    p[0] = cl_ast.Type(cl_ast.Pointer(cl_ast.Builtin(p[1], p.position(1)), p.position(2)))
+    p[0] = cl_ast.types.Type(cl_ast.types.Pointer(cl_ast.types.Builtin(p[1], p.position(1)), p.position(2)), p.position(2))
 
 
 def p_type_const(p):

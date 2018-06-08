@@ -11,7 +11,6 @@
 #include    <taskscheduler.hh>
 #include    <rtti/engine/namespace.hh>
 
-BE_REGISTER_NAMESPACE_2_NAMED(bugengine, BugEngine, Kernel)
 
 namespace BugEngine
 {

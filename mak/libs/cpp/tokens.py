@@ -45,7 +45,7 @@ reserved = {
     '__local': '__LOCAL',
     '__global': '__GLOBAL',
     'restrict': 'RESTRICT',
-    '__restrict': '__RESTRICT'
+    '__restrict': '__RESTRICT',
 }
 
 tokens=[

@@ -13,7 +13,7 @@ except ImportError:
         from io import StringIO
 
 option_decl = OptionParser()
-option_decl.set_usage('ddf.py [options] input out_def out_instances out_doc')
+option_decl.set_usage('ddf.py [options] input out_def out_instances out_doc out_namespaces')
 option_decl.add_option("-d", dest="macro_file", action="append", help="Add the content of <macrofile> to the macros, one macro per line")
 option_decl.add_option("-p", "--pch", dest="pch", help="Insert an include for precompiled header at the start of the file")
 option_decl.add_option("-m", "--module", dest="module", help="Module root")
@@ -24,7 +24,7 @@ if __name__ == '__main__':
     if not args:
         option_decl.print_help()
         sys.exit(1)
-    elif len(args) != 4:
+    elif len(args) != 5:
         option_decl.print_help()
         sys.exit(1)
     else:
@@ -44,6 +44,8 @@ if __name__ == '__main__':
                 i.write(instances.getvalue())
             with open(args[3], 'w') as d:
                 d.write(docs.getvalue())
+            with open(args[4], 'wb') as namespace_file:
+                result.write_namespaces(namespace_file)
             sys.exit(result.error_count)
         except Exception as e:
             print(e)

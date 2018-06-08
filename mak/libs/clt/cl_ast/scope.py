@@ -1,0 +1,16 @@
+class Scope:
+    def __init__(self, position):
+        self.members = []
+        self.position = position
+
+    def find(self, name):
+        for m in self.members:
+            sub = m.find_nonrecursive(name)
+            if sub:
+                return sub
+
+    def add(self, member):
+        self.members.append(member)
+
+    def instantiate(self, template_arguments):
+        return self
