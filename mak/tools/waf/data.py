@@ -31,6 +31,7 @@ ${TGT[3].abspath()}
 cls = Task.task_factory('datagen', ddf, [], 'PINK', ext_in='.h .hh .hxx', ext_out='.cc')
 cls.scan = scan
 
+namespace_register = 'BE_REGISTER_NAMESPACE_%d_NAMED(%s, %s)\n'
 
 class docgen(Task.Task):
     def process_node(self, node):
@@ -57,7 +58,10 @@ class nsdef(Task.Task):
                             namespace = cPickle.load(in_file)
                             if '::'.join(namespace) not in seen:
                                 seen.add('::'.join(namespace))
-                                namespace_file.write('BE_REGISTER_NAMESPACE_%d_NAMED(%s, %s)\n' % (len(namespace), self.generator.env.PLUGIN, ', '.join(namespace)))
+                                line = namespace_register % (len(namespace),
+                                                             self.generator.env.PLUGIN,
+                                                             ', '.join(namespace))
+                                namespace_file.write(line)
                         except EOFError:
                             break
         return 0
