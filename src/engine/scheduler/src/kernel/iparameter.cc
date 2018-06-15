@@ -7,7 +7,7 @@
 #include    <scheduler/kernel/imemoryhost.hh>
 
 
-namespace BugEngine { namespace Kernel
+namespace BugEngine { namespace KernelScheduler
 {
 
 IParameter::IParameter()

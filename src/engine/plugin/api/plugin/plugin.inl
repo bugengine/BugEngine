@@ -16,9 +16,9 @@ namespace BugEngine { namespace Plugin
 {
 
 #define BE_PLUGIN_REGISTER_KERNELS_(id)                                                             \
-    BugEngine::Kernel::Kernel::KernelList&   getKernelList_##id()                                   \
+    BugEngine::KernelScheduler::Kernel::KernelList&   getKernelList_##id()                          \
     {                                                                                               \
-        static BugEngine::Kernel::Kernel::KernelList s_result;                                      \
+        static BugEngine::KernelScheduler::Kernel::KernelList s_result;                             \
         return s_result;                                                                            \
     }
 
@@ -90,11 +90,11 @@ namespace BugEngine { namespace Plugin
     BE_PLUGIN_REGISTER_KERNELS_(project)                                                            \
     static ref<klass> create(const BugEngine::Plugin::Context& context)                             \
     {                                                                                               \
-        const BugEngine::Kernel::Kernel::KernelList& kernelList = getKernelList_##project();        \
-        for (BugEngine::Kernel::Kernel::KernelList::const_iterator it = kernelList.begin();         \
+        const BugEngine::KernelScheduler::Kernel::KernelList& kernelList=getKernelList_##project(); \
+        for (BugEngine::KernelScheduler::Kernel::KernelList::const_iterator it = kernelList.begin();\
              it != kernelList.end();                                                                \
              ++it)                                                                                  \
-            context.resourceManager->load(weak<const BugEngine::Kernel::Kernel>(it.operator->()));  \
+            context.resourceManager->load(weak<const BugEngine::KernelScheduler::Kernel>(it.operator->()));  \
         return ref<klass>::create(BugEngine::Arena::game(), context);                               \
     }                                                                                               \
     BE_PLUGIN_REGISTER_CREATE(&create)

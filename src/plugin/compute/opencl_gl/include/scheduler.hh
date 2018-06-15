@@ -8,7 +8,7 @@
 #include    <opencl/scheduler.hh>
 #include    <plugin/plugin.hh>
 
-namespace BugEngine { namespace Kernel { namespace OpenCL_GL
+namespace BugEngine { namespace KernelScheduler { namespace OpenCL_GL
 {
 
 class Scheduler : public OpenCL::Scheduler

@@ -5,7 +5,7 @@
 #include    <cpu/memorybuffer.hh>
 #include    <memoryhost.hh>
 
-namespace BugEngine { namespace Kernel { namespace CPU
+namespace BugEngine { namespace KernelScheduler { namespace CPU
 {
 
 MemoryBuffer::MemoryBuffer(weak<const MemoryHost> provider)

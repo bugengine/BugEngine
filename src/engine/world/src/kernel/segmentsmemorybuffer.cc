@@ -7,7 +7,7 @@
 namespace BugEngine { namespace World
 {
 
-SegmentsMemoryBuffer::SegmentsMemoryBuffer(weak<const Kernel::IMemoryHost> host)
+SegmentsMemoryBuffer::SegmentsMemoryBuffer(weak<const KernelScheduler::IMemoryHost> host)
     :   IMemoryBuffer(host)
 {
 }

@@ -4,6 +4,7 @@
 
 
 void kmain(u32 index, u32 total,
-           ::Kernel::segments<Obstacle>   obstacles)
+           Kernel::segments<Particle>   particles,
+           Kernel::segments<Obstacle>   obstacles)
 {
 }

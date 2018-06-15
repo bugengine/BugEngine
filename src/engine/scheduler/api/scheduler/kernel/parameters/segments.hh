@@ -10,7 +10,7 @@
 #include    <kernel/input/segments.hh>
 
 
-namespace BugEngine { namespace Kernel
+namespace BugEngine { namespace KernelScheduler
 {
 
 template< typename T >

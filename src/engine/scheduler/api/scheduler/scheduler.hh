@@ -24,7 +24,7 @@ namespace Task
     template< typename RANGE, typename BODY > class TaskItem;
 }
 
-namespace Kernel
+namespace KernelScheduler
 {
     class IScheduler;
 }
@@ -61,18 +61,18 @@ private:
     friend struct WorkItem;
 private:
     struct Buffer { char buffer[256]; };
-    i_u32                                       m_runningTasks;
-    i_bool                                      m_running;
-    minitl::pool<Buffer>                        m_taskPool;
-    scoped<Task::TaskScheduler>                 m_taskScheduler;
-    minitl::vector< weak<Kernel::IScheduler> >  m_kernelSchedulers;
+    i_u32                                               m_runningTasks;
+    i_bool                                              m_running;
+    minitl::pool<Buffer>                                m_taskPool;
+    scoped<Task::TaskScheduler>                         m_taskScheduler;
+    minitl::vector< weak<KernelScheduler::IScheduler> > m_kernelSchedulers;
 private:
     void notifyEnd();
 private:
     void queueTasks(Task::ITaskItem* head, Task::ITaskItem* tail, u32 count, Priority priority);
     void queueTasks(Task::ITaskItem* head, Task::ITaskItem* tail, u32 count);
     void queueKernel(weak<Task::KernelTask> task,
-                     const minitl::array< weak<Kernel::IParameter> >& parameters);
+                     const minitl::array< weak<KernelScheduler::IParameter> >& parameters);
     void* allocate(size_t size);
     void  release(void* t, size_t size);
     template< typename T > inline void* allocateTask();
@@ -82,8 +82,8 @@ public:
     ~Scheduler();
 
     void mainThreadJoin();
-    void addKernelScheduler(weak<Kernel::IScheduler> scheduler);
-    void removeKernelScheduler(weak<Kernel::IScheduler> scheduler);
+    void addKernelScheduler(weak<KernelScheduler::IScheduler> scheduler);
+    void removeKernelScheduler(weak<KernelScheduler::IScheduler> scheduler);
     u32 workerCount() const;
 };
 

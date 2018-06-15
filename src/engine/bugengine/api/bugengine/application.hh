@@ -14,7 +14,7 @@
 namespace BugEngine
 {
 
-namespace Kernel
+namespace KernelScheduler
 {
 class IKernelScheduler;
 }
@@ -37,20 +37,20 @@ private:
         Task::TaskGroup::TaskEndConnection      end;
     };
 private:
-    ref<Folder> const                           m_dataFolder;
-    weak<Scheduler>                             m_scheduler;
-    weak<Resource::ResourceManager>             m_resourceManager;
-    Plugin::Context const                       m_pluginContext;
-    Plugin::Plugin<Kernel::IKernelScheduler>    m_cpuKernelScheduler;
-    ref<Task::TaskGroup>                        m_updateTask;
-    ref<Task::TaskGroup>                        m_worldTask;
-    minitl::vector< UpdateTask >                m_tasks;
-    Task::ITask::CallbackConnection             m_updateLoop;
-    Task::ITask::CallbackConnection             m_forceContinue;
-    Task::ITask::CallbackConnection             m_worldLoop;
-    size_t                                      m_resourceLoadingCount;
-    u32                                         m_worldCount;
-    bool                                        m_runLoop;
+    ref<Folder> const                                   m_dataFolder;
+    weak<Scheduler>                                     m_scheduler;
+    weak<Resource::ResourceManager>                     m_resourceManager;
+    Plugin::Context const                               m_pluginContext;
+    Plugin::Plugin<KernelScheduler::IKernelScheduler>   m_cpuKernelScheduler;
+    ref<Task::TaskGroup>                                m_updateTask;
+    ref<Task::TaskGroup>                                m_worldTask;
+    minitl::vector< UpdateTask >                        m_tasks;
+    Task::ITask::CallbackConnection                     m_updateLoop;
+    Task::ITask::CallbackConnection                     m_forceContinue;
+    Task::ITask::CallbackConnection                     m_worldLoop;
+    size_t                                              m_resourceLoadingCount;
+    u32                                                 m_worldCount;
+    bool                                                m_runLoop;
 private:
     void frameUpdate();
     void updateResources();

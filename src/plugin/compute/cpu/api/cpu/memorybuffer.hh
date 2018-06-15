@@ -9,7 +9,7 @@
 #include    <kernel/input/segment_part.hh>
 
 
-namespace BugEngine { namespace Kernel { namespace CPU
+namespace BugEngine { namespace KernelScheduler { namespace CPU
 {
 
 class MemoryHost;

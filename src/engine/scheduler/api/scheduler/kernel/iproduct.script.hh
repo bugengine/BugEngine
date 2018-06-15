@@ -9,7 +9,7 @@
 #include    <scheduler/kernel/parameters/iparameter.script.hh>
 
 
-namespace BugEngine { namespace Kernel
+namespace BugEngine { namespace KernelScheduler
 {
 
 class be_api(SCHEDULER) IProduct : public minitl::refcountable

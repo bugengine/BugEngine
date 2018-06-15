@@ -7,7 +7,7 @@
 #include    <scheduler/stdafx.h>
 #include    <resource/description.script.hh>
 
-namespace BugEngine { namespace Kernel
+namespace BugEngine { namespace KernelScheduler
 {
 
 class be_api(SCHEDULER) IMemoryHost : public minitl::refcountable

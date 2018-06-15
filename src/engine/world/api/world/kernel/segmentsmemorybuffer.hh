@@ -12,11 +12,11 @@
 namespace BugEngine { namespace World
 {
 
-class be_api(WORLD) SegmentsMemoryBuffer : public Kernel::IMemoryBuffer
+class be_api(WORLD) SegmentsMemoryBuffer : public KernelScheduler::IMemoryBuffer
                                          , public minitl::intrusive_list<SegmentsMemoryBuffer>::item
 {
 public:
-    SegmentsMemoryBuffer(weak<const Kernel::IMemoryHost> host);
+    SegmentsMemoryBuffer(weak<const KernelScheduler::IMemoryHost> host);
     ~SegmentsMemoryBuffer();
 };
 

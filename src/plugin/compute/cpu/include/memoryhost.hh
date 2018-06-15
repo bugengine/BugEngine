@@ -7,7 +7,7 @@
 #include    <stdafx.h>
 #include    <scheduler/kernel/imemoryhost.hh>
 
-namespace BugEngine { namespace Kernel { namespace CPU
+namespace BugEngine { namespace KernelScheduler { namespace CPU
 {
 
 class MemoryHost : public IMemoryHost
