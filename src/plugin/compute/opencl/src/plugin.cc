@@ -6,4 +6,4 @@
 #include    <plugin/plugin.hh>
 #include    <rtti/classinfo.script.hh>
 
-BE_PLUGIN_REGISTER(BugEngine::Kernel::OpenCL::Scheduler);
+BE_PLUGIN_REGISTER(BugEngine::KernelScheduler::OpenCL::Scheduler);

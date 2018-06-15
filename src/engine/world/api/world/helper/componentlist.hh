@@ -31,10 +31,10 @@ struct ComponentList : public TAIL
     enum { Index = TAIL::Index+1, Storage = (u32)STORAGE };
     typedef T Type;
     typedef TAIL Tail;
-    ref< Kernel::Product< Kernel::Segments<T> > > product;
+    ref< KernelScheduler::Product< KernelScheduler::Segments<T> > > product;
     ComponentList(weak<Task::ITask> task)
         :   TAIL(task)
-        ,   product(ref<Kernel::Product< Kernel::Segments<T> > >::create(Arena::game(), ref< Kernel::Segments<T> >::create(Arena::game()), task))
+        ,   product(ref<KernelScheduler::Product< KernelScheduler::Segments<T> > >::create(Arena::game(), ref< KernelScheduler::Segments<T> >::create(Arena::game()), task))
     {
     }
     static void addComponent(minitl::array< minitl::tuple< raw<const RTTI::Class>, u32 > >& componentList, u32 count = 0)
@@ -55,9 +55,9 @@ struct ComponentList<T, STORAGE, void>
     enum { Index = 0, Storage = STORAGE };
     typedef T Type;
     typedef void Tail;
-    ref< Kernel::Product< Kernel::Segments<T> > > product;
+    ref< KernelScheduler::Product< KernelScheduler::Segments<T> > > product;
     ComponentList(weak<Task::ITask> task)
-        :   product(ref<Kernel::Product< Kernel::Segments<T> > >::create(Arena::game(), ref< Kernel::Segments<T> >::create(Arena::game()), task))
+        :   product(ref<KernelScheduler::Product< KernelScheduler::Segments<T> > >::create(Arena::game(), ref< KernelScheduler::Segments<T> >::create(Arena::game()), task))
     {
     }
     static void addComponent(minitl::array< minitl::tuple< raw<const RTTI::Class>, u32 > >& componentList, u32 count = 0)
@@ -74,7 +74,7 @@ namespace Helper
 template< typename T, typename T2, StorageSize STORAGE, typename TAIL >
 struct ProductGetter
 {
-    static weak< const Kernel::Product< Kernel::Segments<T> > > getProduct(const ComponentList<T2, STORAGE, TAIL>& list)
+    static weak< const KernelScheduler::Product< KernelScheduler::Segments<T> > > getProduct(const ComponentList<T2, STORAGE, TAIL>& list)
     {
         return ProductGetter<T, typename TAIL::Type, (StorageSize)TAIL::Storage, typename TAIL::Tail>::getProduct(list);
     }
@@ -83,7 +83,7 @@ struct ProductGetter
 template< typename T, StorageSize STORAGE, typename TAIL >
 struct ProductGetter<T, T, STORAGE, TAIL>
 {
-    static weak< const Kernel::Product< Kernel::Segments<T> > > getProduct(const ComponentList<T, STORAGE, TAIL>& list)
+    static weak< const KernelScheduler::Product< KernelScheduler::Segments<T> > > getProduct(const ComponentList<T, STORAGE, TAIL>& list)
     {
         return list.product;
     }
@@ -102,7 +102,7 @@ struct Property
             {0},
             be_typeid<T>::klass()->name,
             be_typeid<LIST>::type(),
-            be_typeid< weak< const Kernel::Product< Kernel::Segments<T> > > >::type(),
+            be_typeid< weak< const KernelScheduler::Product< KernelScheduler::Segments<T> > > >::type(),
             &LIST::template getProduct<T>
         };
         new (&properties[INDEX]) RTTI::Property(property);
@@ -119,7 +119,7 @@ struct Property<LIST, INDEX, T, STORAGE, void>
             {0},
             be_typeid<T>::klass()->name,
             be_typeid<LIST>::type(),
-            be_typeid< weak< const Kernel::Product< Kernel::Segments<T> > > >::type(),
+            be_typeid< weak< const KernelScheduler::Product< KernelScheduler::Segments<T> > > >::type(),
             &LIST::template getProduct<T>
         };
         new (&properties[INDEX]) RTTI::Property(property);

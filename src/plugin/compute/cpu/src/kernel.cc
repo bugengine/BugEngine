@@ -4,7 +4,7 @@
 #include    <stdafx.h>
 #include    <kernelobject.hh>
 
-namespace BugEngine { namespace Kernel { namespace CPU
+namespace BugEngine { namespace KernelScheduler { namespace CPU
 {
 
 CPUKernelTask::CPUKernelTask(weak<KernelObject> object)

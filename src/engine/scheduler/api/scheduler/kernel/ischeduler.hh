@@ -14,7 +14,7 @@ namespace BugEngine
 class Scheduler;
 }
 
-namespace BugEngine { namespace Kernel
+namespace BugEngine { namespace KernelScheduler
 {
 
 class IMemoryHost;

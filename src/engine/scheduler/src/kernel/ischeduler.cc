@@ -6,7 +6,7 @@
 #include    <scheduler/scheduler.hh>
 
 
-namespace BugEngine { namespace Kernel
+namespace BugEngine { namespace KernelScheduler
 {
 
 IScheduler::IScheduler(istring name, weak<Scheduler> scheduler)

@@ -8,7 +8,7 @@
 #include    <scheduler/kernel/parameters/iparameter.script.hh>
 
 
-namespace BugEngine { namespace Kernel
+namespace BugEngine { namespace KernelScheduler
 {
 
 template< typename T >

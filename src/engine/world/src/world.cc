@@ -12,7 +12,7 @@
 namespace BugEngine { namespace World
 {
 
-World::World(weak<EntityStorage> storage, minitl::array< weak<const Kernel::IProduct> > products)
+World::World(weak<EntityStorage> storage, minitl::array< weak<const KernelScheduler::IProduct> > products)
 :   m_task(ref<Task::TaskGroup>::create(Arena::task(), "world:update", Colors::make(89, 89, 180)))
 ,   m_storage(storage)
 ,   m_taskStart(Task::TaskGroup::TaskStartConnection(m_task, m_storage->initialTask()))
@@ -20,7 +20,7 @@ World::World(weak<EntityStorage> storage, minitl::array< weak<const Kernel::IPro
 ,   m_productEnds(Arena::task(), products.size())
 {
     minitl::array<Task::TaskGroup::TaskEndConnection>::iterator connection = m_productEnds.begin();
-    for (minitl::array< weak<const Kernel::IProduct> >::const_iterator product = products.begin();
+    for (minitl::array< weak<const KernelScheduler::IProduct> >::const_iterator product = products.begin();
          product != products.end();
          ++product, ++connection)
     {

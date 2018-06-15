@@ -6,4 +6,4 @@
 #include    <scheduler.hh>
 #include    <rtti/classinfo.script.hh>
 
-BE_PLUGIN_REGISTER(BugEngine::Kernel::CPU::Scheduler);
+BE_PLUGIN_REGISTER(BugEngine::KernelScheduler::CPU::Scheduler);

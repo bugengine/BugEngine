@@ -7,7 +7,7 @@
 #include    <opencl/stdafx.h>
 #include    <scheduler/kernel/imemoryhost.hh>
 
-namespace BugEngine { namespace Kernel { namespace OpenCL
+namespace BugEngine { namespace KernelScheduler { namespace OpenCL
 {
 
 class MemoryHost : public IMemoryHost
