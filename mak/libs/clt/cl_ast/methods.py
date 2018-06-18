@@ -1,23 +1,5 @@
 from .scope import Scope
-
-
-class Method(Scope):
-    def __init__(self, method_name, return_type, attributes, position):
-        Scope.__init__(self, position)
-        self.name = method_name
-        self.return_type = return_type
-        self.attributes = attributes
-        self.definition = None
-
-    def define(self, definition):
-        self.definition = definition
-
-    def get_token_type(self):
-        return 'METHOD_ID'
-
-    def find_nonrecursive(self, name):
-        if self.name == name:
-            return self
+from .types import Type, Pointer
 
 
 class Parameter:
@@ -34,6 +16,55 @@ class Parameter:
 
     def get_token_type(self):
         return 'VARIABLE_ID'
+
+
+class Overload(Scope):
+    def __init__(self, return_type, parameters, attributes, is_member, position):
+        Scope.__init__(self, position)
+        self.return_type = return_type
+        self.parameters = parameters
+        if is_member:
+            if not 'static' in attributes:
+                rtype = Type(is_member, is_member.position)
+                if 'const' in attributes:
+                    rtype.add_attribute('const')
+                rtype = Type(Pointer(rtype, is_member.position), is_member.position)
+                p = Parameter(rtype, 'this', None, [], is_member.position)
+                self.parameters = [p] + self.parameters
+        for p in self.parameters:
+            self.add(p)
+        self.attributes = attributes
+        self.definition = None
+        self.this = None
+        self.signature = '|'.join((p.type.signature() for p in self.parameters))
+
+    def define(self, definition):
+        self.definition = definition
+
+
+class Method(Scope):
+    def __init__(self, method_name, position):
+        Scope.__init__(self, position)
+        self.name = method_name
+        self.overloads = []
+
+    def get_token_type(self):
+        return 'METHOD_ID'
+
+    def find_nonrecursive(self, name):
+        if self.name == name:
+            return self
+
+    def find_overload(self, return_type, parameters, attributes, is_member, allow_creation, position):
+        new_overload = Overload(return_type, parameters, attributes, is_member, position)
+        for overload in self.overloads:
+            if overload.signature == new_overload.signature:
+                return overload
+        if allow_creation:
+            self.overloads.append(new_overload)
+            return new_overload
+        else:
+            return None
 
 
 class Body(Scope):

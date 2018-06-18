@@ -14,6 +14,19 @@ class Constant:
         return 'VARIABLE_ID'
 
 
+class Value:
+    def __init__(self, type, value, position):
+        self.type = type
+        self.value = value
+        self.position = position
+
+    def find_nonrecursive(self, name):
+        return None
+
+    def is_valid(self, type):
+        return False
+
+
 class DependentValueName:
     def __init__(self, name):
         self.name = name

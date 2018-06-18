@@ -1,23 +1,138 @@
 from .. import cl_ast
 
 
-def p_value(p):
+def p_value_float(p):
     """
         expression : FLOAT_CONST
-                   | HEX_FLOAT_CONST
-                   | INT_CONST_DEC
-                   | INT_CONST_OCT
-                   | INT_CONST_HEX
-                   | INT_CONST_BIN
-                   | CHAR_CONST
-                   | WCHAR_CONST
-                   | STRING_LITERAL
-                   | WSTRING_LITERAL
-                   | TRUE
-                   | FALSE
-                   | THIS
     """
-    p[0] = p[1]
+    type = cl_ast.types.Builtin('float', p.position(1))
+    type = cl_ast.types.Type(type, p.position(1))
+    type.add_modifier('const', p.position(1))
+    if p[1][-1] == 'f':
+        p[1] = p[1][:-1]
+    p[0] = cl_ast.values.Value(type, float(p[1]), p.position(1))
+
+
+def p_value_float_hex(p):
+    """
+        expression : HEX_FLOAT_CONST
+    """
+    type = cl_ast.types.Builtin('float', p.position(1))
+    type = cl_ast.types.Type(type, p.position(1))
+    type.add_modifier('const', position)
+    p[0] = cl_ast.values.Value(type, float.fromhex(p[1]), p.position(1))
+
+
+def int_to_value(string_value, base, position):
+    type = 'i32'
+    while string_value[-1] in ('l', 'u'):
+        if string_value[-1] == 'l':
+            type = type[0] + '64'
+        elif string_value[-1] == 'u':
+            type = 'u' + type[1:]
+        string_value = string_value[:-1]
+    value = int(string_value, base)
+    type = cl_ast.types.Builtin(type, position)
+    type = cl_ast.types.Type(type, position)
+    type.add_modifier('const', position)
+    return cl_ast.values.Value(type, value, position)
+
+
+def p_value_int_10(p):
+    """
+        expression : INT_CONST_DEC
+    """
+    p[0] = int_to_value(p[1], 10, p.position(1))
+
+
+def p_value_int_8(p):
+    """
+        expression : INT_CONST_OCT
+    """
+    p[0] = int_to_value(p[1], 8, p.position(1))
+
+
+def p_value_int_16(p):
+    """
+        expression : INT_CONST_HEX
+    """
+    p[0] = int_to_value(p[1][2:], 16, p.position(1))
+
+
+def p_value_int_2(p):
+    """
+        expression : INT_CONST_BIN
+    """
+    p[0] = int_to_value(p[1][2:], 2, p.position(1))
+
+
+def p_value_char(p):
+    """
+        expression : CHAR_CONST
+    """
+    type = cl_ast.types.Builtin('i8', p.position(1))
+    type = cl_ast.types.Type(type, p.position(1))
+    type.add_modifier('const', p.position(1))
+    str = eval(p[1])
+    p[0] = cl_ast.values.Value(type, str, p.position(1))
+
+
+def p_value_wchar(p):
+    """
+        expression : WCHAR_CONST
+    """
+    type = cl_ast.types.Builtin('i8', p.position(1))
+    type = cl_ast.types.Type(type, p.position(1))
+    type.add_modifier('const', p.position(1))
+    str = eval(p[1][1:])
+    p[0] = cl_ast.values.Value(type, str, p.position(1))
+
+
+def p_value_string_literal(p):
+    """
+        expression : STRING_LITERAL
+    """
+    type = cl_ast.types.Builtin('i8', p.position(1))
+    type = cl_ast.types.Type(type, p.position(1))
+    type.add_modifier('const', p.position(1))
+    str = eval(p[1])
+    str = str.encode('utf8')
+    p[0] = cl_ast.values.Value(type, str, p.position(1))
+
+
+def p_value_wstring_literal(p):
+    """
+        expression : WSTRING_LITERAL
+    """
+    type = cl_ast.types.Builtin('i8', p.position(1))
+    type = cl_ast.types.Type(type, p.position(1))
+    type.add_modifier('const', p.position(1))
+    str = eval(p[1][1:])
+    str = str.encode('utf32')
+    p[0] = cl_ast.values.Value(type, str, p.position(1))
+
+
+def p_value_true(p):
+    """
+        expression : TRUE
+                   | FALSE
+    """
+    type = cl_ast.types.Builtin('bool', p.position(1))
+    type = cl_ast.types.Type(type, p.position(1))
+    type.add_modifier('const', p.position(1))
+    p[0] = cl_ast.values.Value(type, p[1] == 'true', p.position(1))
+
+
+def p_value_this(p):
+    """
+        expression : THIS
+    """
+    p.lexer.lookup(p.slice[1])
+    try:
+        p[0] = p.slice[1].found_object
+    except AttributeError:
+        p.lexer._error('invalid use of \'this\' outside of a non-static member function', p.position(1))
+        p[0] = None
 
 
 def p_value_object(p):
