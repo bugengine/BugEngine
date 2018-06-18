@@ -154,10 +154,56 @@ def p_object_name(p):
                 qualified = not p.slice[1].type.endswith('SHADOW'))
 
 
+def p_operator_name(p):
+    """
+        operator_name : OPERATOR PLUS
+                      | OPERATOR MINUS
+                      | OPERATOR TIMES
+                      | OPERATOR DIVIDE
+                      | OPERATOR MOD
+                      | OPERATOR OR
+                      | OPERATOR AND
+                      | OPERATOR NOT
+                      | OPERATOR XOR
+                      | OPERATOR LSHIFT
+                      | OPERATOR RSHIFT
+                      | OPERATOR LOR
+                      | OPERATOR LAND
+                      | OPERATOR LNOT
+                      | OPERATOR LT
+                      | OPERATOR LE
+                      | OPERATOR GT
+                      | OPERATOR GE
+                      | OPERATOR EQ
+                      | OPERATOR NE
+                      | OPERATOR EQUALS
+                      | OPERATOR TIMESEQUAL
+                      | OPERATOR DIVEQUAL
+                      | OPERATOR MODEQUAL
+                      | OPERATOR PLUSEQUAL
+                      | OPERATOR MINUSEQUAL
+                      | OPERATOR LSHIFTEQUAL
+                      | OPERATOR RSHIFTEQUAL
+                      | OPERATOR ANDEQUAL
+                      | OPERATOR XOREQUAL
+                      | OPERATOR OREQUAL
+                      | OPERATOR PLUSPLUS
+                      | OPERATOR MINUSMINUS
+                      | OPERATOR ARROW
+                      | OPERATOR LPAREN RPAREN
+                      | OPERATOR LBRACKET RBRACKET
+                      | OPERATOR PERIOD
+                      | OPERATOR COMMA
+    """
+    p[0] = 'op%s' % p.slice[2].type.lower()
+
+
 def p_object_name_id(p):
     """
         object_name : ID                                                                %prec PRIO0
+                    | operator_name                                                     %prec PRIO0
         object_name_id_qualified : ID                                                   %prec PRIO0
+                                 | operator_name                                        %prec PRIO0
     """
     p[0] = Name(p.lexer, (p[1],), p.position(1), resolved = False)
 
@@ -186,4 +232,3 @@ def p_type_name_shadow(p):
                   | template_typename_id_shadow                                         %prec PRIO0
     """
     p[0] = p[1]
-
