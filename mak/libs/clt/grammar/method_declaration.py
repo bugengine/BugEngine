@@ -83,18 +83,23 @@ def p_create_method(p):
     """
     name = p[-1]
     if name.qualified:
-        if not name.target or name.target.get_token_type() != 'METHOD_ID':
+        if not name.target:
+            p.lexer._error('%s should have been declared inside of %s' % ('::'.join(name.name),
+                                                                          '::'.join(name.name[:-1])),
+                           name.position)
+            raise SyntaxError()
+        if name.target.get_token_type() != 'METHOD_ID':
             if len(name.name) > 1:
                 p.lexer._error('qualified name %s does not name a method' % '::'.join(name.name), name.position)
             else:
                 p.lexer._error('name %s does not name a method' % '::'.join(name.name), name.position)
-            if name.target:
-                p.lexer._note('previously declared here', name.target.position)
+            p.lexer._note('previously declared here', name.target.position)
             raise SyntaxError()
         else:
             p[0] = (len(name.name) == 1, name.target)
     else:
-        p[0] = (True, cl_ast.methods.Method(p[-1].name[-1], p.position(-1)))
+        parent = isinstance(p.lexer.scopes[-1], cl_ast.types.Struct) and p.lexer.scopes[-1] or None
+        p[0] = (True, cl_ast.methods.Method(p[-1].name[-1], p.position(-1), parent))
     p.set_position_absolute(0, name.position)
 
 
@@ -105,14 +110,16 @@ def p_create_constructor(p):
     if p.lexer.scopes[-1].definition.constructor:
         p[0] = p.lexer.scopes[-1].definition.constructor
     else:
-        p.lexer.scopes[-1].definition.constructor = p[0] = cl_ast.methods.Method(p[-1], p.position(-1))
+        p.lexer.scopes[-1].definition.constructor = p[0] = cl_ast.methods.Method(p[-1],
+                                                                          p.position(-1),
+                                                                          p.lexer.scopes[-1])
 
 
 def p_create_destructor(p):
     """
         create_destructor :
     """
-    p[0] = cl_ast.methods.Method('~'+p[-1], p.position(-1))
+    p[0] = cl_ast.methods.Method('~'+p[-1], p.position(-1), p.lexer.scopes[-1])
     if p.lexer.scopes[-1].definition.destructor:
         p.lexer._error('destructor cannot be redeclared', p.position(-1))
     else:
@@ -123,7 +130,8 @@ def p_create_castop(p):
     """
         create_castop :
     """
-    p[0] = cl_ast.methods.Method(p[-1], p.position(-1))
+    parent = isinstance(p.lexer.scopes[-1], cl_ast.types.Struct) and p.lexer.scopes[-1] or None
+    p[0] = cl_ast.methods.Method(p[-1], p.position(-1), parent)
 
 
 def p_create_method_definition(p):
@@ -197,6 +205,7 @@ def p_method_declaration_prefix(p):
     """
     p[0] = (p[2], p[4][0], p[1], p[4][1])
     p.set_position_absolute(0, p[4][1].position)
+    p.lexer.scopes[-1].add(p[4][1])
 
 
 def p_method_declaration_prefix_cast_operator(p):
@@ -205,6 +214,7 @@ def p_method_declaration_prefix_cast_operator(p):
     """
     p[0] = (p[3], True, p[1], p[4])
     p.set_position(0, 2)
+    p.lexer.scopes[-1].add(p[4])
 
 
 def p_method_declaration_prefix_destructor(p):
@@ -217,6 +227,32 @@ def p_method_declaration_prefix_destructor(p):
 
 def p_method_declaration_prefix_ctor(p):
     """
+        method_declaration_prefix : declaration_specifier_list object_name
+    """
+    name = p[2]
+    if name.qualified:
+        if not name.target:
+            p.lexer._error('%s should have been declared inside of %s' % ('::'.join(name.name),
+                                                                          '::'.join(name.name[:-1])),
+                           name.position)
+            raise SyntaxError()
+        if name.target.get_token_type() != 'METHOD_ID':
+            if len(name.name) > 1:
+                p.lexer._error('qualified name %s does not name a method' % '::'.join(name.name), name.position)
+            else:
+                p.lexer._error('name %s does not name a method' % '::'.join(name.name), name.position)
+            p.lexer._note('previously declared here', name.target.position)
+            raise SyntaxError()
+        else:
+            method = name.target
+            p[0] = (method.overloads[0].return_type, True, p[1], method)
+    else:
+        raise SyntaxError()
+    p.set_position_absolute(0, name.position)
+
+
+def p_method_declaration_prefix_ctor_2(p):
+    """
         method_declaration_prefix : declaration_specifier_list STRUCT_ID_SHADOW create_constructor
                                   | declaration_specifier_list TEMPLATE_STRUCT_ID_SHADOW create_constructor
     """
@@ -228,8 +264,7 @@ def p_method_declaration(p):
     """
         method_declaration : method_declaration_prefix push_method_scope LPAREN method_parameters RPAREN method_attributes pop_method_scope
     """
-    is_member = isinstance(p.lexer.scopes[-1], cl_ast.types.Struct) and p.lexer.scopes[-1] or None
-    p[0] = p[2].find_overload(p[1][0], p[4], p[1][2], is_member, p[1][1], p.position(1))
+    p[0] = p[2].find_overload(p[1][0], p[4], p[1][2], p[1][1], p.position(1))
     if not p[0]:
         p.lexer._error('Method defined with different signature', p.position(1))
 
@@ -239,4 +274,3 @@ def p_method_definition(p):
         method_definition : method_declaration push_overload_scope create_method_definition initializer_list_opt statement_block pop_method_scope
     """
     p[0] = p[1]
-

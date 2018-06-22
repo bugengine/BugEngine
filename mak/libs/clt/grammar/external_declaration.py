@@ -35,14 +35,18 @@ def p_external_declarations(p):
     """
         external_declarations : external_declarations external_declaration
     """
-    p[0] = p[1] + (p[2] and [p[2]] or [])
+    p[0] = p[1]
+    if p[2]:
+        p[0].append(p[2])
 
 
 def p_external_declarations_namespace(p):
     """
         external_declarations : external_declarations namespace_declaration
     """
-    p[0] = p[1] + (p[2] and [p[2]] or [])
+    p[0] = p[1]
+    if p[2]:
+        p[0].append(p[2])
 
 
 def p_external_declaration_empty(p):
@@ -142,5 +146,6 @@ def p_external_declaration_typedef(p):
 def p_external_declaration_error(p):
     """
         external_declaration : error SEMI
+                             | error statement_block
     """
     pass

@@ -15,17 +15,30 @@ struct A
     static void testStatic()
     {
     }
+    void operator++() {}
 };
 
+
+A::A()
+{
+}
+//void A::operator++()
+//{
+//}
+
 }
 
-/*void A::testInline2()
+NS::A::A()
 {
 }
 
-void A::testStatic()
+void NS::A::testInline2()
 {
-}*/
+}
+
+void NS::A::testStatic()
+{
+}
 
 
 void kmain(u32 index, u32 total)
