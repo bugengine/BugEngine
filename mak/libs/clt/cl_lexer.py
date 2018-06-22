@@ -68,13 +68,13 @@ class ClLexer:
 
     def lookup(self, token):
         if self.current_scope:
-            obj = self.current_scope.find(token.value)
+            obj = self.current_scope.find(token.value, True)
             if obj:
                 token.found_object = obj
                 token.type = obj.get_token_type()
         else:
             for s in self.scopes[::-1]:
-                obj = s.find(token.value)
+                obj = s.find(token.value, False)
                 if obj:
                     token.found_object = obj
                     token.type = obj.get_token_type()

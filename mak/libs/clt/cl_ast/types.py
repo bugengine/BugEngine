@@ -15,7 +15,7 @@ class Typedef:
     def type_name(self):
         return self.name
 
-    def find(self, name):
+    def find(self, name, is_current_scope):
         return self.type.find(name)
 
     #TODO: delete
@@ -41,7 +41,7 @@ class Typename:
         if self.name == name:
             return self
 
-    def find(self, name):
+    def find(self, name, is_current_scope):
         return None
 
     def type_name(self):
@@ -70,11 +70,11 @@ class DependentTypeName:
         if self.name == name:
             return self
 
-    def find(self, name):
+    def find(self, name, is_current_scope):
         return None
 
     def type_name(self):
-        return self.name
+        return '::'.join(self.name.name)
 
     def original_type(self):
         return self.resolved_to
@@ -83,7 +83,7 @@ class DependentTypeName:
         return template_arguments.get(self.name, self)
 
     def signature(self):
-        return 'typename{%s}' % ('::'.join(self.name.name))
+        return 'typename{%s}' % self.type_name()
 
 
 class Struct:
@@ -105,8 +105,10 @@ class Struct:
     def add(self, member):
         self.definition.members.append(member)
 
-    def find(self, name):
+    def find(self, name, is_current_scope):
         if self.definition:
+            if is_current_scope and name == self.name and self.definition.constructor:
+                return self.definition.constructor
             for m in self.definition.members:
                 sub = m.find_nonrecursive(name)
                 if sub:
@@ -157,7 +159,7 @@ class Type:
         self.modifier.append((modifier, position))
 
     def type_name(self):
-        return ' '.join([self.base_type.type_name()] + self.modifier)
+        return ' '.join([self.base_type.type_name()] + [m[0] for m in self.modifier])
 
     def original_type(self):
         return self.base_type.original_type()

@@ -224,47 +224,53 @@ def p_constructor_args_opt(p):
 
 def p_method_prototype_operator(p):
     """
-        method_prototype : method_return_type OPERATOR method_operator LEFT_PARENTHESIS method_args RIGHT_PARENTHESIS method_attribute_right_list
+        method_prototype : method_return_type name_operator method_operator LEFT_PARENTHESIS method_args RIGHT_PARENTHESIS method_attribute_right_list
     """
-    p[0] = Operator(p[3], p[1], p[5], p[7])
+    if not p[2]:
+        p[0] = Operator(p[3], p[1], p[5], p[7])
 
 
 def p_method_prototype_operator_cast(p):
     """
-        method_prototype : OPERATOR type LEFT_PARENTHESIS method_args RIGHT_PARENTHESIS method_attribute_right_list
+        method_prototype : name_operator type LEFT_PARENTHESIS method_args RIGHT_PARENTHESIS method_attribute_right_list
     """
-    p[0] = Method('#%s'%p[2], p[2], p[4], p[6])
+    if not p[1]:
+        p[0] = Method('#%s'%p[2], p[2], p[4], p[6])
 
 
 def p_method_prototype_constructor(p):
     """
         method_prototype : method_return_type LEFT_PARENTHESIS method_args RIGHT_PARENTHESIS method_attribute_right_list constructor_args_opt
     """
-    p[0] = Constructor(p.parser.stack[-1], p[1], p[1], p[3], p[5])
+    if p[1].find('::') == -1:
+        p[0] = Constructor(p.parser.stack[-1], p[1], p[1], p[3], p[5])
 
 
 def p_method_prototype_destructor(p):
     """
-        method_prototype : BITWISE_NOT ID LEFT_PARENTHESIS method_args RIGHT_PARENTHESIS method_attribute_right_list
+        method_prototype : name_destructor ID LEFT_PARENTHESIS method_args RIGHT_PARENTHESIS method_attribute_right_list
     """
-    p[0] = Destructor(p[2], 'void', p[4], p[6])
+    if not p[1]:
+        p[0] = Destructor(p[2], 'void', p[4], p[6])
 
 
 def p_method_prototype(p):
     """
         method_prototype : method_return_type name LEFT_PARENTHESIS method_args RIGHT_PARENTHESIS method_attribute_right_list
     """
-    p[0] = Method(p[2], p[1], p[4], p[6])
+    if p[2].find('::') == -1:
+        p[0] = Method(p[2], p[1], p[4], p[6])
 
 
 def p_method_decl(p):
     """
         method_decl : attribute_left_list method_prototype
     """
-    p[2].add_attributes(p[1][0])
-    p[2].add_tags(p[1][1])
-    if not 'template' in p[2].attributes:
-        p.parser.stack[-1].add_method(p[2])
+    if p[2]:
+        p[2].add_attributes(p[1][0])
+        p[2].add_tags(p[1][1])
+        if not 'template' in p[2].attributes:
+            p.parser.stack[-1].add_method(p[2])
 
 
 def p_method_pointer_name_opt(p):

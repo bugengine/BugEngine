@@ -39,7 +39,7 @@ class DependentValueName:
         if self.name == name:
             return self
 
-    def find(self, name):
+    def find(self, name, is_current_scope):
         return None
 
     def instantiate(self, template_arguments):

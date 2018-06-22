@@ -154,6 +154,15 @@ def p_object_name(p):
                 qualified = not p.slice[1].type.endswith('SHADOW'))
 
 
+def p_object_name_destructor(p):
+    """
+        object_name : NOT STRUCT_ID                                                     %prec PRIO0
+        object_name_id_qualified : NOT STRUCT_ID                                        %prec PRIO0
+    """
+    p[0] = Name(p.lexer, (p[1]+p[2],), p.position(1), p.slice[1].found_object,
+                qualified = True)
+
+
 def p_operator_name(p):
     """
         operator_name : OPERATOR PLUS
