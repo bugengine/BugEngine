@@ -6,7 +6,10 @@ import sys
 
 
 def build_parser(pickle_file):
-    return yacc.yacc(start='unit', picklefile=pickle_file, debug=1)
+    return yacc.yacc(start='unit',
+                     picklefile=pickle_file,
+                     debugfile=pickle_file+'.debug',
+                     debug=1)
 
 
 def p_error(p):
