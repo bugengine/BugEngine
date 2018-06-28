@@ -1,5 +1,6 @@
 from .scope import Scope
 from .types import Type, Pointer
+from .expressions import Specifier
 
 
 class Parameter:
@@ -19,15 +20,17 @@ class Parameter:
 
 
 class Overload(Scope):
-    def __init__(self, return_type, parameters, attributes, is_member, position):
+    def __init__(self, owner, return_type, parameters, attributes, is_member, position):
         Scope.__init__(self, position)
+        self.owner = owner
         self.return_type = return_type
         self.parameters = parameters
         if is_member:
-            if 'static' not in attributes:
+            if 'static' not in [a.specifier for a in attributes]:
                 rtype = Type(is_member, is_member.position)
-                if 'const' in attributes:
-                    rtype.add_attribute('const')
+                for a in attributes:
+                    if a.specifier == 'const':
+                        rtype.add_modifier('const', a.position)
                 rtype = Type(Pointer(rtype, is_member.position), is_member.position)
                 p = Parameter(rtype, 'this', None, [], is_member.position)
                 self.parameters = [p] + self.parameters
@@ -57,8 +60,10 @@ class Method(Scope):
             return self
 
     def find_overload(self, return_type, parameters, attributes, allow_creation, position):
-        new_overload = Overload(return_type, parameters, attributes, self.owner, position)
-        new_overload_static = Overload(return_type, parameters, attributes+['static'], self.owner, position)
+        new_overload = Overload(self, return_type, parameters, attributes, self.owner, position)
+        new_overload_static = Overload(self, return_type, parameters,
+                                       attributes+[Specifier('static', position)],
+                                       self.owner, position)
         for overload in self.overloads:
             if overload.signature == new_overload.signature:
                 return overload
@@ -70,6 +75,10 @@ class Method(Scope):
         else:
             return None
 
+
+class SpecialMethod(Method):
+    def get_token_type(self):
+        return 'SPECIAL_METHOD_ID'
 
 class Body(Scope):
     pass

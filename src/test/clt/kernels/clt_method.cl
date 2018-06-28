@@ -1,11 +1,15 @@
 namespace NS
 {
 
+struct B
+{
+};
+
 struct A
 {
     A();
     A(int x);
-    ~A();
+    ~ A();
 
     inline void testInline()
     {
@@ -15,32 +19,31 @@ struct A
     static void testStatic()
     {
     }
-    void operator++() {}
+    void operator++();
 };
 
 
 A::A()
 {
 }
-//void A::operator++()
-//{
-//}
 
-}
-
-NS::A::A()
+A::A(int)
 {
 }
 
-void NS::A::testInline2()
+A::~A()
 {
 }
 
-void NS::A::testStatic()
+void A::testInline2()
 {
 }
 
+void A::operator++()
+{
+}
 
+}
 void kmain(u32 index, u32 total)
 {
 }
