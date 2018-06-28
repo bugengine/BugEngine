@@ -21,7 +21,7 @@ def p_declaration_specifier_list(p):
         declaration_specifier_list : declaration_specifier_list declaration_specifier
     """
     p[0] = p[1] + [p[2]]
-    p.set_position(0, 2)
+    p.set_position_absolute(0, p[2].position)
 
 
 def p_external_declarations_end(p):
@@ -33,20 +33,20 @@ def p_external_declarations_end(p):
 
 def p_external_declarations(p):
     """
-        external_declarations : external_declarations external_declaration
+        external_declarations : external_declaration external_declarations
     """
-    p[0] = p[1]
-    if p[2]:
-        p[0].append(p[2])
+    p[0] = p[2]
+    if p[1]:
+        p[0].append(p[1])
 
 
 def p_external_declarations_namespace(p):
     """
-        external_declarations : external_declarations namespace_declaration
+        external_declarations : namespace_declaration external_declarations
     """
-    p[0] = p[1]
-    if p[2]:
-        p[0].append(p[2])
+    p[0] = p[2]
+    if p[1]:
+        p[0].append(p[1])
 
 
 def p_external_declaration_empty(p):
