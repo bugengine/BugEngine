@@ -4,7 +4,7 @@
 #include    <scheduler/stdafx.h>
 #include    <scheduler/kernel/imemoryhost.hh>
 
-namespace BugEngine { namespace Kernel
+namespace BugEngine { namespace KernelScheduler
 {
 
 IMemoryHost::IMemoryHost(const istring &name)

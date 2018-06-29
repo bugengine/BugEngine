@@ -255,6 +255,10 @@ class Lexer(lex.Lexer):
         else:
             self.macros[name] = False
 
+    def token(self):
+        t = self.parent.token(self)
+        return t
+
 lex.Lexer = Lexer
 
 lexer = lex.lex()

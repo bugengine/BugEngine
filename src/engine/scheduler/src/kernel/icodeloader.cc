@@ -4,7 +4,7 @@
 #include    <scheduler/stdafx.h>
 #include    <scheduler/kernel/icodeloader.hh>
 
-namespace BugEngine { namespace Kernel
+namespace BugEngine { namespace KernelScheduler
 {
 
 ICodeLoader::ICodeLoader()

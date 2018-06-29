@@ -3,7 +3,7 @@ class Scope:
         self.members = []
         self.position = position
 
-    def find(self, name):
+    def find(self, name, is_current_scope):
         for m in self.members:
             sub = m.find_nonrecursive(name)
             if sub:

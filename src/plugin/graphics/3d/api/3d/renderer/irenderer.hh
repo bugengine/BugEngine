@@ -17,7 +17,7 @@ namespace Task
 class ITask;
 }
 
-namespace Kernel
+namespace KernelScheduler
 {
 class Kernel;
 }
@@ -42,8 +42,8 @@ protected:
     scoped< GPUResourceLoader<RenderSurfaceDescription> >   m_renderSurfaceLoader;
     scoped< GPUResourceLoader<RenderWindowDescription> >    m_renderWindowLoader;
     scoped< GPUResourceLoader<ShaderProgramDescription> >   m_shaderProgramLoader;
-    scoped<Kernel::Kernel>                                  m_kernelSort;
-    scoped<Kernel::Kernel>                                  m_kernelRender;
+    scoped<KernelScheduler::Kernel>                         m_kernelSort;
+    scoped<KernelScheduler::Kernel>                         m_kernelRender;
 protected:
     IRenderer(minitl::Allocator& allocator, weak<Resource::ResourceManager> manager, Scheduler::Affinity affinity = Scheduler::DontCare);
     virtual ~IRenderer();

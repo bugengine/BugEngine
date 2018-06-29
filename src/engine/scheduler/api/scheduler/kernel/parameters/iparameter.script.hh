@@ -6,7 +6,7 @@
 /**************************************************************************************************/
 #include    <scheduler/stdafx.h>
 
-namespace BugEngine { namespace Kernel
+namespace BugEngine { namespace KernelScheduler
 {
 
 class IMemoryBuffer;

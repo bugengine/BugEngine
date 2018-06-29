@@ -537,6 +537,11 @@ class Container(CppObject):
     def add_property(self, p):
         self.objects.append(p)
 
+    def find_object(self, name):
+        for o in self.objects:
+            if o.name[-1] == name:
+                return o
+
 
 class Class(Container):
     def __init__(self, name, type, parents):

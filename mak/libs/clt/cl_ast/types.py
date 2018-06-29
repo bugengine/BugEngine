@@ -15,8 +15,8 @@ class Typedef:
     def type_name(self):
         return self.name
 
-    def find(self, name):
-        return None
+    def find(self, name, is_current_scope):
+        return self.type.find(name)
 
     #TODO: delete
     def original_type(self):
@@ -24,6 +24,9 @@ class Typedef:
 
     def instantiate(self, template_arguments):
         return Typedef(self.name, self.type.instantiate(params), self.position)
+
+    def signature(self):
+        return self.type.signature()
 
 
 class Typename:
@@ -38,7 +41,7 @@ class Typename:
         if self.name == name:
             return self
 
-    def find(self, name):
+    def find(self, name, is_current_scope):
         return None
 
     def type_name(self):
@@ -50,6 +53,9 @@ class Typename:
 
     def instantiate(self, template_arguments):
         return template_arguments.get(self.name, self)
+
+    def signature(self):
+        return 'typename{%s}' % (self.name)
 
 
 class DependentTypeName:
@@ -64,11 +70,11 @@ class DependentTypeName:
         if self.name == name:
             return self
 
-    def find(self, name):
+    def find(self, name, is_current_scope):
         return None
 
     def type_name(self):
-        return self.name
+        return '::'.join(self.name.name)
 
     def original_type(self):
         return self.resolved_to
@@ -76,14 +82,21 @@ class DependentTypeName:
     def instantiate(self, template_arguments):
         return template_arguments.get(self.name, self)
 
+    def signature(self):
+        return 'typename{%s}' % self.type_name()
+
 
 class Struct:
+    id = 1
     class Definition:
         def __init__(self, parent):
             self.parent = parent
             self.members = []
+            self.constructor = None
+            self.destructor = None
 
     def __init__(self, struct_type, name, position):
+        self.id += 1
         self.name = name
         self.position = position
         self.struct_type = struct_type
@@ -92,8 +105,10 @@ class Struct:
     def add(self, member):
         self.definition.members.append(member)
 
-    def find(self, name):
+    def find(self, name, is_current_scope):
         if self.definition:
+            if is_current_scope and name == self.name and self.definition.constructor:
+                return self.definition.constructor
             for m in self.definition.members:
                 sub = m.find_nonrecursive(name)
                 if sub:
@@ -115,6 +130,9 @@ class Struct:
     def type_name(self):
         return self.name
 
+    def signature(self):
+        return '%s{%d}' % (self.name, self.id)
+
 
 class Builtin:
     def __init__(self, typename, position):
@@ -127,10 +145,13 @@ class Builtin:
     def original_type(self):
         return self
 
+    def signature(self):
+        return 'builtin{%s}' % self.typename
+
 
 class Type:
     def __init__(self, base_type, position):
-        self.base_type = type
+        self.base_type = base_type
         self.modifier = []
         self.position = position
 
@@ -138,13 +159,16 @@ class Type:
         self.modifier.append((modifier, position))
 
     def type_name(self):
-        return ' '.join([self.base_type.type_name()] + self.modifier)
+        return ' '.join([self.base_type.type_name()] + [m[0] for m in self.modifier])
 
     def original_type(self):
         return self.base_type.original_type()
 
     def is_valid(self, type):
         return isinstance(type, Typename)
+
+    def signature(self):
+        return self.base_type.signature()
 
 
 class Pointer:
@@ -158,6 +182,9 @@ class Pointer:
     def original_type(self):
         return self.pointer_to.original_type()
 
+    def signature(self):
+        return '%s*' % (self.pointer_to.signature())
+
 
 class Reference:
     def __init__(self, pointer_to, position):
@@ -165,10 +192,13 @@ class Reference:
         self.position = position
 
     def type_name(self):
-        return self.pointer_to.type_name() + '*'
+        return self.pointer_to.type_name() + '&'
 
     def original_type(self):
         return self.pointer_to.original_type()
+
+    def signature(self):
+        return '%s&' % (self.pointer_to.signature())
 
 
 class Array:
@@ -182,6 +212,9 @@ class Array:
             return '%s[%s]' % (self.array_type.type_name(), self.count.write_expr())
         else:
             return '%s[]' % (self.array_type.type_name())
+
+    def signature(self):
+        return '%s[%s]' % (self.array_type.signature(), count or '')
 
     def original_type(self):
         return self.array_type.original_type()

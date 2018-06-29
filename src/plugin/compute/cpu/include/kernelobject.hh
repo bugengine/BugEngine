@@ -9,7 +9,7 @@
 #include    <scheduler/task/task.hh>
 
 
-namespace BugEngine { namespace Kernel { namespace CPU
+namespace BugEngine { namespace KernelScheduler { namespace CPU
 {
 
 class KernelObject;

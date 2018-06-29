@@ -25,7 +25,7 @@ class Template:
     def add_template_parameter(self, parameter):
         self.parameters.append(parameter)
 
-    def find(self, name):
+    def find(self, name, is_current_scope):
         for p in self.parameters:
             if p.name == name:
                 return p

@@ -9,7 +9,7 @@
 #include    <plugin/plugin.hh>
 
 
-namespace BugEngine { namespace Kernel { namespace OpenCL
+namespace BugEngine { namespace KernelScheduler { namespace OpenCL
 {
 
 class CodeLoader;

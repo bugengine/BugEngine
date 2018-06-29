@@ -11,7 +11,7 @@
 #include    <scheduler/kernel/kernel.script.hh>
 
 
-namespace BugEngine { namespace Kernel { namespace OpenCL
+namespace BugEngine { namespace KernelScheduler { namespace OpenCL
 {
 
 #define checkResult(a) do { cl_int err = a; if (err != CL_SUCCESS) be_error("OpenCL call %s failed with error code %d"|#a|err); } while (0)

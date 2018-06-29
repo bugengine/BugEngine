@@ -9,7 +9,7 @@
 #include    <scheduler/kernel/parameters/iparameter.script.hh>
 
 
-namespace BugEngine { namespace Kernel
+namespace BugEngine { namespace KernelScheduler
 {
 class Kernel;
 }}
@@ -27,12 +27,12 @@ class be_api(SCHEDULER) KernelTask : public ITask
     friend class ::BugEngine::Scheduler;
     BE_NOCOPY(KernelTask)
 private:
-    weak<const Kernel::Kernel> const                m_kernel;
-    minitl::array< weak<Kernel::IParameter> > const m_parameters;
+    weak<const KernelScheduler::Kernel> const                m_kernel;
+    minitl::array< weak<KernelScheduler::IParameter> > const m_parameters;
 public:
     KernelTask(istring name, color32 color, Scheduler::Priority priority,
-               weak<const BugEngine::Kernel::Kernel> kernel,
-               minitl::array< weak<Kernel::IParameter> > parameters);
+               weak<const BugEngine::KernelScheduler::Kernel> kernel,
+               minitl::array< weak<KernelScheduler::IParameter> > parameters);
     ~KernelTask();
 
     virtual void schedule(weak<Scheduler> scheduler) override;

@@ -4,7 +4,7 @@
 #include    <stdafx.h>
 #include    <memoryhost.hh>
 
-namespace BugEngine { namespace Kernel { namespace CPU
+namespace BugEngine { namespace KernelScheduler { namespace CPU
 {
 
 MemoryHost::MemoryHost()

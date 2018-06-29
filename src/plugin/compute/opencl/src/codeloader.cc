@@ -5,7 +5,7 @@
 #include    <codeloader.hh>
 #include    <scheduler/kernel/kernel.script.hh>
 
-namespace BugEngine { namespace Kernel { namespace OpenCL
+namespace BugEngine { namespace KernelScheduler { namespace OpenCL
 {
 
 CodeLoader::CodeLoader()

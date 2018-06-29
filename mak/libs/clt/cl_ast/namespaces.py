@@ -34,5 +34,5 @@ class AnonymousNamespace(Scope):
         return 'NAMESPACE_ID'
 
     def find_nonrecursive(self, name):
-        o = self.find(name)
+        o = self.find(name, False)
         return o

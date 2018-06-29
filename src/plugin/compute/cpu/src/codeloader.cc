@@ -6,7 +6,7 @@
 #include    <kernelobject.hh>
 #include    <scheduler/kernel/kernel.script.hh>
 
-namespace BugEngine { namespace Kernel { namespace CPU
+namespace BugEngine { namespace KernelScheduler { namespace CPU
 {
 
 CodeLoader::CodeLoader(const inamespace& cpuVariant)

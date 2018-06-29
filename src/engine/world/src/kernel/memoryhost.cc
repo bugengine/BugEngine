@@ -9,7 +9,7 @@ namespace BugEngine { namespace World
 {
 
 MemoryHost::MemoryHost(const SystemAllocator& pageAllocator)
-    :   Kernel::IMemoryHost("World")
+    :   KernelScheduler::IMemoryHost("World")
     ,   m_allocator(pageAllocator)
 {
     be_forceuse(m_allocator);

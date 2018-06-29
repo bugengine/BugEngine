@@ -10,7 +10,7 @@
 namespace BugEngine { namespace OpenGL
 {
 
-class be_api(GL4) GLMemoryHost : public Kernel::IMemoryHost
+class be_api(GL4) GLMemoryHost : public KernelScheduler::IMemoryHost
 {
 public:
     GLMemoryHost();

@@ -4,7 +4,7 @@
 #include    <scheduler/stdafx.h>
 #include    <scheduler/kernel/kernel.script.hh>
 
-namespace BugEngine { namespace Kernel
+namespace BugEngine { namespace KernelScheduler
 {
 
 Kernel::Kernel(const inamespace &name)

@@ -8,7 +8,7 @@
 #include    <scheduler/kernel/imemoryhost.hh>
 
 
-namespace BugEngine { namespace Kernel
+namespace BugEngine { namespace KernelScheduler
 {
 
 class be_api(SCHEDULER) IMemoryBuffer : public minitl::refcountable
