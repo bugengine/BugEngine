@@ -57,14 +57,14 @@ void Scheduler::queueTasks(Task::ITaskItem* head, Task::ITaskItem* tail, u32 cou
 }
 
 void Scheduler::queueKernel(weak<Task::KernelTask> task,
-                            const minitl::array< weak<Kernel::IParameter> >& parameters)
+                            const minitl::array< weak<KernelScheduler::IParameter> >& parameters)
 {
     be_assert(m_kernelSchedulers.size() > 0, "no kernel scheduler installed");
     u32 paramCount = parameters.size();
-    minitl::array< weak<const Kernel::IMemoryBuffer> > kernelParams(Arena::temporary(), paramCount);
+    minitl::array< weak<const KernelScheduler::IMemoryBuffer> > kernelParams(Arena::temporary(), paramCount);
     for (u32 i = 0; i < paramCount; ++i)
     {
-        weak<const Kernel::IMemoryBuffer> bank = parameters[i]->getCurrentBank();
+        weak<const KernelScheduler::IMemoryBuffer> bank = parameters[i]->getCurrentBank();
         // todo: transfer
         kernelParams[i] = bank;
     }
@@ -83,14 +83,14 @@ void Scheduler::notifyEnd()
     m_taskScheduler->notifyEnd();
 }
 
-void Scheduler::addKernelScheduler(weak<Kernel::IScheduler> scheduler)
+void Scheduler::addKernelScheduler(weak<KernelScheduler::IScheduler> scheduler)
 {
     m_kernelSchedulers.push_back(scheduler);
 }
 
-void Scheduler::removeKernelScheduler(weak<Kernel::IScheduler> scheduler)
+void Scheduler::removeKernelScheduler(weak<KernelScheduler::IScheduler> scheduler)
 {
-    for (minitl::vector< weak<Kernel::IScheduler> >::iterator it = m_kernelSchedulers.begin();
+    for (minitl::vector< weak<KernelScheduler::IScheduler> >::iterator it = m_kernelSchedulers.begin();
          it != m_kernelSchedulers.end();
          ++it)
     {

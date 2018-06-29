@@ -12,7 +12,7 @@
 namespace BugEngine { namespace World
 {
 
-class be_api(WORLD) MemoryHost : public Kernel::IMemoryHost
+class be_api(WORLD) MemoryHost : public KernelScheduler::IMemoryHost
 {
 private:
     const SystemAllocator&  m_allocator;

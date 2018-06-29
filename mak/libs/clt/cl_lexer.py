@@ -66,21 +66,23 @@ class ClLexer:
     def pop_scope(self):
         self.scopes.pop(-1)
 
-    def lookup(self, token):
+    def lookup_by_name(self, name):
         if self.current_scope:
-            obj = self.current_scope.find(token.value)
-            if obj:
-                token.found_object = obj
-                token.type = obj.get_token_type()
+            return (None, self.current_scope.find(name, True))
         else:
             for s in self.scopes[::-1]:
-                obj = s.find(token.value)
+                obj = s.find(name, False)
                 if obj:
-                    token.found_object = obj
-                    token.type = obj.get_token_type()
-                    if s != self.scopes[-1]:
-                        token.type += '_SHADOW'
-                    break
+                    return (s, obj)
+            return (None, None)
+
+    def lookup(self, token):
+        scope, obj = self.lookup_by_name(token.value)
+        if obj:
+            token.found_object = obj
+            token.type = obj.get_token_type()
+            if scope and scope != self.scopes[-1]:
+                token.type += '_SHADOW'
 
     def input(self, text):
         self.lexer.input(text)
@@ -93,7 +95,10 @@ class ClLexer:
             if new_token.type == 'SCOPE':
                 if self.last_token:
                     self.current_scope = getattr(self.last_token, 'found_object', self.scopes[0])
-            elif self.last_token and self.last_token.type != 'SCOPE':
+            elif self.last_token and self.last_token.type in ('OPERATOR', ):
+                scope, obj = self.lookup_by_name('op%s' % new_token.type.lower())
+                new_token.found_object = obj
+            elif self.last_token and self.last_token.type not in ('SCOPE', 'OPERATOR', ):
                 self.current_scope = None
         self.last_token = new_token
         return new_token
@@ -179,6 +184,7 @@ class ClLexer:
         'TEMPLATE_STRUCT_ID_SHADOW',
         'TEMPLATE_METHOD_ID_SHADOW',
         'TEMPLATE_TYPENAME_ID_SHADOW',
+        'SPECIAL_METHOD_ID',
 
         # constants
         'INT_CONST_DEC', 'INT_CONST_OCT', 'INT_CONST_HEX', 'INT_CONST_BIN',

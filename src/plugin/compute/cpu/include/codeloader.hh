@@ -8,7 +8,7 @@
 #include    <scheduler/kernel/icodeloader.hh>
 
 
-namespace BugEngine { namespace Kernel { namespace CPU
+namespace BugEngine { namespace KernelScheduler { namespace CPU
 {
 
 class CodeLoader : public ICodeLoader

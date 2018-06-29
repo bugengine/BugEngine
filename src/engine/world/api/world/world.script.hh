@@ -43,7 +43,8 @@ published:
     bool hasComponent(Entity e, raw<const RTTI::Class> metaclass) const;
     RTTI::Value getComponent(Entity e, raw<const RTTI::Class> metaclass) const;
 published:
-    World(weak<EntityStorage> storage, minitl::array< weak<const Kernel::IProduct> > products);
+    World(weak<EntityStorage> storage,
+          minitl::array< weak<const KernelScheduler::IProduct> > products);
     ~World();
 };
 

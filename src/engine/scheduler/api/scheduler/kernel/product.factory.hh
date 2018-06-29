@@ -13,7 +13,7 @@ namespace BugEngine
 {
 
 template< typename T >
-struct be_typeid<  Kernel::Product<T> >
+struct be_typeid<  KernelScheduler::Product<T> >
 {
     static BE_EXPORT istring name();
     static BE_EXPORT raw<const RTTI::Class> klass();
@@ -22,7 +22,7 @@ struct be_typeid<  Kernel::Product<T> >
 
 template< typename T >
 BE_EXPORT
-istring be_typeid< Kernel::Product<T> >::name()
+istring be_typeid< KernelScheduler::Product<T> >::name()
 {
     static istring s_result = istring(minitl::format<256u>("Product<%s>") | be_typeid<T>::name());
     return s_result;
@@ -31,15 +31,15 @@ istring be_typeid< Kernel::Product<T> >::name()
 
 template< typename T >
 BE_EXPORT
-raw<const RTTI::Class> be_typeid< Kernel::Product<T> >::klass()
+raw<const RTTI::Class> be_typeid< KernelScheduler::Product<T> >::klass()
 {
     static const RTTI::Class s_class = {
         name(),
-        u32(sizeof(Kernel::Product<T>)),
+        u32(sizeof(KernelScheduler::Product<T>)),
         0,
         RTTI::ClassType_Object,
         {0},
-        {be_typeid< Kernel::IProduct >::klass().m_ptr},
+        {be_typeid< KernelScheduler::IProduct >::klass().m_ptr},
         {0},
         { 0 },
         { 0, 0 },
@@ -55,7 +55,7 @@ raw<const RTTI::Class> be_typeid< Kernel::Product<T> >::klass()
 
 template< typename T >
 BE_EXPORT
-RTTI::Type be_typeid<  Kernel::Product<T> >::type()
+RTTI::Type be_typeid<  KernelScheduler::Product<T> >::type()
 {
     return RTTI::Type::makeType(klass(), RTTI::Type::Value,
                                 RTTI::Type::Mutable, RTTI::Type::Mutable);

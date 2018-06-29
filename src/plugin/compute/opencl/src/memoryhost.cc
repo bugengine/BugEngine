@@ -5,7 +5,7 @@
 #include    <opencl/memoryhost.hh>
 
 
-namespace BugEngine { namespace Kernel { namespace OpenCL
+namespace BugEngine { namespace KernelScheduler { namespace OpenCL
 {
 
 MemoryHost::MemoryHost()

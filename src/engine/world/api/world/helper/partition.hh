@@ -23,7 +23,7 @@ namespace Helper
 template< typename T, typename T2, typename TAIL >
 struct PartitionProductGetter
 {
-    static weak<const Kernel::Product< Kernel::Segments<T> > > getProduct(const Partition<T2, TAIL>& partition)
+    static weak<const KernelScheduler::Product< KernelScheduler::Segments<T> > > getProduct(const Partition<T2, TAIL>& partition)
     {
         return PartitionProductGetter<T, typename TAIL::Type, typename TAIL::Tail>::getProduct(partition);
     }
@@ -32,7 +32,7 @@ struct PartitionProductGetter
 template< typename T, typename TAIL >
 struct PartitionProductGetter<T, T, TAIL>
 {
-    static weak<const Kernel::Product< Kernel::Segments<T> > > getProduct(const Partition<T, TAIL>& partition)
+    static weak<const KernelScheduler::Product< KernelScheduler::Segments<T> > > getProduct(const Partition<T, TAIL>& partition)
     {
         return partition.product;
     }
@@ -46,10 +46,10 @@ struct Partition : public TAIL
     enum { Index = TAIL::Index+1 };
     typedef T Type;
     typedef TAIL Tail;
-    ref< Kernel::Product< Kernel::Segments<T> > > product;
+    ref< KernelScheduler::Product< KernelScheduler::Segments<T> > > product;
     Partition(weak<Task::ITask> task)
         :   TAIL(task)
-        ,   product(ref<Kernel::Product< Kernel::Segments<T> > >::create(Arena::game(), ref< Kernel::Segments<T> >::create(Arena::game()), task))
+        ,   product(ref<KernelScheduler::Product< KernelScheduler::Segments<T> > >::create(Arena::game(), ref< KernelScheduler::Segments<T> >::create(Arena::game()), task))
     {
     }
 
@@ -87,9 +87,9 @@ public:
     enum { Index = 0 };
     typedef T Type;
     typedef void Tail;
-    ref< Kernel::Product< Kernel::Segments<T> > > product;
+    ref< KernelScheduler::Product< KernelScheduler::Segments<T> > > product;
     Partition(weak<Task::ITask> task)
-        :   product(ref<Kernel::Product< Kernel::Segments<T> > >::create(Arena::game(), ref< Kernel::Segments<T> >::create(Arena::game()), task))
+        :   product(ref<KernelScheduler::Product< KernelScheduler::Segments<T> > >::create(Arena::game(), ref< KernelScheduler::Segments<T> >::create(Arena::game()), task))
     {
     }
     static const istring name();
@@ -131,7 +131,7 @@ struct PartitionPropertyInfo
             {0},
             be_typeid<T>::klass()->name,
             be_typeid<PARTITION>::type(),
-            be_typeid< weak< const Kernel::Product< Kernel::Segments<T> > > >::type(),
+            be_typeid< weak< const KernelScheduler::Product< KernelScheduler::Segments<T> > > >::type(),
             &PARTITION::template getProduct<T>
         };
         new (&properties[INDEX]) RTTI::Property(property);
@@ -148,7 +148,7 @@ struct PartitionPropertyInfo<PARTITION, INDEX, T, void>
             {0},
             be_typeid<T>::name(),
             be_typeid<PARTITION>::type(),
-            be_typeid< weak< const Kernel::Product< Kernel::Segments<T> > > >::type(),
+            be_typeid< weak< const KernelScheduler::Product< KernelScheduler::Segments<T> > > >::type(),
             &PARTITION::template getProduct<T>
         };
         new (&properties[INDEX]) RTTI::Property(property);

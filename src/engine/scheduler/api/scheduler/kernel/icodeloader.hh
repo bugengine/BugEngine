@@ -7,7 +7,7 @@
 #include    <scheduler/stdafx.h>
 #include    <resource/loader.hh>
 
-namespace BugEngine { namespace Kernel
+namespace BugEngine { namespace KernelScheduler
 {
 
 class be_api(SCHEDULER) ICodeLoader : public Resource::ILoader

@@ -35,6 +35,7 @@ def p_id(p):
         template_struct_id_shadow : TEMPLATE_STRUCT_ID_SHADOW
         template_typename_id : TEMPLATE_TYPENAME_ID
         template_typename_id_shadow : TEMPLATE_TYPENAME_ID_SHADOW
+        special_method_id : SPECIAL_METHOD_ID
     """
     p[0] = Name(p.lexer, (p[1],), p.position(1),
                 p.slice[1].found_object,
@@ -104,6 +105,14 @@ def p_object_name_namespace(p):
                   | typename_id_shadow SCOPE type_name_struct_qualified
                   | template_typename_id SCOPE type_name_struct_qualified
                   | template_typename_id_shadow SCOPE type_name_struct_qualified
+        special_method_name : namespace_id SCOPE special_method_name_qualified
+                            | namespace_id_shadow SCOPE special_method_name_qualified
+                            | struct_id SCOPE special_method_name_struct_qualified
+                            | struct_id_shadow SCOPE special_method_name_struct_qualified
+                            | typename_id SCOPE special_method_name_struct_qualified
+                            | typename_id_shadow SCOPE special_method_name_struct_qualified
+                            | template_typename_id SCOPE special_method_name_struct_qualified
+                            | template_typename_id_shadow SCOPE special_method_name_struct_qualified
     """
     p[0] = p[1] + p[3]
 
@@ -114,7 +123,6 @@ def p_object_name_struct_qualified(p):
                               | object_name_struct_qualified
         object_name_struct_qualified : struct_id SCOPE object_name_struct_qualified
                                      | type_name_tpl_qualified SCOPE object_name_struct_qualified
-                                     | object_name_id_qualified SCOPE object_name_struct_qualified
                                      | object_name_id_qualified                                     %prec PRIO0
 
         type_name_qualified : namespace_id SCOPE type_name_qualified
@@ -122,8 +130,13 @@ def p_object_name_struct_qualified(p):
 
         type_name_struct_qualified : struct_id SCOPE type_name_struct_qualified
                                    | type_name_tpl_qualified SCOPE type_name_struct_qualified
-                                   | type_name_id_qualified SCOPE type_name_struct_qualified
                                    | type_name_id_qualified                                         %prec PRIO0
+
+        special_method_name_qualified : namespace_id SCOPE special_method_name_qualified
+                                      | special_method_name_struct_qualified
+        special_method_name_struct_qualified : struct_id SCOPE special_method_name_struct_qualified
+                                     | type_name_tpl_qualified SCOPE special_method_name_struct_qualified
+                                     | special_method_name_id_qualified                                     %prec PRIO0
     """
     if len(p) > 2:
         p[0] = p[1] + p[3]
@@ -135,6 +148,7 @@ def p_object_name_namespace_root(p):
     """
         object_name : SCOPE object_name_qualified
         type_name : SCOPE type_name_qualified
+        special_method_name : SCOPE special_method_name_qualified
     """
     p[0] = p[2]
     p[0].absolute = True
@@ -154,6 +168,84 @@ def p_object_name(p):
                 qualified = not p.slice[1].type.endswith('SHADOW'))
 
 
+def p_object_name_destructor(p):
+    """
+        special_method_name : NOT STRUCT_ID_SHADOW                                      %prec PRIO0
+                            | NOT TEMPLATE_STRUCT_ID_SHADOW                             %prec PRIO0
+        special_method_name_id_qualified : NOT STRUCT_ID_SHADOW                         %prec PRIO0
+                                         | NOT TEMPLATE_STRUCT_ID_SHADOW                %prec PRIO0
+    """
+    owner = p.slice[2].found_object
+    scope = p.lexer.scopes[-1]
+    if owner != scope:
+        p.lexer._error('declaration of ~%s as a member of %s' % (owner.name, scope.name), p.position(1))
+        raise SyntaxError()
+    if not owner.definition:
+        p.lexer._error('invalid use of incomplete type %s' % owner.name, p.position(1))
+        p.lexer._info('forward declaration of %s' % owner.name, owner.position)
+        raise SyntaxError()
+    p[0] = Name(p.lexer, (p[1]+p[2],), p.position(1), owner.definition.destructor,
+                qualified = False)
+
+
+def p_object_name_destructor_2(p):
+    """
+        special_method_name : NOT SPECIAL_METHOD_ID                                     %prec PRIO0
+        special_method_name_id_qualified : NOT SPECIAL_METHOD_ID                        %prec PRIO0
+    """
+    owner = p.slice[2].found_object.owner
+    if not owner.definition:
+        p.lexer._error('invalid use of incomplete type %s' % owner.name, p.position(1))
+        p.lexer._info('forward declaration of %s' % owner.name, owner.position)
+        raise SyntaxError()
+    p[0] = Name(p.lexer, (p[1]+p[2],), p.position(1), owner.definition.destructor,
+                qualified = False)
+
+def p_operator_name(p):
+    """
+        operator_name : OPERATOR PLUS
+                      | OPERATOR MINUS
+                      | OPERATOR TIMES
+                      | OPERATOR DIVIDE
+                      | OPERATOR MOD
+                      | OPERATOR OR
+                      | OPERATOR AND
+                      | OPERATOR NOT
+                      | OPERATOR XOR
+                      | OPERATOR LSHIFT
+                      | OPERATOR RSHIFT
+                      | OPERATOR LOR
+                      | OPERATOR LAND
+                      | OPERATOR LNOT
+                      | OPERATOR LT
+                      | OPERATOR LE
+                      | OPERATOR GT
+                      | OPERATOR GE
+                      | OPERATOR EQ
+                      | OPERATOR NE
+                      | OPERATOR EQUALS
+                      | OPERATOR TIMESEQUAL
+                      | OPERATOR DIVEQUAL
+                      | OPERATOR MODEQUAL
+                      | OPERATOR PLUSEQUAL
+                      | OPERATOR MINUSEQUAL
+                      | OPERATOR LSHIFTEQUAL
+                      | OPERATOR RSHIFTEQUAL
+                      | OPERATOR ANDEQUAL
+                      | OPERATOR XOREQUAL
+                      | OPERATOR OREQUAL
+                      | OPERATOR PLUSPLUS
+                      | OPERATOR MINUSMINUS
+                      | OPERATOR ARROW
+                      | OPERATOR LPAREN RPAREN
+                      | OPERATOR LBRACKET RBRACKET
+                      | OPERATOR PERIOD
+                      | OPERATOR COMMA
+    """
+    p[0] = ('op%s' % p.slice[2].type.lower(), p.slice[2].found_object)
+    p.set_position(0, 2)
+
+
 def p_object_name_id(p):
     """
         object_name : ID                                                                %prec PRIO0
@@ -161,6 +253,15 @@ def p_object_name_id(p):
     """
     p[0] = Name(p.lexer, (p[1],), p.position(1), resolved = False)
 
+
+def p_object_name_operator(p):
+    """
+        object_name : operator_name                                                     %prec PRIO0
+        object_name_id_qualified : operator_name                                        %prec PRIO0
+    """
+    p[0] = Name(p.lexer, (p[1][0],), p.position(1), p[1][1],
+                qualified = False,
+                dependent = False)
 
 
 def p_type_name(p):
@@ -174,6 +275,9 @@ def p_type_name(p):
                                | typename_id                                            %prec PRIO0
                                | template_struct_id                                     %prec PRIO0
                                | template_typename_id                                   %prec PRIO0
+
+        special_method_name : special_method_id                                         %prec PRIO0
+        special_method_name_id_qualified : special_method_id                            %prec PRIO0
     """
     p[0] = p[1]
 
@@ -186,4 +290,3 @@ def p_type_name_shadow(p):
                   | template_typename_id_shadow                                         %prec PRIO0
     """
     p[0] = p[1]
-

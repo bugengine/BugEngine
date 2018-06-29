@@ -13,7 +13,7 @@
 #include    <scheduler/kernel/kernel.script.hh>
 #include    <kernel_optims.hh>
 
-namespace BugEngine { namespace Kernel { namespace CPU
+namespace BugEngine { namespace KernelScheduler { namespace CPU
 {
 
 Scheduler::Scheduler(const Plugin::Context& context)

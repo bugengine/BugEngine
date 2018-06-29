@@ -5,7 +5,7 @@
 #include    <scheduler.hh>
 
 
-namespace BugEngine { namespace Kernel { namespace OpenCL_GL
+namespace BugEngine { namespace KernelScheduler { namespace OpenCL_GL
 {
 
 minitl::array<cl_context_properties> Scheduler::createPlatformSpecificContextProperties()

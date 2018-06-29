@@ -41,8 +41,8 @@ def p_struct_push(p):
     """
         struct_push :
     """
-    p[0] = p[-3][1] or p[-3][0]
-    p[0].define(p[-2])
+    p[0] = p[-2][1] or p[-2][0]
+    p[0].define(p[-1])
     p.lexer.scopes[-1].add(p[0])
     p.lexer.push_scope(p[0])
 
@@ -84,12 +84,20 @@ def p_struct_parent_error(p):
     p.lexer._error('expected class name', p[3].position)
 
 
+def p_struct_begin(p):
+    """
+        struct_begin : struct_header struct_parent_opt struct_push LBRACE
+                     | struct_header error struct_push LBRACE
+    """
+    p[0] = p[3]
+    p.set_position(0, 1)
+
+
 def p_struct_definition(p):
     """
-        struct_definition : struct_header struct_parent_opt LBRACE struct_push struct_declaration_list RBRACE struct_pop
-        struct_definition : struct_header error LBRACE struct_push struct_declaration_list RBRACE struct_pop
+        struct_definition : struct_begin struct_declaration_list RBRACE struct_pop
     """
-    p[0] = p[4]
+    p[0] = p[1]
     p.set_position(0, 1)
 
 
