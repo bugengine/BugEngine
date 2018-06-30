@@ -96,7 +96,8 @@ class Struct:
             self.destructor = None
 
     def __init__(self, struct_type, name, position):
-        self.id += 1
+        self.id = Struct.id
+        Struct.id += 1
         self.name = name
         self.position = position
         self.struct_type = struct_type
@@ -133,6 +134,16 @@ class Struct:
     def signature(self):
         return '%s{%d}' % (self.name, self.id)
 
+    def write_to(self, writer):
+        if self.definition:
+            with writer.create_struct(self.position, self.id, self.name,
+                                      self.definition.parent and self.definition.parent.id) as s:
+                if self.definition.constructor:
+                    self.definition.constructor.write_to(s)
+                if self.definition.destructor:
+                    self.definition.destructor.write_to(s)
+                for member in self.definition.members:
+                    member.write_to(s)
 
 class Builtin:
     def __init__(self, typename, position):

@@ -14,3 +14,7 @@ class Scope:
 
     def instantiate(self, template_arguments):
         return self
+
+    def _write_to(self, writer):
+        for m in self.members:
+            m.write_to(writer)
