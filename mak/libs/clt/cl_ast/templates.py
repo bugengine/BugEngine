@@ -70,3 +70,6 @@ class Template:
             if parameter.name:
                 template_arguments[parameter.name] = { argument }
         return self.specializations[0][1], template_arguments
+
+    def write_to(self, writer):
+        pass

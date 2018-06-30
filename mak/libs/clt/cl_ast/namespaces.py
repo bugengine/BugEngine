@@ -3,8 +3,8 @@ from .scope import Scope
 
 class Root(Scope):
     def write_to(self, writer):
-        writer.begin_document()
-        writer.end_document()
+        with writer.create_document() as document:
+            Scope._write_to(self, document)
 
 
 class Namespace(Scope):
@@ -15,15 +15,13 @@ class Namespace(Scope):
     def get_token_type(self):
         return 'NAMESPACE_ID'
 
-    def dump(self, indent=''):
-        print('namespace %s\n{' % self.name)
-        for m in self.members:
-            m.dump(indent)
-        print('}')
-
     def find_nonrecursive(self, name):
         if self.name == name:
             return self
+
+    def write_to(self, writer):
+        with writer.create_namespace(self.position, self.name) as namespace:
+            Scope._write_to(self, namespace)
 
 
 class AnonymousNamespace(Scope):
@@ -36,3 +34,7 @@ class AnonymousNamespace(Scope):
     def find_nonrecursive(self, name):
         o = self.find(name, False)
         return o
+
+    def write_to(self, writer):
+        with writer.create_namespace(self.position, None) as namespace:
+            Scope._write_to(self, namespace)

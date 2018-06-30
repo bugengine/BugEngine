@@ -1,9 +1,14 @@
+from io import BytesIO
+from .document import Document
+
+
 class ClcCWriter:
     def __init__(self, out_file):
         self.out_file = out_file
+        self.stack = []
+        self.namespace = []
+        self.structs = {}
+        self.methods = {}
 
-    def begin_document(self):
-        self.out_file.write(b'#include <kernel/stdafx.h>')
-
-    def end_document(self):
-        self.out_file.write(b'\n')
+    def create_document(self):
+        return Document(self.out_file)
