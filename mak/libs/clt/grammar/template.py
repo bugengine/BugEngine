@@ -83,7 +83,7 @@ def p_template_parameter_value(p):
     """
         template_parameter : template_specifier_opt type template_parameter_name template_parameter_default_value_opt
     """
-    p[0] = cl_ast.values.Constant(p[1], p[2], p[3], p.position(2))
+    p[0] = cl_ast.values.Constant(p[2], p[3], p[4], p.position(2))
     p.lexer.scopes[-1].add_template_parameter(p[0])
 
 

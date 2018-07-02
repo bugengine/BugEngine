@@ -73,12 +73,16 @@ def p_template_struct_id(p):
         struct_id_shadow : TEMPLATE_STRUCT_ID_SHADOW template_arguments
         typename_id : TEMPLATE_TYPENAME_ID template_arguments
         typename_id_shadow : TEMPLATE_TYPENAME_ID_SHADOW template_arguments
+        object_name : TEMPLATE_METHOD_ID template_arguments
+        object_name : TEMPLATE_METHOD_ID_SHADOW template_arguments
     """
     try:
         target = p.slice[1].found_object.create_instance(p[2])
     except cl_ast.templates.Template.InstanciationError as e:
         target = None
-        p.lexer._error(e.msg, p.position(2))
+        p.lexer._error(e.msg, e.position)
+        if e.error:
+            p.lexer._note(e.error.message, e.error.position)
         p.lexer._note('Template %s declared here' % p[1], p.slice[1].found_object.position)
     p[0] = Name(p.lexer, (p[1],), p.position(1), target,
                 qualified = not p.slice[1].type.endswith('SHADOW'),
