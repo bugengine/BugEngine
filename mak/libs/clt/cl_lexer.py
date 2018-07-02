@@ -121,14 +121,14 @@ class ClLexer:
             offset -= 1
         while end < len(self.lexer.lexdata) and self.lexer.lexdata[end] != '\n':
             end += 1
-        location = self.error_format % { 'f': filename, 'l': lineno, 'c': pos[1] - offset + 1 }
+        location = self.error_format % { 'f': filename, 'l': lineno, 'c': pos[2] - offset + 1 }
         sys.stderr.write('%s%s%s%s %s:%s %s%s%s\n' % (color_filename, location, color_off,
                                                       color_error_type, error_type, color_off,
                                                       color_msg, msg, color_off))
         sys.stderr.write(self.lexer.lexdata[offset:end+1])
-        sys.stderr.write('%s%s%s%s\n' % (' '*(pos[1] - offset),
+        sys.stderr.write('%s%s%s%s\n' % (' '*(pos[2] - offset),
                                          color_caret,
-                                         '^'*(pos[2]-pos[1]),
+                                         '^'*(pos[3]-pos[2]),
                                          color_off))
 
     def _note(self, msg, pos):
