@@ -13,9 +13,14 @@ def plugins(bld):
 
 
 @extension('.plist')
-def install_plist(self, node):
-    self.install_files(os.path.join(self.env.PREFIX, self.bld.optim, self.env.DEPLOY_ROOTDIR),
-                       [node])
+def install_plist_darwin(self, node):
+    if 'darwin' in self.bld.env.VALID_PLATFORMS:
+        bld_env = self.bld.env
+        if bld_env.SUB_TOOLCHAINS:
+            bld_env = self.bld.all_envs[bld_env.SUB_TOOLCHAINS[0]]
+        self.install_files(os.path.join(bld_env.PREFIX, self.bld.optim,
+                                        bld_env.DEPLOY_ROOTDIR),
+                           [node])
 
 
 @feature('cshlib', 'cxxshlib')

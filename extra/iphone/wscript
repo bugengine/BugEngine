@@ -6,7 +6,7 @@ import os
 
 class iOS(Configure.ConfigurationContext.Darwin):
     NAME = 'iPhone'
-    PLATFORMS = ['iphone']
+    PLATFORMS = ['iphone', 'darwin']
     SDK_NAME = 'iPhoneOS'
     OS_NAME = 'iphoneos'
 

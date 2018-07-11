@@ -246,7 +246,7 @@ Configure.ConfigurationContext.Darwin = Darwin
 
 class MacOSX(Darwin):
     NAME = 'MacOSX'
-    PLATFORMS = ['macosx', 'pc']
+    PLATFORMS = ['macosx', 'pc', 'darwin']
     SDK_NAME = 'MacOSX'
     OS_NAME = 'macosx'
 

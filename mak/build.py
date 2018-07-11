@@ -587,6 +587,8 @@ def build(bld):
     if bld.env.STATIC and bld.env.DYNAMIC:
         raise Errors.WafError('Engine requested to be built both as static and dynamic')
     bld.original_env = bld.env
+    for env_name in bld.env.SUB_TOOLCHAINS:
+        bld.common_env.append_unique('VALID_PLATFORMS', bld.all_envs[env_name].VALID_PLATFORMS)
     bld.multiarch_envs = [bld.all_envs[envname] for envname in bld.env.SUB_TOOLCHAINS] or [bld.env]
 
 
@@ -864,14 +866,14 @@ def filter_sources(self):
                 add_platform = False
                 platforms = node.name[9:].split(',')
                 for p in platforms:
-                    add_platform = add_platform or p in self.env.VALID_PLATFORMS
+                    add_platform = add_platform or p in self.bld.env.VALID_PLATFORMS
             elif node.name.startswith('arch='):
                 add_arch = False
                 architectures = node.name[5:].split(',')
                 for a in architectures:
                     add_arch = add_arch or a in self.env.VALID_ARCHITECTURES
             elif node.parent.name == 'extra' and node.parent.parent == self.bld.bugenginenode:
-                add_platform = node.name in self.env.VALID_PLATFORMS
+                add_platform = node.name in self.bld.env.VALID_PLATFORMS
             node = node.parent
         if add_platform and add_arch:
             sources.append(file)

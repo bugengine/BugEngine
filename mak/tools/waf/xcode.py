@@ -538,17 +538,21 @@ class xcode(Build.BuildContext):
 
         for toolchain in self.env.ALL_TOOLCHAINS:
             env = self.all_envs[toolchain]
-            if env.XCODE_ABI == 'mach_o':
+            if env.SUB_TOOLCHAINS:
+                bld_env = self.all_envs[env.SUB_TOOLCHAINS[0]]
+            else:
+                bld_env = env
+            if bld_env.XCODE_ABI == 'mach_o':
                 variants = []
                 for variant in self.env.ALL_VARIANTS:
                     variants.append(XCBuildConfiguration(variant, {
                                 'PRODUCT_NAME': appname,
                                 'BUILT_PRODUCTS_DIR': os.path.join(env.PREFIX, variant),
                                 'CONFIGURATION_BUILD_DIR':  os.path.join(env.PREFIX, variant),
-                                'ARCHS': macarch(env.VALID_ARCHITECTURES[0]),
-                                'VALID_ARCHS': macarch(env.VALID_ARCHITECTURES[0]),
-                                'SDKROOT': env.XCODE_SDKROOT,
-                                'SUPPORTED_PLATFORMS': env.XCODE_SUPPORTEDPLATFORMS}))
+                                'ARCHS': macarch(bld_env.VALID_ARCHITECTURES[0]),
+                                'VALID_ARCHS': macarch(bld_env.VALID_ARCHITECTURES[0]),
+                                'SDKROOT': bld_env.XCODE_SDKROOT,
+                                'SUPPORTED_PLATFORMS': bld_env.XCODE_SUPPORTEDPLATFORMS}))
                 build = PBXShellScriptBuildPhase('build:'+toolchain+':${CONFIG}')
                 target = PBXNativeTarget(
                                 toolchain,
