@@ -2,12 +2,13 @@ from .. import cl_ast
 
 
 class Name:
-    def __init__(self, lexer, name, position, target = None, qualified = False,
+    def __init__(self, lexer, name, position, target = None, targets = None, qualified = False,
                        dependent = False, resolved = True):
         self.lexer = lexer
         self.name = name
         self.position = position
         self.target = target
+        self.targets = targets or (target,)
         self.qualified = qualified
         self.dependent = dependent
         self.resolved = resolved
@@ -18,6 +19,7 @@ class Name:
                     self.name + other.name,
                     other.position,
                     target = other.target,
+                    targets = self.targets + other.targets,
                     qualified = True,
                     dependent = self.dependent or other.dependent,
                     resolved = self.resolved and other.resolved)
@@ -25,17 +27,17 @@ class Name:
 
 def p_id(p):
     """
-        namespace_id : NAMESPACE_ID
-        namespace_id_shadow : NAMESPACE_ID_SHADOW
-        struct_id : STRUCT_ID
-        struct_id_shadow : STRUCT_ID_SHADOW
-        typename_id : TYPENAME_ID
-        typename_id_shadow : TYPENAME_ID_SHADOW
-        template_struct_id : TEMPLATE_STRUCT_ID
-        template_struct_id_shadow : TEMPLATE_STRUCT_ID_SHADOW
-        template_typename_id : TEMPLATE_TYPENAME_ID
-        template_typename_id_shadow : TEMPLATE_TYPENAME_ID_SHADOW
-        special_method_id : SPECIAL_METHOD_ID
+        namespace_id :                  NAMESPACE_ID
+        namespace_id_shadow :           NAMESPACE_ID_SHADOW
+        struct_id :                     STRUCT_ID
+        struct_id_shadow :              STRUCT_ID_SHADOW
+        typename_id :                   TYPENAME_ID
+        typename_id_shadow :            TYPENAME_ID_SHADOW
+        template_struct_id :            TEMPLATE_STRUCT_ID
+        template_struct_id_shadow :     TEMPLATE_STRUCT_ID_SHADOW
+        template_typename_id :          TEMPLATE_TYPENAME_ID
+        template_typename_id_shadow :   TEMPLATE_TYPENAME_ID_SHADOW
+        special_method_id :             SPECIAL_METHOD_ID
     """
     p[0] = Name(p.lexer, (p[1],), p.position(1),
                 p.slice[1].found_object,
@@ -67,7 +69,7 @@ def p_template_new_template_id(p):
     # p.lexer.set_search_scope_ifn(p.slice[2].found_object.create_instance(p[2])) # TODO
 
 
-def p_template_struct_id(p):
+def p_template_id(p):
     """
         struct_id : TEMPLATE_STRUCT_ID template_arguments
         struct_id_shadow : TEMPLATE_STRUCT_ID_SHADOW template_arguments
@@ -75,6 +77,7 @@ def p_template_struct_id(p):
         typename_id_shadow : TEMPLATE_TYPENAME_ID_SHADOW template_arguments
         object_name : TEMPLATE_METHOD_ID template_arguments
         object_name : TEMPLATE_METHOD_ID_SHADOW template_arguments
+        object_name_id_qualified : TEMPLATE_METHOD_ID template_arguments
     """
     try:
         target = p.slice[1].found_object.create_instance(p[2])
@@ -83,7 +86,7 @@ def p_template_struct_id(p):
         p.lexer._error(e.msg, e.position)
         if e.error:
             p.lexer._note(e.error.message, e.error.position)
-        p.lexer._note('Template %s declared here' % p[1], p.slice[1].found_object.position)
+        p.lexer._note('template %s declared here' % p[1], p.slice[1].found_object.position)
     p[0] = Name(p.lexer, (p[1],), p.position(1), target,
                 qualified = not p.slice[1].type.endswith('SHADOW'),
                 resolved = (p.slice[1].type.find('TYPENAME') == -1))
@@ -162,11 +165,14 @@ def p_object_name(p):
     """
         object_name : METHOD_ID                                                         %prec PRIO0
                     | VARIABLE_ID                                                       %prec PRIO0
+                    | TEMPLATE_METHOD_ID                                                %prec PRIO0
                     | METHOD_ID_SHADOW                                                  %prec PRIO0
                     | VARIABLE_ID_SHADOW                                                %prec PRIO0
+                    | TEMPLATE_METHOD_ID_SHADOW                                         %prec PRIO0
 
         object_name_id_qualified : METHOD_ID                                            %prec PRIO0
                                  | VARIABLE_ID                                          %prec PRIO0
+                                 | TEMPLATE_METHOD_ID                                   %prec PRIO0
     """
     p[0] = Name(p.lexer, (p[1],), p.position(1), p.slice[1].found_object,
                 qualified = not p.slice[1].type.endswith('SHADOW'))
