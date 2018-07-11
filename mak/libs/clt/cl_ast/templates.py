@@ -18,12 +18,13 @@ class Template:
         self.created_instances = []
         self.name = None
         self.position = position
+        self.specialization = False
 
     def get_token_type(self):
         return 'TEMPLATE_' + self.specializations[0][1].get_token_type()
 
     def find_nonrecursive(self, name):
-        if self.name == name:
+        if self.name == name and not self.specialization:
             return self
 
     def add_template_parameter(self, parameter):
@@ -57,18 +58,18 @@ class Template:
         self.specializations.append(([], specialization))
 
     def specialize(self, parameters, template_specialization):
-        if self.name == template_specialization.name:
-            self.specializations.append((parameters, template_specialization))
-            return True
+        if not self.name:
+            self.name = template_specialization.name
+        self.specializations.append((parameters, template_specialization))
 
     def find_specialization(self, arguments):
         template_arguments = { }
         for parameter, argument in zip_longest(self.parameters, arguments):
             if not argument:
-                raise Template.InstanciationError('Too many template parameters')
+                raise Template.InstanciationError('too many template parameters')
             if not parameter:
                 if not agument.default_value:
-                    raise Template.InstanciationError('Too few template parameters')
+                    raise Template.InstanciationError('too few template parameters')
                 else:
                     argument = parameter.default_value
             try:

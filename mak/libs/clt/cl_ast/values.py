@@ -18,6 +18,13 @@ class Constant:
     def get_token_type(self):
         return 'VARIABLE_ID'
 
+    def is_valid(self, other):
+        if not isinstance(other, Constant):
+            raise types.ConversionError('cannot convert from %s to %s constant' % (other.__class__.__name__.lower(),
+                                                                                   self.type.name()),
+                                         self.position)
+        self.type.try_conversion(other.type)
+
 
 class Value:
     def __init__(self, type, value, position):

@@ -1,4 +1,5 @@
 from ..ply import lex
+from . import cl_ast
 import sys
 
 color_list = {
@@ -81,8 +82,14 @@ class ClLexer:
         if obj:
             token.found_object = obj
             token.type = obj.get_token_type()
-            if scope and scope != self.scopes[-1]:
-                token.type += '_SHADOW'
+            if scope:
+                for s in self.scopes[::-1]:
+                    if isinstance(s, cl_ast.templates.Template):
+                        continue
+                    if scope == s:
+                        break
+                    token.type += '_SHADOW'
+                    return
 
     def input(self, text):
         self.lexer.input(text)

@@ -88,15 +88,17 @@ def p_create_method(p):
                                                                           '::'.join(name.name[:-1])),
                            name.position)
             raise SyntaxError()
-        if name.target.get_token_type() != 'METHOD_ID':
+        if name.target.get_token_type() not in ('METHOD_ID', 'TEMPLATE_METHOD_ID'):
             if len(name.name) > 1:
                 p.lexer._error('qualified name %s does not name a method' % '::'.join(name.name), name.position)
             else:
                 p.lexer._error('name %s does not name a method' % '::'.join(name.name), name.position)
             p.lexer._note('previously declared here', name.target.position)
             raise SyntaxError()
-        else:
+        elif name.target.get_token_type() == 'METHOD_ID':
             p[0] = (len(name.name) == 1, name.target)
+        else:
+            p[0] = (len(name.name) == 1, name.target.specializations[0][1])
     else:
         parent = isinstance(p.lexer.scopes[-1], cl_ast.types.Struct) and p.lexer.scopes[-1] or None
         p[0] = (True, cl_ast.methods.Method(p[-1].name[-1], name.position, parent))
@@ -135,7 +137,6 @@ def p_create_method_definition(p):
         p.lexer._info('originally declared here', overload.position)
         p.lexer._info('first definition here', overload.definition.position)
     overload.definition = cl_ast.methods.Body(p.position(-1))
-    #p.lexer.scopes[-1].define(p[0])
 
 
 def p_push_method_scope(p):

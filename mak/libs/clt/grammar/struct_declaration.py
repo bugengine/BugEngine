@@ -18,19 +18,35 @@ def p_struct_declaration(p):
                       | struct_keyword object_name
     """
     if p[2].qualified:
-        if not p[2].target or p[2].target.get_token_type() != 'STRUCT_ID':
+        if p[2].target:
+            if p[2].target.get_token_type() == 'STRUCT_ID':
+                p[0] = (p[2].target, None)
+            elif p[2].target.get_token_type() == 'TEMPLATE_STRUCT_ID':
+                # TODO
+                cls = p[2].target.specializations[0][1]
+                p[0] = (cls, None)
+            else:
+                if len(p[2].name) > 1:
+                    p.lexer._error('qualified name %s does not name a struct' % '::'.join(p[2].name), p[2].position)
+                else:
+                    p.lexer._error('name %s does not name a struct' % '::'.join(p[2].name), p[2].position)
+                p.lexer._note('previously declared here', p[2].target.position)
+                raise SyntaxError()
+        else:
             if len(p[2].name) > 1:
                 p.lexer._error('qualified name %s does not name a struct' % '::'.join(p[2].name), p[2].position)
             else:
                 p.lexer._error('name %s does not name a struct' % '::'.join(p[2].name), p[2].position)
-            if p[2].target:
-                p.lexer._note('previously declared here', p[2].target.position)
             raise SyntaxError()
-        else:
-            p[0] = (p[2].target, None)
-    elif p[2].target and p[2].target.get_token_type() == 'STRUCT_ID':
+    elif p[2].target:
         # optimistically use provided declaration, but if definition, it will be overriden
-        p[0] = (p[2].target, cl_ast.types.Struct(p[1], p[2].name[0], p[2].position))
+        if p[2].target.get_token_type() == 'STRUCT_ID':
+            p[0] = (p[2].target, cl_ast.types.Struct(p[1], p[2].name[0], p[2].position))
+        elif p[2].target and p[2].target.get_token_type() == 'TEMPLATE_STRUCT_ID':
+            p[0] = (p[2].target.specializations[0][1], cl_ast.types.Struct(p[1], p[2].name[0], p[2].position))
+        else:
+            # Previously declared object is not a type
+            p[0] = (None, cl_ast.types.Struct(p[1], p[2].name[0], p[2].position))
     else:
         # No previously delcared type, declare one here
         p[0] = (None, cl_ast.types.Struct(p[1], p[2].name[0], p[2].position))
