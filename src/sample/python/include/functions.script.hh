@@ -12,8 +12,8 @@ namespace BugEngine { namespace TestCases
 class Class : public minitl::refcountable
 {
 published:
-    int x1;
-    int y1;
+    i32 x1;
+    i32 y1;
 
     Class(u32 x1=0, u32 y1=0) : x1(x1), y1(y1) {}
     ~Class() {}
