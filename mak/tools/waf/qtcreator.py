@@ -1220,6 +1220,7 @@ class Qbs(QtCreator):
 
                 project_file.write('%s    name: "%s"\n' % (indent, p.name))
                 project_file.write('%s    targetName: "%s"\n' % (indent, p.name.split('.')[-1]))
+                project_file.write('%s    cpp._skipAllChecks: true\n' % (indent, ))
                 project_file.write('%s    cpp.includePaths: [\n' % (indent))
                 for include in includes:
                     project_file.write('%s        "%s",\n' % (indent, include.replace('\\', '/')))
