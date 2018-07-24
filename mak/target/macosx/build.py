@@ -18,7 +18,7 @@ def install_plist_darwin(self, node):
         bld_env = self.bld.env
         if bld_env.SUB_TOOLCHAINS:
             bld_env = self.bld.all_envs[bld_env.SUB_TOOLCHAINS[0]]
-        self.install_files(os.path.join(bld_env.PREFIX, self.bld.optim,
+        self.install_files(os.path.join(self.bld.env.PREFIX, self.bld.optim,
                                         bld_env.DEPLOY_ROOTDIR),
                            [node])
 
