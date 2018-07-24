@@ -85,11 +85,11 @@ class Darwin(Configure.ConfigurationContext.Platform):
         conf.env.MACOSX_SDK = os.path.splitext(os.path.basename(self.sdk[1]))[0]
         conf.env.XCODE_SDK_PATH = self.sdk[1]
         conf.env.SYSROOT = self.sdk[1]
-        conf.env.append_unique('CPPFLAGS', ['-m%s-version-min=%s'%(self.OS_NAME, self.sdk[0]), '-isysroot', self.sdk[1]])
-        conf.env.append_unique('CFLAGS', ['-m%s-version-min=%s'%(self.OS_NAME, self.sdk[0]), '-isysroot', self.sdk[1]])
-        conf.env.append_unique('CXXFLAGS', ['-m%s-version-min=%s'%(self.OS_NAME, self.sdk[0]),
+        conf.env.append_unique('CPPFLAGS', ['-m%s-version-min=%s'%(self.OS_NAME, self.sdk[3]), '-isysroot', self.sdk[1]])
+        conf.env.append_unique('CFLAGS', ['-m%s-version-min=%s'%(self.OS_NAME, self.sdk[3]), '-isysroot', self.sdk[1]])
+        conf.env.append_unique('CXXFLAGS', ['-m%s-version-min=%s'%(self.OS_NAME, self.sdk[3]),
                                             '-isysroot', self.sdk[1]])
-        conf.env.append_unique('LINKFLAGS', ['-m%s-version-min=%s'%(self.OS_NAME, self.sdk[0]),
+        conf.env.append_unique('LINKFLAGS', ['-m%s-version-min=%s'%(self.OS_NAME, self.sdk[3]),
                                              '-isysroot', self.sdk[1], '-L%s/usr/lib'%self.sdk[1]])
         conf.env.CFLAGS_cshlib = ['-fPIC']
         conf.env.CXXFLAGS_cxxshlib = ['-fPIC']
@@ -237,7 +237,7 @@ class Darwin(Configure.ConfigurationContext.Platform):
                 if len(sdk_compilers) > len(best_sdk[2]):
                     best_sdk = ('.'.join(sdk_version), sdk_path, sdk_compilers, sdk_bin_paths)
             if best_sdk[2]:
-                return best_sdk[2], (best_sdk[0], best_sdk[1], best_sdk[3])
+                return best_sdk[2], (best_sdk[0], best_sdk[1], best_sdk[3], '.'.join(os_version_min))
             else:
                 raise Errors.WafError('No SDK for compiler %s' % compilers[0].compiler_c)
 
