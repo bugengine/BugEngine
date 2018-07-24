@@ -196,7 +196,8 @@ class Darwin(Configure.ConfigurationContext.Platform):
             for sdk_version, sdk_archs, sdk_path in all_sdks:
                 if len(best_sdk[2]) >= len(sdk_archs):
                     break
-                sdk_option = '-m%s-version-min=%s'%(self.OS_NAME, '.'.join(sdk_version))
+                os_version_min = getattr(self, 'OS_VERSION_MIN', sdk_version)
+                sdk_option = '-m%s-version-min=%s'%(self.OS_NAME, '.'.join(os_version_min))
                 if sdk_number_max and sdk_version > sdk_number_max:
                     continue
                 if sdk_number_min and sdk_version < sdk_number_min:
@@ -249,6 +250,7 @@ class MacOSX(Darwin):
     PLATFORMS = ['macosx', 'pc', 'darwin']
     SDK_NAME = 'MacOSX'
     OS_NAME = 'macosx'
+    OS_VERSION_MIN = ('10', '5')
 
     def __init__(self, conf, sdk = None):
         Darwin.__init__(self, conf, sdk)
