@@ -219,7 +219,7 @@ class Darwin(Configure.ConfigurationContext.Platform):
                             except Exception: pass
                             env = copy(os.environ)
                             env['PATH'] = os.path.pathsep.join(sdk_bin_paths + c.directories + [env['PATH']])
-                            r, out, err = c.run_cxx([sdk_option,
+                            r, out, err = c.run_cxx([sdk_option, '-g', '-O2',
                                                      '-c', '-o', obj_node.abspath(),
                                                      '-isysroot', sdk_path, src_node.abspath()], env=env)
                             if r == 0:
