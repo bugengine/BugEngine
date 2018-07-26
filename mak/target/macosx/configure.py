@@ -52,6 +52,10 @@ class Darwin(Configure.ConfigurationContext.Platform):
                 self.conf.end_msg('none', color='YELLOW')
         return result
 
+    def get_root_dirs(self, appname):
+        return (os.path.join(appname + '.app', 'Contents'),
+                os.path.join(appname + '.app', 'Contents', 'MacOS'))
+    
     def load_in_env(self, conf, compiler):
         self.CFLAGS_cshlib = ['-fPIC']
         platform = self.SDK_NAME.lower()
@@ -71,12 +75,13 @@ class Darwin(Configure.ConfigurationContext.Platform):
         conf.env.pymodule_PATTERN = '%s.so'
 
         appname = getattr(Context.g_module, Context.APPNAME, conf.srcnode.name)
-        conf.env.DEPLOY_ROOTDIR = os.path.join(appname + '.app', 'Contents')
-        conf.env.DEPLOY_BINDIR = os.path.join(appname + '.app', 'Contents', 'MacOS')
-        conf.env.DEPLOY_RUNBINDIR = os.path.join(appname + '.app', 'Contents', 'MacOS')
+        root_dir, bin_dir = self.get_root_dirs(appname)
+        conf.env.DEPLOY_ROOTDIR = root_dir
+        conf.env.DEPLOY_BINDIR = bin_dir
+        conf.env.DEPLOY_RUNBINDIR = bin_dir
         conf.env.DEPLOY_LIBDIR = 'lib'
         conf.env.DEPLOY_INCLUDEDIR = 'include'
-        share = os.path.join(appname + '.app', 'Contents', 'share', 'bugengine')
+        share = os.path.join(root_dir, 'share', 'bugengine')
         conf.env.DEPLOY_DATADIR = share
         conf.env.DEPLOY_PLUGINDIR = os.path.join(share, 'plugin')
         conf.env.DEPLOY_KERNELDIR = os.path.join(share, 'kernel')

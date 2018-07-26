@@ -13,8 +13,12 @@ class iOS(Configure.ConfigurationContext.Darwin):
     def __init__(self, conf, sdk = None):
         Configure.ConfigurationContext.Darwin.__init__(self, conf, sdk)
 
+    def get_root_dirs(self, appname):
+        return (appname + '.app',
+                appname + '.app')
 
-class iOSSimulator(Configure.ConfigurationContext.Darwin):
+
+class iOSSimulator(iOS):
     NAME = 'iPhoneSimulator'
     PLATFORMS = ['iphone', 'iphonesimulator']
     SDK_NAME = 'iPhoneSimulator'
