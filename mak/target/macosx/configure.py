@@ -59,12 +59,9 @@ class Darwin(Configure.ConfigurationContext.Platform):
     def load_in_env(self, conf, compiler):
         self.CFLAGS_cshlib = ['-fPIC']
         platform = self.SDK_NAME.lower()
-        compiler.find_target_program(conf, self, 'lipo', mandatory=False)
-        if not conf.env.LIPO:
-            conf.find_program('lipo')
-        compiler.find_target_program(conf, self, 'dsymutil', mandatory=False)
-        if not conf.env.DSYMUTIL:
-            conf.find_program('dsymutil')
+        compiler.find_target_program(conf, self, 'lipo', mandatory=False) or conf.find_program('lipo')
+        compiler.find_target_program(conf, self, 'codesign', mandatory=False) or conf.find_program('codesign')
+        compiler.find_target_program(conf, self, 'dsymutil', mandatory=False) or conf.find_program('dsymutil')
         environ = getattr(conf, 'environ', os.environ)
         conf.env.PATH = os.path.pathsep.join(self.directories + compiler.directories + [environ['PATH']])
         conf.env.ABI = 'mach_o'
