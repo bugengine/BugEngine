@@ -460,8 +460,8 @@ class PBXProject(XCodeNode):
         for variant in bld.env.ALL_VARIANTS:
             variants.append(XCBuildConfiguration(variant, {
                 'PRODUCT_NAME': p.target,
-                'ARCHS':['i386'],
-                'VALID_ARCHS':['i386'],
+                'ARCHS':['x86_64'],
+                'VALID_ARCHS':['x86_64'],
                 'SDKROOT': 'macosx',
                 'SUPPORTED_PLATFORMS': 'macosx',
                 'HEADER_SEARCH_PATHS': [get_include_path(i) for i in includes],
@@ -540,8 +540,10 @@ class xcode(Build.BuildContext):
             env = self.all_envs[toolchain]
             if env.SUB_TOOLCHAINS:
                 bld_env = self.all_envs[env.SUB_TOOLCHAINS[0]]
+                all_envs = [self.all_envs[t] for t in env.SUB_TOOLCHAINS]
             else:
                 bld_env = env
+                all_envs =[env]
             if bld_env.XCODE_ABI == 'mach_o':
                 variants = []
                 for variant in self.env.ALL_VARIANTS:
@@ -549,8 +551,8 @@ class xcode(Build.BuildContext):
                                 'PRODUCT_NAME': appname,
                                 'BUILT_PRODUCTS_DIR': os.path.join(env.PREFIX, variant),
                                 'CONFIGURATION_BUILD_DIR':  os.path.join(env.PREFIX, variant),
-                                'ARCHS': macarch(bld_env.VALID_ARCHITECTURES[0]),
-                                'VALID_ARCHS': macarch(bld_env.VALID_ARCHITECTURES[0]),
+                                'ARCHS': ' '.join([macarch(e.VALID_ARCHITECTURES[0]) for e in all_envs]),
+                                'VALID_ARCHS': ' '.join([macarch(e.VALID_ARCHITECTURES[0])  for e in all_envs]),
                                 'SDKROOT': bld_env.XCODE_SDKROOT,
                                 'SUPPORTED_PLATFORMS': bld_env.XCODE_SUPPORTEDPLATFORMS}))
                 build = PBXShellScriptBuildPhase('build:'+toolchain+':${CONFIG}')
