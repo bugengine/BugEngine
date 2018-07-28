@@ -4,9 +4,10 @@ class StatusCommand(Command):
     name = 'status'
     colors = {
         'online':   u'\x1b[01;32m\u25cf\x1b[0m',
+        'standby':  u'\x1b[01;33m\u25cf\x1b[0m',
         'offline':  u'\x1b[37m\u25cf\x1b[0m',
         'error':    u'\x1b[01;31m\u25cf\x1b[0m',
-        'unknown':  u'\x1b[01;33m\u25cf\x1b[0m'
+        'unknown':  u'\x1b[01;35m?\x1b[0m'
     }
     def get_device(self, name):
         for d in self.all_devices():
@@ -22,7 +23,7 @@ class StatusCommand(Command):
         for name, device in devices:
             if device:
                 status = device.get_status()
-                if status.connection_status == 'online':
+                if status.connection_status in ('online', 'standby'):
                     print('%s %s%s[%s - %s]' % (self.colors[status.connection_status],
                                                name,
                                                ' '*(device_name_length + 2 - len(name)),

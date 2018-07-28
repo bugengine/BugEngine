@@ -19,3 +19,4 @@ from .boot import BootCommand, ShutdownCommand
 from .put import PutCommand
 from .pull import PullCommand
 from .shell import ShellCommand
+from .autoimport import AutoimportCommand
