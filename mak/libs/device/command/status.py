@@ -40,6 +40,6 @@ class StatusCommand(Command):
 
     @classmethod
     def help(self, out):
-        out.write('    %s [device...]\n' % self.bold_name())
+        out.write('    %s [<device_name>...]\n' % self.bold_name())
         out.write('        Shows the status of the specified devices, or all if no device is specified\n')
 
