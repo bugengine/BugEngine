@@ -11,9 +11,9 @@ class AddCommand(Command):
         print('registering device %s (%s)' % (name, url))
         device = Device(name, url)
         try:
-            self.devices[device.__class__.__name__].append(device)
+            self.devices[device.platform.__class__.__name__].append(device)
         except KeyError:
-            self.devices[device.__class__.__name__] = [device]
+            self.devices[device.platform.__class__.__name__] = [device]
 
     @classmethod
     def help(self, out):

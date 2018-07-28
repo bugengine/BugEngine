@@ -26,7 +26,7 @@ class Device:
             except KeyError:
                 raise Errors.WafError('Unknwon protocol: %s' % self.protocol_name)
         s = self.get_status()
-        if s.connection_status != 'online':
+        if s.connection_status not in ('online', 'standby'):
             raise Exception('device at address %s is in state %s' % (connection, s.connection_status))
         platform_class = Platform.find_platform(s.platform.lower())
         if not platform_class:
@@ -74,3 +74,6 @@ class Device:
             raise Exception('device %s is using unsupported platform %s' % (self.name, self.platform_name))
         else:
             self.platform = platform_class(self.platform_archs)
+
+    def matches(self, other_device):
+        return self.protocol_name == other_device.protocol_name and self.connection_info == other_device.connection_info
