@@ -1,4 +1,5 @@
 .waf_toolchains.py
+extra/*
 bld/*
 nbproject/*
 *.pyc
