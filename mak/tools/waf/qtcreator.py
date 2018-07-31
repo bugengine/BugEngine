@@ -52,6 +52,14 @@ def qbsPlatform(env):
     else:
         return env.VALID_PLATFORMS[0]
 
+def qbsPlatformList(env):
+    if 'iphonesimulator' in env.VALID_PLATFORMS:
+        return '["ios-simulator","ios","darwin","bsd","unix"]'
+    elif 'iphone' in env.VALID_PLATFORMS:
+        return '["ios","darwin","bsd","unix"]'
+    else:
+        return None
+
 def _hexdigest(s):
     """Return a string as a string of hex characters.
     """
@@ -868,6 +876,8 @@ class QtCreator(Build.BuildContext):
                         deploy_configurations = []
                         build_configuration_index = 0
                         for variant in self.env.ALL_VARIANTS:
+                            target_os = qbsPlatformList(env)
+                            extraPlatformFlags = target_os and [('qbs.targetOS', target_os),] or []
                             build_configurations.append((
                                 'ProjectExplorer.Target.BuildConfiguration.%d'%build_configuration_index,
                                 [
@@ -885,8 +895,8 @@ class QtCreator(Build.BuildContext):
                                             ('Qbs.Configuration', [
                                                 ('qbs.buildVariant', 'debug'),
                                                 ('qbs.architecture', qbsArch(env.TARGET_ARCH)),
-                                                ('qbs.targetPlatform', qbsPlatform(env))
-                                            ]),
+                                                ('qbs.targetPlatform', qbsPlatform(env)),
+                                            ] + extraPlatformFlags),
                                             ('ProjectExplorer.ProjectConfiguration.Id',
                                               'Qbs.BuildStep')
                                         ]),
