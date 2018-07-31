@@ -70,8 +70,8 @@ lipo = '${LIPO} ${LIPOFLAGS} ${SRC} -create -output ${TGT[0].abspath()}'
 Task.task_factory('lipo', lipo, color='BLUE')
 class codesign(Task.Task):
     def run(self):
-        with open(self.outputs[0].abspath(), 'w') as out:
-            out.write(self.inputs[0].read())
+        with open(self.outputs[0].abspath(), 'wb') as out:
+            out.write(self.inputs[0].read('rb'))
         return self.exec_command(self.env.CODESIGN + ['-s-', self.outputs[0].abspath()])
 
 
