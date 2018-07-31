@@ -108,7 +108,7 @@ Thread::~Thread()
     int result = pthread_join(*reinterpret_cast<pthread_t*>(m_data), &rvalue);
 #endif
     (void)result;
-    delete reinterpret_cast<ThreadParams*>(m_params);
+    delete m_params;
     delete reinterpret_cast<pthread_t*>(m_data);
 }
 

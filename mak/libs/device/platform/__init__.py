@@ -11,6 +11,11 @@ class Platform(object):
         for subclass in self.__subclasses__():
             if name in (subclass.__name__.lower(),) + subclass.names:
                 return subclass
+
+    @classmethod
+    def list_devices(self):
+        return []
+
 from .freebsd import FreeBSD
 from .linux import Linux
 from .macos import MacOS

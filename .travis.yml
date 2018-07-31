@@ -214,6 +214,12 @@ matrix:
     - os: osx
       env: COMPILER=appleclang COMPILER_VERSION=8.1.0 TARGET_OS=macosx10.12 FLAVOR=final
     - os: osx
+      env: COMPILER=appleclang COMPILER_VERSION=8.1.0 TARGET_OS=iphone10.3 FLAVOR=debug
+    - os: osx
+      env: COMPILER=appleclang COMPILER_VERSION=8.1.0 TARGET_OS=iphone10.3 FLAVOR=profile
+    - os: osx
+      env: COMPILER=appleclang COMPILER_VERSION=8.1.0 TARGET_OS=iphone10.3 FLAVOR=final
+    - os: osx
       env: COMPILER=appleclang COMPILER_VERSION=8.1.0 TARGET_OS=iphonesimulator10.3 FLAVOR=debug
     - os: osx
       env: COMPILER=appleclang COMPILER_VERSION=8.1.0 TARGET_OS=iphonesimulator10.3 FLAVOR=profile

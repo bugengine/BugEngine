@@ -17,6 +17,6 @@ class ShellCommand(Command):
 
     @classmethod
     def help(self, out):
-        out.write('    %s device\n' % self.bold_name())
+        out.write('    %s <device_name>\n' % self.bold_name())
         out.write('        Starts a shell on device\n')
 
