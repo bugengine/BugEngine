@@ -40,6 +40,7 @@ def qbsArch(arch_name):
     archs = {
         'amd64': 'x86_64',
         'x64': 'x86_64',
+        'x86_amd64': 'x86_64',
         'aarch64': 'arm64'
     }
     return archs.get(arch_name, arch_name)
@@ -231,14 +232,15 @@ class QtToolchain(QtObject):
         supported_platform = (
                 ('android', 'android'),
                 ('mingw', 'msys'),
-                ('msvc-7.0', 'msvc2002'),
-                ('msvc-7.1', 'msvc2003'),
-                ('msvc-8.0', 'msvc2005'),
-                ('msvc-9.0', 'msvc2008'),
-                ('msvc-10.0', 'msvc2010'),
-                ('msvc-11.0', 'msvc2012'),
-                ('msvc-12.0', 'msvc2013'),
-                ('msvc-14.0', 'msvc2015'),
+                ('msvc 7.0', 'msvc2002'),
+                ('msvc 7.1', 'msvc2003'),
+                ('msvc 8.0', 'msvc2005'),
+                ('msvc 9.0', 'msvc2008'),
+                ('msvc 10.0', 'msvc2010'),
+                ('msvc 11.0', 'msvc2012'),
+                ('msvc 12.0', 'msvc2013'),
+                ('msvc 14.0', 'msvc2015'),
+                ('msvc 15.', 'msvc2017'),
             )
         for o, o_name in supported_os:
             if target.find(o) != -1:
@@ -319,7 +321,7 @@ class QtToolchain(QtObject):
                 self.ProjectExplorer_MsvcToolChain_VarsBat = env.MSVC_BATFILE[0].replace('\\', '/')
                 self.ProjectExplorer_MsvcToolChain_VarsBatArg = env.MSVC_BATFILE[1] or ''
                 self.ProjectExplorer_MsvcToolChain_SupportedAbi = abi
-                toolchain_id =  'ProjectExplorer.ToolChain.Msvc:%s' % generateGUID('BugEngine:toolchain:%s'%env_name)
+                toolchain_id =  'ProjectExplorer.ToolChain.Msvc:%s' % generateGUID('BugEngine:toolchain:%s:%d'%(env_name, language))
             else:
                 self.ProjectExplorer_CustomToolChain_CompilerPath = compiler
                 self.ProjectExplorer_CustomToolChain_Cxx11Flags = ()

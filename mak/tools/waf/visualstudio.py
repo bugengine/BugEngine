@@ -310,6 +310,8 @@ class VCxproj:
                 self.vcxproj._add(config, 'Platform', task_gen.bld.get_platform(env.MS_PROJECT_PLATFORM))
         for toolchain in task_gen.bld.env.ALL_TOOLCHAINS:
             env = task_gen.bld.all_envs[toolchain]
+            if env.SUB_TOOLCHAINS:
+                env = task_gen.bld.all_envs[env.SUB_TOOLCHAINS[0]]
             pgroup = self.vcxproj._add(project, 'PropertyGroup')
             self.vcxproj._add(pgroup, 'PlatformShortName', toolchain)
             self.vcxproj._add(pgroup, 'PlatformArchitecture', env.VALID_ARCHITECTURES[0])
