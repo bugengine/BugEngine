@@ -177,6 +177,7 @@ def p_operator_expr(p):
         expression : LPAREN expression_list RPAREN                          %prec PRIO0
                    | expression PLUSPLUS                                    %prec PRIO1
                    | expression MINUSMINUS                                  %prec PRIO1
+                   | expression LPAREN RPAREN                               %prec PRIO1
                    | expression LPAREN expression_list RPAREN               %prec PRIO1
                    | expression LBRACKET expression_list RBRACKET           %prec PRIO1
                    | expression PERIOD object_name                          %prec PRIO1

@@ -116,18 +116,6 @@ def p_create_constructor(p):
     p.set_position(0, -1)
 
 
-def p_create_destructor(p):
-    """
-        create_destructor :
-    """
-    p[0] = cl_ast.methods.SpecialMethod('~'+p[-1], p.position(-1), p.lexer.scopes[-1])
-    if p.lexer.scopes[-1].definition.destructor:
-        p.lexer._error('destructor cannot be redeclared', p.position(-1))
-    else:
-        p.lexer.scopes[-1].definition.destructor = p[0]
-    p.set_position(0, -1)
-
-
 def p_create_castop(p):
     """
         create_castop :

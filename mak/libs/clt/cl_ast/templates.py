@@ -1,3 +1,4 @@
+from . import types
 try:
     from itertools import zip_longest
 except ImportError:
@@ -6,12 +7,15 @@ except ImportError:
 
 class Template:
     class InstanciationError(Exception):
-        def __init__(self, msg):
+        def __init__(self, msg, position, error):
             self.msg = msg
+            self.position = position
+            self.error = error
 
     def __init__(self, position):
         self.parameters = []
         self.specializations = []
+        self.created_instances = []
         self.name = None
         self.position = position
 
@@ -32,14 +36,19 @@ class Template:
 
     def create_instance(self, arguments):
         specialization, template_arguments = self.find_specialization(arguments)
-        return specialization.instantiate(template_arguments)
+        instance = specialization.instantiate(template_arguments)
+        self.created_instances.append((arguments, instance))
+        return instance
 
     def instantiate(self, template_arguments):
-        result = Template()
+        result = Template(self.position)
+        result.name = self.name
         for p in self.parameters:
             result.add_template_parameter(p.instantiate(template_arguments))
         for params, s in self.specializations:
-            result.add((p.instantiate(template_values) for p in params), s.instantiate(template_values))
+            instance_params = (p.instantiate(template_arguments) for p in params)
+            instance_specialization = s.instantiate(template_arguments)
+            result.specialize(tuple(instance_params), instance_specialization)
         return result
 
     def add(self, specialization):
@@ -62,11 +71,25 @@ class Template:
                     raise Template.InstanciationError('Too few template parameters')
                 else:
                     argument = parameter.default_value
-            if not argument.is_valid(parameter):
+            try:
+                argument.is_valid(parameter)
+            except AttributeError:
+                raise Template.InstanciationError('Invalid value for template parameter %s' % parameter.name,
+                                                  argument.position,
+                                                  None)
+            except types.ConversionError as e:
                 if parameter.name:
-                    raise Template.InstanciationError('%s: Invalid template parameter' % parameter.name)
+                    raise Template.InstanciationError('Invalid value for template parameter %s' % parameter.name,
+                                                      argument.position,
+                                                      e)
                 else:
-                    raise Template.InstanciationError('Invalid template parameter')
+                    raise Template.InstanciationError('Invalid value for template parameter',
+                                                      argument.position,
+                                                      e)
             if parameter.name:
                 template_arguments[parameter.name] = { argument }
         return self.specializations[0][1], template_arguments
+
+    def write_to(self, writer):
+        for arguments, instance in self.created_instances:
+            instance.write_to(writer)

@@ -4,19 +4,19 @@ import os
 
 
 def set_position(p, s1, s2):
-    p.slice[s1].lineno, p.slice[s1].lexpos, p.slice[s1].endlexpos = p.position(s2)
+    p.slice[s1].filename, p.slice[s1].lineno, p.slice[s1].lexpos, p.slice[s1].endlexpos = p.position(s2)
 
 def set_position_absolute(p, s1, position):
-    p.slice[s1].lineno, p.slice[s1].lexpos, p.slice[s1].endlexpos = position
+    p.slice[s1].filename, p.slice[s1].lineno, p.slice[s1].lexpos, p.slice[s1].endlexpos = position
 
 def position(p, s):
     if s >= 0:
-        return (p.lineno(s),) + p.lexspan(s)
+        return (getattr(p.slice[s], 'filename', ''), p.lineno(s),) + p.lexspan(s)
     else:
         production = p.stack[s]
         startpos = getattr(production, 'lexpos', 0)
         endpos = getattr(production, 'endlexpos', startpos)
-        return (getattr(production, 'lineno', 0), startpos, endpos)
+        return (getattr(production, 'filename', ''), getattr(production, 'lineno', 0), startpos, endpos)
 
 yacc.YaccProduction.set_position = set_position
 yacc.YaccProduction.set_position_absolute = set_position_absolute
