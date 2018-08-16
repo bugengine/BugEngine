@@ -1,3 +1,8 @@
+class ConversionError(Exception):
+    def __init__(self, message, position):
+        self.message = message
+        self.position = position
+
 
 class Typedef:
     def __init__(self, name, type, position):
@@ -96,7 +101,8 @@ class Struct:
             self.destructor = None
 
     def __init__(self, struct_type, name, position):
-        self.id += 1
+        self.id = Struct.id
+        Struct.id += 1
         self.name = name
         self.position = position
         self.struct_type = struct_type
@@ -118,7 +124,17 @@ class Struct:
         self.definition = Struct.Definition(parent)
 
     def instantiate(self, template_arguments):
-        return self
+        instance = Struct(self.struct_type, self.name, self.position)
+        d = self.definition
+        if d:
+            instance.definition = Struct.Definition(d.parent)
+            for m in d.members:
+                instance.definition.members.append(m.instantiate(template_arguments))
+            if d.constructor:
+                instance.definition.constructor = d.constructor.instantiate(template_arguments)
+            if d.destructor:
+                instance.definition.destructor = d.destructor.instantiate(template_arguments)
+        return instance
 
     def get_token_type(self):
         return 'STRUCT_ID'
@@ -132,6 +148,17 @@ class Struct:
 
     def signature(self):
         return '%s{%d}' % (self.name, self.id)
+
+    def write_to(self, writer):
+        if self.definition:
+            with writer.create_struct(self.position, self.id, self.name,
+                                      self.definition.parent and self.definition.parent.id) as s:
+                if self.definition.constructor:
+                    self.definition.constructor.write_to(s)
+                if self.definition.destructor:
+                    self.definition.destructor.write_to(s)
+                for member in self.definition.members:
+                    member.write_to(s)
 
 
 class Builtin:
@@ -147,6 +174,14 @@ class Builtin:
 
     def signature(self):
         return 'builtin{%s}' % self.typename
+
+    def try_conversion(self, other, qualifier_importance=False):
+        if not isinstance(other, Builtin):
+            raise ConversionError("can't convert from %s type %s to %s type" % (self.__class__.__name__.lower(),
+                                                                                self.typename,
+                                                                                other.__class__.__name__.lower()),
+                                  self.position)
+        #TODO: actual conversions?
 
 
 class Type:
@@ -170,6 +205,16 @@ class Type:
     def signature(self):
         return self.base_type.signature()
 
+    def try_conversion(self, other_type, qualifier_importance=False):
+        self.base_type.try_conversion(other_type.base_type, True)
+        if qualifier_importance:
+            for modifier, position in self.modifier:
+                for other_modifier, other_position in other.modifier:
+                    if modifier == other.modifier: break
+                else:
+                    raise ConversionError("conversion would lose '%s' qualifier" % modifier,
+                                          position)
+
 
 class Pointer:
     def __init__(self, pointer_to, position):
@@ -185,6 +230,13 @@ class Pointer:
     def signature(self):
         return '%s*' % (self.pointer_to.signature())
 
+    def try_conversion(self, other, qualifier_importance=False):
+        if not isinstance(other, Pointer):
+            raise ConversionError("can't convert from %s type to %s type" % (self.__class__.__name__.lower(),
+                                                                             other.__class__.__name__.lower()),
+                                  self.position)
+        self.pointer_to.try_conversion(other.pointer_to, True)
+
 
 class Reference:
     def __init__(self, pointer_to, position):
@@ -199,6 +251,13 @@ class Reference:
 
     def signature(self):
         return '%s&' % (self.pointer_to.signature())
+
+    def try_conversion(self, other, qualifier_importance=False):
+        if not isinstance(other, Reference):
+            raise ConversionError("can't convert from %s type to %s type" % (self.__class__.__name__.lower(),
+                                                                             other.__class__.__name__.lower()),
+                                  self.position)
+        self.pointer_to.try_conversion(other.pointer_to, True)
 
 
 class Array:
@@ -218,3 +277,10 @@ class Array:
 
     def original_type(self):
         return self.array_type.original_type()
+
+    def try_conversion(self, other, qualifier_importance=False):
+        if not isinstance(other, Array):
+            raise ConversionError("can't convert from %s type to %s type" % (self.__class__.__name__.lower(),
+                                                                             other.__class__.__name__.lower()),
+                                  self.position)
+        self.pointer_to.try_conversion(other.pointer_to, True)

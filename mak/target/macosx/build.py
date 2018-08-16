@@ -1,5 +1,5 @@
 from waflib import Task, Context, Utils
-from waflib.TaskGen import feature, extension, before_method, after_method
+from waflib.TaskGen import taskgen_method, feature, extension, before_method, after_method
 from waflib.Tools import gcc, ccroot
 import os
 
@@ -13,9 +13,14 @@ def plugins(bld):
 
 
 @extension('.plist')
-def install_plist(self, node):
-    self.install_files(os.path.join(self.env.PREFIX, self.bld.optim, self.env.DEPLOY_ROOTDIR),
-                       [node])
+def install_plist_darwin(self, node):
+    if 'darwin' in self.bld.env.VALID_PLATFORMS:
+        bld_env = self.bld.env
+        if bld_env.SUB_TOOLCHAINS:
+            bld_env = self.bld.all_envs[bld_env.SUB_TOOLCHAINS[0]]
+        self.install_files(os.path.join(self.bld.env.PREFIX, self.bld.optim,
+                                        bld_env.DEPLOY_ROOTDIR),
+                           [node])
 
 
 @feature('cshlib', 'cxxshlib')
@@ -63,15 +68,62 @@ strip = '${STRIP} ${STRIPFLAGS} -S -o ${TGT[0].abspath()} ${SRC[0].abspath()}'
 Task.task_factory('strip', strip, color='BLUE')
 lipo = '${LIPO} ${LIPOFLAGS} ${SRC} -create -output ${TGT[0].abspath()}'
 Task.task_factory('lipo', lipo, color='BLUE')
+class codesign(Task.Task):
+    def run(self):
+        with open(self.outputs[0].abspath(), 'wb') as out:
+            out.write(self.inputs[0].read('rb'))
+        return self.exec_command(self.env.CODESIGN + ['-s-', self.outputs[0].abspath()])
+
+
+@taskgen_method
+def darwin_postlink_task(self, link_task):
+    appname = getattr(Context.g_module, Context.APPNAME, self.bld.srcnode.name)
+    
+    bldnode = self.bld.bldnode.make_node(self.bld.bugengine_variant).make_node(self.bld.optim)
+    out_rootdir = os.path.join(appname+'.app.dSYM', 'Contents')
+    out_rootnode = bldnode.make_node(out_rootdir)
+    out_dsymdir = out_rootnode.make_node('Resources/DWARF')
+
+    out_node = link_task.outputs[0]
+    out_node_stripped = out_node.change_ext('.stripped')
+    out_node_signed = self.make_bld_node('bin.signed', None, out_node.name)
+    self.strip_task = self.create_task('strip', [out_node], [out_node_stripped])
+    self.sign_task = self.create_task('codesign', [out_node_stripped], [out_node_signed])
+    self.link_task = self.sign_task
+    
+    
+    dsymtask = getattr(self.bld, 'dsym_task', None)
+    if not dsymtask:
+        infoplist = out_rootnode.make_node('Info.plist')
+        dsymtask = self.bld.dsym_task = self.create_task('dsym', [], [infoplist])
+        self.install_as(os.path.join(self.bld.env.PREFIX, self.bld.optim,
+                                     infoplist.path_from(bldnode)),
+                        infoplist)
+
+    dsymtask.set_inputs(out_node)
+    dsymtask.set_outputs(out_dsymdir.make_node(out_node.name))
+    self.install_as(os.path.join(self.bld.env.PREFIX, self.bld.optim, appname+'.app.dSYM',
+                                 'Contents', 'Resources', 'DWARF', out_node.name),
+                    dsymtask.outputs[-1])
+    return self.sign_task
+
+
+@feature('cshlib', 'cxxshlib', 'cprogram', 'cxxprogram')
+@after_method('apply_link')
+@after_method('process_use')
+@before_method('install_step')
+def apply_postlink_darwin(self):
+    if 'darwin' in self.env.VALID_PLATFORMS:
+        if not self.env.ENV_PREFIX:
+            self.darwin_postlink_task(self.link_task)
 
 
 @feature('multiarch')
 @after_method('apply_link')
 @after_method('process_use')
+@before_method('install_step')
 def apply_multiarch_darwin(self):
     if 'darwin' in self.env.VALID_PLATFORMS:
-        appname = getattr(Context.g_module, Context.APPNAME, self.bld.srcnode.name)
-
         features = []
         inputs = []
         for tg_name in self.use:
@@ -95,31 +147,10 @@ def apply_multiarch_darwin(self):
         else:
             return
 
-        out_rootdir = os.path.join(appname+'.app.dSYM', 'Contents')
-        out_rootnode = self.bld.bldnode.make_node(out_rootdir)
-        out_dsymdir = out_rootnode.make_node('Resources/DWARF')
-
-        out_node = self.make_bld_node('.bin', None, out_name+'.stripped')
-        out_node_dbg = self.make_bld_node('.bin', None, out_name+'.dbg')
-        out_node_full = self.make_bld_node('.bin', None, out_name)
+        out_node_full = self.make_bld_node('bin', None, out_name)
 
         self.lipo_task = self.create_task('lipo', inputs, [out_node_full])
-        self.strip_task = self.create_task('strip', [out_node_full], [out_node])
+        l = self.darwin_postlink_task(self.lipo_task)
         self.install_as(os.path.join(self.bld.env.PREFIX, self.bld.optim, out_path, out_name),
-                        out_node,
+                        l.outputs[0],
                         chmod=Utils.O755)
-
-        dsymtask = getattr(self.bld, 'dsym_task', None)
-        if not dsymtask:
-            infoplist = self.bld.bldnode.make_node(os.path.join(out_rootdir, 'Info.plist'))
-            dsymtask = self.bld.dsym_task = self.create_task('dsym', [], [infoplist])
-            self.install_as(os.path.join(self.bld.env.PREFIX, self.bld.optim,
-                                         infoplist.path_from(self.bld.bldnode)),
-                            infoplist)
-
-        dsymtask.set_inputs(out_node_full)
-        dsymtask.set_outputs(out_dsymdir.make_node(out_name))
-        self.install_as(os.path.join(self.bld.env.PREFIX, self.bld.optim, appname+'.app.dSYM',
-                                     'Contents', 'Resources', 'DWARF', out_name),
-                        dsymtask.outputs[-1])
-

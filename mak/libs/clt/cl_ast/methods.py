@@ -46,8 +46,11 @@ class Overload(Scope):
 
 
 class Method(Scope):
+    id = 1
     def __init__(self, method_name, position, owner):
         Scope.__init__(self, position)
+        self.id = Method.id
+        Method.id += 1
         self.name = method_name
         self.overloads = []
         self.owner = owner
@@ -74,6 +77,11 @@ class Method(Scope):
             return new_overload
         else:
             return None
+
+    def write_to(self, writer):
+        for overload_id, overload in enumerate(self.overloads):
+            with writer.create_method(self.position, self.id, self.name, overload_id) as m:
+                pass
 
 
 class SpecialMethod(Method):

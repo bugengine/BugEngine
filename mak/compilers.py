@@ -398,6 +398,9 @@ class GnuCompiler(Compiler):
         self.find_target_program(conf, platform, 'gdb', mandatory=False, os_paths=os_paths)
         if not conf.env.GDB:
             conf.find_program('gdb', var='GDB', mandatory=False)
+        self.find_target_program(conf, platform, 'lldb', mandatory=False, os_paths=os_paths)
+        if not conf.env.LLDB:
+            conf.find_program('lldb', var='LLDB', mandatory=False)
         Compiler.load_tools(self, conf, platform)
         conf.env.CCLNK_TGT_F = ['-o', '']
         conf.env.CXXLNK_TGT_F = ['-o', '']

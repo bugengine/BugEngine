@@ -14,3 +14,9 @@ class Variable:
     def get_token_type(self):
         return 'VARIABLE_ID'
 
+    def write_to(self, writer):
+        pass
+
+    def instantiate(self, template_arguments):
+        return self
+

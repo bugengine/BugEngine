@@ -45,6 +45,22 @@ def qbsArch(arch_name):
     }
     return archs.get(arch_name, arch_name)
 
+def qbsPlatform(env):
+    if 'iphonesimulator' in env.VALID_PLATFORMS:
+        return 'ios-simulator'
+    elif 'iphone' in env.VALID_PLATFORMS:
+        return 'ios'
+    else:
+        return env.VALID_PLATFORMS[0]
+
+def qbsPlatformList(env):
+    if 'iphonesimulator' in env.VALID_PLATFORMS:
+        return '["ios-simulator","ios","darwin","bsd","unix"]'
+    elif 'iphone' in env.VALID_PLATFORMS:
+        return '["ios","darwin","bsd","unix"]'
+    else:
+        return None
+
 def _hexdigest(s):
     """Return a string as a string of hex characters.
     """
@@ -149,7 +165,13 @@ def read_value(node):
         value = list([read_value(n) for n in node.childNodes if n.nodeType == n.ELEMENT_NODE])
     elif type == 'QDateTime':
         if node.childNodes:
-            value = datetime.datetime.strptime(node.childNodes[0].wholeText.strip(), '%Y-%m-%dT%H:%M:%S')
+            time = node.childNodes[0].wholeText.strip()
+            if len(time) == 19:
+              value = datetime.datetime.strptime(time, '%Y-%m-%dT%H:%M:%S')
+            elif len(time) == 23:
+              value = datetime.datetime.strptime(time, '%Y-%m-%dT%H:%M:%S.000')
+            else:
+                raise ValueError('invalid date format: %s' % time)
         else:
             value = datetime.datetime(1970,1,1)
     else:
@@ -286,6 +308,8 @@ class QtToolchain(QtObject):
                         flags.append(f)
             if isinstance(compiler, list):
                 compiler = compiler[0]
+            for define in env.DEFINES + env.SYSTEM_DEFINES:
+                flags.append(env.DEFINES_ST % define)
 
             if env.COMPILER_NAME == 'gcc':
                 self.ProjectExplorer_GccToolChain_Path = compiler
@@ -363,7 +387,7 @@ class QtDebugger(QtObject):
                 self.Binary = env.LLDB[0]
                 self.EngineType = 256
             else:
-                self.Binary = env.GDB[0] or '/usr/bin/gdb'
+                self.Binary = env.GDB and env.GDB[0] or '/usr/bin/gdb'
                 self.EngineType = 1
             abi = getattr(toolchain, 'ProjectExplorer_CustomToolChain_TargetAbi', None)
             abi = abi or getattr(toolchain, 'ProjectExplorer_GccToolChain_TargetAbi', None)
@@ -854,6 +878,8 @@ class QtCreator(Build.BuildContext):
                         deploy_configurations = []
                         build_configuration_index = 0
                         for variant in self.env.ALL_VARIANTS:
+                            target_os = qbsPlatformList(env)
+                            extraPlatformFlags = target_os and [('qbs.targetOS', target_os),] or []
                             build_configurations.append((
                                 'ProjectExplorer.Target.BuildConfiguration.%d'%build_configuration_index,
                                 [
@@ -870,8 +896,9 @@ class QtCreator(Build.BuildContext):
                                             ('ProjectExplorer.ProjectConfiguration.DisplayName', ''),
                                             ('Qbs.Configuration', [
                                                 ('qbs.buildVariant', 'debug'),
-                                                ('qbs.architecture', qbsArch(env.TARGET_ARCH))
-                                            ]),
+                                                ('qbs.architecture', qbsArch(env.TARGET_ARCH)),
+                                                ('qbs.targetPlatform', qbsPlatform(env)),
+                                            ] + extraPlatformFlags),
                                             ('ProjectExplorer.ProjectConfiguration.Id',
                                               'Qbs.BuildStep')
                                         ]),
@@ -1222,6 +1249,7 @@ class Qbs(QtCreator):
 
                 project_file.write('%s    name: "%s"\n' % (indent, p.name))
                 project_file.write('%s    targetName: "%s"\n' % (indent, p.name.split('.')[-1]))
+                project_file.write('%s    cpp._skipAllChecks: true\n' % (indent, ))
                 project_file.write('%s    cpp.includePaths: [\n' % (indent))
                 for include in includes:
                     project_file.write('%s        "%s",\n' % (indent, include.replace('\\', '/')))

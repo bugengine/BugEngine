@@ -14,6 +14,12 @@
 # define be_break()             __asm("break")
 #elif defined(_ARM64)
 # define be_break()             __asm__ volatile("brk 0x0")
+#elif defined(__APPLE_CC__) && defined(_ARM)
+# if !defined(__thumb__)
+#  define be_break()            __asm__ volatile(".word 0xe7f001f0");
+# else
+#  define be_break()            __asm__ volatile(".short 0xde01");
+# endif
 #elif defined(_ARM) && !defined(__thumb__)
 # define be_break()             __asm__ volatile(".inst 0xe7f001f0")
 #elif defined(_ARM)

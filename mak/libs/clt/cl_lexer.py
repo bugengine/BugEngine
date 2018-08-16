@@ -91,6 +91,7 @@ class ClLexer:
         new_token = self.lexer.token()
         if new_token:
             new_token.lexer = self
+            new_token.filename = self.filename
             new_token.endlexpos = new_token.lexpos + len(new_token.value)
             if new_token.type == 'SCOPE':
                 if self.last_token:
@@ -104,7 +105,7 @@ class ClLexer:
         return new_token
 
     def _position(self, token):
-        return (token.lineno, token.lexpos, token.lexpos + len(token.value))
+        return (token.filename, token.lineno, token.lexpos, token.lexpos + len(token.value))
 
     def _msg(self, error_type, msg, pos):
         if self.error_color:
@@ -115,17 +116,20 @@ class ClLexer:
             color_msg = ''
             color_caret = ''
             color_off = ''
-        lineno, offset, end = pos
+        filename, lineno, offset, end = pos
         while offset>0 and self.lexer.lexdata[offset-1] != '\n':
             offset -= 1
         while end < len(self.lexer.lexdata) and self.lexer.lexdata[end] != '\n':
             end += 1
-        location = self.error_format % { 'f': self.filename, 'l': lineno, 'c': pos[1] - offset + 1 }
+        location = self.error_format % { 'f': filename, 'l': lineno, 'c': pos[2] - offset + 1 }
         sys.stderr.write('%s%s%s%s %s:%s %s%s%s\n' % (color_filename, location, color_off,
-                                                       color_error_type, error_type, color_off,
-                                                       color_msg, msg, color_off))
+                                                      color_error_type, error_type, color_off,
+                                                      color_msg, msg, color_off))
         sys.stderr.write(self.lexer.lexdata[offset:end+1])
-        sys.stderr.write('%s%s%s%s\n' % (' '*(pos[1] - offset), color_caret, '^'*(pos[2]-pos[1]), color_off))
+        sys.stderr.write('%s%s%s%s\n' % (' '*(pos[2] - offset),
+                                         color_caret,
+                                         '^'*(pos[3]-pos[2]),
+                                         color_off))
 
     def _note(self, msg, pos):
         self._msg('note', msg, pos)
