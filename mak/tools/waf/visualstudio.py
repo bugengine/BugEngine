@@ -304,12 +304,15 @@ class VCxproj:
         configs = self.vcxproj._add(project, 'ItemGroup', {'Label': 'ProjectConfigurations'})
         for toolchain in task_gen.bld.env.ALL_TOOLCHAINS:
             env = task_gen.bld.all_envs[toolchain]
+            platform = task_gen.bld.get_platform(env.MS_PROJECT_PLATFORM)
             for variant in task_gen.bld.env.ALL_VARIANTS:
-                config = self.vcxproj._add(configs, 'ProjectConfiguration', {'Include': '%s|%s' % (variant, toolchain)})
+                config = self.vcxproj._add(configs, 'ProjectConfiguration', {'Include': '%s-%s|%s' % (toolchain, variant, platform)})
                 self.vcxproj._add(config, 'Configuration', '%s-%s' % (toolchain, variant))
-                self.vcxproj._add(config, 'Platform', task_gen.bld.get_platform(env.MS_PROJECT_PLATFORM))
+                self.vcxproj._add(config, 'Platform', platform)
         for toolchain in task_gen.bld.env.ALL_TOOLCHAINS:
             env = task_gen.bld.all_envs[toolchain]
+            if env.SUB_TOOLCHAINS:
+                env = task_gen.bld.all_envs[env.SUB_TOOLCHAINS[0]]
             pgroup = self.vcxproj._add(project, 'PropertyGroup')
             self.vcxproj._add(pgroup, 'PlatformShortName', toolchain)
             self.vcxproj._add(pgroup, 'PlatformArchitecture', env.VALID_ARCHITECTURES[0])
@@ -325,6 +328,7 @@ class VCxproj:
             env = task_gen.bld.all_envs[toolchain]
             if env.SUB_TOOLCHAINS:
                 env = task_gen.bld.all_envs[env.SUB_TOOLCHAINS[0]]
+            platform = task_gen.bld.get_platform(env.MS_PROJECT_PLATFORM)
             for prop in env.MS_PROJECT_IMPORT_PROPS:
                 for variant in task_gen.bld.env.ALL_VARIANTS:
                     self.vcxproj._add(project, 'Import', {
@@ -333,27 +337,39 @@ class VCxproj:
 
         for toolchain in task_gen.bld.env.ALL_TOOLCHAINS:
             env = task_gen.bld.all_envs[toolchain]
+            if env.SUB_TOOLCHAINS:
+                env = task_gen.bld.all_envs[env.SUB_TOOLCHAINS[0]]
+            platform = task_gen.bld.get_platform(env.MS_PROJECT_PLATFORM)
             for variant in task_gen.bld.env.ALL_VARIANTS:
-                properties = self.vcxproj._add(project, 'PropertyGroup', {'Condition': "'$(Configuration)'=='%s-%s'" % (toolchain, variant)})
+                properties = self.vcxproj._add(project, 'PropertyGroup', {'Condition': "'$(Configuration)|$(Platform)'=='%s-%s|%s'" % (toolchain, variant, platform)})
                 for var in ['Prefix', 'TmpDir', 'Toolchain', 'Deploy_BinDir', 'Deploy_RunBinDir', 'Deploy_LibDir',
                             'Deploy_IncludeDir', 'Deploy_DataDir', 'Deploy_PluginDir', 'Deploy_KernelDir', 'Deploy_RootDir']:
-                    self.vcxproj._add(properties, var, env[var.upper()])
+                    self.vcxproj._add(properties, var, env[var.upper()].replace('/', '\\'))
                 self.vcxproj._add(properties, 'Variant', variant)
-
-        configuration = self.vcxproj._add(project, 'PropertyGroup', {'Label': 'Configuration'})
-        self.vcxproj._add(configuration, 'ConfigurationType', 'Makefile')
-        self.vcxproj._add(configuration, 'PlatformToolset', 'v%d'% (float(version_project[1])*10))
-        self.vcxproj._add(configuration, 'OutDir', '$(SolutionDir)$(Prefix)\\$(Variant)\\')
-        self.vcxproj._add(configuration, 'IntDir', '$(TmpDir)\\$(Variant)\\')
 
         for toolchain in task_gen.bld.env.ALL_TOOLCHAINS:
             env = task_gen.bld.all_envs[toolchain]
             if env.SUB_TOOLCHAINS:
                 env = task_gen.bld.all_envs[env.SUB_TOOLCHAINS[0]]
+            platform = task_gen.bld.get_platform(env.MS_PROJECT_PLATFORM)
             for variant in task_gen.bld.env.ALL_VARIANTS:
-                properties = self.vcxproj._add(project, 'PropertyGroup', {'Condition': "'$(Configuration)'=='%s-%s'" % (toolchain, variant)})
-                for var,value in env.MS_PROJECT_VARIABLES:
-                    self.vcxproj._add(properties, var, value)
+                configuration = self.vcxproj._add(project, 'PropertyGroup', {'Label': 'Configuration',
+                                                                             'Condition': "'$(Configuration)|$(Platform)'=='%s-%s|%s'" % (toolchain, variant, platform)})
+                self.vcxproj._add(configuration, 'ConfigurationType', 'Makefile')
+                self.vcxproj._add(configuration, 'PlatformToolset', 'v%d'% (float(version_project[1])*10))
+                self.vcxproj._add(configuration, 'OutDir', '$(SolutionDir)$(Prefix)\\$(Variant)\\')
+                self.vcxproj._add(configuration, 'IntDir', '$(TmpDir)\\$(Variant)\\')
+
+        for toolchain in task_gen.bld.env.ALL_TOOLCHAINS:
+            env = task_gen.bld.all_envs[toolchain]
+            if env.SUB_TOOLCHAINS:
+                env = task_gen.bld.all_envs[env.SUB_TOOLCHAINS[0]]
+            platform = task_gen.bld.get_platform(env.MS_PROJECT_PLATFORM)
+            for variant in task_gen.bld.env.ALL_VARIANTS:
+                if env.MS_PROJECT_VARIABLES:
+                    properties = self.vcxproj._add(project, 'PropertyGroup', {'Condition': "'$(Configuration)|$(Platform)'=='%s-%s|%s'" % (toolchain, variant, platform)})
+                    for var,value in env.MS_PROJECT_VARIABLES:
+                        self.vcxproj._add(properties, var, value)
 
 
         includes, defines = gather_includes_defines(task_gen)
@@ -363,8 +379,9 @@ class VCxproj:
                 sub_env = task_gen.bld.all_envs[env.SUB_TOOLCHAINS[0]]
             else:
                 sub_env = env
+            platform = task_gen.bld.get_platform(sub_env.MS_PROJECT_PLATFORM)
             for variant in task_gen.bld.env.ALL_VARIANTS:
-                properties = self.vcxproj._add(project, 'PropertyGroup', {'Condition': "'$(Configuration)'=='%s-%s'" % (toolchain, variant)})
+                properties = self.vcxproj._add(project, 'PropertyGroup', {'Condition': "'$(Configuration)|$(Platform)'=='%s-%s|%s'" % (toolchain, variant, platform)})
                 command = getattr(task_gen, 'command', '')
                 if command:
                     command = command % {'toolchain':toolchain, 'variant':variant}
@@ -394,10 +411,11 @@ class VCxproj:
             env = task_gen.bld.all_envs[toolchain]
             if env.SUB_TOOLCHAINS:
                 env = task_gen.bld.all_envs[env.SUB_TOOLCHAINS[0]]
+            platform = task_gen.bld.get_platform(env.MS_PROJECT_PLATFORM)
             for target in env.MS_PROJECT_IMPORT_TARGETS:
                 for variant in task_gen.bld.env.ALL_VARIANTS:
                     self.vcxproj._add(project, 'Import', {
-                        'Condition': "'$(Configuration)'=='%s-%s'" % (toolchain, variant),
+                        'Condition': "'$(Configuration)|$(Platform)'=='%s-%s|%s'" % (toolchain, variant, platform),
                         'Project': target})
 
     def write(self, nodes):
@@ -596,6 +614,6 @@ class vs2017(vs2003):
     "creates projects for Visual Studio 2017"
     cmd = 'vs2017'
     fun = 'build'
-    version =	(('Visual Studio 15', '12.00', True, '15.0.00000.0'),(VCxproj, ('6.0','15.0', '15.0')))
+    version =	(('Visual Studio 15', '12.00', True, '15.0.00000.0'),(VCxproj, ('6.0','14.1', '15.0')))
     platforms = ['Win32', 'x64', 'ARM', 'Itanium']
 

@@ -32,35 +32,39 @@ struct ParseLocation
     }
 };
 
-typedef minitl::format<512> ErrorType;
 
-struct Error
+struct Message
 {
+    typedef minitl::format<512u> MessageType;
     ParseLocation   location;
-    ErrorType       errorMessage;
-    Error(const ParseLocation& location,
-          const ErrorType& message)
-        :   location(location)
-        ,   errorMessage(message)
+    MessageType     message;
+    LogLevel        severity;
+    Message(const ParseLocation& location,
+            const MessageType& message,
+            LogLevel severity)
+        : location(location)
+        , message(message)
+        , severity(severity)
     {
     }
 };
+typedef minitl::vector< Message > MessageList;
 
-typedef minitl::vector< Error > ErrorList;
 
 struct be_api(RTTIPARSE) DbContext
 {
+
     const ifilename             filename;
     ref<const Namespace> const  rootNamespace;
     ref<Folder> const           rootFolder;
-    ErrorList                   errors;
-    ErrorList                   warnings;
+    MessageList                 messages;
+    u32                         errorCount;
 
     DbContext(minitl::Allocator& arena, const ifilename& filename, ref<Folder> rootFolder);
     DbContext(minitl::Allocator& arena, const ifilename& filename,
               ref<const Namespace> ns, ref<Folder> rootFolder);
-    void error(const ParseLocation& where, const ErrorType& error);
-    void warning(const ParseLocation& where, const ErrorType& error);
+    void error(const ParseLocation& location, const Message::MessageType& error);
+    void warning(const ParseLocation& location, const Message::MessageType& warning);
 };
 
 }}}

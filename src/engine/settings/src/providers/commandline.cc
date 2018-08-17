@@ -57,18 +57,25 @@ CommandLineSettingsProvider::buildSettings(int argc, const char* argv[])
             }
             else
             {
+                RTTI::Parser::MessageList errorList(Arena::stack());
                 istring category(nameBegin, sep);
                 istring property(sep+1, nameEnd);
-                ref<RTTI::Parser::Node> value;
-                addSetting(result, category, property, value);
+                ref<RTTI::Parser::Node> value = RTTI::parseValue(Arena::script(), errorList, optionBegin, optionEnd, 0, 0);
+                for (RTTI::Parser::MessageList::const_iterator it = errorList.begin(); it != errorList.end(); ++it)
+                {
+                    Logger::root()->log(logError, "<command line>", 0, it->message);
+                }
+                if (errorList.empty())
+                    addSetting(result, category, property, value);
             }
         }
     }
     return result;
 }
 
-CommandLineSettingsProvider::CommandLineSettingsProvider(int argc, const char* argv[])
-    :   SettingsProvider(buildSettings(argc, argv))
+CommandLineSettingsProvider::CommandLineSettingsProvider(int argc, const char* argv[],
+                                                         ref<Folder> folder)
+    :   SettingsProvider(ifilename("<command line>"), buildSettings(argc, argv), folder)
 {
 
 }

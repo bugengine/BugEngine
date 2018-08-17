@@ -17,19 +17,21 @@ namespace BugEngine { namespace RTTI
 
 be_api(RTTIPARSE)
 ref<Parser::Node> parseValue(minitl::Allocator& arena,
-                             Parser::ErrorList& errors,
+                             Parser::MessageList& context,
                              const char* strBegin,
                              const char *strEnd = 0,
                              u32 initialLine = 0,
                              u32 initialColumn = 0);
 be_api(RTTIPARSE)
 ref<Parser::Object> parseObject(minitl::Allocator& arena,
-                                Parser::ErrorList& errors,
+                                Parser::MessageList& context,
                                 const char* strBegin,
                                 const char *strEnd = 0,
                                 u32 initialLine = 0,
                                 u32 initialColumn = 0);
 
+be_api(RTTIPARSE)
+RTTI::Value quickParse(minitl::Allocator& arena, const char* strBegin, const char *strEnd = 0);
 }}
 
 /**************************************************************************************************/

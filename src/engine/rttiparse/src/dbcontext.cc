@@ -14,8 +14,8 @@ DbContext::DbContext(minitl::Allocator& arena, const ifilename& filename, ref<Fo
     :   filename(filename)
     ,   rootNamespace(ref<Namespace>::create(arena, byref(arena)))
     ,   rootFolder(rootFolder)
-    ,   errors(arena)
-    ,   warnings(arena)
+    ,   messages(arena)
+    ,   errorCount()
 {
 }
 
@@ -24,21 +24,20 @@ DbContext::DbContext(minitl::Allocator& arena, const ifilename& filename,
     :   filename(filename)
     ,   rootNamespace(ns)
     ,   rootFolder(rootFolder)
-    ,   errors(arena)
-    ,   warnings(arena)
+    ,   messages(arena)
+    ,   errorCount()
 {
 }
 
-void DbContext::error(const ParseLocation& where, const ErrorType& error)
+void DbContext::error(const ParseLocation& location, const Message::MessageType& error)
 {
-    Error e(where, error);
-    errors.push_back(e);
+    messages.push_back(Message(location, error, logError));
+    errorCount++;
 }
 
-void DbContext::warning(const ParseLocation& where, const ErrorType& error)
+void DbContext::warning(const ParseLocation& location, const Message::MessageType& warning)
 {
-    Error e(where, error);
-    warnings.push_back(e);
+    messages.push_back(Message(location, warning, logWarning));
 }
 
 }}}

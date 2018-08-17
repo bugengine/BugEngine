@@ -386,10 +386,10 @@ def external(bld, name):
 
 
 @conf
-def thirdparty(bld, name, feature='', path='.', var='', use=[], private_use=[]):
+def thirdparty(bld, name, feature='', path='', var='', use=[], private_use=[]):
     platforms = bld.env.VALID_PLATFORMS
     platform_specific = platforms
-    source_node = bld.path.make_node(path.replace('.', '/'))
+    source_node = bld.path.make_node(path and path.replace('.', '/') or '.')
     project_path = source_node.parent.path_from(bld.srcnode).replace('/', '.')
     project_path = '%s.%s' % (project_path, name.split('.')[-1])
     if not var: var = bld.path.name
