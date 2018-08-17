@@ -1080,7 +1080,7 @@ class QtCreator(Build.BuildContext):
                                 ('ProjectExplorer.BuildConfiguration.BuildStepList.0', [
                                     ('ProjectExplorer.BuildStepList.Step.0', [
                                         ('ProjectExplorer.BuildStep.Enabled', True),
-                                        ('ProjectExplorer.ProcessStep.Arguments', '%s deploy:${Toolchain}:${Variant}' % sys.argv[0]),
+                                        ('ProjectExplorer.ProcessStep.Arguments', '%s deploy:%s:%s' % (sys.argv[0], to_var('Toolchain'), to_var('Variant'))),
                                         ('ProjectExplorer.ProcessStep.Command', sys.executable),
                                         ('ProjectExplorer.ProcessStep.WorkingDirectory', self.srcnode.abspath()),
                                         ('ProjectExplorer.ProjectConfiguration.DefaultDisplayName', 'Custom Process Step'),
