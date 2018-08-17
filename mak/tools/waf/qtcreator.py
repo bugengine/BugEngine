@@ -40,6 +40,7 @@ def qbsArch(arch_name):
     archs = {
         'amd64': 'x86_64',
         'x64': 'x86_64',
+        'x86_amd64': 'x86_64',
         'aarch64': 'arm64'
     }
     return archs.get(arch_name, arch_name)
@@ -51,6 +52,14 @@ def qbsPlatform(env):
         return 'ios'
     else:
         return env.VALID_PLATFORMS[0]
+
+def qbsPlatformList(env):
+    if 'iphonesimulator' in env.VALID_PLATFORMS:
+        return '["ios-simulator","ios","darwin","bsd","unix"]'
+    elif 'iphone' in env.VALID_PLATFORMS:
+        return '["ios","darwin","bsd","unix"]'
+    else:
+        return None
 
 def _hexdigest(s):
     """Return a string as a string of hex characters.
@@ -245,14 +254,15 @@ class QtToolchain(QtObject):
         supported_platform = (
                 ('android', 'android'),
                 ('mingw', 'msys'),
-                ('msvc-7.0', 'msvc2002'),
-                ('msvc-7.1', 'msvc2003'),
-                ('msvc-8.0', 'msvc2005'),
-                ('msvc-9.0', 'msvc2008'),
-                ('msvc-10.0', 'msvc2010'),
-                ('msvc-11.0', 'msvc2012'),
-                ('msvc-12.0', 'msvc2013'),
-                ('msvc-14.0', 'msvc2015'),
+                ('msvc 7.0', 'msvc2002'),
+                ('msvc 7.1', 'msvc2003'),
+                ('msvc 8.0', 'msvc2005'),
+                ('msvc 9.0', 'msvc2008'),
+                ('msvc 10.0', 'msvc2010'),
+                ('msvc 11.0', 'msvc2012'),
+                ('msvc 12.0', 'msvc2013'),
+                ('msvc 14.0', 'msvc2015'),
+                ('msvc 15.', 'msvc2017'),
             )
         for o, o_name in supported_os:
             if target.find(o) != -1:
@@ -335,7 +345,7 @@ class QtToolchain(QtObject):
                 self.ProjectExplorer_MsvcToolChain_VarsBat = env.MSVC_BATFILE[0].replace('\\', '/')
                 self.ProjectExplorer_MsvcToolChain_VarsBatArg = env.MSVC_BATFILE[1] or ''
                 self.ProjectExplorer_MsvcToolChain_SupportedAbi = abi
-                toolchain_id =  'ProjectExplorer.ToolChain.Msvc:%s' % generateGUID('BugEngine:toolchain:%s'%env_name)
+                toolchain_id =  'ProjectExplorer.ToolChain.Msvc:%s' % generateGUID('BugEngine:toolchain:%s:%d'%(env_name, language))
             else:
                 self.ProjectExplorer_CustomToolChain_CompilerPath = compiler
                 self.ProjectExplorer_CustomToolChain_Cxx11Flags = ()
@@ -868,6 +878,8 @@ class QtCreator(Build.BuildContext):
                         deploy_configurations = []
                         build_configuration_index = 0
                         for variant in self.env.ALL_VARIANTS:
+                            target_os = qbsPlatformList(env)
+                            extraPlatformFlags = target_os and [('qbs.targetOS', target_os),] or []
                             build_configurations.append((
                                 'ProjectExplorer.Target.BuildConfiguration.%d'%build_configuration_index,
                                 [
@@ -885,8 +897,8 @@ class QtCreator(Build.BuildContext):
                                             ('Qbs.Configuration', [
                                                 ('qbs.buildVariant', 'debug'),
                                                 ('qbs.architecture', qbsArch(env.TARGET_ARCH)),
-                                                ('qbs.targetPlatform', qbsPlatform(env))
-                                            ]),
+                                                ('qbs.targetPlatform', qbsPlatform(env)),
+                                            ] + extraPlatformFlags),
                                             ('ProjectExplorer.ProjectConfiguration.Id',
                                               'Qbs.BuildStep')
                                         ]),
@@ -1068,7 +1080,7 @@ class QtCreator(Build.BuildContext):
                                 ('ProjectExplorer.BuildConfiguration.BuildStepList.0', [
                                     ('ProjectExplorer.BuildStepList.Step.0', [
                                         ('ProjectExplorer.BuildStep.Enabled', True),
-                                        ('ProjectExplorer.ProcessStep.Arguments', '%s deploy:${Toolchain}:${Variant}' % sys.argv[0]),
+                                        ('ProjectExplorer.ProcessStep.Arguments', '%s deploy:%s:%s' % (sys.argv[0], to_var('Toolchain'), to_var('Variant'))),
                                         ('ProjectExplorer.ProcessStep.Command', sys.executable),
                                         ('ProjectExplorer.ProcessStep.WorkingDirectory', self.srcnode.abspath()),
                                         ('ProjectExplorer.ProjectConfiguration.DefaultDisplayName', 'Custom Process Step'),

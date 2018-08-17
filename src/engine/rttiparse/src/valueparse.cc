@@ -11,7 +11,7 @@ namespace BugEngine { namespace RTTI
 {
 
 ref<Parser::Node> parseValue(minitl::Allocator& arena,
-                             Parser::ErrorList& errors,
+                             Parser::MessageList& errors,
                              const char* strBegin,
                              const char *strEnd,
                              u32 initialLine,
@@ -31,7 +31,7 @@ ref<Parser::Node> parseValue(minitl::Allocator& arena,
 }
 
 ref<Parser::Object> parseObject(minitl::Allocator& arena,
-                                Parser::ErrorList& errors,
+                                Parser::MessageList& errors,
                                 const char* strBegin,
                                 const char *strEnd,
                                 u32 initialLine,
