@@ -27,7 +27,7 @@ bool FileName::resolve(DbContext &context)
     if (!m_file)
     {
         context.error(m_location,
-                      ErrorType("could not open file: %s: no such file or directory") | m_value);
+                      Message::MessageType("could not open file: %s: no such file or directory") | m_value);
     }
     return m_file;
 }

@@ -56,7 +56,7 @@ public:
 template< typename T >
 T Settings<T>::s_settings;
 template< typename T >
-SettingsProvider::SettingsRegistration Settings<T>::s_registration;
+SettingsProvider::SettingsRegistration Settings<T>::s_registration(s_settings);
 
 }}
 

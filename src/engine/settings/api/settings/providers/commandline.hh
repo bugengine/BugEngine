@@ -17,7 +17,7 @@ private:
     minitl::hashmap< istring, SettingsProvider::SettingsList > buildSettings(int argc,
                                                                              const char* argv[]);
 public:
-    CommandLineSettingsProvider(int argc, const char* argv[]);
+    CommandLineSettingsProvider(int argc, const char* argv[], ref<Folder> folder);
     ~CommandLineSettingsProvider();
 };
 
