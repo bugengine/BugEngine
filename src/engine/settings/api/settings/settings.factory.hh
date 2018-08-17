@@ -40,8 +40,8 @@ template< typename T >
 struct Settings : public SettingsBase
 {
 private:
-    static BE_EXPORT T                                      s_settings;
     static BE_EXPORT SettingsProvider::SettingsRegistration s_registration;
+    static BE_EXPORT T& getStaticSettings() { static T s_settings; return s_settings; }
 protected:
     Settings()
         :   SettingsBase(be_typeid<T>::klass())
@@ -50,13 +50,11 @@ protected:
     }
 
 public:
-    static BE_EXPORT const T& get() { return s_settings; }
+    static BE_EXPORT const T& get() { return getStaticSettings(); }
 };
 
 template< typename T >
-T Settings<T>::s_settings;
-template< typename T >
-SettingsProvider::SettingsRegistration Settings<T>::s_registration(s_settings);
+BE_EXPORT SettingsProvider::SettingsRegistration Settings<T>::s_registration(getStaticSettings());
 
 }}
 

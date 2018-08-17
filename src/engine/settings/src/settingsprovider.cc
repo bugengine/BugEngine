@@ -35,11 +35,13 @@ SettingsProvider::SettingsProvider(const ifilename& settingsOrigin,
     ,   m_settings(Arena::general(), initialSettings)
     ,   m_folder(folder)
 {
+    SettingsRegistration::getSettingsList().push_back(*this);
     SettingsBase::onProviderAdded(this);
 }
 
 SettingsProvider::~SettingsProvider()
 {
+    this->unhook();
 }
 
 SettingsProvider::SettingsRegistration::SettingsRegistration(SettingsBase& settings)
