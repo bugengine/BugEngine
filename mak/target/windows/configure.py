@@ -53,6 +53,7 @@ class Windows(Configure.ConfigurationContext.Platform):
         env.VALID_PLATFORMS = ['windows', 'pc']
         env.pymodule_PATTERN = '%s.pyd'
 
+        env.DEPLOY_ROOTDIR = ''
         env.DEPLOY_BINDIR = ''
         env.DEPLOY_RUNBINDIR = ''
         env.DEPLOY_LIBDIR = 'lib'

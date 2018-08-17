@@ -97,7 +97,7 @@ class MSVC(Configure.ConfigurationContext.Compiler):
         Configure.ConfigurationContext.Compiler.load_in_env(self, conf, platform)
         env = conf.env
         env.IDIRAFTER='/I'
-        env.CC_CPP = Utils.to_list(env.CC) + ['/TC', '/X', '/E']
+        env.CC_CPP = Utils.to_list(env.CC) + ['/nologo', '/TC', '/X', '/E']
         env.CC_CPP_SRC_F = ''
         env.CC_CPP_TGT_F = ['/Fo'] # will actually be ignored
         env.append_unique('STLIB', [conf.bugenginenode.make_node('mak/compiler/msvc/set_conditional').abspath()])
