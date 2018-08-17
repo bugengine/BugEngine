@@ -28,8 +28,6 @@ def build(bld):
         derived.exec_command = exec_command_filter
     for task in 'c', 'cxx', 'cshlib', 'cxxshlib', 'cstlib', 'cxxstlib', 'cprogram', 'cxxprogram':
         wrap_class(task)
-    if bld.env.COMPILER_CXX == 'msvc':
-        print('hop')
 
 
 @feature('c', 'cxx')
