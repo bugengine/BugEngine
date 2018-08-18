@@ -100,6 +100,8 @@ class ClLexer:
             new_token.lexer = self
             new_token.filename = self.filename
             new_token.endlexpos = new_token.lexpos + len(new_token.value)
+            if new_token.type == 'OPERATOR':
+                new_token.owner = self.current_scope
             if new_token.type == 'SCOPE':
                 if self.last_token:
                     self.current_scope = getattr(self.last_token, 'found_object', self.scopes[0])
@@ -112,7 +114,7 @@ class ClLexer:
         return new_token
 
     def _position(self, token):
-        return (token.filename, token.lineno, token.lexpos, token.lexpos + len(token.value))
+        return (self.filename, token.lineno, token.lexpos, token.lexpos + len(token.value))
 
     def _msg(self, error_type, msg, pos):
         if self.error_color:

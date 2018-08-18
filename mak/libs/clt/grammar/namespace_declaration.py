@@ -44,7 +44,7 @@ def p_namespace_declaration_new(p):
     """
         namespace_declaration_new : NAMESPACE new_namespace_name
     """
-    p[0] = cl_ast.namespaces.Namespace(p[2], p.position(2))
+    p[0] = cl_ast.namespaces.Namespace(p.lexer.scopes[-1], p.position(2), p[2])
     p.lexer.scopes[-1].add(p[0])
     p.lexer.push_scope(p[0])
 
@@ -69,7 +69,7 @@ def p_namespace_declaration_anonymous(p):
     """
         namespace_declaration_anonymous : NAMESPACE
     """
-    p[0] = cl_ast.namespaces.AnonymousNamespace(p.position(1))
+    p[0] = cl_ast.namespaces.AnonymousNamespace(p.lexer.scopes[-1], p.position(1))
     p.lexer.scopes[-1].add(p[0])
     p.lexer.push_scope(p[0])
 
