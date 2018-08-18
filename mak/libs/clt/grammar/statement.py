@@ -61,8 +61,7 @@ def p_statement_expression(p):
 def p_variable_declaration_opt(p):
     """
         variable_declaration_opt : variable_declaration
-                                 | declaration_specifier_list expression_list
-                                 |
+                                 | declaration_specifier_list expression_list_opt
     """
     pass
 
@@ -79,7 +78,7 @@ def p_push_for_scope(p):
     """
         push_for_scope :
     """
-    p[0] = cl_ast.statements.ForStatement(p.position(-1))
+    p[0] = cl_ast.statements.ForStatement(p.lexer.scopes[-1], p.position(-1))
     p.lexer.push_scope(p[0])
 
 

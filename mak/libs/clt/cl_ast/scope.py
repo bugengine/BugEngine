@@ -1,7 +1,10 @@
-class Scope:
-    def __init__(self, position):
+from .cppobject import CppObject
+
+
+class Scope(CppObject):
+    def __init__(self, parent, position):
+        CppObject.__init__(self, parent, position)
         self.members = []
-        self.position = position
 
     def find(self, name, is_current_scope):
         for m in self.members:
@@ -12,9 +15,10 @@ class Scope:
     def add(self, member):
         self.members.append(member)
 
-    def instantiate(self, template_arguments):
-        return self
-
     def _write_to(self, writer):
         for m in self.members:
             m.write_to(writer)
+
+    def _debug_dump(self, indent):
+        for m in self.members:
+            m._debug_dump(indent)
