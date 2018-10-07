@@ -13,10 +13,12 @@ def add_build_command(toolchain, optimisation):
             optim = optimisation
             cmd = name + ':' + toolchain + ':' + optimisation
             bugengine_variant = toolchain
+            variant = os.path.join(toolchain, optimisation)
         c[command] = Command
     class Deploy(c[BuildContext]):
         cmd = 'deploy:%s:%s' %(toolchain, optimisation)
         bugengine_variant = toolchain
+        variant = os.path.join(toolchain, optimisation)
         def execute(self):
             if super(Deploy, self).execute() == "SKIP":
                 return "SKIP"

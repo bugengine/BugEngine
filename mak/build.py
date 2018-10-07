@@ -801,13 +801,7 @@ def make_bld_node(self, category, path, name):
         constructs a path from the build node:
             build_node/variant/optim/target/category/path/name
     """
-    if 'preprocess' in self.features:
-        bldnode = self.bld.bldnode.make_node('_any_').make_node('preprocess')
-    else:
-        try:
-            bldnode = self.bld.bldnode.make_node(self.bld.bugengine_variant).make_node(self.bld.optim)
-        except AttributeError:
-            bldnode = self.bld.bldnode.make_node('_any_').make_node('_any_')
+    bldnode = self.bld.bldnode
     node = bldnode.make_node(self.target).make_node(category)
     if not path:
         node = node.make_node(name)
@@ -815,9 +809,9 @@ def make_bld_node(self, category, path, name):
         if path.is_child_of(self.bld.bldnode):
             out_dir = path.path_from(self.bld.bldnode)
             # skip variant
-            out_dir = out_dir[out_dir.find(os.path.sep)+1:]
+            #out_dir = out_dir[out_dir.find(os.path.sep)+1:]
             # skip optim
-            out_dir = out_dir[out_dir.find(os.path.sep)+1:]
+            #out_dir = out_dir[out_dir.find(os.path.sep)+1:]
             # skip target
             out_dir = out_dir[out_dir.find(os.path.sep)+1:]
             # skip category
