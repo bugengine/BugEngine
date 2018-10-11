@@ -30,27 +30,27 @@ class MSVC(Configure.ConfigurationContext.Compiler):
         conf.env.append_unique('ARFLAGS_debug', [])
 
         conf.env.append_unique('CPPFLAGS_profile', ['/DNDEBUG', '/MT', '/Ox', '/Ob2', '/Oi', '/Ot',
-                                                    '/Oy', '/GT', '/GL', '/GF', '/FD', '/GS-', '/Gy',
+                                                    '/Oy', '/GT', '/GF', '/FD', '/GS-', '/Gy',
                                                     '/GR-'])
         conf.env.append_unique('CFLAGS_profile', ['/DNDEBUG', '/MT', '/Ox', '/Ob2', '/Oi', '/Ot',
-                                                  '/Oy', '/GT', '/GL', '/GF', '/FD', '/GS-', '/Gy',
+                                                  '/Oy', '/GT', '/GF', '/FD', '/GS-', '/Gy',
                                                   '/GR-'])
         conf.env.append_unique('CXXFLAGS_profile', ['/DNDEBUG', '/D_HAS_EXCEPTIONS=0', '/MT', '/Ox',
-                                                    '/Ob2', '/Oi', '/Ot', '/Oy', '/GT', '/GL',
+                                                    '/Ob2', '/Oi', '/Ot', '/Oy', '/GT',
                                                     '/GF', '/FD', '/GS-', '/Gy', '/GR-'])
-        conf.env.append_unique('LINKFLAGS_profile', ['/DEBUG', '/LTCG', '/INCREMENTAL:no'])
+        conf.env.append_unique('LINKFLAGS_profile', ['/DEBUG', '/INCREMENTAL:no'])
         conf.env.append_unique('ARFLAGS_profile', ['/LTCG'])
 
         conf.env.append_unique('CPPFLAGS_final', ['/DNDEBUG', '/MT', '/Ox', '/Ob2', '/Oi', '/Ot',
-                                                  '/Oy', '/GT', '/GL', '/GF', '/FD', '/GS-', '/Gy',
+                                                  '/Oy', '/GT', '/GF', '/FD', '/GS-', '/Gy',
                                                   '/GR-'])
         conf.env.append_unique('CFLAGS_final', ['/DNDEBUG', '/MT', '/Ox', '/Ob2', '/Oi', '/Ot',
-                                                '/Oy', '/GT', '/GL', '/GF', '/FD', '/GS-', '/Gy',
+                                                '/Oy', '/GT', '/GF', '/FD', '/GS-', '/Gy',
                                                 '/GR-'])
         conf.env.append_unique('CXXFLAGS_final', ['/DNDEBUG', '/D_HAS_EXCEPTIONS=0', '/MT', '/Ox',
-                                                  '/Ob2', '/Oi', '/Ot', '/Oy', '/GT', '/GL', '/GF',
+                                                  '/Ob2', '/Oi', '/Ot', '/Oy', '/GT', '/GF',
                                                   '/FD', '/GS-', '/Gy', '/GR-'])
-        conf.env.append_unique('LINKFLAGS_final', ['/DEBUG', '/LTCG', '/INCREMENTAL:no'])
+        conf.env.append_unique('LINKFLAGS_final', ['/DEBUG', '/INCREMENTAL:no'])
         conf.env.append_unique('ARFLAGS_final', ['/LTCG'])
 
     def set_warning_options(self, conf):
