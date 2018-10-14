@@ -15,13 +15,13 @@ static HMODULE getPythonModuleHandle()
     HMODULE h = LoadLibraryA("Psapi.dll");
     if (h != 0)
     {
-        EnumProcessModules = (EnumProcessModulesFunc)GetProcAddress(h, "EnumProcessModules");
+        EnumProcessModules = be_function_cast<EnumProcessModulesFunc>(GetProcAddress(h, "EnumProcessModules"));
     }
     if (!EnumProcessModules)
     {
         if (h) FreeLibrary(h);
         h = LoadLibraryA("kernel32.dll");
-        EnumProcessModules = (EnumProcessModulesFunc)GetProcAddress(h, "K32EnumProcessModules ");
+        EnumProcessModules = be_function_cast<EnumProcessModulesFunc>(GetProcAddress(h, "K32EnumProcessModules"));
     }
 
     if (EnumProcessModules)
