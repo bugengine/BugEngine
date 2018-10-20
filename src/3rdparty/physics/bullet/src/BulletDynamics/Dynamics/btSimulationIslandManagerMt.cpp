@@ -71,6 +71,14 @@ inline	int	getIslandId(const btPersistentManifold* lhs)
 }
 
 
+SIMD_FORCE_INLINE	int	btGetConstraintIslandIdEx( const btTypedConstraint* lhs )
+{
+    const btCollisionObject& rcolObj0 = lhs->getRigidBodyA();
+    const btCollisionObject& rcolObj1 = lhs->getRigidBodyB();
+    int islandId = rcolObj0.getIslandTag() >= 0 ? rcolObj0.getIslandTag() : rcolObj1.getIslandTag();
+    return islandId;
+}
+
 /// function object that routes calls to operator<
 class IslandBatchSizeSortPredicate
 {
@@ -465,7 +473,7 @@ void btSimulationIslandManagerMt::addConstraintsToIslands( btAlignedObjectArray<
         btTypedConstraint* constraint = constraints[ i ];
         if ( constraint->isEnabled() )
         {
-            int islandId = btGetConstraintIslandId( constraint );
+            int islandId = btGetConstraintIslandIdEx( constraint );
             // if island is not sleeping,
             if ( Island* island = getIsland( islandId ) )
             {
