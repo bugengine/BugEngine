@@ -37,17 +37,22 @@ class MSVC(Configure.ConfigurationContext.Compiler):
                                                     '/Ob2', '/Oi', '/Ot', '/GT',
                                                     '/GF', '/FD', '/Gy', '/GR-'])
         conf.env.append_unique('LINKFLAGS_profile', ['/DEBUG', '/INCREMENTAL:no'])
-        conf.env.append_unique('ARFLAGS_profile', ['/LTCG'])
+        conf.env.append_unique('ARFLAGS_profile', [])
 
         conf.env.append_unique('CPPFLAGS_final', ['/DNDEBUG', '/MT', '/Ox', '/Ob2', '/Oi', '/Ot',
-                                                  '/GT', '/GF', '/FD', '/Gy', '/GR-'])
+                                                  '/GT', '/GF', '/FD', '/Gy', '/GR-', '/GS-'])
         conf.env.append_unique('CFLAGS_final', ['/DNDEBUG', '/MT', '/Ox', '/Ob2', '/Oi', '/Ot',
-                                                '/GT', '/GF', '/FD', '/Gy', '/GR-'])
+                                                '/GT', '/GF', '/FD', '/Gy', '/GR-', '/GS-'])
         conf.env.append_unique('CXXFLAGS_final', ['/DNDEBUG', '/D_HAS_EXCEPTIONS=0', '/MT', '/Ox',
                                                   '/Ob2', '/Oi', '/Ot', '/GT', '/GF',
-                                                  '/FD', '/Gy', '/GR-'])
+                                                  '/FD', '/Gy', '/GR-', '/GS-'])
         conf.env.append_unique('LINKFLAGS_final', ['/DEBUG', '/INCREMENTAL:no'])
-        conf.env.append_unique('ARFLAGS_final', ['/LTCG'])
+        conf.env.append_unique('ARFLAGS_final', [])
+        
+        
+        if self.NAMES[0] != 'intel' or self.version_number >= (9,1):
+            conf.env.append_unique('CXXFLAGS_cxxstlib', ['/Zl'])
+            conf.env.append_unique('CFLAGS_cxxstlib', ['/Zl'])
 
     def set_warning_options(self, conf):
         if self.NAMES[0] == 'intel':
