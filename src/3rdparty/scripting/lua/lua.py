@@ -1,4 +1,5 @@
 from waflib.Logs import pprint
+import os
 
 
 def options(opt):
@@ -21,5 +22,14 @@ def setup(conf):
             pprint('GREEN', '+lua%s'%v, sep=' ')
             break
     else:
-        pprint('BLUE', '=lua', sep=' ')
+        conf.env.SYSTEM_LUA = conf.check_lib('lua', var='lua',
+                       libpath=[os.path.join(conf.path.abspath(),
+                                            'lib.%s.%s'%(conf.env.VALID_PLATFORMS[0], a))
+                                for a in conf.env.VALID_ARCHITECTURES],
+                       includepath=[os.path.join(conf.path.abspath(), 'api')],
+                       includes_externc=['lua.h', 'lauxlib.h'],
+                       defines=['LUA_LIB'],
+                       functions=['luaL_newmetatable'])
+        if not conf.env.SYSTEM_LUA:
+            pprint('BLUE', '=lua', sep=' ')
 

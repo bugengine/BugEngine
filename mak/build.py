@@ -1,4 +1,5 @@
 from waflib import Task, Options, Build, Logs, Utils, Errors, TaskGen, Node
+from waflib import Task, Options, Build, Logs, Utils, Errors, TaskGen, Node
 from waflib.Configure import conf
 from waflib.TaskGen import feature, taskgen_method, extension, before_method, after_method
 import os
@@ -700,6 +701,15 @@ def set_extra_flags(self):
         self.env.append_unique('CFLAGS', self.env['CFLAGS_%s'%f])
         self.env.append_unique('CXXFLAGS', self.env['CXXFLAGS_%s'%f])
         self.env.append_unique('LINKFLAGS', self.env['LINKFLAGS_%s'%f])
+        self.env.append_unique('LIB', self.env['LIB_%s'%f])
+        self.env.append_unique('STLIB', self.env['STLIB_%s'%f])
+    for f in getattr(self, 'features', []):
+        self.env.append_unique('CPPFLAGS', self.env['CPPFLAGS_%s'%f])
+        self.env.append_unique('CFLAGS', self.env['CFLAGS_%s'%f])
+        self.env.append_unique('CXXFLAGS', self.env['CXXFLAGS_%s'%f])
+        self.env.append_unique('LINKFLAGS', self.env['LINKFLAGS_%s'%f])
+        self.env.append_unique('LIB', self.env['LIB_%s'%f])
+        self.env.append_unique('STLIB', self.env['STLIB_%s'%f])
 
 
 @taskgen_method
