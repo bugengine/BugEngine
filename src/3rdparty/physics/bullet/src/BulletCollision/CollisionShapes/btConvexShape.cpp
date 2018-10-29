@@ -313,20 +313,24 @@ btVector3 btConvexShape::localGetSupportVertexNonVirtual (const btVector3& local
 	return localGetSupportVertexWithoutMarginNonVirtual(localDirNorm)+ getMarginNonVirtual() * localDirNorm;
 }
 
+#ifdef _MSC_VER
+#if _MSC_VER < 1500
+#pragma message("disabling optimizations")
+#pragma optimize("", off)
+#endif
+#endif
 /* TODO: This should be bumped up to btCollisionShape () */
 btScalar btConvexShape::getMarginNonVirtual () const
 {
 	switch (m_shapeType)
 	{
-    case SPHERE_SHAPE_PROXYTYPE:
+	case SPHERE_SHAPE_PROXYTYPE:
 	{
-		btSphereShape* sphereShape = (btSphereShape*)this;
-		return sphereShape->getRadius ();
+		return ((btSphereShape*)this)->getRadius();
 	}
 	case BOX_SHAPE_PROXYTYPE:
 	{
-		btBoxShape* convexShape = (btBoxShape*)this;
-		return convexShape->getMarginNV ();
+		return ((btBoxShape*)this)->getMarginNV();
 	}
 	case TRIANGLE_SHAPE_PROXYTYPE:
 	{
@@ -367,6 +371,12 @@ btScalar btConvexShape::getMarginNonVirtual () const
 	btAssert (0);
 	return btScalar(0.0f);
 }
+#ifdef _MSC_VER
+#if _MSC_VER < 1500
+#pragma optimize("", on)
+#endif
+#endif
+
 #ifndef __SPU__
 void btConvexShape::getAabbNonVirtual (const btTransform& t, btVector3& aabbMin, btVector3& aabbMax) const
 {

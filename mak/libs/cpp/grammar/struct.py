@@ -45,9 +45,8 @@ def p_struct_parent_decl(p):
 
 def p_struct_optional_id(p):
     """
-        struct_optional_id : ID
+        struct_optional_id : name
                            |
-                           | ID LESS_THAN skip_template_args GREATER_THAN
     """
     if len(p) == 2:
         p[0] = p[1]
@@ -116,7 +115,7 @@ def p_struct_def_error(p):
 
 def p_struct_type_declaration(p):
     """
-        type_declaration :   struct_type ID
+        type_declaration :   struct_type name
     """
     p[0] = p[2]
 

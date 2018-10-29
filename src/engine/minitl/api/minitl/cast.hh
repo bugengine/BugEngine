@@ -8,7 +8,10 @@
 #include    <minitl/assert.hh>
 #include    <minitl/refptr.hh>
 #include    <minitl/weakptr.hh>
-#include    <typeinfo>
+#include    <minitl/features.hh>
+#if BE_ENABLE_ASSERT
+# include   <typeinfo>
+#endif
 
 namespace minitl
 {
@@ -50,6 +53,13 @@ template< typename U, typename T >
 inline ref<U> be_const_cast(ref<T> value)
 {
     return ref<U>(const_cast<U*>(value.operator->()));
+}
+
+template< typename U, typename T >
+inline U be_function_cast(T value)
+{
+    typedef void(*GenericFunction)();
+    return reinterpret_cast<U>(reinterpret_cast<GenericFunction>(value));
 }
 
 #if BE_COMPILER_MSVC

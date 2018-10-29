@@ -33,6 +33,7 @@ if __name__ == '__main__':
             elif result.error_count > 0:
                 sys.exit(result.error_count)
             else:
+                #result.debug_dump()
                 path, module = os.path.split(args[2])
                 sys.path.append(path)
                 s = __import__(module)

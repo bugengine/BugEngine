@@ -8,6 +8,9 @@ import sys
 os_name = platform.uname()[0].lower().split('-')[0]
 USE_LIBRARY_CODE="""
 %(include)s
+extern "C" {
+%(include_externc)s
+}
 #if defined(_WIN32) && !defined(__clang__)
 __declspec(dllexport) int be_test()
 {
@@ -66,13 +69,16 @@ def link_framework_test(self):
 
 
 @conf
-def check_lib(self, libname, var='', libpath=[], includepath=[], includes=[], functions=[], code=USE_LIBRARY_CODE):
+def check_lib(self, libname, var='', libpath=[], includepath=[], includes=[], includes_externc=[], functions=[], defines=[], code=USE_LIBRARY_CODE):
     def cut(string):
         if len(string) > 19:
             return string[0:17]+'...'
         else:
             return string
     libname = Utils.to_list(libname)
+    env = self.env.derive()
+    env.detach()
+    env.append_unique('DEFINES', defines)
     if not var: var = self.path.name
     try:
         if functions:
@@ -80,6 +86,7 @@ def check_lib(self, libname, var='', libpath=[], includepath=[], includes=[], fu
         else:
             functions = 'i = *(int*)0;'
         self.check(
+            env=env,
             compile_filename=[],
             features='link_library',
             msg='check for libraries %s' %cut(','.join(libname)),
@@ -87,6 +94,7 @@ def check_lib(self, libname, var='', libpath=[], includepath=[], includes=[], fu
             libpath=libpath,
             code=code % {
                     'include': '\n'.join(['#include <%s>'%i for i in includes]),
+                    'include_externc': '\n'.join(['#include <%s>'%i for i in includes_externc]),
                     'function': functions
                 },
             includepath=includepath,
@@ -100,6 +108,7 @@ def check_lib(self, libname, var='', libpath=[], includepath=[], includes=[], fu
         self.env.append_unique('check_%s_libs' % var, libname)
         self.env.append_unique('check_%s_libpath' % var, libpath)
         self.env.append_unique('check_%s_includes' % var, includepath)
+        self.env.append_unique('check_%s_defines' % var, defines)
         Logs.pprint('GREEN', '+%s' % var, sep=' ')
 
     return self.env['check_%s' % var]
@@ -135,7 +144,7 @@ def check_header(self, headername, var='', libpath=[], includepath=[], code=USE_
 
 
 @conf
-def check_framework(self, frameworks, var='', libpath=[], includepath=[], includes=[], functions=[], code=USE_LIBRARY_CODE):
+def check_framework(self, frameworks, var='', libpath=[], includepath=[], includes=[], includes_externc=[], functions=[], code=USE_LIBRARY_CODE):
     def cut(string):
         if len(string) > 19:
             return string[0:17]+'...'
@@ -157,6 +166,7 @@ def check_framework(self, frameworks, var='', libpath=[], includepath=[], includ
             libpath=libpath,
             code=code % {
                     'include': '\n'.join(['#include <%s>'%i for i in includes]),
+                    'include_externc': '\n'.join(['#include <%s>'%i for i in includes_externc]),
                     'function': functions
                 },
             includepath=includepath,

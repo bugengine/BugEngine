@@ -1,46 +1,28 @@
 from .. import cl_ast
-
-
-class Name:
-    def __init__(self, lexer, name, position, target = None, qualified = False,
-                       dependent = False, resolved = True):
-        self.lexer = lexer
-        self.name = name
-        self.position = position
-        self.target = target
-        self.qualified = qualified
-        self.dependent = dependent
-        self.resolved = resolved
-        self.absolute = False
-
-    def __add__(self, other):
-        return Name(self.lexer,
-                    self.name + other.name,
-                    other.position,
-                    target = other.target,
-                    qualified = True,
-                    dependent = self.dependent or other.dependent,
-                    resolved = self.resolved and other.resolved)
+from ..cl_ast.name import Name
 
 
 def p_id(p):
     """
-        namespace_id : NAMESPACE_ID
-        namespace_id_shadow : NAMESPACE_ID_SHADOW
-        struct_id : STRUCT_ID
-        struct_id_shadow : STRUCT_ID_SHADOW
-        typename_id : TYPENAME_ID
-        typename_id_shadow : TYPENAME_ID_SHADOW
-        template_struct_id : TEMPLATE_STRUCT_ID
-        template_struct_id_shadow : TEMPLATE_STRUCT_ID_SHADOW
-        template_typename_id : TEMPLATE_TYPENAME_ID
-        template_typename_id_shadow : TEMPLATE_TYPENAME_ID_SHADOW
-        special_method_id : SPECIAL_METHOD_ID
+        namespace_id :                  NAMESPACE_ID
+        namespace_id_shadow :           NAMESPACE_ID_SHADOW
+        struct_id :                     STRUCT_ID
+        struct_id_shadow :              STRUCT_ID_SHADOW
+        typename_id :                   TYPENAME_ID
+        typename_id_shadow :            TYPENAME_ID_SHADOW
+        template_struct_id :            TEMPLATE_STRUCT_ID
+        template_struct_id_shadow :     TEMPLATE_STRUCT_ID_SHADOW
+        template_typename_id :          TEMPLATE_TYPENAME_ID
+        template_typename_id_shadow :   TEMPLATE_TYPENAME_ID_SHADOW
+        special_method_id :             SPECIAL_METHOD_ID
+        method_id :                     METHOD_ID
+        method_id_shadow :              METHOD_ID_SHADOW
     """
     p[0] = Name(p.lexer, (p[1],), p.position(1),
                 p.slice[1].found_object,
                 qualified = not p.slice[1].type.endswith('SHADOW'),
-                dependent = p.slice[1].type.find('TYPENAME'))
+                dependent = (p.slice[1].type.find('TYPENAME') != -1
+                          or p.slice[1].found_object and p.slice[1].found_object.templates))
 
 
 def p_template_new_template_id(p):
@@ -63,30 +45,32 @@ def p_template_new_template_id(p):
                                 | TEMPLATE TEMPLATE_STRUCT_ID_SHADOW template_arguments
                                 | TEMPLATE TEMPLATE_TYPENAME_ID_SHADOW template_arguments
     """
-    p[0] = Name(p.lexer, (p[2],), p.position(2), resolved=False)
-    # p.lexer.set_search_scope_ifn(p.slice[2].found_object.create_instance(p[2])) # TODO
+    p[0] = Name(p.lexer, (p[2],), p.position(2), targets = ((None, p[3], None),),
+                dependent=True, resolved=False)
 
 
-def p_template_struct_id(p):
+def p_template_id(p):
     """
         struct_id : TEMPLATE_STRUCT_ID template_arguments
         struct_id_shadow : TEMPLATE_STRUCT_ID_SHADOW template_arguments
         typename_id : TEMPLATE_TYPENAME_ID template_arguments
         typename_id_shadow : TEMPLATE_TYPENAME_ID_SHADOW template_arguments
-        object_name : TEMPLATE_METHOD_ID template_arguments
-        object_name : TEMPLATE_METHOD_ID_SHADOW template_arguments
+        method_id : TEMPLATE_METHOD_ID template_arguments                             %prec TEMPLATEGT
+        method_id_shadow : TEMPLATE_METHOD_ID_SHADOW template_arguments               %prec TEMPLATEGT
     """
     try:
-        target = p.slice[1].found_object.create_instance(p[2])
+        target = p.slice[1].found_object.find_instance(p.lexer.scopes[-1], p[2], p.position(2))
     except cl_ast.templates.Template.InstanciationError as e:
         target = None
         p.lexer._error(e.msg, e.position)
         if e.error:
             p.lexer._note(e.error.message, e.error.position)
-        p.lexer._note('Template %s declared here' % p[1], p.slice[1].found_object.position)
+        p.lexer._note('template %s declared here' % p[1], p.slice[1].found_object.position)
     p[0] = Name(p.lexer, (p[1],), p.position(1), target,
+                targets = ((target, p[2], p.slice[1].found_object),),
                 qualified = not p.slice[1].type.endswith('SHADOW'),
-                resolved = (p.slice[1].type.find('TYPENAME') == -1))
+                resolved = (p.slice[1].type.find('TYPENAME') == -1),
+                dependent = (target==None))
     if target:
         p.lexer.set_search_scope_ifn(target)
 
@@ -117,6 +101,14 @@ def p_object_name_namespace(p):
                             | typename_id_shadow SCOPE special_method_name_struct_qualified
                             | template_typename_id SCOPE special_method_name_struct_qualified
                             | template_typename_id_shadow SCOPE special_method_name_struct_qualified
+        cast_method_name : namespace_id SCOPE cast_method_name_qualified
+                         | namespace_id_shadow SCOPE cast_method_name_qualified
+                         | struct_id SCOPE cast_method_name_struct_qualified
+                         | struct_id_shadow SCOPE cast_method_name_struct_qualified
+                         | typename_id SCOPE cast_method_name_struct_qualified
+                         | typename_id_shadow SCOPE cast_method_name_struct_qualified
+                         | template_typename_id SCOPE cast_method_name_struct_qualified
+                         | template_typename_id_shadow SCOPE cast_method_name_struct_qualified
     """
     p[0] = p[1] + p[3]
 
@@ -127,20 +119,27 @@ def p_object_name_struct_qualified(p):
                               | object_name_struct_qualified
         object_name_struct_qualified : struct_id SCOPE object_name_struct_qualified
                                      | type_name_tpl_qualified SCOPE object_name_struct_qualified
-                                     | object_name_id_qualified                                     %prec PRIO0
+                                     | object_name_id_qualified
 
         type_name_qualified : namespace_id SCOPE type_name_qualified
                             | type_name_struct_qualified
 
         type_name_struct_qualified : struct_id SCOPE type_name_struct_qualified
                                    | type_name_tpl_qualified SCOPE type_name_struct_qualified
-                                   | type_name_id_qualified                                         %prec PRIO0
+                                   | type_name_id_qualified
 
         special_method_name_qualified : namespace_id SCOPE special_method_name_qualified
                                       | special_method_name_struct_qualified
         special_method_name_struct_qualified : struct_id SCOPE special_method_name_struct_qualified
-                                     | type_name_tpl_qualified SCOPE special_method_name_struct_qualified
-                                     | special_method_name_id_qualified                                     %prec PRIO0
+                                             | type_name_tpl_qualified SCOPE special_method_name_struct_qualified
+                                             | special_method_name_id_qualified
+
+        cast_method_name_qualified : namespace_id SCOPE cast_method_name_qualified
+                                   | cast_method_name_struct_qualified
+        cast_method_name_struct_qualified : struct_id SCOPE cast_method_name_struct_qualified
+                                          | type_name_tpl_qualified SCOPE cast_method_name_struct_qualified
+                                          | cast_method_name_id_qualified
+
     """
     if len(p) > 2:
         p[0] = p[1] + p[3]
@@ -153,6 +152,7 @@ def p_object_name_namespace_root(p):
         object_name : SCOPE object_name_qualified
         type_name : SCOPE type_name_qualified
         special_method_name : SCOPE special_method_name_qualified
+        cast_method_name : SCOPE cast_method_name_qualified
     """
     p[0] = p[2]
     p[0].absolute = True
@@ -160,13 +160,13 @@ def p_object_name_namespace_root(p):
 
 def p_object_name(p):
     """
-        object_name : METHOD_ID                                                         %prec PRIO0
-                    | VARIABLE_ID                                                       %prec PRIO0
-                    | METHOD_ID_SHADOW                                                  %prec PRIO0
-                    | VARIABLE_ID_SHADOW                                                %prec PRIO0
+        object_name : VARIABLE_ID
+                    | TEMPLATE_METHOD_ID
+                    | VARIABLE_ID_SHADOW
+                    | TEMPLATE_METHOD_ID_SHADOW
 
-        object_name_id_qualified : METHOD_ID                                            %prec PRIO0
-                                 | VARIABLE_ID                                          %prec PRIO0
+        object_name_id_qualified : VARIABLE_ID
+                                 | TEMPLATE_METHOD_ID
     """
     p[0] = Name(p.lexer, (p[1],), p.position(1), p.slice[1].found_object,
                 qualified = not p.slice[1].type.endswith('SHADOW'))
@@ -174,10 +174,10 @@ def p_object_name(p):
 
 def p_object_name_destructor(p):
     """
-        special_method_name : NOT STRUCT_ID_SHADOW                                      %prec PRIO0
-                            | NOT TEMPLATE_STRUCT_ID_SHADOW                             %prec PRIO0
-        special_method_name_id_qualified : NOT STRUCT_ID_SHADOW                         %prec PRIO0
-                                         | NOT TEMPLATE_STRUCT_ID_SHADOW                %prec PRIO0
+        special_method_name : NOT STRUCT_ID_SHADOW
+                            | NOT TEMPLATE_STRUCT_ID_SHADOW
+        special_method_name_id_qualified : NOT STRUCT_ID_SHADOW
+                                         | NOT TEMPLATE_STRUCT_ID_SHADOW
     """
     owner = p.slice[2].found_object
     scope = p.lexer.scopes[-1]
@@ -194,8 +194,8 @@ def p_object_name_destructor(p):
 
 def p_object_name_destructor_2(p):
     """
-        special_method_name : NOT SPECIAL_METHOD_ID                                     %prec PRIO0
-        special_method_name_id_qualified : NOT SPECIAL_METHOD_ID                        %prec PRIO0
+        special_method_name : NOT SPECIAL_METHOD_ID
+        special_method_name_id_qualified : NOT SPECIAL_METHOD_ID
     """
     owner = p.slice[2].found_object.owner
     if not owner.definition:
@@ -204,6 +204,7 @@ def p_object_name_destructor_2(p):
         raise SyntaxError()
     p[0] = Name(p.lexer, (p[1]+p[2],), p.position(1), owner.definition.destructor,
                 qualified = False)
+
 
 def p_operator_name(p):
     """
@@ -250,18 +251,30 @@ def p_operator_name(p):
     p.set_position(0, 2)
 
 
+def p_operator_cast(p):
+    """
+        operator_cast : OPERATOR type
+    """
+    current_scope = p.slice[1].owner
+    p[0] = Name(p.lexer, ('cast<%s>'%p[2].signature(),), p.position(1), None,
+                qualified = False,
+                dependent = isinstance(p[2], cl_ast.types.DependentTypeName),
+                data = p[2])
+    p.set_position(0, 1)
+
+
 def p_object_name_id(p):
     """
-        object_name : ID                                                                %prec PRIO0
-        object_name_id_qualified : ID                                                   %prec PRIO0
+        object_name : ID
+        object_name_id_qualified : ID
     """
     p[0] = Name(p.lexer, (p[1],), p.position(1), resolved = False)
 
 
 def p_object_name_operator(p):
     """
-        object_name : operator_name                                                     %prec PRIO0
-        object_name_id_qualified : operator_name                                        %prec PRIO0
+        object_name : operator_name
+        object_name_id_qualified : operator_name
     """
     p[0] = Name(p.lexer, (p[1][0],), p.position(1), p[1][1],
                 qualified = False,
@@ -270,27 +283,40 @@ def p_object_name_operator(p):
 
 def p_type_name(p):
     """
-        type_name : struct_id                                                           %prec PRIO0
-                  | typename_id                                                         %prec PRIO0
-                  | template_struct_id                                                  %prec PRIO0
-                  | template_typename_id                                                %prec PRIO0
+        type_name : struct_id                                                           %prec NAME0
+                  | typename_id                                                         %prec NAME0
+                  | template_struct_id
+                  | template_typename_id                                                %prec NAME0
 
-        type_name_id_qualified : struct_id                                              %prec PRIO0
-                               | typename_id                                            %prec PRIO0
-                               | template_struct_id                                     %prec PRIO0
-                               | template_typename_id                                   %prec PRIO0
+        type_name_id_qualified : struct_id                                              %prec NAME0
+                               | typename_id
+                               | template_struct_id
+                               | template_typename_id
 
-        special_method_name : special_method_id                                         %prec PRIO0
-        special_method_name_id_qualified : special_method_id                            %prec PRIO0
+        special_method_name : special_method_id
+        special_method_name_id_qualified : special_method_id
+
+        object_name : method_id
+                    | method_id_shadow
+        object_name_id_qualified : method_id
+                                 | type_name_tpl_qualified                              %prec NAME2
+    """
+    p[0] = p[1]
+
+
+def p_cast_name(p):
+    """
+        cast_method_name : operator_cast
+        cast_method_name_id_qualified : operator_cast
     """
     p[0] = p[1]
 
 
 def p_type_name_shadow(p):
     """
-        type_name : struct_id_shadow                                                    %prec PRIO0
-                  | typename_id_shadow                                                  %prec PRIO0
-                  | template_struct_id_shadow                                           %prec PRIO0
-                  | template_typename_id_shadow                                         %prec PRIO0
+        type_name : struct_id_shadow                                                    %prec NAME0
+                  | typename_id_shadow                                                  %prec NAME0
+                  | template_struct_id_shadow
+                  | template_typename_id_shadow                                         %prec NAME0
     """
     p[0] = p[1]

@@ -15,7 +15,7 @@ def build(bld):
         else:
             return super(derived, self).exec_command(*k, **kw)
     derived.exec_command = exec_command_stdout
-    
+
     def wrap_class(cls_name):
         cls = Task.classes.get(cls_name, None)
         derived = type(cls_name, (cls,), {})

@@ -96,7 +96,7 @@ static HGLRC createGLContext(weak<const GLRenderer> renderer, HDC hdc)
         HGLRC glrc = wglCreateContext(dc);
         wglMakeCurrent(dc, glrc);
 
-        wglCreateContextAttribsARB = (PFNWGLCREATECONTEXTATTRIBSARBPROC)wglGetProcAddress("wglCreateContextAttribsARB");
+        wglCreateContextAttribsARB = be_function_cast<PFNWGLCREATECONTEXTATTRIBSARBPROC>(wglGetProcAddress("wglCreateContextAttribsARB"));
 
         wglMakeCurrent(0, 0);
         wglDeleteContext(glrc);
@@ -156,7 +156,7 @@ GLRenderer::Context::Context(weak<const GLRenderer> renderer)
 :   m_dummyHwnd(createDummyWnd(renderer))
 ,   m_dummyDC(GetDC(m_dummyHwnd))
 ,   m_glContext(createGLContext(renderer, m_dummyDC))
-,   m_setSwapInterval((PFNWGLSWAPINTERVALEXTPROC)wglGetProcAddress("wglSwapIntervalEXT"))
+,   m_setSwapInterval(be_function_cast<PFNWGLSWAPINTERVALEXTPROC>(wglGetProcAddress("wglSwapIntervalEXT")))
 ,   m_threadId(Thread::currentId())
 ,   shaderext()
 {

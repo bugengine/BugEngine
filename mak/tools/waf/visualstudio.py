@@ -448,6 +448,7 @@ class vs2003(Build.BuildContext):
     optim = 'debug'
     version = (('Visual Studio .NET 2003', '8.00', False, None), (VCproj, '7.10'))
     platforms = ['Win32']
+    variant = 'projects/vs'
 
     def get_platform(self, platform_name):
         return platform_name if platform_name in self.__class__.platforms else self.__class__.platforms[0]

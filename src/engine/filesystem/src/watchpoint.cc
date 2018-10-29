@@ -8,8 +8,7 @@
 namespace BugEngine { namespace FileSystem
 {
 
-CriticalSection s_lock;
-ref<WatchPoint> WatchPoint::s_root = ref<WatchPoint>::create(Arena::filesystem());
+static CriticalSection s_lock;
 
 
 WatchPoint::WatchPoint(weak<WatchPoint> parent)
@@ -150,5 +149,7 @@ void WatchPoint::cleanup()
 {
     s_root->cleanupTree();
 }
+
+ref<WatchPoint> WatchPoint::s_root = ref<WatchPoint>::create(Arena::general());
 
 }}
