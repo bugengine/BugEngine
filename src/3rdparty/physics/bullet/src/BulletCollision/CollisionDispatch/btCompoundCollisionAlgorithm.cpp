@@ -98,7 +98,7 @@ btCompoundCollisionAlgorithm::~btCompoundCollisionAlgorithm()
 
 
 
-struct	btCompoundLeafCallback : btDbvt::ICollide
+struct	btCompoundLeafCallback2 : btDbvt::ICollide
 {
 
 public:
@@ -111,7 +111,7 @@ public:
 	btCollisionAlgorithm**	m_childCollisionAlgorithms;
 	btPersistentManifold*	m_sharedManifold;
 	
-	btCompoundLeafCallback (const btCollisionObjectWrapper* compoundObjWrap,const btCollisionObjectWrapper* otherObjWrap,btDispatcher* dispatcher,const btDispatcherInfo& dispatchInfo,btManifoldResult*	resultOut,btCollisionAlgorithm**	childCollisionAlgorithms,btPersistentManifold*	sharedManifold)
+	btCompoundLeafCallback2 (const btCollisionObjectWrapper* compoundObjWrap,const btCollisionObjectWrapper* otherObjWrap,btDispatcher* dispatcher,const btDispatcherInfo& dispatchInfo,btManifoldResult*	resultOut,btCollisionAlgorithm**	childCollisionAlgorithms,btPersistentManifold*	sharedManifold)
 		:m_compoundColObjWrap(compoundObjWrap),m_otherObjWrap(otherObjWrap),m_dispatcher(dispatcher),m_dispatchInfo(dispatchInfo),m_resultOut(resultOut),
 		m_childCollisionAlgorithms(childCollisionAlgorithms),
 		m_sharedManifold(sharedManifold)
@@ -258,7 +258,7 @@ void btCompoundCollisionAlgorithm::processCollision (const btCollisionObjectWrap
     
 	const btDbvt* tree = compoundShape->getDynamicAabbTree();
 	//use a dynamic aabb tree to cull potential child-overlaps
-	btCompoundLeafCallback  callback(colObjWrap,otherObjWrap,m_dispatcher,dispatchInfo,resultOut,&m_childCollisionAlgorithms[0],m_sharedManifold);
+	btCompoundLeafCallback2  callback(colObjWrap, otherObjWrap, m_dispatcher, dispatchInfo, resultOut, &m_childCollisionAlgorithms[0], m_sharedManifold);
 
 	///we need to refresh all contact manifolds
 	///note that we should actually recursively traverse all children, btCompoundShape can nested more then 1 level deep

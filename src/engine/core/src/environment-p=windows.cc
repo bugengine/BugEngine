@@ -28,7 +28,7 @@ Environment::Environment()
     if (h != 0)
     {
         FARPROC symbol = GetProcAddress(h, "GetUserProfileDirectoryA");
-        GetUserProfileDirectoryFunction function = (GetUserProfileDirectoryFunction)symbol;
+        GetUserProfileDirectoryFunction function = be_function_cast<GetUserProfileDirectoryFunction>(symbol);
         (*function)(token, profile, &size);
         FreeLibrary(h);
     }

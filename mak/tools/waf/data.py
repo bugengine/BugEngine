@@ -78,7 +78,7 @@ def datagen(self, node):
     tsk = self.create_task('datagen', node, outs)
     tsk.env.DDF = self.bld.bugenginenode.find_node('mak/tools/ddf.py').abspath()
     tsk.env.MACROS_IGNORE = self.bld.bugenginenode.find_node('mak/libs/cpp/macros_ignore').abspath()
-    tsk.env.TMPDIR = self.bld.bldnode.abspath()
+    tsk.env.TMPDIR = self.bld.bldnode.parent.parent.abspath()
     tsk.path = self.bld.variant_dir
     tsk.env.PCH_HEADER = ['--pch']
     tsk.env.PCH = self.pchstop and [self.pchstop] or []

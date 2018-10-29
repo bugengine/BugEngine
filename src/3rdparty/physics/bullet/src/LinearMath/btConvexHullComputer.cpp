@@ -19,7 +19,7 @@ subject to the following restrictions:
 #include "btMinMax.h"
 #include "btVector3.h"
 
-#if defined(__GNUC__) || defined(__SUNPRO_CC)
+#ifdef __GNUC__
 	#include <stdint.h>
 #elif defined(_MSC_VER)
 	typedef __int32 int32_t;

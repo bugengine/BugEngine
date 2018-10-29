@@ -1,55 +1,46 @@
+from .cppobject import CppObject
 from . import types
+from . import templates
 
 
-class Constant:
-    def __init__(self, type, name, value, position):
-        self.type = type
-        self.name = name
-        self.value = value
-        self.position = position
-
-    def find_nonrecursive(self, name):
-        if self.name == name:
-            return self
-
-    def instantiate(self, template_arguments):
-        return self
-
-    def get_token_type(self):
-        return 'VARIABLE_ID'
-
-
-class Value:
-    def __init__(self, type, value, position):
+class Value(CppObject):
+    def __init__(self, parent, position, type, value):
+        CppObject.__init__(self, parent, position)
         self.type = type
         self.value = value
-        self.position = position
 
     def find_nonrecursive(self, name):
         return None
 
     def is_valid(self, other):
-        if not isinstance(other, Constant):
+        if not isinstance(other, templates.TemplateParameterConstant):
             raise types.ConversionError('cannot convert from %s to %s constant' % (other.__class__.__name__.lower(),
                                                                                    self.type.name()),
                                          self.position)
         self.type.try_conversion(other.type)
 
+    def to_string(self):
+        return '(%s)%s' % (self.type.type_name(), str(self.value))
 
-class DependentValueName:
-    def __init__(self, name):
-        self.name = name
-        self.resolved_to = None
+    def matches(self, other):
+        return self.type.matches(other.type) and self.value == other.value
+
+    def _instantiate(self, parent, template_arguments):
+        return Value(parent, self.position,
+                     self.type.instantiate(parent, template_arguments), self.value)
+
+
+class DependentValueName(templates.DependentName):
+    def __init__(self, parent, position, name):
+        templates.DependentName.__init__(self, parent, position, name)
 
     def get_token_type(self):
         return 'VARIABLE_ID'
 
-    def find_nonrecursive(self, name):
-        if self.name == name:
-            return self
+    def _instantiate(self, parent, template_arguments):
+        result = emplates.DependentName._instantiate(self, parent, template_arguments)
+        # TODO: type check
+        return result
 
-    def find(self, name, is_current_scope):
-        return None
-
-    def instantiate(self, template_arguments):
-        return template_arguments.get(self.name, self)
+    def to_string(self):
+        return '::'.join(self.name.name)

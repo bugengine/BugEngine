@@ -4,11 +4,9 @@
 #include    <stdafx.h>
 #include    <bugengine/main.hh>
 #include    <windows.h>
-#include    <iostream>
 #include    <io.h>
 #include    <stdio.h>
 #include    <fcntl.h>
-#include    <fstream>
 
 #ifdef _CONSOLE
 extern "C"
@@ -44,8 +42,6 @@ int WINAPI WinMain( HINSTANCE /*hInstance*/,
         fp = _fdopen( conHandle, "w" );
         *stderr = *fp;
         setvbuf(stderr, NULL, _IONBF, 0);
-
-        std::ios::sync_with_stdio();
     }
     return beMain(__argc, (const char **)__argv);
 }
