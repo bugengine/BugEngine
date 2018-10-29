@@ -73,7 +73,7 @@ class Platform:
                 compiler.load_in_env(conf, self)
             v = conf.env
             v.ARCH_NAME = compiler.arch
-            v.TOOLCHAIN=toolchain
+            v.TOOLCHAIN = toolchain
             v.append_unique('DEFINES', ['BE_PLATFORM=platform_%s'%v.VALID_PLATFORMS[0]])
             if not add:
                 v.ENV_PREFIX = compiler.arch
