@@ -48,8 +48,7 @@ class MSVC(Configure.ConfigurationContext.Compiler):
                                                   '/FD', '/Gy', '/GR-', '/GS-'])
         conf.env.append_unique('LINKFLAGS_final', ['/DEBUG', '/INCREMENTAL:no'])
         conf.env.append_unique('ARFLAGS_final', [])
-        
-        
+
         if self.NAMES[0] != 'intel' or self.version_number >= (9,1):
             conf.env.append_unique('CXXFLAGS_cxxstlib', ['/Zl'])
             conf.env.append_unique('CFLAGS_cxxstlib', ['/Zl'])

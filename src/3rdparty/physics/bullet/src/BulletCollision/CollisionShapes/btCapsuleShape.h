@@ -46,7 +46,7 @@ public:
 
 	virtual void	batchedUnitVectorGetSupportingVertexWithoutMargin(const btVector3* vectors,btVector3* supportVerticesOut,int numVectors) const;
 	
-	virtual void setMargin(btScalar collisionMargin)
+	virtual void setMargin(btScalar /*collisionMargin*/)
 	{
 		//don't override the margin for capsules, their entire radius == margin
 	}
