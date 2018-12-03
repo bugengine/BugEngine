@@ -208,23 +208,23 @@ matrix:
     - os: linux
       env: COMPILER=gcc_x86 COMPILER_VERSION=4.2.1 TARGET_OS=windows_x86 FLAVOR=final
     - os: osx
-      env: COMPILER=appleclang COMPILER_VERSION=8.1.0 TARGET_OS=macosx10.12 FLAVOR=debug
+      env: COMPILER=appleclang COMPILER_VERSION=9.1.0 TARGET_OS=macosx10.13 FLAVOR=debug
     - os: osx
-      env: COMPILER=appleclang COMPILER_VERSION=8.1.0 TARGET_OS=macosx10.12 FLAVOR=profile
+      env: COMPILER=appleclang COMPILER_VERSION=9.1.0 TARGET_OS=macosx10.13 FLAVOR=profile
     - os: osx
-      env: COMPILER=appleclang COMPILER_VERSION=8.1.0 TARGET_OS=macosx10.12 FLAVOR=final
+      env: COMPILER=appleclang COMPILER_VERSION=9.1.0 TARGET_OS=macosx10.13 FLAVOR=final
     - os: osx
-      env: COMPILER=appleclang COMPILER_VERSION=8.1.0 TARGET_OS=iphone10.3 FLAVOR=debug
+      env: COMPILER=appleclang COMPILER_VERSION=9.1.0 TARGET_OS=iphone11.4 FLAVOR=debug
     - os: osx
-      env: COMPILER=appleclang COMPILER_VERSION=8.1.0 TARGET_OS=iphone10.3 FLAVOR=profile
+      env: COMPILER=appleclang COMPILER_VERSION=9.1.0 TARGET_OS=iphone11.4 FLAVOR=profile
     - os: osx
-      env: COMPILER=appleclang COMPILER_VERSION=8.1.0 TARGET_OS=iphone10.3 FLAVOR=final
+      env: COMPILER=appleclang COMPILER_VERSION=9.1.0 TARGET_OS=iphone11.4 FLAVOR=final
     - os: osx
-      env: COMPILER=appleclang COMPILER_VERSION=8.1.0 TARGET_OS=iphonesimulator10.3 FLAVOR=debug
+      env: COMPILER=appleclang COMPILER_VERSION=9.1.0 TARGET_OS=iphonesimulator11.4 FLAVOR=debug
     - os: osx
-      env: COMPILER=appleclang COMPILER_VERSION=8.1.0 TARGET_OS=iphonesimulator10.3 FLAVOR=profile
+      env: COMPILER=appleclang COMPILER_VERSION=9.1.0 TARGET_OS=iphonesimulator11.4 FLAVOR=profile
     - os: osx
-      env: COMPILER=appleclang COMPILER_VERSION=8.1.0 TARGET_OS=iphonesimulator10.3 FLAVOR=final
+      env: COMPILER=appleclang COMPILER_VERSION=9.1.0 TARGET_OS=iphonesimulator11.4 FLAVOR=final
 
 script:
   - CC= CXX= ./waf configure ${CONFIGURE_OPTIONS}
