@@ -78,8 +78,8 @@ class codesign(Task.Task):
 @taskgen_method
 def darwin_postlink_task(self, link_task):
     appname = getattr(Context.g_module, Context.APPNAME, self.bld.srcnode.name)
-    
-    bldnode = self.bld.bldnode.make_node(self.bld.bugengine_variant).make_node(self.bld.optim)
+
+    bldnode = self.bld.bldnode
     out_rootdir = os.path.join(appname+'.app.dSYM', 'Contents')
     out_rootnode = bldnode.make_node(out_rootdir)
     out_dsymdir = out_rootnode.make_node('Resources/DWARF')
@@ -90,8 +90,7 @@ def darwin_postlink_task(self, link_task):
     self.strip_task = self.create_task('strip', [out_node], [out_node_stripped])
     self.sign_task = self.create_task('codesign', [out_node_stripped], [out_node_signed])
     self.link_task = self.sign_task
-    
-    
+
     dsymtask = getattr(self.bld, 'dsym_task', None)
     if not dsymtask:
         infoplist = out_rootnode.make_node('Info.plist')
