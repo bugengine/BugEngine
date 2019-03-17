@@ -41,10 +41,10 @@
 /* but this structure may be useful at some point for an MSVC build */
 /* so, for now unconditionally define the important flags           */
 /* "the right way" for proper static and dll+auto-import behavior   */
-#undef NCURSES_DLL
-#define NCURSES_STATIC
+//#undef NCURSES_DLL
+//#define NCURSES_STATIC
 
-#if defined(__CYGWIN__) || defined(__MINGW32__)
+#if defined(__CYGWIN__) || defined(__MINGW32__) || 1
 #  if defined(NCURSES_DLL)
 #    if defined(NCURSES_STATIC)
 #      undef NCURSES_STATIC
@@ -64,8 +64,8 @@
 /* linking to the DLL */
 #    define NCURSES_IMPEXP __declspec(dllimport)
 #  endif
-#  define NCURSES_API __cdecl
-#  define NCURSES_EXPORT(type) NCURSES_IMPEXP type NCURSES_API
+#  define NCURSES_API
+#  define NCURSES_EXPORT(type) NCURSES_IMPEXP type
 #  define NCURSES_EXPORT_VAR(type) NCURSES_IMPEXP type
 #endif
 
