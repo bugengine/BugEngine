@@ -34,6 +34,7 @@ matrix:
           - build-tools-27.0.3
           - android-26
       before_install:
+        - echo -ne "\n8933bad161af4178b1185d1a37fbf41ea5269c55" >> $ANDROID_HOME/licenses/android-sdk-license
         - echo y | /usr/local/android-sdk/tools/bin/sdkmanager "ndk-bundle"
     - os: linux
       language: android
@@ -48,6 +49,7 @@ matrix:
           - build-tools-27.0.3
           - android-26
       before_install:
+        - echo -ne "\n8933bad161af4178b1185d1a37fbf41ea5269c55" >> $ANDROID_HOME/licenses/android-sdk-license
         - echo y | /usr/local/android-sdk/tools/bin/sdkmanager "ndk-bundle"
     - os: linux
       language: android
@@ -62,6 +64,7 @@ matrix:
           - build-tools-27.0.3
           - android-26
       before_install:
+        - echo -ne "\n8933bad161af4178b1185d1a37fbf41ea5269c55" >> $ANDROID_HOME/licenses/android-sdk-license
         - echo y | /usr/local/android-sdk/tools/bin/sdkmanager "ndk-bundle"
     - os: linux
       language: android
@@ -76,6 +79,7 @@ matrix:
           - build-tools-27.0.3
           - android-26
       before_install:
+        - echo -ne "\n8933bad161af4178b1185d1a37fbf41ea5269c55" >> $ANDROID_HOME/licenses/android-sdk-license
         - echo y | /usr/local/android-sdk/tools/bin/sdkmanager "ndk-bundle"
     - os: linux
       language: android
@@ -90,6 +94,7 @@ matrix:
           - build-tools-27.0.3
           - android-26
       before_install:
+        - echo -ne "\n8933bad161af4178b1185d1a37fbf41ea5269c55" >> $ANDROID_HOME/licenses/android-sdk-license
         - echo y | /usr/local/android-sdk/tools/bin/sdkmanager "ndk-bundle"
     - os: linux
       language: android
@@ -104,6 +109,7 @@ matrix:
           - build-tools-27.0.3
           - android-26
       before_install:
+        - echo -ne "\n8933bad161af4178b1185d1a37fbf41ea5269c55" >> $ANDROID_HOME/licenses/android-sdk-license
         - echo y | /usr/local/android-sdk/tools/bin/sdkmanager "ndk-bundle"
     - os: linux
       language: android
@@ -118,6 +124,7 @@ matrix:
           - build-tools-27.0.3
           - android-26
       before_install:
+        - echo -ne "\n8933bad161af4178b1185d1a37fbf41ea5269c55" >> $ANDROID_HOME/licenses/android-sdk-license
         - echo y | /usr/local/android-sdk/tools/bin/sdkmanager "ndk-bundle"
     - os: linux
       language: android
@@ -132,6 +139,7 @@ matrix:
           - build-tools-27.0.3
           - android-26
       before_install:
+        - echo -ne "\n8933bad161af4178b1185d1a37fbf41ea5269c55" >> $ANDROID_HOME/licenses/android-sdk-license
         - echo y | /usr/local/android-sdk/tools/bin/sdkmanager "ndk-bundle"
     - os: linux
       language: android
@@ -146,6 +154,7 @@ matrix:
           - build-tools-27.0.3
           - android-26
       before_install:
+        - echo -ne "\n8933bad161af4178b1185d1a37fbf41ea5269c55" >> $ANDROID_HOME/licenses/android-sdk-license
         - echo y | /usr/local/android-sdk/tools/bin/sdkmanager "ndk-bundle"
     - os: linux
       language: android
@@ -160,6 +169,7 @@ matrix:
           - build-tools-27.0.3
           - android-26
       before_install:
+        - echo -ne "\n8933bad161af4178b1185d1a37fbf41ea5269c55" >> $ANDROID_HOME/licenses/android-sdk-license
         - echo y | /usr/local/android-sdk/tools/bin/sdkmanager "ndk-bundle"
     - os: linux
       language: android
@@ -174,6 +184,7 @@ matrix:
           - build-tools-27.0.3
           - android-26
       before_install:
+        - echo -ne "\n8933bad161af4178b1185d1a37fbf41ea5269c55" >> $ANDROID_HOME/licenses/android-sdk-license
         - echo y | /usr/local/android-sdk/tools/bin/sdkmanager "ndk-bundle"
     - os: linux
       language: android
@@ -188,6 +199,7 @@ matrix:
           - build-tools-27.0.3
           - android-26
       before_install:
+        - echo -ne "\n8933bad161af4178b1185d1a37fbf41ea5269c55" >> $ANDROID_HOME/licenses/android-sdk-license
         - echo y | /usr/local/android-sdk/tools/bin/sdkmanager "ndk-bundle"
     - os: linux
       env: COMPILER=gcc_amd64 COMPILER_VERSION=4.8.4 TARGET_OS=linux_amd64 FLAVOR=debug
