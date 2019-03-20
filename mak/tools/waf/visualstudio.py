@@ -50,8 +50,8 @@ def unique(seq):
     return [ x for x in seq if x not in seen and not seen_add(x)]
 
 def gather_includes_defines(task_gen):
-    defines = getattr(task_gen, 'defines', []) + getattr(task_gen, 'export_defines', [])
-    includes = getattr(task_gen, 'includes', []) + getattr(task_gen, 'export_includes', [])
+    defines = getattr(task_gen, 'defines', []) + getattr(task_gen, 'export_defines', []) + getattr(task_gen, 'extra_defines', [])
+    includes = getattr(task_gen, 'includes', []) + getattr(task_gen, 'export_includes', []) + getattr(task_gen, 'extra_includes', [])
     seen = set([])
     use = getattr(task_gen, 'use', []) + getattr(task_gen, 'private_use', [])
     while use:
@@ -64,8 +64,8 @@ def gather_includes_defines(task_gen):
                 pass
             else:
                 use = use + getattr(t, 'use', [])
-                includes = includes + getattr(t, 'includes', []) + getattr(t, 'export_includes', [])
-                defines = defines + getattr(t, 'defines', []) + getattr(t, 'export_defines', [])
+                includes = includes + getattr(t, 'includes', []) + getattr(t, 'export_includes', []) + getattr(task_gen, 'extra_includes', [])
+                defines = defines + getattr(t, 'defines', []) + getattr(t, 'export_defines', []) + getattr(task_gen, 'extra_defines', [])
     return unique(includes), unique(defines)
 
 def path_from(path, bld):

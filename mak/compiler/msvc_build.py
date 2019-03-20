@@ -39,3 +39,10 @@ def apply_pdb_flag(self):
                 task.env.append_unique('CFLAGS', '/Fd%s'%task.outputs[0].change_ext('.pdb').abspath())
                 task.env.append_unique('CXXFLAGS', '/Fd%s'%task.outputs[0].change_ext('.pdb').abspath())
                 task.env.append_unique('CPPFLAGS', '/Fd%s'%task.outputs[0].change_ext('.pdb').abspath())
+
+@feature('cshlib', 'cxxshlib')
+@after_method('process_source')
+def apply_def_flag(self):
+    if self.env.CC_NAME == 'msvc':
+        for f in getattr(self, 'def_files', []):
+            self.env.append_unique('LINKFLAGS', ['/DEF:%s'%f.abspath()])
