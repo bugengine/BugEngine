@@ -40,7 +40,7 @@ def kernel_generate(self):
         tsk.env.KERNEL = self.bld.bugenginenode.find_node('mak/tools/kernel_task.py').abspath()
         tsk.env.KERNEL_NAME = '.'.join(kernel)
         tsk.env.MACROS_IGNORE = self.bld.bugenginenode.find_node('mak/libs/cpp/macros_ignore').abspath(),
-        tsk.env.TMPDIR = self.bld.bldnode.abspath()
+        tsk.env.TMPDIR = self.bld.bldnode.parent.parent.abspath()
         tsk.env.PCH_HEADER = ['--pch']
         tsk.env.PCH = self.pchstop and [self.pchstop] or []
         tsk.dep_nodes = [mak_node.find_node('tools/kernel_task.py')]

@@ -230,6 +230,7 @@ def build_games(bld):
                       'plugin.scripting.package'],
              path='tool.help', platforms=['pc'])
     bld.game('test.clt', ['plugin.compute.cpu'])
+    bld.game('test.settings', ['engine.bugengine'])
 
 
 def build(bld):

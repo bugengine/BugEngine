@@ -20,3 +20,4 @@ def configure(conf):
     else:
         v.WINRC_TGT_F='-o'
         v.WINRC_SRC_F='-i'
+

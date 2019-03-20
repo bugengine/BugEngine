@@ -31,25 +31,12 @@ SettingsBase::~SettingsBase()
 
 void SettingsBase::onProviderAdded(weak<const SettingsProvider> provider)
 {
-    for (minitl::intrusive_list<SettingsBase>::const_iterator it = getSettings().begin();
+    for (minitl::intrusive_list<SettingsBase>::iterator it = getSettings().begin();
          it != getSettings().end();
          ++it)
     {
-        SettingsProvider::SettingsCategoryMap::const_iterator settingsOverride;
-        settingsOverride = provider->m_settings.find(it->m_settingsClass->name);
-        if (settingsOverride != provider->m_settings.end())
-        {
-            for (SettingsProvider::SettingsList::const_iterator s = settingsOverride->second.begin();
-                 s != settingsOverride->second.end();
-                 ++s)
-            {
-                be_info("override %s.%s" | settingsOverride->first | s->first);
-            }
-        }
+        provider->apply(*it);
     }
 }
-
-
-
 
 }}

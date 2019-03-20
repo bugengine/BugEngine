@@ -68,25 +68,30 @@ public:
 // of bad because if you call any of these functions from external code
 // (where BT_THREADSAFE is undefined) you will get unexpected race conditions.
 //
-SIMD_FORCE_INLINE void btMutexLock( btSpinMutex* /*mutex*/ )
+SIMD_FORCE_INLINE void btMutexLock( btSpinMutex* mutex )
 {
 #if BT_THREADSAFE
     mutex->lock();
+#else
+    (void)mutex;
 #endif // #if BT_THREADSAFE
 }
 
-SIMD_FORCE_INLINE void btMutexUnlock( btSpinMutex* /*mutex*/ )
+SIMD_FORCE_INLINE void btMutexUnlock( btSpinMutex* mutex )
 {
 #if BT_THREADSAFE
     mutex->unlock();
+#else
+    (void)mutex;
 #endif // #if BT_THREADSAFE
 }
 
-SIMD_FORCE_INLINE bool btMutexTryLock( btSpinMutex* /*mutex*/ )
+SIMD_FORCE_INLINE bool btMutexTryLock( btSpinMutex* mutex )
 {
 #if BT_THREADSAFE
     return mutex->tryLock();
 #else
+    (void)mutex;
     return true;
 #endif // #if BT_THREADSAFE
 }

@@ -124,6 +124,7 @@ def configure(conf):
                                             sdk_archs.append(archs[a[:-1]] if a[-1] == ',' else archs[a])
                                         except KeyError:
                                             print('Unknown %s arch: %s in %s' % (sdk_os, a, dylib))
+                                    break
                 try:
                     conf.darwin_sdks[sdk_os].append((sdk_version, sdk_archs, sdk_path))
                     conf.darwin_sdks[sdk_os].sort()

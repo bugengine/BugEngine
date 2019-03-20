@@ -49,6 +49,6 @@ class PutCommand(Command):
 
     @classmethod
     def help(self, out):
-        out.write('    %s device file1 [file2...] destination\n' % self.bold_name())
+        out.write('    %s <device> <file1> [<file2>...] <destination>\n' % self.bold_name())
         out.write('        Uploads files or directories to the device\n')
 

@@ -32,7 +32,7 @@ void Environment::init()
 
 void Environment::init(int argc, const char *argv[])
 {
-    m_game = istring("sample.kernel");
+    m_game = istring("sample.lua");
     ipath rootPath = canonicalPath(argv[0], "/");
     m_programPath = ifilename(rootPath);
     rootPath.pop_back();

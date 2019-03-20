@@ -34,7 +34,9 @@ matrix:
           - build-tools-27.0.3
           - android-26
       before_install:
-        - yes | /usr/local/android-sdk/tools/bin/sdkmanager "ndk-bundle"
+        - mkdir $ANDROID_HOME/licenses
+        - echo -ne "\n8933bad161af4178b1185d1a37fbf41ea5269c55" >> $ANDROID_HOME/licenses/android-sdk-license
+        - echo y | /usr/local/android-sdk/tools/bin/sdkmanager "ndk-bundle"
     - os: linux
       language: android
       env: COMPILER=gcc COMPILER_VERSION=4.9.x TARGET_OS=android_nougat_7.1 FLAVOR=profile
@@ -48,7 +50,9 @@ matrix:
           - build-tools-27.0.3
           - android-26
       before_install:
-        - yes | /usr/local/android-sdk/tools/bin/sdkmanager "ndk-bundle"
+        - mkdir $ANDROID_HOME/licenses
+        - echo -ne "\n8933bad161af4178b1185d1a37fbf41ea5269c55" >> $ANDROID_HOME/licenses/android-sdk-license
+        - echo y | /usr/local/android-sdk/tools/bin/sdkmanager "ndk-bundle"
     - os: linux
       language: android
       env: COMPILER=gcc COMPILER_VERSION=4.9.x TARGET_OS=android_nougat_7.1 FLAVOR=final
@@ -62,7 +66,9 @@ matrix:
           - build-tools-27.0.3
           - android-26
       before_install:
-        - yes | /usr/local/android-sdk/tools/bin/sdkmanager "ndk-bundle"
+        - mkdir $ANDROID_HOME/licenses
+        - echo -ne "\n8933bad161af4178b1185d1a37fbf41ea5269c55" >> $ANDROID_HOME/licenses/android-sdk-license
+        - echo y | /usr/local/android-sdk/tools/bin/sdkmanager "ndk-bundle"
     - os: linux
       language: android
       env: COMPILER=gcc COMPILER_VERSION=4.9.x TARGET_OS=android_oreo_8.0 FLAVOR=debug
@@ -76,7 +82,9 @@ matrix:
           - build-tools-27.0.3
           - android-26
       before_install:
-        - yes | /usr/local/android-sdk/tools/bin/sdkmanager "ndk-bundle"
+        - mkdir $ANDROID_HOME/licenses
+        - echo -ne "\n8933bad161af4178b1185d1a37fbf41ea5269c55" >> $ANDROID_HOME/licenses/android-sdk-license
+        - echo y | /usr/local/android-sdk/tools/bin/sdkmanager "ndk-bundle"
     - os: linux
       language: android
       env: COMPILER=gcc COMPILER_VERSION=4.9.x TARGET_OS=android_oreo_8.0 FLAVOR=profile
@@ -90,7 +98,9 @@ matrix:
           - build-tools-27.0.3
           - android-26
       before_install:
-        - yes | /usr/local/android-sdk/tools/bin/sdkmanager "ndk-bundle"
+        - mkdir $ANDROID_HOME/licenses
+        - echo -ne "\n8933bad161af4178b1185d1a37fbf41ea5269c55" >> $ANDROID_HOME/licenses/android-sdk-license
+        - echo y | /usr/local/android-sdk/tools/bin/sdkmanager "ndk-bundle"
     - os: linux
       language: android
       env: COMPILER=gcc COMPILER_VERSION=4.9.x TARGET_OS=android_oreo_8.0 FLAVOR=final
@@ -104,7 +114,9 @@ matrix:
           - build-tools-27.0.3
           - android-26
       before_install:
-        - yes | /usr/local/android-sdk/tools/bin/sdkmanager "ndk-bundle"
+        - mkdir $ANDROID_HOME/licenses
+        - echo -ne "\n8933bad161af4178b1185d1a37fbf41ea5269c55" >> $ANDROID_HOME/licenses/android-sdk-license
+        - echo y | /usr/local/android-sdk/tools/bin/sdkmanager "ndk-bundle"
     - os: linux
       language: android
       env: COMPILER=clang COMPILER_VERSION=6.0.2 TARGET_OS=android_nougat_7.1 FLAVOR=debug
@@ -118,7 +130,9 @@ matrix:
           - build-tools-27.0.3
           - android-26
       before_install:
-        - yes | /usr/local/android-sdk/tools/bin/sdkmanager "ndk-bundle"
+        - mkdir $ANDROID_HOME/licenses
+        - echo -ne "\n8933bad161af4178b1185d1a37fbf41ea5269c55" >> $ANDROID_HOME/licenses/android-sdk-license
+        - echo y | /usr/local/android-sdk/tools/bin/sdkmanager "ndk-bundle"
     - os: linux
       language: android
       env: COMPILER=clang COMPILER_VERSION=6.0.2 TARGET_OS=android_nougat_7.1 FLAVOR=profile
@@ -132,7 +146,9 @@ matrix:
           - build-tools-27.0.3
           - android-26
       before_install:
-        - yes | /usr/local/android-sdk/tools/bin/sdkmanager "ndk-bundle"
+        - mkdir $ANDROID_HOME/licenses
+        - echo -ne "\n8933bad161af4178b1185d1a37fbf41ea5269c55" >> $ANDROID_HOME/licenses/android-sdk-license
+        - echo y | /usr/local/android-sdk/tools/bin/sdkmanager "ndk-bundle"
     - os: linux
       language: android
       env: COMPILER=clang COMPILER_VERSION=6.0.2 TARGET_OS=android_nougat_7.1 FLAVOR=final
@@ -146,7 +162,9 @@ matrix:
           - build-tools-27.0.3
           - android-26
       before_install:
-        - yes | /usr/local/android-sdk/tools/bin/sdkmanager "ndk-bundle"
+        - mkdir $ANDROID_HOME/licenses
+        - echo -ne "\n8933bad161af4178b1185d1a37fbf41ea5269c55" >> $ANDROID_HOME/licenses/android-sdk-license
+        - echo y | /usr/local/android-sdk/tools/bin/sdkmanager "ndk-bundle"
     - os: linux
       language: android
       env: COMPILER=clang COMPILER_VERSION=6.0.2 TARGET_OS=android_oreo_8.0 FLAVOR=debug
@@ -160,7 +178,9 @@ matrix:
           - build-tools-27.0.3
           - android-26
       before_install:
-        - yes | /usr/local/android-sdk/tools/bin/sdkmanager "ndk-bundle"
+        - mkdir $ANDROID_HOME/licenses
+        - echo -ne "\n8933bad161af4178b1185d1a37fbf41ea5269c55" >> $ANDROID_HOME/licenses/android-sdk-license
+        - echo y | /usr/local/android-sdk/tools/bin/sdkmanager "ndk-bundle"
     - os: linux
       language: android
       env: COMPILER=clang COMPILER_VERSION=6.0.2 TARGET_OS=android_oreo_8.0 FLAVOR=profile
@@ -174,7 +194,9 @@ matrix:
           - build-tools-27.0.3
           - android-26
       before_install:
-        - yes | /usr/local/android-sdk/tools/bin/sdkmanager "ndk-bundle"
+        - mkdir $ANDROID_HOME/licenses
+        - echo -ne "\n8933bad161af4178b1185d1a37fbf41ea5269c55" >> $ANDROID_HOME/licenses/android-sdk-license
+        - echo y | /usr/local/android-sdk/tools/bin/sdkmanager "ndk-bundle"
     - os: linux
       language: android
       env: COMPILER=clang COMPILER_VERSION=6.0.2 TARGET_OS=android_oreo_8.0 FLAVOR=final
@@ -188,7 +210,9 @@ matrix:
           - build-tools-27.0.3
           - android-26
       before_install:
-        - yes | /usr/local/android-sdk/tools/bin/sdkmanager "ndk-bundle"
+        - mkdir $ANDROID_HOME/licenses
+        - echo -ne "\n8933bad161af4178b1185d1a37fbf41ea5269c55" >> $ANDROID_HOME/licenses/android-sdk-license
+        - echo y | /usr/local/android-sdk/tools/bin/sdkmanager "ndk-bundle"
     - os: linux
       env: COMPILER=gcc_amd64 COMPILER_VERSION=4.8.4 TARGET_OS=linux_amd64 FLAVOR=debug
     - os: linux
@@ -208,17 +232,23 @@ matrix:
     - os: linux
       env: COMPILER=gcc_x86 COMPILER_VERSION=4.2.1 TARGET_OS=windows_x86 FLAVOR=final
     - os: osx
-      env: COMPILER=appleclang COMPILER_VERSION=8.1.0 TARGET_OS=macosx10.12 FLAVOR=debug
+      env: COMPILER=appleclang COMPILER_VERSION=9.1.0 TARGET_OS=macosx10.13 FLAVOR=debug
     - os: osx
-      env: COMPILER=appleclang COMPILER_VERSION=8.1.0 TARGET_OS=macosx10.12 FLAVOR=profile
+      env: COMPILER=appleclang COMPILER_VERSION=9.1.0 TARGET_OS=macosx10.13 FLAVOR=profile
     - os: osx
-      env: COMPILER=appleclang COMPILER_VERSION=8.1.0 TARGET_OS=macosx10.12 FLAVOR=final
+      env: COMPILER=appleclang COMPILER_VERSION=9.1.0 TARGET_OS=macosx10.13 FLAVOR=final
     - os: osx
-      env: COMPILER=appleclang COMPILER_VERSION=8.1.0 TARGET_OS=iphonesimulator10.3 FLAVOR=debug
+      env: COMPILER=appleclang_arm64 COMPILER_VERSION=9.1.0 TARGET_OS=iphone11.4_arm64 FLAVOR=debug
     - os: osx
-      env: COMPILER=appleclang COMPILER_VERSION=8.1.0 TARGET_OS=iphonesimulator10.3 FLAVOR=profile
+      env: COMPILER=appleclang_arm64 COMPILER_VERSION=9.1.0 TARGET_OS=iphone11.4_arm64 FLAVOR=profile
     - os: osx
-      env: COMPILER=appleclang COMPILER_VERSION=8.1.0 TARGET_OS=iphonesimulator10.3 FLAVOR=final
+      env: COMPILER=appleclang_arm64 COMPILER_VERSION=9.1.0 TARGET_OS=iphone11.4_arm64 FLAVOR=final
+    - os: osx
+      env: COMPILER=appleclang_amd64 COMPILER_VERSION=9.1.0 TARGET_OS=iphonesimulator11.4_amd64 FLAVOR=debug
+    - os: osx
+      env: COMPILER=appleclang_amd64 COMPILER_VERSION=9.1.0 TARGET_OS=iphonesimulator11.4_amd64 FLAVOR=profile
+    - os: osx
+      env: COMPILER=appleclang_amd64 COMPILER_VERSION=9.1.0 TARGET_OS=iphonesimulator11.4_amd64 FLAVOR=final
 
 script:
   - CC= CXX= ./waf configure ${CONFIGURE_OPTIONS}

@@ -53,6 +53,7 @@ class Windows(Configure.ConfigurationContext.Platform):
         env.VALID_PLATFORMS = ['windows', 'pc']
         env.pymodule_PATTERN = '%s.pyd'
 
+        env.DEPLOY_ROOTDIR = ''
         env.DEPLOY_BINDIR = ''
         env.DEPLOY_RUNBINDIR = ''
         env.DEPLOY_LIBDIR = 'lib'
@@ -79,7 +80,10 @@ class Windows(Configure.ConfigurationContext.Platform):
         if not winres:
             winres = conf.find_program('windres', var='WINRC', mandatory=False)
         conf.load('winres_patch', tooldir=[os.path.join(conf.bugenginenode.abspath(), 'mak', 'tools', 'waf')])
-
+        if compiler.arch == 'x86':
+            conf.env.append_unique('WINRCFLAGS', ['--target=pe-i386'])
+        elif compiler.arch == 'amd64':
+            conf.env.append_unique('WINRCFLAGS', ['--target=pe-x86-64'])
 
 
 class Windows_Clang(Windows):
