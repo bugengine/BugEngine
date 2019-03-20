@@ -60,14 +60,14 @@ public:
 #if (defined(BT_USE_SSE_IN_API) && defined(BT_USE_SSE))|| defined(BT_USE_NEON) 
 	// Set Vector 
 	SIMD_FORCE_INLINE btQuaternion(const btSimdFloat4 vec)
+		: mVec128(vec)
 	{
-		mVec128 = vec;
 	}
 
 	// Copy constructor
 	SIMD_FORCE_INLINE btQuaternion(const btQuaternion& rhs)
+		: mVec128(rhs.mVec128)
 	{
-		mVec128 = rhs.mVec128;
 	}
 
 	// Assignment Operator
