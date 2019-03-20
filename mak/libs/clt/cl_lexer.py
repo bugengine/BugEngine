@@ -1,4 +1,5 @@
 from ..ply import lex
+from . import cl_ast
 import sys
 
 color_list = {
@@ -81,8 +82,14 @@ class ClLexer:
         if obj:
             token.found_object = obj
             token.type = obj.get_token_type()
-            if scope and scope != self.scopes[-1]:
-                token.type += '_SHADOW'
+            if scope:
+                for s in self.scopes[::-1]:
+                    if isinstance(s, cl_ast.templates.Template):
+                        continue
+                    if scope == s:
+                        break
+                    token.type += '_SHADOW'
+                    return
 
     def input(self, text):
         self.lexer.input(text)
@@ -93,6 +100,8 @@ class ClLexer:
             new_token.lexer = self
             new_token.filename = self.filename
             new_token.endlexpos = new_token.lexpos + len(new_token.value)
+            if new_token.type == 'OPERATOR':
+                new_token.owner = self.current_scope
             if new_token.type == 'SCOPE':
                 if self.last_token:
                     self.current_scope = getattr(self.last_token, 'found_object', self.scopes[0])
@@ -105,7 +114,7 @@ class ClLexer:
         return new_token
 
     def _position(self, token):
-        return (token.filename, token.lineno, token.lexpos, token.lexpos + len(token.value))
+        return (self.filename, token.lineno, token.lexpos, token.lexpos + len(token.value))
 
     def _msg(self, error_type, msg, pos):
         if self.error_color:

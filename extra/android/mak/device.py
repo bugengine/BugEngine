@@ -113,6 +113,7 @@ class AdbProtocol(Protocol):
 
 
 class AndroidPlatform(Platform):
+    name = 'Android'
     names = ('android',)
 
     @classmethod

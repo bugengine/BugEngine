@@ -1,4 +1,5 @@
 from waflib.Logs import pprint
+import os
 
 
 def options(opt):
@@ -8,7 +9,6 @@ def options(opt):
                   default=False,
                   dest='included_freetype',
                   help='Compile the Freetype library from the included code')
-
 
 
 def setup(conf):
@@ -21,4 +21,12 @@ def setup(conf):
             conf.env.SYSTEM_FREETYPE = True
             pprint('GREEN', '+freetype', sep=' ')
     else:
-        pprint('BLUE', '=freetype', sep=' ')
+        conf.env.SYSTEM_FREETYPE = conf.check_lib('freetype', var='freetype',
+                       libpath=[os.path.join(conf.path.abspath(),
+                                            'lib.%s.%s'%(conf.env.VALID_PLATFORMS[0], a))
+                                for a in conf.env.VALID_ARCHITECTURES],
+                       includepath=[os.path.join(conf.path.abspath(), 'api')],
+                       includes=['ft2build.h', 'freetype/freetype.h', 'freetype/t1tables.h'],
+                       functions=['FT_Get_PS_Font_Info'])
+        if not conf.env.SYSTEM_FREETYPE:
+            pprint('BLUE', '=freetype', sep=' ')

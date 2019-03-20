@@ -50,14 +50,14 @@ struct ParseContext
     const char*         bufferStart;
     const char*         bufferEnd;
     const char*         buffer;
-    ErrorList&          errors;
+    MessageList&        errors;
     ParseLocation       location;
     Header              parseHeader;
 
     ParseContext(minitl::Allocator& arena,
                  const char*        bufferStart,
                  const char*        bufferEnd,
-                 ErrorList&         errors,
+                 MessageList&       errors,
                  bool               expectObject = false,
                  u32                lineStart = 0,
                  u32                columnStart = 0);

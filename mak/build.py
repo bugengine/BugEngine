@@ -1,4 +1,5 @@
 from waflib import Task, Options, Build, Logs, Utils, Errors, TaskGen, Node
+from waflib import Task, Options, Build, Logs, Utils, Errors, TaskGen, Node
 from waflib.Configure import conf
 from waflib.TaskGen import feature, taskgen_method, extension, before_method, after_method
 import os
@@ -172,7 +173,7 @@ def module(bld, name, module_path, depends, private_depends,
     else:
         plugin_name = 'bugengine'
 
-    compile_extensions = ['cxx', 'cpp', 'cc', 'c', 'rc', 'm', 'mm']
+    compile_extensions = ['cxx', 'cpp', 'cc', 'c', 'rc', 'm', 'mm', 'def']
     preprocess_extensions = ['yy', 'll', 'plist']
     try:
         sources = source_node.ant_glob(['src/**/*.%s'%(ext) for ext in compile_extensions])
@@ -386,10 +387,10 @@ def external(bld, name):
 
 
 @conf
-def thirdparty(bld, name, feature='', path='.', var='', use=[], private_use=[]):
+def thirdparty(bld, name, feature='', path='', var='', use=[], private_use=[]):
     platforms = bld.env.VALID_PLATFORMS
     platform_specific = platforms
-    source_node = bld.path.make_node(path.replace('.', '/'))
+    source_node = bld.path.make_node(path and path.replace('.', '/') or '.')
     project_path = source_node.parent.path_from(bld.srcnode).replace('/', '.')
     project_path = '%s.%s' % (project_path, name.split('.')[-1])
     if not var: var = bld.path.name
@@ -700,6 +701,15 @@ def set_extra_flags(self):
         self.env.append_unique('CFLAGS', self.env['CFLAGS_%s'%f])
         self.env.append_unique('CXXFLAGS', self.env['CXXFLAGS_%s'%f])
         self.env.append_unique('LINKFLAGS', self.env['LINKFLAGS_%s'%f])
+        self.env.append_unique('LIB', self.env['LIB_%s'%f])
+        self.env.append_unique('STLIB', self.env['STLIB_%s'%f])
+    for f in getattr(self, 'features', []):
+        self.env.append_unique('CPPFLAGS', self.env['CPPFLAGS_%s'%f])
+        self.env.append_unique('CFLAGS', self.env['CFLAGS_%s'%f])
+        self.env.append_unique('CXXFLAGS', self.env['CXXFLAGS_%s'%f])
+        self.env.append_unique('LINKFLAGS', self.env['LINKFLAGS_%s'%f])
+        self.env.append_unique('LIB', self.env['LIB_%s'%f])
+        self.env.append_unique('STLIB', self.env['STLIB_%s'%f])
 
 
 @taskgen_method
@@ -801,13 +811,7 @@ def make_bld_node(self, category, path, name):
         constructs a path from the build node:
             build_node/variant/optim/target/category/path/name
     """
-    if 'preprocess' in self.features:
-        bldnode = self.bld.bldnode.make_node('_any_').make_node('preprocess')
-    else:
-        try:
-            bldnode = self.bld.bldnode.make_node(self.bld.bugengine_variant).make_node(self.bld.optim)
-        except AttributeError:
-            bldnode = self.bld.bldnode.make_node('_any_').make_node('_any_')
+    bldnode = self.bld.bldnode
     node = bldnode.make_node(self.target).make_node(category)
     if not path:
         node = node.make_node(name)
@@ -815,9 +819,9 @@ def make_bld_node(self, category, path, name):
         if path.is_child_of(self.bld.bldnode):
             out_dir = path.path_from(self.bld.bldnode)
             # skip variant
-            out_dir = out_dir[out_dir.find(os.path.sep)+1:]
+            #out_dir = out_dir[out_dir.find(os.path.sep)+1:]
             # skip optim
-            out_dir = out_dir[out_dir.find(os.path.sep)+1:]
+            #out_dir = out_dir[out_dir.find(os.path.sep)+1:]
             # skip target
             out_dir = out_dir[out_dir.find(os.path.sep)+1:]
             # skip category
@@ -918,6 +922,14 @@ def create_compiled_task(self, name, node):
     except AttributeError:
         self.compiled_tasks = [task]
     return task
+
+
+@extension('.def')
+def def_file(self, node):
+    try:
+        self.def_files.append(node)
+    except Exception:
+        self.def_files = [node]
 
 
 @extension('.rc')

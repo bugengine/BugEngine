@@ -44,12 +44,13 @@ extern int yylex();
 static int yyerror(::BugEngine::RTTI::Parser::ParseContext* context, const char *msg)
 {
     using namespace BugEngine::RTTI::Parser;
-    context->errors.push_back(Error(context->location,
-                              ErrorType("%s at line %d (%d:%d)")
-                                      | msg
-                                      | (context->location.line+1)
-                                      | (context->location.columnStart+1)
-                                      | (context->location.columnEnd+1)));
+    context->errors.push_back(Message(context->location,
+                                      Message::MessageType("%s at line %d (%d:%d)")
+                                                         | msg
+                                                         | (context->location.line+1)
+                                                         | (context->location.columnStart+1)
+                                                         | (context->location.columnEnd+1),
+                                      BugEngine::logError));
     return 0;
 }
 
@@ -292,11 +293,13 @@ object:
                     {
                         if (it->name == it2->name)
                         {
-                            context->errors.push_back(Error(it2->location,
-                                                            ErrorType("attribute %s specified several times")
-                                                          | it->name));
-                            context->errors.push_back(Error(it->location,
-                                                            ErrorType("  first defined here")));
+                            context->errors.push_back(Message(it2->location,
+                                                              Message::MessageType("attribute %s specified several times")
+                                                                                 | it->name,
+                                                              BugEngine::logError));
+                            context->errors.push_back(Message(it->location,
+                                                              Message::MessageType("  first defined here"),
+                                                              BugEngine::logInfo));
                             it2 = $3.value->erase(it2);
                         }
                         else

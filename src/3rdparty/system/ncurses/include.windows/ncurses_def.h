@@ -686,7 +686,7 @@
 #endif
 
 #ifndef USE_REENTRANT
-#define USE_REENTRANT 0
+#define USE_REENTRANT 1
 #endif
 
 #ifndef USE_SAFE_SPRINTF

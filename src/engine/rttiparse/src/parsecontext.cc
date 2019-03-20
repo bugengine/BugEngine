@@ -13,7 +13,7 @@ static i_u32 s_useCount;
 
 ParseContext::ParseContext(minitl::Allocator& allocator,
                            const char* bufferStart, const char* bufferEnd,
-                           ErrorList& errors,
+                           MessageList& errors,
                            bool expectObject,
                            u32 lineStart, u32 columnStart)
     :   arena(&allocator)

@@ -1,31 +1,7 @@
 # set iPhone(Simulator) specific options
-from waflib import Configure
-from waflib.TaskGen import feature, after_method
-import os
 
-
-class iOS(Configure.ConfigurationContext.Darwin):
-    NAME = 'iPhone'
-    PLATFORMS = ['iphone', 'darwin']
-    SDK_NAME = 'iPhoneOS'
-    OS_NAME = 'iphoneos'
-
-    def __init__(self, conf, sdk = None):
-        Configure.ConfigurationContext.Darwin.__init__(self, conf, sdk)
-
-
-class iOSSimulator(Configure.ConfigurationContext.Darwin):
-    NAME = 'iPhoneSimulator'
-    PLATFORMS = ['iphone', 'iphonesimulator']
-    SDK_NAME = 'iPhoneSimulator'
-    OS_NAME = 'iphoneos'
-
-    def __init__(self, conf, sdk = None):
-        Configure.ConfigurationContext.Darwin.__init__(self, conf, sdk)
-
-
-def options(opt):
-    gr = opt.get_option_group('SDK paths and options')
+def options(option_context):
+    gr = option_context.get_option_group('SDK paths and options')
     gr.add_option( '--iphone-sdk-min',
                     action='store',
                     default='',
@@ -36,35 +12,37 @@ def options(opt):
                     default='',
                     dest='iphone_sdk_max',
                     help='Maximum version of the iPhone SDK to target')
+    option_context.recurse('mak/device.py')
 
 
-def host_configure(conf):
-    pass
+def host_configure(configuration_context):
+    configuration_context.recurse('mak/configure.py', name='host_configure')
 
 
-def configure(conf):
-    conf.platforms.append(iOS(conf))
-    conf.platforms.append(iOSSimulator(conf))
+def configure(configuration_context):
+    configuration_context.recurse('mak/configure.py', name='configure')
 
 
-def setup(conf):
-    pass
+def setup(configuration_context):
+    configuration_context.recurse('mak/configure.py', name='setup')
 
 
-def build(bld):
-    bld.recurse(os.path.join(bld.bugenginenode.abspath(), 'mak', 'target', 'macosx', 'build.py'))
+def build(build_context):
+    build_context.recurse('mak/build.py', name='build')
 
 
-def plugins(bld):
-    bld.recurse(os.path.join(bld.bugenginenode.abspath(), 'mak', 'target', 'macosx', 'build.py'))
+def plugins(build_context):
+    build_context.recurse('mak/build.py', name='plugins')
 
 
-@feature('cxxshlib', 'cshlib')
-@after_method('apply_link')
-def set_iphone_shlib_name(self):
-    if 'iphone' in self.env.VALID_PLATFORMS:
-        if 'plugin' in self.features:
-            self.env.append_unique('LINKFLAGS', ['-install_name', os.path.join('@executable_path', 'share', 'bugengine', 'plugin', self.link_task.outputs[0].name)])
-        elif 'kernel' in self.features:
-            self.env.append_unique('LINKFLAGS', ['-install_name', os.path.join('@executable_path', 'share', 'bugengine', 'kernel', self.link_task.outputs[0].name)])
+def deploy(build_context):
+    build_context.recurse('mak/deploy.py', name='deploy')
+ 
+
+def debug(build_context):
+    build_context.recurse('mak/debug.py', name='debug')
+
+
+def run(build_context):
+    build_context.recurse('mak/run.py', name='run')
 

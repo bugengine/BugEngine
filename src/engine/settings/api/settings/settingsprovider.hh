@@ -26,23 +26,28 @@ private:
     struct be_api(SETTINGS) SettingsRegistration
     {
         static minitl::intrusive_list<SettingsProvider>& getSettingsList();
-        SettingsRegistration();
+        SettingsRegistration(SettingsBase& settings);
         ~SettingsRegistration();
     };
+    friend struct SettingsRegistration;
 protected:
     typedef minitl::vector< minitl::tuple< istring, ref<RTTI::Parser::Node > > > SettingsList;
     typedef minitl::hashmap< istring, SettingsList > SettingsCategoryMap;
 private:
-private:
+    ifilename           m_filename;
     SettingsCategoryMap m_settings;
+    ref<Folder>         m_folder;
 protected:
     static void addSetting(SettingsCategoryMap& container,
                            istring category,
                            istring name,
                            ref<RTTI::Parser::Node> value);
 protected:
-    SettingsProvider(const SettingsCategoryMap& initialSettings);
+    SettingsProvider(const ifilename& settingsOrigin, const SettingsCategoryMap& initialSettings,
+                     ref<Folder> folder);
     virtual ~SettingsProvider();
+private:
+    void apply(SettingsBase& settings) const;
 };
 
 }}

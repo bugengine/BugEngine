@@ -1,4 +1,6 @@
-class Specifier:
-    def __init__(self, specifier, position):
+from .cppobject import CppObject
+
+class Specifier(CppObject):
+    def __init__(self, owner, position, specifier):
+        CppObject.__init__(self, owner, position)
         self.specifier = specifier
-        self.position = position

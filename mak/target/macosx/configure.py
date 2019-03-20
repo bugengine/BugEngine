@@ -52,15 +52,16 @@ class Darwin(Configure.ConfigurationContext.Platform):
                 self.conf.end_msg('none', color='YELLOW')
         return result
 
+    def get_root_dirs(self, appname):
+        return (os.path.join(appname + '.app', 'Contents'),
+                os.path.join(appname + '.app', 'Contents', 'MacOS'))
+    
     def load_in_env(self, conf, compiler):
         self.CFLAGS_cshlib = ['-fPIC']
         platform = self.SDK_NAME.lower()
-        compiler.find_target_program(conf, self, 'lipo', mandatory=False)
-        if not conf.env.LIPO:
-            conf.find_program('lipo')
-        compiler.find_target_program(conf, self, 'dsymutil', mandatory=False)
-        if not conf.env.DSYMUTIL:
-            conf.find_program('dsymutil')
+        compiler.find_target_program(conf, self, 'lipo', mandatory=False) or conf.find_program('lipo')
+        compiler.find_target_program(conf, self, 'codesign', mandatory=False) or conf.find_program('codesign')
+        compiler.find_target_program(conf, self, 'dsymutil', mandatory=False) or conf.find_program('dsymutil')
         environ = getattr(conf, 'environ', os.environ)
         conf.env.PATH = os.path.pathsep.join(self.directories + compiler.directories + [environ['PATH']])
         conf.env.ABI = 'mach_o'
@@ -71,12 +72,13 @@ class Darwin(Configure.ConfigurationContext.Platform):
         conf.env.pymodule_PATTERN = '%s.so'
 
         appname = getattr(Context.g_module, Context.APPNAME, conf.srcnode.name)
-        conf.env.DEPLOY_ROOTDIR = os.path.join(appname + '.app', 'Contents')
-        conf.env.DEPLOY_BINDIR = os.path.join(appname + '.app', 'Contents', 'MacOS')
-        conf.env.DEPLOY_RUNBINDIR = os.path.join(appname + '.app', 'Contents', 'MacOS')
+        root_dir, bin_dir = self.get_root_dirs(appname)
+        conf.env.DEPLOY_ROOTDIR = root_dir
+        conf.env.DEPLOY_BINDIR = bin_dir
+        conf.env.DEPLOY_RUNBINDIR = bin_dir
         conf.env.DEPLOY_LIBDIR = 'lib'
         conf.env.DEPLOY_INCLUDEDIR = 'include'
-        share = os.path.join(appname + '.app', 'Contents', 'share', 'bugengine')
+        share = os.path.join(root_dir, 'share', 'bugengine')
         conf.env.DEPLOY_DATADIR = share
         conf.env.DEPLOY_PLUGINDIR = os.path.join(share, 'plugin')
         conf.env.DEPLOY_KERNELDIR = os.path.join(share, 'kernel')
@@ -85,11 +87,11 @@ class Darwin(Configure.ConfigurationContext.Platform):
         conf.env.MACOSX_SDK = os.path.splitext(os.path.basename(self.sdk[1]))[0]
         conf.env.XCODE_SDK_PATH = self.sdk[1]
         conf.env.SYSROOT = self.sdk[1]
-        conf.env.append_unique('CPPFLAGS', ['-m%s-version-min=%s'%(self.OS_NAME, self.sdk[0]), '-isysroot', self.sdk[1]])
-        conf.env.append_unique('CFLAGS', ['-m%s-version-min=%s'%(self.OS_NAME, self.sdk[0]), '-isysroot', self.sdk[1]])
-        conf.env.append_unique('CXXFLAGS', ['-m%s-version-min=%s'%(self.OS_NAME, self.sdk[0]),
+        conf.env.append_unique('CPPFLAGS', ['-m%s-version-min=%s'%(self.OS_NAME, self.sdk[3]), '-isysroot', self.sdk[1]])
+        conf.env.append_unique('CFLAGS', ['-m%s-version-min=%s'%(self.OS_NAME, self.sdk[3]), '-isysroot', self.sdk[1]])
+        conf.env.append_unique('CXXFLAGS', ['-m%s-version-min=%s'%(self.OS_NAME, self.sdk[3]),
                                             '-isysroot', self.sdk[1]])
-        conf.env.append_unique('LINKFLAGS', ['-m%s-version-min=%s'%(self.OS_NAME, self.sdk[0]),
+        conf.env.append_unique('LINKFLAGS', ['-m%s-version-min=%s'%(self.OS_NAME, self.sdk[3]),
                                              '-isysroot', self.sdk[1], '-L%s/usr/lib'%self.sdk[1]])
         conf.env.CFLAGS_cshlib = ['-fPIC']
         conf.env.CXXFLAGS_cxxshlib = ['-fPIC']
@@ -196,7 +198,8 @@ class Darwin(Configure.ConfigurationContext.Platform):
             for sdk_version, sdk_archs, sdk_path in all_sdks:
                 if len(best_sdk[2]) >= len(sdk_archs):
                     break
-                sdk_option = '-m%s-version-min=%s'%(self.OS_NAME, '.'.join(sdk_version))
+                os_version_min = getattr(self, 'OS_VERSION_MIN', sdk_version)
+                sdk_option = '-m%s-version-min=%s'%(self.OS_NAME, '.'.join(os_version_min))
                 if sdk_number_max and sdk_version > sdk_number_max:
                     continue
                 if sdk_number_min and sdk_version < sdk_number_min:
@@ -218,7 +221,7 @@ class Darwin(Configure.ConfigurationContext.Platform):
                             except Exception: pass
                             env = copy(os.environ)
                             env['PATH'] = os.path.pathsep.join(sdk_bin_paths + c.directories + [env['PATH']])
-                            r, out, err = c.run_cxx([sdk_option,
+                            r, out, err = c.run_cxx([sdk_option, '-g', '-O2',
                                                      '-c', '-o', obj_node.abspath(),
                                                      '-isysroot', sdk_path, src_node.abspath()], env=env)
                             if r == 0:
@@ -236,7 +239,7 @@ class Darwin(Configure.ConfigurationContext.Platform):
                 if len(sdk_compilers) > len(best_sdk[2]):
                     best_sdk = ('.'.join(sdk_version), sdk_path, sdk_compilers, sdk_bin_paths)
             if best_sdk[2]:
-                return best_sdk[2], (best_sdk[0], best_sdk[1], best_sdk[3])
+                return best_sdk[2], (best_sdk[0], best_sdk[1], best_sdk[3], '.'.join(os_version_min))
             else:
                 raise Errors.WafError('No SDK for compiler %s' % compilers[0].compiler_c)
 
@@ -249,6 +252,7 @@ class MacOSX(Darwin):
     PLATFORMS = ['macosx', 'pc', 'darwin']
     SDK_NAME = 'MacOSX'
     OS_NAME = 'macosx'
+    OS_VERSION_MIN = ('10', '5')
 
     def __init__(self, conf, sdk = None):
         Darwin.__init__(self, conf, sdk)

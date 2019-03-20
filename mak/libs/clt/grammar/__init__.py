@@ -1,3 +1,4 @@
+from .precedence import precedence
 from .translation_unit import *
 from .template import *
 from .external_declaration import *

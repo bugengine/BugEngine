@@ -4,7 +4,10 @@
 #ifndef BE_MINITL_PTR_REFPTR_INL_
 #define BE_MINITL_PTR_REFPTR_INL_
 /**************************************************************************************************/
-#include   <typeinfo>
+#include    <minitl/features.hh>
+#if BE_ENABLE_ASSERT
+# include   <typeinfo>
+#endif
 
 namespace minitl
 {

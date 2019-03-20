@@ -3,7 +3,7 @@ from .. import cl_ast
 
 def p_template_argument(p):
     """
-        template_argument : expression                                              %prec PRIO6
+        template_argument : expression                                                  %prec NAME2
                           | type
     """
     p[0] = p[1]
@@ -11,8 +11,8 @@ def p_template_argument(p):
 
 def p_template_argument_list(p):
     """
-        template_argument_list : template_argument_list COMMA template_argument
-                               | template_argument
+        template_argument_list : template_argument_list COMMA template_argument         %prec NAME2
+                               | template_argument                                      %prec NAME2
     """
     if len(p) > 3:
         p[0] = p[1] + [p[3]]
@@ -30,7 +30,7 @@ def p_template_arguments(p):
 
 def p_template_arguments_empty(p):
     """
-        template_arguments : LT GT
+        template_arguments : LT GT                                                  %prec TEMPLATEGT
     """
     p[0] = []
     p.set_position(0, 2)
@@ -71,7 +71,7 @@ def p_template_parameter_name_incorrect(p):
 
 def p_template_parameter_default_value_opt(p):
     """
-        template_parameter_default_value_opt :  EQUALS expression   %prec PRIO11
+        template_parameter_default_value_opt :  EQUALS expression
                                              |  EQUALS type
                                              |
     """
@@ -83,7 +83,9 @@ def p_template_parameter_value(p):
     """
         template_parameter : template_specifier_opt type template_parameter_name template_parameter_default_value_opt
     """
-    p[0] = cl_ast.values.Constant(p[2], p[3], p[4], p.position(2))
+    p[0] = cl_ast.templates.TemplateParameterConstant(p.lexer.scopes[-1], p.position(2), p[2], p[3], p[4])
+    for i in range(0, len(p[1])):
+        p.lexer.pop_scope()
     p.lexer.scopes[-1].add_template_parameter(p[0])
 
 
@@ -92,8 +94,8 @@ def p_template_parameter_typename(p):
         template_parameter : template_specifier_opt TYPENAME template_parameter_name template_parameter_default_value_opt
                            | template_specifier_opt struct_keyword template_parameter_name template_parameter_default_value_opt
     """
-    p[0] = cl_ast.types.Typename(p[3], p[4])
-    if p[1]:
+    p[0] = cl_ast.templates.TemplateParameterTypename(p.lexer.scopes[-1], p.position(3), p[3], p[4])
+    for i in range(0, len(p[1])):
         p.lexer.pop_scope()
     p.lexer.scopes[-1].add_template_parameter(p[0])
 
@@ -127,7 +129,7 @@ def p_template_push(p):
     """
         template_push :
     """
-    p[0] = cl_ast.templates.Template(p.position(-1))
+    p[0] = cl_ast.templates.Template(p.lexer.scopes[-1], p.position(-1))
     p.set_position(0, -1)
     p.lexer.scopes[-1].add(p[0])
     p.lexer.push_scope(p[0])
@@ -135,15 +137,14 @@ def p_template_push(p):
 
 def p_template_specifier_opt(p):
     """
-        template_specifier_opt : TEMPLATE LT template_push template_parameters GT
+        template_specifier_opt : TEMPLATE LT template_push template_parameters GT template_specifier_opt
     """
-    p[0] = p[3]
-    p[0].position = p.position(2)
+    p[0] = [p[3]] + p[6]
 
 
 def p_template_specifier_none(p):
     """
         template_specifier_opt :
     """
-    pass
+    p[0] = []
 

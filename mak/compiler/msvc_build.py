@@ -15,7 +15,7 @@ def build(bld):
         else:
             return super(derived, self).exec_command(*k, **kw)
     derived.exec_command = exec_command_stdout
-    
+
     def wrap_class(cls_name):
         cls = Task.classes.get(cls_name, None)
         derived = type(cls_name, (cls,), {})
@@ -28,8 +28,6 @@ def build(bld):
         derived.exec_command = exec_command_filter
     for task in 'c', 'cxx', 'cshlib', 'cxxshlib', 'cstlib', 'cxxstlib', 'cprogram', 'cxxprogram':
         wrap_class(task)
-    if bld.env.COMPILER_CXX == 'msvc':
-        print('hop')
 
 
 @feature('c', 'cxx')
@@ -40,3 +38,11 @@ def apply_pdb_flag(self):
             if task:
                 task.env.append_unique('CFLAGS', '/Fd%s'%task.outputs[0].change_ext('.pdb').abspath())
                 task.env.append_unique('CXXFLAGS', '/Fd%s'%task.outputs[0].change_ext('.pdb').abspath())
+                task.env.append_unique('CPPFLAGS', '/Fd%s'%task.outputs[0].change_ext('.pdb').abspath())
+
+@feature('cshlib', 'cxxshlib')
+@after_method('process_source')
+def apply_def_flag(self):
+    if self.env.CC_NAME == 'msvc':
+        for f in getattr(self, 'def_files', []):
+            self.env.append_unique('LINKFLAGS', ['/DEF:%s'%f.abspath()])

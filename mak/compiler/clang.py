@@ -13,13 +13,13 @@ class Clang(Configure.ConfigurationContext.GnuCompiler):
 
     def has_arch_flag(self):
         # if clang manages to compile, then the -arch keyword was ignored
-        returncode = self.run_c(['-arch', 'no arch of that name', '-E', '-'], '\n')[0]
-        return returncode != 0
+        return_code = self.run_c(['-arch', 'no arch of that name', '-E', '-'], '\n')
+        return return_code[0] != 0
 
     def set_warning_options(self, conf):
         Configure.ConfigurationContext.GnuCompiler.set_warning_options(self, conf)
         if 'AppleClang' in self.NAMES:
-            if self.version_number >= (6, 1):
+            if self.version_number >= (6, 22):
                 conf.env.CXXFLAGS_warnall.append('-Wno-unused-local-typedefs')
         else:
             if self.version_number >= (6, 0):
@@ -36,8 +36,10 @@ class Clang(Configure.ConfigurationContext.GnuCompiler):
                     continue
                 try:
                     c = self.__class__(self.compiler_c, self.compiler_cxx,
-                                       self.extra_args.get('c', []) + ['-arch', arch_target])
-                except Exception:
+                                       {'c': self.extra_args.get('c', []) + ['-arch', arch_target],
+                                        'cxx': self.extra_args.get('cxx', []) + ['-arch', arch_target],
+                                        'link': self.extra_args.get('link', []) + ['-arch', arch_target],})
+                except Exception as e:
                     pass
                 else:
                     if c.arch in seen:
