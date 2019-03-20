@@ -1,6 +1,7 @@
 from waflib.Logs import pprint
 import os
 
+
 def options(opt):
     gr = opt.get_option_group('3rd party libraries')
     gr.add_option('--with-included-freetype',
@@ -8,7 +9,6 @@ def options(opt):
                   default=False,
                   dest='included_freetype',
                   help='Compile the Freetype library from the included code')
-
 
 
 def setup(conf):

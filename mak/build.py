@@ -173,7 +173,7 @@ def module(bld, name, module_path, depends, private_depends,
     else:
         plugin_name = 'bugengine'
 
-    compile_extensions = ['cxx', 'cpp', 'cc', 'c', 'rc', 'm', 'mm']
+    compile_extensions = ['cxx', 'cpp', 'cc', 'c', 'rc', 'm', 'mm', 'def']
     preprocess_extensions = ['yy', 'll', 'plist']
     try:
         sources = source_node.ant_glob(['src/**/*.%s'%(ext) for ext in compile_extensions])
@@ -922,6 +922,14 @@ def create_compiled_task(self, name, node):
     except AttributeError:
         self.compiled_tasks = [task]
     return task
+
+
+@extension('.def')
+def def_file(self, node):
+    try:
+        self.def_files.append(node)
+    except Exception:
+        self.def_files = [node]
 
 
 @extension('.rc')
