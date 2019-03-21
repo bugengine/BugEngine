@@ -34,9 +34,9 @@ matrix:
           - build-tools-27.0.3
           - android-26
       before_install:
-        - mkdir $ANDROID_HOME/licenses
-        - echo -ne "\n8933bad161af4178b1185d1a37fbf41ea5269c55" >> $ANDROID_HOME/licenses/android-sdk-license
-        - echo y | /usr/local/android-sdk/tools/bin/sdkmanager "ndk-bundle"
+        - wget https://dl.google.com/android/repository/android-ndk-r19c-linux-x86_64.zip
+        - unzip android-ndk-r19c-linux-x86_64.zip
+        - mv android-ndk-r19c $ANDROID_HOME/ndk-bundle
     - os: linux
       language: android
       env: COMPILER=gcc COMPILER_VERSION=4.9.x TARGET_OS=android_nougat_7.1 FLAVOR=profile
@@ -50,9 +50,9 @@ matrix:
           - build-tools-27.0.3
           - android-26
       before_install:
-        - mkdir $ANDROID_HOME/licenses
-        - echo -ne "\n8933bad161af4178b1185d1a37fbf41ea5269c55" >> $ANDROID_HOME/licenses/android-sdk-license
-        - echo y | /usr/local/android-sdk/tools/bin/sdkmanager "ndk-bundle"
+        - wget https://dl.google.com/android/repository/android-ndk-r19c-linux-x86_64.zip
+        - unzip android-ndk-r19c-linux-x86_64.zip
+        - mv android-ndk-r19c $ANDROID_HOME/ndk-bundle
     - os: linux
       language: android
       env: COMPILER=gcc COMPILER_VERSION=4.9.x TARGET_OS=android_nougat_7.1 FLAVOR=final
@@ -66,9 +66,9 @@ matrix:
           - build-tools-27.0.3
           - android-26
       before_install:
-        - mkdir $ANDROID_HOME/licenses
-        - echo -ne "\n8933bad161af4178b1185d1a37fbf41ea5269c55" >> $ANDROID_HOME/licenses/android-sdk-license
-        - echo y | /usr/local/android-sdk/tools/bin/sdkmanager "ndk-bundle"
+        - wget https://dl.google.com/android/repository/android-ndk-r19c-linux-x86_64.zip
+        - unzip android-ndk-r19c-linux-x86_64.zip
+        - mv android-ndk-r19c $ANDROID_HOME/ndk-bundle
     - os: linux
       language: android
       env: COMPILER=gcc COMPILER_VERSION=4.9.x TARGET_OS=android_oreo_8.0 FLAVOR=debug
@@ -82,9 +82,9 @@ matrix:
           - build-tools-27.0.3
           - android-26
       before_install:
-        - mkdir $ANDROID_HOME/licenses
-        - echo -ne "\n8933bad161af4178b1185d1a37fbf41ea5269c55" >> $ANDROID_HOME/licenses/android-sdk-license
-        - echo y | /usr/local/android-sdk/tools/bin/sdkmanager "ndk-bundle"
+        - wget https://dl.google.com/android/repository/android-ndk-r19c-linux-x86_64.zip
+        - unzip android-ndk-r19c-linux-x86_64.zip
+        - mv android-ndk-r19c $ANDROID_HOME/ndk-bundle
     - os: linux
       language: android
       env: COMPILER=gcc COMPILER_VERSION=4.9.x TARGET_OS=android_oreo_8.0 FLAVOR=profile
@@ -98,9 +98,9 @@ matrix:
           - build-tools-27.0.3
           - android-26
       before_install:
-        - mkdir $ANDROID_HOME/licenses
-        - echo -ne "\n8933bad161af4178b1185d1a37fbf41ea5269c55" >> $ANDROID_HOME/licenses/android-sdk-license
-        - echo y | /usr/local/android-sdk/tools/bin/sdkmanager "ndk-bundle"
+        - wget https://dl.google.com/android/repository/android-ndk-r19c-linux-x86_64.zip
+        - unzip android-ndk-r19c-linux-x86_64.zip
+        - mv android-ndk-r19c $ANDROID_HOME/ndk-bundle
     - os: linux
       language: android
       env: COMPILER=gcc COMPILER_VERSION=4.9.x TARGET_OS=android_oreo_8.0 FLAVOR=final
@@ -114,9 +114,9 @@ matrix:
           - build-tools-27.0.3
           - android-26
       before_install:
-        - mkdir $ANDROID_HOME/licenses
-        - echo -ne "\n8933bad161af4178b1185d1a37fbf41ea5269c55" >> $ANDROID_HOME/licenses/android-sdk-license
-        - echo y | /usr/local/android-sdk/tools/bin/sdkmanager "ndk-bundle"
+        - wget https://dl.google.com/android/repository/android-ndk-r19c-linux-x86_64.zip
+        - unzip android-ndk-r19c-linux-x86_64.zip
+        - mv android-ndk-r19c $ANDROID_HOME/ndk-bundle
     - os: linux
       language: android
       env: COMPILER=clang COMPILER_VERSION=6.0.2 TARGET_OS=android_nougat_7.1 FLAVOR=debug
@@ -130,9 +130,9 @@ matrix:
           - build-tools-27.0.3
           - android-26
       before_install:
-        - mkdir $ANDROID_HOME/licenses
-        - echo -ne "\n8933bad161af4178b1185d1a37fbf41ea5269c55" >> $ANDROID_HOME/licenses/android-sdk-license
-        - echo y | /usr/local/android-sdk/tools/bin/sdkmanager "ndk-bundle"
+        - wget https://dl.google.com/android/repository/android-ndk-r19c-linux-x86_64.zip
+        - unzip android-ndk-r19c-linux-x86_64.zip
+        - mv android-ndk-r19c $ANDROID_HOME/ndk-bundle
     - os: linux
       language: android
       env: COMPILER=clang COMPILER_VERSION=6.0.2 TARGET_OS=android_nougat_7.1 FLAVOR=profile
@@ -146,9 +146,9 @@ matrix:
           - build-tools-27.0.3
           - android-26
       before_install:
-        - mkdir $ANDROID_HOME/licenses
-        - echo -ne "\n8933bad161af4178b1185d1a37fbf41ea5269c55" >> $ANDROID_HOME/licenses/android-sdk-license
-        - echo y | /usr/local/android-sdk/tools/bin/sdkmanager "ndk-bundle"
+        - wget https://dl.google.com/android/repository/android-ndk-r19c-linux-x86_64.zip
+        - unzip android-ndk-r19c-linux-x86_64.zip
+        - mv android-ndk-r19c $ANDROID_HOME/ndk-bundle
     - os: linux
       language: android
       env: COMPILER=clang COMPILER_VERSION=6.0.2 TARGET_OS=android_nougat_7.1 FLAVOR=final
@@ -162,9 +162,9 @@ matrix:
           - build-tools-27.0.3
           - android-26
       before_install:
-        - mkdir $ANDROID_HOME/licenses
-        - echo -ne "\n8933bad161af4178b1185d1a37fbf41ea5269c55" >> $ANDROID_HOME/licenses/android-sdk-license
-        - echo y | /usr/local/android-sdk/tools/bin/sdkmanager "ndk-bundle"
+        - wget https://dl.google.com/android/repository/android-ndk-r19c-linux-x86_64.zip
+        - unzip android-ndk-r19c-linux-x86_64.zip
+        - mv android-ndk-r19c $ANDROID_HOME/ndk-bundle
     - os: linux
       language: android
       env: COMPILER=clang COMPILER_VERSION=6.0.2 TARGET_OS=android_oreo_8.0 FLAVOR=debug
@@ -178,9 +178,9 @@ matrix:
           - build-tools-27.0.3
           - android-26
       before_install:
-        - mkdir $ANDROID_HOME/licenses
-        - echo -ne "\n8933bad161af4178b1185d1a37fbf41ea5269c55" >> $ANDROID_HOME/licenses/android-sdk-license
-        - echo y | /usr/local/android-sdk/tools/bin/sdkmanager "ndk-bundle"
+        - wget https://dl.google.com/android/repository/android-ndk-r19c-linux-x86_64.zip
+        - unzip android-ndk-r19c-linux-x86_64.zip
+        - mv android-ndk-r19c $ANDROID_HOME/ndk-bundle
     - os: linux
       language: android
       env: COMPILER=clang COMPILER_VERSION=6.0.2 TARGET_OS=android_oreo_8.0 FLAVOR=profile
@@ -194,9 +194,9 @@ matrix:
           - build-tools-27.0.3
           - android-26
       before_install:
-        - mkdir $ANDROID_HOME/licenses
-        - echo -ne "\n8933bad161af4178b1185d1a37fbf41ea5269c55" >> $ANDROID_HOME/licenses/android-sdk-license
-        - echo y | /usr/local/android-sdk/tools/bin/sdkmanager "ndk-bundle"
+        - wget https://dl.google.com/android/repository/android-ndk-r19c-linux-x86_64.zip
+        - unzip android-ndk-r19c-linux-x86_64.zip
+        - mv android-ndk-r19c $ANDROID_HOME/ndk-bundle
     - os: linux
       language: android
       env: COMPILER=clang COMPILER_VERSION=6.0.2 TARGET_OS=android_oreo_8.0 FLAVOR=final
@@ -210,9 +210,9 @@ matrix:
           - build-tools-27.0.3
           - android-26
       before_install:
-        - mkdir $ANDROID_HOME/licenses
-        - echo -ne "\n8933bad161af4178b1185d1a37fbf41ea5269c55" >> $ANDROID_HOME/licenses/android-sdk-license
-        - echo y | /usr/local/android-sdk/tools/bin/sdkmanager "ndk-bundle"
+        - wget https://dl.google.com/android/repository/android-ndk-r19c-linux-x86_64.zip
+        - unzip android-ndk-r19c-linux-x86_64.zip
+        - mv android-ndk-r19c $ANDROID_HOME/ndk-bundle
     - os: linux
       env: COMPILER=gcc_amd64 COMPILER_VERSION=4.8.4 TARGET_OS=linux_amd64 FLAVOR=debug
     - os: linux
