@@ -256,3 +256,6 @@ script:
             --with-included-zlib --with-included-minizip --with-included-oggvorbis;
     fi
 
+after_failure:
+  - cat bld/.waf/config.log
+
