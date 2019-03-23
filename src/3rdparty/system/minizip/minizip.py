@@ -11,10 +11,13 @@ def options(opt):
 
 
 def setup(conf):
-    try:
-        conf.pkg_config('minizip')
-    except Exception as e:
-        pprint('BLUE', '=minizip', sep=' ')
+    if not 'windows' in conf.env.VALID_PLATFORMS:
+        try:
+            conf.pkg_config('minizip')
+        except Exception as e:
+            pprint('BLUE', '=minizip', sep=' ')
+        else:
+            conf.env.SYSTEM_MINIZIP = True
+            pprint('GREEN', '+minizip', sep=' ')
     else:
-        conf.env.SYSTEM_MINIZIP = True
-        pprint('GREEN', '+minizip', sep=' ')
+        pprint('BLUE', '=minizip', sep=' ')
