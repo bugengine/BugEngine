@@ -119,6 +119,8 @@ class AndroidPlatform(Configure.ConfigurationContext.Platform):
         env.VALID_PLATFORMS = ['android']
         appname = getattr(Context.g_module, Context.APPNAME, conf.srcnode.name)
         env.cxxprogram_PATTERN = 'lib%s.so'
+        env.append_unique('CFLAGS', ['-fPIC'])
+        env.append_unique('CXXFLAGS', ['-fPIC'])
         env.append_unique('LINKFLAGS_cprogram', ['-shared', '-Wl,-z,defs', '-llog', '-lc'])
         env.append_unique('LINKFLAGS_cxxprogram', ['-shared', '-Wl,-z,defs', '-llog', '-lc'])
         env.LINK_WITH_PROGRAM = True
@@ -144,7 +146,7 @@ class AndroidPlatform(Configure.ConfigurationContext.Platform):
         env.ANDROID_SDK_PATH = self.sdk_path
         env.ANDROID_NDK_PATH = self.ndk_path
         for n in Options.options.android_ndk_path.split(','):
-            n = os.path.normpath(n)
+            n = os.path.normpath(os.path.abspath(n))
             if self.ndk_path.startswith(n):
                 ndk_root = n
                 break
@@ -287,7 +289,7 @@ class AndroidLoader(Configure.ConfigurationContext.Platform):
         for c in compiler_list:
             compiler_path = os.path.normpath(c.compiler_c)
             for ndk_path in Options.options.android_ndk_path.split(','):
-                ndk_path = os.path.normpath(ndk_path)
+                ndk_path = os.path.normpath(os.path.abspath(ndk_path))
                 if compiler_path.startswith(ndk_path):
                     c_name = c.NAMES[0].lower()
                     try:
@@ -332,6 +334,7 @@ class AndroidLoader(Configure.ConfigurationContext.Platform):
                 continue
             else:
                 seen.add((k[0], k[1]))
+
         if all_gcc_compilers:
             for k, compilers in sorted(compiler_sets.get('clang', {}).items()):
                 if (k[0], k[1]) in seen:
@@ -348,7 +351,7 @@ class AndroidLoader(Configure.ConfigurationContext.Platform):
                         clang_compiler = c.__class__(c.compiler_c,
                                                      c.compiler_cxx,
                                                      extra_args)
-                    except Exception:
+                    except Exception as e:
                         pass
                     else:
                         prebuilt = os.path.join(k[2], 'prebuilt')
@@ -357,6 +360,43 @@ class AndroidLoader(Configure.ConfigurationContext.Platform):
                         clang_compiler.directories += gcc.directories
                         clang_compiler.target = gcc.target
                         clang_compilers.append(clang_compiler)
+                if clang_compilers:
+                    try:
+                        add_compiler_set(clang_compilers)
+                    except Errors.WafError as e:
+                        print(e)
+                        continue
+                    else:
+                        seen.add((k[0], k[1]))
+        else:
+            for k, compilers in sorted(compiler_sets.get('clang', {}).items()):
+                if (k[0], k[1]) in seen:
+                    continue
+                c = compilers[0]
+                clang_compilers = []
+                targets = os.path.normpath(os.path.join(c.compiler_c, '..', '..', 'lib', 'gcc'))
+                for target in os.listdir(targets):
+                    extra_args = deepcopy(c.extra_args)
+                    extra_args['c'] += ['-target', target]
+                    extra_args['cxx'] += ['-target', target]
+                    extra_args['link'] += ['-target', target]
+                    try:
+                        clang_compiler = c.__class__(c.compiler_c,
+                                                     c.compiler_cxx,
+                                                     extra_args)
+                    except Exception as e:
+                        pass
+                    else:
+                        for path in self.conf.env.EXTRA_PATH:
+                            lib_path = os.path.normpath(os.path.join(path, '..', 'lib', 'gcc', target))
+                            if os.path.isdir(lib_path):
+                                clang_compiler.directories.append(path)
+                        prebuilt = os.path.join(k[2], 'prebuilt')
+                        for t in os.listdir(prebuilt):
+                            clang_compiler.directories.append(os.path.join(prebuilt, t, 'bin'))
+                        clang_compiler.target = target
+                        clang_compilers.append(clang_compiler)
+
                 if clang_compilers:
                     try:
                         add_compiler_set(clang_compilers)
@@ -417,6 +457,7 @@ def host_configure(configuration_context):
     if ndk_paths:
         compiler_paths = []
         for ndk_path in ndk_paths:
+            ndk_path = os.path.normpath(os.path.abspath(ndk_path))
             toolchains_path = os.path.join(ndk_path, 'toolchains')
             if os.path.isdir(toolchains_path):
                 for toolchain in os.listdir(toolchains_path):

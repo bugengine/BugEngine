@@ -377,7 +377,7 @@ class GnuCompiler(Compiler):
                 sys_dirs.append(pd)
             d, a = os.path.split(d)
         var = program.upper()
-        for t in self.targets:
+        for t in list(self.targets) + [self.target]:
             if conf.find_program('%s-%s' % (t, program), var=var, path_list=sys_dirs, mandatory=False):
                 break
         else:
