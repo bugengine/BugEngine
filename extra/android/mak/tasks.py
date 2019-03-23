@@ -93,8 +93,7 @@ class aapt_pkg(Task.Task):
 
     def run(self):
         bld = self.generator.bld
-        root = bld.bldnode.make_node(bld.bugengine_variant)
-        root = root.make_node(bld.optim)
+        root = bld.bldnode
         root = root.make_node('zip')
         self.outputs[0].write(self.inputs[0].read())
         if self.env._7Z:
