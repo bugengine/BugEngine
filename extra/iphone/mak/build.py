@@ -14,7 +14,6 @@ def plugins(bld):
 @feature('cxxshlib', 'cshlib')
 @after_method('apply_link')
 def set_iphone_shlib_name(self):
-    self.env.append_unique('CXXFLAGS', ['-fpic'])
     if 'iphone' in self.env.VALID_PLATFORMS:
         if 'plugin' in self.features:
             self.env.append_unique('LINKFLAGS', ['-install_name', os.path.join('@executable_path', 'share', 'bugengine', 'plugin', self.link_task.outputs[0].name)])
