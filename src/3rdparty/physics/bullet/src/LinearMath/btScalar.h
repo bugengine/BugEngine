@@ -440,6 +440,9 @@ inline int btGetVersion()
 	SIMD_FORCE_INLINE btScalar btFmod(btScalar x, btScalar y) { return fmod(x, y); }
 
 #else//BT_USE_DOUBLE_PRECISION
+#include <cmath>
+namespace std {}
+
 
 	SIMD_FORCE_INLINE btScalar btSqrt(btScalar y)
 	{
@@ -469,20 +472,22 @@ inline int btGetVersion()
 		return x * y;
 	#endif
 	#else
-		return sqrtf(y);
+		using namespace std;
+		return sqrt(y);
 	#endif
 	}
-	SIMD_FORCE_INLINE btScalar btFabs(btScalar x) { return fabsf(x); }
-	SIMD_FORCE_INLINE btScalar btCos(btScalar x) { return cosf(x); }
-	SIMD_FORCE_INLINE btScalar btSin(btScalar x) { return sinf(x); }
-	SIMD_FORCE_INLINE btScalar btTan(btScalar x) { return tanf(x); }
+	SIMD_FORCE_INLINE btScalar btFabs(btScalar x) { using namespace std; return fabs(x); }
+	SIMD_FORCE_INLINE btScalar btCos(btScalar x) { using namespace std; return cos(x); }
+	SIMD_FORCE_INLINE btScalar btSin(btScalar x) { using namespace std; return sin(x); }
+	SIMD_FORCE_INLINE btScalar btTan(btScalar x) { using namespace std; return tan(x); }
 	SIMD_FORCE_INLINE btScalar btAcos(btScalar x)
 	{
 		if (x < btScalar(-1))
 			x = btScalar(-1);
 		if (x > btScalar(1))
 			x = btScalar(1);
-		return acosf(x);
+		using namespace std;
+		return acos(x);
 	}
 	SIMD_FORCE_INLINE btScalar btAsin(btScalar x)
 	{
@@ -490,14 +495,15 @@ inline int btGetVersion()
 			x = btScalar(-1);
 		if (x > btScalar(1))
 			x = btScalar(1);
-		return asinf(x);
+        using namespace std;
+		return asin(x);
 	}
-	SIMD_FORCE_INLINE btScalar btAtan(btScalar x) { return atanf(x); }
-	SIMD_FORCE_INLINE btScalar btAtan2(btScalar x, btScalar y) { return atan2f(x, y); }
-	SIMD_FORCE_INLINE btScalar btExp(btScalar x) { return expf(x); }
-	SIMD_FORCE_INLINE btScalar btLog(btScalar x) { return logf(x); }
-	SIMD_FORCE_INLINE btScalar btPow(btScalar x, btScalar y) { return powf(x, y); }
-	SIMD_FORCE_INLINE btScalar btFmod(btScalar x, btScalar y) { return fmodf(x, y); }
+	SIMD_FORCE_INLINE btScalar btAtan(btScalar x) { using namespace std; return atan(x); }
+	SIMD_FORCE_INLINE btScalar btAtan2(btScalar x, btScalar y) { using namespace std; return atan2(x, y); }
+	SIMD_FORCE_INLINE btScalar btExp(btScalar x) { using namespace std; return exp(x); }
+	SIMD_FORCE_INLINE btScalar btLog(btScalar x) { using namespace std; return log(x); }
+	SIMD_FORCE_INLINE btScalar btPow(btScalar x, btScalar y) { using namespace std; return pow(x, y); }
+	SIMD_FORCE_INLINE btScalar btFmod(btScalar x, btScalar y) { using namespace std; return fmod(x, y); }
 
 #endif//BT_USE_DOUBLE_PRECISION
 
