@@ -344,6 +344,7 @@ def macarch(arch):
     arch_map = {
         'amd64': 'x86_64',
         'arm': 'armv6',
+        'armv7a': 'armv7',
         'x86': 'i386',
         'i486': 'i386',
         'i586': 'i386',
@@ -554,6 +555,7 @@ class xcode(Build.BuildContext):
                                 'ARCHS': ' '.join([macarch(e.VALID_ARCHITECTURES[0]) for e in all_envs]),
                                 'VALID_ARCHS': ' '.join([macarch(e.VALID_ARCHITECTURES[0])  for e in all_envs]),
                                 'SDKROOT': bld_env.XCODE_SDKROOT,
+                                '%s_DEPLOYMENT_TARGET'%bld_env.XCODE_SUPPORTEDPLATFORMS.upper(): bld_env.MACOSX_SDK_MIN,
                                 'SUPPORTED_PLATFORMS': bld_env.XCODE_SUPPORTEDPLATFORMS}))
                 build = PBXShellScriptBuildPhase('build:'+toolchain+':${CONFIG}')
                 target = PBXNativeTarget(

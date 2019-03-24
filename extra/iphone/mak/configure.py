@@ -4,6 +4,7 @@ from waflib import Configure
 
 class iOS(Configure.ConfigurationContext.Darwin):
     NAME = 'iPhone'
+    CERTIFICATE_NAME = 'iPhone Developer'
     PLATFORMS = ['iphone', 'darwin']
     SDK_NAME = 'iPhoneOS'
     OS_NAME = 'iphoneos'
@@ -15,6 +16,12 @@ class iOS(Configure.ConfigurationContext.Darwin):
         return (appname + '.app',
                 appname + '.app')
 
+
+    def load_in_env(self, conf, compiler):
+        Configure.ConfigurationContext.Darwin.load_in_env(self, conf, compiler)
+        if 'GCC' in compiler.NAMES:
+            conf.env.append_unique('LINKFLAGS_cxxshlib', ['-lgcc_eh'])
+            conf.env.append_unique('LINKFLAGS_cxxprogram', ['-lgcc_eh'])
 
 class iOSSimulator(iOS):
     NAME = 'iPhoneSimulator'

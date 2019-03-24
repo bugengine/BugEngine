@@ -55,7 +55,7 @@ class Darwin(Configure.ConfigurationContext.Platform):
     def get_root_dirs(self, appname):
         return (os.path.join(appname + '.app', 'Contents'),
                 os.path.join(appname + '.app', 'Contents', 'MacOS'))
-    
+
     def load_in_env(self, conf, compiler):
         self.CFLAGS_cshlib = ['-fPIC']
         platform = self.SDK_NAME.lower()
@@ -87,6 +87,7 @@ class Darwin(Configure.ConfigurationContext.Platform):
         conf.env.MACOSX_SDK = os.path.splitext(os.path.basename(self.sdk[1]))[0]
         conf.env.XCODE_SDK_PATH = self.sdk[1]
         conf.env.SYSROOT = self.sdk[1]
+        conf.env.MACOSX_SDK_MIN = self.sdk[3]
         conf.env.append_unique('CPPFLAGS', ['-m%s-version-min=%s'%(self.OS_NAME, self.sdk[3]), '-isysroot', self.sdk[1]])
         conf.env.append_unique('CFLAGS', ['-m%s-version-min=%s'%(self.OS_NAME, self.sdk[3]), '-isysroot', self.sdk[1]])
         conf.env.append_unique('CXXFLAGS', ['-m%s-version-min=%s'%(self.OS_NAME, self.sdk[3]),
@@ -249,6 +250,7 @@ Configure.ConfigurationContext.Darwin = Darwin
 
 class MacOSX(Darwin):
     NAME = 'MacOSX'
+    CERTIFICATE_NAME = 'Mac Developer'
     PLATFORMS = ['macosx', 'pc', 'darwin']
     SDK_NAME = 'MacOSX'
     OS_NAME = 'macosx'

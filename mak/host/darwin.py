@@ -4,6 +4,7 @@
 import os
 import sys
 import re
+import shlex
 from waflib.Logs import pprint
 from waflib import Options, Utils
 
@@ -132,6 +133,21 @@ def configure(conf):
                     conf.darwin_sdks[sdk_os] = [(sdk_version, sdk_archs, sdk_path)]
     for sdk_os in conf.darwin_sdks.keys():
         conf.darwin_sdks[sdk_os] = sorted(conf.darwin_sdks[sdk_os], key = lambda x: (-len(x[1]), x[0]))
+
+    # find valid code signing identity
+    process = Utils.subprocess.Popen(['security', 'find-identity', '-p', 'codesigning', '-v'],
+                                     stdout=Utils.subprocess.PIPE,
+                                     stderr=Utils.subprocess.STDOUT)
+    output, error = process.communicate()
+    if not isinstance(output, str):
+        output = output.decode(sys.stdout.encoding)
+    for line in output.split('\n'):
+        line = shlex.split(line.strip())
+        if len(line) == 3:
+            guid = line[1]
+            identity = line[2]
+            dev = identity.split(':')[0]
+            conf.env.append_unique('MAC_SIGNING_IDENTITIES', [(dev, guid, identity)])
 
 
 def build(bld):
