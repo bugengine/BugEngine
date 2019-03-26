@@ -366,12 +366,13 @@ class GnuCompiler(Compiler):
         v = conf.env
         v.CFLAGS_warnnone = ['-w'] + v.CFLAGS_warnnone
         v.CXXFLAGS_warnnone = ['-w'] + v.CXXFLAGS_warnnone
-        v.CFLAGS_warnall = ['-std=c99', '-Wall', '-pedantic', '-Winline', '-Werror', '-Wstrict-aliasing'] + v.CFLAGS_warnall
-        v.CXXFLAGS_warnall = ['-Wall', '-Werror', '-Wno-sign-compare',
-                              '-Woverloaded-virtual', '-Wstrict-aliasing'] + v.CXXFLAGS_warnall
         if 'Clang' in self.NAMES or 'GCC' in self.NAMES and self.version_number >= (3, 4,):
-            v.append_unique('CFLAGS_warnall', ['-Wextra'])
-            v.append_unique('CXXFLAGS_warnall', ['-Wextra', '-Wno-invalid-offsetof'])
+            extra_flags = ['-Wextra', '-Wno-invalid-offsetof']
+        else:
+            extra_flags = []
+        v.CFLAGS_warnall = ['-std=c99', '-Wall'] + extra_flags + ['-pedantic', '-Winline', '-Werror', '-Wstrict-aliasing'] + v.CFLAGS_warnall
+        v.CXXFLAGS_warnall = ['-Wall'] + extra_flags + [ '-Werror', '-Wno-sign-compare',
+                              '-Woverloaded-virtual', '-Wstrict-aliasing'] + v.CXXFLAGS_warnall
 
     def find_target_program(self, conf, platform, program, mandatory=True, os_paths=[]):
         sys_dirs = platform.directories + self.directories
