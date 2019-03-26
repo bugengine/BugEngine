@@ -29,7 +29,7 @@ class ILogListener : public minitl::refcountable
 {
     friend class Logger;
 protected:
-    static be_api(CORE) const char* s_logNames[];
+    static be_api(CORE) const char* getLogLevelName(LogLevel level);
     virtual ~ILogListener() {}
     virtual bool log(const istring& logname, LogLevel level, const char *filename, int line,
                      const char* thread, const char *msg) const = 0;

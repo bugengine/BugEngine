@@ -37,7 +37,7 @@ protected:
                                       | filename
                                       | line
                                       | logname.c_str()
-                                      | s_logNames[level]
+                                      | getLogLevelName(level)
                                       | msg
                                       | (msg[strlen(msg)-1] == '\n' ? "" : "\n");
         OutputDebugString(message);
@@ -81,7 +81,7 @@ protected:
 
         const char* normal = colors[0];
         fprintf(stdout, "[%s%s%s] %s%s(%s)%s: %s",
-                color, s_logNames[level], normal,
+                color, getLogLevelName(level), normal,
                 colors[1], logname.c_str(), thread, normal,
                 //filename, line,
                 msg);

@@ -11,7 +11,7 @@
 namespace BugEngine
 {
 
-be_api(CORE) const char* ILogListener::s_logNames[] =
+static const char* s_logLevelNames[] =
 {
     " SPAM  ",
     " DEBUG ",
@@ -21,6 +21,13 @@ be_api(CORE) const char* ILogListener::s_logNames[] =
     " FATAL "
 };
 
+be_api(CORE) const char* ILogListener::getLogLevelName(LogLevel level)
+{
+    if (u32(level) <= logFatal)
+        return s_logLevelNames[level];
+    else
+        return "Unknown";
+}
 
 Logger::Logger()
 :   m_listeners(Arena::debug())
