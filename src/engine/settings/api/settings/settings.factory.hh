@@ -106,7 +106,7 @@ const RTTI::Method Settings_BugHelper<T>::s_methods[1] = {
     {
         istring("get"),
         { 1, s_method_get_overloads },
-        {&s_methods[0]}
+        {0}
     }
 };
 
