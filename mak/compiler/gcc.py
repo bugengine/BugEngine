@@ -36,9 +36,13 @@ class GCC(Configure.ConfigurationContext.GnuCompiler):
 
     def load_in_env(self, conf, platform):
         Configure.ConfigurationContext.GnuCompiler.load_in_env(self, conf, platform)
+        v = conf.env
+        if self.version_number < (4,3,):
+            v.append_unique('CFLAGS', ['-static-libgcc'])
+            v.append_unique('CXXFLAGS', ['-static-libgcc'])
+            v.append_unique('LINKFLAGS', ['-static-libgcc'])
         if self.version_number >= (4,):
             if platform.NAME != 'windows':
-                v = conf.env
                 v.append_unique('CFLAGS', ['-fvisibility=hidden'])
                 v.append_unique('CXXFLAGS', ['-fvisibility=hidden'])
                 v.CFLAGS_exportall = ['-fvisibility=default']

@@ -337,7 +337,9 @@ class GnuCompiler(Compiler):
 
     def set_optimisation_options(self, conf):
         v = conf.env
-        if 'ICC' not in self.NAMES:
+        if 'Clang' in self.NAMES:
+            v.append_unique('CXXFLAGS', ['-fno-threadsafe-statics'])
+        if 'GCC' in self.NAMES and self.version_number >= (4,):
             v.append_unique('CXXFLAGS', ['-fno-threadsafe-statics'])
         v.CPPFLAGS_debug = ['-D_DEBUG'] + v.CPPFLAGS_debug
         v.CFLAGS_debug = ['-pipe', '-g', '-D_DEBUG'] + v.CFLAGS_debug
@@ -364,9 +366,12 @@ class GnuCompiler(Compiler):
         v = conf.env
         v.CFLAGS_warnnone = ['-w'] + v.CFLAGS_warnnone
         v.CXXFLAGS_warnnone = ['-w'] + v.CXXFLAGS_warnnone
-        v.CFLAGS_warnall = ['-std=c99', '-Wall', '-Wextra', '-pedantic', '-Winline', '-Werror', '-Wstrict-aliasing'] + v.CFLAGS_warnall
-        v.CXXFLAGS_warnall = ['-Wall', '-Wextra', '-Werror', '-Wno-sign-compare',
-                              '-Woverloaded-virtual', '-Wno-invalid-offsetof', '-Wstrict-aliasing'] + v.CXXFLAGS_warnall
+        v.CFLAGS_warnall = ['-std=c99', '-Wall', '-pedantic', '-Winline', '-Werror', '-Wstrict-aliasing'] + v.CFLAGS_warnall
+        v.CXXFLAGS_warnall = ['-Wall', '-Werror', '-Wno-sign-compare',
+                              '-Woverloaded-virtual', '-Wstrict-aliasing'] + v.CXXFLAGS_warnall
+        if 'Clang' in self.NAMES or 'GCC' in self.NAMES and self.version_number >= (3, 4,):
+            v.append_unique('CFLAGS_warnall', ['-Wextra'])
+            v.append_unique('CXXFLAGS_warnall', ['-Wextra', '-Wno-invalid-offsetof'])
 
     def find_target_program(self, conf, platform, program, mandatory=True, os_paths=[]):
         sys_dirs = platform.directories + self.directories

@@ -77,8 +77,8 @@ class ICC(Configure.ConfigurationContext.GnuCompiler):
                 v.append_unique('SYSTEM_LIBPATHS', ['=/usr/lib/x86_64-linux-gnu'])
                 v.append_unique('INCLUDES', ['/usr/include/x86_64-linux-gnu'])
         v.append_unique('CPPFLAGS', ['-fPIC', '-D__PURE_INTEL_C99_HEADERS__=1'])
-        v.append_unique('CFLAGS', ['-fPIC', '-D__PURE_INTEL_C99_HEADERS__=1'])
-        v.append_unique('CXXFLAGS', ['-fPIC', '-D__PURE_INTEL_C99_HEADERS__=1'])
+        v.append_unique('CFLAGS', ['-fPIC', '-D__PURE_INTEL_C99_HEADERS__=1', '-diag-disable', '1292'])
+        v.append_unique('CXXFLAGS', ['-fPIC', '-D__PURE_INTEL_C99_HEADERS__=1', '-diag-disable', '1292'])
         if platform.NAME != 'windows':
             if self.version_number >= (10,):
                 v.append_unique('LINKFLAGS', ['-static-intel'])
