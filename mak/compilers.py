@@ -127,6 +127,7 @@ class Compiler:
         return []
 
     def load_in_env(self, conf, platform):
+        conf.env.append_unique('TARGETS', list(self.targets) + [self.target])
         conf.env.append_unique('CPPFLAGS', self.extra_args.get('c', []))
         conf.env.append_unique('CFLAGS', self.extra_args.get('c', []))
         conf.env.append_unique('CXXFLAGS', self.extra_args.get('cxx', []))
