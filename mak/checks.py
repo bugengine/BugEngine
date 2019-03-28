@@ -232,6 +232,9 @@ def run_pkg_config(conf, name):
     configs = {}
     lib_paths = conf.env.SYSTEM_LIBPATHS + ['=/usr/lib', '=/usr/local/lib',
                                             '=/usr/libdata', '=/usr/local/libdata']
+    for t in conf.env.TARGETS:
+        lib_paths.append('=/usr/lib/%s'%t)
+        lib_paths.append('=/usr/libdata/%s'%t)
     lib_paths = [extend_lib_path(l) for l in lib_paths]
     for l in lib_paths:
         config_file = os.path.join(l, 'pkgconfig', name+'.pc')
