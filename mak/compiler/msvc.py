@@ -18,6 +18,7 @@ class MSVC(Configure.ConfigurationContext.Compiler):
         self.includes = [os.path.join(i, target_arch) for i in includes if os.path.isdir(os.path.join(i, target_arch))] + includes
         self.libdirs = libdirs
         self.target = self.platform
+        self.targets = [self.target]
 
     def set_optimisation_options(self, conf):
         conf.env.append_unique('CPPFLAGS_debug', ['/Od', '/Ob1', '/EHsc', '/RTC1', '/RTCc', '/Zi',
