@@ -182,6 +182,13 @@ class GnuCompiler(Compiler):
         'armv7k':   [(['-march=%s'%a], a) for a in ALL_ARM_ARCHS],
         'armv7l':   [(['-march=%s'%a], a) for a in ALL_ARM_ARCHS],
     }
+    MULTILIB_ARCH_MAP = (
+        ('i386',   '-m64', ['x86_64']),
+        ('i486',   '-m64', ['x86_64']),
+        ('i586',   '-m64', ['x86_64']),
+        ('i686',   '-m64', ['x86_64']),
+        ('x86_64', '-m32', ['i386', 'i486', 'i586', 'i686']),
+    )
     MACRO_ARCHS = (
         (('__x86_64__',),                                   'amd64'),
         (('__i386__',),                                     'x86'),
@@ -226,6 +233,15 @@ class GnuCompiler(Compiler):
             if os.path.isdir(target_dir):
                 self.directories.append(target_dir)
 
+    def get_actual_targets(self, target, args, multilibs):
+        target = target.split('-')
+        for arch, flag, archs in multilibs:
+            if arch == target[0]:
+                if flag in args:
+                    return ['-'.join([a]+target[1:]) for a in archs]
+        else:
+            return ['-'.join(target)]
+
     def get_version(self, compiler_c, extra_args, extra_env):
         env = os.environ.copy()
         for env_name, env_value in extra_env.items():
@@ -244,7 +260,11 @@ class GnuCompiler(Compiler):
                 line = line.strip()
                 if line.startswith('Target: '):
                     self.target = line[len('Target: '):]
-        self.targets = (self.target, self.target.replace('-unknown', ''), self.target.replace('--', '-'))
+        self.targets = self.get_actual_targets(self.target, extra_args.get('c', []), self.MULTILIB_ARCH_MAP)
+        self.target = self.targets[0]
+        for t in self.targets[:]:
+            self.targets.append(t.replace('-unknown', ''))
+            self.targets.append(t.replace('--', '-'))
         if self.target.find('-') != -1:
             arch, platform = split_triple(self.target)
         else:
