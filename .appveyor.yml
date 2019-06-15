@@ -87,42 +87,42 @@ environment:
 
     - COMPILER: gcc
       COMPILER_TARGET: amd64
-      COMPILER_VERSION: 6.4.0
+      COMPILER_VERSION: 7.4.0
       TARGET_OS: windows_amd64
       COMPILER_PATH: C:\cygwin64\bin
       FLAVOR: debug
 
     - COMPILER: gcc
       COMPILER_TARGET: amd64
-      COMPILER_VERSION: 6.4.0
+      COMPILER_VERSION: 7.4.0
       TARGET_OS: windows_amd64
       COMPILER_PATH: C:\cygwin64\bin
       FLAVOR: profile
 
     - COMPILER: gcc
       COMPILER_TARGET: amd64
-      COMPILER_VERSION: 6.4.0
+      COMPILER_VERSION: 7.4.0
       TARGET_OS: windows_amd64
       COMPILER_PATH: C:\cygwin64\bin
       FLAVOR: final
 
     - COMPILER: gcc
       COMPILER_TARGET: x86
-      COMPILER_VERSION: 6.4.0
+      COMPILER_VERSION: 7.4.0
       TARGET_OS: windows_x86
       COMPILER_PATH: C:\cygwin\bin
       FLAVOR: debug
 
     - COMPILER: gcc
       COMPILER_TARGET: x86
-      COMPILER_VERSION: 6.4.0
+      COMPILER_VERSION: 7.4.0
       TARGET_OS: windows_x86
       COMPILER_PATH: C:\cygwin\bin
       FLAVOR: profile
 
     - COMPILER: gcc
       COMPILER_TARGET: x86
-      COMPILER_VERSION: 6.4.0
+      COMPILER_VERSION: 7.4.0
       TARGET_OS: windows_x86
       COMPILER_PATH: C:\cygwin\bin
       FLAVOR: final
