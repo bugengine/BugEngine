@@ -41,6 +41,25 @@ ide_format = {
 }
 
 class ClLexer:
+    class TemplateStack:
+        def __init__(self, template_list):
+            self.template_list = template_list[:]
+        
+        def __bool__(self):
+            return True
+
+        def __len__(self):
+            return len(self.template_list)
+
+        def __getitem__(self, index):
+            return self.template_list[index]
+
+        def pop(self):
+            try:
+                return self.template_list.pop(-1)
+            except IndexError:
+                return None
+
     def __init__(self, filename, error_format):
         self.lexer = lex.lex(object=self)
         self.filename = filename
@@ -50,6 +69,9 @@ class ClLexer:
         self.current_scope = None
         self.pp_line = None
         self.pp_filename = None
+        self.template_stack = None
+        self._template_stack = None
+        self._template_stack_count = 0
         try:
             self.error_format = ide_format[error_format]
             self.error_color = error_format == 'unix' and sys.stderr.isatty()
@@ -58,14 +80,46 @@ class ClLexer:
             self.error_color = False
 
     def push_scope(self, scope):
+        assert isinstance(scope, cl_ast.scope.Scope)
         self.scopes.append(scope)
 
-    def set_search_scope_ifn(self, scope):
+    def set_search_scope_ifn(self, position, obj):
         if self.last_token.type == 'SCOPE':
-            self.current_scope = scope
+            if obj:
+                self.current_scope = obj.scope
+            else:
+                self._error('nested name specifier for a declaration cannot depend on a template parameter', position)
 
     def pop_scope(self):
+        self.scopes[-1].seal()
         self.scopes.pop(-1)
+
+    def push_template_stack(self, templates):
+        assert self.template_stack == None, self.template_stack
+        self.template_stack = ClLexer.TemplateStack(templates)
+
+    def finalize_template_stack(self):
+        assert self.template_stack != None
+        if len(self.template_stack) > 1:
+            self._error('extraneous template parameter list in template specialization or out-of-line template definition',
+                        self.template_stack[1].position)
+        result = self.template_stack.pop()
+        self.template_stack = None
+        return result
+
+    def disable_template_stack(self):
+        if self._template_stack_count == 0:
+            assert self._template_stack == None
+            self._template_stack = self.template_stack
+            self.template_stack = None
+        self._template_stack_count += 1
+
+    def enable_template_stack(self):
+        self._template_stack_count -= 1
+        if self._template_stack_count == 0:
+            assert self.template_stack == None
+            self.template_stack = self._template_stack
+            self._template_stack = None
 
     def lookup_by_name(self, name):
         if self.current_scope:
@@ -84,7 +138,7 @@ class ClLexer:
             token.type = obj.get_token_type()
             if scope:
                 for s in self.scopes[::-1]:
-                    if isinstance(s, cl_ast.templates.Template):
+                    if isinstance(s, cl_ast.templates.TemplateScope):
                         continue
                     if scope == s:
                         break
@@ -104,7 +158,8 @@ class ClLexer:
                 new_token.owner = self.current_scope
             if new_token.type == 'SCOPE':
                 if self.last_token:
-                    self.current_scope = getattr(self.last_token, 'found_object', self.scopes[0])
+                    self.current_scope = getattr(self.last_token, 'found_object', self.scopes[0].owner)
+                    self.current_scope = self.current_scope.scope
             elif self.last_token and self.last_token.type in ('OPERATOR', ):
                 scope, obj = self.lookup_by_name('op%s' % new_token.type.lower())
                 new_token.found_object = obj

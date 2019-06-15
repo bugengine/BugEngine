@@ -14,69 +14,85 @@ def p_struct_keyword(p):
 
 def p_struct_declaration(p):
     """
-        struct_header : struct_keyword type_name
-                      | struct_keyword object_name
+        struct_header : struct_keyword consume_template_stack type_name verify_template_stack
+                      | struct_keyword consume_template_stack object_name verify_template_stack
     """
-    template_stack = []
-    for container in p.lexer.scopes[::-1]:
-        if not isinstance(container, cl_ast.templates.Template):
-            break
-        template_stack.append(container)
-    try:
-        cl_ast.templates.resolve(p[2], template_stack)
-    except cl_ast.templates.ResolutionError as e:
-        p.lexer._error(str(e), e.position)
-        raise SyntaxError()
-    if p[2].qualified:
-        if p[2].target:
-            if p[2].target.get_token_type() == 'STRUCT_ID':
-                p[0] = (p[2].target, None)
-            elif p[2].target.get_token_type() == 'TEMPLATE_STRUCT_ID':
+    name = p[3]
+    if name.qualified:
+        if name.target:
+            if name.target.get_token_type() == 'STRUCT_ID':
+                p[0] = (name.target, None)
+            elif name.target.get_token_type() == 'TEMPLATE_STRUCT_ID':
+                assert False, 'Name parsing should have handled this'
                 # retrieve right specialization
-                cls = p[2].target.specializations[0][1]
+                template = p[4]
+                if template:
+                    template.bind(name.target)
+                    cls = name.target.find_specialization(name.position, template.parameters)
+                else:
+                    p.lexer._error('template specialization or definition requires a '
+                                   'template parameter list corresponding to '
+                                   'the nested type %s' % '::'.join(name.name), name.position)
+                    cls = name.target.scope.items[0][1]
                 p[0] = (cls, None)
             else:
-                if len(p[2].name) > 1:
-                    p.lexer._error('qualified name %s does not name a struct' % '::'.join(p[2].name),
-                                   p[2].position)
+                if len(name.name) > 1:
+                    p.lexer._error('qualified name %s does not name a struct' % '::'.join(name.name),
+                                   name.position)
                 else:
-                    p.lexer._error('name %s does not name a struct' % '::'.join(p[2].name),
-                                   p[2].position)
-                p.lexer._note('previously declared here', p[2].target.position)
-                raise SyntaxError()
+                    p.lexer._error('name %s does not name a struct' % '::'.join(name.name),
+                                   name.position)
+                p.lexer._note('previously declared here', name.target.position)
+                p[0] = (None, cl_ast.types.Struct(p.lexer, name.position, p[1], name.name[0]))
+        elif name.targets[-1][2]:
+            # new specialization
+            s = cl_ast.types.Struct(p.lexer, name.position, p[1], name.name[0])
+            name.targets[-1][2].create_specialization(name.targets[-1][1], s)
+            p[0] = (s, None)
         else:
-            if len(p[2].name) > 1:
-                p.lexer._error('qualified name %s does not name a struct' % '::'.join(p[2].name),
-                               p[2].position)
+            if len(name.name) > 1:
+                p.lexer._error('qualified name %s does not name a struct' % '::'.join(name.name),
+                               name.position)
             else:
-                p.lexer._error('name %s does not name a struct' % '::'.join(p[2].name),
-                               p[2].position)
-            raise SyntaxError()
-    elif p[2].target:
+                p.lexer._error('name %s does not name a struct' % '::'.join(name.name),
+                               name.position)
+            p[0] = (None, cl_ast.types.Struct(p.lexer, name.position, p[1], name.name[0]))
+    elif name.target:
         # optimistically use provided declaration, but if definition, it will be overriden
-        if p[2].target.get_token_type() == 'STRUCT_ID':
-            p[0] = (p[2].target, cl_ast.types.Struct(p.lexer.scopes[-1], p[2].position, p[1], p[2].name[0]))
-        elif p[2].target and p[2].target.get_token_type() == 'TEMPLATE_STRUCT_ID':
-            p[0] = (p[2].target.specializations[0][1], cl_ast.types.Struct(p.lexer.scopes[-1], p[2].position,
-                                                                           p[1], p[2].name[0]))
+        if p[4]:
+            p[4].bind(p[4])
+        if name.target.get_token_type() == 'STRUCT_ID':
+            p[0] = (name.target, cl_ast.types.Struct(p.lexer, name.position, p[1], name.name[0]))
+        elif name.target and name.target.get_token_type() == 'TEMPLATE_STRUCT_ID':
+            p[0] = (name.target.specializations[0][1], cl_ast.types.Struct(p.lexer, name.position,
+                                                                           p[1], name.name[0]))
         else:
             # Previously declared object is not a type
-            p[0] = (None, cl_ast.types.Struct(p.lexer.scopes[-1], p[2].position, p[1], p[2].name[0]))
+            p[0] = (None, cl_ast.types.Struct(p.lexer, name.position, p[1], name.name[0]))
     else:
-        # No previously delcared type, declare one here
-        p[0] = (None, cl_ast.types.Struct(p.lexer.scopes[-1], p[2].position, p[1], p[2].name[0]))
-    p.set_position_absolute(0, p[2].position)
+        if name.targets[-1][2]:
+            # new specialization
+            s = cl_ast.types.Struct(p.lexer, name.position, p[1], name.name[0])
+            name.targets[-1][2].create_specialization(name.targets[-1][1], s)
+            p[0] = (s, None)
+        else:
+            # No previously delcared type, declare one here
+            if p[4]:
+                p[4].bind(p[4])
+            p[0] = (None, cl_ast.types.Struct(p.lexer, name.position, p[1], name.name[0]))
+    p.set_position_absolute(0, name.position)
 
 
 def p_struct_push(p):
     """
         struct_push :
     """
-    p[0] = p[-2][1] or p[-2][0]
+    p[0] = p[-2][1]
+    if not p[0]:
+        p[0] = p[-2][0]
+    else:
+        p[0].register()
     p[0].define(p[-1])
-    if p[-2][1]:
-        p.lexer.scopes[-1].add(p[0])
-    p.lexer.push_scope(p[0])
 
 
 def p_struct_pop(p):
@@ -103,10 +119,7 @@ def p_struct_parent(p):
                           |
     """
     if len(p) > 1:
-        if p[3].dependent:
-            p[0] = cl_ast.types.DependentTypeName(p.lexer.scopes[-1], p[3].position, p[3])
-        else:
-            p[0] = p[3].target
+        p[0] = p[3].target
 
 
 def p_struct_parent_error(p):
@@ -119,11 +132,16 @@ def p_struct_parent_error(p):
 def p_struct_begin(p):
     """
         struct_begin : struct_header struct_parent_opt struct_push LBRACE
-                     | struct_header error struct_push LBRACE
     """
     p[0] = p[3]
     p.set_position(0, 1)
 
+def p_struct_begin_error(p):
+    """
+        struct_begin : struct_header struct_parent_opt error LBRACE
+    """
+    p[0] = p[1][1] or p[1][0]
+    p.set_position(0, 1)
 
 def p_struct_definition(p):
     """
@@ -135,13 +153,12 @@ def p_struct_definition(p):
 
 def p_struct_header_anonymous(p):
     """
-        struct_header_anonymous : struct_keyword LBRACE
+        struct_header_anonymous : struct_keyword consume_template_stack verify_template_stack LBRACE
     """
-    p[0] = cl_ast.types.Struct(p.lexer.scopes[-1], p.position(1), p[1], None)
+    p[0] = cl_ast.types.Struct(p.lexer, p.position(1), p[1], None)
+    p[0].register()
     p[0].define(None)
     p.set_position(0, 1)
-    p.lexer.scopes[-1].add(p[0])
-    p.lexer.push_scope(p[0])
 
 
 def p_struct_definition_anonymous(p):
@@ -156,9 +173,11 @@ def p_type_struct_declaration(p):
     """
         typedecl : struct_header
     """
-    p[0] = p[1][0] or p[1][1]
+    p[0] = p[1][0]
+    if not p[0]:
+        p[0] = p[1][1]
+        p[0].register()
     p.set_position(0, 1)
-    p.lexer.scopes[-1].add(p[0])
 
 
 def p_type_struct_definition(p):
@@ -190,7 +209,18 @@ def p_struct_declaration_scope(p):
                            | PUBLIC COLON
                            | PROTECTED COLON
                            | PRIVATE COLON
-                           | FRIEND struct_header SEMI
     """
     pass
 
+def p_struct_declaration_friend(p):
+    """
+        struct_declaration : FRIEND struct_keyword type_name SEMI
+    """
+    pass
+
+def p_struct_declaration_friend_template(p):
+    """
+        struct_declaration : template_specifier FRIEND struct_header SEMI
+    """
+    for i in range(0, len(p[1])):
+        p.lexer.pop_scope()

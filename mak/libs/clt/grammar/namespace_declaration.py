@@ -1,4 +1,4 @@
-from .. import cl_ast
+from ..cl_ast.namespaces import Namespace, AnonymousNamespace
 
 
 def p_new_namespace_name(p):
@@ -22,6 +22,7 @@ def p_existing_namespace_name(p):
         existing_namespace_name : NAMESPACE_ID
     """
     p[0] = p.slice[1].found_object
+    p.set_position(0, 1)
 
 
 def p_new_namespace_name_invalid(p):
@@ -34,19 +35,19 @@ def p_new_namespace_name_invalid(p):
                            | TEMPLATE_METHOD_ID
                            | TEMPLATE_TYPENAME_ID
     """
-    p.lexer._error("redefinition of '%s' as different kind of symbol" % (p[1]), p.position(1))
-    p.lexer._note("previous definition is here", p.slice[1].found_object.position)
     p[0] = p[1]
     p.set_position(0, 1)
+    p._lexer.error('redefinition of %s as a namespace' % p[0])
+    p.slice[1].found_object._note('previously declared here')
+    p[0].push_scope()
 
 
 def p_namespace_declaration_new(p):
     """
         namespace_declaration_new : NAMESPACE new_namespace_name
     """
-    p[0] = cl_ast.namespaces.Namespace(p.lexer.scopes[-1], p.position(2), p[2])
-    p.lexer.scopes[-1].add(p[0])
-    p.lexer.push_scope(p[0])
+    p[0] = Namespace(p.lexer, p.position(2), p[2])
+    p[0].push_scope()
 
 
 def p_namespace_declaration_existing(p):
@@ -54,24 +55,22 @@ def p_namespace_declaration_existing(p):
         namespace_declaration_existing : NAMESPACE existing_namespace_name
     """
     p[0] = p[2]
-    p.lexer.push_scope(p[0])
+    p[0].push_scope()
 
 
 def p_namespace_declaration_error(p):
     """
         namespace_declaration_existing : NAMESPACE error
     """
-    p[0] = p[2]
-    p.lexer.push_scope(p[0])
+    p[0] = None
 
 
 def p_namespace_declaration_anonymous(p):
     """
         namespace_declaration_anonymous : NAMESPACE
     """
-    p[0] = cl_ast.namespaces.AnonymousNamespace(p.lexer.scopes[-1], p.position(1))
-    p.lexer.scopes[-1].add(p[0])
-    p.lexer.push_scope(p[0])
+    p[0] = AnonymousNamespace(p.lexer, p[1].position)
+    p[0].push_scope()
 
 
 def p_namespace_pop(p):
@@ -87,4 +86,3 @@ def p_namespace_declaration(p):
                               | namespace_declaration_existing LBRACE external_declarations RBRACE namespace_pop
                               | namespace_declaration_anonymous LBRACE external_declarations RBRACE namespace_pop
     """
-    p[0] = p[1]

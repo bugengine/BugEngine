@@ -22,14 +22,3 @@ class Name:
                     dependent = self.dependent or other.dependent,
                     resolved = self.resolved and other.resolved,
                     data = other.data)
-
-    def instantiate(self, parent, template_arguments):
-        result = self.Name(self.lexer, self.name, self.position,
-                           self.target.instantiate(parent, template_arguments),
-                           ((t[0].instantiate(parent, template_arguments),
-                             [p.instantiate(parent, template_arguments) for p in t[1]],
-                             t[2].instantiate(parent, template_arguments)) for t in self.targets),
-                           self.qualified,
-                           self.dependent,
-                           self.resolved,
-                           self.data.instantiate(parent, template_argumnents))
