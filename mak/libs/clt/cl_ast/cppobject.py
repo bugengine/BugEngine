@@ -1,65 +1,91 @@
+from .scope import Scope
+
+
 class CppObject:
-    def __init__(self, parent, position):
+    def __init__(self, lexer, position, name=None):
         from .templates import Template
-        self.parser = parent and parent.parser
+        self.lexer = lexer
         self.position = position
-        self.parent = parent
+        self.parent_scope = self.lexer.scopes and self.lexer.scopes[-1] or None
+        self.parent = self.parent_scope and self.parent_scope.owner
+        self.name = name
+        self.scope = None
         self.templates = []
+        parent = self.parent
         while parent:
             if isinstance(parent, Template):
-                self.templates.append(parent)
+                self.templates.append(parent.back_link)
             parent = parent.parent
         self.instances = []
 
-    def instantiate(self, parent, template_arguments, *args):
-        from .templates import Template
-        for template_position, t in enumerate(self.templates):
-            if t.root_template == template_arguments[0].root_template:
-                break
-        else:
+    def create_template_instance(self, template, arguments, position):
+        if template not in [t.back_link for t in self.templates]:
             return self
-        templates = []
-        p = parent
-        while p:
-            if isinstance(p, Template):
-                templates.insert(0, p)
-            p = p.parent
-        #for i in range(0, template_position):
-        #    assert(self.templates[i].root_template == templates[i].root_template)
-        for arguments, instance in self.instances:
-            if self.match(arguments, template_arguments[1]):
-                return instance
-        else:
-            #print('creating instance of %s %s (%s)' % (self.__class__.__name__,
-            #                                           getattr(self, 'name', ''),
-            #                                           self.position))
-            instance = self._instantiate(parent, template_arguments, *args)
-            assert instance, '%s did not return an instance' % self.__class__.__name__
-            self.instances.append((template_arguments[1], instance))
-            self._instantiate_content(instance, template_arguments)
-            #print('done')
-            return instance
+        instance = self._get_cached_instance(arguments)
+        if not instance:
+            instance = self._create_template_instance(template, arguments, position)
+            self.instances.append((arguments, position, template, instance))
+            self._complete_template_instance(instance, template, arguments, position)
+        return instance
 
-    def _instantiate_content(self, instance, template_arguments):
+    def seal(self):
+        for arguments, position, template, instance in self.instances:
+            self._complete_template_instance(instance, template, arguments, position)
+
+    def _get_cached_instance(self, arguments):
+        from . import types
+        for args, _, _, instance in self.instances:
+            assert len(args) == len(arguments)
+            for i in range(0, len(args)):
+                try:
+                    args[i].distance(arguments[i], types.CAST_NONE)
+                except types.CastError:
+                    break
+            else:
+                return instance
+        return None
+    
+    def _complete_template_instance(self, result, template, arguments, position):
         pass
 
-    def match(self, arguments1, arguments2):
-        for arg1, arg2 in zip(arguments1, arguments2):
-            if arg1[1] != arg2[1]:
-                if not arg1[1].matches(arg2[1]):
-                    return False
-        return True
+    def register(self):
+        self.parent_scope.add(self)
 
-    def lookup_by_name(self, name):
-        while self:
-            obj = self.find(name, False)
-            if obj:
-                return (self, obj)
-            self = self.parent
-        return (None, None)
+    def push_scope(self, scope = None):
+        if not self.scope:
+            self.scope = scope or Scope(self)
+        elif scope:
+            self.lexer._error('redefinition of object %s'%self.name, self.position)
+            self.lexer.push_scope(scope)
+            raise SyntaxError
+        self.lexer.push_scope(self.scope)
 
-    def _error(self, error_message):
-        self.parser.lexer._error(error_message, self.position)
+    def _error(self, message):
+        self.lexer._error(message, self.position)
 
-    def wrap_template_parameter(self):
-        return self
+    def _note(self, message):
+        self.lexer._note(message, self.position)
+
+    def find(self, name):
+        if self.name == name:
+            return self
+        else:
+            return None
+
+    def get_token_type(self):
+        assert False, '%s should redefine get_token_type'%self
+
+    def get_token_type_raw(self):
+        return self.get_token_type()
+
+    def get_template_param_dependencies(self):
+        return []
+
+    def debug_dump(self, indent=''):
+        print('%s%s%s [%s]' % (indent, self.__class__.__name__,
+                               self.name and (' %s'%self.name) or '',
+                               self.position))
+        if self.scope:
+            print('%s{' % indent)
+            self.scope.debug_dump(indent)
+            print('%s}' % indent)

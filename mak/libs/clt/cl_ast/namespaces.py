@@ -1,57 +1,27 @@
-from .scope import Scope
+from .cppobject import CppObject
 
 
-class Root(Scope):
-    def __init__(self, parser):
-        Scope.__init__(self, None, None)
-        self.parser = parser
-
-    def write_to(self, writer):
-        with writer.create_document() as document:
-            Scope._write_to(self, document)
-
-    def debug_dump(self):
-        Scope._debug_dump(self, '')
-
-
-class Namespace(Scope):
-    def __init__(self, parent, position, name):
-        Scope.__init__(self, parent, position)
-        self.name = name
+class Namespace(CppObject):
+    def __init__(self, lexer, position, name):
+        CppObject.__init__(self, lexer, position, name)
+        self.register()
 
     def get_token_type(self):
         return 'NAMESPACE_ID'
 
-    def find_nonrecursive(self, name):
-        if self.name == name:
-            return self
+
+class AnonymousNamespace(Namespace):
+    def __init__(self, lexer, position):
+        Namespace.__init__(self, lexer, position, None)
+        self.register()
+
+    def find(self, name):
+        return self.scope and self.scope.find(name)
+
+
+class RootNamespace(CppObject):
+    def __init__(self, lexer):
+        CppObject.__init__(self, lexer, (lexer.filename, 1, 1, 1), None)
 
     def write_to(self, writer):
-        with writer.create_namespace(self.position, self.name) as namespace:
-            Scope._write_to(self, namespace)
-
-    def _debug_dump(self, indent):
-        print('namespace %s\n%s{' % (self.name, indent))
-        Scope._debug_dump(self, indent + '  ')
-        print('}\n')
-
-
-class AnonymousNamespace(Scope):
-    def __init__(self, parent, position):
-        Scope.__init__(self, parent, position)
-
-    def get_token_type(self):
-        return 'NAMESPACE_ID'
-
-    def find_nonrecursive(self, name):
-        o = self.find(name, False)
-        return o
-
-    def write_to(self, writer):
-        with writer.create_namespace(self.position, None) as namespace:
-            Scope._write_to(self, namespace)
-
-    def _debug_dump(self, indent):
-        print(indent + 'namespace\n%s{' % indent)
-        Scope._debug_dump(self, indent)
-        print(indent + '}\n%s' % indent)
+        pass

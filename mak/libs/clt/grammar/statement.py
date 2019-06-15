@@ -1,5 +1,3 @@
-from .. import cl_ast
-
 
 def p_statement_list_end(p):
     """
@@ -11,13 +9,6 @@ def p_statement_list_end(p):
 def p_statement_list(p):
     """
         statement_list : statement statement_list
-    """
-    pass
-
-
-def p_statement_error(p):
-    """
-        statement : error SEMI
     """
     pass
 
@@ -78,15 +69,12 @@ def p_push_for_scope(p):
     """
         push_for_scope :
     """
-    p[0] = cl_ast.statements.ForStatement(p.lexer.scopes[-1], p.position(-1))
-    p.lexer.push_scope(p[0])
 
 
 def p_pop_for_scope(p):
     """
         pop_for_scope :
     """
-    p.lexer.pop_scope()
 
 
 def p_statement_for(p):

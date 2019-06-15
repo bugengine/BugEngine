@@ -22,27 +22,6 @@ struct A
     void operator++();
 };
 
-
-A::A()
-{
-}
-
-A::A(int)
-{
-}
-
-A::~A()
-{
-}
-
-void A::testInline2()
-{
-}
-
-void A::operator++()
-{
-}
-
 }
 void kmain(u32 index, u32 total)
 {

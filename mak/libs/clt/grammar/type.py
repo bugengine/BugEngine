@@ -1,4 +1,5 @@
-from .. import cl_ast
+from ..cl_ast import types
+
 
 def p_type_builtin(p):
     """
@@ -69,8 +70,8 @@ def p_type_builtin(p):
              |  DOUBLE8
              |  DOUBLE16
     """
-    p[0] = cl_ast.types.Type(p.lexer.scopes[-1], p.position(1),
-                             cl_ast.types.Builtin(p.lexer.scopes[-1], p.position(1), p[1]))
+    builtin = types.BuiltIn(p.lexer, p.position(1), p[1])
+    p[0] = types.TypeRef(p.lexer, builtin.position, builtin)
 
 
 def p_type_builtin_modifier_list_deprecated(p):
@@ -86,7 +87,7 @@ def p_type_builtin_modifier_list_deprecated(p):
                                  | SIGNED
                                  | UNSIGNED
     """
-    p[0] = (p[1], p.position(1))
+    p[0] = p[1]
     p.set_position(0, 1)
 
 
@@ -95,10 +96,10 @@ def p_type_builtin_deprecated(p):
         type_modifier_list_deprecated : type_modifier_deprecated type_modifier_list_deprecated
                                       | type_modifier_deprecated
     """
-    p[0] = [p[1]]
-    p.set_position(0, 1)
+    p[0] = [(p[1], p.position(1))]
     if len(p) > 2:
         p[0] += p[2]
+    p.set_position(0, 1)
 
 
 def p_type_deprecated(p):
@@ -129,63 +130,55 @@ def p_type_deprecated(p):
             if s2[0] in incompatible_kw:
                 p.lexer._error("cannot combine with previous '%s' declaration specifier" % s2[0], s[1])
         result = rebuild_pattern%rebuild
-    p[0] = cl_ast.types.Type(p.lexer.scopes[-1], p.position(1),
-                             cl_ast.types.Builtin(p.lexer.scopes[-1], p.position(1), result))
+    builtin = types.BuiltIn(p.lexer, p.position(1), result)
+    p[0] = types.TypeRef(p.lexer, builtin.position, builtin)
 
 
 def p_type_type_name(p):
     """
         type : type_name
     """
-    if p[1].dependent:
-        p[0] = cl_ast.types.Type(p.lexer.scopes[-1], p[1].position,
-                                 cl_ast.types.DependentTypeName(p.lexer.scopes[-1], p[1].position, p[1]))
-    else:
-        p[0] = cl_ast.types.Type(p.lexer.scopes[-1], p[1].position, p[1].target)
+    assert isinstance(p[1].target, types.Type), p[1].target
+    p[0] = types.TypeRef(p.lexer, p[1].target.position, p[1].target)
 
 
 def p_type_type_name_typename(p):
     """
         type : TYPENAME object_name
     """
-    if not p[2].dependent:
-        p.lexer._error('Use of typename in non-dependent name %s' % ('::'.join(p[2].name)),
-                       p[2].position)
-    p[0] = cl_ast.types.Type(p.lexer.scopes[-1], p[2].position,
-                             cl_ast.types.DependentTypeName(p.lexer.scopes[-1], p[2].position, p[2]))
+    assert False
 
 
 def p_type_type_decl(p):
     """
         type : typedecl
     """
-    p[0] = cl_ast.types.Type(p.lexer.scopes[-1], p.position(1), p[1])
+    assert isinstance(p[1], types.Type)
+    p[0] = types.TypeRef(p.lexer, p[1].position, p[1])
 
 
 def p_type_ptr(p):
     """
         type : type TIMES
     """
-    p[0] = cl_ast.types.Type(p.lexer.scopes[-1], p.position(2),
-                             cl_ast.types.Pointer(p.lexer.scopes[-1], p.position(2), p[1]))
+    ptr = types.Pointer(p.lexer, p.position(2), p[1])
+    p[0] = types.TypeRef(p.lexer, ptr.position, ptr)
 
 
 def p_type_reference(p):
     """
         type : type AND
     """
-    p[0] = cl_ast.types.Type(p.lexer.scopes[-1], p.position(2),
-                             cl_ast.types.Reference(p.lexer.scopes[-1], p.position(2), p[1]))
+    ref = types.Reference(p.lexer, p.position(2), p[1])
+    p[0] = types.TypeRef(p.lexer, ref.position, ref)
 
 
 def p_type_void_ptr(p):
     """
         type : VOID TIMES
     """
-    p[0] = cl_ast.types.Type(p.lexer.scopes[-1], p.position(2),
-                             cl_ast.types.Pointer(p.lexer.scopes[-1], p.position(2),
-                                                  cl_ast.types.Builtin(p.lexer.scopes[-1],
-                                                                       p.position(1), p[1])))
+    ptr = types.Pointer(p.lexer, p.position(2), types.BuiltIn(p.lexer, p.position(1), 'void'))
+    p[0] = types.TypeRef(p.lexer, ptr.position, ptr)
 
 
 def p_type_const(p):
@@ -199,8 +192,8 @@ def p_type_const(p):
              | type __RESTRICT                                                  %prec TYPEMODIFIER
              | type VOLATILE                                                    %prec TYPEMODIFIER
     """
-    p[0] = p[1]
-    p[1].add_modifier(p[2], p.position(2))
+    p[0] = p[1].clone()
+    p[0].add_qualifier(p[2])
 
 
 def p_type_const_pre(p):
@@ -214,5 +207,5 @@ def p_type_const_pre(p):
              | __RESTRICT type                                                  %prec TYPEMODIFIER
              | VOLATILE type                                                    %prec TYPEMODIFIER
     """
-    p[0] = p[2]
-    p[2].add_modifier(p[1], p.position(1))
+    p[0] = p[2].clone()
+    p[0].add_qualifier(p[1])

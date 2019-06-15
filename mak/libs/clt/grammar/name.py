@@ -10,10 +10,6 @@ def p_id(p):
         struct_id_shadow :              STRUCT_ID_SHADOW
         typename_id :                   TYPENAME_ID
         typename_id_shadow :            TYPENAME_ID_SHADOW
-        template_struct_id :            TEMPLATE_STRUCT_ID
-        template_struct_id_shadow :     TEMPLATE_STRUCT_ID_SHADOW
-        template_typename_id :          TEMPLATE_TYPENAME_ID
-        template_typename_id_shadow :   TEMPLATE_TYPENAME_ID_SHADOW
         special_method_id :             SPECIAL_METHOD_ID
         method_id :                     METHOD_ID
         method_id_shadow :              METHOD_ID_SHADOW
@@ -23,6 +19,48 @@ def p_id(p):
                 qualified = not p.slice[1].type.endswith('SHADOW'),
                 dependent = (p.slice[1].type.find('TYPENAME') != -1
                           or p.slice[1].found_object and p.slice[1].found_object.templates))
+
+
+def p_id_template(p):
+    """
+        template_struct_id :            TEMPLATE_STRUCT_ID
+        template_struct_id_shadow :     TEMPLATE_STRUCT_ID_SHADOW
+        template_typename_id :          TEMPLATE_TYPENAME_ID
+        template_typename_id_shadow :   TEMPLATE_TYPENAME_ID_SHADOW
+    """
+    found_object = p.slice[1].found_object
+    if found_object:
+        if p.lexer.template_stack:
+            template = p.lexer.template_stack.pop()
+            if template:
+                found_object = found_object.find_instance(template, template.parameters, p.position(1))
+            else:
+                p.lexer._error('template specialization or definition requires a '
+                               'template parameter list corresponding to '
+                               'the nested type %s' % p[1], p.position(1))
+                # tries to recover and keep parsing
+                found_object = found_object.scope.items[0][1]
+            p[0] = Name(p.lexer, (p[1],), p.position(1),
+                        found_object,
+                        targets=((found_object, template.parameters, template)),
+                        qualified = not p.slice[1].type.endswith('SHADOW'),
+                        dependent = (p.slice[1].type.find('TYPENAME') != -1
+                                or p.slice[1].found_object and p.slice[1].found_object.templates))
+        else:
+            p.lexer._error('template specialization or definition requires a template parameter list '
+                           'corresponding to the type %s' % p[1],
+                            p.position(1))
+            p[0] = Name(p.lexer, (p[1],), p.position(1),
+                        found_object,
+                        qualified = not p.slice[1].type.endswith('SHADOW'),
+                        dependent = (p.slice[1].type.find('TYPENAME') != -1
+                                or p.slice[1].found_object and p.slice[1].found_object.templates))
+    else:
+        p[0] = Name(p.lexer, (p[1],), p.position(1),
+                    found_object,
+                    qualified = not p.slice[1].type.endswith('SHADOW'),
+                    dependent = (p.slice[1].type.find('TYPENAME') != -1
+                            or p.slice[1].found_object and p.slice[1].found_object.templates))
 
 
 def p_template_new_template_id(p):
@@ -59,10 +97,17 @@ def p_template_id(p):
         method_id_shadow : TEMPLATE_METHOD_ID_SHADOW template_arguments               %prec TEMPLATEGT
     """
     try:
-        target = p.slice[1].found_object.find_instance(p.lexer.scopes[-1], p[2], p.position(2))
-    except cl_ast.templates.Template.InstanciationError as e:
+        tpl = None
+        if p.lexer.template_stack:
+            tpl = p.lexer.template_stack.pop()
+            if not tpl:
+                p.lexer._error('3 template specialization or definition requires a template parameter list '
+                               'corresponding to the nested type %s<%s>' % (p[1], ', '.join(str(t) for t in p[2])),
+                               p.position(1))
+        target = p.slice[1].found_object.find_instance(tpl, p[2], p.position(1))
+    except cl_ast.templates.Template.InstantiationError as e:
         target = None
-        p.lexer._error(e.msg, e.position)
+        p.lexer._error(e.message, e.position)
         if e.error:
             p.lexer._note(e.error.message, e.error.position)
         p.lexer._note('template %s declared here' % p[1], p.slice[1].found_object.position)
@@ -71,8 +116,7 @@ def p_template_id(p):
                 qualified = not p.slice[1].type.endswith('SHADOW'),
                 resolved = (p.slice[1].type.find('TYPENAME') == -1),
                 dependent = (target==None))
-    if target:
-        p.lexer.set_search_scope_ifn(target)
+    p.lexer.set_search_scope_ifn(p.position(1), target)
 
 
 def p_object_name_namespace(p):
@@ -161,14 +205,35 @@ def p_object_name_namespace_root(p):
 def p_object_name(p):
     """
         object_name : VARIABLE_ID
-                    | TEMPLATE_METHOD_ID
                     | VARIABLE_ID_SHADOW
-                    | TEMPLATE_METHOD_ID_SHADOW
 
         object_name_id_qualified : VARIABLE_ID
-                                 | TEMPLATE_METHOD_ID
     """
     p[0] = Name(p.lexer, (p[1],), p.position(1), p.slice[1].found_object,
+                qualified = not p.slice[1].type.endswith('SHADOW'))
+
+
+def p_object_name_template(p):
+    """
+        object_name : TEMPLATE_METHOD_ID                                            %prec TEMPLATEGT
+                    | TEMPLATE_METHOD_ID_SHADOW                                     %prec TEMPLATEGT
+
+        object_name_id_qualified : TEMPLATE_METHOD_ID                               %prec TEMPLATEGT
+    """
+    found_object = p.slice[1].found_object
+    if found_object:
+        if p.lexer.template_stack:
+            template = p.lexer.template_stack.pop()
+            if template:
+                template.bind(found_object)
+                found_object = found_object.find_specialization(p.position(1), template.parameters)
+            else:
+                p.lexer._error('template specialization or definition requires a '
+                                'template parameter list corresponding to '
+                                'the nested type %s' % p[1], p.position(1))
+                found_object = found_object.scope.items[0][1]
+
+    p[0] = Name(p.lexer, (p[1],), p.position(1), found_object,
                 qualified = not p.slice[1].type.endswith('SHADOW'))
 
 
@@ -181,14 +246,12 @@ def p_object_name_destructor(p):
     """
     owner = p.slice[2].found_object
     scope = p.lexer.scopes[-1]
-    if owner != scope:
-        p.lexer._error('declaration of ~%s as a member of %s' % (owner.name, scope.name), p.position(1))
-        raise SyntaxError()
-    if not owner.definition:
+    if owner.scope != scope:
+        p.lexer._error('declaration of ~%s as a member of %s' % (owner.name, scope.owner.name), p.position(1))
+    if not owner.scope:
         p.lexer._error('invalid use of incomplete type %s' % owner.name, p.position(1))
         p.lexer._info('forward declaration of %s' % owner.name, owner.position)
-        raise SyntaxError()
-    p[0] = Name(p.lexer, (p[1]+p[2],), p.position(1), owner.definition.destructor,
+    p[0] = Name(p.lexer, (p[1]+p[2],), p.position(1), owner.scope.destructor,
                 qualified = False)
 
 
@@ -198,11 +261,10 @@ def p_object_name_destructor_2(p):
         special_method_name_id_qualified : NOT SPECIAL_METHOD_ID
     """
     owner = p.slice[2].found_object.owner
-    if not owner.definition:
+    if not owner.scope:
         p.lexer._error('invalid use of incomplete type %s' % owner.name, p.position(1))
         p.lexer._info('forward declaration of %s' % owner.name, owner.position)
-        raise SyntaxError()
-    p[0] = Name(p.lexer, (p[1]+p[2],), p.position(1), owner.definition.destructor,
+    p[0] = Name(p.lexer, (p[1]+p[2],), p.position(1), owner.scope.destructor,
                 qualified = False)
 
 
@@ -255,10 +317,9 @@ def p_operator_cast(p):
     """
         operator_cast : OPERATOR type
     """
-    current_scope = p.slice[1].owner
     p[0] = Name(p.lexer, ('cast<%s>'%p[2].signature(),), p.position(1), None,
                 qualified = False,
-                dependent = isinstance(p[2], cl_ast.types.DependentTypeName),
+                dependent = False,
                 data = p[2])
     p.set_position(0, 1)
 

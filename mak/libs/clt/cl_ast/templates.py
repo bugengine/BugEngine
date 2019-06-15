@@ -1,368 +1,328 @@
 from .cppobject import CppObject
-from .name import Name
-try:
-    from itertools import zip_longest
-except ImportError:
-    from itertools import izip_longest as zip_longest
+from .scope import Scope
+from .types import TypeRef, Type, BuiltIn, CAST_NONE, CAST_ATTRIB, CAST_UNRELATED, CastError
 
 
-class ResolutionError(Exception):
-    def __init__(self, message, position):
-        Exception.__init__(self, message)
-        self.position = position
-
-
-def resolve(name, template_stack):
-    def get_template():
-        try:
-            return template_stack.pop(0)
-        except IndexError:
-            raise ResolutionError('missing template specifier for template %s' % '::'.join(name.name), name.position)
-    for object, arguments, template in name.targets[:-1]:
-        if arguments:
-            second_template = get_template()
-            second_template.bind_arguments(template, arguments)
-    object, arguments, template = name.targets[-1]
-    if arguments and template_stack:
-        second_template = get_template()
-        second_template.bind_arguments(template, arguments)
-    elif isinstance(object, Template):
-        second_template = get_template()
-        second_template.bind_arguments(template, second_template.parameters)
-    elif template_stack:
-        if object:
-            object_type = object.get_token_type().split('_')[0].lower()
-            raise ResolutionError('extra template specifier for %s %s' % (object_type, '::'.join(name.name)), name.position)
-        template = get_template()
-        template.create_binding()
-
-
-
-class DependentName(CppObject):
-    def __init__(self, parent, position, name):
-        CppObject.__init__(self, parent, position)
-        self.name = name
-        self.resolved_to = None
-
-    def find_nonrecursive(self, name):
-        if self.name == name:
-            return self
-
-    def find(self, name, is_current_scope):
-        return None
-
-    def _instantiate(self, parent, template_arguments):
-        if self.name.targets[0][0]:
-            value = self.name.targets[0][0].instantiate(parent, template_arguments)
-        else:
-            value = (parent.lookup_by_name(self.name.name[0])[1]
-                  or self.parser.lexer.lookup_by_name(self.name.name[0])[1])
-        if not value:
-            return DependentTypeName(parent, self.position, self.name.instantiate(parent, template_arguments))
-        prev_name = self.name.name[0]
-        for name, target in zip(self.name.name[1:], self.name.targets[1:]):
-            try:
-                value = value.find(name, True).instantiate(parent, template_arguments)
-            except AttributeError:
-                self.parser.lexer._error("%s cannot be used prior to '::' because it has no members" % name.to_string(),
-                                         self.name.position)
-            if not value:
-                self._error('%s does not refer to a member of %s' % (name, prev_name))
-            if target[1]:
-                if not isinstance(value, Template):
-                    self._error('%s does not refer to a template member of %s' % (name, prev_name))
-                try:
-                    value = value.find_instance(parent,
-                                                [t.instantiate(parent, template_arguments) for t in target[1]],
-                                                self.name.position)
-                except Template.InstanciationError as e:
-                    self.parser.lexer._error(e.msg, e.position)
-                    if e.error:
-                        self.parser.lexer._note(e.error.message, e.error.position)
-                    self.parser.lexer._note('template %s declared here' % value.name, value.position)
-                else:
-                    if not value:
-                        return DependentTypeName(parent, self.position, self.name.instantiate(parent, template_arguments))
-            prev_name = name
-        return value
-
-
-class TemplateParameterValue:
-    def __init__(self, owner, index):
-        self.owner = owner
-        self.index = index
-
-    def instantiate(self, template_arguments):
-        value = template_arguments[1][self.index][1]
-        print(self.owner.name, '->', value.__class__.__name__, value.to_string())
-        return value
-
-
-class TemplateParameter(CppObject):
-    def __init__(self, parent, position, name):
-        CppObject.__init__(self, parent, position)
-        self.name = name
-        self.bound_value = None
-
-    def bind(self, value):
-        if self.bound_value:
-            raise Exception('cannot bind twice a template parameter')
-        self.bound_value = value
-
-    def find_nonrecursive(self, name):
-        if self.name == name:
-            return self
-
-    def instantiate(self, parent, template_arguments):
-        if self.bound_value.owner.root_template == template_arguments[0].root_template:
-            return self.bound_value.instantiate(template_arguments)
-        else:
-            for template, instance in template_arguments[2]:
-                if template.root_template == self.bound_value.owner.root_template:
-                    return self._instantiate(instance.root_template, parent, template_arguments)
-            return self
-
-
-class TemplateParameterConstant(TemplateParameter):
-    def __init__(self, parent, position, type, name, default_value):
-        TemplateParameter.__init__(self, parent, position, name)
+class TemplateValueParameter(CppObject):
+    def __init__(self, lexer, position, name, type, value):
+        CppObject.__init__(self, lexer, position, name)
         self.type = type
-        self.default_value = default_value
+        self.value = value
+        self.parameter_bind = None
+
+    def get_parameter(self):
+        return self.parameter_bind and self.parameter_bind[1] or self
+
+    def is_bound(self):
+        return self.parameter_bind != None
+
+    def bind(self, argument_position, template):
+        self.parameter_bind = (argument_position, template)
 
     def get_token_type(self):
         return 'VARIABLE_ID'
 
-    def is_valid(self, other):
-        from .types import ConversionError
-        if not isinstance(other, TemplateParameterConstant):
-            raise ConversionError('cannot convert from %s to %s constant' % (other.__class__.__name__.lower(),
-                                                                             self.type.name()),
-                                         self.position)
-        self.type.try_conversion(other.type)
+    def __str__(self):
+        return '%s%s' % (self.type, self.name and ' '+self.name or '')
 
-    def to_string(self):
-        return '/*%s*/ %s/*%s*/' % (self.type.type_name(), self.name,
-                                    self.default_value and self.default_value.to_string() or '')
+    def get_type(self):
+        return self.type.name()
 
-    def _instantiate(self, new_template, parent, template_arguments):
-        default_value = self.default_value and self.default_value.instantiate(parent, template_arguments)
-        result = TemplateParameterConstant(parent, self.position,
-                                           self.type.instantiate(parent, template_arguments),
-                                           self.name,
-                                           default_value)
-        result.bind(TemplateParameterValue(new_template, self.bound_value.index))
-        return result
+    def get_template_param_dependencies(self):
+        return [self]
 
-    def wrap_template_parameter(self):
-        from .values import DependentValueName
-        name = Name(self.parser.lexer, (self.name,), self.position, self, dependent=True)
-        return DependentValueName(self.parent, self.position, name)
+    def _create_template_instance(self, template, arguments, position):
+        if template == self.parameter_bind[1]:
+            return arguments[self.parameter_bind[0]]
+        else:
+            template_parent = self.lexer.scopes[-1].owner
+            assert isinstance(template_parent, Template)
+            value = self.value and self.value.create_template_instance(template, arguments, position)
+            type = self.type.create_template_instance(template, arguments, position)
+            result = TemplateValueParameter(self.lexer, position, self.name, type, value)
+            result.bind(self.parameter_bind[0], template_parent)
+            return result
 
 
-class TemplateParameterTypename(TemplateParameter):
-    def __init__(self, parent, position, name, default_value):
-        TemplateParameter.__init__(self, parent, position, name)
-        self.default_value = default_value
+class TemplateTypenameParameter(Type):
+    def __init__(self, lexer, position, name, value):
+        Type.__init__(self, lexer, position, name)
+        self.value = value
+        self.parameter_bind = None
+
+    def get_parameter(self):
+        return self.parameter_bind and self.parameter_bind[1] or self
+
+    def is_bound(self):
+        return self.parameter_bind != None
+
+    def bind(self, argument_position, template):
+        self.parameter_bind = (argument_position, template)
 
     def get_token_type(self):
         return 'TYPENAME_ID'
 
-    def type_name(self):
-        return self.name
+    def __str__(self):
+        return 'typename%s' % (self.name and ' '+self.name or '')
+
+    def get_type(self):
+        return 'typename'
+    
+    def is_compatible(self, argument):
+        return isinstance(argument, TypeRef)
+
+    def get_template_param_dependencies(self):
+        return [self]
+
+    def _distance(self, other, matches, typeref, other_typeref, allowed_cast):
+        if self.parameter_bind[0] in matches:
+            new_match = matches[self.parameter_bind[0]]
+            for a in typeref.qualifiers:
+                #assert a not in new_match.qualifiers
+                if a in new_match.qualifiers:
+                    raise CastError
+                new_match.qualifiers.add(a)
+            return new_match.distance(other_typeref, CAST_NONE, matches)
+        else:
+            match = other_typeref.clone()
+            d = Type.Distance(variant=100000, matches={self.parameter_bind[0]: match})
+            for a in typeref.qualifiers:
+                if a in other_typeref.qualifiers:
+                    match.qualifiers.remove(a)
+                    d = d.refine()
+                elif allowed_cast == CAST_UNRELATED:
+                    return Type.Distance(variant=-1)
+                else:
+                    raise CastError()
+            return d
+
+    def _create_template_instance(self, template, arguments, position):
+        if template == self.parameter_bind[1]:
+            return arguments[self.parameter_bind[0]]
+        else:
+            template_parent = self.parameter_bind[1].create_template_instance(template, arguments, position)
+            value = self.value and self.value.create_template_instance(template, arguments, position)
+            result = TemplateTypenameParameter(self.lexer, position, self.name, value)
+            result.bind(self.parameter_bind[0], template_parent)
+            return result
+
+
+class TemplateScope(Scope):
+    def __init__(self, owner):
+        Scope.__init__(self, owner)
+        self.parameters = []
+
+    def add(self, element):
+        assert self.owner.back_link == self.owner
+        if isinstance(element, TemplateValueParameter) or isinstance(element, TemplateTypenameParameter):
+            self.parameters.append(element)
+            self.owner.add_parameter(element)
+        else:
+            Scope.add(self, element)
 
     def find(self, name, is_current_scope):
-        return None
-
-    def signature(self):
-        return 'typename{%s}' % (self.name)
-
-    def try_conversion(self, other, qualifier_importance = False):
-        from .types import ConversionError
-        if not isinstance(other, TemplateParameterTypename):
-            raise ConversionError("can't convert from %s type to %s type" % (self.__class__.__name__.lower(),
-                                                                             other.__class__.__name__.lower()),
-                                  self.position)
-        if self.bound_value != other.bound_value:
-            raise ConversionError("can't convert from %s to %s" % (self.name, other.name),
-                                  self.position)
-
-    def to_string(self):
-        return 'typename %s%s' % (self.name,
-                                  self.default_value and self.default_value.to_string() or '')
-
-    def _instantiate(self, new_template, parent, template_arguments):
-        default_value = self.default_value and self.default_value.instantiate(parent, template_arguments)
-        result = TemplateParameterTypename(parent, self.position, self.name,
-                                           default_value)
-        result.bind(TemplateParameterValue(new_template, self.bound_value.index))
-        return result
-
-    def __str__(self):
-        return '%s[from %s %s]' % (self.name, self.parent.name, id(self.parent))
-
-    def wrap_template_parameter(self):
-        from .types import DependentTypeName
-        name = Name(self.parser.lexer, (self.name,), self.position, self, dependent=True)
-        return DependentTypeName(self.parent, self.position, name)
+        for element in self.parameters:
+            result = element.find(name)
+            if result:
+                return result
+        else:
+            if self.owner.back_link != self.owner:
+                return self.owner.back_link.scope.find(name, is_current_scope)
+            else:
+                return Scope.find(self, name, is_current_scope)
 
 
 class Template(CppObject):
-    class InstanciationError(Exception):
-        def __init__(self, msg, position, error):
-            self.msg = msg
+    class InstantiationError(Exception):
+        def __init__(self, position, error_msg, inner_error=None):
+            Exception.__init__(self)
+            self.message = error_msg
             self.position = position
-            self.error = error
+            self.error = inner_error
 
-    def __init__(self, parent, position):
-        CppObject.__init__(self, parent, position)
+    def __init__(self, lexer, position):
+        CppObject.__init__(self, lexer, position)
+        self.back_link = self
+        self.siblings = []
         self.parameters = []
         self.specializations = []
-        self.created_instances = []
-        self.name = None
-        self.root_template = self
-        self.specialization = False
+        self.push_scope(TemplateScope(self))
+
+    def add_parameter(self, parameter):
+        if isinstance(parameter, TemplateTypenameParameter):
+            self.parameters.append(TypeRef(self.lexer, parameter.position, parameter))
+        else:
+            self.parameters.append(parameter)
+
+    def get_token_type_raw(self):
+        if self.back_link == self:
+            assert self.scope
+            assert self.scope[0]
+            return self.scope[0][1].get_token_type_raw()
+        else:
+            return self.back_link.get_token_type_raw()
 
     def get_token_type(self):
-        return 'TEMPLATE_' + self.specializations[0][1].get_token_type()
+        if self.back_link == self:
+            assert self.scope
+            assert self.scope[0]
+            return 'TEMPLATE_' + self.scope[0][1].get_token_type_raw()
+        else:
+            return self.back_link.get_token_type_raw()
 
-    def find_nonrecursive(self, name):
-        if self.name == name and not self.specialization:
-            return self
+    def bind(self, template):
+        assert self.back_link == self
+        self.back_link = template
+        if self.back_link != self:
+            self.siblings.append(template)
+        for i, p in enumerate(self.scope.parameters):
+            p.bind(i, template)
 
-    def add_template_parameter(self, parameter):
-        self.parameters.append(parameter)
-
-    def find(self, name, is_current_scope):
-        if name == self.name:
-            return self.specializations[0][1]
-        for p in self.parameters:
-            if p.name == name:
-                return p
-            
-    def find_instance(self, parent, arguments, position):
-        template_decl = True
-        template_arguments = []
-        if len(arguments) > len(self.parameters):
-            parameters = ', '.join([p.to_string() for p in self.parameters])
-            self.parser.lexer._error('wrong number of template arguments (%d, should be %d)' % (len(arguments), len(self.parameters)),
-                                     position)
-            self.parser.lexer._note('provided for template %s<%s>' % (self.name, parameters), self.position)
+    def find(self, name):
+        if self.scope and self.scope.items:
+            return self.scope[0][1].find(name) and self or None
+        elif self.back_link != self:
+            return self.back_link.find(name)
+        else:
             return None
 
-        for parameter, argument in zip_longest(self.parameters, arguments):
-            if not argument and not a.default_value:
-                parameters = ', '.join([p.to_string() for p in self.parameters])
-                self.parser.lexer._error('wrong number of template arguments (%d, should be %d)' % (len(arguments), len(self.parameters)),
-                                         position)
-                self.parser.lexer._note('provided for template %s<%s>' % (self.name, parameters), self.position)
-                return None
-            template_arguments.append((parameter.name, argument or parameter.default_value))
-
-        #for specialization_arguments, specialization in self.specializations:
-        #    for index, arg in enumerate(arguments):
-        #        template_arg =
-        if template_decl:
-            return self.specializations[0][1]
-        else:
-            return self.create_instance(specialization, parent, template_arguments, position)
-
-    def create_instance(self, specialization, parent, arguments, position):
-        instance = specialization.instantiate(parent, (self, template_arguments, []))
-        self.created_instances.append((arguments, instance))
-        instance_name = '%s< %s >' % (self.name, (', ').join([a.to_string() for a in arguments]))
-        print(u'\u256d%s\u256e' % (u'\u2500'*(23+len(instance_name))))
-        print(u'\u2502 creating instance of %s \u2502' % instance_name)
-        print(u'\u251c%s\u256f' % (u'\u2500'*(23+len(instance_name))))
-        instance._debug_dump(u'\u2502 ')
-        print(u'\u2570%s\u2500' % (u'\u2500'*(23+len(instance_name))))
-        return instance
-
-    def _instantiate(self, parent, template_arguments):
-        result = Template(parent, self.position)
-        result.name = self.name
-        new_arguments = (template_arguments[0],
-                         template_arguments[1],
-                         template_arguments[2] + [(self, result)])
-        for p in self.parameters:
-            result.add_template_parameter(p.instantiate(result, new_arguments))
-        for params, s in self.specializations:
-            instance_params = (p.instantiate(result, new_arguments) for p in params)
-            instance_specialization = s.instantiate(result, new_arguments)
-            result.specialize(tuple(instance_params), instance_specialization)
-        for (arguments, instance) in self.created_instances:
-            new_arguments = [a.instantiate(result, template_arguments) for a in arguments]
-            result.created_instances.append((new_arguments,
-                                             instance.instantiate(parent, template_arguments)))
+    def make_match(self, arguments):
+        result = {}
+        for i, a in enumerate(arguments):
+            result[i] = a
         return result
 
-    def add(self, specialization):
-        if not self.name:
-            self.name = specialization.name
-        self.specializations.append(([p.wrap_template_parameter() for p in self.parameters],
-                                     specialization))
+    def instantiate(self, arguments, position):
+        #self.lexer._note('creating instance of template %s'%self.scope[0][1].name, position)
+        matches, specialization = self.find_specialization(position, None, arguments) or (self.make_match(arguments), self.scope[0][1])
+        return specialization.create_template_instance(self, matches, position)
 
-    def specialize(self, parameters, template_specialization):
-        if not self.name:
-            self.name = template_specialization.name
-        self.specializations.append((parameters, template_specialization))
-
-    def create_template_arguments(self, arguments, position):
-        template_arguments = []
-        from .types import ConversionError
-        for parameter, argument in zip_longest(self.parameters, arguments):
-            if not argument:
-                raise Template.InstanciationError('too many template parameters', position, None)
-            if not parameter:
-                if not agument.default_value:
-                    raise Template.InstanciationError('too few template parameters', position, None)
-                else:
-                    argument = parameter.default_value
-            try:
-                argument.is_valid(parameter)
-            except AttributeError:
-                raise Template.InstanciationError('Invalid value for template parameter %s' % parameter.name,
-                                                  argument.position,
-                                                  None)
-            except ConversionError as e:
-                if parameter.name:
-                    raise Template.InstanciationError('Invalid value for template parameter %s' % parameter.name,
-                                                      argument.position,
-                                                      e)
-                else:
-                    raise Template.InstanciationError('Invalid value for template parameter',
-                                                      argument.position,
-                                                      e)
-            template_arguments.append((parameter.name, argument))
-        return self.specializations[0][1], template_arguments
-
-    def write_to(self, writer):
-        for arguments, instance  in self.created_instances:
-            instance.write_to(writer)
-
-    def create_binding(self):
-        for index, parameter in enumerate(self.parameters):
-            parameter.bind(TemplateParameterValue(self, index))
-
-    def bind_arguments(self, original_template, argument_list):
-        self.root_template = original_template
-        for index, parameter in enumerate(self.parameters):
-            parameter.bind(TemplateParameterValue(original_template, index))
-
-    def _debug_dump(self, indent):
-        parameters = ', '.join([p.to_string() for p in self.parameters])
-        if self.specializations:
-            print(indent + 'template< %s >' % parameters)
-            print(indent + '/* %s->%s */' % (id(self), id(self.root_template)))
-            self.specializations[0][1]._debug_dump(indent)
-
-            #TODO: specializations
-            for arguments, instance in self.created_instances:
-                print(indent + '`-+- instance <%s>' % ', '.join([a.to_string() for a in arguments]))
-                instance._debug_dump(indent + '  |  ')
+    def find_instance(self, template_on_stack, arguments, position):
+        arguments = self.match(arguments, position)
+        assert len(arguments) == len(self.parameters)
+        if template_on_stack:
+            template_on_stack.bind(self)
+            for i, p in enumerate(arguments):
+                if not isinstance(p, TypeRef):
+                    break
+                if not (isinstance(p.type, TemplateTypenameParameter)
+                     or isinstance(p.type, TemplateValueParameter)):
+                    break
+                if p.qualifiers:
+                    break
+                if p.type not in template_on_stack.scope.parameters:
+                    break
+                if p.type.parameter_bind[0] != i:
+                    break
+            else:
+                return self.scope[0][1]
+            return self.find_exact_specialization(position, template_on_stack, arguments)
         else:
-            print(indent + '/* template< %s > */' % parameters)
-            print(indent + '/* %s->%s */' % (id(self), id(self.root_template)))
-            print(indent + '/* %s definition */' % (self.root_template.specializations[0][1].name))
+            return self.instantiate(arguments, position)
 
-    def type_name(self):
-        return self.name
+    def _create_template_instance(self, template, arguments, position):
+        assert self == self.back_link
+        return Template(self.lexer, position)
+
+    def _complete_template_instance(self, result, template, arguments, position):
+        parameters = [p.create_template_instance(template, arguments, position) for p in self.scope.parameters]
+        for p in parameters:
+            result.scope.add(p)
+        for s in self.siblings:
+            for i, p in enumerate(s.scope.parameters):
+                p.create_template_instance(template, arguments, position).bind(i, result)
+        if self.scope:
+            result.scope.add(self.scope[0][1].create_template_instance(template, arguments, position))
+        for specialization_parameters, specialization in self.specializations:
+            params = [p.create_template_instance(template, arguments, position) for p in specialization_parameters]
+            result.specializations.append((params, specialization.create_template_instance(template, arguments, position)))
+        self.lexer.pop_scope()
+        return result
+
+    def create_specialization(self, arguments, specialization):
+        assert self == self.back_link
+        self.specializations.append((arguments, specialization))
+
+    def find_exact_specialization(self, position, template_on_stack, arguments):
+        for specialization_arguments, specialization in self.specializations:
+            try:
+                matches, scores = self.argument_match(specialization_arguments, arguments)
+            except CastError:
+                pass
+            else:
+                for score in scores:
+                    if score == Type.Distance():
+                        return None
+                else:
+                    return specialization
+
+    def find_specialization(self, position, template_on_stack, arguments):
+        specializations = []
+        for specialization_arguments, specialization in self.specializations:
+            try:
+                matches, score = self.argument_match(specialization_arguments, arguments)
+            except CastError:
+                pass
+            else:
+                specializations.append((score, matches, specialization))
+        if specializations:
+            specializations = sorted(specializations, key=lambda x: x[0])
+            score, matches, result = specializations[0]
+            if len(specializations) > 1 and specializations[0][0] == specializations[1][0]:
+                args = ', '.join(str(x) for x in arguments)
+                self.lexer._error('ambiguous partial specializations of %s<%s>' % (self.scope[0][1].name, args),
+                                  position)
+                for s, m, r in specializations:
+                    if s == score:
+                        match_str = ', '.join('%s = %s' % (r.parent.scope.parameters[i].name or '<anonymous>', v) for i,v in sorted(m.items()))
+                        self.lexer._note('partial specialization matches [%s]'%match_str, r.position)
+                    else:
+                        break
+            return matches, result
+        return None
+
+    def argument_match(self, parameters, arguments):
+        assert len(arguments) == len(parameters)
+        matches = { }
+        result = [ ]
+        for a, p in zip(arguments, parameters):
+            score = p.distance(a, CAST_NONE, matches)
+            for k, v in score.matches.items():
+                assert k not in matches
+                matches[k] = v
+            result.append(score)
+        return matches, result
+
+    def debug_dump(self, indent=''):
+        if self.scope and not self.scope.empty():
+            params = ', '.join(str(p) for p in self.scope.parameters)
+            print('%s%s<%s> [%s]' % (indent, self.__class__.__name__,
+                                    params, self.position))
+            self.scope[0][-1].debug_dump(indent)
+            for args, pos, _, instance in self.scope[0][-1].instances:
+                print('%s<%s> [%s]' % (indent, ', '.join(str(a) for a in args), pos))
+                instance.debug_dump(indent + '* ')
+        for specialization_arguments, specialization in self.specializations:
+            params = ', '.join(str(p) for p in specialization_arguments)
+            print('%sspecialization: %s<%s> [%s]' % (indent, self.__class__.__name__,
+                                        params, self.position))
+            specialization.debug_dump(indent+' | ')
+            for args, pos, _, instance in specialization.instances:
+                print('%s<%s> [%s]' % (indent+' | ', ', '.join(str(a) for a in args), pos))
+                instance.debug_dump(indent + ' | * ')
+            print(indent + ' `-- end specialization')
+
+    def match(self, arguments, position):
+        if len(arguments) > len(self.scope.parameters):
+            raise self.InstantiationError(arguments[len(self.scope.parameters)].position,
+                                          'Too many template arguments')
+        for missing_parameter in self.scope.parameters[len(arguments):]:
+            if not missing_parameter.value:
+                raise self.InstantiationError(position, 'too few template arguments')
+            arguments.append(missing_parameter.value)
+        for p, a in zip(self.scope.parameters, arguments):
+            if not p.is_compatible(a):
+                raise self.InstantiationError(a.position,
+                                              'Invalid template argument: expected %s, got %s' % (p.get_type(),
+                                                                                                  a.__class__.__name__))
+        return arguments

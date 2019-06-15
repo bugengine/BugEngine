@@ -318,8 +318,8 @@ build_script:
   - set PATH=%COMPILER_PATH%;%PATH%
   - set
   - python waf configure --compilers=%COMPILER%
-  - python waf build:%TARGET_OS%-%COMPILER%_%COMPILER_TARGET%-%COMPILER_VERSION%:%FLAVOR%
-  - python waf build:%TARGET_OS%-%COMPILER%_%COMPILER_TARGET%-%COMPILER_VERSION%:%FLAVOR% --static
-  - python waf build:%TARGET_OS%-%COMPILER%_%COMPILER_TARGET%-%COMPILER_VERSION%:%FLAVOR% --dynamic
-  - python waf build:%TARGET_OS%-%COMPILER%_%COMPILER_TARGET%-%COMPILER_VERSION%:%FLAVOR% --nomaster
+  - python waf build:%TARGET_OS%-%COMPILER%_%COMPILER_TARGET%-%COMPILER_VERSION%:%FLAVOR% --tests
+  - python waf build:%TARGET_OS%-%COMPILER%_%COMPILER_TARGET%-%COMPILER_VERSION%:%FLAVOR% --tests --static
+  - python waf build:%TARGET_OS%-%COMPILER%_%COMPILER_TARGET%-%COMPILER_VERSION%:%FLAVOR% --tests --dynamic
+  - python waf build:%TARGET_OS%-%COMPILER%_%COMPILER_TARGET%-%COMPILER_VERSION%:%FLAVOR% --tests --nomaster
 

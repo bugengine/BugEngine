@@ -1,6 +1,7 @@
 """
     Use this file to declare all libraries and modules in the bugengine
 """
+from waflib import Options
 
 
 def build_externals(bld):
@@ -229,8 +230,9 @@ def build_games(bld):
     bld.game('help', ['engine.bugengine', 'plugin.ui.console',
                       'plugin.scripting.package'],
              path='tool.help', platforms=['pc'])
-    bld.game('test.clt', ['plugin.compute.cpu'])
-    bld.game('test.settings', ['engine.bugengine'])
+    if Options.options.tests:
+        bld.game('test.clt', ['plugin.compute.cpu'])
+        bld.game('test.settings', ['engine.bugengine'])
 
 
 def build(bld):

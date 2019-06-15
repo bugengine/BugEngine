@@ -1,403 +1,330 @@
 from .cppobject import CppObject
 from .scope import Scope
-from .templates import Template, DependentName
 
 
-class ConversionError(Exception):
-    def __init__(self, message, position):
-        self.message = message
-        self.position = position
+class CastError(Exception):
+    pass
 
 
-class Typedef(CppObject):
-    def __init__(self, parent, position, name, type):
-        CppObject.__init__(self, parent, position)
-        self.name = name
+CAST_NONE=0
+CAST_ATTRIB=1
+CAST_IMPLICIT=2
+CAST_STATIC=3
+CAST_UPCAST=4
+CAST_REINTERPRET=5
+CAST_UNRELATED=6
+
+
+class Type(CppObject):
+    class Distance:
+        def __init__(self, variant=0, cast=0, attribute=0, matches={}):
+            self.distance = (variant, cast, attribute)
+            self.matches = {}
+            for a, m in matches.items():
+                self.matches[a] = m
+
+        def refine(self):
+            if self.distance[0] > 0:
+                self.distance = (self.distance[0]-1, self.distance[1], self.distance[2])
+            return self
+
+        def __bool__(self):
+            return self.distance[0] >= 0 and self.distance[1] >= 0 and self.distance[2] >= 0
+
+
+        def match_attributes(self, allowed_cast, attrs1, attrs2):
+            for a in attrs2:
+                if a not in attrs1:
+                    raise CastError()
+            cast_cost = 0
+            for a in attrs1:
+                if a not in attrs2:
+                    cast_cost += 1
+            if not allowed_cast:
+                if cast_cost:
+                    raise CastError()
+            self.distance = (self.distance[0], self.distance[1], self.distance[2]+cast_cost)
+            return self
+
+        def __eq__(self, other):
+            return self.distance == other.distance
+
+        def __ne__(self, other):
+            return self.distance != other.distance
+
+        def __lt__(self, other):
+            return self.distance < other.distance
+
+        def __le__(self, other):
+            return self.distance <= other.distance
+
+        def __gt__(self, other):
+            return self.distance > other.distance
+
+        def __ge__(self, other):
+            return self.distance >= other.distance
+        
+        def __iadd__(self, other):
+            for k, v in other.matches.items():
+                if k in self.matches:
+                    d = v.distance(self.matches[k], CAST_NONE)
+                    if d != type.Distance():
+                        raise CastError()
+                else:
+                    self.matches[k] = v
+            self.distance = (self.distance[0] + other.distance[0],
+                             self.distance[1] + other.distance[1],
+                             self.distance[2] + other.distance[2],)
+            return self
+        
+        def __repr__(self):
+            return 'd[%s,%s,%s]' % self.distance
+
+        def __str__(self):
+            return 'variant=%d / attribute = %d / cast = %d' % (self.distance[0], self.distance[1], self.distance[2])
+
+    def __init__(self, *args):
+        CppObject.__init__(self, *args)
+
+
+class Pointer(Type):
+    def __init__(self, lexer, position, type):
+        Type.__init__(self, lexer, position)
         self.type = type
 
-    def get_token_type(self):
-        return 'TYPENAME_ID'
-
-    def find_nonrecursive(self, name):
-        if self.name == name:
-            return self.type
-
-    def type_name(self):
-        return self.name
-
-    def to_string(self):
-        return self.name
-
-    def find(self, name, is_current_scope):
-        return self.type.find(name)
-
-    #TODO: delete
-    def original_type(self):
-        return self.type
-
-    def _instantiate(self, parent, template_arguments):
-        return Typedef(parent, self.position, self.name,
-                       self.type.instantiate(parent, template_arguments),)
-
-    def signature(self):
-        return self.type.signature()
-
-    def _debug_dump(self, indent):
-        print(indent + '/* typedef %s %s */' % (self.type.to_string(), self.name))
-
-    def write_to(self, writer):
-        pass
-
-
-class DependentTypeName(DependentName):
-    def __init__(self, parent, position, name):
-        DependentName.__init__(self, parent, position, name)
-
-    def get_token_type(self):
-        return 'TYPENAME_ID'
-
-    def type_name(self):
-        result = []
-        for name, params in zip(self.name.name, self.name.targets):
-            if params[1]:
-                result.append('%s<%s>' % (name, ', '.join([p.to_string() for p in params[1]])))
+    def __str__(self):
+        return str(self.type)+'*'
+    
+    def _distance(self, other, matches, typeref, other_typeref, allowed_cast):
+        if isinstance(other, Pointer):
+            if allowed_cast in (CAST_STATIC, CAST_UPCAST):
+                target_cast = CAST_UPCAST
+            elif allowed_cast in (CAST_REINTERPRET, CAST_UNRELATED):
+                target_cast = CAST_UNRELATED
             else:
-                result.append(name)
-        return '::'.join(result)
-
-    def to_string(self):
-        return self.type_name()
-
-    def original_type(self):
-        return self.resolved_to
-
-    def _instantiate(self, parent, template_arguments):
-        result = DependentName._instantiate(self, parent, template_arguments)
-        # TODO error check
-        return result
-
-    def try_conversion(self, other, qualifier_importance = False):
-        if not isinstance(other, DependentTypeName):
-            raise ConversionError("can't convert from %s type to %s type" % (self.__class__.__name__.lower(),
-                                                                             other.__class__.__name__.lower()),
-                                  self.position)
-        if self.resolved_to:
-            if self.resolved_to != other.resolved_to:
-                print("can't convert from %s to %s" % ('::'.join(self.name.name),
-                                                       '::'.join(other.name.name)))
-                print(self.resolved_to, other.resolved_to)
-                raise ConversionError("can't convert from %s to %s" % ('::'.join(self.name.name),
-                                                                       '::'.join(other.name.name)),
-                                      self.position)
+                target_cast = allowed_cast
+            d = self.type.distance(other.type, target_cast, matches).refine()
+            return d.match_attributes(allowed_cast, typeref.qualifiers, other_typeref.qualifiers)
+        elif allowed_cast == CAST_UNRELATED:
+            return Type.Distance(variant=-1)
         else:
-            print('TODO')
-            raise ConversionError("can't convert from %s to %s" % ('::'.join(self.name.name),
-                                                                   '::'.join(other.name.name)),
-                                  self.position)
+            raise CastError()
+
+    def _create_template_instance(self, template, arguments, position):
+        return Pointer(self.lexer, self.position,
+                       self.type.create_template_instance(template, arguments, self.position))
 
     def signature(self):
-        return 'typename{%s}' % self.type_name()
-
-    def build_type(self, type_builder):
-        print(self.name.name, self.position)
-        assert(False)
+        return 'P'+self.type.signature()
 
 
-class Struct(CppObject):
-    id = 1
-    class Definition(Scope):
-        def __init__(self, parent, position, parent_struct):
-            Scope.__init__(self, parent, position)
-            self.parent_struct = parent_struct
-            self.constructor = None
-            self.destructor = None
+class Reference(Type):
+    def __init__(self, lexer, position, type):
+        Type.__init__(self, lexer, position)
+        self.type = type
 
-    def __init__(self, parent, position, struct_type, name):
-        CppObject.__init__(self, parent, position)
-        self.id = Struct.id
-        Struct.id += 1
-        self.struct_type = struct_type
-        self.name = name
-        self.definition = None
-        self.queued_templates = []
+    def __str__(self):
+        return str(self.type)+'&'
 
-    def add(self, member):
-        self.definition.add(member)
-
-    def find(self, name, is_current_scope):
-        if self.definition:
-            if is_current_scope and name == self.name and self.definition.constructor:
-                return self.definition.constructor
+    def _distance(self, other, matches, typeref, other_typeref, allowed_cast):
+        if isinstance(other, Reference):
+            if allowed_cast in (CAST_STATIC, CAST_UPCAST):
+                target_cast = CAST_UPCAST
+            elif allowed_cast in (CAST_REINTERPRET, CAST_UNRELATED):
+                target_cast = CAST_UNRELATED
             else:
-                return self.definition.find(name, is_current_scope)
+                target_cast = allowed_cast
+            d = self.type.distance(other.type, target_cast).refine()
+            return d.match_attributes(allowed_cast, typeref.qualifiers, other_typeref.qualifiers)
+        elif allowed_cast == CAST_UNRELATED:
+            return Type.Distance(variant=-1)
+        else:
+            raise CastError()
 
-    def define(self, parent):
-        self.definition = Struct.Definition(self, self.position, parent)
-        for instance, parameters in self.queued_templates:
-            self._instantiate_content(instance, parameters)
+    def _create_template_instance(self, template, arguments, position):
+        return Reference(self.lexer, self.position,
+                         self.type.create_template_instance(template, arguments, self.position))
+
+    def signature(self):
+        return 'R'+self.type.signature()
+
+
+class Array(Type):
+    def __init__(self, lexer, position, type, size):
+        Type.__init__(self, lexer, position)
+        self.type = type
+        self.size = size
+
+    def __str__(self):
+        return '%s[%s]' % (str(self.type), self.size or '')
+
+    def _distance(self, other, matches, typeref, other_typeref, allowed_cast):
+        if isinstance(other, Array):
+            if allowed_cast in (CAST_STATIC, CAST_UPCAST):
+                target_cast = CAST_UPCAST
+            elif allowed_cast in (CAST_REINTERPRET, CAST_UNRELATED):
+                target_cast = CAST_UNRELATED
+            else:
+                target_cast = allowed_cast
+            d = self.type.distance(other.type, target_cast).refine()
+            return d.match_attributes(allowed_cast, typeref.qualifiers, other_typeref.qualifiers)
+        elif allowed_cast == CAST_UNRELATED:
+            return Type.Distance(variant=-1)
+        else:
+            raise CastError()
+
+    def _create_template_instance(self, template, arguments, position):
+        return Array(self.lexer, self.position,
+                     self.type.create_template_instance(template, arguments, self.position),
+                     self.size and self.size.create_template_instance(template, arguments, self.position))
+
+    def signature(self):
+        return 'P'+self.type.signature()
+
+
+class StructScope(Scope):
+    def __init__(self, owner, parent):
+        Scope.__init__(self, owner)
+        self.parent = parent
+        self.destructor = None
+
+
+class Struct(Type):
+    global_index = 0
+
+    def __init__(self, lexer, position, struct_type, name):
+        Type.__init__(self, lexer, position, name)
+        self.struct_type = struct_type
+        self.index = self.global_index
+        self.global_index += 1
 
     def get_token_type(self):
         return 'STRUCT_ID'
 
-    def find_nonrecursive(self, name):
-        if self.name == name:
-            return self
+    def define(self, parent):
+        self.push_scope(StructScope(self, parent))
 
-    def type_name(self):
-        return self.name
+    def _create_template_instance(self, template, arguments, position):
+        return Struct(self.lexer, self.position, self.struct_type, self.name)
 
-    def to_string(self):
-        return self.type_name()
+    def _complete_template_instance(self, result, template, arguments, position):
+        if self.scope:
+            result.define(self.scope.parent and self.scope.parent.create_template_instance(template, arguments, position))
+            self.scope.create_template_instance(result.scope, template, arguments, position)
+            self.lexer.pop_scope()
+        return result
 
-    def signature(self):
-        return '%s{%d}' % (self.name, self.id)
-
-    def write_to(self, writer):
-        if self.definition:
-            with writer.create_struct(self.position, self.id, self.name,
-                                      self.definition.parent_struct and self.definition.parent_struct.id) as s:
-                if self.definition.constructor:
-                    self.definition.constructor.write_to(s)
-                if self.definition.destructor:
-                    self.definition.destructor.write_to(s)
-                for member in self.definition.members:
-                    member.write_to(s)
-
-    def build_type(self, writer):
-        return writer.struct(self.name, self.id, self.position)
-
-    def _instantiate(self, parent, template_arguments):
-        return Struct(parent, self.position, self.struct_type, self.name)
-
-    def _instantiate_content(self, instance, template_arguments):
-        definition = self.definition
-        if definition:
-            instance.define(definition.parent_struct
-                        and definition.parent_struct.instantiate(instance, template_arguments))
-            for member in definition.members:
-                print(member)
-                instance.definition.members.append(member.instantiate(instance, template_arguments))
-            if definition.constructor:
-                instance.definition.constructor = definition.constructor.instantiate(instance, template_arguments)
-            if definition.destructor:
-                instance.definition.destructor = definition.destructor.instantiate(instance, template_arguments)
-        else:
-            self.queued_templates.append((instance, template_arguments))
-        return instance
-
-    def try_conversion(self, other, qualifier_importance = False):
-        if not isinstance(other, Struct):
-            raise ConversionError("can't convert from %s type to %s type" % (self.__class__.__name__.lower(),
-                                                                             other.__class__.__name__.lower()),
-                                  self.position)
-        if not self.definition:
-            raise ConversionError("struct %s is not defined" % (self.name),
-                                  self.position)
-        s = self
-        while s:
-            if s == other:
-                return
-            s = s.definition.parent_struct
-        raise ConversionError("can't convert from %s to %s" % (self.name, other.name),
-                              self.position)
-
-    def _debug_dump(self, indent):
-        if self.definition:
-            parent_name = self.definition.parent_struct and (' : '+self.definition.parent_struct.type_name()) or ''
-            print(indent + 'struct %s%s\n%s{' % (self.name, parent_name, indent))
-            self.definition._debug_dump(indent + '  ')
-            print(indent + '};\n%s' % indent)
-        else:
-            print(indent + 'struct %s;' % self.name)
-
-
-class Builtin(CppObject):
-    def __init__(self, parent, position, typename):
-        CppObject.__init__(self, parent, position)
-        self.typename = typename
-
-    def type_name(self):
-        return self.typename
-
-    def original_type(self):
-        return self
-
-    def signature(self):
-        return 'builtin{%s}' % self.typename
-
-    def try_conversion(self, other, qualifier_importance=False):
-        if not isinstance(other, Builtin):
-            raise ConversionError("can't convert from %s type %s to %s type" % (self.__class__.__name__.lower(),
-                                                                                self.typename,
-                                                                                other.__class__.__name__.lower()),
-                                  self.position)
-        #TODO: actual conversions?
-
-    def build_type(self, writer):
-        return writer.builtin(self.typename, self.position)
-
-    def instantiate(self, parent, template_arguments):
-        return self
-
-    def to_string(self):
-        return self.type_name()
-
-
-class Type(CppObject):
-    def __init__(self, parent, position, base_type):
-        CppObject.__init__(self, parent, position)
-        self.base_type = base_type
-        self.modifier = []
-
-    def find(self, name, is_current_scope):
-        return self.base_type.find(name, is_current_scope)
-
-    def add_modifier(self, modifier, position):
-        self.modifier.append((modifier, position))
-
-    def type_name(self):
-        return ' '.join([self.base_type.type_name()] + [m[0] for m in self.modifier])
-
-    def original_type(self):
-        return self.base_type.original_type()
-
-    def is_valid(self, type):
-        from . import templates
-        return isinstance(type, templates.TemplateParameterTypename)
-
-    def signature(self):
-        return self.base_type.signature()
-
-    def try_conversion(self, other_type, qualifier_importance=False):
-        self.base_type.try_conversion(other_type.base_type, True)
-        if qualifier_importance:
-            for modifier, position in self.modifier:
-                for other_modifier, other_position in other_type.modifier:
-                    if modifier == other_modifier: break
+    def _distance(self, other, matches, typeref, other_typeref, allowed_cast):
+        if isinstance(other, Struct):
+            if allowed_cast <= CAST_ATTRIB:
+                if other != self:
+                    raise CastError()
                 else:
-                    raise ConversionError("conversion would lose '%s' qualifier" % modifier,
-                                          position)
-
-    def build_type(self, writer):
-        t = self.base_type.build_type(writer)
-        for modifier, position in self.modifier:
-            t.add_modifier(modifier, position)
-        return t
-
-    def _instantiate(self, parent, template_arguments):
-        t = Type(parent, self.position, self.base_type.instantiate(parent, template_arguments))
-        for modifier, position in self.modifier:
-            t.add_modifier(modifier, position)
-        return t
-
-    def matches(self, other):
-        try:
-            self.try_conversion(other, True)
-        except ConversionError:
-            return False
+                    d = Type.Distance()
+                    return d.match_attributes(allowed_cast, typeref.qualifiers, other_typeref.qualifiers)
+            cast = 0
+            variant = 0
+            p = self
+            while p:
+                if p == other:
+                    break
+                cast += 1
+                p = p.scope and p.scope.parent
+            else:
+                cast = 0
+                p = other
+                while p:
+                    if p == self:
+                        break
+                    cast -= 1
+                else:
+                    if allowed_cast < CAST_UNRELATED:
+                        raise CastError()
+                    variant = -1
+                    cast = 0
+            d = Type.Distance(variant=variant, cast=cast)
+            return d.match_attributes(allowed_cast, typeref.qualifiers, other_typeref.qualifiers)
+        elif allowed_cast == CAST_UNRELATED:
+            return Type.Distance(variant = -1)
         else:
-            return True
+            raise CastError()
 
-    def to_string(self):
-        return self.type_name()
-
-
-class Pointer(CppObject):
-    def __init__(self, parent, position, pointer_to):
-        CppObject.__init__(self, parent, position)
-        self.pointer_to = pointer_to
-
-    def type_name(self):
-        return self.pointer_to.type_name() + '*'
-
-    def original_type(self):
-        return self.pointer_to.original_type()
+    def __str__(self):
+        return self.name or '<anonymous>'
 
     def signature(self):
-        return '%s*' % (self.pointer_to.signature())
-
-    def try_conversion(self, other, qualifier_importance=False):
-        if not isinstance(other, Pointer):
-            raise ConversionError("can't convert from %s type to %s type" % (self.__class__.__name__.lower(),
-                                                                             other.__class__.__name__.lower()),
-                                  self.position)
-        self.pointer_to.try_conversion(other.pointer_to, True)
-
-    def build_type(self, writer):
-        return writer.pointer(self.pointer_to.build_type(writer), self.position)
-
-    def _instantiate(self, parent, template_arguments):
-        return Pointer(parent, self.position,
-                       self.pointer_to.instantiate(parent, template_arguments))
-
-    def to_string(self):
-        return self.type_name()
+        return '%s_%d' % (self.name or 'anonymous', self.index)
 
 
-class Reference(CppObject):
-    def __init__(self, parent, position, pointer_to):
-        CppObject.__init__(self, parent, position)
-        self.pointer_to = pointer_to
+class BuiltIn(Type):
+    def __init__(self, lexer, position, builtin):
+        Type.__init__(self, lexer, position)
+        self.builtin = builtin
 
-    def type_name(self):
-        return self.pointer_to.type_name() + '&'
+    def __str__(self):
+        return self.builtin
 
-    def original_type(self):
-        return self.pointer_to.original_type()
-
-    def signature(self):
-        return '%s&' % (self.pointer_to.signature())
-
-    def try_conversion(self, other, qualifier_importance=False):
-        if not isinstance(other, Reference):
-            raise ConversionError("can't convert from %s type to %s type" % (self.__class__.__name__.lower(),
-                                                                             other.__class__.__name__.lower()),
-                                  self.position)
-        self.pointer_to.try_conversion(other.pointer_to, True)
-
-    def build_type(self, writer):
-        return writer.reference(self.pointer_to.build_type(writer), self.position)
-
-    def _instantiate(self, parent, template_arguments):
-        return Reference(parent, self.position,
-                         self.pointer_to.instantiate(parent, template_arguments))
-
-    def to_string(self):
-        return self.type_name()
-
-
-class Array(CppObject):
-    def __init__(self, parent, position, array_type, count):
-        CppObject.__init__(self, parent, position)
-        self.array_type = array_type
-        self.count = count
-
-    def type_name(self):
-        if self.count:
-            return '%s[%s]' % (self.array_type.type_name(), self.count.to_string())
+    def _distance(self, other, matches, typeref, other_typeref, allowed_cast):
+        if isinstance(other, BuiltIn):
+            if self.builtin != other.builtin:
+                if allowed_cast >= CAST_IMPLICIT:
+                    d = Type.Distance(cast=1)
+                    return d.match_attributes(allowed_cast, typeref.qualifiers, other_typeref.qualifiers)
+                else:
+                    raise CastError()
+            else:
+                d = Type.Distance(cast=0)
+                return d.match_attributes(allowed_cast, typeref.qualifiers, other_typeref.qualifiers)
+        elif allowed_cast == CAST_UNRELATED:
+            d = Type.Distance(variant = -1)
+            return d.match_attributes(allowed_cast, typeref.qualifiers, other_typeref.qualifiers)
         else:
-            return '%s[]' % (self.array_type.type_name())
+            raise CastError()
+
+    def _create_template_instance(self, template, arguments, position):
+        return self
+    
+    def signature(self):
+        return '%d%s' % (len(self.builtin), self.builtin)
+
+
+class TypeRef(CppObject):
+    def __init__(self, lexer, position, type):
+        CppObject.__init__(self, lexer, position)
+        self.type = type
+        self.qualifiers = set([])
+
+    def add_qualifier(self, qualifier):
+        self.qualifiers.add(qualifier)
+
+    def clone(self):
+        result = TypeRef(self.lexer, self.position, self.type)
+        for q in self.qualifiers:
+            result.qualifiers.add(q)
+        return result
+
+    def distance(self, other, allowed_cast, matches = {}):
+        if isinstance(other, TypeRef):
+            return self.type._distance(other.type, matches, self, other, allowed_cast)
+        else:
+            raise CastError()
+
+    def _create_template_instance(self, template, arguments, position):
+        result = self.clone()
+        result.type = result.type.create_template_instance(template, arguments, position)
+        return result
+
+    def __str__(self):
+        return str(self.type) + (self.qualifiers and ' '+' '.join(self.qualifiers) or '')
+    __repr__ = __str__
 
     def signature(self):
-        return '%s[%s]' % (self.array_type.signature(), count or '')
-
-    def original_type(self):
-        return self.array_type.original_type()
-
-    def try_conversion(self, other, qualifier_importance=False):
-        if not isinstance(other, Array):
-            raise ConversionError("can't convert from %s type to %s type" % (self.__class__.__name__.lower(),
-                                                                             other.__class__.__name__.lower()),
-                                  self.position)
-        self.pointer_to.try_conversion(other.pointer_to, True)
-
-    def build_type(self, writer):
-        return writer.array(self.array_type.build_type(writer), self.count, self.position)
-
-    def _instantiate(self, parent, template_arguments):
-        return Array(parent, self.position,
-                     self.array_type.instantiate(parent, template_arguments),
-                     self.count and self.count.instantiate(parent, template_arguments))
-
-    def to_string(self):
-        return self.type_name()
+        s = self.type.signature()
+        for a in self.qualifiers:
+            if a == 'const':
+                s = 'K'+s
+            elif a == 'volatile':
+                s = 'V'+s
+            else:
+                assert False
+        return s

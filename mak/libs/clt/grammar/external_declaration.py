@@ -1,4 +1,4 @@
-from .. import cl_ast
+from ..cl_ast import specifiers
 
 
 def p_declaration_specifier(p):
@@ -6,7 +6,7 @@ def p_declaration_specifier(p):
         declaration_specifier : STATIC
                               | INLINE
     """
-    p[0] = cl_ast.expressions.Specifier(p.lexer.scopes[-1], p.position(1), p[1])
+    p[0] = p[1]
 
 
 def p_declaration_specifier_list_end(p):
@@ -20,40 +20,31 @@ def p_declaration_specifier_list(p):
     """
         declaration_specifier_list : declaration_specifier_list declaration_specifier
     """
-    p[0] = p[1] + [p[2]]
-    p.set_position_absolute(0, p[2].position)
+    p[0] = p[1] + [specifiers.Specifier(p.lexer, p.position(2), p[2])]
 
 
 def p_external_declarations_end(p):
     """
         external_declarations :
     """
-    p[0] = []
 
 
 def p_external_declarations(p):
     """
         external_declarations : external_declaration external_declarations
     """
-    p[0] = p[2]
-    if p[1]:
-        p[0].append(p[1])
 
 
 def p_external_declarations_namespace(p):
     """
         external_declarations : namespace_declaration external_declarations
     """
-    p[0] = p[2]
-    if p[1]:
-        p[0].append(p[1])
 
 
 def p_external_declaration_empty(p):
     """
         external_declaration : template_specifier_opt declaration_specifier_list SEMI
     """
-    p[0] = None
     for i in range(0, len(p[1])):
         p.lexer.pop_scope()
 
@@ -62,9 +53,6 @@ def p_external_declaration_type(p):
     """
         external_declaration : template_specifier_opt declaration_specifier_list type SEMI
     """
-    p[0] = p[3]
-    for s in p[2]:
-        p.lexer._warning('specifier ignored', s.position)
     for i in range(0, len(p[1])):
         p.lexer.pop_scope()
 
@@ -73,7 +61,6 @@ def p_external_declaration_variable(p):
     """
         external_declaration : template_specifier_opt variable_declaration SEMI
     """
-    p[0] = p[2]
     for i in range(0, len(p[1])):
         p.lexer.pop_scope()
 
@@ -113,8 +100,6 @@ def p_typedef_name(p):
                      | TEMPLATE_METHOD_ID_SHADOW
                      | TEMPLATE_TYPENAME_ID_SHADOW
     """
-    p[0] = p[1]
-    p.set_position(0, 1)
 
 
 def p_typedef_name_error(p):
@@ -128,22 +113,9 @@ def p_typedef_name_error(p):
                      | TEMPLATE_METHOD_ID
                      | TEMPLATE_TYPENAME_ID
     """
-    p.lexer._error("redefinition of '%s' as different kind of symbol" % (p[1]), p.position(1))
-    p.lexer._note("previous definition is here", p.slice[1].found_object.position)
-    p[0] = p[1]
-    p.set_position(0, 1)
 
 
 def p_external_declaration_typedef(p):
     """
         external_declaration : TYPEDEF type typedef_name SEMI
     """
-    p.lexer.scopes[-1].add(cl_ast.types.Typedef(p.lexer.scopes[-1], p.position(3), p[3], p[2]))
-
-
-def p_external_declaration_error(p):
-    """
-        external_declaration : error SEMI
-                             | error statement_block
-    """
-    pass

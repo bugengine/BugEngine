@@ -134,6 +134,11 @@ def options(opt):
                   default = False,
                   dest = 'silent',
                   help = 'do not print build log from Waf')
+    gr.add_option('--tests',
+                  action = 'store_true',
+                  default = False,
+                  dest = 'tests',
+                  help = 'build tests')
 
 
 @conf
