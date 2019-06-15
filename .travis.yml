@@ -22,6 +22,7 @@ addons:
 matrix:
   include:
     - os: linux
+      dist: trusty
       language: android
       env: COMPILER=gcc COMPILER_VERSION=4.9.x TARGET_OS=android_nougat_7.1 FLAVOR=debug
            CONFIGURE_OPTIONS="--android-sdk-path=$ANDROID_HOME --android-ndk-path=android-ndk-r17c,android-ndk-r19c"
@@ -39,6 +40,7 @@ matrix:
         - wget https://dl.google.com/android/repository/android-ndk-r19c-linux-x86_64.zip
         - unzip -q android-ndk-r19c-linux-x86_64.zip
     - os: linux
+      dist: trusty
       language: android
       env: COMPILER=gcc COMPILER_VERSION=4.9.x TARGET_OS=android_nougat_7.1 FLAVOR=profile
            CONFIGURE_OPTIONS="--android-sdk-path=$ANDROID_HOME --android-ndk-path=android-ndk-r17c,android-ndk-r19c"
@@ -56,6 +58,7 @@ matrix:
         - wget https://dl.google.com/android/repository/android-ndk-r19c-linux-x86_64.zip
         - unzip -q android-ndk-r19c-linux-x86_64.zip
     - os: linux
+      dist: trusty
       language: android
       env: COMPILER=gcc COMPILER_VERSION=4.9.x TARGET_OS=android_nougat_7.1 FLAVOR=final
            CONFIGURE_OPTIONS="--android-sdk-path=$ANDROID_HOME --android-ndk-path=android-ndk-r17c,android-ndk-r19c"
@@ -73,6 +76,7 @@ matrix:
         - wget https://dl.google.com/android/repository/android-ndk-r19c-linux-x86_64.zip
         - unzip -q android-ndk-r19c-linux-x86_64.zip
     - os: linux
+      dist: trusty
       language: android
       env: COMPILER=gcc COMPILER_VERSION=4.9.x TARGET_OS=android_oreo_8.0 FLAVOR=debug
            CONFIGURE_OPTIONS="--android-sdk-path=$ANDROID_HOME --android-ndk-path=android-ndk-r17c,android-ndk-r19c"
@@ -90,6 +94,7 @@ matrix:
         - wget https://dl.google.com/android/repository/android-ndk-r19c-linux-x86_64.zip
         - unzip -q android-ndk-r19c-linux-x86_64.zip
     - os: linux
+      dist: trusty
       language: android
       env: COMPILER=gcc COMPILER_VERSION=4.9.x TARGET_OS=android_oreo_8.0 FLAVOR=profile
            CONFIGURE_OPTIONS="--android-sdk-path=$ANDROID_HOME --android-ndk-path=android-ndk-r17c,android-ndk-r19c"
@@ -107,6 +112,7 @@ matrix:
         - wget https://dl.google.com/android/repository/android-ndk-r19c-linux-x86_64.zip
         - unzip -q android-ndk-r19c-linux-x86_64.zip
     - os: linux
+      dist: trusty
       language: android
       env: COMPILER=gcc COMPILER_VERSION=4.9.x TARGET_OS=android_oreo_8.0 FLAVOR=final
            CONFIGURE_OPTIONS="--android-sdk-path=$ANDROID_HOME --android-ndk-path=android-ndk-r17c,android-ndk-r19c"
@@ -124,6 +130,7 @@ matrix:
         - wget https://dl.google.com/android/repository/android-ndk-r19c-linux-x86_64.zip
         - unzip -q android-ndk-r19c-linux-x86_64.zip
     - os: linux
+      dist: trusty
       language: android
       env: COMPILER=clang COMPILER_VERSION=6.0.2 TARGET_OS=android_nougat_7.1 FLAVOR=debug
            CONFIGURE_OPTIONS="--android-sdk-path=$ANDROID_HOME --android-ndk-path=android-ndk-r17c,android-ndk-r19c"
@@ -141,6 +148,7 @@ matrix:
         - wget https://dl.google.com/android/repository/android-ndk-r19c-linux-x86_64.zip
         - unzip -q android-ndk-r19c-linux-x86_64.zip
     - os: linux
+      dist: trusty
       language: android
       env: COMPILER=clang COMPILER_VERSION=6.0.2 TARGET_OS=android_nougat_7.1 FLAVOR=profile
            CONFIGURE_OPTIONS="--android-sdk-path=$ANDROID_HOME --android-ndk-path=android-ndk-r17c,android-ndk-r19c"
@@ -158,6 +166,7 @@ matrix:
         - wget https://dl.google.com/android/repository/android-ndk-r19c-linux-x86_64.zip
         - unzip -q android-ndk-r19c-linux-x86_64.zip
     - os: linux
+      dist: trusty
       language: android
       env: COMPILER=clang COMPILER_VERSION=6.0.2 TARGET_OS=android_nougat_7.1 FLAVOR=final
            CONFIGURE_OPTIONS="--android-sdk-path=$ANDROID_HOME --android-ndk-path=android-ndk-r17c,android-ndk-r19c"
@@ -175,6 +184,7 @@ matrix:
         - wget https://dl.google.com/android/repository/android-ndk-r19c-linux-x86_64.zip
         - unzip -q android-ndk-r19c-linux-x86_64.zip
     - os: linux
+      dist: trusty
       language: android
       env: COMPILER=clang COMPILER_VERSION=6.0.2 TARGET_OS=android_oreo_8.0 FLAVOR=debug
            CONFIGURE_OPTIONS="--android-sdk-path=$ANDROID_HOME --android-ndk-path=android-ndk-r17c,android-ndk-r19c"
@@ -192,6 +202,7 @@ matrix:
         - wget https://dl.google.com/android/repository/android-ndk-r19c-linux-x86_64.zip
         - unzip -q android-ndk-r19c-linux-x86_64.zip
     - os: linux
+      dist: trusty
       language: android
       env: COMPILER=clang COMPILER_VERSION=6.0.2 TARGET_OS=android_oreo_8.0 FLAVOR=profile
            CONFIGURE_OPTIONS="--android-sdk-path=$ANDROID_HOME --android-ndk-path=android-ndk-r17c,android-ndk-r19c"
@@ -209,6 +220,7 @@ matrix:
         - wget https://dl.google.com/android/repository/android-ndk-r19c-linux-x86_64.zip
         - unzip -q android-ndk-r19c-linux-x86_64.zip
     - os: linux
+      dist: trusty
       language: android
       env: COMPILER=clang COMPILER_VERSION=6.0.2 TARGET_OS=android_oreo_8.0 FLAVOR=final
            CONFIGURE_OPTIONS="--android-sdk-path=$ANDROID_HOME --android-ndk-path=android-ndk-r17c,android-ndk-r19c"
@@ -226,6 +238,7 @@ matrix:
         - wget https://dl.google.com/android/repository/android-ndk-r19c-linux-x86_64.zip
         - unzip -q android-ndk-r19c-linux-x86_64.zip
     - os: linux
+      dist: trusty
       language: android
       env: COMPILER=clang COMPILER_VERSION=8.0.2 TARGET_OS=android_oreo_8.0 FLAVOR=debug
            CONFIGURE_OPTIONS="--android-sdk-path=$ANDROID_HOME --android-ndk-path=android-ndk-r17c,android-ndk-r19c"
@@ -243,6 +256,7 @@ matrix:
         - wget https://dl.google.com/android/repository/android-ndk-r19c-linux-x86_64.zip
         - unzip -q android-ndk-r19c-linux-x86_64.zip
     - os: linux
+      dist: trusty
       language: android
       env: COMPILER=clang COMPILER_VERSION=8.0.2 TARGET_OS=android_oreo_8.0 FLAVOR=profile
            CONFIGURE_OPTIONS="--android-sdk-path=$ANDROID_HOME --android-ndk-path=android-ndk-r17c,android-ndk-r19c"
@@ -260,6 +274,7 @@ matrix:
         - wget https://dl.google.com/android/repository/android-ndk-r19c-linux-x86_64.zip
         - unzip -q android-ndk-r19c-linux-x86_64.zip
     - os: linux
+      dist: trusty
       language: android
       env: COMPILER=clang COMPILER_VERSION=8.0.2 TARGET_OS=android_oreo_8.0 FLAVOR=final
            CONFIGURE_OPTIONS="--android-sdk-path=$ANDROID_HOME --android-ndk-path=android-ndk-r17c,android-ndk-r19c"
@@ -277,22 +292,31 @@ matrix:
         - wget https://dl.google.com/android/repository/android-ndk-r19c-linux-x86_64.zip
         - unzip -q android-ndk-r19c-linux-x86_64.zip
     - os: linux
+      dist: trusty
       env: COMPILER=gcc_amd64 COMPILER_VERSION=4.8.4 TARGET_OS=linux_amd64 FLAVOR=debug
     - os: linux
+      dist: trusty
       env: COMPILER=gcc_amd64 COMPILER_VERSION=4.8.4 TARGET_OS=linux_amd64 FLAVOR=profile
     - os: linux
+      dist: trusty
       env: COMPILER=gcc_amd64 COMPILER_VERSION=4.8.4 TARGET_OS=linux_amd64 FLAVOR=final
     - os: linux
+      dist: trusty
       env: COMPILER=clang_amd64 COMPILER_VERSION=5.0.0 TARGET_OS=linux_amd64 FLAVOR=debug
     - os: linux
+      dist: trusty
       env: COMPILER=clang_amd64 COMPILER_VERSION=5.0.0 TARGET_OS=linux_amd64 FLAVOR=profile
     - os: linux
+      dist: trusty
       env: COMPILER=clang_amd64 COMPILER_VERSION=5.0.0 TARGET_OS=linux_amd64 FLAVOR=final
     - os: linux
+      dist: trusty
       env: COMPILER=gcc_x86 COMPILER_VERSION=4.2.1 TARGET_OS=windows_x86 FLAVOR=debug
     - os: linux
+      dist: trusty
       env: COMPILER=gcc_x86 COMPILER_VERSION=4.2.1 TARGET_OS=windows_x86 FLAVOR=profile
     - os: linux
+      dist: trusty
       env: COMPILER=gcc_x86 COMPILER_VERSION=4.2.1 TARGET_OS=windows_x86 FLAVOR=final
     - os: osx
       env: COMPILER=appleclang COMPILER_VERSION=9.1.0 TARGET_OS=macosx10.13 FLAVOR=debug
@@ -315,7 +339,7 @@ matrix:
 
 script:
   - CC= CXX= ./waf configure ${CONFIGURE_OPTIONS}
-  - ./waf build:${TARGET_OS}-${COMPILER}-${COMPILER_VERSION}:${FLAVOR}
+  - ./waf build:${TARGET_OS}-${COMPILER}-${COMPILER_VERSION}:${FLAVOR} --tests
   - if [[ "x${BUILD_STATIC}" != "xno" ]]; then
         ./waf build:${TARGET_OS}-${COMPILER}-${COMPILER_VERSION}:${FLAVOR} --static --tests;
     fi
