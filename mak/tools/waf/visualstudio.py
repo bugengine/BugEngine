@@ -618,3 +618,10 @@ class vs2017(vs2003):
     version =	(('Visual Studio 15', '12.00', True, '15.0.00000.0'),(VCxproj, ('6.0','14.1', '15.0')))
     platforms = ['Win32', 'x64', 'ARM', 'Itanium']
 
+class vs2019(vs2003):
+    "creates projects for Visual Studio 2019"
+    cmd = 'vs2019'
+    fun = 'build'
+    version =	(('Visual Studio 16', '12.00', True, '16.0.00000.0'),(VCxproj, ('6.0','14.2', '16.0')))
+    platforms = ['Win32', 'x64', 'ARM', 'Itanium']
+
