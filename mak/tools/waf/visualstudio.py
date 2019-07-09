@@ -131,15 +131,15 @@ class Solution:
         else:
             return None
 
-    def get_dependency(self):
-        if self.master:
+    def get_dependency(self, project):
+        if self.master and project.GUID == VCproj.GUID:
             return "	ProjectSection(ProjectDependencies) = postProject\r\n		%s = %s\r\n	EndProjectSection\r\n" % (self.master, self.master)
         else:
             return ''
 
 
     def add(self, task_gen, project, project_path, build = False):
-        self.projects.append('Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "%s", "%s", "%s"\r\n%sEndProject' % (project.name, project_path, project.guid, self.get_dependency()))
+        self.projects.append('Project("%s") = "%s", "%s", "%s"\r\n%sEndProject' % (project.GUID, project.name, project_path, project.guid, self.get_dependency(project)))
         project_config = []
         for t in task_gen.bld.env.ALL_TOOLCHAINS:
             env = task_gen.bld.all_envs[t]
@@ -195,6 +195,7 @@ class VcprojNode:
             XmlNode(xml, 'File', {'RelativePath': '$(SolutionDir)%s'%file.path_from(src_node).replace('/', '\\')}).close()
 
 class VCproj:
+    GUID = '{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}'
     extensions = ['vcproj']
     def __init__(self, task_gen, version, version_project, use_folders):
         if use_folders:
@@ -287,6 +288,7 @@ class VCproj:
         self.vcproj.close()
 
 class VCxproj:
+    GUID = '{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}'
     extensions = ['vcxproj', 'vcxproj.filters']
     def __init__(self, task_gen, version, version_project, use_folders):
         self.vcxproj = XmlFile()
@@ -441,6 +443,56 @@ class VCxproj:
             self.vcxfilters._add(n, 'Filter', node.parent.path_from(project_node).replace('/', '\\'))
 
 
+class PyProj:
+    GUID = '{888888A0-9F3D-457C-B088-3A5042F75D52}'
+    def __init__(self, task_gen, version, version_project, use_folders):
+        self.pyproj = XmlFile()
+        self.guid = generateGUID(task_gen.target)
+        if use_folders:
+            self.name = task_gen.target.split('.')[-1]
+        else:
+            self.name = task_gen.target
+
+        project = self.pyproj._add(self.pyproj.document, 'Project', {'DefaultTargets':'Build', 'ToolsVersion':'4.0', 'xmlns':'http://schemas.microsoft.com/developer/msbuild/2003'})
+        propgroup = self.pyproj._add(project, 'PropertyGroup')
+        self.pyproj._add(propgroup, 'SchemaVersion', '2.0')
+        self.pyproj._add(propgroup, 'ProjectGuid', self.guid[1:-1])
+        self.pyproj._add(propgroup, 'ProjectHome', '.')
+        self.pyproj._add(propgroup, 'StartupFile', task_gen.bld.bugenginenode.make_node('waf').abspath().replace('/', '\\'))
+        self.pyproj._add(propgroup, 'SearchPath', task_gen.bld.bugenginenode.make_node('mak').make_node('libs').abspath().replace('/', '\\'))
+        self.pyproj._add(propgroup, 'WorkingDirectory', task_gen.bld.srcnode.abspath().replace('/', '\\'))
+        self.pyproj._add(propgroup, 'OutputPath', '.')
+        self.pyproj._add(propgroup, 'Name', self.name)
+        self.pyproj._add(propgroup, 'RootNamespace', task_gen.target)
+        self.pyproj._add(propgroup, 'LaunchProvider', 'Standard Python launcher')
+        self.pyproj._add(propgroup, 'EnableNativeCodeDebugging', 'False')
+        self.pyproj._add(propgroup, 'IsWindowsApplication', 'False')
+        self.pyproj._add(propgroup, 'InterpreterId', 'MSBuild|env|$(MSBuildProjectFullPath)')
+        for toolchain in task_gen.bld.env.ALL_TOOLCHAINS:
+            for variant in task_gen.bld.env.ALL_VARIANTS:
+                properties = self.pyproj._add(project, 'PropertyGroup', {'Condition': "'$(Configuration)'=='%s-%s'" % (toolchain, variant)})
+                self.pyproj._add(properties, 'CommandLineArguments', 'build:%s:%s' % (toolchain, variant))
+                self.pyproj._add(properties, 'DebugSymbols', 'true')
+                self.pyproj._add(properties, 'EnableUnmanagedDebugging', 'false')
+
+        self.pyproj._add(project, 'ItemGroup')
+        ig_env = self.pyproj._add(project, 'ItemGroup')
+        interpreter = self.pyproj._add(ig_env, 'Interpreter', {'Include': 'env\\'})
+        self.pyproj._add(interpreter, 'Id', 'env')
+        self.pyproj._add(interpreter, 'Version', '.'.join(str(i) for i in sys.version_info[0:2]))
+        self.pyproj._add(interpreter, 'Description', 'Python used to generate solution')
+        self.pyproj._add(interpreter, 'InterpreterPath', sys.executable)
+        self.pyproj._add(interpreter, 'WindowsInterpreterPath', sys.executable)
+        self.pyproj._add(interpreter, 'PathEnvironmentVariable', 'PYTHONPATH')
+        self.pyproj._add(interpreter, 'Architecture', 'x64')
+        self.pyproj._add(project, 'Import', {'Project': "$(MSBuildExtensionsPath32)\\Microsoft\\VisualStudio\\v$(VisualStudioVersion)\\Python Tools\\Microsoft.PythonTools.targets"})
+        self.pyproj._add(project, 'Target', {'Name': 'BeforeBuild'})
+        self.pyproj._add(project, 'Target', {'Name': 'AfterBuild'})
+
+    def write(self, node):
+        self.pyproj.write(node)
+
+
 class vs2003(Build.BuildContext):
     "creates projects for Visual Studio 2003"
     cmd = 'vs2003'
@@ -504,6 +556,16 @@ class vs2003(Build.BuildContext):
             project = klass(task_gen, version, version_project, folders)
             project.write(nodes)
             solution.add(task_gen, project, nodes[0].path_from(self.srcnode).replace('/', '\\'), do_build)
+
+        pydbg_task_gen = lambda: None
+        pydbg_task_gen.target = 'build.debug'
+        pydbg_task_gen.command = command
+        pydbg_task_gen.bld = self
+        pydbg_task_gen.all_sources = []
+        project = PyProj(pydbg_task_gen, version, version_project, folders)
+        pydbg_node = projects.make_node('build.debug.pyproj')
+        project.write(pydbg_node)
+        solution.add(pydbg_task_gen, project, pydbg_node.path_from(self.srcnode).replace('/', '\\'), False)
 
         for g in self.groups:
             for tg in g:
