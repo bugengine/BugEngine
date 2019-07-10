@@ -309,7 +309,7 @@ def p_operator_name(p):
                       | OPERATOR PERIOD
                       | OPERATOR COMMA
     """
-    p[0] = ('op%s' % p.slice[2].type.lower(), p.slice[2].found_object)
+    p[0] = ('!op_%s' % p.slice[2].type.lower(), p.slice[2].found_object)
     p.set_position(0, 2)
 
 
@@ -317,7 +317,7 @@ def p_operator_cast(p):
     """
         operator_cast : OPERATOR type
     """
-    p[0] = Name(p.lexer, ('cast<%s>'%p[2].signature(),), p.position(1), None,
+    p[0] = Name(p.lexer, ('!cast<%s>'%p[2].signature(),), p.position(1), None,
                 qualified = False,
                 dependent = False,
                 data = p[2])
@@ -338,7 +338,7 @@ def p_object_name_operator(p):
         object_name_id_qualified : operator_name
     """
     p[0] = Name(p.lexer, (p[1][0],), p.position(1), p[1][1],
-                qualified = False,
+                qualified = p[1][1] != None,
                 dependent = False)
 
 

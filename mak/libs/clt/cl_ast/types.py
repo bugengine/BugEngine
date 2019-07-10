@@ -186,7 +186,10 @@ class StructScope(Scope):
     def __init__(self, owner, parent):
         Scope.__init__(self, owner)
         self.parent = parent
+        self.constructor = None
         self.destructor = None
+        self.casts = []
+        self.operators = []
 
 
 class Struct(Type):
