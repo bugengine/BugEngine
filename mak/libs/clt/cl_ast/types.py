@@ -196,7 +196,7 @@ class StructScope(Scope):
             self.constructor.debug_dump(indent)
         if self.destructor:
             self.destructor.debug_dump(indent)
-        for cast in self.casts:
+        for _, cast in self.casts:
             cast.debug_dump(indent)
         Scope.debug_dump(self, indent)
 
