@@ -9,6 +9,9 @@ class Namespace(CppObject):
     def get_token_type(self):
         return 'NAMESPACE_ID'
 
+    def write_to(self, writer):
+        with writer.create_namespace(self.position, self.name) as namespace:
+            self.scope.write_to(namespace)
 
 class AnonymousNamespace(Namespace):
     def __init__(self, lexer, position):
@@ -24,4 +27,5 @@ class RootNamespace(CppObject):
         CppObject.__init__(self, lexer, (lexer.filename, 1, 1, 1), None)
 
     def write_to(self, writer):
-        pass
+        with writer.create_document() as document:
+            self.scope.write_to(document)

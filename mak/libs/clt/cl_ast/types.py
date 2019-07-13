@@ -198,8 +198,8 @@ class Struct(Type):
     def __init__(self, lexer, position, struct_type, name):
         Type.__init__(self, lexer, position, name)
         self.struct_type = struct_type
-        self.index = self.global_index
-        self.global_index += 1
+        self.index = Struct.global_index
+        Struct.global_index += 1
 
     def get_token_type(self):
         return 'STRUCT_ID'
@@ -257,6 +257,11 @@ class Struct(Type):
 
     def signature(self):
         return '%s_%d' % (self.name or 'anonymous', self.index)
+
+    def write_to(self, writer):
+        with writer.create_struct(self.position, self.index, self.name, self.scope.parent and self.scope.parent.index) as struct:
+            if self.scope:
+                self.scope.write_to(struct)
 
 
 class BuiltIn(Type):
