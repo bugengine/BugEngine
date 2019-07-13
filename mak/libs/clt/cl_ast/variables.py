@@ -23,3 +23,6 @@ class Variable(CppObject):
                         self.type.create_template_instance(template, arguments, position),
                         self.value and self.value.create_template_instance(template, arguments, position),
                         self.attributes)
+
+    def write_to(self, writer):
+        pass

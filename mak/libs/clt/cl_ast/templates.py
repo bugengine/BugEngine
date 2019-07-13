@@ -326,3 +326,11 @@ class Template(CppObject):
                                               'Invalid template argument: expected %s, got %s' % (p.get_type(),
                                                                                                   a.__class__.__name__))
         return arguments
+
+    def write_to(self, writer):
+        if self.scope and not self.scope.empty():
+            for _, _, _, instance in self.scope[0][-1].instances:
+                instance.write_to(writer)
+            for _, specialization in self.specializations:
+                for _, _, _, instance in specialization.instances:
+                    instance.write_to(writer)

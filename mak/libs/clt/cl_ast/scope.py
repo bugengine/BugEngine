@@ -31,3 +31,7 @@ class Scope:
     def create_template_instance(self, target_scope, template, arguments, position):
         for visibility, element in self.items:
             target_scope.items.append((visibility, element.create_template_instance(template, arguments, position)))
+
+    def write_to(self, document):
+        for visibility, object in self.items:
+            object.write_to(document)

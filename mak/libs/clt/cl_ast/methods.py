@@ -1,4 +1,5 @@
 from .cppobject import CppObject
+from .scope import Scope
 from . import types
 
 
@@ -16,6 +17,9 @@ class Parameter(CppObject):
                          self.type.create_template_instance(template, arguments, position),
                          self.default_value and self.default_value.create_template_instance(template, arguments, position))
 
+
+class OverloadScope(Scope):
+    pass
 
 class Overload(CppObject):
     def __init__(self, lexer, position, parameters, return_type, attributes):
@@ -45,8 +49,11 @@ class Overload(CppObject):
 
 
 class Method(CppObject):
+    index = 1
     def __init__(self, lexer, position, name):
         CppObject.__init__(self, lexer, position, name)
+        self.id = Method.index
+        Method.index += 1
         self.overloads = []
 
     def find_overload(self, parameters, return_type, attributes):
@@ -70,3 +77,8 @@ class Method(CppObject):
         for o in self.overloads:
             result.overloads.append(o.create_template_instance(template, arguments, position))
         return result
+
+    def write_to(self, writer):
+        for i, o in enumerate(self.overloads):
+            with writer.create_method(o.position, self.id, self.name, i) as method:
+                pass
