@@ -10,7 +10,6 @@ def p_id(p):
         struct_id_shadow :              STRUCT_ID_SHADOW
         typename_id :                   TYPENAME_ID
         typename_id_shadow :            TYPENAME_ID_SHADOW
-        special_method_id :             SPECIAL_METHOD_ID
         method_id :                     METHOD_ID
         method_id_shadow :              METHOD_ID_SHADOW
     """
@@ -237,6 +236,18 @@ def p_object_name_template(p):
                 qualified = not p.slice[1].type.endswith('SHADOW'))
 
 
+def p_object_name_constructor(p):
+    """
+        special_method_id :             SPECIAL_METHOD_ID
+    """
+    owner = p.slice[1].found_object.owner
+    if not owner.scope:
+        p.lexer._error('invalid use of incomplete type %s' % owner.name, p.position(1))
+        p.lexer._info('forward declaration of %s' % owner.name, owner.position)
+    p[0] = Name(p.lexer, (p[1],), p.position(1), p.slice[1].found_object,
+                qualified = True, data=owner)
+
+
 def p_object_name_destructor(p):
     """
         special_method_name : NOT STRUCT_ID_SHADOW
@@ -252,7 +263,7 @@ def p_object_name_destructor(p):
         p.lexer._error('invalid use of incomplete type %s' % owner.name, p.position(1))
         p.lexer._info('forward declaration of %s' % owner.name, owner.position)
     p[0] = Name(p.lexer, (p[1]+p[2],), p.position(1), owner.scope.destructor,
-                qualified = False)
+                qualified = False, data=owner)
 
 
 def p_object_name_destructor_2(p):
@@ -264,8 +275,8 @@ def p_object_name_destructor_2(p):
     if not owner.scope:
         p.lexer._error('invalid use of incomplete type %s' % owner.name, p.position(1))
         p.lexer._info('forward declaration of %s' % owner.name, owner.position)
-    p[0] = Name(p.lexer, (p[1]+p[2],), p.position(1), owner.scope.destructor,
-                qualified = False)
+    p[0] = Name(p.lexer, (p[1]+p[2],), p.position(1), p.slice[2].found_object,
+                qualified = True, data=owner)
 
 
 def p_operator_name(p):

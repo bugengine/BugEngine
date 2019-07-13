@@ -3,7 +3,17 @@ namespace NS
 
 struct B
 {
+    B();
+    ~B();
 };
+
+B::B()
+{
+}
+
+B::~B()
+{
+}
 
 struct A
 {
@@ -20,6 +30,7 @@ struct A
     {
     }
     void operator++();
+    void operator++(int);
 };
 
 }

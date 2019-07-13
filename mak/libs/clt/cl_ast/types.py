@@ -191,6 +191,24 @@ class StructScope(Scope):
         self.casts = []
         self.operators = []
 
+    def debug_dump(self, indent):
+        if self.constructor:
+            self.constructor.debug_dump(indent)
+        if self.destructor:
+            self.destructor.debug_dump(indent)
+        for cast in self.casts:
+            cast.debug_dump(indent)
+        Scope.debug_dump(self, indent)
+
+    def find(self, name, is_current_scope):
+        if is_current_scope:
+            if name == self.owner.name:
+                if self.owner.lexer.last_token == '~':
+                    return self.destructor
+                else:
+                    return self.constructor
+        return Scope.find(self, name, is_current_scope)
+
 
 class Struct(Type):
     global_index = 0

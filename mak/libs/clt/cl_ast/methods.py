@@ -47,6 +47,9 @@ class Overload(CppObject):
                         self.return_type.create_template_instance(template, arguments, position),
                         self.attributes)
 
+    def debug_dump(self, name, indent):
+        print('%s%s%s(%s);\n' % (indent, self.return_type and ('%s '%self.return_type) or '', name,
+                                 ', '.join('%s%s'%(str(p.type), p.name and (' %s'%p.name) or '') for p in self.parameters)))
 
 class Method(CppObject):
     index = 1
@@ -82,3 +85,17 @@ class Method(CppObject):
         for i, o in enumerate(self.overloads):
             with writer.create_method(o.position, self.id, self.name, i) as method:
                 pass
+
+    def debug_dump(self, indent):
+        for overload in self.overloads:
+            overload.debug_dump(self.name, indent)
+
+
+
+class SpecialMethod(Method):
+    def __init__(self, lexer, position, name, owner):
+        Method.__init__(self, lexer, position, name)
+        self.owner = owner
+
+    def get_token_type(self):
+        return 'SPECIAL_METHOD_ID'
