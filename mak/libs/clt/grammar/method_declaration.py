@@ -141,17 +141,23 @@ def p_create_method(p):
     p.set_position_absolute(0, name.position)
 
 
-def p_create_constructor(p):
+def p_create_special_method(p):
     """
-        create_constructor :
+        create_special_method :
     """
     name = p[-1]
-    klass = name.target
-    assert klass, 'resolution of %s failed' % name
-    if klass.definition.constructor:
-        p[0] = klass.definition.constructor
+    klass = name.data
+    obj = name.target
+    if obj:
+        p[0] = obj
     else:
-        p[0] = klass.definition.constructor = methods.Method(p.lexer, name.position, name.name[-1])
+        assert name.name[-1][0] == '~'
+        assert klass, 'resolution of %s failed' % name
+        assert klass.scope, '%s is not defined' % name
+        if klass.scope.destructor:
+            p[0] = klass.scope.destructor
+        else:
+            p[0] = klass.scope.destructor = methods.SpecialMethod(p.lexer, name.position, name.name[-1], klass)
 
 
 def p_create_castop(p):
@@ -167,7 +173,7 @@ def p_create_castop(p):
     assert isinstance(owner, types.Struct)
     for type, method in owner.scope.casts:
         try:
-            type.distance(data, types.CAST_NONE)
+            type.distance(cast_type, types.CAST_NONE)
         except types.CastError:
             continue
         else:
@@ -249,12 +255,11 @@ def p_method_declaration_prefix_cast_operator(p):
     p[0] = (p[2].data, p[1], p[3], p[2])
 
 
-def p_method_declaration_prefix_ctor(p):
+def p_method_declaration_prefix_special_method(p):
     """
-        method_declaration_prefix : declaration_specifier_list special_method_name create_constructor
+        method_declaration_prefix : declaration_specifier_list special_method_name create_special_method
     """
-    assert False
-    p[0] = (p[2], p[1], p[3], p[2])
+    p[0] = (None, p[1], p[3], p[2])
 
 
 def p_method_declaration_prefix_ctor_2(p):
@@ -269,7 +274,7 @@ def p_method_declaration_prefix_ctor_2(p):
     if klass.scope.constructor:
         m = klass.scope.constructor
     else:
-        m = klass.scope.constructor = methods.Method(p.lexer, p.position(2), name)
+        m = klass.scope.constructor = methods.SpecialMethod(p.lexer, p.position(2), name, klass)
     p[0] = (None, p[1], m, p[2])
 
 
