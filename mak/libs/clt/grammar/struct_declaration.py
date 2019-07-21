@@ -92,14 +92,15 @@ def p_struct_push(p):
         p[0] = p[-2][0]
     else:
         p[0].register()
-    p[0].define(p[-1])
+    p[0].define(p[-1], p.position(-2))
 
 
 def p_struct_pop(p):
     """
         struct_pop :
     """
-    p.lexer.pop_scope()
+    struct = p[-3]
+    p.lexer.pop_scope(struct.scope)
 
 
 def p_struct_parent_visibility(p):
@@ -136,12 +137,6 @@ def p_struct_begin(p):
     p[0] = p[3]
     p.set_position(0, 1)
 
-def p_struct_begin_error(p):
-    """
-        struct_begin : struct_header struct_parent_opt error LBRACE
-    """
-    p[0] = p[1][1] or p[1][0]
-    p.set_position(0, 1)
 
 def p_struct_definition(p):
     """
@@ -157,7 +152,7 @@ def p_struct_header_anonymous(p):
     """
     p[0] = cl_ast.types.Struct(p.lexer, p.position(1), p[1], None)
     p[0].register()
-    p[0].define(None)
+    p[0].define(None, p.position(4))
     p.set_position(0, 1)
 
 
@@ -222,5 +217,5 @@ def p_struct_declaration_friend_template(p):
     """
         struct_declaration : template_specifier FRIEND struct_header SEMI
     """
-    for i in range(0, len(p[1])):
-        p.lexer.pop_scope()
+    for t in p[1]:
+        p.lexer.pop_scope(t.scope)

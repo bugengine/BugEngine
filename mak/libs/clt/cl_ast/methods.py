@@ -18,12 +18,18 @@ class Parameter(CppObject):
                          self.default_value and self.default_value.create_template_instance(template, arguments, position))
 
 
-class OverloadScope(Scope):
+class CodeBlock(Scope):
+    def is_definition_scope(self):
+        return False
+
+
+class OverloadScope(CodeBlock):
     pass
 
+
 class Overload(CppObject):
-    def __init__(self, lexer, position, parameters, return_type, attributes):
-        CppObject.__init__(self, lexer, position)
+    def __init__(self, lexer, position, name, parameters, return_type, attributes):
+        CppObject.__init__(self, lexer, position, name)
         self.parameters = parameters[:]
         self.return_type = return_type
         self.attributes = attributes
@@ -42,7 +48,7 @@ class Overload(CppObject):
         return True
     
     def _create_template_instance(self, template, arguments, position):
-        return Overload(self.lexer, self.position,
+        return Overload(self.lexer, self.position, self.name,
                         [p.create_template_instance(template, arguments, position) for p in self.parameters],
                         self.return_type.create_template_instance(template, arguments, position),
                         self.attributes)
@@ -50,6 +56,7 @@ class Overload(CppObject):
     def debug_dump(self, name, indent):
         print('%s%s%s(%s);\n' % (indent, self.return_type and ('%s '%self.return_type) or '', name,
                                  ', '.join('%s%s'%(str(p.type), p.name and (' %s'%p.name) or '') for p in self.parameters)))
+
 
 class Method(CppObject):
     index = 1
@@ -66,7 +73,7 @@ class Method(CppObject):
         return None
 
     def create_overload(self, position, parameters, return_type, attributes):
-        o = Overload(self.lexer, position, parameters, return_type, attributes)
+        o = Overload(self.lexer, position, self.name, parameters, return_type, attributes)
         self.overloads.append(o)
         return o
 
@@ -89,7 +96,6 @@ class Method(CppObject):
     def debug_dump(self, indent):
         for overload in self.overloads:
             overload.debug_dump(self.name, indent)
-
 
 
 class SpecialMethod(Method):

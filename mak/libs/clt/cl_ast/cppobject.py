@@ -51,13 +51,14 @@ class CppObject:
     def register(self):
         self.parent_scope.add(self)
 
-    def push_scope(self, scope = None):
+    def push_scope(self, position, scope = None):
         if not self.scope:
-            self.scope = scope or Scope(self)
+            self.scope = scope or Scope(self, position)
         elif scope:
-            self.lexer._error('redefinition of object %s'%self.name, self.position)
-            self.lexer.push_scope(scope)
-            raise SyntaxError
+            self.lexer._error('redefinition of object %s'%self.name, position)
+            self.lexer._note('first defined here', self.scope.position)
+            self.lexer._note('first declared here', self.position)
+            self.scope = scope
         self.lexer.push_scope(self.scope)
 
     def _error(self, message):

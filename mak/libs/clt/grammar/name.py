@@ -275,7 +275,7 @@ def p_object_name_destructor_2(p):
     if not owner.scope:
         p.lexer._error('invalid use of incomplete type %s' % owner.name, p.position(1))
         p.lexer._info('forward declaration of %s' % owner.name, owner.position)
-    p[0] = Name(p.lexer, (p[1]+p[2],), p.position(1), p.slice[2].found_object,
+    p[0] = Name(p.lexer, (p[1]+p[2],), p.position(1), owner.scope and owner.scope.destructor,
                 qualified = True, data=owner)
 
 
@@ -339,6 +339,11 @@ def p_object_name_id(p):
     """
         object_name : ID
         object_name_id_qualified : ID
+        object_name_id_qualified : METHOD_ID_SHADOW
+        object_name_id_qualified : VARIABLE_ID_SHADOW
+        object_name_id_qualified : STRUCT_ID_SHADOW
+        object_name_id_qualified : TEMPLATE_METHOD_ID_SHADOW
+        object_name_id_qualified : TEMPLATE_STRUCT_ID_SHADOW
     """
     p[0] = Name(p.lexer, (p[1],), p.position(1), resolved = False)
 

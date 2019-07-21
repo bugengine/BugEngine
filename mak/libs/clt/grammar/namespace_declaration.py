@@ -39,7 +39,7 @@ def p_new_namespace_name_invalid(p):
     p.set_position(0, 1)
     p._lexer.error('redefinition of %s as a namespace' % p[0])
     p.slice[1].found_object._note('previously declared here')
-    p[0].push_scope()
+    p[0].push_scope(p.position(1))
 
 
 def p_namespace_declaration_new(p):
@@ -47,7 +47,7 @@ def p_namespace_declaration_new(p):
         namespace_declaration_new : NAMESPACE new_namespace_name
     """
     p[0] = Namespace(p.lexer, p.position(2), p[2])
-    p[0].push_scope()
+    p[0].push_scope(p.position(2))
 
 
 def p_namespace_declaration_existing(p):
@@ -55,14 +55,7 @@ def p_namespace_declaration_existing(p):
         namespace_declaration_existing : NAMESPACE existing_namespace_name
     """
     p[0] = p[2]
-    p[0].push_scope()
-
-
-def p_namespace_declaration_error(p):
-    """
-        namespace_declaration_existing : NAMESPACE error
-    """
-    p[0] = None
+    p[0].push_scope(p.position(2))
 
 
 def p_namespace_declaration_anonymous(p):
@@ -70,14 +63,16 @@ def p_namespace_declaration_anonymous(p):
         namespace_declaration_anonymous : NAMESPACE
     """
     p[0] = AnonymousNamespace(p.lexer, p[1].position)
-    p[0].push_scope()
+    p[0].push_scope(p[1].position)
 
 
 def p_namespace_pop(p):
     """
         namespace_pop :
     """
-    p.lexer.pop_scope()
+    namespace = p[-4]
+    if namespace:
+        p.lexer.pop_scope(namespace.scope)
 
 
 def p_namespace_declaration(p):

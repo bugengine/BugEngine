@@ -188,12 +188,17 @@ def p_push_overload_scope(p):
     """
         push_overload_scope :
     """
+    overload = p[-1]
+    overload.push_scope(p.position(-1), methods.OverloadScope(overload, p.position(-1)))
+    p[0] = overload
 
 
 def p_pop_overload_scope(p):
     """
         pop_overload_scope :
     """
+    overload = p[-3]
+    p.lexer.pop_scope(overload.scope)
 
 
 def p_method_attribute(p):
@@ -287,10 +292,10 @@ def p_method_declaration(p):
     p[0] = p[1][2].find_overload(p[3], p[1][0], p[1][1] + p[5])
     if not p[0]:
         p[0] = p[1][2].create_overload(p.position(2), p[3], p[1][0], p[1][1] + p[5])
+    p.set_position(0, 2)
 
 
 def p_method_definition(p):
     """
         method_definition : method_declaration push_overload_scope initializer_list_opt statement_block pop_overload_scope
     """
-

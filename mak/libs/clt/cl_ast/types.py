@@ -183,8 +183,8 @@ class Array(Type):
 
 
 class StructScope(Scope):
-    def __init__(self, owner, parent):
-        Scope.__init__(self, owner)
+    def __init__(self, owner, position, parent):
+        Scope.__init__(self, owner, position)
         self.parent = parent
         self.constructor = None
         self.destructor = None
@@ -222,17 +222,17 @@ class Struct(Type):
     def get_token_type(self):
         return 'STRUCT_ID'
 
-    def define(self, parent):
-        self.push_scope(StructScope(self, parent))
+    def define(self, parent, position):
+        self.push_scope(position, StructScope(self, position, parent))
 
     def _create_template_instance(self, template, arguments, position):
         return Struct(self.lexer, self.position, self.struct_type, self.name)
 
     def _complete_template_instance(self, result, template, arguments, position):
         if self.scope:
-            result.define(self.scope.parent and self.scope.parent.create_template_instance(template, arguments, position))
+            result.define(self.scope.parent and self.scope.parent.create_template_instance(template, arguments, position), position)
             self.scope.create_template_instance(result.scope, template, arguments, position)
-            self.lexer.pop_scope()
+            self.lexer.pop_scope(result.scope)
         return result
 
     def _distance(self, other, matches, typeref, other_typeref, allowed_cast):
