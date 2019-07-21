@@ -108,8 +108,8 @@ class TemplateTypenameParameter(Type):
 
 
 class TemplateScope(Scope):
-    def __init__(self, owner):
-        Scope.__init__(self, owner)
+    def __init__(self, owner, position):
+        Scope.__init__(self, owner, position)
         self.parameters = []
 
     def add(self, element):
@@ -146,7 +146,7 @@ class Template(CppObject):
         self.siblings = []
         self.parameters = []
         self.specializations = []
-        self.push_scope(TemplateScope(self))
+        self.push_scope(position, TemplateScope(self, position))
 
     def add_parameter(self, parameter):
         if isinstance(parameter, TemplateTypenameParameter):
@@ -236,7 +236,7 @@ class Template(CppObject):
         for specialization_parameters, specialization in self.specializations:
             params = [p.create_template_instance(template, arguments, position) for p in specialization_parameters]
             result.specializations.append((params, specialization.create_template_instance(template, arguments, position)))
-        self.lexer.pop_scope()
+        self.lexer.pop_scope(result.scope)
         return result
 
     def create_specialization(self, arguments, specialization):

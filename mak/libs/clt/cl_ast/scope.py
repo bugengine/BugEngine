@@ -1,8 +1,12 @@
 class Scope:
-    def __init__(self, owner, visibility='published'):
+    def __init__(self, owner, position, visibility='published'):
         self.owner = owner
+        self.position = position
         self.visibility = visibility
         self.items = []
+
+    def is_definition_scope(self):
+        return True
 
     def add(self, element):
         self.items.append((self.visibility, element))
@@ -33,5 +37,5 @@ class Scope:
             target_scope.items.append((visibility, element.create_template_instance(template, arguments, position)))
 
     def write_to(self, document):
-        for visibility, object in self.items:
+        for _, object in self.items:
             object.write_to(document)

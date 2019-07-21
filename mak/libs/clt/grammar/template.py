@@ -114,8 +114,8 @@ def p_template_parameter_value(p):
         p.lexer._error("unexpected template specifier", p[1][0].position)
     p[0] = cl_ast.templates.TemplateValueParameter(p.lexer, p.position(3), p[3], p[2], p[4])
     p[0].register()
-    for _ in range(0, len(p[1])):
-        p.lexer.pop_scope()
+    for t in p[1]:
+        p.lexer.pop_scope(t.scope)
 
 
 def p_template_parameter_typename(p):
@@ -127,8 +127,8 @@ def p_template_parameter_typename(p):
     else:
         p[0] = cl_ast.templates.TemplateTypenameParameter(p.lexer, p.position(3), p[3], p[4])
         p[0].register()
-    for _ in range(0, len(p[1])):
-        p.lexer.pop_scope()
+    for t in p[1]:
+        p.lexer.pop_scope(t.scope)
 
 
 def p_template_parameter_struct(p):
@@ -139,8 +139,8 @@ def p_template_parameter_struct(p):
         assert False, "TODO"
     else:
         p[0] = cl_ast.templates.TemplateTypenameParameter(p.lexer, p.position(4), p[4], p[6])
-    for _ in range(0, len(p[1])):
-        p.lexer.pop_scope()
+    for t in p[1]:
+        p.lexer.pop_scope(t.scope)
 
 
 def p_template_parameter_list(p):

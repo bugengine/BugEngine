@@ -6,14 +6,15 @@ def p_translation_unit_start(p):
         translation_unit_start :
     """
     p[0] = RootNamespace(p.lexer)
-    p[0].push_scope()
+    p[0].push_scope(None)
 
 
 def p_translation_unit_end(p):
     """
         translation_unit_end :
     """
-    p.lexer.pop_scope()
+    tu = p[-2]
+    p.lexer.pop_scope(tu.scope)
     assert not p.lexer.scopes, 'internal error: asymetric scope push/pop'
 
 

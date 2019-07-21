@@ -45,40 +45,40 @@ def p_external_declaration_empty(p):
     """
         external_declaration : template_specifier_opt declaration_specifier_list SEMI
     """
-    for i in range(0, len(p[1])):
-        p.lexer.pop_scope()
+    for t in p[1]:
+        p.lexer.pop_scope(t.scope)
 
 
 def p_external_declaration_type(p):
     """
         external_declaration : template_specifier_opt declaration_specifier_list type SEMI
     """
-    for i in range(0, len(p[1])):
-        p.lexer.pop_scope()
+    for t in p[1]:
+        p.lexer.pop_scope(t.scope)
 
 
 def p_external_declaration_variable(p):
     """
         external_declaration : template_specifier_opt variable_declaration SEMI
     """
-    for i in range(0, len(p[1])):
-        p.lexer.pop_scope()
+    for t in p[1]:
+        p.lexer.pop_scope(t.scope)
 
 
 def p_external_declaration_method(p):
     """
         external_declaration : template_specifier_opt method_declaration SEMI
     """
-    for i in range(0, len(p[1])):
-        p.lexer.pop_scope()
+    for t in p[1]:
+        p.lexer.pop_scope(t.scope)
 
 
 def p_external_declaration_method_definition(p):
     """
         external_declaration : template_specifier_opt method_definition
     """
-    for i in range(0, len(p[1])):
-        p.lexer.pop_scope()
+    for t in p[1]:
+        p.lexer.pop_scope(t.scope)
 
 
 def p_external_declaration_using(p):
@@ -118,4 +118,10 @@ def p_typedef_name_error(p):
 def p_external_declaration_typedef(p):
     """
         external_declaration : TYPEDEF type typedef_name SEMI
+    """
+
+
+def p_external_declaration_error(p):
+    """
+        external_declaration : error SEMI
     """

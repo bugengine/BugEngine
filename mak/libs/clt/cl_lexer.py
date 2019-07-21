@@ -80,6 +80,7 @@ class ClLexer:
             self.error_color = False
 
     def push_scope(self, scope):
+        #print('>%s %s' % (' '*len(self.scopes), scope.owner))
         assert isinstance(scope, cl_ast.scope.Scope)
         self.scopes.append(scope)
 
@@ -90,7 +91,9 @@ class ClLexer:
             else:
                 self._error('nested name specifier for a declaration cannot depend on a template parameter', position)
 
-    def pop_scope(self):
+    def pop_scope(self, scope):
+        #print('<%s %s' % (' '*(len(self.scopes) - 1), scope.owner))
+        assert self.scopes[-1] == scope,"asymetric scope push/pop: %s/%s" % (scope.owner, self.scopes[-1].owner)
         self.scopes[-1].seal()
         self.scopes.pop(-1)
 
@@ -158,8 +161,14 @@ class ClLexer:
                 new_token.owner = self.current_scope
             if new_token.type == 'SCOPE':
                 if self.last_token:
-                    self.current_scope = getattr(self.last_token, 'found_object', self.scopes[0].owner)
-                    self.current_scope = self.current_scope.scope
+                    owner = getattr(self.last_token, 'found_object', self.scopes[0].owner)
+                    self.current_scope = owner.scope
+                    if not self.current_scope:
+                        if self.scopes[-1].is_definition_scope():
+                            self._error("incomplete type '%s' used in nested name specifier" % self.last_token.value,
+                                        self._position(new_token))
+                            self._note("forward declaration of '%s'" % self.last_token.value,
+                                       owner.position)
             elif self.last_token and self.last_token.type in ('OPERATOR', ):
                 scope, obj = self.lookup_by_name('op%s' % new_token.type.lower())
                 new_token.found_object = obj

@@ -1,10 +1,14 @@
 namespace NS
 {
 
+
 struct B
 {
     B();
     ~B();
+    void doStuff()
+    {
+    }
 };
 
 B::B()
@@ -34,6 +38,7 @@ struct A
 };
 
 }
+
 void kmain(u32 index, u32 total)
 {
 }
