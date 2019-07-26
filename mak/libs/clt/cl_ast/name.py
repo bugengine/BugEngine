@@ -1,9 +1,10 @@
 class Name:
     def __init__(self, lexer, name, position, target = None, targets = None, qualified = False,
-                 dependent = False, resolved = True, data=None):
+                 dependent = False, resolved = True, data=None, positions=None):
         self.lexer = lexer
         self.name = name
         self.position = position
+        self.positions = positions or (position,)
         self.target = target
         self.targets = targets or ((target, tuple(), target),)
         self.qualified = qualified
@@ -21,4 +22,5 @@ class Name:
                     qualified = True,
                     dependent = self.dependent or other.dependent,
                     resolved = self.resolved and other.resolved,
-                    data = other.data)
+                    data = other.data,
+                    positions = self.positions + (other.position,))
