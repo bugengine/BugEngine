@@ -30,7 +30,9 @@ class Type(CppObject):
 
         def __bool__(self):
             return self.distance[0] >= 0 and self.distance[1] >= 0 and self.distance[2] >= 0
-
+        
+        def exact_match(self):
+            return self.distance[0] == 0 and self.distance[1] == 0 and self.distance[2] == 0
 
         def match_attributes(self, allowed_cast, attrs1, attrs2):
             for a in attrs2:
@@ -85,6 +87,9 @@ class Type(CppObject):
 
     def __init__(self, *args):
         CppObject.__init__(self, *args)
+
+    def get_unresolved_parameters(self):
+        return []
 
 
 class Pointer(Type):
@@ -231,8 +236,13 @@ class Struct(Type):
     def _complete_template_instance(self, result, template, arguments, position):
         if self.scope:
             result.define(self.scope.parent and self.scope.parent.create_template_instance(template, arguments, position), position)
-            self.scope.create_template_instance(result.scope, template, arguments, position)
-            self.lexer.pop_scope(result.scope)
+            try:
+                self.scope.create_template_instance(result.scope, template, arguments, position)
+            except Exception:
+                self.lexer.pop_scope(result.scope)
+                raise
+            else:
+                self.lexer.pop_scope(result.scope)
         return result
 
     def _distance(self, other, matches, typeref, other_typeref, allowed_cast):
@@ -314,6 +324,62 @@ class BuiltIn(Type):
         return '%d%s' % (len(self.builtin), self.builtin)
 
 
+class DependentTypeName(Type):
+    def __init__(self, lexer, position, name):
+        Type.__init__(self, lexer, position)
+        self.name = name
+
+    def get_unresolved_parameters(self):
+        result = []
+        for target, name_arguments, name_template in self.name.targets:
+            if target:
+                result += target.get_unresolved_parameters()
+                for a in name_arguments:
+                    result += a.get_unresolved_parameters()
+                if name_template:
+                    result += name_template.get_unresolved_parameters()
+        print(result)
+        return result
+
+    def resolve(self, current_scope, name, target, position, arguments, template):
+        if not current_scope:
+            _, result = self.lexer.lookup_by_name(name)
+            assert result
+        else:
+            result = current_scope.find(name)
+        if result and arguments:
+            result = result.instantiate(arguments, position)
+        return result
+
+    def _create_template_instance(self, template, arguments, position):
+        current_scope = None
+        for name, position, (target, name_arguments, name_template) in zip(self.name.name, self.name.positions, self.name.targets):
+            name_template_arguments = [a.create_template_instance(template, arguments, position) for a in name_arguments]
+            name_template = name_template.create_template_instance(template, arguments, position)
+            current_scope = self.resolve(current_scope, name, target, position, name_template_arguments, name_template)
+            current_scope = current_scope.create_template_instance(template, arguments, position)
+            assert current_scope
+        return current_scope
+
+    def _distance(self, other, matches, typeref, other_typeref, allowed_cast):
+        if isinstance(other, DependentTypeName):
+            # TODO
+            if self.name != other.name:
+                if allowed_cast == CAST_UNRELATED:
+                    d = Type.Distance(variant = -1)
+                    return d.match_attributes(allowed_cast, typeref.qualifiers, other_typeref.qualifiers)
+                else:
+                    raise CastError()
+            else:
+                d = Type.Distance(cast=0)
+                return d.match_attributes(allowed_cast, typeref.qualifiers, other_typeref.qualifiers)
+        elif allowed_cast == CAST_UNRELATED:
+            d = Type.Distance(variant = -1)
+            return d.match_attributes(allowed_cast, typeref.qualifiers, other_typeref.qualifiers)
+        else:
+            raise CastError()
+
+
 class TypeRef(CppObject):
     def __init__(self, lexer, position, type):
         CppObject.__init__(self, lexer, position)
@@ -336,13 +402,21 @@ class TypeRef(CppObject):
             raise CastError()
 
     def _create_template_instance(self, template, arguments, position):
-        result = self.clone()
-        result.type = result.type.create_template_instance(template, arguments, position)
+        type = self.type.create_template_instance(template, arguments, position)
+        if isinstance(type, TypeRef):
+            result = type.clone()
+            result.qualifiers |= self.qualifiers
+        else:
+            result = self.clone()
+            result.type = type
         return result
 
     def __str__(self):
         return str(self.type) + (self.qualifiers and ' '+' '.join(self.qualifiers) or '')
     __repr__ = __str__
+
+    def get_unresolved_parameters(self):
+        return self.type.get_unresolved_parameters()
 
     def signature(self):
         s = self.type.signature()

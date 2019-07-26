@@ -40,7 +40,7 @@ class TemplateValueParameter(CppObject):
             value = self.value and self.value.create_template_instance(template, arguments, position)
             type = self.type.create_template_instance(template, arguments, position)
             result = TemplateValueParameter(self.lexer, position, self.name, type, value)
-            result.bind(self.parameter_bind[0], template_parent)
+            result.bind(self.parameter_bind[0].create_template_instance(template, arguments, position), template_parent)
             return result
 
 
@@ -49,6 +49,9 @@ class TemplateTypenameParameter(Type):
         Type.__init__(self, lexer, position, name)
         self.value = value
         self.parameter_bind = None
+
+    def get_unresolved_parameters(self):
+        return [self]
 
     def get_parameter(self):
         return self.parameter_bind and self.parameter_bind[1] or self
@@ -75,6 +78,9 @@ class TemplateTypenameParameter(Type):
         return [self]
 
     def _distance(self, other, matches, typeref, other_typeref, allowed_cast):
+        if isinstance(other, TemplateTypenameParameter):
+            if self.parameter_bind == other.parameter_bind:
+                return Type.Distance()
         if self.parameter_bind[0] in matches:
             new_match = matches[self.parameter_bind[0]]
             for a in typeref.qualifiers:
@@ -126,10 +132,7 @@ class TemplateScope(Scope):
             if result:
                 return result
         else:
-            if self.owner.back_link != self.owner:
-                return self.owner.back_link.scope.find(name, is_current_scope)
-            else:
-                return Scope.find(self, name, is_current_scope)
+            return Scope.find(self.owner.back_link.scope, name, is_current_scope)
 
 
 class Template(CppObject):
@@ -192,10 +195,32 @@ class Template(CppObject):
             result[i] = a
         return result
 
+    def push_scope_recursively(self, scope):
+        if scope.owner.parent:
+            self.push_scope_recursively(scope.owner.parent.scope)
+        self.lexer.push_scope(scope)
+
+    def pop_scope_recursively(self, scope):
+        self.lexer.pop_scope(scope)
+        if scope.owner.parent:
+            self.pop_scope_recursively(scope.owner.parent.scope)
+
     def instantiate(self, arguments, position):
         #self.lexer._note('creating instance of template %s'%self.scope[0][1].name, position)
         matches, specialization = self.find_specialization(position, None, arguments) or (self.make_match(arguments), self.scope[0][1])
-        return specialization.create_template_instance(self, matches, position)
+        for a in matches.values():
+            for p in a.get_unresolved_parameters():
+                if p.parameter_bind[1] != self:
+                    return None
+        self.push_scope_recursively(specialization.scope)
+        try:
+            result = specialization.create_template_instance(self, matches, position)
+        except Exception:
+            self.pop_scope_recursively(specialization.scope)
+            raise
+        else:
+            self.pop_scope_recursively(specialization.scope)
+            return result
 
     def find_instance(self, template_on_stack, arguments, position):
         arguments = self.match(arguments, position)
@@ -225,19 +250,24 @@ class Template(CppObject):
         return Template(self.lexer, position)
 
     def _complete_template_instance(self, result, template, arguments, position):
-        parameters = [p.create_template_instance(template, arguments, position) for p in self.scope.parameters]
-        for p in parameters:
-            result.scope.add(p)
-        for s in self.siblings:
-            for i, p in enumerate(s.scope.parameters):
-                p.create_template_instance(template, arguments, position).bind(i, result)
-        if self.scope:
-            result.scope.add(self.scope[0][1].create_template_instance(template, arguments, position))
-        for specialization_parameters, specialization in self.specializations:
-            params = [p.create_template_instance(template, arguments, position) for p in specialization_parameters]
-            result.specializations.append((params, specialization.create_template_instance(template, arguments, position)))
-        self.lexer.pop_scope(result.scope)
-        return result
+        try:
+            for p in self.scope.parameters:
+                p = p.create_template_instance(template, arguments, position)
+                result.scope.add(p)
+            for s in self.siblings:
+                for i, p in enumerate(s.scope.parameters):
+                    p.create_template_instance(template, arguments, position).bind(i, result)
+            if self.scope:
+                result.scope.add(self.scope[0][1].create_template_instance(template, arguments, position))
+            for specialization_parameters, specialization in self.specializations:
+                params = [p.create_template_instance(template, arguments, position) for p in specialization_parameters]
+                result.specializations.append((params, specialization.create_template_instance(template, arguments, position)))
+        except Exception:
+            self.lexer.pop_scope(result.scope)
+            raise
+        else:
+            self.lexer.pop_scope(result.scope)
+            return result
 
     def create_specialization(self, arguments, specialization):
         assert self == self.back_link
@@ -300,7 +330,7 @@ class Template(CppObject):
                                     params, self.position))
             self.scope[0][-1].debug_dump(indent)
             for args, pos, _, instance in self.scope[0][-1].instances:
-                print('%s<%s> [%s]' % (indent, ', '.join(str(a) for a in args), pos))
+                print('%s<%s> [%s]' % (indent, ', '.join('%d:%s'%(i,a) for i,a in sorted(args.items())), pos))
                 instance.debug_dump(indent + '* ')
         for specialization_arguments, specialization in self.specializations:
             params = ', '.join(str(p) for p in specialization_arguments)
@@ -308,7 +338,7 @@ class Template(CppObject):
                                         params, self.position))
             specialization.debug_dump(indent+' | ')
             for args, pos, _, instance in specialization.instances:
-                print('%s<%s> [%s]' % (indent+' | ', ', '.join(str(a) for a in args), pos))
+                print('%s<%s> [%s]' % (indent, ', '.join('%d:%s'%(i,a) for i,a in sorted(args.items())), pos))
                 instance.debug_dump(indent + ' | * ')
             print(indent + ' `-- end specialization')
 

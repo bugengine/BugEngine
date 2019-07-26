@@ -16,8 +16,7 @@ def p_id(p):
     p[0] = Name(p.lexer, (p[1],), p.position(1),
                 p.slice[1].found_object,
                 qualified = not p.slice[1].type.endswith('SHADOW'),
-                dependent = (p.slice[1].type.find('TYPENAME') != -1
-                          or p.slice[1].found_object and p.slice[1].found_object.templates))
+                dependent = False)
 
 
 def p_id_template(p):
@@ -44,7 +43,7 @@ def p_id_template(p):
                         targets=((found_object, template.parameters, template)),
                         qualified = not p.slice[1].type.endswith('SHADOW'),
                         dependent = (p.slice[1].type.find('TYPENAME') != -1
-                                or p.slice[1].found_object and p.slice[1].found_object.templates))
+                                  or p.slice[1].found_object and p.slice[1].found_object.templates))
         else:
             p.lexer._error('template specialization or definition requires a template parameter list '
                            'corresponding to the type %s' % p[1],
@@ -53,13 +52,13 @@ def p_id_template(p):
                         found_object,
                         qualified = not p.slice[1].type.endswith('SHADOW'),
                         dependent = (p.slice[1].type.find('TYPENAME') != -1
-                                or p.slice[1].found_object and p.slice[1].found_object.templates))
+                                  or p.slice[1].found_object and p.slice[1].found_object.templates))
     else:
         p[0] = Name(p.lexer, (p[1],), p.position(1),
                     found_object,
                     qualified = not p.slice[1].type.endswith('SHADOW'),
                     dependent = (p.slice[1].type.find('TYPENAME') != -1
-                            or p.slice[1].found_object and p.slice[1].found_object.templates))
+                              or p.slice[1].found_object and p.slice[1].found_object.templates))
 
 
 def p_template_new_template_id(p):
@@ -100,7 +99,7 @@ def p_template_id(p):
         if p.lexer.template_stack:
             tpl = p.lexer.template_stack.pop()
             if not tpl:
-                p.lexer._error('3 template specialization or definition requires a template parameter list '
+                p.lexer._error('template specialization or definition requires a template parameter list '
                                'corresponding to the nested type %s<%s>' % (p[1], ', '.join(str(t) for t in p[2])),
                                p.position(1))
         target = p.slice[1].found_object.find_instance(tpl, p[2], p.position(1))

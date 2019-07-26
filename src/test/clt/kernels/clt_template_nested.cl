@@ -5,6 +5,7 @@ struct Test
     struct NestedTest;
 };
 
+
 template< typename T >
 template< typename T2 >
 struct Test<T>::NestedTest
@@ -17,6 +18,7 @@ struct Test<T>::NestedTest
     T   m_test;
     T2* m_testPtr;
 };
+
 
 template< typename U >
 struct Test<U*>
@@ -45,7 +47,6 @@ struct Test<const V>
 
 void kmain(u32 index, u32 total)
 {
-    Test<u32> w;
     Test<u32>::NestedTest<i32> x;
     Test<i32>::NestedTest<i32> y;
     Test<i32*>::NestedTest<i32> z;

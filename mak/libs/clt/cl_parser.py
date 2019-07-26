@@ -1,6 +1,7 @@
-from . import cl_lexer
-from ..ply import yacc
 import os
+
+from ..ply import yacc
+from . import cl_lexer
 
 
 def set_position(p, s1, s2):
@@ -44,4 +45,3 @@ class ClParser:
             #result.debug_dump()
             result.error_count = self.lexer.error_count
         return result
-

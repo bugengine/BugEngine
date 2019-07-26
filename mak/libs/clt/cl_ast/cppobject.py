@@ -29,8 +29,9 @@ class CppObject:
         return instance
 
     def seal(self):
-        for arguments, position, template, instance in self.instances:
-            self._complete_template_instance(instance, template, arguments, position)
+        pass
+        #for arguments, position, template, instance in self.instances:
+        #    self._complete_template_instance(instance, template, arguments, position)
 
     def _get_cached_instance(self, arguments):
         from . import types
@@ -38,9 +39,12 @@ class CppObject:
             assert len(args) == len(arguments)
             for i in range(0, len(args)):
                 try:
-                    args[i].distance(arguments[i], types.CAST_NONE)
+                    d = args[i].distance(arguments[i], types.CAST_NONE)
                 except types.CastError:
                     break
+                else:
+                    if not d.exact_match():
+                        break
             else:
                 return instance
         return None
