@@ -141,7 +141,7 @@ class Template(CppObject):
             Exception.__init__(self)
             self.message = error_msg
             self.position = position
-            self.error = inner_error
+            self.inner_error = inner_error
 
     def __init__(self, lexer, position):
         CppObject.__init__(self, lexer, position)

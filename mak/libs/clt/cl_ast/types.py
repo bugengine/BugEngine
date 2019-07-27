@@ -1,5 +1,6 @@
 from .cppobject import CppObject
 from .scope import Scope
+from .name import Name
 
 
 class CastError(Exception):
@@ -338,28 +339,47 @@ class DependentTypeName(Type):
                     result += a.get_unresolved_parameters()
                 if name_template:
                     result += name_template.get_unresolved_parameters()
-        print(result)
         return result
 
-    def resolve(self, current_scope, name, target, position, arguments, template):
-        if not current_scope:
+    def resolve(self, current_object, name, target, position, arguments, template):
+        from .templates import Template
+        if not current_object:
             _, result = self.lexer.lookup_by_name(name)
             assert result
         else:
-            result = current_scope.find(name)
-        if result and arguments:
-            result = result.instantiate(arguments, position)
+            result = current_object.scope.find(name, True)
+        if not result:
+            raise Template.InstantiationError(position, 'no object named %s in %s' % (name, current_object.name))
+        if arguments:
+            try:
+                result = result.instantiate(arguments, position)
+            except Template.InstantiationError as e:
+                raise Template.InstantiationError(position, "in instantiation of template '%s' requested here"%name, e)
+        return result
+
+    def _create_partial_template_instance(self, template, arguments, position):
+        result = None
+        for name, pos, (_, name_arguments, name_template) in zip(self.name.name, self.name.positions, self.name.targets):
+            name_template = name_template and name_template.create_template_instance(template, arguments, position)
+            name_arguments = [a.create_template_instance(template, arguments, position) for a in name_arguments]
+            n = Name(self.lexer, (name,), pos, targets=((None, name_arguments, name_template),))
+            if result:
+                result += n
+            else:
+                result = n
+        result = DependentTypeName(self.lexer, self.position, result)
         return result
 
     def _create_template_instance(self, template, arguments, position):
-        current_scope = None
+        current_object = None
         for name, position, (target, name_arguments, name_template) in zip(self.name.name, self.name.positions, self.name.targets):
             name_template_arguments = [a.create_template_instance(template, arguments, position) for a in name_arguments]
-            name_template = name_template.create_template_instance(template, arguments, position)
-            current_scope = self.resolve(current_scope, name, target, position, name_template_arguments, name_template)
-            current_scope = current_scope.create_template_instance(template, arguments, position)
-            assert current_scope
-        return current_scope
+            name_template = name_template and name_template.create_template_instance(template, arguments, position)
+            current_object = self.resolve(current_object, name, target, position, name_template_arguments, name_template)
+            if not current_object:
+                return self._create_partial_template_instance(template, arguments, position)
+            current_object = current_object.create_template_instance(template, arguments, position)
+        return current_object
 
     def _distance(self, other, matches, typeref, other_typeref, allowed_cast):
         if isinstance(other, DependentTypeName):

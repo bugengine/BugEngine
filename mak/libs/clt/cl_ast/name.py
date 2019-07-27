@@ -24,3 +24,6 @@ class Name:
                     resolved = self.resolved and other.resolved,
                     data = other.data,
                     positions = self.positions + (other.position,))
+    
+    def __str__(self):
+        return '::'.join(self.name)
