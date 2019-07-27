@@ -105,10 +105,14 @@ def p_template_id(p):
         target = p.slice[1].found_object.find_instance(tpl, p[2], p.position(1))
     except cl_ast.templates.Template.InstantiationError as e:
         target = None
-        p.lexer._error(e.message, e.position)
-        if e.error:
-            p.lexer._note(e.error.message, e.error.position)
-        p.lexer._note('template %s declared here' % p[1], p.slice[1].found_object.position)
+        def show_template_error(e):
+            if e.inner_error:
+                show_template_error(e.inner_error)
+                p.lexer._note(e.message, e.position)
+            else:
+                p.lexer._error(e.message, e.position)
+        show_template_error(e)
+        p.lexer._note("in instantiation of template '%s' requested here" % p[1], p.position(1))
     p[0] = Name(p.lexer, (p[1],), p.position(1), target,
                 targets = ((target, p[2], p.slice[1].found_object),),
                 qualified = not p.slice[1].type.endswith('SHADOW'),

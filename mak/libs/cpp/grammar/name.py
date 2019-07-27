@@ -5,13 +5,6 @@ def p_name_item_id(p):
     p[0] = p[1]
 
 
-def p_name_item_typename(p):
-    """
-        name_item : TYPENAME ID
-    """
-    p[0] = '%s %s' % (p[1], p[2])
-
-
 def p_name_item_template(p):
     """
         name_item : ID LESS_THAN skip_template_args GREATER_THAN
@@ -52,7 +45,19 @@ def p_name(p):
     if len(p) > 3:
         p[0] = '%s%s%s' % (p[1], p[2], p[3])
     else:
-        p[0] = '%s%s%s' % (p[1], p[2])
+        p[0] = '%s%s' % (p[1], p[2])
+
+
+def p_name_typename(p):
+    """
+        name : TYPENAME name_item SCOPE name_list
+             | TYPENAME SCOPE name_list
+    """
+
+    if len(p) > 4:
+        p[0] = '%s %s%s%s' % (p[1], p[2], p[3], p[4])
+    else:
+        p[0] = '%s %s%s' % (p[1], p[2], p[3])
 
 
 def p_name_single_item(p):

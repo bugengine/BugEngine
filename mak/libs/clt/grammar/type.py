@@ -150,7 +150,8 @@ def p_type_type_name_typename(p):
     """
         type : TYPENAME object_name
     """
-    assert False
+    p[0] = types.TypeRef(p.lexer, p[2].position,
+                         types.DependentTypeName(p.lexer, p[2].position, p[2]))
 
 
 def p_type_type_decl(p):

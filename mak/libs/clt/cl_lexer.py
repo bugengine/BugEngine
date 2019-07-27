@@ -41,6 +41,10 @@ ide_format = {
 }
 
 class ClLexer:
+    class UnknownScope:
+        def find(self, name, is_current_scope):
+            return None
+
     class TemplateStack:
         def __init__(self, template_list):
             self.template_list = template_list[:]
@@ -89,7 +93,7 @@ class ClLexer:
             if obj:
                 self.current_scope = obj.scope
             else:
-                self._error('nested name specifier for a declaration cannot depend on a template parameter', position)
+                self.current_scope = ClLexer.UnknownScope()
 
     def pop_scope(self, scope):
         #print('<%s %s' % (' '*(len(self.scopes) - 1), scope.owner))
