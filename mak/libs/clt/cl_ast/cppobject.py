@@ -83,9 +83,6 @@ class CppObject:
     def get_token_type_raw(self):
         return self.get_token_type()
 
-    def get_template_param_dependencies(self):
-        return []
-
     def debug_dump(self, indent=''):
         print('%s%s%s [%s]' % (indent, self.__class__.__name__,
                                self.name and (' %s'%self.name) or '',

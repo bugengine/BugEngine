@@ -28,9 +28,6 @@ class TemplateValueParameter(CppObject):
     def get_type(self):
         return self.type.name()
 
-    def get_template_param_dependencies(self):
-        return [self]
-
     def _create_template_instance(self, template, arguments, position):
         if template == self.parameter_bind[1]:
             return arguments[self.parameter_bind[0]]
@@ -41,6 +38,61 @@ class TemplateValueParameter(CppObject):
             type = self.type.create_template_instance(template, arguments, position)
             result = TemplateValueParameter(self.lexer, position, self.name, type, value)
             result.bind(self.parameter_bind[0].create_template_instance(template, arguments, position), template_parent)
+            return result
+
+
+class TemplateTemplateParameter(CppObject):
+    def __init__(self, lexer, position, name, template, value):
+        CppObject.__init__(self, lexer, position, name)
+        if len(template) > 1:
+            raise SyntaxError
+        self.template_params = template[0].parameters
+        self.value = value
+        self.parameter_bind = None
+
+    def get_unresolved_parameters(self):
+        return [self]
+
+    def get_parameter(self):
+        return self.parameter_bind and self.parameter_bind[1] or self
+
+    def is_bound(self):
+        return self.parameter_bind != None
+
+    def bind(self, argument_position, template):
+        self.parameter_bind = (argument_position, template)
+
+    def get_token_type(self):
+        return 'TEMPLATE_TYPENAME_ID'
+
+    def __str__(self):
+        params = ', '.join(str(x) for x in self.template_params)
+        return 'template<%s> typename%s' % (params, self.name and ' '+self.name or '')
+
+    def get_type(self):
+        return 'template typename'
+    
+    def is_compatible(self, argument):
+        return isinstance(argument, Template) or isinstance(argument, TemplateTemplateParameter)
+
+    def find_instance(self, template_on_stack, arguments, position):
+        return None
+
+    def instantiate(self, arguments, position):
+        return None
+    
+    def distance(self, other, cast):
+        assert False
+
+    def _create_template_instance(self, template, arguments, position):
+        if template == self.parameter_bind[1]:
+            return arguments[self.parameter_bind[0]]
+        else:
+            template_parent = self.parameter_bind[1].create_template_instance(template, arguments, position)
+            parameters = [p.create_template_instance(template, arguments, position) for p in self.template_params]
+            value = self.value and self.value.create_template_instance(template, arguments, position)
+            result = TemplateTemplateParameter(self.lexer, position, self.name, parameters, value)
+            result.bind(self.parameter_bind[0], template_parent)
             return result
 
 
@@ -74,9 +126,6 @@ class TemplateTypenameParameter(Type):
     def is_compatible(self, argument):
         return isinstance(argument, TypeRef)
 
-    def get_template_param_dependencies(self):
-        return [self]
-
     def _distance(self, other, matches, typeref, other_typeref, allowed_cast):
         if isinstance(other, TemplateTypenameParameter):
             if self.parameter_bind == other.parameter_bind:
@@ -86,7 +135,7 @@ class TemplateTypenameParameter(Type):
             for a in typeref.qualifiers:
                 #assert a not in new_match.qualifiers
                 if a in new_match.qualifiers:
-                    raise CastError
+                    raise CastError()
                 new_match.qualifiers.add(a)
             return new_match.distance(other_typeref, CAST_NONE, matches)
         else:
@@ -120,7 +169,9 @@ class TemplateScope(Scope):
 
     def add(self, element):
         assert self.owner.back_link == self.owner
-        if isinstance(element, TemplateValueParameter) or isinstance(element, TemplateTypenameParameter):
+        if (isinstance(element, TemplateValueParameter)
+         or isinstance(element, TemplateTemplateParameter)
+         or isinstance(element, TemplateTypenameParameter)):
             self.parameters.append(element)
             self.owner.add_parameter(element)
         else:
@@ -205,6 +256,20 @@ class Template(CppObject):
         if scope.owner.parent:
             self.pop_scope_recursively(scope.owner.parent.scope)
 
+    def distance(self, other, cast):
+        if isinstance(other, Template):
+            params = other.scope.parameters
+        elif isinstance(other, TemplateTemplateParameter):
+            params = other.template_params
+        else:
+            raise CastError()
+        if len(params) != len(self.scope.parameters):
+            raise CastError()
+        d = Type.Distance()
+        for p1, p2 in zip(self.parameters, params):
+            d += p1.distance(p2, cast)
+        return d
+
     def instantiate(self, arguments, position):
         #self.lexer._note('creating instance of template %s'%self.scope[0][1].name, position)
         matches, specialization = self.find_specialization(position, None, arguments) or (self.make_match(arguments), self.scope[0][1])
@@ -231,6 +296,7 @@ class Template(CppObject):
                 if not isinstance(p, TypeRef):
                     break
                 if not (isinstance(p.type, TemplateTypenameParameter)
+                     or isinstance(p.type, TemplateTemplateParameter)
                      or isinstance(p.type, TemplateValueParameter)):
                     break
                 if p.qualifiers:
@@ -310,6 +376,9 @@ class Template(CppObject):
                         break
             return matches, result
         return None
+
+    def get_unresolved_parameters(self):
+        return []
 
     def argument_match(self, parameters, arguments):
         assert len(arguments) == len(parameters)

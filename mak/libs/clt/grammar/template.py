@@ -28,6 +28,14 @@ def p_template_argument(p):
     p[0] = p[1]
 
 
+def p_template_argument_template(p):
+    """
+        template_argument : template_name
+    """
+    p[0] = p[1].target
+    assert isinstance(p[0], cl_ast.templates.Template) or isinstance(p[0], cl_ast.templates.TemplateTemplateParameter)
+
+
 def p_template_argument_list(p):
     """
         template_argument_list : template_argument COMMA template_argument_list         %prec NAME2
@@ -122,25 +130,26 @@ def p_template_parameter_typename(p):
     """
         template_parameter : template_specifier_opt_detach TYPENAME template_parameter_name template_parameter_default_value_opt
     """
-    if p[1]:
-        assert False, "TODO"
-    else:
-        p[0] = cl_ast.templates.TemplateTypenameParameter(p.lexer, p.position(3), p[3], p[4])
-        p[0].register()
     for t in p[1]:
         p.lexer.pop_scope(t.scope)
+    if p[1]:
+        p[0] = cl_ast.templates.TemplateTemplateParameter(p.lexer, p.position(3), p[3], p[1], p[4])
+    else:
+        p[0] = cl_ast.templates.TemplateTypenameParameter(p.lexer, p.position(3), p[3], p[4])
+    p[0].register()
 
 
 def p_template_parameter_struct(p):
     """
         template_parameter : template_specifier_opt_detach struct_keyword consume_template_stack template_parameter_name verify_template_stack template_parameter_default_value_opt
     """
-    if p[1]:
-        assert False, "TODO"
-    else:
-        p[0] = cl_ast.templates.TemplateTypenameParameter(p.lexer, p.position(4), p[4], p[6])
     for t in p[1]:
         p.lexer.pop_scope(t.scope)
+    if p[1]:
+        p[0] = cl_ast.templates.TemplateTemplateParameter(p.lexer, p.position(4), p[4], p[1], p[6])
+    else:
+        p[0] = cl_ast.templates.TemplateTypenameParameter(p.lexer, p.position(4), p[4], p[6])
+    p[0].register()
 
 
 def p_template_parameter_list(p):

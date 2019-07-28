@@ -7,8 +7,10 @@ from . import cl_lexer
 def set_position(p, s1, s2):
     p.slice[s1].filename, p.slice[s1].lineno, p.slice[s1].lexpos, p.slice[s1].endlexpos = p.position(s2)
 
+
 def set_position_absolute(p, s1, position):
     p.slice[s1].filename, p.slice[s1].lineno, p.slice[s1].lexpos, p.slice[s1].endlexpos = position
+
 
 def position(p, s):
     if s >= 0:
@@ -18,6 +20,7 @@ def position(p, s):
         startpos = getattr(production, 'lexpos', 0)
         endpos = getattr(production, 'endlexpos', startpos)
         return (getattr(production, 'filename', ''), getattr(production, 'lineno', 0), startpos, endpos)
+
 
 yacc.YaccProduction.set_position = set_position
 yacc.YaccProduction.set_position_absolute = set_position_absolute
@@ -42,6 +45,6 @@ class ClParser:
             result = self.parser.parse(input.read(), lexer=self.lexer)
 
         if result:
-            result.debug_dump()
+            #result.debug_dump()
             result.error_count = self.lexer.error_count
         return result
