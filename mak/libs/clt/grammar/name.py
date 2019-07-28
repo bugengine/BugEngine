@@ -32,33 +32,18 @@ def p_id_template(p):
             template = p.lexer.template_stack.pop()
             if template:
                 found_object = found_object.find_instance(template, template.parameters, p.position(1))
-            else:
-                p.lexer._error('template specialization or definition requires a '
-                               'template parameter list corresponding to '
-                               'the nested type %s' % p[1], p.position(1))
-                # tries to recover and keep parsing
-                found_object = found_object.scope.items[0][1]
-            p[0] = Name(p.lexer, (p[1],), p.position(1),
-                        found_object,
-                        targets=((found_object, template.parameters, template)),
-                        qualified = not p.slice[1].type.endswith('SHADOW'),
-                        dependent = (p.slice[1].type.find('TYPENAME') != -1
-                                  or p.slice[1].found_object and p.slice[1].found_object.templates))
-        else:
-            p.lexer._error('template specialization or definition requires a template parameter list '
-                           'corresponding to the type %s' % p[1],
-                            p.position(1))
-            p[0] = Name(p.lexer, (p[1],), p.position(1),
-                        found_object,
-                        qualified = not p.slice[1].type.endswith('SHADOW'),
-                        dependent = (p.slice[1].type.find('TYPENAME') != -1
-                                  or p.slice[1].found_object and p.slice[1].found_object.templates))
-    else:
-        p[0] = Name(p.lexer, (p[1],), p.position(1),
-                    found_object,
-                    qualified = not p.slice[1].type.endswith('SHADOW'),
-                    dependent = (p.slice[1].type.find('TYPENAME') != -1
-                              or p.slice[1].found_object and p.slice[1].found_object.templates))
+                p[0] = Name(p.lexer, (p[1],), p.position(1),
+                            found_object,
+                            targets=((found_object, template.parameters, template)),
+                            qualified = not p.slice[1].type.endswith('SHADOW'),
+                            dependent = (p.slice[1].type.find('TYPENAME') != -1
+                                    or p.slice[1].found_object and p.slice[1].found_object.templates))
+                return
+    p[0] = Name(p.lexer, (p[1],), p.position(1),
+                found_object,
+                qualified = not p.slice[1].type.endswith('SHADOW'),
+                dependent = (p.slice[1].type.find('TYPENAME') != -1
+                            or p.slice[1].found_object and p.slice[1].found_object.templates))
 
 
 def p_template_new_template_id(p):
@@ -139,6 +124,14 @@ def p_object_name_namespace(p):
                   | typename_id_shadow SCOPE type_name_struct_qualified
                   | template_typename_id SCOPE type_name_struct_qualified
                   | template_typename_id_shadow SCOPE type_name_struct_qualified
+        template_name : namespace_id SCOPE template_name_qualified
+                      | namespace_id_shadow SCOPE template_name_qualified
+                      | struct_id SCOPE template_name_struct_qualified
+                      | struct_id_shadow SCOPE template_name_struct_qualified
+                      | typename_id SCOPE template_name_struct_qualified
+                      | typename_id_shadow SCOPE template_name_struct_qualified
+                      | template_typename_id SCOPE template_name_struct_qualified
+                      | template_typename_id_shadow SCOPE template_name_struct_qualified
         special_method_name : namespace_id SCOPE special_method_name_qualified
                             | namespace_id_shadow SCOPE special_method_name_qualified
                             | struct_id SCOPE special_method_name_struct_qualified
@@ -174,6 +167,13 @@ def p_object_name_struct_qualified(p):
                                    | type_name_tpl_qualified SCOPE type_name_struct_qualified
                                    | type_name_id_qualified
 
+        template_name_qualified : namespace_id SCOPE template_name_qualified
+                                | template_name_struct_qualified
+
+        template_name_struct_qualified : struct_id SCOPE template_name_struct_qualified
+                                       | type_name_tpl_qualified SCOPE template_name_struct_qualified
+                                       | template_name_id_qualified
+
         special_method_name_qualified : namespace_id SCOPE special_method_name_qualified
                                       | special_method_name_struct_qualified
         special_method_name_struct_qualified : struct_id SCOPE special_method_name_struct_qualified
@@ -197,6 +197,7 @@ def p_object_name_namespace_root(p):
     """
         object_name : SCOPE object_name_qualified
         type_name : SCOPE type_name_qualified
+        template_name : SCOPE template_name_qualified
         special_method_name : SCOPE special_method_name_qualified
         cast_method_name : SCOPE cast_method_name_qualified
     """
@@ -365,13 +366,15 @@ def p_type_name(p):
     """
         type_name : struct_id                                                           %prec NAME0
                   | typename_id                                                         %prec NAME0
-                  | template_struct_id
-                  | template_typename_id                                                %prec NAME0
+
+        template_name : template_struct_id
+                      | template_typename_id                                            %prec NAME0
 
         type_name_id_qualified : struct_id                                              %prec NAME0
                                | typename_id
-                               | template_struct_id
-                               | template_typename_id
+
+        template_name_id_qualified : template_struct_id
+                                   | template_typename_id
 
         special_method_name : special_method_id
         special_method_name_id_qualified : special_method_id
@@ -396,7 +399,7 @@ def p_type_name_shadow(p):
     """
         type_name : struct_id_shadow                                                    %prec NAME0
                   | typename_id_shadow                                                  %prec NAME0
-                  | template_struct_id_shadow
-                  | template_typename_id_shadow                                         %prec NAME0
+        template_name : template_struct_id_shadow
+                      | template_typename_id_shadow                                     %prec NAME0
     """
     p[0] = p[1]

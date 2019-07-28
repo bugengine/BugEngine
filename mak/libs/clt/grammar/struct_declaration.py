@@ -15,9 +15,17 @@ def p_struct_keyword(p):
 def p_struct_declaration(p):
     """
         struct_header : struct_keyword consume_template_stack type_name verify_template_stack
+                      | struct_keyword consume_template_stack template_name verify_template_stack
                       | struct_keyword consume_template_stack object_name verify_template_stack
     """
     name = p[3]
+    if p.slice[3].type == 'template_name':
+        if (isinstance(name.target, cl_ast.templates.Template)
+         or isinstance(name.target, cl_ast.templates.TemplateTemplateParameter)):
+            p.lexer._error('template specialization or definition requires a template parameter list '
+                           'corresponding to the type %s' % p[3],
+                            p[3].position)
+            name.target = name.target.scope[0][1]
     if name.qualified:
         if name.target:
             if name.target.get_token_type() == 'STRUCT_ID':

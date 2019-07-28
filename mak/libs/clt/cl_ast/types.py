@@ -341,7 +341,7 @@ class DependentTypeName(Type):
                     result += name_template.get_unresolved_parameters()
         return result
 
-    def resolve(self, current_object, name, target, position, arguments, template):
+    def resolve(self, current_object, name, position, arguments, instance_template, instance_arguments, instance_position):
         from .templates import Template
         if not current_object:
             _, result = self.lexer.lookup_by_name(name)
@@ -350,9 +350,10 @@ class DependentTypeName(Type):
             result = current_object.scope.find(name, True)
         if not result:
             raise Template.InstantiationError(position, 'no object named %s in %s' % (name, current_object.name))
+        result = result.create_template_instance(instance_template, instance_arguments, instance_position)
         if arguments:
             try:
-                result = result.instantiate(arguments, position)
+                result = result.instantiate([a.create_template_instance(instance_template, instance_arguments, instance_position) for a in arguments], position)
             except Template.InstantiationError as e:
                 raise Template.InstantiationError(position, "in instantiation of template '%s' requested here"%name, e)
         return result
@@ -360,7 +361,6 @@ class DependentTypeName(Type):
     def _create_partial_template_instance(self, template, arguments, position):
         result = None
         for name, pos, (_, name_arguments, name_template) in zip(self.name.name, self.name.positions, self.name.targets):
-            name_template = name_template and name_template.create_template_instance(template, arguments, position)
             name_arguments = [a.create_template_instance(template, arguments, position) for a in name_arguments]
             n = Name(self.lexer, (name,), pos, targets=((None, name_arguments, name_template),))
             if result:
@@ -372,13 +372,10 @@ class DependentTypeName(Type):
 
     def _create_template_instance(self, template, arguments, position):
         current_object = None
-        for name, position, (target, name_arguments, name_template) in zip(self.name.name, self.name.positions, self.name.targets):
-            name_template_arguments = [a.create_template_instance(template, arguments, position) for a in name_arguments]
-            name_template = name_template and name_template.create_template_instance(template, arguments, position)
-            current_object = self.resolve(current_object, name, target, position, name_template_arguments, name_template)
+        for name, name_position, (_, name_arguments, _) in zip(self.name.name, self.name.positions, self.name.targets):
+            current_object = self.resolve(current_object, name, name_position, name_arguments, template, arguments, position)
             if not current_object:
                 return self._create_partial_template_instance(template, arguments, position)
-            current_object = current_object.create_template_instance(template, arguments, position)
         return current_object
 
     def _distance(self, other, matches, typeref, other_typeref, allowed_cast):
