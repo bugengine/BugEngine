@@ -9,3 +9,4 @@ BugEngine.*
 .settings
 .tags
 .clang_complete
+**/.vscode

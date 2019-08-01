@@ -7,29 +7,33 @@ def unique(seq):
     seen_add = seen.add
     return [ x for x in seq if x not in seen and not seen_add(x)]
 
+
 def gather_includes_defines(task_gen):
-    defines = getattr(task_gen, 'defines', [])
-    includes = getattr(task_gen, 'includes', [])
-    seen = []
-    use = getattr(task_gen, 'use', [])[:]
+    defines = getattr(task_gen, 'defines', []) + getattr(task_gen, 'export_defines', []) + getattr(task_gen, 'extra_defines', [])
+    includes = getattr(task_gen, 'includes', []) + getattr(task_gen, 'export_includes', []) + getattr(task_gen, 'extra_includes', [])
+    seen = set([])
+    use = getattr(task_gen, 'use', []) + getattr(task_gen, 'private_use', [])
     while use:
         name = use.pop()
         if name not in seen:
+            seen.add(name)
             try:
                 t = task_gen.bld.get_tgen_by_name(name)
             except:
                 pass
             else:
                 use = use + getattr(t, 'use', [])
-                includes = includes + getattr(t, 'includes ', [])
-                defines = defines + getattr(t, 'defines ', [])
+                includes = includes + getattr(t, 'includes', []) + getattr(t, 'export_includes', []) + getattr(task_gen, 'extra_includes', [])
+                defines = defines + getattr(t, 'defines', []) + getattr(t, 'export_defines', []) + getattr(task_gen, 'extra_defines', [])
     return unique(includes), unique(defines)
+
 
 def path_from(path, bld):
     if isinstance(path, str):
         return path
     else:
         return path.abspath()
+
 
 class vscode(Build.BuildContext):
     "creates projects for Visual Studio Code"
@@ -83,7 +87,7 @@ class vscode(Build.BuildContext):
                         vscode_node.mkdir()
                         settings_node = vscode_node.make_node('c_cpp_properties.json')
                         with open(settings_node.abspath(), 'w') as settings:
-                            settings.write('{\n  "configurations": [\n')
+                            configs = []
                             for toolchain in tg.bld.env.ALL_TOOLCHAINS:
                                 env = tg.bld.all_envs[toolchain]
                                 if env.SUB_TOOLCHAINS:
@@ -93,7 +97,7 @@ class vscode(Build.BuildContext):
                                 for variant in tg.bld.env.ALL_VARIANTS:
                                     all_defines = ('"%s"' % d for d in sub_env.DEFINES + defines)
                                     all_includes = ('"%s"' % path_from(p, tg.bld) for p in (includes + sub_env.INCLUDES + sub_env.SYSTEM_INCLUDES + [os.path.join(sub_env.SYSROOT or '', 'usr', 'include')]))
-                                    settings.write('    {\n'
+                                    configs.append('    {\n'
                                                    '      "name": "%s:%s",\n'
                                                    '      "includePath": [\n'
                                                    '        %s\n'
@@ -101,17 +105,54 @@ class vscode(Build.BuildContext):
                                                    '      "defines": [\n'
                                                    '        %s\n'
                                                    '      ]\n'
-                                                   '    },\n' % (toolchain, variant,
-                                                                 ',\n        '.join(all_includes),
-                                                                 ',\n        '.join(all_defines)))
-                            settings.write('  ]\n}\n')
+                                                   '    }' % (toolchain, variant,
+                                                              ',\n        '.join(all_includes),
+                                                              ',\n        '.join(all_defines)))
+                            settings.write('{\n  "configurations": [\n%s\n  ]\n}\n' % (',\n'.join(configs)))
                         if node.is_child_of(extra_node):
                             while node.parent != extra_node:
                                 node = node.parent
-                            name += '[%s]'%node
+                            name += '[%s]'%node.name
                         workspace.write('    {\n'
                                         '        "name": "%s",\n'
                                         '        "path": "%s"\n'
                                         '    },\n' % (name, path))
+
+                    if 'Makefile' in tg.features:
+                        root = tg.source_nodes[0]
+                        vscode_node = node.make_node('.vscode')
+                        tasks = []
+                        for env_name in self.env.ALL_TOOLCHAINS:
+                            bld_env = self.all_envs[env_name]
+                            if bld_env.SUB_TOOLCHAINS:
+                                env = self.all_envs[bld_env.SUB_TOOLCHAINS[0]]
+                            else:
+                                env = bld_env
+                            for variant in self.env.ALL_VARIANTS:
+                                tasks.append('    {\n'
+                                             '      "label": "build:%(toolchain)s:%(variant)s",\n'
+                                             '      "type": "process",\n'
+                                             '      "command": ["%(python)s"],\n'
+                                             '      "args": ["%(waf)s", "build:%(toolchain)s:%(variant)s"],\n'
+                                             '      "options":{\n'
+                                             '        "cwd": "%(pwd)s"\n'
+                                             '      },\n'
+                                             '      "problemMatcher": [\n'
+                                             '        "$gcc",\n'
+                                             '        "$msCompile"\n'
+                                             '      ],\n'
+                                             '      "group": {\n'
+                                             '        "kind": "build",\n'
+                                             '        "isDefault": true\n'
+                                             '      }\n'
+                                             '    }\n' % {'python': sys.executable,
+                                                          'waf': sys.argv[0],
+                                                          'toolchain': env_name,
+                                                          'variant': variant,
+                                                          'pwd': tg.bld.srcnode.abspath()})
+                        with open(vscode_node.make_node('tasks.json').abspath(), 'w') as task_file:
+                            task_file.write('{\n  "version":"2.0.0",\n  "tasks": [\n')
+                            task_file.write(',\n'.join(tasks))
+                            task_file.write('\n  ]\n}\n')
             workspace.write('  ]\n}n')
 

@@ -26,6 +26,7 @@ def options(opt):
     opt.load('netbeans', tooldir=[os.path.join(opt.path.abspath(), 'tools', 'waf')])
     opt.load('eclipse', tooldir=[os.path.join(opt.path.abspath(), 'tools', 'waf')])
     opt.load('qtcreator', tooldir=[os.path.join(opt.path.abspath(), 'tools', 'waf')])
+    opt.load('vscode', tooldir=[os.path.join(opt.path.abspath(), 'tools', 'waf')])
 
     opt.recurse('devices.py')
     opt.recurse('build.py')
