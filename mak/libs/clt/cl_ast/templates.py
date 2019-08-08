@@ -101,6 +101,7 @@ class TemplateTypenameParameter(Type):
         Type.__init__(self, lexer, position, name)
         self.value = value
         self.parameter_bind = None
+        self.scope = lexer.UnknownScope()
 
     def get_unresolved_parameters(self):
         return [self]

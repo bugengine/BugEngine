@@ -4,6 +4,7 @@ from .template import *
 from .external_declaration import *
 from .namespace_declaration import *
 from .struct_declaration import *
+from .enum_declaration import *
 from .variable_declaration import *
 from .method_declaration import *
 from .statement import *
