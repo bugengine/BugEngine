@@ -5,7 +5,6 @@ def p_struct_keyword(p):
     """
         struct_keyword : STRUCT
                        | UNION
-                       | ENUM
                        | CLASS
     """
     p[0] = p[1]
@@ -29,6 +28,9 @@ def p_struct_declaration(p):
     if name.qualified:
         if name.target:
             if name.target.get_token_type() == 'STRUCT_ID':
+                if name.target.struct_type != p[1]:
+                    p.lexer._warning("'%s' declared as %s here, but first declared as %s" % (name, p[1], name.target.struct_type), p.position(1))
+                    p.lexer._note('previously declared here', name.target.position)
                 p[0] = (name.target, None)
             elif name.target.get_token_type() == 'TEMPLATE_STRUCT_ID':
                 assert False, 'Name parsing should have handled this'
@@ -180,6 +182,10 @@ def p_type_struct_declaration(p):
     if not p[0]:
         p[0] = p[1][1]
         p[0].register()
+    elif p[1][1]:
+        if p[1][0].struct_type != p[1][1].struct_type:
+            p.lexer._warning("'%s' declared as %s here, but first declared as %s" % (p[1][1].name, p[1][1].struct_type, p[1][0].struct_type), p[1][1].position)
+            p.lexer._note('previously declared here', p[1][0].position)
     p.set_position(0, 1)
 
 

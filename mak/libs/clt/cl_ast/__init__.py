@@ -1,5 +1,6 @@
 from . import namespaces
 from . import types
+from . import enum
 from . import templates
 from . import methods
 from . import variables

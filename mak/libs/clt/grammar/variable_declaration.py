@@ -12,7 +12,7 @@ def p_variable_initial_value(p):
     """
         variable_initial_value_opt : EQUALS expression
     """
-    p[0] = None
+    p[0] = p[2]
 
 
 def p_type_modifier_opt_end(p):
@@ -60,8 +60,8 @@ def p_variable_declaration(p):
         # todo: check specifiers
     else:
         v = variables.Variable(p.lexer, name.position, name.name[0], p[6], p[7], p[1])
+        v.register()
         p[0] = [v]
-        p.lexer.scopes[-1].add(p[0][0])
         for s in p[1]:
             if s.specifier == 'inline':
                 p.lexer._error('inline can only be used on functions', s.position)
@@ -84,4 +84,5 @@ def p_variable_declaration_cted(p):
         # todo: check specifiers
     else:
         v = variables.Variable(p.lexer, name.position, name.name[0], p[8], p[9], p[1][0].attributes)
+        v.register()
         p[0] = p[1] + [v]

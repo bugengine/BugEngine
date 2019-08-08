@@ -168,6 +168,7 @@ class ClLexer:
                     owner = getattr(self.last_token, 'found_object', self.scopes[0].owner)
                     self.current_scope = owner.scope
                     if not self.current_scope:
+                        self.current_scope = ClLexer.UnknownScope()
                         if self.scopes[-1].is_definition_scope():
                             self._error("incomplete type '%s' used in nested name specifier" % self.last_token.value,
                                         self._position(new_token))
