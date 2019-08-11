@@ -208,6 +208,8 @@ def build_plugins(bld):
     bld.plugin('tool.bugeditor.ui',
                ['engine.bugengine'],
                platforms=['pc'])
+    if Options.options.tests:
+        bld.plugin('test.clt', ['plugin.compute.cpu'])
 
 
 def build_games(bld):
@@ -231,7 +233,6 @@ def build_games(bld):
                       'plugin.scripting.package'],
              path='tool.help', platforms=['pc'])
     if Options.options.tests:
-        bld.game('test.clt', ['plugin.compute.cpu'])
         bld.game('test.settings', ['engine.bugengine'])
 
 
