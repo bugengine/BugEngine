@@ -17,7 +17,7 @@ class Scope:
     def __getitem__(self, index):
         return self.items[index]
 
-    def find(self, name, is_current_scope):
+    def find(self, name, position, is_current_scope):
         for _, element in self.items:
             result = element.find(name)
             if result:

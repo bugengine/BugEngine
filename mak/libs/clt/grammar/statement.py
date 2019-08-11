@@ -34,6 +34,13 @@ def p_statement_block_error(p):
     pass
 
 
+def p_statement_typedef(p):
+    """
+        statement : typedef SEMI
+    """
+    pass
+
+
 def p_statement_variable_declaration(p):
     """
         statement : variable_declaration SEMI

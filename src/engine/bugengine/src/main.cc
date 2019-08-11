@@ -112,10 +112,10 @@ namespace
                 }
 
                 const char* normal = colors[0];
-                fprintf(stdout, "[%s%s%s] %s%s(%s)%s: %s",
+                fprintf(stdout, "[%s%s%s] %s%s(%s)%s %s(%d): %s",
                         color, getLogLevelName(level), normal,
                         colors[1], logname.c_str(), thread, normal,
-                        //filename, line,
+                        filename, line,
                         msg);
                 fflush(stdout);
                 be_forceuse(filename);
@@ -153,14 +153,21 @@ int beMain(int argc, const char *argv[])
                 inamespace("plugin.debug.assert"),
                 Plugin::Context(weak<Resource::ResourceManager>(), ref<Folder>(), weak<Scheduler>()));
         ScopedLogListener file(scoped<FileLogListener>::create(Arena::debug(), home->createFile("log")));
-        be_info("Running %s" | Environment::getEnvironment().getGame());
         scoped<Scheduler> scheduler = scoped<Scheduler>::create(Arena::task());
         scoped<Resource::ResourceManager> manager = scoped<Resource::ResourceManager>::create(Arena::resource());;
         Plugin::Plugin<Application> app(
                 inamespace(Environment::getEnvironment().getGame()),
                 Plugin::Context(manager, home, scheduler));
-
-        return app->run();
+        if (app)
+        {
+            be_info("Running %s" | Environment::getEnvironment().getGame());
+            return app->run();
+        }
+        else
+        {
+            be_error("Failed to load main module \"%s\", exiting" | Environment::getEnvironment().getGame());
+            return EXIT_FAILURE;
+        }
     }
 #if BE_ENABLE_EXCEPTIONS
     catch(...)

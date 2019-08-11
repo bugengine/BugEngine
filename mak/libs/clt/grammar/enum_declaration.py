@@ -105,7 +105,7 @@ def p_enum_header_anonymous(p):
     """
     p[0] = Enum(p.lexer, p.position(1), None)
     p[0].register()
-    p[0].define(None, p.position(4))
+    p[0].define(p.position(4))
     p.set_position(0, 1)
 
 

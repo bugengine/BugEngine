@@ -41,8 +41,14 @@ ide_format = {
 }
 
 class ClLexer:
+    class ScopeError(Exception):
+        def __init__(self, msg, position, inner_error=None):
+            self.msg = msg
+            self.position = position
+            self.inner_error = inner_error
+
     class UnknownScope:
-        def find(self, name, is_current_scope):
+        def find(self, name, position, is_current_scope):
             return None
 
     class TemplateStack:
@@ -128,18 +134,18 @@ class ClLexer:
             self.template_stack = self._template_stack
             self._template_stack = None
 
-    def lookup_by_name(self, name):
+    def lookup_by_name(self, name, position):
         if self.current_scope:
-            return (None, self.current_scope.find(name, True))
+            return (None, self.current_scope.find(name, position, True))
         else:
             for s in self.scopes[::-1]:
-                obj = s.find(name, False)
+                obj = s.find(name, position, False)
                 if obj:
                     return (s, obj)
             return (None, None)
 
     def lookup(self, token):
-        scope, obj = self.lookup_by_name(token.value)
+        scope, obj = self.lookup_by_name(token.value, self._position(token))
         if obj:
             token.found_object = obj
             token.type = obj.get_token_type()
@@ -175,7 +181,7 @@ class ClLexer:
                             self._note("forward declaration of '%s'" % self.last_token.value,
                                        owner.position)
             elif self.last_token and self.last_token.type in ('OPERATOR', ):
-                scope, obj = self.lookup_by_name('op%s' % new_token.type.lower())
+                scope, obj = self.lookup_by_name('op%s' % new_token.type.lower(), self._position(new_token))
                 new_token.found_object = obj
             elif self.last_token and self.last_token.type not in ('SCOPE', 'OPERATOR', ):
                 self.current_scope = None

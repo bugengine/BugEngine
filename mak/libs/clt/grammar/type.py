@@ -74,6 +74,14 @@ def p_type_builtin(p):
     p[0] = types.TypeRef(p.lexer, builtin.position, builtin)
 
 
+def p_type_void(p):
+    """
+        type : VOID
+    """
+    void = types.Void(p.lexer, p.position(1))
+    p[0] = types.TypeRef(p.lexer, void.position, void)
+
+
 def p_type_builtin_modifier_list_deprecated(p):
     """
         type_modifier_deprecated : CHAR
@@ -178,14 +186,6 @@ def p_type_reference(p):
     p[0] = types.TypeRef(p.lexer, ref.position, ref)
 
 
-def p_type_void_ptr(p):
-    """
-        type : VOID TIMES
-    """
-    ptr = types.Pointer(p.lexer, p.position(2), types.BuiltIn(p.lexer, p.position(1), 'void'))
-    p[0] = types.TypeRef(p.lexer, ptr.position, ptr)
-
-
 def p_type_const(p):
     """
         type : type CONST                                                       %prec TYPEMODIFIER
@@ -214,3 +214,41 @@ def p_type_const_pre(p):
     """
     p[0] = p[2].clone()
     p[0].add_qualifier(p[1])
+
+
+
+def p_typedef_name(p):
+    """
+        typedef_name : ID
+                     | STRUCT_ID_SHADOW
+                     | TYPENAME_ID_SHADOW
+                     | NAMESPACE_ID_SHADOW
+                     | METHOD_ID_SHADOW
+                     | VARIABLE_ID_SHADOW
+                     | TEMPLATE_STRUCT_ID_SHADOW
+                     | TEMPLATE_METHOD_ID_SHADOW
+                     | TEMPLATE_TYPENAME_ID_SHADOW
+    """
+    p[0] = p[1]
+
+
+def p_typedef_name_error(p):
+    """
+        typedef_name : STRUCT_ID
+                     | TYPENAME_ID
+                     | NAMESPACE_ID
+                     | METHOD_ID
+                     | VARIABLE_ID
+                     | TEMPLATE_STRUCT_ID
+                     | TEMPLATE_METHOD_ID
+                     | TEMPLATE_TYPENAME_ID
+    """
+    p[0] = p[1]
+
+
+def p_declaration_typedef(p):
+    """
+        typedef : TYPEDEF type typedef_name
+    """
+    p[0] = types.TypeDef(p.lexer, p.position(1), p[3], p[2])
+    p[0].register()

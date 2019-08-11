@@ -89,8 +89,40 @@ class Type(CppObject):
     def __init__(self, *args):
         CppObject.__init__(self, *args)
 
+    def get_type(self):
+        return self
+
     def get_unresolved_parameters(self):
         return []
+
+
+class TypeDef(Type):
+    class ErrorScope(Scope):
+        def __init__(self, owner, position):
+            Scope.__init__(self, owner, position)
+
+        def find(self, name, position, is_current_scope):
+            if is_current_scope:
+                self.owner.lexer._error('f', position)
+                self.owner.lexer._note('f',self.position)
+            return None
+
+    def __init__(self, lexer, position, name, type):
+        Type.__init__(self, lexer, position, name)
+        self.type = type
+        assert isinstance(self.type, TypeRef)
+        self.scope = getattr(self.type.type, 'scope', None)
+        if not self.scope:
+            self.scope = self.ErrorScope(self, self.position)
+
+    def get_type(self):
+        return self.type.get_type()
+
+    def __str__(self):
+        return str(self.type)
+
+    def get_token_type(self):
+        return 'TYPENAME_ID'
 
 
 class Pointer(Type):
@@ -206,14 +238,14 @@ class StructScope(Scope):
             cast.debug_dump(indent)
         Scope.debug_dump(self, indent)
 
-    def find(self, name, is_current_scope):
+    def find(self, name, position, is_current_scope):
         if is_current_scope:
             if name == self.owner.name:
                 if self.owner.lexer.last_token == '~':
                     return self.destructor
                 else:
                     return self.constructor
-        return Scope.find(self, name, is_current_scope)
+        return Scope.find(self, name, position, is_current_scope)
 
 
 class Struct(Type):
@@ -236,7 +268,7 @@ class Struct(Type):
 
     def _complete_template_instance(self, result, template, arguments, position):
         if self.scope:
-            result.define(self.scope.parent and self.scope.parent.create_template_instance(template, arguments, position), position)
+            result.define(self.scope.parent and self.scope.parent.create_template_instance(template, arguments, position).get_type(), position)
             try:
                 self.scope.create_template_instance(result.scope, template, arguments, position)
             except Exception:
@@ -325,6 +357,30 @@ class BuiltIn(Type):
         return '%d%s' % (len(self.builtin), self.builtin)
 
 
+class Void(Type):
+    def __init__(self, lexer, position):
+        Type.__init__(self, lexer, position)
+
+    def __str__(self):
+        return 'void'
+
+    def _distance(self, other, matches, typeref, other_typeref, allowed_cast):
+        if isinstance(other, Void):
+            d = Type.Distance(cast=0)
+            return d.match_attributes(allowed_cast, typeref.qualifiers, other_typeref.qualifiers)
+        elif allowed_cast == CAST_UNRELATED:
+            d = Type.Distance(variant = -1)
+            return d.match_attributes(allowed_cast, typeref.qualifiers, other_typeref.qualifiers)
+        else:
+            raise CastError()
+
+    def _create_template_instance(self, template, arguments, position):
+        return self
+
+    def signature(self):
+        return '4void'
+
+
 class DependentTypeName(Type):
     def __init__(self, lexer, position, name):
         Type.__init__(self, lexer, position)
@@ -344,10 +400,10 @@ class DependentTypeName(Type):
     def resolve(self, current_object, name, position, arguments, instance_template, instance_arguments, instance_position):
         from .templates import Template
         if not current_object:
-            _, result = self.lexer.lookup_by_name(name)
+            _, result = self.lexer.lookup_by_name(name, position)
             assert result
         else:
-            result = current_object.scope.find(name, True)
+            result = current_object.scope.find(name, position, True)
         if not result:
             raise Template.InstantiationError(position, 'no object named %s in %s' % (name, current_object.name))
         result = result.create_template_instance(instance_template, instance_arguments, instance_position)
@@ -403,6 +459,12 @@ class TypeRef(CppObject):
         self.type = type
         self.qualifiers = set([])
 
+    def get_type(self):
+        return self.type.get_type()
+
+    def is_void(self):
+        return isinstance(self.type.get_type(), Void)
+
     def add_qualifier(self, qualifier):
         self.qualifiers.add(qualifier)
 
@@ -413,8 +475,13 @@ class TypeRef(CppObject):
         return result
 
     def distance(self, other, allowed_cast, matches = {}):
-        if isinstance(other, TypeRef):
-            return self.type._distance(other.type, matches, self, other, allowed_cast)
+        if isinstance(self.type, TypeDef):
+            return self.type.type.distance(other, allowed_cast, matches)
+        elif isinstance(other, TypeRef):
+            if isinstance(other.type, TypeDef):
+                return self.distance(other.type.type, allowed_cast, matches)
+            else:
+                return self.type._distance(other.type, matches, self, other, allowed_cast)
         else:
             raise CastError()
 

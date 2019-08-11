@@ -64,13 +64,21 @@ def p_method_parameters(p):
     """
         method_parameters : method_parameter_list
     """
-    p[0] = p[1]
+    if len(p[1]) == 1:
+        if p[1][0].type.is_void():
+            if p[1][0].name:
+                p.lexer._error("argument '%s' may not have void type" % p[1][0].name,
+                               p[1][0].position)
+            p[0] = []
+        else:
+            p[0] = p[1]
+    else:
+        p[0] = p[1]
 
 
 def p_method_parameters_none(p):
     """
-        method_parameters : VOID
-                          |
+        method_parameters :
     """
     p[0] = []
 
@@ -246,13 +254,6 @@ def p_method_declaration_prefix(p):
     p[0] = (p[2], p[1], p[6], p[4])
 
 
-def p_method_declaration_prefix_void(p):
-    """
-        method_declaration_prefix : declaration_specifier_list VOID consume_template_stack object_name verify_template_stack create_method
-    """
-    p[0] = (None, p[1], p[6], p[4])
-
-
 def p_method_declaration_prefix_cast_operator(p):
     """
         method_declaration_prefix : declaration_specifier_list cast_method_name create_castop
@@ -289,7 +290,7 @@ def p_method_declaration(p):
     """
     if p[1][0]:
         assert isinstance(p[1][0], types.TypeRef), p[1][3].name
-    p[0] = p[1][2].find_overload(p[3], p[1][0], p[1][1] + p[5])
+    p[0] = p[1][2].find_overload(p[3], p.position(2), p[1][0], p[1][1] + p[5])
     if not p[0]:
         p[0] = p[1][2].create_overload(p.position(2), p[3], p[1][0], p[1][1] + p[5])
     p.set_position(0, 2)

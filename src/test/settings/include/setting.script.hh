@@ -15,6 +15,7 @@ enum EnumSetting
     EnumSettingValue1,
     EnumSettingValue2
 };
+
 struct TestSettings : public Settings::Settings<TestSettings>
 {
     EnumSetting enumSetting;
