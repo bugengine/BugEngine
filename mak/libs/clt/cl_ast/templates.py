@@ -25,7 +25,7 @@ class TemplateValueParameter(CppObject):
     def __str__(self):
         return '%s%s' % (self.type, self.name and ' '+self.name or '')
 
-    def get_type(self):
+    def get_template_parameter_type(self):
         return self.type.name()
 
     def _create_template_instance(self, template, arguments, position):
@@ -69,7 +69,7 @@ class TemplateTemplateParameter(CppObject):
         params = ', '.join(str(x) for x in self.template_params)
         return 'template<%s> typename%s' % (params, self.name and ' '+self.name or '')
 
-    def get_type(self):
+    def get_template_parameter_type(self):
         return 'template typename'
     
     def is_compatible(self, argument):
@@ -121,7 +121,7 @@ class TemplateTypenameParameter(Type):
     def __str__(self):
         return 'typename%s' % (self.name and ' '+self.name or '')
 
-    def get_type(self):
+    def get_template_parameter_type(self):
         return 'typename'
     
     def is_compatible(self, argument):
@@ -131,7 +131,11 @@ class TemplateTypenameParameter(Type):
         if isinstance(other, TemplateTypenameParameter):
             if self.parameter_bind == other.parameter_bind:
                 return Type.Distance()
-        if self.parameter_bind[0] in matches:
+            elif allowed_cast == CAST_UNRELATED:
+                return Type.Distance(variant=-1)
+            else:
+                raise CastError()
+        elif self.parameter_bind[0] in matches:
             new_match = matches[self.parameter_bind[0]]
             for a in typeref.qualifiers:
                 #assert a not in new_match.qualifiers
@@ -178,13 +182,13 @@ class TemplateScope(Scope):
         else:
             Scope.add(self, element)
 
-    def find(self, name, is_current_scope):
+    def find(self, name, position, is_current_scope):
         for element in self.parameters:
             result = element.find(name)
             if result:
                 return result
         else:
-            return Scope.find(self.owner.back_link.scope, name, is_current_scope)
+            return Scope.find(self.owner.back_link.scope, name, position, is_current_scope)
 
 
 class Template(CppObject):
@@ -423,7 +427,7 @@ class Template(CppObject):
         for p, a in zip(self.scope.parameters, arguments):
             if not p.is_compatible(a):
                 raise self.InstantiationError(a.position,
-                                              'Invalid template argument: expected %s, got %s' % (p.get_type(),
+                                              'Invalid template argument: expected %s, got %s' % (p.get_template_parameter_type(),
                                                                                                   a.__class__.__name__))
         return arguments
 

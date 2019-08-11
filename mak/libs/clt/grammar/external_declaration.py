@@ -88,36 +88,9 @@ def p_external_declaration_using(p):
     """
 
 
-def p_typedef_name(p):
-    """
-        typedef_name : ID
-                     | STRUCT_ID_SHADOW
-                     | TYPENAME_ID_SHADOW
-                     | NAMESPACE_ID_SHADOW
-                     | METHOD_ID_SHADOW
-                     | VARIABLE_ID_SHADOW
-                     | TEMPLATE_STRUCT_ID_SHADOW
-                     | TEMPLATE_METHOD_ID_SHADOW
-                     | TEMPLATE_TYPENAME_ID_SHADOW
-    """
-
-
-def p_typedef_name_error(p):
-    """
-        typedef_name : STRUCT_ID
-                     | TYPENAME_ID
-                     | NAMESPACE_ID
-                     | METHOD_ID
-                     | VARIABLE_ID
-                     | TEMPLATE_STRUCT_ID
-                     | TEMPLATE_METHOD_ID
-                     | TEMPLATE_TYPENAME_ID
-    """
-
-
 def p_external_declaration_typedef(p):
     """
-        external_declaration : TYPEDEF type typedef_name SEMI
+        external_declaration : typedef SEMI
     """
 
 

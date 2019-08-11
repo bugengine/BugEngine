@@ -33,6 +33,7 @@ struct A
     static void testStatic()
     {
     }
+    void testVoid();
     void operator++();
     void operator++(int);
 };

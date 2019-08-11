@@ -67,7 +67,7 @@ def p_template_new_template_id(p):
                                 | TEMPLATE TEMPLATE_TYPENAME_ID_SHADOW template_arguments
     """
     p[0] = Name(p.lexer, (p[2],), p.position(2), targets = ((None, p[3], None),),
-                dependent=True, resolved=False)
+                dependent=True)
 
 
 def p_template_id(p):
@@ -101,7 +101,6 @@ def p_template_id(p):
     p[0] = Name(p.lexer, (p[1],), p.position(1), target,
                 targets = ((target, p[2], p.slice[1].found_object),),
                 qualified = not p.slice[1].type.endswith('SHADOW'),
-                resolved = (p.slice[1].type.find('TYPENAME') == -1),
                 dependent = (target==None))
     p.lexer.set_search_scope_ifn(p.position(1), target)
 
@@ -349,7 +348,7 @@ def p_object_name_id(p):
         object_name_id_qualified : TEMPLATE_METHOD_ID_SHADOW
         object_name_id_qualified : TEMPLATE_STRUCT_ID_SHADOW
     """
-    p[0] = Name(p.lexer, (p[1],), p.position(1), resolved = False)
+    p[0] = Name(p.lexer, (p[1],), p.position(1))
 
 
 def p_object_name_operator(p):

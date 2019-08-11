@@ -130,7 +130,7 @@ def p_struct_parent(p):
                           |
     """
     if len(p) > 1:
-        p[0] = p[3].target
+        p[0] = p[3].target.get_type()
 
 
 def p_struct_parent_error(p):
