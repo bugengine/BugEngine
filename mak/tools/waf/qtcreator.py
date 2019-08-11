@@ -867,6 +867,7 @@ class QtCreator(Build.BuildContext):
                     write_value(data, [])
                 with XmlNode(qtcreator, 'data') as data:
                     target_index = 0
+                    options = [a for a in sys.argv if a[0] == '-']
                     for env_name in self.env.ALL_TOOLCHAINS:
                         XmlNode(data, 'variable', 'ProjectExplorer.Project.Target.%d'%target_index).close()
                         bld_env = self.all_envs[env_name]
@@ -906,7 +907,7 @@ class QtCreator(Build.BuildContext):
                                             ('ProjectExplorer.BuildStep.Enabled',
                                               True),
                                             ('ProjectExplorer.ProcessStep.Arguments',
-                                              '%s build:%s:%s'%(sys.argv[0], env_name, variant)),
+                                              '%s build:%s:%s %s'%(sys.argv[0], env_name, variant, ' '.join(options))),
                                             ('ProjectExplorer.ProcessStep.Command',
                                               sys.executable),
                                             ('ProjectExplorer.ProcessStep.WorkingDirectory',
