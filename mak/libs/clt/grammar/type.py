@@ -158,7 +158,8 @@ def p_type_type_name_typename(p):
     """
         type : TYPENAME object_name
     """
-    p[0] = types.TypeRef(p.lexer, p[2].position,
+    p[2].dependent = True
+    p[0] = types.TypeRef(p.lexer, p.position(1),
                          types.DependentTypeName(p.lexer, p[2].position, p[2]))
 
 

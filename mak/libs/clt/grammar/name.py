@@ -402,3 +402,4 @@ def p_type_name_shadow(p):
                       | template_typename_id_shadow                                     %prec NAME0
     """
     p[0] = p[1]
+

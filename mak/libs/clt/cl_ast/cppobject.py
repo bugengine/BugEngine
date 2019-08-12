@@ -1,7 +1,24 @@
-from .scope import Scope
+from .scope import Scope, ScopeError
 
 
 class CppObject:
+    class NoContainerScope(Scope):
+        def find(self, name, position, is_current_scope):
+            if is_current_scope:
+                raise ScopeError("%s is not a class, namespace or enumeration" % (self.owner.pretty_name()), position)
+            else:
+                return None
+
+    class NotDefinedScope(Scope):
+        def find(self, name, position, is_current_scope):
+            if is_current_scope:
+                raise ScopeError("forward declaration of %s" % (self.owner.pretty_name()), self.owner.position,
+                                 ScopeError("incomplete type '%s' named in nested name specifier" % (self.owner.name), position))
+            else:
+                return None
+
+    INITIAL_SCOPE = NoContainerScope
+
     def __init__(self, lexer, position, name=None):
         from .templates import Template
         self.lexer = lexer
@@ -9,7 +26,7 @@ class CppObject:
         self.parent_scope = self.lexer.scopes and self.lexer.scopes[-1] or None
         self.parent = self.parent_scope and self.parent_scope.owner
         self.name = name
-        self.scope = None
+        self.scope = self.INITIAL_SCOPE(self, self.position)
         self.templates = []
         parent = self.parent
         while parent:
@@ -52,11 +69,14 @@ class CppObject:
     def _complete_template_instance(self, result, template, arguments, position):
         pass
 
+    def pretty_name(self):
+        return "'%s'" % (self.name or '<anonymous object>')
+
     def register(self):
         self.parent_scope.add(self)
 
     def push_scope(self, position, scope = None):
-        if not self.scope:
+        if isinstance(self.scope, self.INITIAL_SCOPE):
             self.scope = scope or Scope(self, position)
         elif scope:
             self.lexer._error('redefinition of object %s'%self.name, position)
@@ -87,7 +107,3 @@ class CppObject:
         print('%s%s%s [%s]' % (indent, self.__class__.__name__,
                                self.name and (' %s'%self.name) or '',
                                self.position))
-        if self.scope:
-            print('%s{' % indent)
-            self.scope.debug_dump(indent)
-            print('%s}' % indent)

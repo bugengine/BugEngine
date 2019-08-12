@@ -1,5 +1,6 @@
 from .cppobject import CppObject
-from .scope import Scope
+from .error import CppError
+from .scope import Scope, ScopeError
 from .name import Name
 
 
@@ -97,23 +98,20 @@ class Type(CppObject):
 
 
 class TypeDef(Type):
-    class ErrorScope(Scope):
-        def __init__(self, owner, position):
-            Scope.__init__(self, owner, position)
-
+    class INITIAL_SCOPE(Scope):
         def find(self, name, position, is_current_scope):
             if is_current_scope:
-                self.owner.lexer._error('f', position)
-                self.owner.lexer._note('f',self.position)
-            return None
+                scope = self.owner.type.type.scope
+                try:
+                    return scope.find(name, position, is_current_scope)
+                except CppError as e:
+                    raise ScopeError("with '%s' defined as %s" % (self.owner.name, self.owner.type.type.pretty_name()), self.position, e)
+            else:
+                return None
 
     def __init__(self, lexer, position, name, type):
         Type.__init__(self, lexer, position, name)
         self.type = type
-        assert isinstance(self.type, TypeRef)
-        self.scope = getattr(self.type.type, 'scope', None)
-        if not self.scope:
-            self.scope = self.ErrorScope(self, self.position)
 
     def get_type(self):
         return self.type.get_type()
@@ -222,7 +220,14 @@ class Array(Type):
 
 class StructScope(Scope):
     def __init__(self, owner, position, parent):
+        from .templates import TemplateTypenameParameter
         Scope.__init__(self, owner, position)
+        if parent:
+            assert isinstance(parent, Type)
+            if not (isinstance(parent, Struct)
+                 or isinstance(parent, DependentTypeName)
+                 or isinstance(parent, TemplateTypenameParameter)):
+                owner.lexer._error('expected struct name', position)
         self.parent = parent
         self.constructor = None
         self.destructor = None
@@ -249,6 +254,8 @@ class StructScope(Scope):
 
 
 class Struct(Type):
+    INITIAL_SCOPE = CppObject.NotDefinedScope
+
     global_index = 0
 
     def __init__(self, lexer, position, struct_type, name):
@@ -268,7 +275,8 @@ class Struct(Type):
 
     def _complete_template_instance(self, result, template, arguments, position):
         if self.scope:
-            result.define(self.scope.parent and self.scope.parent.create_template_instance(template, arguments, position).get_type(), position)
+            parent = self.scope.parent and self.scope.parent.create_template_instance(template, arguments, position)
+            result.define(parent and parent.get_type(), position)
             try:
                 self.scope.create_template_instance(result.scope, template, arguments, position)
             except Exception:
@@ -350,6 +358,9 @@ class BuiltIn(Type):
         else:
             raise CastError()
 
+    def pretty_name(self):
+        return "builtin type '%s'" % self.builtin
+
     def _create_template_instance(self, template, arguments, position):
         return self
     
@@ -380,8 +391,15 @@ class Void(Type):
     def signature(self):
         return '4void'
 
+    def pretty_name(self):
+        return "builtin type 'void'"
+
 
 class DependentTypeName(Type):
+    class INITIAL_SCOPE(Scope):
+        def find(self, name, position, is_current_scope):
+            return None
+
     def __init__(self, lexer, position, name):
         Type.__init__(self, lexer, position)
         self.name = name
@@ -402,16 +420,19 @@ class DependentTypeName(Type):
         if not current_object:
             _, result = self.lexer.lookup_by_name(name, position)
             assert result
+        elif not current_object.scope:
+            return None
         else:
-            result = current_object.scope.find(name, position, True)
-        if not result:
-            raise Template.InstantiationError(position, 'no object named %s in %s' % (name, current_object.name))
+            try:
+                result = current_object.scope.find(name, position, True)
+            except CppError as e:
+                raise Template.InstantiationError(e.message, e.position, e.inner_error)
         result = result.create_template_instance(instance_template, instance_arguments, instance_position)
         if arguments:
             try:
                 result = result.instantiate([a.create_template_instance(instance_template, instance_arguments, instance_position) for a in arguments], position)
             except Template.InstantiationError as e:
-                raise Template.InstantiationError(position, "in instantiation of template '%s' requested here"%name, e)
+                raise Template.InstantiationError("in instantiation of template '%s' requested here"%name, position, e)
         return result
 
     def _create_partial_template_instance(self, template, arguments, position):
@@ -498,6 +519,7 @@ class TypeRef(CppObject):
     def __str__(self):
         return str(self.type) + (self.qualifiers and ' '+' '.join(self.qualifiers) or '')
     __repr__ = __str__
+    pretty_name = __str__
 
     def get_unresolved_parameters(self):
         return self.type.get_unresolved_parameters()

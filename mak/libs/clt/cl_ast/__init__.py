@@ -1,3 +1,4 @@
+from . import error
 from . import namespaces
 from . import types
 from . import enum
