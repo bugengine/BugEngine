@@ -1,3 +1,10 @@
+from .error import CppError
+
+
+class ScopeError(CppError):
+    pass
+
+
 class Scope:
     def __init__(self, owner, position, visibility='published'):
         self.owner = owner
@@ -22,7 +29,10 @@ class Scope:
             result = element.find(name)
             if result:
                 return result
-        return None
+        if is_current_scope:
+            raise ScopeError("no member named '%s' in %s" % (name, self.owner.pretty_name()), position)
+        else:
+            return None
 
     def seal(self):
         self.owner.seal()

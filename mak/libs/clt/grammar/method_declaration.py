@@ -132,7 +132,6 @@ def p_create_method(p):
             p[0].register()
     elif name.target:
         # method not in this scope: redeclare
-        print(name.name, name.target, name.target.position)
         if template:
             template.bind(template)
         p[0] = methods.Method(p.lexer, name.position, name.name[-1])

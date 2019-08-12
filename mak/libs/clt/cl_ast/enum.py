@@ -22,6 +22,8 @@ class EnumScope(Scope):
 
 
 class Enum(Type):
+    INITIAL_SCOPE = CppObject.NotDefinedScope
+
     def __init__(self, lexer, position, name):
         Type.__init__(self, lexer, position,name)
         self.struct_type = 'enum'
@@ -31,6 +33,9 @@ class Enum(Type):
     
     def define(self, position):
         self.push_scope(position, EnumScope(self, position))
+
+    def find(self, name):
+        return self.scope.find(name, None, False) or Type.find(self, name)
 
     def write_to(self, writer):
         pass

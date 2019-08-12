@@ -126,11 +126,11 @@ def p_struct_parent_visibility(p):
 
 def p_struct_parent(p):
     """
-        struct_parent_opt : COLON struct_parent_visibility_opt type_name
+        struct_parent_opt : COLON struct_parent_visibility_opt type
                           |
     """
     if len(p) > 1:
-        p[0] = p[3].target.get_type()
+        p[0] = p[3].get_type()
 
 
 def p_struct_parent_error(p):

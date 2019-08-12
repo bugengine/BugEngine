@@ -1,4 +1,5 @@
 from .cppobject import CppObject
+from .error import CppError
 from .scope import Scope
 from .types import TypeRef, Type, BuiltIn, CAST_NONE, CAST_ATTRIB, CAST_UNRELATED, CastError
 
@@ -97,6 +98,10 @@ class TemplateTemplateParameter(CppObject):
 
 
 class TemplateTypenameParameter(Type):
+    class INITIAL_SCOPE(Scope):
+        def find(self, name, position, is_current_scope):
+            return None
+
     def __init__(self, lexer, position, name, value):
         Type.__init__(self, lexer, position, name)
         self.value = value
@@ -192,12 +197,8 @@ class TemplateScope(Scope):
 
 
 class Template(CppObject):
-    class InstantiationError(Exception):
-        def __init__(self, position, error_msg, inner_error=None):
-            Exception.__init__(self)
-            self.message = error_msg
-            self.position = position
-            self.inner_error = inner_error
+    class InstantiationError(CppError):
+        pass
 
     def __init__(self, lexer, position):
         CppObject.__init__(self, lexer, position)

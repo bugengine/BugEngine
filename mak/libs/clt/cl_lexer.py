@@ -41,12 +41,6 @@ ide_format = {
 }
 
 class ClLexer:
-    class ScopeError(Exception):
-        def __init__(self, msg, position, inner_error=None):
-            self.msg = msg
-            self.position = position
-            self.inner_error = inner_error
-
     class UnknownScope:
         def find(self, name, position, is_current_scope):
             return None
@@ -134,14 +128,30 @@ class ClLexer:
             self.template_stack = self._template_stack
             self._template_stack = None
 
+    def show_error_stack(self, cpp_error):
+        if cpp_error.inner_error:
+            self.show_error_stack(cpp_error.inner_error)
+            self._note(cpp_error.message, cpp_error.position)
+        else:
+            self._error(cpp_error.message, cpp_error.position)
+
     def lookup_by_name(self, name, position):
         if self.current_scope:
-            return (None, self.current_scope.find(name, position, True))
+            try:
+                return (None, self.current_scope.find(name, position, True))
+            except cl_ast.error.CppError as e:
+                self.show_error_stack(e)
+                return (None, None)
         else:
             for s in self.scopes[::-1]:
-                obj = s.find(name, position, False)
-                if obj:
-                    return (s, obj)
+                try:
+                    obj = s.find(name, position, False)
+                except cl_ast.error.CppError as e:
+                    self.show_error_stack(e)
+                    return (None, None)
+                else:
+                    if obj:
+                        return (s, obj)
             return (None, None)
 
     def lookup(self, token):
@@ -173,13 +183,7 @@ class ClLexer:
                 if self.last_token:
                     owner = getattr(self.last_token, 'found_object', self.scopes[0].owner)
                     self.current_scope = owner.scope
-                    if not self.current_scope:
-                        self.current_scope = ClLexer.UnknownScope()
-                        if self.scopes[-1].is_definition_scope():
-                            self._error("incomplete type '%s' used in nested name specifier" % self.last_token.value,
-                                        self._position(new_token))
-                            self._note("forward declaration of '%s'" % self.last_token.value,
-                                       owner.position)
+                    assert self.current_scope
             elif self.last_token and self.last_token.type in ('OPERATOR', ):
                 scope, obj = self.lookup_by_name('op%s' % new_token.type.lower(), self._position(new_token))
                 new_token.found_object = obj
