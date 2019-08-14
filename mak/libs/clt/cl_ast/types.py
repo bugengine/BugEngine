@@ -250,7 +250,15 @@ class StructScope(Scope):
                     return self.destructor
                 else:
                     return self.constructor
-        return Scope.find(self, name, position, is_current_scope)
+        try:
+            result = Scope.find(self, name, position, is_current_scope)
+        except ScopeError:
+            if self.parent:
+                return self.parent.scope.find(name, position, is_current_scope)
+            else:
+                raise
+        else:
+            return result or (self.parent and self.parent.scope.find(name, position, is_current_scope))
 
 
 class Struct(Type):

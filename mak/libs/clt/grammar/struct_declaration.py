@@ -26,7 +26,7 @@ def p_struct_declaration(p):
                             p[3].position)
             name.target = name.target.scope[0][1]
     if name.qualified:
-        if name.target:
+        if not name.dependent:
             if name.target.get_token_type() == 'STRUCT_ID':
                 if name.target.struct_type != p[1]:
                     p.lexer._warning("'%s' declared as %s here, but first declared as %s" % (name, p[1], name.target.struct_type), p.position(1))
@@ -97,12 +97,11 @@ def p_struct_push(p):
     """
         struct_push :
     """
-    p[0] = p[-2][1]
+    p[0] = p[-1][1]
     if not p[0]:
-        p[0] = p[-2][0]
+        p[0] = p[-1][0]
     else:
         p[0].register()
-    p[0].define(p[-1], p.position(-2))
 
 
 def p_struct_pop(p):
@@ -126,11 +125,11 @@ def p_struct_parent_visibility(p):
 
 def p_struct_parent(p):
     """
-        struct_parent_opt : COLON struct_parent_visibility_opt type
+        struct_parent_opt : COLON struct_parent_visibility_opt type_name
                           |
     """
     if len(p) > 1:
-        p[0] = p[3].get_type()
+        p[0] = p[3].target.get_type()
 
 
 def p_struct_parent_error(p):
@@ -140,11 +139,18 @@ def p_struct_parent_error(p):
     p.lexer._error('expected class name', p[3].position)
 
 
+def p_struct_define(p):
+    """
+        struct_define :
+    """
+    p[-2].define(p[-1], p.position(-1))
+
+
 def p_struct_begin(p):
     """
-        struct_begin : struct_header struct_parent_opt struct_push LBRACE
+        struct_begin : struct_header struct_push struct_parent_opt struct_define LBRACE
     """
-    p[0] = p[3]
+    p[0] = p[2]
     p.set_position(0, 1)
 
 

@@ -34,10 +34,9 @@ def p_id_template(p):
                 found_object = found_object.find_instance(template, template.parameters, p.position(1))
                 p[0] = Name(p.lexer, (p[1],), p.position(1),
                             found_object,
-                            targets=((found_object, template.parameters, template)),
+                            targets=((found_object, template.parameters, template),),
                             qualified = not p.slice[1].type.endswith('SHADOW'),
-                            dependent = (p.slice[1].type.find('TYPENAME') != -1
-                                    or p.slice[1].found_object and p.slice[1].found_object.templates))
+                            dependent = (found_object == None))
                 return
     p[0] = Name(p.lexer, (p[1],), p.position(1),
                 found_object,
@@ -402,4 +401,13 @@ def p_type_name_shadow(p):
                       | template_typename_id_shadow                                     %prec NAME0
     """
     p[0] = p[1]
+
+
+def p_type_name_typename(p):
+    """
+        type_name : TYPENAME object_name
+    """
+    p[2].dependent = True
+    p[2].target = cl_ast.types.DependentTypeName(p.lexer, p[2].position, p[2])
+    p[0] = p[2]
 
