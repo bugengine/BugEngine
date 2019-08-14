@@ -107,3 +107,4 @@ class CppObject:
         print('%s%s%s [%s]' % (indent, self.__class__.__name__,
                                self.name and (' %s'%self.name) or '',
                                self.position))
+        self.scope.debug_dump(indent)

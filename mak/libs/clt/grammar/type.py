@@ -146,21 +146,8 @@ def p_type_type_name(p):
     """
         type : type_name
     """
-    if p[1].dependent:
-        p[0] = types.TypeRef(p.lexer, p[1].position,
-                             types.DependentTypeName(p.lexer, p[1].position, p[1]))
-    else:
-        assert isinstance(p[1].target, types.Type), p[1].target
-        p[0] = types.TypeRef(p.lexer, p[1].target.position, p[1].target)
-
-
-def p_type_type_name_typename(p):
-    """
-        type : TYPENAME object_name
-    """
-    p[2].dependent = True
-    p[0] = types.TypeRef(p.lexer, p.position(1),
-                         types.DependentTypeName(p.lexer, p[2].position, p[2]))
+    assert isinstance(p[1].target, types.Type), p[1].target
+    p[0] = types.TypeRef(p.lexer, p[1].target.position, p[1].target)
 
 
 def p_type_type_decl(p):

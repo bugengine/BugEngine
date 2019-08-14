@@ -1,11 +1,20 @@
+
 class Name:
     def __init__(self, lexer, name, position, target = None, targets = None, qualified = False,
                  dependent = False, data=None, positions=None):
+        from .types import DependentTypeName
+        if targets:
+            assert isinstance(targets[-1], tuple)
         self.lexer = lexer
         self.name = name
         self.position = position
         self.positions = positions or (position,)
-        self.target = target
+        if dependent:
+            #print(target)
+            #assert not target or isinstance(target, DependentTypeName)
+            self.target = DependentTypeName(lexer, position, self)
+        else:
+            self.target = target
         self.targets = targets or ((target, tuple(), target),)
         self.qualified = qualified
         self.dependent = dependent
