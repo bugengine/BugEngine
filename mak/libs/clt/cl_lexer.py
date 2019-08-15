@@ -42,7 +42,7 @@ ide_format = {
 
 class ClLexer:
     class UnknownScope:
-        def find(self, name, position, is_current_scope):
+        def find(self, name, position, source_context, is_current_scope):
             return None
 
     class TemplateStack:
@@ -138,14 +138,14 @@ class ClLexer:
     def lookup_by_name(self, name, position):
         if self.current_scope:
             try:
-                return (None, self.current_scope.find(name, position, True))
+                return (None, self.current_scope.find(name, position, self.scopes[-1].owner, True))
             except cl_ast.error.CppError as e:
                 self.show_error_stack(e)
                 return (None, None)
         else:
             for s in self.scopes[::-1]:
                 try:
-                    obj = s.find(name, position, False)
+                    obj = s.find(name, position, self.scopes[-1].owner, False)
                 except cl_ast.error.CppError as e:
                     self.show_error_stack(e)
                     return (None, None)
@@ -187,8 +187,10 @@ class ClLexer:
             elif self.last_token and self.last_token.type in ('OPERATOR', ):
                 scope, obj = self.lookup_by_name('op%s' % new_token.type.lower(), self._position(new_token))
                 new_token.found_object = obj
-            elif self.last_token and self.last_token.type not in ('SCOPE', 'OPERATOR', ):
+            elif self.last_token and self.last_token.type not in ('SCOPE', 'OPERATOR', 'NOT' ):
                 self.current_scope = None
+        if new_token and new_token.type == 'ID':
+            self.lookup(new_token)
         self.last_token = new_token
         return new_token
 
@@ -618,8 +620,6 @@ class ClLexer:
     @lex.TOKEN(identifier)
     def t_ID(self, t):
         t.type = self.keyword_map.get(t.value, "ID")
-        if t.type == 'ID':
-            self.lookup(t)
         return t
 
     def t_error(self, t):

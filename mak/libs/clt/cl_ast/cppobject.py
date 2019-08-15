@@ -3,14 +3,14 @@ from .scope import Scope, ScopeError
 
 class CppObject:
     class NoContainerScope(Scope):
-        def find(self, name, position, is_current_scope):
+        def find(self, name, position, source_context, is_current_scope):
             if is_current_scope:
                 raise ScopeError("%s is not a class, namespace or enumeration" % (self.owner.pretty_name()), position)
             else:
                 return None
 
     class NotDefinedScope(Scope):
-        def find(self, name, position, is_current_scope):
+        def find(self, name, position, source_context, is_current_scope):
             if is_current_scope:
                 raise ScopeError("forward declaration of %s" % (self.owner.pretty_name()), self.owner.position,
                                  ScopeError("incomplete type '%s' named in nested name specifier" % (self.owner.name), position))

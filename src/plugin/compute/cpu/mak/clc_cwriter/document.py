@@ -36,8 +36,8 @@ class Document(TypeWriter):
     def create_namespace(self, position, namespace_name):
         return Namespace(self, namespace_name and [namespace_name] or [])
 
-    def create_struct(self, position, struct_id, struct_name, parent_id):
-        return Struct(self, position, struct_id, [struct_name], parent_id)
+    def create_struct(self, position, struct_id, struct_name, parent_visibility, parent_id):
+        return Struct(self, position, struct_id, [struct_name], parent_visibility, parent_id)
 
     def create_method(self, position, method_id, method_name, overload_id):
         return Method(self, position, method_id, [method_name], overload_id)
