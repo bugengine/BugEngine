@@ -15,7 +15,7 @@ class Namespace(CppObject):
         with writer.create_namespace(self.position, self.name) as namespace:
             self.scope.write_to(namespace)
 
-    def pretty_name(sef):
+    def pretty_name(self):
         return "namespace '%s'" % self.name
 
 
@@ -25,9 +25,9 @@ class AnonymousNamespace(Namespace):
         self.register()
 
     def find(self, name):
-        return self.scope and self.scope.find(name)
+        return self.scope and self.scope.find(name, None, None, False)
 
-    def pretty_name(sef):
+    def pretty_name(self):
         return "anonymous namespace"
 
 

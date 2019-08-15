@@ -99,11 +99,11 @@ class Type(CppObject):
 
 class TypeDef(Type):
     class INITIAL_SCOPE(Scope):
-        def find(self, name, position, is_current_scope):
+        def find(self, name, position, source_context, is_current_scope):
             if is_current_scope:
                 scope = self.owner.type.type.scope
                 try:
-                    return scope.find(name, position, is_current_scope)
+                    return scope.find(name, position, source_context, is_current_scope)
                 except CppError as e:
                     raise ScopeError("with '%s' defined as %s" % (self.owner.name, self.owner.type.type.pretty_name()), self.position, e)
             else:
@@ -219,15 +219,16 @@ class Array(Type):
 
 
 class StructScope(Scope):
-    def __init__(self, owner, position, parent):
+    def __init__(self, owner, position, visibility, parent_visibility, parent):
         from .templates import TemplateTypenameParameter
-        Scope.__init__(self, owner, position)
+        Scope.__init__(self, owner, position, visibility)
         if parent:
             assert isinstance(parent, Type)
             if not (isinstance(parent, Struct)
                  or isinstance(parent, DependentTypeName)
                  or isinstance(parent, TemplateTypenameParameter)):
                 owner.lexer._error('expected struct name', position)
+        self.parent_visibility = parent_visibility
         self.parent = parent
         self.constructor = None
         self.destructor = None
@@ -243,7 +244,7 @@ class StructScope(Scope):
             cast.debug_dump(indent)
         Scope.debug_dump(self, indent)
 
-    def find(self, name, position, is_current_scope):
+    def find(self, name, position, source_context, is_current_scope):
         if is_current_scope:
             if name == self.owner.name:
                 if self.owner.lexer.last_token == '~':
@@ -251,14 +252,14 @@ class StructScope(Scope):
                 else:
                     return self.constructor
         try:
-            result = Scope.find(self, name, position, is_current_scope)
+            result = Scope.find(self, name, position, source_context, is_current_scope)
         except ScopeError:
             if self.parent:
-                return self.parent.scope.find(name, position, is_current_scope)
+                return self.parent.scope.find(name, position, source_context, is_current_scope)
             else:
                 raise
         else:
-            return result or (self.parent and self.parent.scope.find(name, position, is_current_scope))
+            return result or (self.parent and self.parent.scope.find(name, position, source_context, is_current_scope))
 
 
 class Struct(Type):
@@ -269,14 +270,18 @@ class Struct(Type):
     def __init__(self, lexer, position, struct_type, name):
         Type.__init__(self, lexer, position, name)
         self.struct_type = struct_type
+        self.default_visibility = (struct_type == 'class') and 'protected' or 'public'
         self.index = Struct.global_index
         Struct.global_index += 1
 
     def get_token_type(self):
         return 'STRUCT_ID'
 
-    def define(self, parent, position):
-        self.push_scope(position, StructScope(self, position, parent))
+    def define(self, parent_visibility, parent, position):
+        if self.struct_type == 'union' and parent:
+            self.lexer._error('unions cannot have a base class', position)
+        self.push_scope(position, StructScope(self, position, self.default_visibility,
+                                              parent_visibility or self.default_visibility, parent))
 
     def _create_template_instance(self, template, arguments, position):
         return Struct(self.lexer, self.position, self.struct_type, self.name)
@@ -284,7 +289,7 @@ class Struct(Type):
     def _complete_template_instance(self, result, template, arguments, position):
         if self.scope:
             parent = self.scope.parent and self.scope.parent.create_template_instance(template, arguments, position)
-            result.define(parent and parent.get_type(), position)
+            result.define(self.scope.parent_visibility, parent and parent.get_type(), position)
             try:
                 self.scope.create_template_instance(result.scope, template, arguments, position)
             except Exception:
@@ -336,7 +341,9 @@ class Struct(Type):
         return '%s_%d' % (self.name or 'anonymous', self.index)
 
     def write_to(self, writer):
-        with writer.create_struct(self.position, self.index, self.name, self.scope.parent and self.scope.parent.index) as struct:
+        with writer.create_struct(self.position, self.index, self.name,
+                                  self.scope.parent_visibility,
+                                  self.scope.parent and self.scope.parent.index) as struct:
             if self.scope:
                 self.scope.write_to(struct)
 
@@ -405,7 +412,7 @@ class Void(Type):
 
 class DependentTypeName(Type):
     class INITIAL_SCOPE(Scope):
-        def find(self, name, position, is_current_scope):
+        def find(self, name, position, source_context, is_current_scope):
             return None
 
     def __init__(self, lexer, position, name):
@@ -432,7 +439,7 @@ class DependentTypeName(Type):
             return None
         else:
             try:
-                result = current_object.scope.find(name, position, True)
+                result = current_object.scope.find(name, position, self, True)
             except CppError as e:
                 raise Template.InstantiationError(e.message, e.position, e.inner_error)
         result = result.create_template_instance(instance_template, instance_arguments, instance_position)

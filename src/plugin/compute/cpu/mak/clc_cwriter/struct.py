@@ -4,11 +4,12 @@ from .variable import Variable
 
 
 class Struct(TypeWriter):
-    def __init__(self, document, position, struct_id, struct_name, parent_id):
+    def __init__(self, document, position, struct_id, struct_name, parent_visibility, parent_id):
         TypeWriter.__init__(self, document)
         self.position = position
         self.id = struct_id
         self.name = struct_name + [str(struct_id)]
+        self.parent_visibility = parent_visibility
         self.parent = parent_id
         if self.parent != None:
             self.document.register_dependencies(struct_id, [self.parent])
@@ -24,8 +25,8 @@ class Struct(TypeWriter):
     def struct_name(self):
         return '_' + '_'.join(self.name)
 
-    def create_struct(self, position, struct_id, struct_name, parent_id):
-        return Struct(self.document, position, struct_id, self.name + [struct_name], parent_id)
+    def create_struct(self, position, struct_id, struct_name, parent_visibility, parent_id):
+        return Struct(self.document, position, struct_id, self.name + [struct_name], parent_visibility, parent_id)
 
     def create_method(self, position, method_id, method_name, overload_id):
         return Method(self.document, position, method_id, self.name + [method_name], overload_id)

@@ -99,7 +99,7 @@ class TemplateTemplateParameter(CppObject):
 
 class TemplateTypenameParameter(Type):
     class INITIAL_SCOPE(Scope):
-        def find(self, name, position, is_current_scope):
+        def find(self, name, position, source_context, is_current_scope):
             return None
 
     def __init__(self, lexer, position, name, value):
@@ -187,13 +187,13 @@ class TemplateScope(Scope):
         else:
             Scope.add(self, element)
 
-    def find(self, name, position, is_current_scope):
+    def find(self, name, position, source_context, is_current_scope):
         for element in self.parameters:
             result = element.find(name)
             if result:
                 return result
         else:
-            return Scope.find(self.owner.back_link.scope, name, position, is_current_scope)
+            return Scope.find(self.owner.back_link.scope, name, position, source_context, is_current_scope)
 
 
 class Template(CppObject):

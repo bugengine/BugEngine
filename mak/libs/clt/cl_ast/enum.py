@@ -35,7 +35,7 @@ class Enum(Type):
         self.push_scope(position, EnumScope(self, position))
 
     def find(self, name):
-        return self.scope.find(name, None, False) or Type.find(self, name)
+        return self.scope.find(name, None, None, False) or Type.find(self, name)
 
     def write_to(self, writer):
         pass

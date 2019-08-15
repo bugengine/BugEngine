@@ -18,8 +18,8 @@ class Namespace(TypeWriter):
     def create_namespace(self, position, namespace_name):
         return Namespace(self.document, self.name + [namespace_name])
 
-    def create_struct(self, position, struct_id, struct_name, parent_id):
-        return Struct(self.document, position, struct_id, self.name + [struct_name], parent_id)
+    def create_struct(self, position, struct_id, struct_name, parent_visibility, parent_id):
+        return Struct(self.document, position, struct_id, self.name + [struct_name], parent_visibility, parent_id)
 
     def create_method(self, position, method_id, method_name, overload_id):
         return Method(self.document, position, method_id, self.name + [method_name], overload_id)

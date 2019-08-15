@@ -129,7 +129,9 @@ def p_struct_parent(p):
                           |
     """
     if len(p) > 1:
-        p[0] = p[3].target.get_type()
+        p[0] = (p[2], p[3].target.get_type())
+    else:
+        p[0] = (None, None)
 
 
 def p_struct_parent_error(p):
@@ -143,7 +145,7 @@ def p_struct_define(p):
     """
         struct_define :
     """
-    p[-2].define(p[-1], p.position(-1))
+    p[-2].define(p[-1][0], p[-1][1], p.position(-3))
 
 
 def p_struct_begin(p):

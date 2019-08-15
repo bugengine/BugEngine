@@ -6,7 +6,7 @@ class ScopeError(CppError):
 
 
 class Scope:
-    def __init__(self, owner, position, visibility='published'):
+    def __init__(self, owner, position, visibility='public'):
         self.owner = owner
         self.position = position
         self.visibility = visibility
@@ -24,7 +24,7 @@ class Scope:
     def __getitem__(self, index):
         return self.items[index]
 
-    def find(self, name, position, is_current_scope):
+    def find(self, name, position, source_context, is_current_scope):
         for _, element in self.items:
             result = element.find(name)
             if result:

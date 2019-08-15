@@ -62,8 +62,8 @@ def p_namespace_declaration_anonymous(p):
     """
         namespace_declaration_anonymous : NAMESPACE
     """
-    p[0] = AnonymousNamespace(p.lexer, p[1].position)
-    p[0].push_scope(p[1].position)
+    p[0] = AnonymousNamespace(p.lexer, p.position(1))
+    p[0].push_scope(p.position(1))
 
 
 def p_namespace_pop(p):
