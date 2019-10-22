@@ -16,6 +16,7 @@ precedence = (
               'LOGICAL_NOT', 'ADDRESS_OF', 'PTR'),
     ('left', 'PINCREMENT', 'PDECREMENT', 'PERIOD', 'DEREFERENCE', 'FUNCTION_CALL', 'ARRAY'),
     ('left', 'GROUP'),
+    ('left', 'SCOPE2'),
     ('left', 'SCOPE'),
 )
 

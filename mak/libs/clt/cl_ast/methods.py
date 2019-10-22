@@ -36,7 +36,8 @@ class Overload(CppObject):
             assert not return_type.is_void()
         self.attributes = attributes
 
-    def match(self, position, parameters, return_type, attributes):
+    def match(self, parameters, position, return_type, attributes):
+        #attributes should be reflected in argument signature instread
         if self.attributes != attributes:
             return False
         if len(parameters) != len(self.parameters):
@@ -48,27 +49,27 @@ class Overload(CppObject):
                 return False
         for p1, p2 in zip(self.parameters, parameters):
             if p1.default_value and p2.default_value:
-                self.lexer._error('redefinition of default argument', p2.position)
-                self.lexer._note('previous definition is here', p1.position)
+                self.lexer.error('redefinition of default argument', p2.position)
+                self.lexer.note('previous definition is here', p1.position)
         if self.return_type and return_type:
             try:
                 return_type.distance(self.return_type, types.CAST_NONE)
             except types.CastError:
-                self.lexer._error('functions that differ only by return type cannot be overloaded', return_type.position)
-                self.lexer._note('previous declaration is here', self.return_type.position)
+                self.lexer.error('functions that differ only by return type cannot be overloaded', return_type.position)
+                self.lexer.note('previous declaration is here', self.return_type.position)
         elif return_type:
             if not return_type.is_void():
-                self.lexer._error('functions that differ only by return type cannot be overloaded', return_type.position)
-                self.lexer._note('previous declaration is here', self.position)
+                self.lexer.error('functions that differ only by return type cannot be overloaded', return_type.position)
+                self.lexer.note('previous declaration is here', self.position)
         elif self.return_type:
-            self.lexer._error('functions that differ only by return type cannot be overloaded', position)
-            self.lexer._note('previous declaration is here', self.return_type.position)
+            self.lexer.error('functions that differ only by return type cannot be overloaded', position)
+            self.lexer.note('previous declaration is here', self.return_type.position)
         return True
 
     def _create_template_instance(self, template, arguments, position):
         return Overload(self.lexer, self.position, self.name,
                         [p.create_template_instance(template, arguments, position) for p in self.parameters],
-                        self.return_type.create_template_instance(template, arguments, position),
+                        self.return_type and self.return_type.create_template_instance(template, arguments, position),
                         self.attributes)
 
     def debug_dump(self, name, indent):
@@ -84,13 +85,13 @@ class Method(CppObject):
         Method.index += 1
         self.overloads = []
 
-    def find_overload(self, position, parameters, return_type, attributes):
+    def find_overload(self, parameters, position, return_type, attributes):
         for o in self.overloads:
             if o.match(parameters, position, return_type, attributes):
                 return o
         return None
 
-    def create_overload(self, position, parameters, return_type, attributes):
+    def create_overload(self, parameters, position, return_type, attributes):
         if return_type and return_type.is_void():
             return_type = None
         o = Overload(self.lexer, position, self.name, parameters, return_type, attributes)

@@ -22,14 +22,14 @@ def p_statement_block(p):
 
 def p_statement_block_1(p):
     """
-        statement_block : LBRACE statement_list RBRACE
+        statement_block : LBRACE BRACE_MARKER statement_list RBRACE
     """
     pass
 
 
 def p_statement_block_error(p):
     """
-        statement_block : LBRACE error RBRACE
+        statement_block : LBRACE BRACE_MARKER error RBRACE
     """
     pass
 
@@ -53,7 +53,7 @@ def p_statement_expression(p):
         statement : declaration_specifier_list expression SEMI
     """
     for s in p[1]:
-        p.lexer._error('Unexpected specifier: %s' % s.specifier, s.position)
+        p.lexer.error('Unexpected specifier: %s' % s.specifier, s.position)
 
 
 def p_variable_declaration_opt(p):
@@ -128,7 +128,7 @@ def p_switch_statements(p):
 
 def p_statement_switch(p):
     """
-        statement : SWITCH LPAREN expression RPAREN LBRACE switch_statements RBRACE
+        statement : SWITCH LPAREN expression RPAREN LBRACE BRACE_MARKER switch_statements RBRACE
     """
     pass
 

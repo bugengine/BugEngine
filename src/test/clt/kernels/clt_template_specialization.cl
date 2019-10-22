@@ -1,13 +1,22 @@
 template< typename T >
 struct Test
 {
-    T m_test;
+    struct X;
+};
+
+template< typename T >
+struct Test<T>::X
+{
+    T m_t;
 };
 
 template< typename T >
 struct Test<T*>
 {
-    T& m_testPtr;
+    struct X
+    {
+        T& m_testPtr;
+    };
 };
 
 template< >

@@ -10,7 +10,7 @@ public:
 };
 
 
-class A :public  Singleton<A>
+class A : public Singleton<A>
 {
 public:
     void main(u32 index, u32 total);

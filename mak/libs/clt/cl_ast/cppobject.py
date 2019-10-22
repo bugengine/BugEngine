@@ -10,6 +10,11 @@ class CppObject:
                 return None
 
     class NotDefinedScope(Scope):
+        def __init__(self, *args, **kw):
+            Scope.__init__(self, *args, **kw)
+            self.parent = None
+            self.parent_visibility = 'public'
+
         def find(self, name, position, source_context, is_current_scope):
             if is_current_scope:
                 raise ScopeError("forward declaration of %s" % (self.owner.pretty_name()), self.owner.position,
@@ -18,7 +23,6 @@ class CppObject:
                 return None
 
     INITIAL_SCOPE = NoContainerScope
-
     def __init__(self, lexer, position, name=None):
         from .templates import Template
         self.lexer = lexer
@@ -51,18 +55,9 @@ class CppObject:
         #    self._complete_template_instance(instance, template, arguments, position)
 
     def _get_cached_instance(self, arguments):
-        from . import types
         for args, _, _, instance in self.instances:
             assert len(args) == len(arguments)
-            for i in range(0, len(args)):
-                try:
-                    d = args[i].distance(arguments[i], types.CAST_NONE)
-                except types.CastError:
-                    break
-                else:
-                    if not d.exact_match():
-                        break
-            else:
+            if CppObject.equal_parameters(args, arguments):
                 return instance
         return None
     
@@ -79,17 +74,27 @@ class CppObject:
         if isinstance(self.scope, self.INITIAL_SCOPE):
             self.scope = scope or Scope(self, position)
         elif scope:
-            self.lexer._error('redefinition of object %s'%self.name, position)
-            self.lexer._note('first defined here', self.scope.position)
-            self.lexer._note('first declared here', self.position)
+            self.lexer.error('redefinition of object %s'%self.name, position)
+            self.lexer.note('first defined here', self.scope.position)
+            self.lexer.note('first declared here', self.position)
             self.scope = scope
         self.lexer.push_scope(self.scope)
 
+    def push_scope_recursive(self, position):
+        if self.parent:
+            self.parent.push_scope_recursive(position)
+        self.push_scope(position)
+        
+    def pop_scope_recursive(self):
+        self.lexer.pop_scope(self.scope)
+        if self.parent:
+            self.parent.pop_scope_recursive()
+
     def _error(self, message):
-        self.lexer._error(message, self.position)
+        self.lexer.error(message, self.position)
 
     def _note(self, message):
-        self.lexer._note(message, self.position)
+        self.lexer.note(message, self.position)
 
     def find(self, name):
         if self.name == name:
@@ -108,3 +113,22 @@ class CppObject:
                                self.name and (' %s'%self.name) or '',
                                self.position))
         self.scope.debug_dump(indent)
+
+    @classmethod
+    def equal_parameters(self, parameters1, parameters2):
+        from . import types
+        assert len(parameters1) == len(parameters2)
+        for i in range(0, len(parameters1)):
+            if not parameters1[i]:
+                return False
+            if not parameters2[i]:
+                return False
+            try:
+                d = parameters1[i].distance(parameters2[i], types.CAST_NONE)
+            except types.CastError:
+                return False
+            else:
+                if not d.exact_match():
+                    return False
+        else:
+            return True

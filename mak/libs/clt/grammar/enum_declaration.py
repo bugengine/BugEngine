@@ -3,63 +3,35 @@ from ..cl_ast.enum import Enum, EnumItem
 
 def p_enum_declaration(p):
     """
-        enum_header : ENUM consume_template_stack type_name verify_template_stack
-                    | ENUM consume_template_stack template_name verify_template_stack
-                    | ENUM consume_template_stack object_name verify_template_stack
+        enum_header : ENUM type_name verify_template_stack_1
+                    | ENUM object_name verify_template_stack_1
+                    | ENUM namespace_name verify_template_stack_1
     """
-    name = p[3]
-    if name.qualified:
-        if name.target:
-            if name.target.get_token_type() == 'STRUCT_ID':
-                if name.target.struct_type != p[1]:
-                    p.lexer._error("'%s' declared as %s here, but first declared as %s" % (name, p[1], name.target.struct_type), p.position(1))
-                    p.lexer._note('previously declared here', name.target.position)
-                    p[0] = (None, Enum(p.lexer, name.position, name.name[-1]))
-                else:
-                    p[0] = (name.target, None)
-            else:
-                if len(name.name) > 1:
-                    p.lexer._error('qualified name %s does not name an enum' % '::'.join(name.name),
-                                   name.position)
-                else:
-                    p.lexer._error('name %s does not name an enum' % '::'.join(name.name),
-                                   name.position)
-                p.lexer._note('previously declared here', name.target.position)
-                p[0] = (None, Enum(p.lexer, name.position, name.name[-1]))
-        elif name.targets[-1][2]:
-            p.lexer._error('enumeration cannot be a template', p.position(1))
-            p[0] = (None, Enum(p.lexer, name.position, name.name[-1]))
+    name = p[2][1]
+    struct_type = p[1]
+    object_type = name.get_type()
+    if object_type != 'ID' and (name.is_qualified() or not name.is_shadow()):
+        if object_type == 'STRUCT_ID':
+            if name.target.struct_type != struct_type:
+                p.lexer.warning("'%s' declared as %s here, but first declared as %s" % (name, struct_type, name.target.struct_type), p.position(2))
+                p.lexer.note('previously declared here', name.target.position)
+            p[0] = (name.target, None)
         else:
-            if len(name.name) > 1:
-                p.lexer._error('qualified name %s does not name an enum' % '::'.join(name.name),
-                               name.position)
+            if name.is_qualified():
+                p.lexer.error('qualified name %s does not name a struct' % name, name.position)
             else:
-                p.lexer._error('name %s does not name an enum' % '::'.join(name.name),
-                               name.position)
-            p[0] = (None, Enum(p.lexer, name.position, name.name[-1]))
+                p.lexer.error('name %s does not name a struct' % name, name.position)
+            p.lexer.note('previously declared here', name.target.position)
+            p[0] = (None, Enum(p.lexer, name.position, name.name))
     elif name.target:
         # optimistically use provided declaration, but if definition, it will be overriden
-        if p[4]:
-            p.lexer._error('enumeration cannot be a template', p.position(1))
-            p[0] = (None, Enum(p.lexer, name.position, name.name[0]))
-        if name.target.get_token_type() == 'STRUCT_ID':
-            if name.target.struct_type == p[1]:
-                p[0] = (name.target, Enum(p.lexer, name.position, name.name[0]))
-            else:
-                p[0] = (None, Enum(p.lexer, name.position, name.name[0]))
+        if object_type == 'STRUCT_ID':
+            p[0] = (name.target, Enum(p.lexer, name.position, name.name))
         else:
-            # Previously declared object is not an enum
-            p[0] = (None, Enum(p.lexer, name.position, name.name[0]))
+            # Previously declared object is not a type
+            p[0] = (None, Enum(p.lexer, name.position, name.name))
     else:
-        if name.targets[-1][2]:
-            # new specialization
-            p.lexer._error('enumeration cannot be a template', p.position(1))
-            p[0] = (None, Enum(p.lexer, name.position, name.name[0]))
-        else:
-            # No previously delcared type, declare one here
-            if p[4]:
-                p.lexer._error('enumeration cannot be a template', p.position(1))
-            p[0] = (None, Enum(p.lexer, name.position, name.name[0]))
+        p[0] = (None, Enum(p.lexer, name.position, name.name))
     p.set_position_absolute(0, name.position)
 
 
@@ -85,7 +57,7 @@ def p_enum_pop(p):
 
 def p_enum_begin(p):
     """
-        enum_begin : enum_header enum_push LBRACE
+        enum_begin : enum_header enum_push LBRACE BRACE_MARKER
     """
     p[0] = p[2]
     p.set_position(0, 1)
@@ -101,11 +73,11 @@ def p_enum_definition(p):
 
 def p_enum_header_anonymous(p):
     """
-        enum_header_anonymous : ENUM consume_template_stack verify_template_stack LBRACE
+        enum_header_anonymous : ENUM verify_template_stack_0 LBRACE BRACE_MARKER
     """
     p[0] = Enum(p.lexer, p.position(1), None)
     p[0].register()
-    p[0].define(p.position(4))
+    p[0].define(p.position(3))
     p.set_position(0, 1)
 
 
@@ -150,8 +122,8 @@ def p_enum_value_name_shadows(p):
         owner = p.slice[1].found_object.parent
         enum_namespace = p.lexer.scopes[-2].owner
         if owner == enum_namespace:
-            p.lexer._error("redefinition of '%s'" % p[1], p.position(1))
-            p.lexer._note('previous definition is here', p.slice[1].found_object.position)
+            p.lexer.error("redefinition of '%s'" % p[1], p.position(1))
+            p.lexer.note('previous definition is here', p.slice[1].found_object.position)
     p[0] = p[1]
     p.set_position(0, 1)
 
