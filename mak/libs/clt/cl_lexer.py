@@ -1,6 +1,7 @@
 from ..ply import lex
 from . import cl_ast
 import sys
+import copy
 
 color_list = {
     'BOLD':     '\x1b[01;1m',
@@ -45,10 +46,50 @@ class ClLexer:
         def find(self, name, position, source_context, is_current_scope):
             return None
 
+    class TemplateBind:
+        def __init__(self, previous_bind, bind_index, template):
+            self.previous_bind = previous_bind
+            self.template = template
+            self.next_bind = bind_index + 1
+            self.parameter_binds = previous_bind and previous_bind.parameter_binds or { }
+
+        def temporary_bind(self, template):
+            result = ClLexer.TemplateBind(self.previous_bind, self.next_bind-1, self.template)
+            parameter_binds = { }
+            for p, b in result.parameter_binds.items():
+                parameter_binds[p] = b
+            for i, p in enumerate(result.template.scope.parameters):
+                parameter_binds[p] = (i, template)
+            result.parameter_binds = parameter_binds
+            return result
+
     class TemplateStack:
         def __init__(self, template_list):
             self.template_list = template_list[:]
-        
+
+        def bind(self, template, current_bind):
+            bind_index = current_bind and current_bind.next_bind or 0
+            if bind_index >= len(self.template_list):
+                return None
+            
+            result = ClLexer.TemplateBind(current_bind, bind_index, self.template_list[bind_index])
+            for i, p in enumerate(result.template.scope.parameters):
+                result.parameter_binds[p] = (i, template)
+            return result
+
+        def bind_last(self, template, current_bind):
+            next_index = current_bind and current_bind.next_bind or 0
+            if current_bind:
+                if current_bind.next_bind >= len(self.template_list):
+                    return None
+                else:
+                    assert template
+                    return self.bind(template, current_bind)
+            elif len(self.template_list) == 0:
+                return None
+            else:
+                return self.bind(template or self.template_list[next_index], current_bind)
+
         def __bool__(self):
             return True
 
@@ -83,37 +124,45 @@ class ClLexer:
             self.error_format = ide_format['unix']
             self.error_color = False
 
+    def note(self, msg, pos):
+        self._msg('note', msg, pos)
+
+    def info(self, msg, pos):
+        self._msg('info', msg, pos)
+
+    def warning(self, msg, pos):
+        self._msg('warning', msg, pos)
+
+    def error(self, msg, pos):
+        self.error_count += 1
+        self._msg('error', msg, pos)
+
     def push_scope(self, scope):
-        #print('>%s %s' % (' '*len(self.scopes), scope.owner))
+        #print('>%s %s' % (' '*len(self.scopes), repr(scope.owner)))
         assert isinstance(scope, cl_ast.scope.Scope)
         self.scopes.append(scope)
 
-    def set_search_scope_ifn(self, position, obj):
-        if self.last_token.type == 'SCOPE':
-            if obj:
-                self.current_scope = obj.scope
-            else:
-                self.current_scope = ClLexer.UnknownScope()
-
     def pop_scope(self, scope):
-        #print('<%s %s' % (' '*(len(self.scopes) - 1), scope.owner))
+        #print('<%s %s' % (' '*(len(self.scopes) - 1), repr(scope.owner)))
         assert self.scopes[-1] == scope,"asymetric scope push/pop: %s/%s" % (scope.owner, self.scopes[-1].owner)
         self.scopes[-1].seal()
         self.scopes.pop(-1)
 
+    def set_search_scope(self, obj):
+        #print('new search scope: %s' % obj.name)
+        self.current_scope = obj.scope
+
+    def clear_search_scope(self):
+        self.current_scope = None
+
     def push_template_stack(self, templates):
-        assert self.template_stack == None, self.template_stack
+        assert self.template_stack == None
         self.template_stack = ClLexer.TemplateStack(templates)
 
     def finalize_template_stack(self):
-        assert self.template_stack != None
-        if len(self.template_stack) > 1:
-            self._error('extraneous template parameter list in template specialization or out-of-line template definition',
-                        self.template_stack[1].position)
-        result = self.template_stack.pop()
+        assert self.template_stack
         self.template_stack = None
-        return result
-
+    
     def disable_template_stack(self):
         if self._template_stack_count == 0:
             assert self._template_stack == None
@@ -124,19 +173,20 @@ class ClLexer:
     def enable_template_stack(self):
         self._template_stack_count -= 1
         if self._template_stack_count == 0:
-            assert self.template_stack == None
             self.template_stack = self._template_stack
             self._template_stack = None
 
     def show_error_stack(self, cpp_error):
         if cpp_error.inner_error:
             self.show_error_stack(cpp_error.inner_error)
-            self._note(cpp_error.message, cpp_error.position)
+            self.note(cpp_error.message, cpp_error.position)
         else:
-            self._error(cpp_error.message, cpp_error.position)
+            self.error(cpp_error.message, cpp_error.position)
 
     def lookup_by_name(self, name, position):
         if self.current_scope:
+            if self.last_token.type == 'NOT':
+                name = '~'+name
             try:
                 return (None, self.current_scope.find(name, position, self.scopes[-1].owner, True))
             except cl_ast.error.CppError as e:
@@ -172,26 +222,30 @@ class ClLexer:
         self.lexer.input(text)
 
     def token(self):
-        new_token = self.lexer.token()
-        if new_token:
-            new_token.lexer = self
-            new_token.filename = self.filename
-            new_token.endlexpos = new_token.lexpos + len(new_token.value)
-            if new_token.type == 'OPERATOR':
-                new_token.owner = self.current_scope
-            if new_token.type == 'SCOPE':
-                if self.last_token:
-                    owner = getattr(self.last_token, 'found_object', self.scopes[0].owner)
-                    self.current_scope = owner.scope
-                    assert self.current_scope
-            elif self.last_token and self.last_token.type in ('OPERATOR', ):
-                scope, obj = self.lookup_by_name('op%s' % new_token.type.lower(), self._position(new_token))
-                new_token.found_object = obj
-            elif self.last_token and self.last_token.type not in ('SCOPE', 'OPERATOR', 'NOT' ):
-                self.current_scope = None
-        if new_token and new_token.type == 'ID':
-            self.lookup(new_token)
+        if self.last_token and self.last_token.type == 'SCOPE':
+            new_token = copy.copy(self.last_token)
+            new_token.type = 'SCOPE_MARKER'
+        elif self.last_token and self.last_token.type == 'LBRACE':
+            new_token = copy.copy(self.last_token)
+            new_token.type = 'BRACE_MARKER'
+        else:
+            new_token = self.lexer.token()
+            if new_token:
+                new_token.lexer = self
+                new_token.filename = self.filename
+                new_token.endlexpos = new_token.lexpos + len(new_token.value)
+                scope_breaks = ('TEMPLATE', 'OPERATOR', )
+                if new_token.type == 'ID':
+                    new_token.found_object = None
+                if new_token.type == 'ID' and (not self.last_token or self.last_token.type not in ('TEMPLATE',)):
+                    self.lookup(new_token)
+                    self.clear_search_scope()
+                if self.last_token and self.last_token.type != 'SCOPE_MARKER':
+                    self.clear_search_scope()
+                elif new_token.type in scope_breaks:
+                    self.clear_search_scope()
         self.last_token = new_token
+        #print(new_token)
         return new_token
 
     def _position(self, token):
@@ -221,19 +275,6 @@ class ClLexer:
                                          '^'*(pos[3]-pos[2]),
                                          color_off))
 
-    def _note(self, msg, pos):
-        self._msg('note', msg, pos)
-
-    def _info(self, msg, pos):
-        self._msg('info', msg, pos)
-
-    def _warning(self, msg, pos):
-        self._msg('warning', msg, pos)
-
-    def _error(self, msg, pos):
-        self.error_count += 1
-        self._msg('error', msg, pos)
-
     # Lexer rules ##
     keywords = (
         # raise warnings when encountered
@@ -243,7 +284,7 @@ class ClLexer:
         'bool', 'size_t', 'ptrdiff_t', 'intptr_t', 'uintptr_t', 'void', 'int',
 
         'const', '__global', '__local', '__constant', '__private',
-        'restrict', '__restrict', 'volatile', 'static', 'inline', 'return',
+        'restrict', '__restrict', 'volatile', 'static', 'inline', 'explicit', 'virtual', 'return',
         'do', 'while', 'for', 'switch', 'case', 'default', 'break', 'continue', 'if', 'else',
         'enum', 'struct', 'union', 'typedef', 'sizeof', 'true', 'false',
 
@@ -312,7 +353,7 @@ class ClLexer:
         'CONDOP',
 
         # C++ scope operator (::)
-        'SCOPE',
+        'SCOPE', 'SCOPE_MARKER',
 
         # Delimeters
         'LPAREN', 'RPAREN',         # ( )
@@ -320,6 +361,7 @@ class ClLexer:
         'LBRACE', 'RBRACE',         # { }
         'COMMA', 'PERIOD',          # . ,
         'SEMI', 'COLON',            # ; :
+        'BRACE_MARKER',
 
         # Ellipsis (...) is not supported
         # 'ELLIPSIS',
@@ -411,7 +453,7 @@ class ClLexer:
         t.lexer.begin('INITIAL')
 
     def t_ppident_error(self, t):
-        self._error('invalid #ident directive', self._position(t))
+        self.error('invalid #ident directive', self._position(t))
         self.lexer.skip(1)
 
 
@@ -433,7 +475,7 @@ class ClLexer:
         t.lexer.begin('INITIAL')
 
     def t_pppragma_error(self, t):
-        self._error('invalid #pragma directive', self._position(t))
+        self.error('invalid #pragma directive', self._position(t))
         self.lexer.skip(1)
 
 
@@ -447,7 +489,7 @@ class ClLexer:
     @lex.TOKEN(string_literal)
     def t_ppline_FILENAME(self, t):
         if self.pp_line is None:
-            self._error('filename before line number in #line', self._position(t))
+            self.error('filename before line number in #line', self._position(t))
             self.lexer.skip(1)
         else:
             self.pp_filename = t.value.lstrip('"').rstrip('"')
@@ -464,8 +506,8 @@ class ClLexer:
     def t_ppline_NEWLINE(self, t):
         r'\n'
         if self.pp_line is None:
-            self._error('line number missing in #line', self._position(t))
-            self.lexer.skip(1)
+            self.error('line number missing in #line', self._position(t))
+            #self.lexer.skip(1)
         else:
             self.lexer.lineno = int(self.pp_line)
             if self.pp_filename is not None:
@@ -480,7 +522,7 @@ class ClLexer:
     t_ppline_ignore = ' \t'
 
     def t_ppline_error(self, t):
-        self._error('invalid #line directive', self._position(t))
+        self.error('invalid #line directive', self._position(t))
         self.lexer.skip(1)
 
 
@@ -571,7 +613,7 @@ class ClLexer:
     @lex.TOKEN(bad_octal_constant)
     def t_BAD_CONST_OCT(self, t):
         msg = "Invalid octal constant"
-        self._error(msg, self._position(t))
+        self.error(msg, self._position(t))
         self.lexer.skip(1)
 
     @lex.TOKEN(octal_constant)
@@ -596,13 +638,13 @@ class ClLexer:
     @lex.TOKEN(unmatched_quote)
     def t_UNMATCHED_QUOTE(self, t):
         msg = "Unmatched '"
-        self._error(msg, self._position(t))
+        self.error(msg, self._position(t))
         self.lexer.skip(1)
 
     @lex.TOKEN(bad_char_const)
     def t_BAD_CHAR_CONST(self, t):
         msg = "Invalid char constant %s" % t.value
-        self._error(msg, self._position(t))
+        self.error(msg, self._position(t))
         self.lexer.skip(1)
 
     @lex.TOKEN(wstring_literal)
@@ -614,7 +656,7 @@ class ClLexer:
     @lex.TOKEN(bad_string_literal)
     def t_BAD_STRING_LITERAL(self, t):
         msg = "String contains invalid escape code"
-        self._error(msg, self._position(t))
+        self.error(msg, self._position(t))
         self.lexer.skip(1)
 
     @lex.TOKEN(identifier)
@@ -623,5 +665,5 @@ class ClLexer:
         return t
 
     def t_error(self, t):
-        self._error('Illegal character %s' % repr(t.value[0]), self._position(t))
+        self.error('Illegal character %s' % repr(t.value[0]), self._position(t))
         self.lexer.skip(1)

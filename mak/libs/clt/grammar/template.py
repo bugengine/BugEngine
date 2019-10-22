@@ -1,23 +1,32 @@
 from .. import cl_ast
 
 
-def p_consume_template_stack(p):
+def p_verify_template_stack_0(p):
     """
-        consume_template_stack :
+        verify_template_stack_0 :
     """
-    template_stack = []
-    for scope in p.lexer.scopes[::-1]:
-        if not isinstance(scope.owner, cl_ast.templates.Template):
-            break
-        template_stack.append(scope.owner)
-    p.lexer.push_template_stack(template_stack)
+    p.lexer.finalize_template_stack()
 
 
-def p_verify_template_stack(p):
+def p_verify_template_stack_1(p):
     """
-        verify_template_stack :
+        verify_template_stack_1 :
     """
-    p[0] = p.lexer.finalize_template_stack()
+    p.lexer.finalize_template_stack()
+    p[0] = p[-1][1].bind()
+    p[0].show_errors()
+
+
+def p_verify_template_stack_1_opt(p):
+    """
+        verify_template_stack_1_opt :
+    """
+    if p.lexer.template_stack:
+        p.lexer.finalize_template_stack()
+        p[0] = p[-1][1].bind()
+        p[0].show_errors()
+    else:
+        p[0] = p[-1][0]
 
 
 def p_template_argument(p):
@@ -26,14 +35,6 @@ def p_template_argument(p):
                           | type
     """
     p[0] = p[1]
-
-
-def p_template_argument_template(p):
-    """
-        template_argument : template_name
-    """
-    p[0] = p[1].target
-    assert isinstance(p[0], cl_ast.templates.Template) or isinstance(p[0], cl_ast.templates.TemplateTemplateParameter)
 
 
 def p_template_argument_list(p):
@@ -76,32 +77,14 @@ def p_template_arguments_empty(p):
 
 def p_template_parameter_name(p):
     """
-        template_parameter_name :   ID
-                                |   NAMESPACE_ID_SHADOW
-                                |   STRUCT_ID_SHADOW
-                                |   TYPENAME_ID_SHADOW
-                                |   VARIABLE_ID_SHADOW
-                                |   METHOD_ID_SHADOW
-                                |   TEMPLATE_STRUCT_ID_SHADOW
-                                |   TEMPLATE_METHOD_ID_SHADOW
-                                |   TEMPLATE_TYPENAME_ID_SHADOW
+        template_parameter_name :   object_name
+                                |   type_name
+                                |   namespace_name
     """
-    p[0] = p[1]
-
-
-def p_template_parameter_name_incorrect(p):
-    """
-        template_parameter_name :   NAMESPACE_ID
-                                |   STRUCT_ID
-                                |   TYPENAME_ID
-                                |   VARIABLE_ID
-                                |   METHOD_ID
-                                |   TEMPLATE_STRUCT_ID
-                                |   TEMPLATE_METHOD_ID
-                                |   TEMPLATE_TYPENAME_ID
-    """
-    p.slice(1).found_object
-    p[0] = p[1]
+    name = p[1][1]
+    if name.is_qualified():
+        p.error('erf', name.position)
+    p[0] = name.name
 
 
 def p_template_parameter_default_value_opt(p):
@@ -119,36 +102,24 @@ def p_template_parameter_value(p):
         template_parameter : template_specifier_opt_detach type template_parameter_name template_parameter_default_value_opt
     """
     if p[1]:
-        p.lexer._error("unexpected template specifier", p[1][0].position)
+        p.lexer.error("unexpected template specifier", p[1][0].position)
     p[0] = cl_ast.templates.TemplateValueParameter(p.lexer, p.position(3), p[3], p[2], p[4])
     p[0].register()
-    for t in p[1]:
+    for t in p[1][::-1]:
         p.lexer.pop_scope(t.scope)
 
 
 def p_template_parameter_typename(p):
     """
         template_parameter : template_specifier_opt_detach TYPENAME template_parameter_name template_parameter_default_value_opt
+        template_parameter : template_specifier_opt_detach struct_keyword template_parameter_name template_parameter_default_value_opt
     """
-    for t in p[1]:
+    for t in p[1][::-1]:
         p.lexer.pop_scope(t.scope)
     if p[1]:
         p[0] = cl_ast.templates.TemplateTemplateParameter(p.lexer, p.position(3), p[3], p[1], p[4])
     else:
         p[0] = cl_ast.templates.TemplateTypenameParameter(p.lexer, p.position(3), p[3], p[4])
-    p[0].register()
-
-
-def p_template_parameter_struct(p):
-    """
-        template_parameter : template_specifier_opt_detach struct_keyword consume_template_stack template_parameter_name verify_template_stack template_parameter_default_value_opt
-    """
-    for t in p[1]:
-        p.lexer.pop_scope(t.scope)
-    if p[1]:
-        p[0] = cl_ast.templates.TemplateTemplateParameter(p.lexer, p.position(4), p[4], p[1], p[6])
-    else:
-        p[0] = cl_ast.templates.TemplateTypenameParameter(p.lexer, p.position(4), p[4], p[6])
     p[0].register()
 
 
@@ -187,27 +158,36 @@ def p_template_push(p):
 
 def p_template_specifier(p):
     """
-        template_specifier : TEMPLATE LT template_push template_parameters GT template_specifier_opt
+        template_specifier : TEMPLATE LT template_push template_parameters GT
     """
-    p[0] = p[6] + [p[3]]
+    p[0] = p[3]
 
 
-def p_template_specifier_opt(p):
+def p_template_specifier_list(p):
     """
-        template_specifier_opt : template_specifier
+        template_specifier_list : template_specifier template_specifier_list
     """
-    p[0] = p[1]
+    p[0] = [p[1]] + p[2]
 
 
-def p_template_specifier_none(p):
+def p_template_specifier_list_end(p):
     """
-        template_specifier_opt :
+        template_specifier_list :
     """
     p[0] = []
 
 
+def p_template_specifier_opt(p):
+    """
+        template_specifier_opt : template_specifier_list
+    """
+    p[0] = p[1]
+    p.lexer.push_template_stack(p[0])
+
+
 def p_template_create(p):
     """
+
         template_create :
     """
     p[0] = cl_ast.templates.Template(p.lexer, p.position(-1))

@@ -128,7 +128,7 @@ def p_type_deprecated(p):
         'unsigned': ('u%(b)s',  ['uchar', 'ushort', 'uint', 'ulong', 'signed']),
     }
     if len(p[1]) > 1 or p[1][0][0] != 'int':
-        p.lexer._warning("old style C type", p.position(1))
+        p.lexer.warning("old style C type", p.position(1))
     for s in p[1]:
         rebuild = { 'r': result[:1], 'b': result[1:]}
         rebuild_pattern, incompatible_kw = kw_data[s[0]]
@@ -136,7 +136,7 @@ def p_type_deprecated(p):
             if s2 == s:
                 break
             if s2[0] in incompatible_kw:
-                p.lexer._error("cannot combine with previous '%s' declaration specifier" % s2[0], s[1])
+                p.lexer.error("cannot combine with previous '%s' declaration specifier" % s2[0], s[1])
         result = rebuild_pattern%rebuild
     builtin = types.BuiltIn(p.lexer, p.position(1), result)
     p[0] = types.TypeRef(p.lexer, builtin.position, builtin)
@@ -145,9 +145,16 @@ def p_type_deprecated(p):
 def p_type_type_name(p):
     """
         type : type_name
+             | type_name_dependent
     """
-    assert isinstance(p[1].target, types.Type), p[1].target
-    p[0] = types.TypeRef(p.lexer, p[1].target.position, p[1].target)
+    name = p[1][0]
+    name.show_errors()
+    if id(name.target) == id(name.template):
+        p[0] = types.TypeRef(p.lexer, name.target.position, name.target.scope[0][1], name.template)
+    else:
+        if not isinstance(name.target, types.Type):
+            p.lexer.error("name '%s' does not refer to a type" % name, name.position)
+        p[0] = types.TypeRef(p.lexer, name.target.position, name.target, name.data)
 
 
 def p_type_type_decl(p):

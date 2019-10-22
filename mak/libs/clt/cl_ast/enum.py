@@ -40,7 +40,7 @@ class Enum(Type):
     def write_to(self, writer):
         pass
 
-    def _distance(self, other, matches, typeref, other_typeref, allowed_cast):
+    def _distance(self, other, matches, template_bindings, typeref, other_typeref, allowed_cast):
         if self == other:
             d = Type.Distance()
             return d.match_attributes(allowed_cast, typeref.qualifiers, other_typeref.qualifiers)

@@ -6,8 +6,9 @@ class ScopeError(CppError):
 
 
 class Scope:
-    def __init__(self, owner, position, visibility='public'):
+    def __init__(self, owner, position, visibility='public', scope_owner = None):
         self.owner = owner
+        self.scope_owner = scope_owner or owner
         self.position = position
         self.visibility = visibility
         self.items = []

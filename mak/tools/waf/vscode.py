@@ -122,6 +122,7 @@ class vscode(Build.BuildContext):
                         root = tg.source_nodes[0]
                         vscode_node = node.make_node('.vscode')
                         tasks = []
+                        options = [a for a in sys.argv if a[0] == '-']
                         for env_name in self.env.ALL_TOOLCHAINS:
                             bld_env = self.all_envs[env_name]
                             if bld_env.SUB_TOOLCHAINS:
@@ -133,7 +134,7 @@ class vscode(Build.BuildContext):
                                              '      "label": "build:%(toolchain)s:%(variant)s",\n'
                                              '      "type": "process",\n'
                                              '      "command": ["%(python)s"],\n'
-                                             '      "args": ["%(waf)s", "build:%(toolchain)s:%(variant)s"],\n'
+                                             '      "args": ["%(waf)s", %(cl)s],\n'
                                              '      "options":{\n'
                                              '        "cwd": "%(pwd)s"\n'
                                              '      },\n'
@@ -149,6 +150,7 @@ class vscode(Build.BuildContext):
                                                           'waf': sys.argv[0],
                                                           'toolchain': env_name,
                                                           'variant': variant,
+                                                          'cl': ', '.join('"%s"'%o for o in options + ['build:%s:%s' % (env_name, variant)]),
                                                           'pwd': tg.bld.srcnode.abspath()})
                         with open(vscode_node.make_node('tasks.json').abspath(), 'w') as task_file:
                             task_file.write('{\n  "version":"2.0.0",\n  "tasks": [\n')

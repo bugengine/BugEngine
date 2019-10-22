@@ -40,7 +40,5 @@ if __name__ == '__main__':
                 with open(args[1], 'wb') as out_file:
                     result.write_to(s.writer(out_file))
         except Exception as e:
-            print(e)
             traceback.print_exc()
             sys.exit(255)
-

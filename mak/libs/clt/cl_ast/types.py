@@ -122,6 +122,9 @@ class TypeDef(Type):
     def get_token_type(self):
         return 'TYPENAME_ID'
 
+    def _create_template_instance(self, template, arguments, position):
+        return TypeDef(self.lexer, self.position, self.name,
+                       self.type.create_template_instance(template, arguments, position))
 
 class Pointer(Type):
     def __init__(self, lexer, position, type):
@@ -131,7 +134,7 @@ class Pointer(Type):
     def __str__(self):
         return str(self.type)+'*'
     
-    def _distance(self, other, matches, typeref, other_typeref, allowed_cast):
+    def _distance(self, other, matches, template_bindings, typeref, other_typeref, allowed_cast):
         if isinstance(other, Pointer):
             if allowed_cast in (CAST_STATIC, CAST_UPCAST):
                 target_cast = CAST_UPCAST
@@ -139,7 +142,7 @@ class Pointer(Type):
                 target_cast = CAST_UNRELATED
             else:
                 target_cast = allowed_cast
-            d = self.type.distance(other.type, target_cast, matches).refine()
+            d = self.type.distance(other.type, target_cast, matches, template_bindings).refine()
             return d.match_attributes(allowed_cast, typeref.qualifiers, other_typeref.qualifiers)
         elif allowed_cast == CAST_UNRELATED:
             return Type.Distance(variant=-1)
@@ -162,7 +165,7 @@ class Reference(Type):
     def __str__(self):
         return str(self.type)+'&'
 
-    def _distance(self, other, matches, typeref, other_typeref, allowed_cast):
+    def _distance(self, other, matches, template_bindings, typeref, other_typeref, allowed_cast):
         if isinstance(other, Reference):
             if allowed_cast in (CAST_STATIC, CAST_UPCAST):
                 target_cast = CAST_UPCAST
@@ -170,7 +173,7 @@ class Reference(Type):
                 target_cast = CAST_UNRELATED
             else:
                 target_cast = allowed_cast
-            d = self.type.distance(other.type, target_cast).refine()
+            d = self.type.distance(other.type, target_cast, matches, template_bindings).refine()
             return d.match_attributes(allowed_cast, typeref.qualifiers, other_typeref.qualifiers)
         elif allowed_cast == CAST_UNRELATED:
             return Type.Distance(variant=-1)
@@ -194,7 +197,7 @@ class Array(Type):
     def __str__(self):
         return '%s[%s]' % (str(self.type), self.size or '')
 
-    def _distance(self, other, matches, typeref, other_typeref, allowed_cast):
+    def _distance(self, other, matches, template_bindings, typeref, other_typeref, allowed_cast):
         if isinstance(other, Array):
             if allowed_cast in (CAST_STATIC, CAST_UPCAST):
                 target_cast = CAST_UPCAST
@@ -202,7 +205,7 @@ class Array(Type):
                 target_cast = CAST_UNRELATED
             else:
                 target_cast = allowed_cast
-            d = self.type.distance(other.type, target_cast).refine()
+            d = self.type.distance(other.type, target_cast, matches, template_bindings).refine()
             return d.match_attributes(allowed_cast, typeref.qualifiers, other_typeref.qualifiers)
         elif allowed_cast == CAST_UNRELATED:
             return Type.Distance(variant=-1)
@@ -227,7 +230,7 @@ class StructScope(Scope):
             if not (isinstance(parent, Struct)
                  or isinstance(parent, DependentTypeName)
                  or isinstance(parent, TemplateTypenameParameter)):
-                owner.lexer._error('expected struct name', position)
+                owner.lexer.error('expected struct name', position)
         self.parent_visibility = parent_visibility
         self.parent = parent
         self.constructor = None
@@ -240,17 +243,15 @@ class StructScope(Scope):
             self.constructor.debug_dump(indent)
         if self.destructor:
             self.destructor.debug_dump(indent)
-        for _, cast in self.casts:
-            cast.debug_dump(indent)
+        #for _, cast in self.casts:
+        #    cast.debug_dump(indent)
         Scope.debug_dump(self, indent)
 
     def find(self, name, position, source_context, is_current_scope):
-        if is_current_scope:
-            if name == self.owner.name:
-                if self.owner.lexer.last_token == '~':
-                    return self.destructor
-                else:
-                    return self.constructor
+        if is_current_scope and name == self.owner.name and self.constructor:
+            return self.constructor
+        if name == '~%s' % self.owner.name:
+            return self.destructor
         try:
             result = Scope.find(self, name, position, source_context, is_current_scope)
         except ScopeError:
@@ -279,7 +280,7 @@ class Struct(Type):
 
     def define(self, parent_visibility, parent, position):
         if self.struct_type == 'union' and parent:
-            self.lexer._error('unions cannot have a base class', position)
+            self.lexer.error('unions cannot have a base class', position)
         self.push_scope(position, StructScope(self, position, self.default_visibility,
                                               parent_visibility or self.default_visibility, parent))
 
@@ -299,7 +300,7 @@ class Struct(Type):
                 self.lexer.pop_scope(result.scope)
         return result
 
-    def _distance(self, other, matches, typeref, other_typeref, allowed_cast):
+    def _distance(self, other, matches, template_bindings, typeref, other_typeref, allowed_cast):
         if isinstance(other, Struct):
             if allowed_cast <= CAST_ATTRIB:
                 if other != self:
@@ -356,7 +357,7 @@ class BuiltIn(Type):
     def __str__(self):
         return self.builtin
 
-    def _distance(self, other, matches, typeref, other_typeref, allowed_cast):
+    def _distance(self, other, matches, template_bindings, typeref, other_typeref, allowed_cast):
         if isinstance(other, BuiltIn):
             if self.builtin != other.builtin:
                 if allowed_cast >= CAST_IMPLICIT:
@@ -390,7 +391,7 @@ class Void(Type):
     def __str__(self):
         return 'void'
 
-    def _distance(self, other, matches, typeref, other_typeref, allowed_cast):
+    def _distance(self, other, matches, template_bindings, typeref, other_typeref, allowed_cast):
         if isinstance(other, Void):
             d = Type.Distance(cast=0)
             return d.match_attributes(allowed_cast, typeref.qualifiers, other_typeref.qualifiers)
@@ -419,6 +420,12 @@ class DependentTypeName(Type):
         Type.__init__(self, lexer, position)
         self.name = name
 
+    def __eq__(self, other):
+        return isinstance(other, DependentTypeName) and self.name == other.name
+
+    def __str__(self):
+        return 'typename(%s)'%self.name
+
     def get_unresolved_parameters(self):
         result = []
         for target, name_arguments, name_template in self.name.targets:
@@ -430,49 +437,49 @@ class DependentTypeName(Type):
                     result += name_template.get_unresolved_parameters()
         return result
 
-    def resolve(self, current_object, name, position, arguments, instance_template, instance_arguments, instance_position):
+    def _resolve(self, name, instance_template, instance_arguments, instance_position):
         from .templates import Template
-        if not current_object:
-            _, result = self.lexer.lookup_by_name(name, position)
-            assert result
-        elif not current_object.scope:
-            return None
+        if name.parent:
+            current_object = self._resolve(name.parent, instance_template, instance_arguments, instance_position)
+            if current_object:
+                try:
+                    result = current_object.scope.find(name.name, name.position, self, True)
+                except CppError as e:
+                    raise Template.InstantiationError(e.message, e.position, e.inner_error)
+            else:
+                return None
         else:
-            try:
-                result = current_object.scope.find(name, position, self, True)
-            except CppError as e:
-                raise Template.InstantiationError(e.message, e.position, e.inner_error)
-        result = result.create_template_instance(instance_template, instance_arguments, instance_position)
-        if arguments:
-            try:
-                result = result.instantiate([a.create_template_instance(instance_template, instance_arguments, instance_position) for a in arguments], position)
-            except Template.InstantiationError as e:
-                raise Template.InstantiationError("in instantiation of template '%s' requested here"%name, position, e)
+            _, result = self.lexer.lookup_by_name(name.name, name.position)
+        if result:
+            result = result.create_template_instance(instance_template, instance_arguments, instance_position)
+            if name.arguments:
+                try:
+                    result = result.instantiate([a.create_template_instance(instance_template, instance_arguments, instance_position) for a in name.arguments], name.position)
+                except Template.InstantiationError as e:
+                    raise Template.InstantiationError("in instantiation of template '%s' requested here"%name, name.position, e)
         return result
 
     def _create_partial_template_instance(self, template, arguments, position):
-        result = None
-        for name, pos, (_, name_arguments, name_template) in zip(self.name.name, self.name.positions, self.name.targets):
-            name_arguments = [a.create_template_instance(template, arguments, position) for a in name_arguments]
-            n = Name(self.lexer, (name,), pos, targets=((None, name_arguments, name_template),))
-            if result:
-                result += n
-            else:
-                result = n
-        result = DependentTypeName(self.lexer, self.position, result)
-        return result
+        def create_name(n):
+            if n:
+                return Name(n.lexer, n.name, n.position,
+                            target=n.target and n.target.create_template_instance(template, arguments, position),
+                            template=n.template and n.template.create_template_instance(template, arguments, position),
+                            arguments=[a.create_template_instance(template, arguments, position) for a in n.arguments or []],
+                            parent=create_name(n.parent))
+        self.name.target = None
+        name = create_name(self.name)
+        name.target = DependentTypeName(self.lexer, self.position, name)
+        return name.target
 
     def _create_template_instance(self, template, arguments, position):
-        current_object = None
-        for name, name_position, (_, name_arguments, _) in zip(self.name.name, self.name.positions, self.name.targets):
-            current_object = self.resolve(current_object, name, name_position, name_arguments, template, arguments, position)
-            if not current_object:
-                return self._create_partial_template_instance(template, arguments, position)
-        return current_object
+        result = self._resolve(self.name, template, arguments, position)
+        if not result:
+            result = self._create_partial_template_instance(template, arguments, position)
+        return result
 
-    def _distance(self, other, matches, typeref, other_typeref, allowed_cast):
+    def _distance(self, other, matches, template_bindings, typeref, other_typeref, allowed_cast):
         if isinstance(other, DependentTypeName):
-            # TODO
             if self.name != other.name:
                 if allowed_cast == CAST_UNRELATED:
                     d = Type.Distance(variant = -1)
@@ -487,13 +494,17 @@ class DependentTypeName(Type):
             return d.match_attributes(allowed_cast, typeref.qualifiers, other_typeref.qualifiers)
         else:
             raise CastError()
+    
+    def signature(self):
+        return '<%s>'%self.name
 
 
 class TypeRef(CppObject):
-    def __init__(self, lexer, position, type):
+    def __init__(self, lexer, position, type, template=None):
         CppObject.__init__(self, lexer, position)
         self.type = type
         self.qualifiers = set([])
+        self.template_origin = template
 
     def get_type(self):
         return self.type.get_type()
@@ -505,19 +516,23 @@ class TypeRef(CppObject):
         self.qualifiers.add(qualifier)
 
     def clone(self):
-        result = TypeRef(self.lexer, self.position, self.type)
+        result = TypeRef(self.lexer, self.position, self.type, self.template_origin)
         for q in self.qualifiers:
             result.qualifiers.add(q)
         return result
 
-    def distance(self, other, allowed_cast, matches = {}):
+    def instantiate(self, *args, **kw):
+        assert self.template_origin
+        self.template_origin.instantiate(*args, **kw)
+
+    def distance(self, other, allowed_cast, matches = {}, template_bindings=None):
         if isinstance(self.type, TypeDef):
-            return self.type.type.distance(other, allowed_cast, matches)
+            return self.type.type.distance(other, allowed_cast, matches, template_bindings)
         elif isinstance(other, TypeRef):
             if isinstance(other.type, TypeDef):
-                return self.distance(other.type.type, allowed_cast, matches)
+                return self.distance(other.type.type, allowed_cast, matches, template_bindings)
             else:
-                return self.type._distance(other.type, matches, self, other, allowed_cast)
+                return self.type._distance(other.type, matches, template_bindings, self, other, allowed_cast)
         else:
             raise CastError()
 
@@ -530,6 +545,11 @@ class TypeRef(CppObject):
             result = self.clone()
             result.type = type
         return result
+
+    def __eq__(self, other):
+        if self.__class__ != other.__class__:
+            return False
+        return self.type == other.type and self.qualifiers == other.qualifiers
 
     def __str__(self):
         return str(self.type) + (self.qualifiers and ' '+' '.join(self.qualifiers) or '')
