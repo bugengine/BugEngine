@@ -13,7 +13,8 @@ def p_verify_template_stack_1(p):
         verify_template_stack_1 :
     """
     p.lexer.finalize_template_stack()
-    p[0] = p[-1][1].bind()
+    p[0] = p[-1][1]
+    p[0].parent and p[0].parent.bind()
     p[0].show_errors()
 
 
@@ -23,7 +24,8 @@ def p_verify_template_stack_1_opt(p):
     """
     if p.lexer.template_stack:
         p.lexer.finalize_template_stack()
-        p[0] = p[-1][1].bind()
+        p[0] = p[-1][1]
+        p[0].parent and p[0].parent.bind()
         p[0].show_errors()
     else:
         p[0] = p[-1][0]

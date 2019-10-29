@@ -13,7 +13,7 @@ class Name:
         self.template_bindings = template_bindings or (parent and parent.template_bindings)
         self.parent = parent
         self.dependent = parent and parent.dependent or False
-        self.errors = errors
+        self.errors = errors[:]
         self.shadow = shadow
         if shadow:
             assert not parent
@@ -45,7 +45,7 @@ class Name:
                 if not self.template.equal_parameters(args1, args2):
                     return False
             else:
-                if not CppObject.equal_parameters(self.arguments, other.arguments):
+                if not CppObject.equal_parameters(self.arguments or [], other.arguments or []):
                     return False
             return True
         else:

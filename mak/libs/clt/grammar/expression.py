@@ -89,6 +89,8 @@ def p_operator_expr(p):
                    | expression LBRACKET expression_list RBRACKET           %prec PRIO1
                    | expression PERIOD object_name                          %prec PRIO1
                    | expression ARROW object_name                           %prec PRIO1
+                   | expression PERIOD NOT object_name                      %prec PRIO1
+                   | expression ARROW NOT object_name                       %prec PRIO1
                    | PLUSPLUS expression                                    %prec PRE_PLUSPLUS
                    | MINUSMINUS expression                                  %prec PRE_MINUSMINUS
                    | PLUS expression                                        %prec UNARY_PLUS

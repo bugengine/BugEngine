@@ -281,8 +281,9 @@ class Struct(Type):
     def define(self, parent_visibility, parent, position):
         if self.struct_type == 'union' and parent:
             self.lexer.error('unions cannot have a base class', position)
-        self.push_scope(position, StructScope(self, position, self.default_visibility,
-                                              parent_visibility or self.default_visibility, parent))
+        self.push_scope_recursive(position, StructScope(self, position, self.default_visibility,
+                                                        parent_visibility or self.default_visibility,
+                                                        parent))
 
     def _create_template_instance(self, template, arguments, position):
         return Struct(self.lexer, self.position, self.struct_type, self.name)
@@ -294,10 +295,10 @@ class Struct(Type):
             try:
                 self.scope.create_template_instance(result.scope, template, arguments, position)
             except Exception:
-                self.lexer.pop_scope(result.scope)
+                result.pop_scope_recursive()
                 raise
             else:
-                self.lexer.pop_scope(result.scope)
+                result.pop_scope_recursive()
         return result
 
     def _distance(self, other, matches, template_bindings, typeref, other_typeref, allowed_cast):
@@ -428,13 +429,15 @@ class DependentTypeName(Type):
 
     def get_unresolved_parameters(self):
         result = []
-        for target, name_arguments, name_template in self.name.targets:
-            if target:
-                result += target.get_unresolved_parameters()
-                for a in name_arguments:
-                    result += a.get_unresolved_parameters()
-                if name_template:
-                    result += name_template.get_unresolved_parameters()
+        n = self.name
+        while n:
+            if n.target and n.target != self:
+                result += n.target.get_unresolved_parameters()
+            for a in n.arguments or []:
+                result += a.get_unresolved_parameters()
+            if n.template:
+                result += n.template.get_unresolved_parameters()
+            n = n.parent
         return result
 
     def _resolve(self, name, instance_template, instance_arguments, instance_position):

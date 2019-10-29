@@ -1,4 +1,3 @@
-#if 0
 namespace minitl
 {
 
@@ -96,8 +95,8 @@ public:
     inline bool  resize(void* ptr, u64 size);
     inline void* realloc(void* ptr, u64 size, u64 alignment);
     inline void  free(const void* pointer);
-    inline char* strdup(const char* src);
-    inline char* strdup(const char* begin, const char* end);
+    inline i8* strdup(const i8* src);
+    inline i8* strdup(const i8* begin, const i8* end);
     template< typename T >
     inline T* alloc();
 };
@@ -122,18 +121,18 @@ void  Allocator::free(const void* pointer)
     internalFree(pointer);
 }
 
-char* Allocator::strdup(const char* src)
+i8* Allocator::strdup(const i8* src)
 {
     size_t s = strlen(src);
-    char *result = static_cast<char*>(internalAlloc(s+1, 1));
+    i8 *result = static_cast<i8*>(internalAlloc(s+1, 1));
     strcpy(result, src);
     return result;
 }
 
-char* Allocator::strdup(const char* begin, const char* end)
+i8* Allocator::strdup(const i8* begin, const i8* end)
 {
     size_t s = end - begin;
-    char *result = static_cast<char*>(internalAlloc(s+1, 1));
+    i8 *result = static_cast<i8*>(internalAlloc(s+1, 1));
     strncpy(result, begin, s);
     result[s] = '\0';
     return result;
@@ -351,7 +350,7 @@ public:
     }
     typename POLICY::difference_type operator-(const base_iterator<POLICY>& other) const
     {
-        be_assert_recover(m_owner == other.m_owner, "can't differ between unrelated iterators", return 0);
+        be_assert_recover(m_owner == other.m_owner, "can't differ between unrelated iterators", 0);
         return POLICY::distance(other.m_iterator, m_iterator);
     }
 
@@ -632,7 +631,6 @@ void                                         vector<T>::push_back(ITERATOR first
     ensure(size() + count);
     while (first != last)
     {
-        new((void*)m_end) T(*first);
         m_end = advance_ptr(m_end, 1);
         ++first;
     }
@@ -654,11 +652,11 @@ typename vector<T>::iterator                 vector<T>::erase(iterator it)
 template< typename T >
 typename vector<T>::iterator                 vector<T>::erase(iterator first, iterator last)
 {
-    be_assert_recover(first.m_owner == this, "can't erase iterator that is not pointing on current vector", return first);
-    be_assert_recover(last.m_owner == this, "can't erase iterator that is not pointing on current vector", return first);
-    be_assert_recover(m_memory <= first.m_iterator && m_end > first.m_iterator, "first %p is not in the range of the vector [%p,%p)" | first.m_iterator | m_memory.data() | m_end, return first);
-    be_assert_recover(m_memory <= last.m_iterator && m_end >= last.m_iterator, "last %p is not in the range of the vector [%p,%p)" | last.m_iterator | m_memory.data() | m_end, return first);
-    be_assert_recover(first.m_iterator <= last.m_iterator,"first %p is not before last %p" | first.m_iterator | last.m_iterator, return first);
+    be_assert_recover(first.m_owner == this, "can't erase iterator that is not pointing on current vector");
+    be_assert_recover(last.m_owner == this, "can't erase iterator that is not pointing on current vector");
+    be_assert_recover(m_memory <= first.m_iterator && m_end > first.m_iterator, "first %p is not in the range of the vector [%p,%p)" | first.m_iterator | m_memory.data() | m_end);
+    be_assert_recover(m_memory <= last.m_iterator && m_end >= last.m_iterator, "last %p is not in the range of the vector [%p,%p)" | last.m_iterator | m_memory.data() | m_end);
+    be_assert_recover(first.m_iterator <= last.m_iterator,"first %p is not before last %p" | first.m_iterator | last.m_iterator);
 
     for (pointer i = first.m_iterator; i != last.m_iterator; i = advance_ptr(i, 1))
     {
@@ -768,7 +766,7 @@ void                                         vector<T>::reserve(size_type size)
 }
 
 template< typename T >
-void swap(vector<T>& t1, vector<T>& t2)
+void swap(minitl::vector<T>& t1, minitl::vector<T>& t2)
 {
     t1.m_memory.swap(t2.m_memory);
     swap(t1.m_end, t2.m_end);
@@ -780,4 +778,3 @@ void kmain(u32 index, u32 total)
 {
 
 }
-#endif

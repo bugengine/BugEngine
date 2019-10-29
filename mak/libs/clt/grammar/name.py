@@ -31,8 +31,8 @@ def p_qualifier_root(p):
     """
         qualifier : SCOPE push_root_namespace SCOPE_MARKER                          %prec NAME0
     """
-    n = Name(p.lexer, '', p.position(1), p.lexer.scopes[0].owner)
-    p[0] = (n, n)
+    p[0] = (Name(p.lexer, '', p.position(1), p.lexer.scopes[0].owner),
+            Name(p.lexer, '', p.position(1), p.lexer.scopes[0].owner))
 
 
 def p_name_object(p):
@@ -97,14 +97,23 @@ def p_template_object(p):
         bindings = template_stack.bind(template, parent[1] and parent[1].template_bindings or None)
         if not bindings:
             errors.append('template specialization requires template<>')
-        specialization = template.find_instance(bindings, p[2], p.position(2))
-        n.dependent = True
-        n.target = DependentTypeName(p.lexer, p.position(1), n)
+        specialization = template.find_instance(bindings and bindings.parameter_binds, p[2], p.position(2))
+        if specialization:
+            n.target = specialization
+        else:
+            n.dependent = True
+            n.target = DependentTypeName(p.lexer, p.position(1), n)
     else:
-        template_instance = template.instantiate(p[2], p.position(1))
-        if not template_instance:
+        try:
+            template_instance = template.instantiate(p[2], p.position(1))
+        except Template.InstantiationError as e:
+            print(e)
             template_instance = DependentTypeName(p.lexer, p.position(1), n)
             n.dependent = True
+        else:
+            if not template_instance:
+                template_instance = DependentTypeName(p.lexer, p.position(1), n)
+                n.dependent = True
         n.target = template_instance
         specialization = template_instance
         bindings = None
@@ -171,7 +180,7 @@ def p_qualifier_template(p):
     p[0][1].target = p[0][1].target.scope[0][1]
     p[0][0].template_bindings = bindings
     p[0][1].template_bindings = bindings
-    p.lexer.error("template class '%s' used without template arguments" % p[0], p[0][0].position)
+    p.lexer.error("template class '%s' used without template arguments" % p[0][1], p[0][0].position)
 
 
 def p_name_end_template(p):
@@ -199,7 +208,7 @@ def p_name_end_tpl_error(p):
         bindings = template_stack.bind(p[2][1].target, p[1][1] and p[1][1].template_bindings)
         if bindings:
             name.template_bindings = bindings
-            name.data = name.target.find_instance(bindings, bindings.template.parameters, name.position)
+            name.data = name.target.find_instance(bindings.parameter_binds, bindings.template.parameters, name.position)
             if not name.data:
                 arg_list = ', '.join(str(p) for p in name.template.parameters)
                 p.lexer.error("type/value mismatch in template parameter list for template<%s> class '%s'" % (arg_list, name), name.position)
@@ -244,7 +253,7 @@ def p_name_end(p):
             p[0][1].template_bindings = bindings
         bindings = template_stack.bind(None, p[0][1] and p[0][1].template_bindings)
         if bindings:
-            p.lexer.error('extraneous template parameter list in template specialization or out-of-line template definition', p[2][1].position)
+            p[0][1].errors.append('extraneous template parameter list in template specialization or out-of-line template definition')
     elif template_stack:
         # error
         pass
@@ -321,7 +330,7 @@ def p_object_name_operator_cast(p):
                 t = None
             template_bindings = template_stack.bind(t, template_bindings_orig)
             try:
-                d = cast_type.distance(dest_type, CAST_NONE, template_bindings=template_bindings)
+                d = cast_type.distance(dest_type, CAST_NONE, template_bindings=template_bindings and template_bindings.parameter_binds)
             except CastError:
                 pass
             else:

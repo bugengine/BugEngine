@@ -19,6 +19,9 @@ class Scope:
     def add(self, element):
         self.items.append((self.visibility, element))
 
+    def remove(self, element):
+        self.items = [i for i in self.items if i[1] != element]
+
     def empty(self):
         return len(self.items) == 0
 

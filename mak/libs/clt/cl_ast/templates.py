@@ -128,6 +128,16 @@ class TemplateTypenameParameter(Type):
         self.parameter_bind = None
         self.scope = lexer.UnknownScope()
 
+    def __eq__(self, other):
+        if not isinstance(other, TemplateTypenameParameter):
+            return False
+        if self.parameter_bind:
+            return self.parameter_bind == other.parameter_bind
+        else:
+            return False
+    def __hash__(self):
+        return id(self)
+
     def get_unresolved_parameters(self):
         return [self]
 
@@ -160,7 +170,7 @@ class TemplateTypenameParameter(Type):
         return '<%s>'%p.name
 
     def _distance(self, other, matches, template_bindings, typeref, other_typeref, allowed_cast):
-        self_parameter_bind = self.parameter_bind or (template_bindings and template_bindings.parameter_binds.get(self))
+        self_parameter_bind = self.parameter_bind or (template_bindings and template_bindings.get(self))
         if isinstance(other, TemplateTypenameParameter):
             if self_parameter_bind == other.parameter_bind:
                 return Type.Distance()
@@ -242,7 +252,10 @@ class Template(CppObject):
         self.push_scope(position, TemplateScope(self, position))
     
     def __eq__(self, other):
-        return id(self.back_link) == id(other.back_link)
+        if isinstance(other, Template):
+            return id(self.back_link) == id(other.back_link)
+        else:
+            return False
 
     def __neq__(self, other):
         return not (self == other)
@@ -302,16 +315,6 @@ class Template(CppObject):
             result[i] = a
         return result
 
-    def push_scope_recursively(self, scope):
-        if scope.owner.parent:
-            self.push_scope_recursively(scope.owner.parent.scope)
-        self.lexer.push_scope(scope)
-
-    def pop_scope_recursively(self, scope):
-        self.lexer.pop_scope(scope)
-        if scope.owner.parent:
-            self.pop_scope_recursively(scope.owner.parent.scope)
-
     def distance(self, other, cast, matches={}, template_bindings=None):
         if isinstance(other, TypeRef):
             other = other.template_origin
@@ -331,26 +334,35 @@ class Template(CppObject):
     def instantiate(self, arguments, position):
         #self.lexer.note('creating instance of template %s'%self.scope[0][1].name, position)
         matches, specialization = self.find_specialization(position, arguments) or (self.make_match(arguments), self.scope[0][1])
+        unresolved_params = []
         for a in matches.values():
-            for p in a.get_unresolved_parameters():
-                if not p.parameter_bind:
-                    return None
-                if p.parameter_bind[1] != self:
-                    return None
-        self.push_scope_recursively(specialization.scope)
+            unresolved_params += a.get_unresolved_parameters()
+        for p in unresolved_params:
+            if not p.parameter_bind:
+                return None
+            if p.parameter_bind[1] != self:
+                return None
+        if unresolved_params:
+            return specialization
+        specialization.push_scope_recursive(position)
         try:
             result = specialization.create_template_instance(self, matches, position)
-        except Exception:
-            self.pop_scope_recursively(specialization.scope)
+        except Template.InstantiationError as e:
+            specialization.pop_scope_recursive()
             raise
         else:
-            self.pop_scope_recursively(specialization.scope)
+            specialization.pop_scope_recursive()
             return result
+
+    def fill_temporary_binding(self, template, binding):
+        for i, p in enumerate(self.scope.parameters):
+            binding[p] = (i, template)
+        return binding
 
     def find_instance(self, template_bindings, arguments, position):
         arguments = self.match(arguments, position)
         assert len(arguments) == len(self.parameters)
-        if template_bindings:
+        if template_bindings is not None:
             for i, p in enumerate(arguments):
                 if not isinstance(p, TypeRef):
                     break
@@ -362,12 +374,12 @@ class Template(CppObject):
                     break
                 if p.type.parameter_bind:
                     break
-                if p.type not in template_bindings.parameter_binds:
+                if p.type not in template_bindings:
                     # definitely a dependent name
                     return None
-                if template_bindings.parameter_binds[p.type][0] != i:
+                if template_bindings[p.type][0] != i:
                     break
-                if template_bindings.parameter_binds[p.type][1] != self:
+                if template_bindings[p.type][1] != self:
                     break
             else:
                 return self.scope[0][1]

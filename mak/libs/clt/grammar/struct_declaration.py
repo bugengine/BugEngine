@@ -18,6 +18,8 @@ def p_struct_declaration(p):
                       | struct_keyword namespace_name verify_template_stack_1
     """
     name = p[2][1]
+    if name.template_bindings and name.template:
+        name.template_bindings.template.bind(name.template)
     struct_type = p[1]
     object_type = name.get_type()
     if object_type != 'ID' and (name.is_qualified() or not name.is_shadow()):
@@ -72,7 +74,7 @@ def p_struct_pop(p):
         struct_pop :
     """
     struct = p[-3]
-    p.lexer.pop_scope(struct.scope)
+    struct.pop_scope_recursive()
 
 
 def p_struct_parent_visibility(p):
@@ -193,20 +195,16 @@ def p_struct_declaration_scope(p):
     """
     pass
 
-#def p_struct_declaration_friend(p):
-#    """
-#        struct_declaration : FRIEND struct_keyword type_name SEMI
-#    """
-#    pass
 
 def p_struct_declaration_friend_template(p):
     """
         struct_declaration : template_specifier_opt FRIEND declaration_specifier_list struct_keyword type_name SEMI
-        struct_declaration : template_specifier_opt FRIEND declaration_specifier_list struct_keyword object_name SEMI
+                           | template_specifier_opt FRIEND declaration_specifier_list struct_keyword object_name SEMI
     """
     p.lexer.finalize_template_stack()
     for t in p[1][::-1]:
         p.lexer.pop_scope(t.scope)
+
 
 def p_struct_declaration_friend_template_method(p):
     """
