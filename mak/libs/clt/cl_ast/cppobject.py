@@ -73,17 +73,17 @@ class CppObject:
     def push_scope(self, position, scope = None):
         if isinstance(self.scope, self.INITIAL_SCOPE):
             self.scope = scope or Scope(self, position)
-        elif scope:
+        elif scope and scope != self.scope:
             self.lexer.error('redefinition of object %s'%self.name, position)
             self.lexer.note('first defined here', self.scope.position)
             self.lexer.note('first declared here', self.position)
             self.scope = scope
         self.lexer.push_scope(self.scope)
 
-    def push_scope_recursive(self, position):
+    def push_scope_recursive(self, position, scope=None):
         if self.parent:
             self.parent.push_scope_recursive(position)
-        self.push_scope(position)
+        self.push_scope(position, scope or self.scope)
         
     def pop_scope_recursive(self):
         self.lexer.pop_scope(self.scope)
@@ -117,7 +117,8 @@ class CppObject:
     @classmethod
     def equal_parameters(self, parameters1, parameters2):
         from . import types
-        assert len(parameters1) == len(parameters2)
+        if len(parameters1) != len(parameters2):
+            return False
         for i in range(0, len(parameters1)):
             if not parameters1[i]:
                 return False

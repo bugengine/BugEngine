@@ -4,18 +4,18 @@ struct Test;
 template< typename T >
 struct Test
 {
-    ~Test();
-    Test();
-    Test(const Test& other);
+    struct Test2;
 };
 
-template< typename T >
-Test<T>::Test(const Test& other)
+template< typename T2 >
+struct Test<T2>::Test2
 {
-}
+    Test2();
+    T2 test;
+};
 
 void kmain(u32 index, u32 total)
 {
-    Test<u32> x;
-    Test<i32> y;
+    Test<u32>::Test2 x = 0;
+    Test<i32>::Test2 y = 0;
 }

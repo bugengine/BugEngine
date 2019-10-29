@@ -16,6 +16,9 @@ struct DataStore
     {
         typename vector<U>::iterator    m_storage;
         T*                              m_dataType;
+
+        template< typename X >
+        typename vector<X>::iterator    cast();
     };
 };
 

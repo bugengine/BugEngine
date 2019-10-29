@@ -77,15 +77,25 @@ def p_method_parameters_none(p):
     p[0] = []
 
 
+def create_method_container(lexer, name):
+    if name.is_qualified():
+        owner = name.parent.target
+    else:
+        owner = lexer.scopes[-1].scope_owner
+    assert owner
+    m = methods.Method(lexer, name.position, name.name, owner)
+    owner.scope.add(m)
+    return m
+
+
 def p_create_method(p):
     """
         create_method :
     """
     name = p[-1]
-    parent = p.lexer.scopes[-1].owner
     object_type = name.get_type()
     if object_type != 'ID' and (name.is_qualified() or not name.is_shadow()):
-        if object_type == 'METHOD_ID':
+        if object_type in ('METHOD_ID', 'TEMPLATE_METHOD_ID',):
             p[0] = name.target
         else:
             if name.is_qualified():
@@ -95,27 +105,12 @@ def p_create_method(p):
                 p.lexer.error('name %s does not name a method' % name,
                                 name.position)
             p.lexer.note('previously declared here', name.target.position)
-            p[0] = methods.Method(p.lexer, name.position, name.name)
-            p[0].register()
+            p[0] = create_method_container(p.lexer, name)
     elif name.target and object_type == 'METHOD_ID':
-        p[0] = methods.Method(p.lexer, name.position, name.name)
-        p[0].register()
+        p[0] = create_method_container(p.lexer, name)
     else:
         # method not in this scope: redeclare
-        assert object_type == 'ID' or (name.is_shadow() and object_type != 'METHOD_ID')
-        t = name.template
-        if not t or name.is_shadow():
-            p[0] = methods.Method(p.lexer, name.position, name.name)
-            p[0].register()
-        else:
-            if name.target:
-                p[0] = name.target
-            elif name.arguments:
-                p[0] = methods.Method(p.lexer, name.position, name.name)
-                t.back_link.create_specialization(name.arguments, p[0])
-            else:
-                p[0] = methods.Method(p.lexer, name.position, name.name)
-                p[0].register()
+        p[0] = create_method_container(p.lexer, name)
     p.set_position_absolute(0, name.position)
 
 
@@ -124,7 +119,7 @@ def p_create_special_method(p):
         create_special_method :
     """
     name = p[-1]
-    klass = name.parent and name.parent.target or p.lexer.scopes[-1].owner
+    klass = name.parent and name.parent.target or p.lexer.scopes[-1].scope_owner
     obj = name.target
     if obj:
         p[0] = obj
@@ -148,8 +143,7 @@ def p_create_op(p):
     name = p[-1]
     m = name.target
     if not m:
-        m = methods.Method(p.lexer, name.position, name.name)
-        m.register()
+        m = create_method_container(p.lexer, name)
     p[0] = m
 
 
@@ -162,15 +156,13 @@ def p_create_castop(p):
     m = name.target
     if m:
         assert len(m.overloads) >= 1
-        try:
-            m.overloads[0].return_type.distance(cast_type, types.CAST_NONE)
-        except types.CastError:
-            assert False
+        #try:
+        #    m.overloads[0].return_type.distance(cast_type, types.CAST_NONE)
+        #except types.CastError:
+        #    assert False
     else:
-        owner = name.parent and name.parent.target or p.lexer.scopes[-1].scope_owner
-        m = methods.Method(p.lexer, name.position, name.name)
-        getattr(owner.scope, 'casts', []).append((cast_type, m))
-        m.register()
+        m = create_method_container(p.lexer, name)
+        m.owner.scope.casts.append((cast_type, m))
     p[0] = m
 
 
@@ -296,14 +288,24 @@ def p_method_declaration(p):
     if p[1][0]:
         assert isinstance(p[1][0], types.TypeRef), p[1][3]
     m = p[1][2]
-    p[0] = m.find_overload(p[3], p.position(2), p[1][0], p[1][1] + p[5])
-    if not p[0]:
-        if p[1][3].is_qualified():
-            p.lexer.error("out-of-line definition of '%s' does not match any declaration in %s" % (p[1][3].name, m.parent.scope.scope_owner.pretty_name()),
-                          p.position(2))
-        p[0] = m.create_overload(p[3], p.position(2), p[1][0], p[1][1] + p[5])
-    p.set_position(0, 2)
-    m.pop_scope_recursive()
+    name = p[1][3]
+    if name.template_bindings and name.template:
+        t = name.template_bindings.template
+        t.parent.scope.remove(t)
+    else:
+        t = None
+    try:
+        p[0] = m.find_overload(t, p[3], p.position(2), p[1][0], p[1][1] + p[5])
+        if not p[0]:
+            if p[1][3].is_qualified():
+                p.lexer.error("out-of-line definition of '%s' does not match any declaration in %s" % (p[1][3].name, m.parent.scope.scope_owner.pretty_name()),
+                            p.position(2))
+            p[0] = m.create_overload(t, p[3], p.position(2), p[1][0], p[1][1] + p[5])
+    finally:
+        p.set_position(0, 2)
+        if t:
+            t.bind(p[0].template)
+        m.pop_scope_recursive()
 
 
 def p_method_definition(p):

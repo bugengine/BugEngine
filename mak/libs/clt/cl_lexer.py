@@ -138,12 +138,12 @@ class ClLexer:
         self._msg('error', msg, pos)
 
     def push_scope(self, scope):
-        #print('>%s %s' % (' '*len(self.scopes), repr(scope.owner)))
+        #print('>%s %s' % (' '*len(self.scopes), str(scope.owner)))
         assert isinstance(scope, cl_ast.scope.Scope)
         self.scopes.append(scope)
 
     def pop_scope(self, scope):
-        #print('<%s %s' % (' '*(len(self.scopes) - 1), repr(scope.owner)))
+        #print('<%s %s' % (' '*(len(self.scopes) - 1), str(scope.owner)))
         assert self.scopes[-1] == scope,"asymetric scope push/pop: %s/%s" % (scope.owner, self.scopes[-1].owner)
         self.scopes[-1].seal()
         self.scopes.pop(-1)
