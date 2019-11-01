@@ -39,10 +39,10 @@ def p_name_object(p):
     """
         namespace_id : NAMESPACE_ID
         namespace_id_shadow : NAMESPACE_ID_SHADOW
-        struct_id : STRUCT_ID
-        struct_id_shadow : STRUCT_ID_SHADOW
-        typename_id : TYPENAME_ID
-        typename_id_shadow : TYPENAME_ID_SHADOW
+        struct_id : STRUCT_ID                                           %prec TPL_REDUCE
+        struct_id_shadow : STRUCT_ID_SHADOW                             %prec TPL_REDUCE
+        typename_id : TYPENAME_ID                                       %prec TPL_REDUCE
+        typename_id_shadow : TYPENAME_ID_SHADOW                         %prec TPL_REDUCE
         method_id : METHOD_ID
         method_id_shadow : METHOD_ID_SHADOW
         variable_id : VARIABLE_ID
@@ -58,12 +58,12 @@ def p_name_object(p):
 
 def p_name_template_object(p):
     """
-        template_typename_id : TEMPLATE_TYPENAME_ID
-        template_typename_id_shadow : TEMPLATE_TYPENAME_ID_SHADOW
-        template_struct_id : TEMPLATE_STRUCT_ID
-        template_struct_id_shadow : TEMPLATE_STRUCT_ID_SHADOW
-        template_method_id : TEMPLATE_METHOD_ID
-        template_method_id_shadow : TEMPLATE_METHOD_ID_SHADOW
+        template_typename_id : TEMPLATE_TYPENAME_ID                     %prec TPL_REDUCE
+        template_typename_id_shadow : TEMPLATE_TYPENAME_ID_SHADOW       %prec TPL_REDUCE
+        template_struct_id : TEMPLATE_STRUCT_ID                         %prec TPL_REDUCE
+        template_struct_id_shadow : TEMPLATE_STRUCT_ID_SHADOW           %prec TPL_REDUCE
+        template_method_id : TEMPLATE_METHOD_ID                         %prec TPL_REDUCE
+        template_method_id_shadow : TEMPLATE_METHOD_ID_SHADOW           %prec TPL_REDUCE
     """
     parent = p[-1]
     template = p.slice[1].found_object
@@ -374,6 +374,8 @@ def p_object_name_destructor(p):
         special_method_name : qualifier_opt NOT SPECIAL_METHOD_ID
         special_method_name : qualifier_opt NOT STRUCT_ID_SHADOW
         special_method_name : qualifier_opt NOT TEMPLATE_STRUCT_ID_SHADOW
+        special_method_name : qualifier_opt NOT TYPENAME_ID_SHADOW
+        special_method_name : qualifier_opt NOT TEMPLATE_TYPENAME_ID_SHADOW
     """
     p[0] = (Name(p.lexer, '~'+p[3], p.position(2), parent=p[1][0]),
             Name(p.lexer, '~'+p[3], p.position(2), parent=p[1][1]))
@@ -382,7 +384,7 @@ def p_object_name_destructor(p):
 
 def p_type_name_typename_error(p):
     """
-        type_name_dependent : dependent_scope_name                                %prec NAME2
+        type_name_dependent : dependent_scope_name                                  %prec NAME2
     """
     n = p[1][0]
     if p.lexer.template_stack:

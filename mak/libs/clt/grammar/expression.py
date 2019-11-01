@@ -79,6 +79,13 @@ def p_value_object(p):
     """
 
 
+def p_parameterlist_opt(p):
+    """
+        parameter_list_opt : LPAREN expression_list_opt RPAREN              %prec PRIO0
+                           |                                                %prec AND
+    """
+
+
 def p_operator_expr(p):
     """
         expression : LPAREN expression_list RPAREN
@@ -89,8 +96,8 @@ def p_operator_expr(p):
                    | expression LBRACKET expression_list RBRACKET           %prec PRIO1
                    | expression PERIOD object_name                          %prec PRIO1
                    | expression ARROW object_name                           %prec PRIO1
-                   | expression PERIOD NOT object_name                      %prec PRIO1
-                   | expression ARROW NOT object_name                       %prec PRIO1
+                   | expression PERIOD special_method_name                  %prec PRIO1
+                   | expression ARROW special_method_name                   %prec PRIO1
                    | PLUSPLUS expression                                    %prec PRE_PLUSPLUS
                    | MINUSMINUS expression                                  %prec PRE_MINUSMINUS
                    | PLUS expression                                        %prec UNARY_PLUS
@@ -136,6 +143,8 @@ def p_operator_expr(p):
                    | DYNAMIC_CAST LT type GT LPAREN expression RPAREN       %prec TEMPLATEGT
                    | REINTERPRET_CAST LT type GT LPAREN expression RPAREN   %prec TEMPLATEGT
                    | CONST_CAST LT type GT LPAREN expression RPAREN         %prec TEMPLATEGT
+                   | NEW parameter_list_opt type parameter_list_opt         %prec TEMPLATEGT
+                   | DELETE expression
     """
     pass
 

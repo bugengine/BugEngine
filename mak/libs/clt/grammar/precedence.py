@@ -1,6 +1,7 @@
 precedence = (
     ('nonassoc','IFX'),
     ('nonassoc','ELSE'),
+    ('nonassoc','TPL_REDUCE'),
     ('left',    'COMMA'),
     ('right',   'CONDOP', 'COLON', 'EQUALS', 'TIMESEQUAL', 'DIVEQUAL',
                 'MODEQUAL', 'PLUSEQUAL', 'MINUSEQUAL', 'LSHIFTEQUAL',
@@ -16,7 +17,7 @@ precedence = (
     ('left',    'PLUS', 'MINUS'),
     ('left',    'TIMES', 'DIVIDE', 'MOD'),
     ('right',   'PRE_PLUSPLUS', 'PRE_MINUSMINUS', 'UNARY_PLUS', 'UNARY_MINUS',
-                'LNOT', 'NOT', 'UNARY_TIMES', 'UNARY_AND', 'SIZEOF'),
+                'LNOT', 'NOT', 'UNARY_TIMES', 'UNARY_AND', 'SIZEOF', 'NEW', 'DELETE'),
     ('left',    'PRIO1'),
     ('left',    'PRIO0'),
     ('left',    'NAME2'),

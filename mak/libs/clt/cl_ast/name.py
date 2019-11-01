@@ -29,7 +29,7 @@ class Name:
         else:
             return name
 
-    def __eq__(self, other):
+    def equals(self, other, template_bindings):
         if not other:
             return False
         if self.dependent:
@@ -42,10 +42,10 @@ class Name:
             if self.template:
                 args1 = self.template.expand_template_arg_list(self.arguments)
                 args2 = self.template.expand_template_arg_list(other.arguments)
-                if not self.template.equal_parameters(args1, args2):
+                if not self.template.equal_parameters(args1, args2, template_bindings):
                     return False
             else:
-                if not CppObject.equal_parameters(self.arguments or [], other.arguments or []):
+                if not CppObject.equal_parameters(self.arguments or [], other.arguments or [], template_bindings):
                     return False
             return True
         else:

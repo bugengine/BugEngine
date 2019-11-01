@@ -57,7 +57,7 @@ class CppObject:
     def _get_cached_instance(self, arguments):
         for args, _, _, instance in self.instances:
             assert len(args) == len(arguments)
-            if CppObject.equal_parameters(args, arguments):
+            if CppObject.equal_parameters(args, arguments, { }):
                 return instance
         return None
     
@@ -114,8 +114,11 @@ class CppObject:
                                self.position))
         self.scope.debug_dump(indent)
 
+    def simplify(self):
+        return self
+
     @classmethod
-    def equal_parameters(self, parameters1, parameters2):
+    def equal_parameters(self, parameters1, parameters2, bindings):
         from . import types
         if len(parameters1) != len(parameters2):
             return False
@@ -125,7 +128,7 @@ class CppObject:
             if not parameters2[i]:
                 return False
             try:
-                d = parameters1[i].distance(parameters2[i], types.CAST_NONE)
+                d = parameters2[i].distance(parameters1[i], types.CAST_NONE, template_bindings=bindings)
             except types.CastError:
                 return False
             else:
