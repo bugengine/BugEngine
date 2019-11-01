@@ -22,7 +22,7 @@ def p_verify_template_stack_1_opt(p):
     """
         verify_template_stack_1_opt :
     """
-    if p.lexer.template_stack:
+    if p.lexer.template_stack is not None:
         p.lexer.finalize_template_stack()
         p[0] = p[-1][1]
         p[0].parent and p[0].parent.bind()
