@@ -90,12 +90,6 @@ class ClLexer:
             else:
                 return self.bind(template or self.template_list[next_index], current_bind)
 
-        def __bool__(self):
-            return True
-
-        def __len__(self):
-            return len(self.template_list)
-
         def __getitem__(self, index):
             return self.template_list[index]
 
@@ -156,16 +150,16 @@ class ClLexer:
         self.current_scope = None
 
     def push_template_stack(self, templates):
-        assert self.template_stack == None
+        assert self.template_stack is None, self.template_stack
         self.template_stack = ClLexer.TemplateStack(templates)
 
     def finalize_template_stack(self):
-        assert self.template_stack
+        assert self.template_stack is not None
         self.template_stack = None
     
     def disable_template_stack(self):
         if self._template_stack_count == 0:
-            assert self._template_stack == None
+            assert self._template_stack is None
             self._template_stack = self.template_stack
             self.template_stack = None
         self._template_stack_count += 1
