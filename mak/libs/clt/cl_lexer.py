@@ -286,7 +286,7 @@ class ClLexer:
         'const', '__global', '__local', '__constant', '__private',
         'restrict', '__restrict', 'volatile', 'static', 'inline', 'explicit', 'virtual', 'return',
         'do', 'while', 'for', 'switch', 'case', 'default', 'break', 'continue', 'if', 'else',
-        'enum', 'struct', 'union', 'typedef', 'sizeof', 'true', 'false',
+        'enum', 'struct', 'union', 'typedef', 'sizeof', 'true', 'false', 'new', 'delete',
 
         # BugEngine additions
         'template', 'namespace', 'typename', 'class', 'using', 'friend', 'this',

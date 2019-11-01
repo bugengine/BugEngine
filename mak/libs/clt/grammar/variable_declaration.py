@@ -15,6 +15,13 @@ def p_variable_initial_value(p):
     p[0] = p[2]
 
 
+def p_variable_initial_value_constructor(p):
+    """
+        variable_initial_value_opt : LPAREN expression_list_opt RPAREN
+    """
+    p[0] = p[2]
+
+
 def p_type_modifier_opt_end(p):
     """
         type_modifier_opt :
@@ -58,13 +65,13 @@ def p_variable_declaration(p):
     object_type = name.get_type()
     variable_type = p[5]
     if object_type != 'ID' and (name.is_qualified() or not name.is_shadow()):
-        if name.get_type() != 'VARIABLE_ID':
+        if object_type != 'VARIABLE_ID':
             p.lexer.error('%s redeclared as different kind of symbol', name.position)
             p.lexer.note('previous declaration of %s' % name.target.position)
             p[0] = variables.Variable(p.lexer, name.position, name.name, variable_type, p[6], p[1])
         else:
             try:
-                name.target.distance(variable_type, types.CAST_NONE)
+                name.target.type.distance(variable_type, types.CAST_NONE)
             except types.CastError:
                 p.lexer.error("redefinition of '%s' with a different type: '%s' vs '%s'" % (name, variable_type.pretty_name(), name.target.type.pretty_name()))
                 p.lexer.note('previous declaration of %s' % name.target.position)

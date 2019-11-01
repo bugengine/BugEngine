@@ -171,7 +171,7 @@ def p_push_overload_scope(p):
         push_overload_scope :
     """
     overload = p[-1]
-    overload.push_scope(p.position(-1), methods.OverloadScope(overload, p.position(-1)))
+    overload.push_scope_recursive(p.position(-1), methods.OverloadScope(overload, p.position(-1)))
     p[0] = overload
 
 
@@ -180,7 +180,7 @@ def p_pop_overload_scope(p):
         pop_overload_scope :
     """
     overload = p[-3]
-    p.lexer.pop_scope(overload.scope)
+    overload.pop_scope_recursive()
 
 
 def p_method_attribute(p):
@@ -303,7 +303,7 @@ def p_method_declaration(p):
             p[0] = m.create_overload(t, p[3], p.position(2), p[1][0], p[1][1] + p[5])
     finally:
         p.set_position(0, 2)
-        if t:
+        if t and p[0]:
             t.bind(p[0].template)
         m.pop_scope_recursive()
 

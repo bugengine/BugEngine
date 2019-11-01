@@ -776,5 +776,6 @@ void swap(minitl::vector<T>& t1, minitl::vector<T>& t2)
 
 void kmain(u32 index, u32 total)
 {
-
+    minitl::vector<u32> u;
+    minitl::vector<u32>::const_iterator it = u.begin();
 }

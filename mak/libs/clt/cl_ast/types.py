@@ -126,6 +126,10 @@ class TypeDef(Type):
         return TypeDef(self.lexer, self.position, self.name,
                        self.type.create_template_instance(template, arguments, position))
 
+    def write_to(self, writer):
+        pass
+    
+
 class Pointer(Type):
     def __init__(self, lexer, position, type):
         Type.__init__(self, lexer, position)
@@ -481,9 +485,31 @@ class DependentTypeName(Type):
             result = self._create_partial_template_instance(template, arguments, position)
         return result
 
+    def simplify(self):
+        def _simplify(name):
+            if not name.dependent:
+                return name.target
+            else:
+                if name.parent:
+                    result = _simplify(name.parent)
+                    if result:
+                        try:
+                            result = result.scope.find(name.name, name.position, self, True)
+                        except CppError as e:
+                            self.lexer.error(e.message, e.position)
+                    else:
+                        return None
+                else:
+                    _, result = self.lexer.lookup_by_name(name.name, name.position)
+                if name.arguments is not None:
+                    result = result.find_instance(name.template_bindings and name.template_bindings.parameter_binds,
+                                                  name.arguments, name.position)
+                return result
+        return _simplify(self.name) or self
+
     def _distance(self, other, matches, template_bindings, typeref, other_typeref, allowed_cast):
         if isinstance(other, DependentTypeName):
-            if self.name != other.name:
+            if self.name.equals(other.name, template_bindings):
                 if allowed_cast == CAST_UNRELATED:
                     d = Type.Distance(variant = -1)
                     return d.match_attributes(allowed_cast, typeref.qualifiers, other_typeref.qualifiers)

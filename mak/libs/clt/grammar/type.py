@@ -154,7 +154,7 @@ def p_type_type_name(p):
     else:
         if not isinstance(name.target, types.Type):
             p.lexer.error("name '%s' does not refer to a type" % name, name.position)
-        p[0] = types.TypeRef(p.lexer, name.target.position, name.target, name.data)
+        p[0] = types.TypeRef(p.lexer, name.target.position, name.target.simplify(), name.data)
 
 
 def p_type_type_decl(p):

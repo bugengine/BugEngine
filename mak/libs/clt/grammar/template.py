@@ -30,7 +30,6 @@ def p_verify_template_stack_1_opt(p):
     else:
         p[0] = p[-1][0]
 
-
 def p_template_argument(p):
     """
         template_argument : expression                                                  %prec NAME2
