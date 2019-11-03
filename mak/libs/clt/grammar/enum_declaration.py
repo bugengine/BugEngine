@@ -167,7 +167,7 @@ def p_type_enum_declaration(p):
 
 def p_type_enum_definition(p):
     """
-        typedecl : enum_definition
+        type_definition : enum_definition
     """
     p[0] = p[1]
     p.set_position(0, 1)

@@ -33,23 +33,30 @@ def p_parameter_name(p):
     p[0] = p[1]
 
 
-def p_method_parameter_type(p):
+def p_parameter_initial_value_none(p):
     """
-        method_parameter_type : type
+        parameter_initial_value_opt :
     """
-    p[0] = p[1]
+    pass
+
+
+def p_parameter_initial_value(p):
+    """
+        parameter_initial_value_opt : EQUALS expression
+    """
+    p[0] = p[2]
 
 
 def p_method_parameter_list_last(p):
     """
-        method_parameter_list : method_parameter_type parameter_name variable_initial_value_opt
+        method_parameter_list : type parameter_name parameter_initial_value_opt
     """
     p[0] = [methods.Parameter(p.lexer, p[1].position, p[2], p[1], p[3])]
 
 
 def p_method_parameter_list(p):
     """
-        method_parameter_list : method_parameter_type parameter_name variable_initial_value_opt COMMA method_parameter_list
+        method_parameter_list : type parameter_name parameter_initial_value_opt COMMA method_parameter_list
     """
     p[0] = [methods.Parameter(p.lexer, p[1].position, p[2], p[1], p[3])] + p[5]
 
@@ -88,15 +95,11 @@ def create_method_container(lexer, name):
     return m
 
 
-def p_create_method(p):
-    """
-        create_method :
-    """
-    name = p[-1]
+def find_or_create_method(p, name, owner):
     object_type = name.get_type()
     if object_type != 'ID' and (name.is_qualified() or not name.is_shadow()):
         if object_type in ('METHOD_ID', 'TEMPLATE_METHOD_ID',):
-            p[0] = name.target
+            return name.target
         else:
             if name.is_qualified():
                 p.lexer.error('qualified name %s does not name a method' % name,
@@ -105,13 +108,12 @@ def p_create_method(p):
                 p.lexer.error('name %s does not name a method' % name,
                                 name.position)
             p.lexer.note('previously declared here', name.target.position)
-            p[0] = create_method_container(p.lexer, name)
+            return create_method_container(p.lexer, name)
     elif name.target and object_type == 'METHOD_ID':
-        p[0] = create_method_container(p.lexer, name)
+        return create_method_container(p.lexer, name)
     else:
         # method not in this scope: redeclare
-        p[0] = create_method_container(p.lexer, name)
-    p.set_position_absolute(0, name.position)
+        return create_method_container(p.lexer, name)
 
 
 def p_create_special_method(p):
@@ -228,12 +230,25 @@ def p_initializer_list_opt(p):
     """
 
 
-def p_method_declaration_prefix(p):
+def p_object_scope(p):
     """
-        method_declaration_prefix : declaration_specifier_list type object_name verify_template_stack_1 create_method
+        push_object_scope :
     """
-    p[0] = (p[2], p[1], p[5], p[4])
-    p[0][2].push_scope_recursive(p[0][2].position)
+    name = p[-2]
+    if name.is_qualified():
+        owner = name.parent.target
+    else:
+        owner = p.lexer.scopes[-1].scope_owner
+    owner.push_scope_recursive(name.position)
+    p[0] = owner
+
+
+def p_object_declaration(p):
+    """
+        object_declaration : declaration_specifier_list type object_name verify_template_stack_1_opt variable_array_specifier_opt push_object_scope
+                           | declaration_specifier_list type_definition object_name verify_template_stack_1_opt variable_array_specifier_opt push_object_scope
+    """
+    p[0] = (p[1], p[2], p[4], p[6], p[5])
 
 
 def p_method_declaration_prefix_operator(p):
@@ -308,8 +323,35 @@ def p_method_declaration(p):
         m.pop_scope_recursive()
 
 
+def p_method_declaration_from_object(p):
+    """
+        method_declaration : object_declaration LPAREN method_parameters RPAREN method_attributes
+    """
+    attributes, return_type, name, owner, array_specifier = p[1]
+    owner.pop_scope_recursive()
+    if id(array_specifier) != id(return_type):
+        p.lexer.error("'%s' declared as an array of functions" % name, array_specifier.position)
+    assert isinstance(return_type, types.TypeRef), return_type
+    m = find_or_create_method(p, name, owner)
+    if name.template_bindings and name.template:
+        t = name.template_bindings.template
+        t.parent.scope.remove(t)
+    else:
+        t = None
+    try:
+        p[0] = m.find_overload(t, p[3], p.position(2), return_type, attributes + p[5])
+        if not p[0]:
+            if name.is_qualified():
+                p.lexer.error("out-of-line definition of '%s' does not match any declaration in %s" % (name, owner.pretty_name()),
+                            p.position(2))
+            p[0] = m.create_overload(t, p[3], p.position(2), return_type, attributes + p[5])
+    finally:
+        p.set_position(0, 2)
+        if t and p[0]:
+            t.bind(p[0].template)
+
+
 def p_method_definition(p):
     """
         method_definition : method_declaration push_overload_scope initializer_list_opt statement_block pop_overload_scope
     """
-
