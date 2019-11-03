@@ -53,7 +53,8 @@ def p_external_declaration_empty(p):
 
 def p_external_declaration_type(p):
     """
-        external_declaration : template_specifier_opt declaration_specifier_list type SEMI
+        external_declaration : template_specifier_opt declaration_specifier_list typedecl SEMI
+        external_declaration : template_specifier_opt declaration_specifier_list type_definition SEMI
     """
     for t in p[1][::-1]:
         p.lexer.pop_scope(t.scope)

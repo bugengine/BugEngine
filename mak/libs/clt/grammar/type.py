@@ -244,6 +244,7 @@ def p_typedef_name_error(p):
 def p_declaration_typedef(p):
     """
         typedef : TYPEDEF type typedef_name
+                | TYPEDEF type_definition typedef_name
     """
     p[0] = types.TypeDef(p.lexer, p.position(1), p[3], p[2])
     p[0].register()

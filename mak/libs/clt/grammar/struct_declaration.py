@@ -165,7 +165,7 @@ def p_type_struct_declaration(p):
 
 def p_type_struct_definition(p):
     """
-        typedecl : struct_definition
+        type_definition : struct_definition
     """
     p[0] = p[1]
     p.set_position(0, 1)
