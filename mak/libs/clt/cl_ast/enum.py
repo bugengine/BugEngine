@@ -1,5 +1,5 @@
 from .cppobject import CppObject
-from .types import Type, BuiltIn, CastError, CAST_IMPLICIT, CAST_UNRELATED, CAST_STATIC
+from .types import Type, BuiltIn, CastError
 from .scope import Scope
 
 
@@ -40,27 +40,27 @@ class Enum(Type):
     def write_to(self, writer):
         pass
 
-    def _distance(self, other, matches, template_bindings, typeref, other_typeref, allowed_cast):
+    def _distance(self, other, cast_options, typeref, other_typeref):
         if self == other:
             d = Type.Distance()
-            return d.match_attributes(allowed_cast, typeref.qualifiers, other_typeref.qualifiers)
+            return d.match_attributes(cast_options.allowed_cast, typeref, other_typeref)
         elif isinstance(other, BuiltIn):
-            if allowed_cast >= CAST_IMPLICIT:
+            if cast_options.allowed_cast >= cast_options.CAST_IMPLICIT:
                 d = Type.Distance(cast=1)
-                return d.match_attributes(allowed_cast, typeref.qualifiers, other_typeref.qualifiers)
+                return d.match_attributes(cast_options.allowed_cast, typeref, other_typeref)
             else:
-                raise CastError()
+                raise CastError('type %s is not compatible with %s' % (self, other), self.position)
         elif isinstance(other, Enum):
-            if allowed_cast >= CAST_STATIC:
+            if cast_options.allowed_cast >= cast_options.CAST_STATIC:
                 d = Type.Distance(cast=1)
-                return d.match_attributes(allowed_cast, typeref.qualifiers, other_typeref.qualifiers)
+                return d.match_attributes(cast_options.allowed_cast, typeref, other_typeref)
             else:
-                raise CastError()
-        elif allowed_cast == CAST_UNRELATED:
+                raise CastError('type %s is not compatible with %s' % (self, other), self.position)
+        elif cast_options.allowed_cast == cast_options.CAST_UNRELATED:
             d = Type.Distance(variant = -1)
-            return d.match_attributes(allowed_cast, typeref.qualifiers, other_typeref.qualifiers)
+            return d.match_attributes(cast_options.allowed_cast, typeref, other_typeref)
         else:
-            raise CastError()
+            raise CastError('type %s is not compatible with %s' % (self, other), self.position)
 
     def _create_template_instance(self, template, arguments, position):
         return Enum(self.lexer, self.position, self.name)

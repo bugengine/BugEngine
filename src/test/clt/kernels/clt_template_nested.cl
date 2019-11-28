@@ -47,8 +47,8 @@ struct Test<const V>
 
 void kmain(u32 index, u32 total)
 {
+    Test<i32* const>::NestedTestConst<i32> z2;
     Test<u32>::NestedTest<i32> x;
     Test<i32>::NestedTest<i32> y;
     Test<i32*>::NestedTest<i32> z;
-    Test<i32* const>::NestedTestConst<i32> z2;
 }

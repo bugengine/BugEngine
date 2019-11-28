@@ -150,7 +150,7 @@ def p_type_type_name(p):
     name = p[1][0]
     name.show_errors()
     if id(name.target) == id(name.template):
-        p[0] = types.TypeRef(p.lexer, name.target.position, name.target.scope[0][1], name.template)
+        p[0] = types.TypeRef(p.lexer, name.target.position, len(name.target.scope.items) and name.target.scope[0][1], name.template)
     else:
         if not isinstance(name.target, types.Type):
             p.lexer.error("name '%s' does not refer to a type" % name, name.position)

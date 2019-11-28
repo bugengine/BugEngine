@@ -1,6 +1,5 @@
 void kmain(u32 index, u32 total)
 {
-    /* int types */
     4;
     4l;
     4u;
@@ -12,14 +11,15 @@ void kmain(u32 index, u32 total)
     0x1234u;
     0b1101;
 
-    /* character/strings */
     'c';
     '\n';
     L'\x50';
     "char string\u0444";
     L"wchar string\u0444";
 
-    /* float types */
     3.15f;
     3.15;
+
+    true;
+    false;
 }

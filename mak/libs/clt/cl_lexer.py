@@ -105,6 +105,7 @@ class ClLexer:
         self.error_count = 0
         self.last_token = None
         self.scopes = []
+        self.owner_scopes=[]
         self.current_scope = None
         self.pp_line = None
         self.pp_filename = None
@@ -117,6 +118,13 @@ class ClLexer:
         except KeyError:
             self.error_format = ide_format['unix']
             self.error_color = False
+        self.base_types = { }
+        p = ('<built-in>', 0, 0, 0)
+        for t in ('bool', 'float', 'double',
+                    'i8', 'u8', 'i16', 'u16', 'i32', 'u32', 'i64', 'u64'):
+            type = cl_ast.types.TypeRef(self, p, cl_ast.types.BuiltIn(self, p, t))
+            type.qualifiers.add('const')
+            self.base_types[t] = type
 
     def note(self, msg, pos):
         self._msg('note', msg, pos)
@@ -131,16 +139,27 @@ class ClLexer:
         self.error_count += 1
         self._msg('error', msg, pos)
 
-    def push_scope(self, scope):
+    def log_cpperror(self, e):
+        if e.inner_error:
+            self.log_cpperror(e.inner_error)
+            self.note(e.message, e.position)
+        else:
+            self.error(e.message, e.position)
+
+    def push_scope(self, scope, owner_scope=True):
         #print('>%s %s' % (' '*len(self.scopes), str(scope.owner)))
         assert isinstance(scope, cl_ast.scope.Scope)
         self.scopes.append(scope)
+        if owner_scope:
+            self.owner_scopes.append(scope)
 
     def pop_scope(self, scope):
         #print('<%s %s' % (' '*(len(self.scopes) - 1), str(scope.owner)))
         assert self.scopes[-1] == scope,"asymetric scope push/pop: %s/%s" % (scope.owner, self.scopes[-1].owner)
         self.scopes[-1].seal()
         self.scopes.pop(-1)
+        if self.owner_scopes and self.owner_scopes[-1] == scope:
+            self.owner_scopes.pop(-1)
 
     def set_search_scope(self, obj):
         #print('new search scope: %s' % obj.name)
@@ -587,21 +606,49 @@ class ClLexer:
     # functions to impose a strict order (otherwise, decimal
     # is placed before the others because its regex is longer,
     # and this is bad)
-    #
     @lex.TOKEN(floating_constant)
     def t_FLOAT_CONST(self, t):
+        if t.value[-1] in 'fF':
+            t.constant_value = float(t.value[:-1])
+            t.constant_type = self.base_types['float']
+        elif t.value[-1] in 'dD':
+            t.constant_value = float(t.value[:-1])
+            t.constant_type = self.base_types['double']
+        else:
+            assert t.value[-1] in '0123456789.'
+            t.constant_value = float(t.value[:-1])
+            t.constant_type = self.base_types['float']
         return t
 
     @lex.TOKEN(hex_floating_constant)
     def t_HEX_FLOAT_CONST(self, t):
+        assert False
         return t
 
     @lex.TOKEN(hex_constant)
     def t_INT_CONST_HEX(self, t):
+        t.constant_type = 'i32'
+        while t.value[-1] in 'lLuU':
+            if t.value[-1] in 'lL':
+                t.constant_type = t.constant_type[0]+'64'
+            else:
+                t.constant_type = 'u' + t.constant_type[1:]
+            t.value = t.value[:-1]
+        t.constant_type = self.base_types[t.constant_type]
+        t.constant_value = int(t.value, 16)
         return t
 
     @lex.TOKEN(bin_constant)
     def t_INT_CONST_BIN(self, t):
+        t.constant_type = 'i32'
+        while t.value[-1] in 'lLuU':
+            if t.value[-1] in 'lL':
+                t.constant_type = t.constant_type[0]+'64'
+            else:
+                t.constant_type = 'u' + t.constant_type[1:]
+            t.value = t.value[:-1]
+        t.constant_type = self.base_types[t.constant_type]
+        t.constant_value = int(t.value, 2)
         return t
 
     @lex.TOKEN(bad_octal_constant)
@@ -612,10 +659,28 @@ class ClLexer:
 
     @lex.TOKEN(octal_constant)
     def t_INT_CONST_OCT(self, t):
+        t.constant_type = 'i32'
+        while t.value[-1] in 'lLuU':
+            if t.value[-1] in 'lL':
+                t.constant_type = t.constant_type[0]+'64'
+            else:
+                t.constant_type = 'u' + t.constant_type[1:]
+            t.value = t.value[:-1]
+        t.constant_type = self.base_types[t.constant_type]
+        t.constant_value = int(t.value, 8)
         return t
 
     @lex.TOKEN(decimal_constant)
     def t_INT_CONST_DEC(self, t):
+        t.constant_type = 'i32'
+        while t.value[-1] in 'lLuU':
+            if t.value[-1] in 'lL':
+                t.constant_type = t.constant_type[0]+'64'
+            else:
+                t.constant_type = 'u' + t.constant_type[1:]
+            t.value = t.value[:-1]
+        t.constant_type = self.base_types[t.constant_type]
+        t.constant_value = int(t.value, 10)
         return t
 
     # Must come before bad_char_const, to prevent it from
@@ -623,10 +688,18 @@ class ClLexer:
     #
     @lex.TOKEN(char_const)
     def t_CHAR_CONST(self, t):
+        exec("x=u%s"%t.value)
+        t.constant_value = ord(x)
+        if t.constant_value > 255:
+            self.error("invalid character constant", self._position(t))
+        t.constant_type = self.base_types['u8']
         return t
 
     @lex.TOKEN(wchar_const)
     def t_WCHAR_CONST(self, t):
+        exec("x=u%s"%t.value[1:])
+        t.constant_value = ord(x)
+        t.constant_type = self.base_types['u32']
         return t
 
     @lex.TOKEN(unmatched_quote)

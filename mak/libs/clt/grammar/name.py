@@ -1,8 +1,8 @@
 from .. import cl_ast
 from ..cl_ast.name import Name
 from ..cl_ast.scope import ScopeError
-from ..cl_ast.types import CAST_NONE, CastError, DependentTypeName, Struct
-from ..cl_ast.templates import Template
+from ..cl_ast.types import CastOptions, CastError, DependentTypeName, Struct
+from ..cl_ast.templates import Template, TemplateTemplateParameter
 
 
 def p_qualifier_empty(p):
@@ -89,15 +89,20 @@ def p_template_object(p):
     template = p.slice[1].found_object
     parent = p[-1]
     template_stack = p.lexer.template_stack
+    arguments = p[2]
     errors = []
     is_shadow = not p[1][0] and p.slice[1].endswith('_SHADOW')
     n = Name(p.lexer, p[1], p.position(1), parent=parent[0], target=None,
-             template=template, arguments=p[2])
+             template=template, arguments=arguments)
     if template_stack:
         bindings = template_stack.bind(template, parent[1] and parent[1].template_bindings or None)
         if not bindings:
             errors.append('template specialization requires template<>')
-        specialization = template.find_instance(bindings and bindings.parameter_binds, p[2], p.position(2))
+        try:
+            specialization = template.find_instance(bindings and bindings.parameter_binds, arguments, p.position(1))
+        except Template.InstantiationError as e:
+            p.lexer.log_cpperror(e)
+            specialization = None
         if specialization:
             n.target = specialization
         else:
@@ -105,9 +110,9 @@ def p_template_object(p):
             n.target = DependentTypeName(p.lexer, p.position(1), n)
     else:
         try:
-            template_instance = template.instantiate(p[2], p.position(1))
+            template_instance = template.instantiate(arguments, p.position(1))
         except Template.InstantiationError as e:
-            print(e)
+            p.lexer.log_cpperror(e)
             template_instance = DependentTypeName(p.lexer, p.position(1), n)
             n.dependent = True
         else:
@@ -119,7 +124,7 @@ def p_template_object(p):
         bindings = None
     p[0] = (n,
             Name(p.lexer, p[1], p.position(1), parent=parent[1], target=specialization,
-                 template=template, arguments=p[2], template_bindings=bindings, shadow=is_shadow, errors=errors))
+                 template=template, arguments=arguments, template_bindings=bindings, shadow=is_shadow, errors=errors))
 
 
 def p_template_object_error(p):
@@ -202,7 +207,7 @@ def p_name_end_tpl_error(p):
     """
     p[0] = p[2]
     name = p[2][1]
-    assert isinstance(name.target, Template)
+    assert isinstance(name.target, Template) or isinstance(name.target, TemplateTemplateParameter)
     template_stack = p.lexer.template_stack
     if template_stack:
         bindings = template_stack.bind(p[2][1].target, p[1][1] and p[1][1].template_bindings)
@@ -330,7 +335,7 @@ def p_object_name_operator_cast(p):
                 t = None
             template_bindings = template_stack.bind(t, template_bindings_orig)
             try:
-                d = cast_type.distance(dest_type, CAST_NONE, template_bindings=template_bindings and template_bindings.parameter_binds)
+                d = cast_type.distance(dest_type, CastOptions(CastOptions.CAST_NONE, template_bindings=template_bindings and template_bindings.parameter_binds))
             except CastError:
                 pass
             else:

@@ -71,7 +71,7 @@ def p_variable_declaration(p):
             p[0] = variables.Variable(p.lexer, name.position, name.name, variable_type, p[2], attributes)
         else:
             try:
-                name.target.type.distance(variable_type, types.CAST_NONE)
+                name.target.type.distance(variable_type, types.CastOptions(types.CastOptions.CAST_NONE))
             except types.CastError:
                 p.lexer.error("redefinition of '%s' with a different type: '%s' vs '%s'" % (name, variable_type.pretty_name(), name.target.type.pretty_name()))
                 p.lexer.note('previous declaration of %s' % name.target.position)
@@ -106,7 +106,7 @@ def p_variable_declaration_cted(p):
             p[0] = variables.Variable(p.lexer, name.position, name.name, variable_type, p[7], p[1][0].attributes)
         else:
             try:
-                name.target.distance(variable_type, types.CAST_NONE)
+                name.target.distance(variable_type, types.CastOptions(types.CastOptions.CAST_NONE))
             except types.CastError:
                 p.lexer.error("redefinition of '%s' with a different type: '%s' vs '%s'" % (name, variable_type.pretty_name(), name.target.type.pretty_name()))
                 p.lexer.note('previous declaration of %s' % name.target.position)

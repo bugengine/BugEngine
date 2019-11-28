@@ -70,7 +70,7 @@ class CppObject:
     def register(self):
         self.parent_scope.add(self)
 
-    def push_scope(self, position, scope = None):
+    def push_scope(self, position, scope = None, owner_scope=True):
         if isinstance(self.scope, self.INITIAL_SCOPE):
             self.scope = scope or Scope(self, position)
         elif scope and scope != self.scope:
@@ -78,12 +78,12 @@ class CppObject:
             self.lexer.note('first defined here', self.scope.position)
             self.lexer.note('first declared here', self.position)
             self.scope = scope
-        self.lexer.push_scope(self.scope)
+        self.lexer.push_scope(self.scope, owner_scope)
 
-    def push_scope_recursive(self, position, scope=None):
+    def push_scope_recursive(self, position, scope=None, owner_scope=True):
         if self.parent:
-            self.parent.push_scope_recursive(position)
-        self.push_scope(position, scope or self.scope)
+            self.parent.push_scope_recursive(position, owner_scope=False)
+        self.push_scope(position, scope or self.scope, owner_scope)
         
     def pop_scope_recursive(self):
         self.lexer.pop_scope(self.scope)
@@ -122,13 +122,14 @@ class CppObject:
         from . import types
         if len(parameters1) != len(parameters2):
             return False
+        d = types.Type.Distance()
         for i in range(0, len(parameters1)):
             if not parameters1[i]:
                 return False
             if not parameters2[i]:
                 return False
             try:
-                d = parameters2[i].distance(parameters1[i], types.CAST_NONE, template_bindings=bindings)
+                d = parameters1[i].distance(parameters2[i], types.CastOptions(types.CastOptions.CAST_NONE, d.matches, template_bindings=bindings))
             except types.CastError:
                 return False
             else:
