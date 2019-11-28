@@ -47,16 +47,19 @@ class Overload(CppObject):
             return False
         for p1, p2 in zip(parameters, self.parameters):
             try:
-                p1.type.distance(p2.type, types.CAST_NONE, template_bindings=binding)
+                d = p1.type.distance(p2.type, types.CastOptions(types.CastOptions.CAST_NONE, template_bindings=binding))
             except types.CastError:
                 return False
+            else:
+                if not d.exact_match():
+                    return False
         for p1, p2 in zip(self.parameters, parameters):
             if p1.default_value and p2.default_value:
                 self.lexer.error('redefinition of default argument', p2.position)
                 self.lexer.note('previous definition is here', p1.position)
         if self.return_type and return_type:
             try:
-                return_type.distance(self.return_type, types.CAST_NONE, template_bindings=binding)
+                return_type.distance(self.return_type, types.CastOptions(types.CastOptions.CAST_NONE, template_bindings=binding))
             except types.CastError:
                 self.lexer.error('functions that differ only by return type cannot be overloaded', return_type.position)
                 self.lexer.note('previous declaration is here', self.return_type.position)

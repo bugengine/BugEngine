@@ -33,7 +33,9 @@ class Name:
         if not other:
             return False
         if self.dependent:
-            if self.parent != other.parent:
+            if self.parent and not self.parent.equals(other.parent, template_bindings):
+                return False
+            if not self.parent and other.parent:
                 return False
             if self.name != other.name:
                 return False
@@ -51,9 +53,6 @@ class Name:
         else:
             return self.target == other.target
         return False
-
-    def __neq__(self, other):
-        return not (self == other)
 
     def get_type(self):
         if self.target:

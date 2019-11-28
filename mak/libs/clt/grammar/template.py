@@ -86,6 +86,7 @@ def p_template_parameter_name(p):
     if name.is_qualified():
         p.error('erf', name.position)
     p[0] = name.name
+    p.set_position_absolute(0, name.position)
 
 
 def p_template_parameter_default_value_opt(p):
@@ -104,7 +105,7 @@ def p_template_parameter_value(p):
     """
     if p[1]:
         p.lexer.error("unexpected template specifier", p[1][0].position)
-    p[0] = cl_ast.templates.TemplateValueParameter(p.lexer, p.position(3), p[3], p[2], p[4])
+    p[0] = cl_ast.templates.TemplateValueParameter(p.lexer, p[3] and p.position(3) or p[2].position, p[3], p[2], p[4])
     p[0].register()
     for t in p[1][::-1]:
         p.lexer.pop_scope(t.scope)
@@ -118,9 +119,9 @@ def p_template_parameter_typename(p):
     for t in p[1][::-1]:
         p.lexer.pop_scope(t.scope)
     if p[1]:
-        p[0] = cl_ast.templates.TemplateTemplateParameter(p.lexer, p.position(3), p[3], p[1], p[4])
+        p[0] = cl_ast.templates.TemplateTemplateParameter(p.lexer, p[3] and p.position(3) or p.position(2), p[3], p[1], p[4])
     else:
-        p[0] = cl_ast.templates.TemplateTypenameParameter(p.lexer, p.position(3), p[3], p[4])
+        p[0] = cl_ast.templates.TemplateTypenameParameter(p.lexer, p[3] and p.position(3) or p.position(2), p[3], p[4])
     p[0].register()
 
 

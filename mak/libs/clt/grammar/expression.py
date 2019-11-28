@@ -1,51 +1,18 @@
+from ..cl_ast import values, types
 
 
-def p_value_float(p):
+def p_value_constant(p):
     """
         expression : FLOAT_CONST
+                   | HEX_FLOAT_CONST
+                   | INT_CONST_DEC
+                   | INT_CONST_OCT
+                   | INT_CONST_HEX
+                   | INT_CONST_BIN
+                   | CHAR_CONST
+                   | WCHAR_CONST
     """
-
-
-def p_value_float_hex(p):
-    """
-        expression : HEX_FLOAT_CONST
-    """
-
-
-def p_value_int_10(p):
-    """
-        expression : INT_CONST_DEC
-    """
-
-
-def p_value_int_8(p):
-    """
-        expression : INT_CONST_OCT
-    """
-
-
-def p_value_int_16(p):
-    """
-        expression : INT_CONST_HEX
-    """
-
-
-def p_value_int_2(p):
-    """
-        expression : INT_CONST_BIN
-    """
-
-
-def p_value_char(p):
-    """
-        expression : CHAR_CONST
-    """
-
-
-def p_value_wchar(p):
-    """
-        expression : WCHAR_CONST
-    """
+    p[0] = values.Constant(p.lexer, p.position(1), p.slice[1].constant_type, p.slice[1].constant_value)
 
 
 def p_value_string_literal(p):
@@ -65,18 +32,21 @@ def p_value_true(p):
         expression : TRUE
                    | FALSE
     """
+    p[0] = values.Constant(p.lexer, p.position(1), p.lexer.base_types['bool'], p[1] == "true")
 
 
 def p_value_this(p):
     """
         expression : THIS
     """
+    # TODO
 
 
 def p_value_object(p):
     """
         expression : object_name
     """
+    p[0] = p[1][0].target
 
 
 def p_parameterlist_opt(p):
@@ -84,6 +54,41 @@ def p_parameterlist_opt(p):
         parameter_list_opt : LPAREN expression_list_opt RPAREN              %prec PRIO0
                            |                                                %prec AND
     """
+
+
+def p_binary_operator_expr(p):
+    """
+        expression : expression TIMES expression
+                   | expression DIVIDE expression
+                   | expression MOD expression
+                   | expression PLUS expression
+                   | expression MINUS expression
+                   | expression LSHIFT expression
+                   | expression RSHIFT expression
+                   | expression LT expression
+                   | expression LE expression
+                   | expression GT expression
+                   | expression GE expression
+                   | expression EQ expression
+                   | expression NE expression
+                   | expression AND expression
+                   | expression XOR expression
+                   | expression OR expression
+                   | expression LAND expression
+                   | expression LOR expression
+                   | expression EQUALS expression
+                   | expression TIMESEQUAL expression
+                   | expression DIVEQUAL expression
+                   | expression MODEQUAL expression
+                   | expression PLUSEQUAL expression
+                   | expression MINUSEQUAL expression
+                   | expression LSHIFTEQUAL expression
+                   | expression RSHIFTEQUAL expression
+                   | expression ANDEQUAL expression
+                   | expression OREQUAL expression
+                   | expression XOREQUAL expression
+    """
+    p[0] = values.BinaryOperation(p.lexer, p.position(2), p[2], p[1], p[3])
 
 
 def p_operator_expr(p):
@@ -109,36 +114,7 @@ def p_operator_expr(p):
                    | AND expression                                         %prec UNARY_AND
                    | SIZEOF expression
                    | SIZEOF LPAREN type RPAREN                              %prec SIZEOF
-                   | expression TIMES expression
-                   | expression DIVIDE expression
-                   | expression MOD expression
-                   | expression PLUS expression
-                   | expression MINUS expression
-                   | expression LSHIFT expression
-                   | expression RSHIFT expression
-                   | expression LT expression
-                   | expression LE expression
-                   | expression GT expression
-                   | expression GE expression
-                   | expression EQ expression
-                   | expression NE expression
-                   | expression AND expression
-                   | expression XOR expression
-                   | expression OR expression
-                   | expression LAND expression
-                   | expression LOR expression
                    | expression CONDOP expression_list COLON expression
-                   | expression EQUALS expression
-                   | expression TIMESEQUAL expression
-                   | expression DIVEQUAL expression
-                   | expression MODEQUAL expression
-                   | expression PLUSEQUAL expression
-                   | expression MINUSEQUAL expression
-                   | expression LSHIFTEQUAL expression
-                   | expression RSHIFTEQUAL expression
-                   | expression ANDEQUAL expression
-                   | expression OREQUAL expression
-                   | expression XOREQUAL expression
                    | STATIC_CAST LT type GT LPAREN expression RPAREN        %prec TEMPLATEGT
                    | DYNAMIC_CAST LT type GT LPAREN expression RPAREN       %prec TEMPLATEGT
                    | REINTERPRET_CAST LT type GT LPAREN expression RPAREN   %prec TEMPLATEGT

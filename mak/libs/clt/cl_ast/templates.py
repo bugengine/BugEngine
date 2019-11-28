@@ -1,7 +1,7 @@
 from .cppobject import CppObject
 from .error import CppError
 from .scope import Scope
-from .types import TypeRef, Type, BuiltIn, CAST_NONE, CAST_ATTRIB, CAST_UNRELATED, CastError
+from .types import TypeRef, Type, BuiltIn, CastOptions, CastError
 
 
 class TemplateValueParameter(CppObject):
@@ -11,14 +11,19 @@ class TemplateValueParameter(CppObject):
         self.value = value
         self.parameter_bind = None
 
-    def __hash__(self):
-        return self.name.__hash__()
-
     def __eq__(self, other):
+        if not isinstance(other, TemplateTypenameParameter):
+            return False
         if self.parameter_bind:
             return self.parameter_bind == other.parameter_bind
         else:
             return False
+
+    def __hash__(self):
+        return id(self)
+
+    def get_unresolved_parameters(self):
+        return [self]
 
     def get_parameter(self):
         return self.parameter_bind and self.parameter_bind[1] or self
@@ -101,9 +106,33 @@ class TemplateTemplateParameter(CppObject):
 
     def instantiate(self, arguments, position):
         return None
-    
-    def distance(self, other, cast, template_bindings):
-        assert False
+
+    def distance(self, cast_to, cast_options):
+        raise CastError('type %s is not compatible with %s' % (self, cast_to), self.position)
+
+    def template_parameter_match(self, type, cast_options, typeref_from, typeref_typename):
+        def _distance(parameters, value):
+            if len(self.template_params) != len(parameters):
+                raise CastError('type %s is not compatible with %s' % (typeref_from, typeref_typename), typeref_typename.position)
+            d = Type.Distance(matches={self.parameter_bind[0]: value})
+            for p1, p2 in zip(self.template_params, parameters):
+                # d += p1.distance(p2, cast, matches, template_bindings)
+                pass
+            return d
+        if isinstance(type, Template):
+            return _distance(type.parameters, type)
+        elif isinstance(type, TypeRef) and type.template_origin:
+            return self.template_parameter_match(type.template_origin, cast_options, typeref_from, typeref_typename)
+        elif isinstance(type, TemplateTemplateParameter):
+            type_parameter_bind = type.parameter_bind or cast_options.template_bindings.get(type)
+            if type_parameter_bind and type_parameter_bind == self.parameter_bind:
+                return Type.Distance()
+            elif type_parameter_bind and type_parameter_bind[1] == cast_options.current_template:
+                return _distance(type.template_params, self)
+            else:
+                raise CastError('type %s is not compatible with %s' % (typeref_from, typeref_typename), typeref_typename.position)
+        else:
+            raise CastError('type %s is not compatible with %s' % (typeref_from, typeref_typename), typeref_typename.position)
 
     def _create_template_instance(self, template, arguments, position):
         if template == self.parameter_bind[1]:
@@ -135,6 +164,7 @@ class TemplateTypenameParameter(Type):
             return self.parameter_bind == other.parameter_bind
         else:
             return False
+
     def __hash__(self):
         return id(self)
 
@@ -169,37 +199,53 @@ class TemplateTypenameParameter(Type):
             p = self
         return '<%s>'%p.name
 
-    def _distance(self, other, matches, template_bindings, typeref, other_typeref, allowed_cast):
-        self_parameter_bind = self.parameter_bind or (template_bindings and template_bindings.get(self))
-        if isinstance(other, TemplateTypenameParameter):
-            if self_parameter_bind == other.parameter_bind:
-                return Type.Distance()
-            elif allowed_cast == CAST_UNRELATED:
-                return Type.Distance(variant=-1)
-            else:
-                raise CastError()
-        elif self_parameter_bind and  self_parameter_bind[0] in matches:
-            new_match = matches[self_parameter_bind[0]]
-            for a in typeref.qualifiers:
-                #assert a not in new_match.qualifiers
+    def template_parameter_match(self, type, cast_options, typeref_from, typeref_typename):
+        def old_match():
+            new_match = cast_options.template_parameter_matches[self.parameter_bind[0]].clone()
+            for a in typeref_from.qualifiers:
                 if a in new_match.qualifiers:
-                    raise CastError()
-                new_match.qualifiers.add(a)
-            return new_match.distance(other_typeref, CAST_NONE, matches)
-        elif self_parameter_bind:
-            match = other_typeref.clone()
-            d = Type.Distance(variant=100000, matches={self_parameter_bind[0]: match})
-            for a in typeref.qualifiers:
-                if a in other_typeref.qualifiers:
+                    new_match.qualifiers.remove(a)
+            return typeref_from.distance(new_match, CastOptions(CastOptions.CAST_NONE,
+                                                                cast_options.template_parameter_matches,
+                                                                cast_options.template_bindings,
+                                                                cast_options.current_template))
+        def make_match():
+            match = typeref_from.clone()
+            d = Type.Distance(variant=100000, matches={self.parameter_bind[0]: match})
+            for a in typeref_typename.qualifiers:
+                if a in typeref_from.qualifiers:
                     match.qualifiers.remove(a)
                     d = d.refine()
-                elif allowed_cast == CAST_UNRELATED:
+                elif cast_options.allowed_cast == cast_options.CAST_UNRELATED:
                     return Type.Distance(variant=-1)
                 else:
-                    raise CastError()
+                    raise CastError('type %s is not compatible with %s' % (typeref_from, typeref_typename), typeref_typename.position)
+            #for a in typeref_from.qualifiers:
+            #    if a not in typeref_typename.qualifiers:
+            #        raise CastError('type %s is not compatible with %s' % (typeref_from, typeref_typename), self.position)
             return d
+        if isinstance(type, TemplateTypenameParameter):
+            type_parameter_bind = type.parameter_bind or cast_options.template_bindings.get(type)
+            if self.parameter_bind == type_parameter_bind:
+                return Type.Distance()
+            elif self.parameter_bind and self.parameter_bind[1] == cast_options.current_template:
+                if self.parameter_bind[0] in cast_options.template_parameter_matches:
+                    return old_match()
+                elif self.parameter_bind:
+                    return make_match()
+            elif cast_options.allowed_cast == cast_options.CAST_UNRELATED:
+                return Type.Distance(variant=-1)
+            else:
+                raise CastError('type %s is not compatible with %s' % (typeref_from, typeref_typename), typeref_typename.position)
+        elif self.parameter_bind and  self.parameter_bind[0] in cast_options.template_parameter_matches:
+            return old_match()
+        elif self.parameter_bind:
+            return make_match()
         else:
-            raise CastError()
+            raise CastError('type %s is not compatible with %s' % (typeref_from, typeref_typename), typeref_typename.position)
+
+    def _distance(self, cast_to, cast_options, typeref_from, typeref_to):
+        raise CastError('type %s is not compatible with %s' % (typeref_from, typeref_to), self.position)
 
     def _create_template_instance(self, template, arguments, position):
         if template == self.parameter_bind[1]:
@@ -309,47 +355,44 @@ class Template(CppObject):
         else:
             return None
 
-    def make_match(self, arguments):
-        result = {}
-        for i, a in enumerate(arguments):
-            result[i] = a
-        return result
-
-    def distance(self, other, cast, matches={}, template_bindings=None):
-        if isinstance(other, TypeRef):
+    def distance(self, cast_to, cast_options):
+        if isinstance(cast_to, TypeRef):
             other = other.template_origin
-        if isinstance(other, Template):
-            params = other.scope.parameters
-        elif isinstance(other, TemplateTemplateParameter):
+        if isinstance(cast_to, Template):
+            if id(self) == id(cast_to):
+                return Type.Distance()
+            else:
+                raise CastError('type %s is not compatible with %s' % (self, cast_to), self.position)
+        elif isinstance(cast_to, TemplateTemplateParameter):
             params = other.template_params
         else:
-            raise CastError()
+            raise CastError('type %s is not compatible with %s' % (self, cast_to), self.position)
         if len(params) != len(self.scope.parameters):
-            raise CastError()
+            raise CastError('type %s is not compatible with %s' % (self, cast_to), self.position)
         d = Type.Distance()
-        for p1, p2 in zip(self.parameters, params):
-            d += p1.distance(p2, cast)
+        #for p1, p2 in zip(self.parameters, params):
+        #    d += p1.distance(p2, cast)
         return d
 
     def instantiate(self, arguments, position):
         #self.lexer.note('creating instance of template %s'%self.scope[0][1].name, position)
-        matches, specialization = self.find_specialization(position, arguments) or (self.make_match(arguments), self.scope[0][1])
+        matches, specialization, scores = self.find_specialization(position, arguments)
         unresolved_params = []
-        for a in matches.values():
+        for a in arguments:
             unresolved_params += a.get_unresolved_parameters()
-        for p in unresolved_params:
-            if not p.parameter_bind:
-                return None
-            if p.parameter_bind[1] != self:
-                return None
         if unresolved_params:
-            return specialization
+            for score in scores:
+                if not score.exact_match():
+                    return None
+            else:
+                return specialization
         specialization.push_scope_recursive(position)
         try:
             result = specialization.create_template_instance(self, matches, position)
         except Template.InstantiationError as e:
             specialization.pop_scope_recursive()
-            raise
+            args = ', '.join(str(a) for a in arguments)
+            raise Template.InstantiationError('in instantiation of template %s<%s>'%(self.scope[0][1].pretty_name(), args), position, e)
         else:
             specialization.pop_scope_recursive()
             return result
@@ -436,11 +479,17 @@ class Template(CppObject):
         specializations = []
         for specialization_arguments, specialization in self.specializations:
             try:
-                matches, score = self.argument_match(specialization_arguments, arguments, None)
+                matches, score = self.argument_match(specialization_arguments, arguments, {})
             except CastError:
                 pass
             else:
                 specializations.append((score, matches, specialization))
+        try:
+            matches, score = self.argument_match(self.parameters, arguments, {})
+        except CastError as e:
+            raise Template.InstantiationError('when instantiating template', position, e)
+        else:
+            specializations.append((score, matches, self.scope[0][1]))
         if specializations:
             specializations = sorted(specializations, key=lambda x: x[0])
             score, matches, result = specializations[0]
@@ -454,21 +503,28 @@ class Template(CppObject):
                         self.lexer.note('partial specialization matches [%s]'%match_str, r.position)
                     else:
                         break
-            return matches, result
-        return None
+            return matches, result, score
+        return None, None, None
 
     def get_unresolved_parameters(self):
         return []
 
     def argument_match(self, parameters, arguments, template_bindings):
-        assert len(arguments) == len(parameters)
+        if len(arguments) != len(parameters):
+            raise CastError('invalid number of parameters', self.position)
         matches = { }
         result = [ ]
         for a, p in zip(arguments, parameters):
-            score = p.distance(a, CAST_NONE, matches, template_bindings)
+            try:
+                score = a.distance(p, CastOptions(CastOptions.CAST_NONE, matches, template_bindings, self))
+            except CastError:
+                a.distance(p, CastOptions(CastOptions.CAST_NONE, matches, template_bindings, self))
+                raise CastError('template argument for template parameter %s is incompatible' % str(p), p.position)
             for k, v in score.matches.items():
-                assert k not in matches
-                matches[k] = v
+                if k not in matches:
+                    matches[k] = v
+                else:
+                    assert matches[k] == v
             result.append(score)
         return matches, result
 
@@ -493,17 +549,17 @@ class Template(CppObject):
 
     def match(self, arguments, position):
         if len(arguments) > len(self.scope.parameters):
-            raise self.InstantiationError(arguments[len(self.scope.parameters)].position,
-                                          'Too many template arguments')
+            raise self.InstantiationError('Too many template arguments',
+                                          arguments[len(self.scope.parameters)].position)
         for missing_parameter in self.scope.parameters[len(arguments):]:
             if not missing_parameter.value:
-                raise self.InstantiationError(position, 'too few template arguments')
+                raise self.InstantiationError('too few template arguments', position)
             arguments.append(missing_parameter.value)
         for p, a in zip(self.scope.parameters, arguments):
             if not p.is_compatible(a):
-                raise self.InstantiationError(a.position,
-                                              'Invalid template argument: expected %s, got %s' % (p.get_template_parameter_type(),
-                                                                                                  a.__class__.__name__))
+                raise self.InstantiationError('Invalid template argument: expected %s, got %s' % (p.get_template_parameter_type(),
+                                                                                                  a.__class__.__name__),
+                                              a.position)
         return arguments
 
     def write_to(self, writer):

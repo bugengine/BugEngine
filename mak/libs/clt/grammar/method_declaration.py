@@ -313,7 +313,7 @@ def p_method_declaration(p):
         p[0] = m.find_overload(t, p[3], p.position(2), p[1][0], p[1][1] + p[5])
         if not p[0]:
             if p[1][3].is_qualified():
-                p.lexer.error("out-of-line definition of '%s' does not match any declaration in %s" % (p[1][3].name, m.parent.scope.scope_owner.pretty_name()),
+                p.lexer.error("out-of-line definition of '%s' does not match any declaration in %s" % (p[1][3].name, m.owner.pretty_name()),
                             p.position(2))
             p[0] = m.create_overload(t, p[3], p.position(2), p[1][0], p[1][1] + p[5])
     finally:

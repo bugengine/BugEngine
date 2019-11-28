@@ -4,17 +4,25 @@ from .scope import Scope, ScopeError
 from .name import Name
 
 
-class CastError(Exception):
+class CastError(CppError):
     pass
 
 
-CAST_NONE=0
-CAST_ATTRIB=1
-CAST_IMPLICIT=2
-CAST_STATIC=3
-CAST_UPCAST=4
-CAST_REINTERPRET=5
-CAST_UNRELATED=6
+
+
+class CastOptions:
+    CAST_NONE=0
+    CAST_ATTRIB=1
+    CAST_IMPLICIT=2
+    CAST_STATIC=3
+    CAST_UPCAST=4
+    CAST_REINTERPRET=5
+    CAST_UNRELATED=6
+    def __init__(self, allowed_cast, template_parameter_matches={}, template_bindings=None, current_template=None):
+        self.allowed_cast = allowed_cast
+        self.template_parameter_matches = template_parameter_matches
+        self.template_bindings = template_bindings
+        self.current_template = current_template
 
 
 class Type(CppObject):
@@ -36,17 +44,20 @@ class Type(CppObject):
         def exact_match(self):
             return self.distance[0] == 0 and self.distance[1] == 0 and self.distance[2] == 0
 
-        def match_attributes(self, allowed_cast, attrs1, attrs2):
-            for a in attrs2:
-                if a not in attrs1:
-                    raise CastError()
-            cast_cost = 0
+        def match_attributes(self, allowed_cast, typeref_from, typeref_to):
+            attrs1 = typeref_from.qualifiers
+            attrs2 = typeref_to.qualifiers
             for a in attrs1:
                 if a not in attrs2:
+                    raise CastError("invalid cast from '%s' to '%s': cannot discard '%s' qualifier" % (typeref_from, typeref_to, a),
+                                    typeref_to.position)
+            cast_cost = 0
+            for a in attrs2:
+                if a not in attrs1:
                     cast_cost += 1
             if not allowed_cast:
                 if cast_cost:
-                    raise CastError()
+                    raise CastError("invalid cast from '%s' to '%s'" % (typeref_from, typeref_to), typeref_to.position)
             self.distance = (self.distance[0], self.distance[1], self.distance[2]+cast_cost)
             return self
 
@@ -71,9 +82,9 @@ class Type(CppObject):
         def __iadd__(self, other):
             for k, v in other.matches.items():
                 if k in self.matches:
-                    d = v.distance(self.matches[k], CAST_NONE)
+                    d = v.distance(self.matches[k], CastOptions(CastOptions.CAST_NONE))
                     if d != type.Distance():
-                        raise CastError()
+                        raise CastError('', ('', 0, 0, 0))
                 else:
                     self.matches[k] = v
             self.distance = (self.distance[0] + other.distance[0],
@@ -138,20 +149,19 @@ class Pointer(Type):
     def __str__(self):
         return str(self.type)+'*'
     
-    def _distance(self, other, matches, template_bindings, typeref, other_typeref, allowed_cast):
-        if isinstance(other, Pointer):
-            if allowed_cast in (CAST_STATIC, CAST_UPCAST):
-                target_cast = CAST_UPCAST
-            elif allowed_cast in (CAST_REINTERPRET, CAST_UNRELATED):
-                target_cast = CAST_UNRELATED
-            else:
-                target_cast = allowed_cast
-            d = self.type.distance(other.type, target_cast, matches, template_bindings).refine()
-            return d.match_attributes(allowed_cast, typeref.qualifiers, other_typeref.qualifiers)
-        elif allowed_cast == CAST_UNRELATED:
+    def _distance(self, cast_to, cast_options, typeref_from, typeref_to):
+        if isinstance(cast_to, Pointer):
+            allowed_cast = cast_options.allowed_cast
+            if cast_options.allowed_cast in (cast_options.CAST_STATIC, cast_options.CAST_UPCAST):
+                cast_options.allowed_cast = cast_options.CAST_UPCAST
+            elif cast_options.allowed_cast in (cast_options.CAST_REINTERPRET, cast_options.CAST_UNRELATED):
+                cast_options.allowed_cast = cast_options.CAST_UNRELATED
+            d = self.type.distance(cast_to.type, cast_options).refine()
+            return d.match_attributes(allowed_cast, typeref_from, typeref_to)
+        elif cast_options.allowed_cast == cast_options.CAST_UNRELATED:
             return Type.Distance(variant=-1)
         else:
-            raise CastError()
+            raise CastError('type %s is not compatible with %s' % (typeref_from, typeref_to), self.position)
 
     def _create_template_instance(self, template, arguments, position):
         return Pointer(self.lexer, self.position,
@@ -169,20 +179,19 @@ class Reference(Type):
     def __str__(self):
         return str(self.type)+'&'
 
-    def _distance(self, other, matches, template_bindings, typeref, other_typeref, allowed_cast):
-        if isinstance(other, Reference):
-            if allowed_cast in (CAST_STATIC, CAST_UPCAST):
-                target_cast = CAST_UPCAST
-            elif allowed_cast in (CAST_REINTERPRET, CAST_UNRELATED):
-                target_cast = CAST_UNRELATED
-            else:
-                target_cast = allowed_cast
-            d = self.type.distance(other.type, target_cast, matches, template_bindings).refine()
-            return d.match_attributes(allowed_cast, typeref.qualifiers, other_typeref.qualifiers)
-        elif allowed_cast == CAST_UNRELATED:
+    def _distance(self, cast_to, cast_options, typeref_from, typeref_to):
+        if isinstance(cast_to, Reference):
+            allowed_cast = cast_options.allowed_cast
+            if cast_options.allowed_cast in (cast_options.CAST_STATIC, cast_options.CAST_UPCAST):
+                cast_options.allowed_cast = cast_options.CAST_UPCAST
+            elif cast_options.allowed_cast in (cast_options.CAST_REINTERPRET, cast_options.CAST_UNRELATED):
+                cast_options.allowed_cast = cast_options.CAST_UNRELATED
+            d = self.type.distance(cast_to.type, cast_options).refine()
+            return d.match_attributes(allowed_cast, typeref_from, typeref_to)
+        elif cast_options.allowed_cast == cast_options.CAST_UNRELATED:
             return Type.Distance(variant=-1)
         else:
-            raise CastError()
+            raise CastError('type %s is not compatible with %s' % (typeref_from, typeref_to), self.position)
 
     def _create_template_instance(self, template, arguments, position):
         return Reference(self.lexer, self.position,
@@ -201,20 +210,19 @@ class Array(Type):
     def __str__(self):
         return '%s[%s]' % (str(self.type), self.size or '')
 
-    def _distance(self, other, matches, template_bindings, typeref, other_typeref, allowed_cast):
-        if isinstance(other, Array):
-            if allowed_cast in (CAST_STATIC, CAST_UPCAST):
-                target_cast = CAST_UPCAST
-            elif allowed_cast in (CAST_REINTERPRET, CAST_UNRELATED):
-                target_cast = CAST_UNRELATED
-            else:
-                target_cast = allowed_cast
-            d = self.type.distance(other.type, target_cast, matches, template_bindings).refine()
-            return d.match_attributes(allowed_cast, typeref.qualifiers, other_typeref.qualifiers)
-        elif allowed_cast == CAST_UNRELATED:
+    def _distance(self, cast_to, cast_options, typeref_from, typeref_to):
+        if isinstance(cast_to, Array):
+            allowed_cast = cast_options.allowed_cast
+            if cast_options.allowed_cast in (cast_options.CAST_STATIC, cast_options.CAST_UPCAST):
+                cast_options.allowed_cast = cast_options.CAST_UPCAST
+            elif cast_options.allowed_cast in (cast_options.CAST_REINTERPRET, cast_options.CAST_UNRELATED):
+                cast_options.allowed_cast = cast_options.CAST_UNRELATED
+            d = self.type.distance(cast_to.type, cast_options).refine()
+            return d.match_attributes(allowed_cast, typeref_from, typeref_to)
+        elif cast_options.allowed_cast == cast_options.CAST_UNRELATED:
             return Type.Distance(variant=-1)
         else:
-            raise CastError()
+            raise CastError('type %s is not compatible with %s' % (typeref_from, typeref_to), self.position)
 
     def _create_template_instance(self, template, arguments, position):
         return Array(self.lexer, self.position,
@@ -298,50 +306,56 @@ class Struct(Type):
             result.define(self.scope.parent_visibility, parent and parent.get_type(), position)
             try:
                 self.scope.create_template_instance(result.scope, template, arguments, position)
-            except Exception:
+            except Exception as e:
                 result.pop_scope_recursive()
                 raise
             else:
                 result.pop_scope_recursive()
         return result
 
-    def _distance(self, other, matches, template_bindings, typeref, other_typeref, allowed_cast):
-        if isinstance(other, Struct):
-            if allowed_cast <= CAST_ATTRIB:
-                if other != self:
-                    raise CastError()
+    def _distance(self, cast_to, cast_options, typeref_from, typeref_to):
+        if isinstance(cast_to, Struct):
+            if cast_options.allowed_cast <= cast_options.CAST_ATTRIB:
+                if cast_to != self:
+                    raise CastError('type %s is not compatible with %s' % (typeref_from, typeref_to), self.position)
                 else:
                     d = Type.Distance()
-                    return d.match_attributes(allowed_cast, typeref.qualifiers, other_typeref.qualifiers)
+                    return d.match_attributes(cast_options.allowed_cast, typeref_from, typeref_to)
             cast = 0
             variant = 0
             p = self
             while p:
-                if p == other:
+                if p == cast_to:
                     break
                 cast += 1
                 p = p.scope and p.scope.parent
             else:
-                cast = 0
-                p = other
-                while p:
-                    if p == self:
-                        break
-                    cast -= 1
-                else:
-                    if allowed_cast < CAST_UNRELATED:
-                        raise CastError()
-                    variant = -1
+                if cast_options.allowed_cast >= cast_options.CAST_UPCAST:
                     cast = 0
+                    p = cast_to
+                    while p:
+                        if p == self:
+                            break
+                        cast -= 1
+                    else:
+                        if cast_options.allowed_cast < cast_options.CAST_UNRELATED:
+                            raise CastError('type %s is not compatible with %s' % (typeref_from, typeref_to), self.position)
+                        variant = -1
+                        cast = 0
+                else:
+                    raise CastError('type %s is not compatible with %s' % (typeref_from, typeref_to), self.position)
             d = Type.Distance(variant=variant, cast=cast)
-            return d.match_attributes(allowed_cast, typeref.qualifiers, other_typeref.qualifiers)
-        elif allowed_cast == CAST_UNRELATED:
+            return d.match_attributes(cast_options.allowed_cast, typeref_from, typeref_to)
+        elif cast_options.allowed_cast == cast_options.CAST_UNRELATED:
             return Type.Distance(variant = -1)
         else:
-            raise CastError()
+            raise CastError('type %s is not compatible with %s' % (typeref_from, typeref_to), self.position)
 
     def __str__(self):
         return self.name or '<anonymous>'
+
+    def pretty_name(self):
+        return "%s '%s'" % (self.struct_type, str(self))
 
     def signature(self):
         return '%s_%d' % (self.name or 'anonymous', self.index)
@@ -362,22 +376,22 @@ class BuiltIn(Type):
     def __str__(self):
         return self.builtin
 
-    def _distance(self, other, matches, template_bindings, typeref, other_typeref, allowed_cast):
+    def _distance(self, other, cast_options, typeref, other_typeref):
         if isinstance(other, BuiltIn):
             if self.builtin != other.builtin:
-                if allowed_cast >= CAST_IMPLICIT:
+                if cast_options.allowed_cast >= cast_options.CAST_IMPLICIT:
                     d = Type.Distance(cast=1)
-                    return d.match_attributes(allowed_cast, typeref.qualifiers, other_typeref.qualifiers)
+                    return d.match_attributes(cast_options.allowed_cast, typeref, other_typeref)
                 else:
-                    raise CastError()
+                    raise CastError('type %s is not compatible with %s' % (self, other), self.position)
             else:
                 d = Type.Distance(cast=0)
-                return d.match_attributes(allowed_cast, typeref.qualifiers, other_typeref.qualifiers)
-        elif allowed_cast == CAST_UNRELATED:
+                return d.match_attributes(cast_options.allowed_cast, typeref, other_typeref)
+        elif cast_options.allowed_cast == cast_options.CAST_UNRELATED:
             d = Type.Distance(variant = -1)
-            return d.match_attributes(allowed_cast, typeref.qualifiers, other_typeref.qualifiers)
+            return d.match_attributes(cast_options.allowed_cast, typeref, other_typeref)
         else:
-            raise CastError()
+            raise CastError('type %s is not compatible with %s' % (self, other), self.position)
 
     def pretty_name(self):
         return "builtin type '%s'" % self.builtin
@@ -396,15 +410,15 @@ class Void(Type):
     def __str__(self):
         return 'void'
 
-    def _distance(self, other, matches, template_bindings, typeref, other_typeref, allowed_cast):
+    def _distance(self, other, cast_options, typeref, other_typeref):
         if isinstance(other, Void):
             d = Type.Distance(cast=0)
-            return d.match_attributes(allowed_cast, typeref.qualifiers, other_typeref.qualifiers)
-        elif allowed_cast == CAST_UNRELATED:
+            return d.match_attributes(cast_options.allowed_cast, typeref, other_typeref)
+        elif cast_options.allowed_cast == cast_options.CAST_UNRELATED:
             d = Type.Distance(variant = -1)
-            return d.match_attributes(allowed_cast, typeref.qualifiers, other_typeref.qualifiers)
+            return d.match_attributes(cast_options.allowed_cast, typeref, other_typeref)
         else:
-            raise CastError()
+            raise CastError('type %s is not compatible with %s' % (self, other), self.position)
 
     def _create_template_instance(self, template, arguments, position):
         return self
@@ -480,12 +494,20 @@ class DependentTypeName(Type):
         return name.target
 
     def _create_template_instance(self, template, arguments, position):
+        from .templates import Template, TemplateScope
         result = self._resolve(self.name, template, arguments, position)
         if not result:
-            result = self._create_partial_template_instance(template, arguments, position)
+            for s in self.lexer.owner_scopes[::-1]:
+                if isinstance(s, TemplateScope) and s.owner != template:
+                    return self._create_partial_template_instance(template, arguments, position)
+                elif not s.owner.parent:
+                    raise Template.InstantiationError('no', position)
+            else:
+                assert False
         return result
 
     def simplify(self):
+        from .templates import Template
         def _simplify(name):
             if not name.dependent:
                 return name.target
@@ -505,24 +527,34 @@ class DependentTypeName(Type):
                     result = result.find_instance(name.template_bindings and name.template_bindings.parameter_binds,
                                                   name.arguments, name.position)
                 return result
-        return _simplify(self.name) or self
-
-    def _distance(self, other, matches, template_bindings, typeref, other_typeref, allowed_cast):
-        if isinstance(other, DependentTypeName):
-            if self.name.equals(other.name, template_bindings):
-                if allowed_cast == CAST_UNRELATED:
-                    d = Type.Distance(variant = -1)
-                    return d.match_attributes(allowed_cast, typeref.qualifiers, other_typeref.qualifiers)
+        try:
+            return _simplify(self.name) or self
+        except Template.InstantiationError as e:
+            def _print_exception(e):
+                if e.inner_error:
+                    _print_exception(e.inner_error)
+                    self.lexer.note(e.message, e.position)
                 else:
-                    raise CastError()
+                    self.lexer.error(e.message, e.position)
+            _print_exception(e)
+            return self
+
+    def _distance(self, other, cast_options, typeref, other_typeref):
+        if isinstance(other, DependentTypeName):
+            if not self.name.equals(other.name, cast_options.template_bindings):
+                if cast_options.allowed_cast == cast_options.CAST_UNRELATED:
+                    d = Type.Distance(variant = -1)
+                    return d.match_attributes(cast_options.allowed_cast, typeref, other_typeref)
+                else:
+                    raise CastError('type %s is not compatible with %s' % (self, other), self.position)
             else:
                 d = Type.Distance(cast=0)
-                return d.match_attributes(allowed_cast, typeref.qualifiers, other_typeref.qualifiers)
-        elif allowed_cast == CAST_UNRELATED:
+                return d.match_attributes(cast_options.allowed_cast, typeref, other_typeref)
+        elif cast_options.allowed_cast == cast_options.CAST_UNRELATED:
             d = Type.Distance(variant = -1)
-            return d.match_attributes(allowed_cast, typeref.qualifiers, other_typeref.qualifiers)
+            return d.match_attributes(cast_options.allowed_cast, typeref, other_typeref)
         else:
-            raise CastError()
+            raise CastError('type %s is not compatible with %s' % (self, other), self.position)
     
     def signature(self):
         return '<%s>'%self.name
@@ -554,16 +586,21 @@ class TypeRef(CppObject):
         assert self.template_origin
         self.template_origin.instantiate(*args, **kw)
 
-    def distance(self, other, allowed_cast, matches = {}, template_bindings=None):
+    def distance(self, other, cast_options):
+        from .templates import TemplateTypenameParameter, TemplateTemplateParameter
         if isinstance(self.type, TypeDef):
-            return self.type.type.distance(other, allowed_cast, matches, template_bindings)
+            return self.type.type.distance(other, cast_options)
         elif isinstance(other, TypeRef):
             if isinstance(other.type, TypeDef):
-                return self.distance(other.type.type, allowed_cast, matches, template_bindings)
+                return self.distance(other.type.type, cast_options)
+            elif isinstance(other.type, TemplateTypenameParameter):
+                return other.type.template_parameter_match(self.type, cast_options, self, other) 
             else:
-                return self.type._distance(other.type, matches, template_bindings, self, other, allowed_cast)
+                return self.type._distance(other.type, cast_options, self, other)
+        elif isinstance(other, TemplateTemplateParameter):
+            return other.template_parameter_match(self, cast_options, self, other) 
         else:
-            raise CastError()
+            raise CastError('type %s is not compatible with %s' % (self, other), self.position)
 
     def _create_template_instance(self, template, arguments, position):
         type = self.type.create_template_instance(template, arguments, position)
@@ -586,7 +623,10 @@ class TypeRef(CppObject):
     pretty_name = __str__
 
     def get_unresolved_parameters(self):
-        return self.type.get_unresolved_parameters()
+        if self.type:
+            return self.type.get_unresolved_parameters()
+        else:
+            return self.template_origin.get_unresolved_parameters()
 
     def signature(self):
         s = self.type.signature()
