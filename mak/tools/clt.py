@@ -15,6 +15,7 @@ option_decl.set_usage('clt.py [options] in_file out_file translate_script')
 option_decl.add_option("-t", "--tmp", dest="tmp_dir", help="Directory to store temporary/cached files", default=".")
 option_decl.add_option("-e", "--error-format", dest="error_format", help="Error message format type", default="unix")
 option_decl.add_option("-d", "--debug", dest="debug", help="Assume running from a debugger", default=False, action="store_true")
+option_decl.add_option("--Werror", dest="warn_error", help="Treat warning as errors", default=False, action="store_true")
 
 
 if __name__ == '__main__':

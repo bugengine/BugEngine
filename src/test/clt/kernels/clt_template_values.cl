@@ -1,4 +1,3 @@
-#if 0
 template< u32 X >
 struct F
 {
@@ -21,4 +20,3 @@ void kmain(u32 current, u32 total)
 {
     u32 x = F<72>::Value;
 }
-#endif

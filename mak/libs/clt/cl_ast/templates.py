@@ -2,6 +2,7 @@ from .cppobject import CppObject
 from .error import CppError
 from .scope import Scope
 from .types import TypeRef, Type, BuiltIn, CastOptions, CastError
+from .values import Constant
 
 
 class TemplateValueParameter(CppObject):
@@ -42,6 +43,9 @@ class TemplateValueParameter(CppObject):
 
     def get_template_parameter_type(self):
         return self.type.name()
+
+    def is_compatible(self, argument):
+        return isinstance(argument, Constant)
 
     def _create_template_instance(self, template, arguments, position):
         if template == self.parameter_bind[1]:
@@ -376,6 +380,7 @@ class Template(CppObject):
 
     def instantiate(self, arguments, position):
         #self.lexer.note('creating instance of template %s'%self.scope[0][1].name, position)
+        arguments = [a.simplify() for a in arguments]
         matches, specialization, scores = self.find_specialization(position, arguments)
         unresolved_params = []
         for a in arguments:
