@@ -47,10 +47,11 @@ class Type(CppObject):
         def match_attributes(self, allowed_cast, typeref_from, typeref_to):
             attrs1 = typeref_from.qualifiers
             attrs2 = typeref_to.qualifiers
-            for a in attrs1:
-                if a not in attrs2:
-                    raise CastError("invalid cast from '%s' to '%s': cannot discard '%s' qualifier" % (typeref_from, typeref_to, a),
-                                    typeref_to.position)
+            if allowed_cast < CastOptions.CAST_IMPLICIT:
+                for a in attrs1:
+                    if a not in attrs2:
+                        raise CastError("invalid cast from '%s' to '%s': cannot discard '%s' qualifier" % (typeref_from, typeref_to, a),
+                                        typeref_to.position)
             cast_cost = 0
             for a in attrs2:
                 if a not in attrs1:
@@ -569,6 +570,9 @@ class TypeRef(CppObject):
 
     def get_type(self):
         return self.type.get_type()
+
+    def get_operation_type(self, operand_type, operation):
+        return self
 
     def is_void(self):
         return isinstance(self.type.get_type(), Void)

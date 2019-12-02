@@ -46,7 +46,7 @@ def p_value_object(p):
     """
         expression : object_name
     """
-    p[0] = p[1][0].target
+    p[0] = values.VariableReference(p.lexer, p[1][0].position, p[1][0], p[1][0].target)
 
 
 def p_parameterlist_opt(p):

@@ -261,6 +261,9 @@ class ClLexer:
         #print(new_token)
         return new_token
 
+    def _execute_pragma(self, pragma):
+        print(pragma)
+
     def _position(self, token):
         return (self.filename, token.lineno, token.lexpos, token.lexpos + len(token.value))
 
@@ -476,16 +479,30 @@ class ClLexer:
     @lex.TOKEN(r'\#[ \t]*pragma')
     def t_PREPROC_PRAGMA(self, t):
         self.lexer.begin('pppragma')
+        self._pragma = []
 
     t_pppragma_ignore = ' \t'
 
-    def t_pppragma_PRAGMA(self, t):
-        r'[^\n]+'
-        pass
+    @lex.TOKEN(identifier)
+    def t_pppragma_id(self, t):
+        self._pragma.append(t)
+
+    @lex.TOKEN(decimal_constant)
+    def t_pppragma_nmber(self, t):
+        self._pragma.append(t)
+
+    def t_pppragma_whitespace(self, t):
+        r'[ \t]+'
+
+    def t_pppragma_else(self, t):
+        r'[^\n]'
+        self._pragma.append(t)
 
     def t_pppragma_NEWLINE(self, t):
         r'\n'
-        t.lexer.begin('INITIAL')
+        self.lexer.begin('INITIAL')
+        self._execute_pragma(self._pragma)
+        self._pragma = []
 
     def t_pppragma_error(self, t):
         self.error('invalid #pragma directive', self._position(t))
