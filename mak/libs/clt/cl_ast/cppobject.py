@@ -56,7 +56,7 @@ class CppObject:
 
     def _get_cached_instance(self, arguments):
         for args, _, _, instance in self.instances:
-            assert len(args) == len(arguments)
+            #assert len(args) == len(arguments)
             if CppObject.equal_parameters(args, arguments, { }):
                 return instance
         return None

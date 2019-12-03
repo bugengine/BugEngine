@@ -47,6 +47,15 @@ class TemplateValueParameter(CppObject):
     def is_compatible(self, argument):
         return isinstance(argument, Constant)
 
+    def template_parameter_match(self, value, cast_options):
+        t = value.return_type()
+        d = t.distance(self.type, CastOptions(CastOptions.CAST_IMPLICIT,
+                                               cast_options.template_parameter_matches,
+                                               cast_options.template_bindings,
+                                               cast_options.current_template))
+        d += Type.Distance(100000, matches={ self.parameter_bind[0]: value })
+        return d
+
     def _create_template_instance(self, template, arguments, position):
         if template == self.parameter_bind[1]:
             return arguments[self.parameter_bind[0]]
@@ -398,6 +407,9 @@ class Template(CppObject):
             specialization.pop_scope_recursive()
             args = ', '.join(str(a) for a in arguments)
             raise Template.InstantiationError('in instantiation of template %s<%s>'%(self.scope[0][1].pretty_name(), args), position, e)
+        except:
+            specialization.pop_scope_recursive()
+            raise
         else:
             specialization.pop_scope_recursive()
             return result
