@@ -6,15 +6,12 @@ class Value(CppObject):
     def distance(self, other, cast_options):
         from .templates import TemplateValueParameter
         if isinstance(other, TemplateValueParameter):
-            t = self.return_type()
-            d = t.distance(other.type, CastOptions(CastOptions.CAST_IMPLICIT,
-                                                   cast_options.template_parameter_matches,
-                                                   cast_options.template_bindings,
-                                                   cast_options.current_template))
-            return Type.Distance(100000+d.distance[0],
-                                 d.distance[1],
-                                 d.distance[2],
-                                 d.matches)
+            return other.template_parameter_match(self, cast_options)
+        elif isinstance(other, Value):
+            if self == other:
+                return Type.Distance()
+            else:
+                raise CastError('error', self.position)
         else:
             raise CastError('error', self.position)
 
@@ -33,7 +30,14 @@ class Constant(Value):
 
     def _create_template_instance(self, template, arguments, position):
         return self
+    
+    def __eq__(self, other):
+        if isinstance(other, Constant):
+            return self.value == other.value
+        return False
 
+    def __str__(self):
+        return '(%s)%s' % (self.type, self.value)
 
 class VariableReference(Value):
     def __init__(self, lexer, position, object_name, target):
@@ -48,12 +52,16 @@ class VariableReference(Value):
         return self.target.get_unresolved_parameters()
 
     def simplify(self):
+        if isinstance(self.target, Constant):
+            return self.target
         return self
 
     def _create_template_instance(self, template, arguments, position):
         return VariableReference(self.lexer, self.position, self.object_name,
                                  self.target and self.target.create_template_instance(template, arguments, position))
 
+    def __str__(self):
+        return str(self.object_name)
 
 class BinaryOperation(Value):
     def __init__(self, lexer, position, operation, left_operand, right_operand):
@@ -81,12 +89,15 @@ class BinaryOperation(Value):
     def return_type(self):
         return self.left_operand.return_type().get_operation_type(self.right_operand.return_type(), self.operation)
 
+    def __str__(self):
+        return '%s %s %s' % (self.left_operand, self.operation, self.right_operand)
+
     @staticmethod
-    def evaluate(self, left_operand, right_operand, operator):
-        assert isinstance(self.left_operand, Constant)
-        assert isinstance(self.right_operand, Constant)
-        v1 = self.left_operand.value
-        v2 = self.right_operand.value
+    def evaluate(left_operand, right_operand, operator):
+        assert isinstance(left_operand, Constant)
+        assert isinstance(right_operand, Constant)
+        v1 = left_operand.value
+        v2 = right_operand.value
         result = eval('%s%s%s' % (v1, operator, v2))
-        print('simplifying: %s %s %s = %s' % (v1, operator, v2, result))
+        #print('simplifying: %s %s %s = %s' % (v1, operator, v2, result))
         return result

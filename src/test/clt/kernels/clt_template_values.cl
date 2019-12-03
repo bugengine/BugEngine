@@ -18,5 +18,5 @@ struct F<0>
 
 void kmain(u32 current, u32 total)
 {
-    u32 x = F<72>::Value;
+    u32 x = F<2>::Value;
 }

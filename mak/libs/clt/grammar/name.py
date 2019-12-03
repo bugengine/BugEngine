@@ -1,7 +1,7 @@
 from .. import cl_ast
 from ..cl_ast.name import Name
 from ..cl_ast.scope import ScopeError
-from ..cl_ast.types import CastOptions, CastError, DependentTypeName, Struct
+from ..cl_ast.types import CastOptions, CastError, DependentName, Struct
 from ..cl_ast.templates import Template, TemplateTemplateParameter
 
 
@@ -54,6 +54,9 @@ def p_name_object(p):
     is_shadow = not parent[0] and p.slice[1].type.endswith('_SHADOW')
     p[0] = (Name(p.lexer, p[1], p.position(1), parent=parent[0], target=p.slice[1].found_object, shadow=is_shadow),
             Name(p.lexer, p[1], p.position(1), parent=parent[1], target=p.slice[1].found_object, shadow=is_shadow))
+    if not p[0][0].target and p[0][0].dependent:
+        p[0][0].target = DependentName(p.lexer, p.position(1), p[0][0])
+        p[0][1].target = DependentName(p.lexer, p.position(1), p[0][1])
 
 
 def p_name_template_object(p):
@@ -107,17 +110,17 @@ def p_template_object(p):
             n.target = specialization
         else:
             n.dependent = True
-            n.target = DependentTypeName(p.lexer, p.position(1), n)
+            n.target = DependentName(p.lexer, p.position(1), n)
     else:
         try:
             template_instance = template.instantiate(arguments, p.position(1))
         except Template.InstantiationError as e:
             p.lexer.log_cpperror(e)
-            template_instance = DependentTypeName(p.lexer, p.position(1), n)
+            template_instance = DependentName(p.lexer, p.position(1), n)
             n.dependent = True
         else:
             if not template_instance:
-                template_instance = DependentTypeName(p.lexer, p.position(1), n)
+                template_instance = DependentName(p.lexer, p.position(1), n)
                 n.dependent = True
         n.target = template_instance
         specialization = template_instance
@@ -148,12 +151,12 @@ def p_template_undefined(p):
     parent = p[-1]
     n = Name(p.lexer, p[2], p.position(2), arguments=p[3], parent=parent[0])
     n.dependent = True
-    n.target = DependentTypeName(p.lexer, p.position(2), n)
+    n.target = DependentName(p.lexer, p.position(2), n)
     template_stack = p.lexer.template_stack
     bindings = template_stack and template_stack.bind(None, parent[1] and parent[1].template_bindings)
     n2 = Name(p.lexer, p[1], p.position(1), parent=parent[1], template=bindings and bindings.template,
               arguments=p[3], template_bindings=bindings, errors=['expected qualified name'])
-    n2.target = DependentTypeName(p.lexer, p.position(1), n2)
+    n2.target = DependentName(p.lexer, p.position(1), n2)
     p[0] = (n, n2)
 
 
@@ -429,7 +432,7 @@ def p_type_name_typename(p):
     n = p[2][0]
     if not n.dependent:
         n.dependent = True
-        n.target = DependentTypeName(p.lexer, n.position, n)
+        n.target = DependentName(p.lexer, n.position, n)
     elif not n.target:
-        n.target = DependentTypeName(p.lexer, n.position, n)
+        n.target = DependentName(p.lexer, n.position, n)
     p[0] = (n, None)

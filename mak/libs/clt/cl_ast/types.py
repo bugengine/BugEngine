@@ -241,7 +241,7 @@ class StructScope(Scope):
         if parent:
             assert isinstance(parent, Type)
             if not (isinstance(parent, Struct)
-                 or isinstance(parent, DependentTypeName)
+                 or isinstance(parent, DependentName)
                  or isinstance(parent, TemplateTypenameParameter)):
                 owner.lexer.error('expected struct name', position)
         self.parent_visibility = parent_visibility
@@ -431,7 +431,7 @@ class Void(Type):
         return "builtin type 'void'"
 
 
-class DependentTypeName(Type):
+class DependentName(Type):
     class INITIAL_SCOPE(Scope):
         def find(self, name, position, source_context, is_current_scope):
             return None
@@ -441,7 +441,7 @@ class DependentTypeName(Type):
         self.name = name
 
     def __eq__(self, other):
-        return isinstance(other, DependentTypeName) and self.name == other.name
+        return isinstance(other, DependentName) and self.name == other.name
 
     def __str__(self):
         return 'typename(%s)'%self.name
@@ -491,7 +491,7 @@ class DependentTypeName(Type):
                             parent=create_name(n.parent))
         self.name.target = None
         name = create_name(self.name)
-        name.target = DependentTypeName(self.lexer, self.position, name)
+        name.target = DependentName(self.lexer, self.position, name)
         return name.target
 
     def _create_template_instance(self, template, arguments, position):
@@ -541,7 +541,7 @@ class DependentTypeName(Type):
             return self
 
     def _distance(self, other, cast_options, typeref, other_typeref):
-        if isinstance(other, DependentTypeName):
+        if isinstance(other, DependentName):
             if not self.name.equals(other.name, cast_options.template_bindings):
                 if cast_options.allowed_cast == cast_options.CAST_UNRELATED:
                     d = Type.Distance(variant = -1)

@@ -37,8 +37,8 @@ struct Test<i32>
 
 void kmain(u32 index, u32 total)
 {
-    Test<u32> x;
     Test<i32> y1;
+    Test<u32> x;
     Test<i32> y2;
     Test<i32*> z;
     Test<u32*> w;
