@@ -84,7 +84,10 @@ class CppObject:
         if self.parent:
             self.parent.push_scope_recursive(position, owner_scope=False)
         self.push_scope(position, scope or self.scope, owner_scope)
-        
+    
+    def pop_scope(self):
+        self.lexer.pop_scope(self.scope)
+
     def pop_scope_recursive(self):
         self.lexer.pop_scope(self.scope)
         if self.parent:

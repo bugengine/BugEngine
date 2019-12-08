@@ -37,7 +37,7 @@ class Enum(Type):
         return 'STRUCT_ID'
     
     def define(self, position):
-        self.push_scope(position, EnumScope(self, position))
+        self.push_scope_recursive(position, EnumScope(self, position))
 
     def find(self, name):
         return self.scope.find(name, None, None, False) or Type.find(self, name)
@@ -76,10 +76,10 @@ class Enum(Type):
             try:
                 self.scope.create_template_instance(result.scope, template, arguments, position)
             except Exception:
-                self.lexer.pop_scope(result.scope)
+                result.pop_scope_recursive()
                 raise
             else:
-                self.lexer.pop_scope(result.scope)
+                result.pop_scope_recursive()
         return result
 
 
