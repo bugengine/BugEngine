@@ -1,5 +1,6 @@
 from .cppobject import CppObject
 from .types import CastError, CastOptions, Type
+from .enum import EnumItem
 
 
 class Value(CppObject):
@@ -54,6 +55,8 @@ class VariableReference(Value):
     def simplify(self):
         if isinstance(self.target, Constant):
             return self.target
+        elif isinstance(self.target, EnumItem):
+            return self.target.value
         return self
 
     def _create_template_instance(self, template, arguments, position):

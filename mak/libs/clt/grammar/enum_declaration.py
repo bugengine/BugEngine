@@ -52,7 +52,7 @@ def p_enum_pop(p):
         enum_pop :
     """
     enum = p[-3]
-    p.lexer.pop_scope(enum.scope)
+    enum.pop_scope_recursive()
 
 
 def p_enum_begin(p):

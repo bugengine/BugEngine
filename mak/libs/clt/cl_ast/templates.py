@@ -370,7 +370,7 @@ class Template(CppObject):
 
     def distance(self, cast_to, cast_options):
         if isinstance(cast_to, TypeRef):
-            other = other.template_origin
+            other = cast_to.template_origin
         if isinstance(cast_to, Template):
             if id(self) == id(cast_to):
                 return Type.Distance()
@@ -401,16 +401,20 @@ class Template(CppObject):
             else:
                 return specialization
         specialization.push_scope_recursive(position)
+        self.parent.push_scope(position)
         try:
             result = specialization.create_template_instance(self, matches, position)
         except Template.InstantiationError as e:
+            self.parent.pop_scope()
             specialization.pop_scope_recursive()
             args = ', '.join(str(a) for a in arguments)
             raise Template.InstantiationError('in instantiation of template %s<%s>'%(self.scope[0][1].pretty_name(), args), position, e)
         except:
+            self.parent.pop_scope()
             specialization.pop_scope_recursive()
             raise
         else:
+            self.parent.pop_scope()
             specialization.pop_scope_recursive()
             return result
 
