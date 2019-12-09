@@ -54,7 +54,7 @@ def p_name_object(p):
     is_shadow = not parent[0] and p.slice[1].type.endswith('_SHADOW')
     p[0] = (Name(p.lexer, p[1], p.position(1), parent=parent[0], target=p.slice[1].found_object, shadow=is_shadow),
             Name(p.lexer, p[1], p.position(1), parent=parent[1], target=p.slice[1].found_object, shadow=is_shadow))
-    if not p[0][0].target and p[0][0].dependent:
+    if not p[0][0].target and parent[0]:
         p[0][0].target = DependentName(p.lexer, p.position(1), p[0][0])
         p[0][1].target = DependentName(p.lexer, p.position(1), p[0][1])
 

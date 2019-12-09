@@ -46,6 +46,7 @@ def p_value_object(p):
     """
         expression : object_name
     """
+    #p.lexer.error("'%s' was not declared in this scope" % p[1][0], p[1][0].position)
     p[0] = values.VariableReference(p.lexer, p[1][0].position, p[1][0], p[1][0].target)
 
 

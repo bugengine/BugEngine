@@ -1,5 +1,5 @@
 from .cppobject import CppObject
-from .scope import Scope
+from .scope import Scope, ScopeError
 from . import types
 
 
@@ -24,7 +24,18 @@ class CodeBlock(Scope):
 
 
 class OverloadScope(CodeBlock):
-    pass
+    def find(self, name, position, source_context, is_current_scope):
+        try:
+            result = CodeBlock.find(self, name, position, source_context, is_current_scope)
+        except ScopeError:
+            result = None
+        if not result:
+            for v in self.owner.parameters:
+                if v.name == name:
+                    return v
+            if not result and is_current_scope:
+                raise ScopeError("no member named '%s' in %s" % (name, self.owner.pretty_name()), position)
+        return result
 
 
 class Overload(CppObject):
