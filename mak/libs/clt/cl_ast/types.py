@@ -562,6 +562,10 @@ class DependentName(Type):
 
 
 class TypeRef(CppObject):
+    class INITIAL_SCOPE(Scope):
+        def find(self, name, position, source_context, is_current_scope):
+            return self.owner.type and self.owner.type.scope.find(name, position, source_context, is_current_scope)
+
     def __init__(self, lexer, position, type, template=None):
         CppObject.__init__(self, lexer, position)
         self.type = type

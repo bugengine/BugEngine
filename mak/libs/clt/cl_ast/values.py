@@ -1,6 +1,5 @@
 from .cppobject import CppObject
 from .types import CastError, CastOptions, Type
-from .enum import EnumItem
 
 
 class Value(CppObject):
@@ -53,11 +52,8 @@ class VariableReference(Value):
         return self.target.get_unresolved_parameters()
 
     def simplify(self):
-        if isinstance(self.target, Constant):
-            return self.target
-        elif isinstance(self.target, EnumItem):
-            return self.target.value
-        return self
+        value = self.target.simplify()
+        return value
 
     def _create_template_instance(self, template, arguments, position):
         return VariableReference(self.lexer, self.position, self.object_name,

@@ -2,7 +2,7 @@ from .cppobject import CppObject
 from .error import CppError
 from .scope import Scope
 from .types import TypeRef, Type, BuiltIn, CastOptions, CastError
-from .values import Constant
+from .values import Value
 
 
 class TemplateValueParameter(CppObject):
@@ -42,10 +42,10 @@ class TemplateValueParameter(CppObject):
         return '%s%s' % (self.type, self.name and ' '+self.name or '')
 
     def get_template_parameter_type(self):
-        return self.type.name()
+        return str(self.type)
 
     def is_compatible(self, argument):
-        return isinstance(argument, Constant)
+        return isinstance(argument, Value) or isinstance(argument, TemplateValueParameter)
 
     def template_parameter_match(self, value, cast_options):
         t = value.return_type()
@@ -67,6 +67,12 @@ class TemplateValueParameter(CppObject):
             result = TemplateValueParameter(self.lexer, position, self.name, type, value)
             result.bind(self.parameter_bind[0].create_template_instance(template, arguments, position), template_parent)
             return result
+
+    def return_type(self):
+        return self.type
+
+    def simplify(self):
+        return self
 
 
 class TemplateTemplateParameter(CppObject):

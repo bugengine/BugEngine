@@ -1,25 +1,38 @@
 from .cppobject import CppObject
-from .types import Type, BuiltIn, CastError
+from .types import Type, TypeRef, BuiltIn, CastError
 from .scope import Scope
 
 
 class EnumItem(CppObject):
     def __init__(self, lexer, position, name, value):
+        from .values import Constant, BinaryOperation
         CppObject.__init__(self, lexer, position, name)
-        self.value = value and value.simplify()
+        if not value:
+            enum = self.parent
+            assert isinstance(enum, Enum)
+            if len(enum.scope.items):
+                value = BinaryOperation(lexer, position, '+',
+                                        Constant(lexer, position, lexer.base_types['u32'], 1),
+                                        enum.scope.items[-1][1].value)
+            else:
+                value = Constant(lexer, position, lexer.base_types['u32'], 0)
+        self.value = value.simplify()
     
     def get_token_type(self):
         return 'VARIABLE_ID'
 
     def _create_template_instance(self, template, arguments, position):
         return EnumItem(self.lexer, self.position, self.name,
-                        self.value and self.value.create_template_instance(template, arguments, position))
+                        self.value.create_template_instance(template, arguments, position))
 
     def debug_dump(self, indent=''):
         print('%s%s%s=%s [%s]' % (indent, self.__class__.__name__,
                                  self.name and (' %s'%self.name) or '',
                                  self.value,
                                  self.position))
+
+    def simplify(self):
+        return self.value
 
 class EnumScope(Scope):
     def __init__(self, owner, position):
