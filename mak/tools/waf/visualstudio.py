@@ -91,12 +91,12 @@ class XmlFile:
         node.appendChild(el)
         return el
 
-    def write(self, node):
+    def write(self, node, indent='\t'):
         try:
             xml = node.read()
         except IOError:
             xml = ''
-        newxml = self.document.toprettyxml()
+        newxml = self.document.toprettyxml(indent=indent)
         if xml != newxml:
             Logs.pprint('NORMAL', 'writing %s' % node.name)
             node.write(newxml)
@@ -455,11 +455,12 @@ class PyProj:
 
         project = self.pyproj._add(self.pyproj.document, 'Project', {'DefaultTargets':'Build', 'ToolsVersion':'4.0', 'xmlns':'http://schemas.microsoft.com/developer/msbuild/2003'})
         propgroup = self.pyproj._add(project, 'PropertyGroup')
+        paths = sys.path + [task_gen.bld.bugenginenode.make_node('mak').make_node('libs').abspath().replace('/', '\\')]
         self.pyproj._add(propgroup, 'SchemaVersion', '2.0')
         self.pyproj._add(propgroup, 'ProjectGuid', self.guid[1:-1])
-        self.pyproj._add(propgroup, 'ProjectHome', '.')
+        self.pyproj._add(propgroup, 'ProjectHome', '..\..')
         self.pyproj._add(propgroup, 'StartupFile', task_gen.bld.bugenginenode.make_node('waf').abspath().replace('/', '\\'))
-        self.pyproj._add(propgroup, 'SearchPath', task_gen.bld.bugenginenode.make_node('mak').make_node('libs').abspath().replace('/', '\\'))
+        self.pyproj._add(propgroup, 'SearchPath', ';'.join(paths))
         self.pyproj._add(propgroup, 'WorkingDirectory', task_gen.bld.srcnode.abspath().replace('/', '\\'))
         self.pyproj._add(propgroup, 'OutputPath', '.')
         self.pyproj._add(propgroup, 'Name', self.name)
@@ -467,7 +468,7 @@ class PyProj:
         self.pyproj._add(propgroup, 'LaunchProvider', 'Standard Python launcher')
         self.pyproj._add(propgroup, 'EnableNativeCodeDebugging', 'False')
         self.pyproj._add(propgroup, 'IsWindowsApplication', 'False')
-        self.pyproj._add(propgroup, 'InterpreterId', 'MSBuild|env|$(MSBuildProjectFullPath)')
+        self.pyproj._add(propgroup, 'InterpreterId', 'MSBuild|env-%s|$(MSBuildProjectFullPath)'%task_gen.target)
         for toolchain in task_gen.bld.env.ALL_TOOLCHAINS:
             for variant in task_gen.bld.env.ALL_VARIANTS:
                 properties = self.pyproj._add(project, 'PropertyGroup', {'Condition': "'$(Configuration)'=='%s-%s'" % (toolchain, variant)})
@@ -477,20 +478,32 @@ class PyProj:
 
         self.pyproj._add(project, 'ItemGroup')
         ig_env = self.pyproj._add(project, 'ItemGroup')
-        interpreter = self.pyproj._add(ig_env, 'Interpreter', {'Include': 'env\\'})
-        self.pyproj._add(interpreter, 'Id', 'env')
+        interpreter = self.pyproj._add(ig_env, 'Interpreter', {'Include': '%s\\'%os.path.dirname(sys.executable)})
+        self.pyproj._add(interpreter, 'Id', 'env-%s'%task_gen.target)
         self.pyproj._add(interpreter, 'Version', '.'.join(str(i) for i in sys.version_info[0:2]))
-        self.pyproj._add(interpreter, 'Description', 'Python used to generate solution')
+        self.pyproj._add(interpreter, 'Description', 'python-%s' % task_gen.target)
         self.pyproj._add(interpreter, 'InterpreterPath', sys.executable)
         self.pyproj._add(interpreter, 'WindowsInterpreterPath', sys.executable)
         self.pyproj._add(interpreter, 'PathEnvironmentVariable', 'PYTHONPATH')
         self.pyproj._add(interpreter, 'Architecture', 'x64')
+        folders = self.pyproj._add(project, 'ItemGroup')
+        folder_cache = set([])
+        def add_folder(folder):
+            if folder != task_gen.bld.srcnode:
+                if folder not in folder_cache:
+                    add_folder(folder.parent)
+                    folder_cache.add(folder)
+                    self.pyproj._add(folders, 'Folder', {'Include': folder.path_from(task_gen.bld.srcnode)})
+        files = self.pyproj._add(project, 'ItemGroup')
+        for f in task_gen.all_sources:
+            add_folder(f.parent)
+            self.pyproj._add(files, 'Compile', {'Include': f.path_from(task_gen.bld.srcnode)})
         self.pyproj._add(project, 'Import', {'Project': "$(MSBuildExtensionsPath32)\\Microsoft\\VisualStudio\\v$(VisualStudioVersion)\\Python Tools\\Microsoft.PythonTools.targets"})
         self.pyproj._add(project, 'Target', {'Name': 'BeforeBuild'})
         self.pyproj._add(project, 'Target', {'Name': 'AfterBuild'})
 
     def write(self, node):
-        self.pyproj.write(node)
+        self.pyproj.write(node, '  ')
 
 
 class vs2003(Build.BuildContext):
@@ -566,6 +579,18 @@ class vs2003(Build.BuildContext):
         pydbg_node = projects.make_node('build.debug.pyproj')
         project.write(pydbg_node)
         solution.add(pydbg_task_gen, project, pydbg_node.path_from(self.srcnode).replace('/', '\\'), False)
+
+        pyclt_task_gen = lambda: None
+        pyclt_task_gen.target = 'build.clt'
+        pyclt_task_gen.command = command
+        pyclt_task_gen.bld = self
+        pyclt_task_gen.all_sources = [self.bugenginenode.make_node('mak/tools/clt.py')]
+        pyclt_task_gen.all_sources += self.bugenginenode.make_node('mak/libs/clt').ant_glob('**/*.py')
+        pyclt_task_gen.all_sources += self.srcnode.ant_glob('**/*.cl')
+        project = PyProj(pyclt_task_gen, version, version_project, folders)
+        pyclt_node = projects.make_node('build.clt.pyproj')
+        project.write(pyclt_node)
+        solution.add(pyclt_task_gen, project, pyclt_node.path_from(self.srcnode).replace('/', '\\'), False)
 
         for g in self.groups:
             for tg in g:
