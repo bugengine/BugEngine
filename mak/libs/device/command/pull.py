@@ -1,6 +1,7 @@
 import os
 from . import Command
 
+
 class PullCommand(Command):
     name = 'pull'
 
@@ -17,4 +18,3 @@ class PullCommand(Command):
     def help(self, out):
         out.write('    %s <device> <file> <destination>\n' % self.bold_name())
         out.write('        Downloads a file from the device\n')
-

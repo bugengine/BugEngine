@@ -6,7 +6,6 @@ from waflib.TaskGen import feature, before_method
 import os
 import sys
 
-
 kernel_task = """
 %s ${KERNEL}
 -d ${MACROS_IGNORE}
@@ -43,6 +42,8 @@ def kernel_generate(self):
         tsk.env.TMPDIR = self.bld.bldnode.parent.parent.abspath()
         tsk.env.PCH_HEADER = ['--pch']
         tsk.env.PCH = self.pchstop and [self.pchstop] or []
+        tsk.env.env = dict(os.environ)
+        tsk.env.env['PYTHONPATH'] = os.path.join(self.bld.bugenginenode.abspath(), 'mak', 'libs')
         tsk.dep_nodes = [mak_node.find_node('tools/kernel_task.py')]
         tsk.dep_nodes += mak_node.find_node('libs/cpp').ant_glob('**/*.py')
         tsk.path = self.bld.variant_dir

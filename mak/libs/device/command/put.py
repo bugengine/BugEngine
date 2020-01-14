@@ -1,6 +1,7 @@
 import os
 from . import Command
 
+
 class PutCommand(Command):
     name = 'put'
 
@@ -36,7 +37,10 @@ class PutCommand(Command):
                     self._copy_file(connection, files[0], destination)
 
     def run(self, device, arg1, arg2, *kw):
-        args = (arg1, arg2,) + kw
+        args = (
+            arg1,
+            arg2,
+        ) + kw
         for d in self.all_devices():
             if d.name == device:
                 try:
@@ -51,4 +55,3 @@ class PutCommand(Command):
     def help(self, out):
         out.write('    %s <device> <file1> [<file2>...] <destination>\n' % self.bold_name())
         out.write('        Uploads files or directories to the device\n')
-

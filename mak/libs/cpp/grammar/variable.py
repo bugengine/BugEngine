@@ -1,5 +1,6 @@
 from ..tree import Variable
 
+
 def p_variable_array(p):
     """
         variable_array : LEFT_BRACKET value RIGHT_BRACKET
@@ -22,7 +23,7 @@ def p_variable_decl(p):
     """
         variable_decl : method_return_type ID variable_array_list_opt
     """
-    p[0] = Variable(p[2], p[1]+p[3])
+    p[0] = Variable(p[2], p[1] + p[3])
 
 
 def p_variable_decl_method(p):

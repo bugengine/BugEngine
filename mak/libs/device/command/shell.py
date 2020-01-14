@@ -1,5 +1,6 @@
 from . import Command
 
+
 class ShellCommand(Command):
     name = 'shell'
 
@@ -19,4 +20,3 @@ class ShellCommand(Command):
     def help(self, out):
         out.write('    %s <device_name>\n' % self.bold_name())
         out.write('        Starts a shell on device\n')
-

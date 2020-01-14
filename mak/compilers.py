@@ -9,56 +9,56 @@ from copy import deepcopy
 
 class Compiler:
     ARCHS = {
-        'x86':      'x86',
-        'i386':     'x86',
-        'i486':     'x86',
-        'i586':     'x86',
-        'i686':     'x86',
-        'amd64':    'amd64',
-        'x86_64':   'amd64',
-        'x64':      'amd64',
-        'arm':      'armv7a',
-        #'armv4':    'armv4',
-        #'armv5':    'armv5',
-        'armv6':    'armv6',
-        'armv7':    'armv7a',
-        'armv7a':   'armv7a',
-        'armv7s':   'armv7s',
-        'armv7k':   'armv7k',
-        'armv7l':   'armv7l',
-        'arm64':    'arm64',
-        'aarch64':  'arm64',
-        'aarch32':  'aarch32',
-        'ppc':      'ppc',
-        'powerpc':  'ppc',
-        'ppc64':    'ppc64',
-        'powerpc64':'ppc64',
-        'spu':      'spu',
-        'mips':     'mips',
-        'mipsel':   'mipsel',
-        'mips64':   'mips64',
+        'x86': 'x86',
+        'i386': 'x86',
+        'i486': 'x86',
+        'i586': 'x86',
+        'i686': 'x86',
+        'amd64': 'amd64',
+        'x86_64': 'amd64',
+        'x64': 'amd64',
+        'arm': 'armv7a',
+                                   #'armv4':    'armv4',
+                                   #'armv5':    'armv5',
+        'armv6': 'armv6',
+        'armv7': 'armv7a',
+        'armv7a': 'armv7a',
+        'armv7s': 'armv7s',
+        'armv7k': 'armv7k',
+        'armv7l': 'armv7l',
+        'arm64': 'arm64',
+        'aarch64': 'arm64',
+        'aarch32': 'aarch32',
+        'ppc': 'ppc',
+        'powerpc': 'ppc',
+        'ppc64': 'ppc64',
+        'powerpc64': 'ppc64',
+        'spu': 'spu',
+        'mips': 'mips',
+        'mipsel': 'mipsel',
+        'mips64': 'mips64',
         'mips64el': 'mips64el',
         'mipsel64': 'mips64el',
     }
     VECTORIZED_FLAGS = {}
 
-    def __init__(self, compiler_c, compiler_cxx, version, platform, arch,
-                 extra_args = {}, extra_env={}):
+    def __init__(self, compiler_c, compiler_cxx, version, platform, arch, extra_args={}, extra_env={}):
         def to_number(version_string):
-             v = version_string.split('-')[0].split('.')
-             result = [0, 0, 0]
-             for i in (0, 1, 2):
-                 if not v:
-                     break
-                 d = v.pop(0)
-                 try:
-                     result[i] = int(d)
-                 except ValueError:
+            v = version_string.split('-')[0].split('.')
+            result = [0, 0, 0]
+            for i in (0, 1, 2):
+                if not v:
+                    break
+                d = v.pop(0)
+                try:
+                    result[i] = int(d)
+                except ValueError:
                     try:
                         result[i] = int(re.match('\\d+', d).group())
                     except AttributeError:
                         pass
-             return tuple(result)
+            return tuple(result)
+
         self.compiler_c = compiler_c
         self.compiler_cxx = compiler_cxx
         self.defines = []
@@ -92,7 +92,8 @@ class Compiler:
     @classmethod
     def run(self, cmd, input=None, env=None):
         try:
-            p = Utils.subprocess.Popen(cmd, stdin=Utils.subprocess.PIPE,
+            p = Utils.subprocess.Popen(cmd,
+                                       stdin=Utils.subprocess.PIPE,
                                        stdout=Utils.subprocess.PIPE,
                                        stderr=Utils.subprocess.PIPE,
                                        env=env)
@@ -143,79 +144,87 @@ class Compiler:
 class GnuCompiler(Compiler):
     ALL_ARM_ARCHS = ('armv7a', 'armv7k', 'armv7s')
     ARCH_FLAGS = {
-            'arm':   ['-march=armv7-a'],
-        }
+        'arm': ['-march=armv7-a'],
+    }
     VECTORIZED_FLAGS = {
-        'x86':      (('.sse3', ['-msse3', '-mssse3']),
-                     ('.sse4', ['-msse4.1', '-msse4.2',]),
-                     ('.avx', ['-mavx']),
-                     ('.avx2', ['-mavx2']),),
-        'amd64':    (('.sse3', ['-msse3', '-mssse3']),
-                     ('.sse4', ['-msse4.1', '-msse4.2',]),
-                     ('.avx', ['-mavx']),
-                     ('.avx2', ['-mavx2']),),
-
-        'ppc':      (('.altivec', ['-maltivec']),),
-        'ppc64':    (('.altivec', ['-maltivec']),),
-
-        'armv6' :   (('.neon', ['-mfpu=neon']),),
-        'armv7a':   (('.neon', ['-mfpu=neon']),),
-        'armv7s':   (('.neon', ['-mfpu=neon']),),
-        'armv7k':   (('.neon', ['-mfpu=neon']),),
-        'armv7l':   (('.neon', ['-mfpu=neon']),),
-        'arm64':    (('.neon', []),),
+        'x86': (
+            ('.sse3', ['-msse3', '-mssse3']),
+            ('.sse4', [
+                '-msse4.1',
+                '-msse4.2',
+            ]),
+            ('.avx', ['-mavx']),
+            ('.avx2', ['-mavx2']),
+        ),
+        'amd64': (
+            ('.sse3', ['-msse3', '-mssse3']),
+            ('.sse4', [
+                '-msse4.1',
+                '-msse4.2',
+            ]),
+            ('.avx', ['-mavx']),
+            ('.avx2', ['-mavx2']),
+        ),
+        'ppc': (('.altivec', ['-maltivec']), ),
+        'ppc64': (('.altivec', ['-maltivec']), ),
+        'armv6': (('.neon', ['-mfpu=neon']), ),
+        'armv7a': (('.neon', ['-mfpu=neon']), ),
+        'armv7s': (('.neon', ['-mfpu=neon']), ),
+        'armv7k': (('.neon', ['-mfpu=neon']), ),
+        'armv7l': (('.neon', ['-mfpu=neon']), ),
+        'arm64': (('.neon', []), ),
     }
     MULTILIBS = {
-        'x86':      ((['-m64'], 'amd64'),),
-        'amd64':    ((['-m32'], 'x86'),),
-        'ppc':      ((['-m64'], 'ppc64'),),
-        'ppc64':    ((['-m32'], 'ppc'),),
-        'mips':     ((['-m64'], 'mips64'),),
-        'mipsel':   ((['-m64'], 'mips64el'),),
-        'mips64':   ((['-m32'], 'mips'),),
-        'mips64el': ((['-m32'], 'mipsel'),),
-        'arm':      [(['-march=%s'%a], a) for a in ALL_ARM_ARCHS],
-        #'armv4':    [(['-march=%s'%a], a) for a in ALL_ARM_ARCHS],
-        #'armv5':    [(['-march=%s'%a], a) for a in ALL_ARM_ARCHS],
-        #'armv7':    [(['-march=%s'%a], a) for a in ALL_ARM_ARCHS],
-        'armv7a':   [(['-march=%s'%a], a) for a in ALL_ARM_ARCHS],
-        'armv7k':   [(['-march=%s'%a], a) for a in ALL_ARM_ARCHS],
-        'armv7l':   [(['-march=%s'%a], a) for a in ALL_ARM_ARCHS],
+        'x86': ((['-m64'], 'amd64'), ),
+        'amd64': ((['-m32'], 'x86'), ),
+        'ppc': ((['-m64'], 'ppc64'), ),
+        'ppc64': ((['-m32'], 'ppc'), ),
+        'mips': ((['-m64'], 'mips64'), ),
+        'mipsel': ((['-m64'], 'mips64el'), ),
+        'mips64': ((['-m32'], 'mips'), ),
+        'mips64el': ((['-m32'], 'mipsel'), ),
+        'arm': [(['-march=%s' % a], a) for a in ALL_ARM_ARCHS],
+                                                                       #'armv4':    [(['-march=%s'%a], a) for a in ALL_ARM_ARCHS],
+                                                                       #'armv5':    [(['-march=%s'%a], a) for a in ALL_ARM_ARCHS],
+                                                                       #'armv7':    [(['-march=%s'%a], a) for a in ALL_ARM_ARCHS],
+        'armv7a': [(['-march=%s' % a], a) for a in ALL_ARM_ARCHS],
+        'armv7k': [(['-march=%s' % a], a) for a in ALL_ARM_ARCHS],
+        'armv7l': [(['-march=%s' % a], a) for a in ALL_ARM_ARCHS],
     }
     MULTILIB_ARCH_MAP = (
-        ('i386',   '-m64', ['x86_64']),
-        ('i486',   '-m64', ['x86_64']),
-        ('i586',   '-m64', ['x86_64']),
-        ('i686',   '-m64', ['x86_64']),
+        ('i386', '-m64', ['x86_64']),
+        ('i486', '-m64', ['x86_64']),
+        ('i586', '-m64', ['x86_64']),
+        ('i686', '-m64', ['x86_64']),
         ('x86_64', '-m32', ['i386', 'i486', 'i586', 'i686']),
     )
     MACRO_ARCHS = (
-        (('__x86_64__',),                                   'amd64'),
-        (('__i386__',),                                     'x86'),
-        (('__i486__',),                                     'x86'),
-        (('__i586__',),                                     'x86'),
-        (('__i686__',),                                     'x86'),
-        (('__powerpc__',),                                  'ppc'),
-        (('__POWERPC__',),                                  'ppc'),
-        (('__powerpc__', '__powerpc64__'),                  'ppc64'),
-        (('__POWERPC__', '__ppc64__'),                      'ppc64'),
-        (('__mips64', '__mips', '_MIPSEL'),                 'mips64el'),
-        (('__mips', '_MIPSEL'),                             'mipsel'),
-        (('__mips64', '__mips'),                            'mips64'),
-        (('__mips__',),                                     'mips'),
-        (('__aarch64__',),                                  'aarch64'),
-        (('__aarch64',),                                    'aarch64'),
-        (('__aarch32__',),                                  'aarch32'),
-        (('__arm__',),                                      'armv4'),
-        (('__arm__', '__ARM_ARCH_5__'),                     'armv5'),
-        (('__arm__', '__ARM_ARCH_6__'),                     'armv6'),
-        (('__arm__', '__ARM_ARCH_6K__'),                    'armv6'),
-        (('__arm__', '__ARM_ARCH_6Z__'),                    'armv6'),
-        (('__arm__', '__ARM_ARCH_6KZ__'),                   'armv6'),
-        (('__arm__', '__ARM_ARCH_6ZK__'),                   'armv6'),
-        (('__arm__', '__ARM_ARCH_7A__'),                    'armv7a'),
+        (('__x86_64__', ), 'amd64'),
+        (('__i386__', ), 'x86'),
+        (('__i486__', ), 'x86'),
+        (('__i586__', ), 'x86'),
+        (('__i686__', ), 'x86'),
+        (('__powerpc__', ), 'ppc'),
+        (('__POWERPC__', ), 'ppc'),
+        (('__powerpc__', '__powerpc64__'), 'ppc64'),
+        (('__POWERPC__', '__ppc64__'), 'ppc64'),
+        (('__mips64', '__mips', '_MIPSEL'), 'mips64el'),
+        (('__mips', '_MIPSEL'), 'mipsel'),
+        (('__mips64', '__mips'), 'mips64'),
+        (('__mips__', ), 'mips'),
+        (('__aarch64__', ), 'aarch64'),
+        (('__aarch64', ), 'aarch64'),
+        (('__aarch32__', ), 'aarch32'),
+        (('__arm__', ), 'armv4'),
+        (('__arm__', '__ARM_ARCH_5__'), 'armv5'),
+        (('__arm__', '__ARM_ARCH_6__'), 'armv6'),
+        (('__arm__', '__ARM_ARCH_6K__'), 'armv6'),
+        (('__arm__', '__ARM_ARCH_6Z__'), 'armv6'),
+        (('__arm__', '__ARM_ARCH_6KZ__'), 'armv6'),
+        (('__arm__', '__ARM_ARCH_6ZK__'), 'armv6'),
+        (('__arm__', '__ARM_ARCH_7A__'), 'armv7a'),
         (('__arm__', '__ARM_ARCH_7A__', '__ARM_ARCH_7K__'), 'armv7k'),
-        (('__arm__', '__ARM_ARCH_7S__'),                    'armv7s'),
+        (('__arm__', '__ARM_ARCH_7S__'), 'armv7s'),
     )
     ARCHIVER = 'ar'
 
@@ -226,8 +235,7 @@ class GnuCompiler(Compiler):
         self.sysroot = None
         extra_args = deepcopy(extra_args)
         version, platform, arch = self.get_version(compiler_cxx, extra_args, extra_env)
-        Compiler.__init__(self, compiler_c, compiler_cxx, version,
-                          platform, arch, extra_args, extra_env)
+        Compiler.__init__(self, compiler_c, compiler_cxx, version, platform, arch, extra_args, extra_env)
         for t in self.targets:
             target_dir = os.path.normpath(os.path.join(self.directories[0], '..', t, 'bin'))
             if os.path.isdir(target_dir):
@@ -238,7 +246,7 @@ class GnuCompiler(Compiler):
         for arch, flag, archs in multilibs:
             if arch == target[0]:
                 if flag in args:
-                    return ['-'.join([a]+target[1:]) for a in archs]
+                    return ['-'.join([a] + target[1:]) for a in archs]
         else:
             return ['-'.join(target)]
 
@@ -246,9 +254,11 @@ class GnuCompiler(Compiler):
         env = os.environ.copy()
         for env_name, env_value in extra_env.items():
             env[env_name] = env_value
+
         def split_triple(t):
             t = t.split('-')
             return t[0], '-'.join(t[1:])
+
         arch = None
         platform = None
         result, out, err = self.run([compiler_c] + extra_args.get('c', []) + ['-dumpmachine'], env=env)
@@ -292,7 +302,7 @@ class GnuCompiler(Compiler):
                 if line.find('%s version ' % name.lower()) != -1:
                     words = line.split()
                     if 'Apple' in words:
-                        self.NAMES = ('Apple'+self.NAMES[0],) + self.NAMES
+                        self.NAMES = ('Apple' + self.NAMES[0], ) + self.NAMES
                     while words[0] != name.lower() and words[1] != 'version':
                         words.pop(0)
                     version = words[2].split('-')[0]
@@ -301,7 +311,7 @@ class GnuCompiler(Compiler):
                 while words[0] != 'Apple' and words[1] != 'LLVM' and words[2] != 'version':
                     words.pop(0)
                 version = words[3].split('-')[0]
-                self.NAMES = ('Apple'+self.NAMES[0],) + self.NAMES
+                self.NAMES = ('Apple' + self.NAMES[0], ) + self.NAMES
             if line.startswith('#define'):
                 macro = line.split()[1].strip()
                 macros.add(macro)
@@ -309,7 +319,7 @@ class GnuCompiler(Compiler):
             if sysroot != -1:
                 sysroot = shlex.split(line[sysroot:].replace('\\', '\\\\'))[1]
                 self.sysroot = os.path.normpath(sysroot)
-                self.NAMES = ('cross_' + self.NAMES[0],) + self.NAMES
+                self.NAMES = ('cross_' + self.NAMES[0], ) + self.NAMES
 
         best = 0
         for values, a in self.MACRO_ARCHS:
@@ -333,16 +343,17 @@ class GnuCompiler(Compiler):
             result = []
             for multilib in multilibs:
                 try:
-                    c = self.__class__(self.compiler_c, self.compiler_cxx,
-                                       { 'c': multilib[0][:],
-                                         'cxx': multilib[0][:],
-                                         'link': multilib[0][:],})
+                    c = self.__class__(self.compiler_c, self.compiler_cxx, {
+                        'c': multilib[0][:],
+                        'cxx': multilib[0][:],
+                        'link': multilib[0][:],
+                    })
                     result.append(c)
                 except Exception as e:
                     pass
             return result
 
-    def is_valid(self, conf, extra_flags = []):
+    def is_valid(self, conf, extra_flags=[]):
         node = conf.bldnode.make_node('main.cxx')
         tgtnode = node.change_ext('')
         node.write('int main() {}\n')
@@ -360,7 +371,7 @@ class GnuCompiler(Compiler):
         v = conf.env
         if 'Clang' in self.NAMES:
             v.append_unique('CXXFLAGS', ['-fno-threadsafe-statics'])
-        if 'GCC' in self.NAMES and self.version_number >= (4,):
+        if 'GCC' in self.NAMES and self.version_number >= (4, ):
             v.append_unique('CXXFLAGS', ['-fno-threadsafe-statics'])
         v.CPPFLAGS_debug = ['-D_DEBUG'] + v.CPPFLAGS_debug
         v.CFLAGS_debug = ['-pipe', '-g', '-D_DEBUG'] + v.CFLAGS_debug
@@ -370,7 +381,9 @@ class GnuCompiler(Compiler):
 
         v.CPPFLAGS_profile = ['-DNDEBUG'] + v.CPPFLAGS_profile
         v.CFLAGS_profile = ['-pipe', '-g', '-DNDEBUG', '-O3'] + v.CFLAGS_profile
-        v.CXXFLAGS_profile = ['-pipe', '-Wno-unused-parameter', '-g', '-DNDEBUG', '-O3', '-fno-rtti', '-fno-exceptions'] + v.CXXFLAGS_profile
+        v.CXXFLAGS_profile = [
+            '-pipe', '-Wno-unused-parameter', '-g', '-DNDEBUG', '-O3', '-fno-rtti', '-fno-exceptions'
+        ] + v.CXXFLAGS_profile
         v.ASFLAGS_profile = ['-pipe', '-g', '-DNDEBUG', '-O3'] + v.ASFLAGS_profile
         v.LINKFLAGS_profile = ['-pipe', '-g'] + v.LINKFLAGS_profile
 
@@ -379,7 +392,8 @@ class GnuCompiler(Compiler):
 
         v.CPPFLAGS_final = ['-DNDEBUG'] + v.CPPFLAGS_final
         v.CFLAGS_final = ['-pipe', '-g', '-DNDEBUG', '-O3'] + v.CFLAGS_final
-        v.CXXFLAGS_final = ['-pipe', '-Wno-unused-parameter', '-g', '-DNDEBUG', '-O3', '-fno-rtti', '-fno-exceptions'] + v.CXXFLAGS_final
+        v.CXXFLAGS_final = ['-pipe', '-Wno-unused-parameter', '-g', '-DNDEBUG', '-O3', '-fno-rtti', '-fno-exceptions'
+                            ] + v.CXXFLAGS_final
         v.ASFLAGS_final = ['-pipe', '-g', '-DNDEBUG', '-O3'] + v.ASFLAGS_final
         v.LINKFLAGS_final = ['-pipe', '-g'] + v.LINKFLAGS_final
 
@@ -387,13 +401,19 @@ class GnuCompiler(Compiler):
         v = conf.env
         v.CFLAGS_warnnone = ['-w'] + v.CFLAGS_warnnone
         v.CXXFLAGS_warnnone = ['-w'] + v.CXXFLAGS_warnnone
-        if 'Clang' in self.NAMES or 'GCC' in self.NAMES and self.version_number >= (3, 4,):
+        if 'Clang' in self.NAMES or 'GCC' in self.NAMES and self.version_number >= (
+                3,
+                4,
+        ):
             extra_flags = ['-Wextra', '-Wno-invalid-offsetof']
         else:
             extra_flags = []
-        v.CFLAGS_warnall = ['-std=c99', '-Wall'] + extra_flags + ['-pedantic', '-Winline', '-Werror', '-Wstrict-aliasing'] + v.CFLAGS_warnall
-        v.CXXFLAGS_warnall = ['-Wall'] + extra_flags + [ '-Werror', '-Wno-sign-compare',
-                              '-Woverloaded-virtual', '-Wstrict-aliasing'] + v.CXXFLAGS_warnall
+        v.CFLAGS_warnall = ['-std=c99', '-Wall'] + extra_flags + [
+            '-pedantic', '-Winline', '-Werror', '-Wstrict-aliasing'
+        ] + v.CFLAGS_warnall
+        v.CXXFLAGS_warnall = ['-Wall'] + extra_flags + [
+            '-Werror', '-Wno-sign-compare', '-Woverloaded-virtual', '-Wstrict-aliasing'
+        ] + v.CXXFLAGS_warnall
 
     def find_target_program(self, conf, platform, program, mandatory=True, os_paths=[]):
         sys_dirs = platform.directories + self.directories
@@ -478,9 +498,9 @@ class GnuCompiler(Compiler):
                     space = line.find(' ')
                     if space != -1:
                         define = line[:space]
-                        value = line[space+1:]
+                        value = line[space + 1:]
                         if define in self.DEFINES:
-                            env.append_unique('SYSTEM_DEFINES', ['%s=%s'%(define, value)])
+                            env.append_unique('SYSTEM_DEFINES', ['%s=%s' % (define, value)])
                     elif line in self.DEFINES:
                         conf.env.append_unique('SYSTEM_DEFINES', [line])
 
@@ -505,24 +525,24 @@ class GnuCompiler(Compiler):
 Configure.ConfigurationContext.Compiler = Compiler
 Configure.ConfigurationContext.GnuCompiler = GnuCompiler
 
+
 @conf
 def detect_executable(conf, program_name, path_list=[]):
-    program = conf.find_program(program_name, var='TEMP_PROGRAM',
-                            path_list=path_list, mandatory=False)
+    program = conf.find_program(program_name, var='TEMP_PROGRAM', path_list=path_list, mandatory=False)
     del conf.env['TEMP_PROGRAM']
     return isinstance(program, list) and program[0] or program
 
 
 def options(opt):
     gr = opt.add_option_group('configure options')
-    gr.add_option( '--compilers',
-                    action='store',
-                    default='',
-                    dest='compilers',
-                    help='List of compilers to configure for')
+    gr.add_option('--compilers',
+                  action='store',
+                  default='',
+                  dest='compilers',
+                  help='List of compilers to configure for')
     for path in opt.path.make_node('compiler').listdir():
         if path.endswith('.py') and not path.endswith('_build.py'):
-            opt.recurse('compiler/%s'%path)
+            opt.recurse('compiler/%s' % path)
 
 
 def configure(conf):
@@ -532,8 +552,8 @@ def configure(conf):
     for path in conf.path.make_node('compiler').listdir():
         if path.endswith('.py') and not path.endswith('_build.py'):
             if not compilers or path[:-3] in compilers:
-                conf.recurse('compiler/%s'%path)
-    conf.compilers.sort(key = lambda x: x.sort_name())
+                conf.recurse('compiler/%s' % path)
+    conf.compilers.sort(key=lambda x: x.sort_name())
 
 
 def build(bld):
@@ -542,4 +562,4 @@ def build(bld):
     for path in bld.path.make_node('compiler').listdir():
         if path.endswith('_build.py'):
             if not compilers or path[:-9] in compilers:
-                bld.recurse('compiler/%s'%path)
+                bld.recurse('compiler/%s' % path)

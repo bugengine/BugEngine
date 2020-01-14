@@ -6,10 +6,9 @@ import os
 @feature('kernel')
 @after_method('install_step')
 def install_kernel(self):
-    if not self.env.ENV_PREFIX and not self.bld.env.STATIC: #no multiarch, no static
+    if not self.env.ENV_PREFIX and not self.bld.env.STATIC:                                                      #no multiarch, no static
         self.install_files(os.path.join(self.bld.env.PREFIX, self.bld.optim, self.bld.env.DEPLOY_KERNELDIR),
-                           [self.postlink_task.outputs[0]],
-                           Utils.O755)
+                           [self.postlink_task.outputs[0]], Utils.O755)
         if self.env.CC_NAME == 'msvc':
             self.install_files(os.path.join(self.bld.env.PREFIX, self.bld.optim, self.bld.env.DEPLOY_KERNELDIR),
                                [self.link_task.outputs[1]])
@@ -19,10 +18,9 @@ def install_kernel(self):
 @after_method('install_step')
 def install_plugin(self):
     if ('cshlib' in self.features) or ('cxxshlib' in self.features):
-        if not self.env.ENV_PREFIX: #no multiarch
+        if not self.env.ENV_PREFIX:                                                                                  #no multiarch
             self.install_files(os.path.join(self.bld.env.PREFIX, self.bld.optim, self.bld.env.DEPLOY_PLUGINDIR),
-                               [self.postlink_task.outputs[0]],
-                               Utils.O755)
+                               [self.postlink_task.outputs[0]], Utils.O755)
             if self.env.CC_NAME == 'msvc':
                 self.install_files(os.path.join(self.bld.env.PREFIX, self.bld.optim, self.bld.env.DEPLOY_PLUGINDIR),
                                    [self.link_task.outputs[1]])
@@ -32,10 +30,9 @@ def install_plugin(self):
 @after_method('install_step')
 def install_shared_lib(self):
     if ('cshlib' in self.features) or ('cxxshlib' in self.features):
-        if not self.env.ENV_PREFIX: #no multiarch
+        if not self.env.ENV_PREFIX:                                                                                  #no multiarch
             self.install_files(os.path.join(self.bld.env.PREFIX, self.bld.optim, self.bld.env.DEPLOY_RUNBINDIR),
-                               [self.postlink_task.outputs[0]],
-                               Utils.O755)
+                               [self.postlink_task.outputs[0]], Utils.O755)
             if self.env.CC_NAME == 'msvc':
                 self.install_files(os.path.join(self.bld.env.PREFIX, self.bld.optim, self.bld.env.DEPLOY_RUNBINDIR),
                                    [self.link_task.outputs[1]])
@@ -44,7 +41,7 @@ def install_shared_lib(self):
 @feature('launcher')
 @after_method('install_step')
 def install_program(self):
-    if not self.env.ENV_PREFIX: #no multiarch
+    if not self.env.ENV_PREFIX:                                                                               #no multiarch
         self.install_files(os.path.join(self.bld.env.PREFIX, self.bld.optim, self.bld.env.DEPLOY_BINDIR),
                            [self.postlink_task.outputs[0]],
                            chmod=Utils.O755)
@@ -56,9 +53,8 @@ def install_program(self):
 @feature('game')
 @after_method('install_step')
 def install_game(self):
-    pass #also plugin
+    pass   #also plugin
 
 
 def build(bld):
     pass
-

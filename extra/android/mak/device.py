@@ -1,8 +1,8 @@
 import os
 import sys
 import subprocess
-from mak.libs.device.protocol import Protocol
-from mak.libs.device.platform import Platform
+from device.protocol import Protocol
+from device.platform import Platform
 from waflib import Options
 
 class AdbProtocol(Protocol):

@@ -1,5 +1,6 @@
 from ..tree import Typedef
 
+
 def p_type_kw(p):
     """
         type_kw : INT
@@ -18,7 +19,7 @@ def p_type_builtin_list(p):
                           |
     """
     if len(p) > 1:
-        p[0] = '%s %s'%(p[1], p[2])
+        p[0] = '%s %s' % (p[1], p[2])
     else:
         p[0] = ''
 
@@ -43,7 +44,7 @@ def p_type_attribute_list(p):
                             |
     """
     if len(p) > 1:
-        p[0] = '%s %s' %(p[1], p[2])
+        p[0] = '%s %s' % (p[1], p[2])
     else:
         p[0] = ''
 
@@ -122,6 +123,6 @@ def p_typedef_expr(p):
              | attribute_left_list TYPEDEF method_pointer doc_left SEMICOLON
     """
     if len(p) == 8:
-        p[0] = Typedef(p[4], p[3]+p[5])
+        p[0] = Typedef(p[4], p[3] + p[5])
         p[0].add_tags(p[1][1])
         p.parser.stack[-1].add_property(p[0])

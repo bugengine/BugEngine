@@ -2,9 +2,9 @@ import os
 import sys
 import subprocess
 import json
-from mak.libs.device.protocol import Protocol
-from mak.libs.device.platform import Platform
-from mak.libs.device import Device
+from device.protocol import Protocol
+from device.platform import Platform
+from device import Device
 from waflib import Options
 
 class SimctlProtocol(Protocol):

@@ -1,5 +1,3 @@
-
-
 reserved = {
     'struct': 'STRUCT',
     'class': 'CLASS',
@@ -37,9 +35,9 @@ reserved = {
     'typedef': 'TYPEDEF',
     'throw': 'THROW',
     'be_tag': 'BE_TAG',
-    'be_segment':  'BE_SEGMENT',
-    'be_segments':  'BE_SEGMENTS',
-    'be_stream':  'BE_STREAM',
+    'be_segment': 'BE_SEGMENT',
+    'be_segments': 'BE_SEGMENTS',
+    'be_stream': 'BE_STREAM',
     '__constant': '__CONSTANT',
     '__private': '__PRIVATE',
     '__local': '__LOCAL',
@@ -48,20 +46,16 @@ reserved = {
     '__restrict': '__RESTRICT',
 }
 
-tokens=[
+tokens = [
     'ID',
-    # Characters
     'CHARACTER',
     'WIDE_CHARACTER',
-    # Strings
     'STRING',
     'WIDE_STRING',
-    # Numbers
     'FLOAT',
     'DECIMAL',
     'OCTAL',
     'HEX',
-    # Operators
     'ADD',
     'SUBSTRACT',
     'MULTIPLY',
@@ -109,7 +103,6 @@ tokens=[
     'SEMICOLON',
     'COLON',
     'ELLIPSIS',
-    # Doxygen
     'DOXYGEN_BEGIN',
     'DOXYGEN_BEGIN_LEFT',
     'DOXYGEN_END',

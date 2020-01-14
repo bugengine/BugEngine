@@ -3,13 +3,14 @@ import os
 import re
 
 
-
 class Linux(Configure.ConfigurationContext.Platform):
     NAME = 'Linux'
-    SUPPORTED_TARGETS = (re.compile('.*-linux-gnu.*'),
-                         re.compile('^linux-gnu.*'),
-                         re.compile('.*-linux$'),
-                         re.compile('^linux$'),)
+    SUPPORTED_TARGETS = (
+        re.compile('.*-linux-gnu.*'),
+        re.compile('^linux-gnu.*'),
+        re.compile('.*-linux$'),
+        re.compile('^linux$'),
+    )
 
     def __init__(self):
         Configure.ConfigurationContext.Platform.__init__(self)
@@ -48,4 +49,3 @@ def options(opt):
 
 def configure(conf):
     conf.platforms.append(Linux())
-

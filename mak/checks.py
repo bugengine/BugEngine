@@ -3,10 +3,9 @@ from waflib.Configure import conf
 from waflib.TaskGen import feature, before_method, after_method
 import platform
 import os
-import sys
 
 os_name = platform.uname()[0].lower().split('-')[0]
-USE_LIBRARY_CODE="""
+USE_LIBRARY_CODE = """
 %(include)s
 extern "C" {
 %(include_externc)s
@@ -25,8 +24,7 @@ int main(int argc, char *argv[])
 }
 """
 
-
-USE_SDK_CODE="""
+USE_SDK_CODE = """
 #include <iostream>
 #include <cstdlib>
 #include <cassert>
@@ -42,9 +40,16 @@ int main(int argc, const char *argv[])
 def link_library_test(self):
     def write_test_file(task):
         task.outputs[0].write(task.generator.code)
+
     bld = self.bld
     bld(rule=write_test_file, target='main.cc', code=self.code)
-    bld(features='cxx cxxprogram', source='main.cc', target='app', lib=self.libname, libpath=self.libpath, includes=self.includepath, use=self.use)
+    bld(features='cxx cxxprogram',
+        source='main.cc',
+        target='app',
+        lib=self.libname,
+        libpath=self.libpath,
+        includes=self.includepath,
+        use=self.use)
 
 
 @feature("link_framework")
@@ -52,6 +57,7 @@ def link_library_test(self):
 def link_framework_test(self):
     def write_test_file(task):
         task.outputs[0].write(task.generator.code)
+
     bld = self.bld
     bld(rule=write_test_file, target='main.mm', code=self.code)
     env = self.env.derive()
@@ -61,20 +67,37 @@ def link_framework_test(self):
     env.append_unique('CXXFLAGS', ['-F%s' % f for f in self.frameworks])
     if self.sdk:
         env.append_unique('CXXFLAGS', ['-isysroot', self.sdk])
-        env.append_unique('LINKFLAGS', ['-isysroot', self.sdk, '-L%s/usr/lib'%self.sdk])
+        env.append_unique('LINKFLAGS', ['-isysroot', self.sdk, '-L%s/usr/lib' % self.sdk])
     if self.version:
         env.append_unique('CXXFLAGS', [self.version])
         env.append_unique('LINKFLAGS', [self.version])
-    bld(features='cxx cxxprogram', source='main.mm', target='app', lib=self.libname, libpath=self.libpath, includes=self.includepath, env=env, use=self.use)
+    bld(features='cxx cxxprogram',
+        source='main.mm',
+        target='app',
+        lib=self.libname,
+        libpath=self.libpath,
+        includes=self.includepath,
+        env=env,
+        use=self.use)
 
 
 @conf
-def check_lib(self, libname, var='', libpath=[], includepath=[], includes=[], includes_externc=[], functions=[], defines=[], code=USE_LIBRARY_CODE):
+def check_lib(self,
+              libname,
+              var='',
+              libpath=[],
+              includepath=[],
+              includes=[],
+              includes_externc=[],
+              functions=[],
+              defines=[],
+              code=USE_LIBRARY_CODE):
     def cut(string):
         if len(string) > 19:
-            return string[0:17]+'...'
+            return string[0:17] + '...'
         else:
             return string
+
     libname = Utils.to_list(libname)
     env = self.env.derive()
     env.detach()
@@ -82,24 +105,23 @@ def check_lib(self, libname, var='', libpath=[], includepath=[], includes=[], in
     if not var: var = self.path.name
     try:
         if functions:
-            functions =  '\n'.join(['i = *(int*)(&%s);'%f for f in functions])
+            functions = '\n'.join(['i = *(int*)(&%s);' % f for f in functions])
         else:
             functions = 'i = *(int*)0;'
-        self.check(
-            env=env,
-            compile_filename=[],
-            features='link_library',
-            msg='check for libraries %s' %cut(','.join(libname)),
-            libname=libname,
-            libpath=libpath,
-            code=code % {
-                    'include': '\n'.join(['#include <%s>'%i for i in includes]),
-                    'include_externc': '\n'.join(['#include <%s>'%i for i in includes_externc]),
-                    'function': functions
-                },
-            includepath=includepath,
-            use=['debug'],
-            envname=self.env.TOOLCHAIN)
+        self.check(env=env,
+                   compile_filename=[],
+                   features='link_library',
+                   msg='check for libraries %s' % cut(','.join(libname)),
+                   libname=libname,
+                   libpath=libpath,
+                   code=code % {
+                       'include': '\n'.join(['#include <%s>' % i for i in includes]),
+                       'include_externc': '\n'.join(['#include <%s>' % i for i in includes_externc]),
+                       'function': functions
+                   },
+                   includepath=includepath,
+                   use=['debug'],
+                   envname=self.env.TOOLCHAIN)
     except self.errors.ConfigurationError as e:
         #Logs.pprint('YELLOW', '-%s' % var, sep=' ')
         pass
@@ -118,22 +140,22 @@ def check_lib(self, libname, var='', libpath=[], includepath=[], includes=[], in
 def check_header(self, headername, var='', libpath=[], includepath=[], code=USE_LIBRARY_CODE):
     def cut(string):
         if len(string) > 19:
-            return string[0:17]+'...'
+            return string[0:17] + '...'
         else:
             return string
+
     headername = Utils.to_list(headername)
     if not var: var = self.path.name
     try:
-        self.check(
-            compile_filename=[],
-            features='link_library',
-            msg='check for header %s' %cut(','.join(headername)),
-            libname=[],
-            libpath=libpath,
-            code='\n'.join(["#include <%s>"%h for h in headername]) + '\n' + code,
-            includepath=includepath,
-            use=['debug'],
-            envname=self.env.TOOLCHAIN)
+        self.check(compile_filename=[],
+                   features='link_library',
+                   msg='check for header %s' % cut(','.join(headername)),
+                   libname=[],
+                   libpath=libpath,
+                   code='\n'.join(["#include <%s>" % h for h in headername]) + '\n' + code,
+                   includepath=includepath,
+                   use=['debug'],
+                   envname=self.env.TOOLCHAIN)
     except self.errors.ConfigurationError as e:
         pass
     else:
@@ -144,36 +166,44 @@ def check_header(self, headername, var='', libpath=[], includepath=[], code=USE_
 
 
 @conf
-def check_framework(self, frameworks, var='', libpath=[], includepath=[], includes=[], includes_externc=[], functions=[], code=USE_LIBRARY_CODE):
+def check_framework(self,
+                    frameworks,
+                    var='',
+                    libpath=[],
+                    includepath=[],
+                    includes=[],
+                    includes_externc=[],
+                    functions=[],
+                    code=USE_LIBRARY_CODE):
     def cut(string):
         if len(string) > 19:
-            return string[0:17]+'...'
+            return string[0:17] + '...'
         else:
             return string
+
     frameworks = Utils.to_list(frameworks)
     if not var: var = self.path.name
     try:
         if functions:
-            functions =  ' + '.join(['*(int*)(&%s)'%f for f in functions])
+            functions = ' + '.join(['*(int*)(&%s)' % f for f in functions])
         else:
             functions = '*(int*)0'
-        self.check(
-            compile_filename=[],
-            features='link_framework',
-            msg='check for framework %s' %cut(','.join(frameworks)),
-            libname=[],
-            frameworks=frameworks,
-            libpath=libpath,
-            code=code % {
-                    'include': '\n'.join(['#include <%s>'%i for i in includes]),
-                    'include_externc': '\n'.join(['#include <%s>'%i for i in includes_externc]),
-                    'function': functions
-                },
-            includepath=includepath,
-            sdk='',
-            version='',
-            use=['debug'],
-            envname=self.env.TOOLCHAIN)
+        self.check(compile_filename=[],
+                   features='link_framework',
+                   msg='check for framework %s' % cut(','.join(frameworks)),
+                   libname=[],
+                   frameworks=frameworks,
+                   libpath=libpath,
+                   code=code % {
+                       'include': '\n'.join(['#include <%s>' % i for i in includes]),
+                       'include_externc': '\n'.join(['#include <%s>' % i for i in includes_externc]),
+                       'function': functions
+                   },
+                   includepath=includepath,
+                   sdk='',
+                   version='',
+                   use=['debug'],
+                   envname=self.env.TOOLCHAIN)
     except self.errors.ConfigurationError as e:
         #Logs.pprint('YELLOW', '-%s' % var, sep=' ')
         pass
@@ -188,8 +218,7 @@ def check_framework(self, frameworks, var='', libpath=[], includepath=[], includ
 
 
 @conf
-def check_sdk(self, compiler, flags, sdk, version,
-              frameworks=[], libpath=[], includepath=[], code=USE_SDK_CODE):
+def check_sdk(self, compiler, flags, sdk, version, frameworks=[], libpath=[], includepath=[], code=USE_SDK_CODE):
     env = ConfigSet.ConfigSet()
     env.CXX = compiler
     env.LINK_CXX = compiler
@@ -198,28 +227,28 @@ def check_sdk(self, compiler, flags, sdk, version,
     env.CXX_TGT_F = ['-c', '-o']
     env.CXXLNK_TGT_F = ['-o']
 
-    code = '\n'.join(['#include <%s/%s.h>' % (f, f) for f in frameworks]) + '\n'+ code
-    self.check(
-        env=env,
-        compile_filename=[],
-        features='link_framework',
-        msg='check for SDK %s' %os.path.split(sdk)[1],
-        libname=[],
-        frameworks=frameworks,
-        libpath=libpath,
-        code=code,
-        includepath=includepath,
-        sdk=sdk,
-        version=version,
-        use=['debug'],
-        errmsg='not usable',
-        compiler=compiler,
-        envname=self.env.TOOLCHAIN)
+    code = '\n'.join(['#include <%s/%s.h>' % (f, f) for f in frameworks]) + '\n' + code
+    self.check(env=env,
+               compile_filename=[],
+               features='link_framework',
+               msg='check for SDK %s' % os.path.split(sdk)[1],
+               libname=[],
+               frameworks=frameworks,
+               libpath=libpath,
+               code=code,
+               includepath=includepath,
+               sdk=sdk,
+               version=version,
+               use=['debug'],
+               errmsg='not usable',
+               compiler=compiler,
+               envname=self.env.TOOLCHAIN)
 
 
 @conf
 def run_pkg_config(conf, name):
     sysroot = conf.env.SYSROOT or ''
+
     def extend_lib_path(lib_path):
         if lib_path[0] == '=':
             if sysroot:
@@ -228,21 +257,21 @@ def run_pkg_config(conf, name):
                 return lib_path[1:]
         else:
             return lib_path
+
     expand = {}
     configs = {}
-    lib_paths = conf.env.SYSTEM_LIBPATHS + ['=/usr/lib', '=/usr/local/lib',
-                                            '=/usr/libdata', '=/usr/local/libdata']
+    lib_paths = conf.env.SYSTEM_LIBPATHS + ['=/usr/lib', '=/usr/local/lib', '=/usr/libdata', '=/usr/local/libdata']
     for t in conf.env.TARGETS:
-        lib_paths.append('=/usr/lib/%s'%t)
-        lib_paths.append('=/usr/libdata/%s'%t)
+        lib_paths.append('=/usr/lib/%s' % t)
+        lib_paths.append('=/usr/libdata/%s' % t)
     lib_paths = [extend_lib_path(l) for l in lib_paths]
     for l in lib_paths:
-        config_file = os.path.join(l, 'pkgconfig', name+'.pc')
+        config_file = os.path.join(l, 'pkgconfig', name + '.pc')
         config_file = os.path.normpath(config_file)
         if os.path.isfile(config_file):
             break
     else:
-        raise Errors.WafError('No pkg-config file for library %s'%name)
+        raise Errors.WafError('No pkg-config file for library %s' % name)
 
     if not sysroot:
         os_name = platform.uname()[0].lower().split('-')[0]
@@ -264,7 +293,7 @@ def run_pkg_config(conf, name):
             pos = line.find('=')
             if pos != -1:
                 var_name = line[:pos].strip()
-                value = line[pos+1:].strip()
+                value = line[pos + 1:].strip()
                 if value[0] == '"' and value[-1] == '"':
                     value = value[1:-1]
                 if sysroot and value[0] == '/':
@@ -276,7 +305,7 @@ def run_pkg_config(conf, name):
             pos = line.find(':')
             if pos != -1:
                 var_name = line[:pos].strip()
-                value = line[pos+1:].strip()
+                value = line[pos + 1:].strip()
                 value = value.replace('${', '{')
                 value = value.format(value, **expand)
                 configs[var_name.strip()] = value.strip().split()
@@ -309,12 +338,11 @@ def pkg_config(conf, name, var=''):
     if not var: var = conf.path.name
     cflags, libs, ldflags = conf.run_pkg_config(name)
     conf.env['check_%s' % var] = True
-    conf.env['check_%s_cflags'%var] += cflags
-    conf.env['check_%s_cxxflags'%var] += cflags
-    conf.env['check_%s_ldflags'%var] += ldflags
-    conf.env['check_%s_libs'%var] += libs
+    conf.env['check_%s_cflags' % var] += cflags
+    conf.env['check_%s_cxxflags' % var] += cflags
+    conf.env['check_%s_ldflags' % var] += ldflags
+    conf.env['check_%s_libs' % var] += libs
 
 
 def configure(conf):
     pass
-

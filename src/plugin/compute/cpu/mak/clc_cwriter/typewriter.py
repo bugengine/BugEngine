@@ -1,3 +1,6 @@
+from clt.cl_document_writer import ClDocumentWriter
+
+
 class Type:
     def __init__(self, name):
         self.type = name
@@ -9,7 +12,7 @@ class Type:
         return self.type
 
 
-class TypeWriter:
+class TypeWriter(ClDocumentWriter):
     def __init__(self, document):
         self.document = document
 
@@ -27,6 +30,6 @@ class TypeWriter:
 
     def array(self, pointee, count, position):
         if count:
-            return Type(pointee.type + '[%d]'%count)
+            return Type(pointee.type + '[%d]' % count)
         else:
             return Type(pointee.type + '[]')

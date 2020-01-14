@@ -10,6 +10,7 @@ class LocalhostProtocol(Protocol):
     class Connection:
         def __init__(self):
             pass
+
         def __enter__(self):
             return self
 
@@ -31,7 +32,6 @@ class LocalhostProtocol(Protocol):
 
         def start_shell(self):
             subprocess.Popen([os.environ['SHELL'], '-i', '-l']).communicate()
-
 
     def __init__(self, connection):
         pass

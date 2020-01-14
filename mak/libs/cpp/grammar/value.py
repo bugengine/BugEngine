@@ -1,7 +1,7 @@
 precedence = (
-    ('right', 'ASSIGN', 'ADD_ASSIGN', 'SUBSTRACT_ASSIGN', 'MULTIPLY_ASSIGN', 'DIVIDE_ASSIGN',
-              'MODULO_ASSIGN', 'LEFT_SHIFT_ASSIGN', 'RIGHT_SHIFT_ASSIGN', 'BITWISE_AND_ASSIGN',
-              'BITWISE_OR_ASSIGN', 'BITWISE_XOR_ASSIGN', 'TERNARY'),
+    ('right', 'ASSIGN', 'ADD_ASSIGN', 'SUBSTRACT_ASSIGN', 'MULTIPLY_ASSIGN', 'DIVIDE_ASSIGN', 'MODULO_ASSIGN',
+     'LEFT_SHIFT_ASSIGN', 'RIGHT_SHIFT_ASSIGN', 'BITWISE_AND_ASSIGN', 'BITWISE_OR_ASSIGN', 'BITWISE_XOR_ASSIGN',
+     'TERNARY'),
     ('left', 'LOGICAL_OR'),
     ('left', 'LOGICAL_AND'),
     ('left', 'BITWISE_OR'),
@@ -12,13 +12,14 @@ precedence = (
     ('left', 'LEFT_SHIFT', 'RIGHT_SHIFT'),
     ('left', 'ADD', 'SUBSTRACT'),
     ('left', 'MULTIPLY', 'DIVIDE', 'MODULO'),
-    ('right', 'INCREMENT', 'DECREMENT', 'UADD', 'USUBSTRACT', 'CCAST', 'BITWISE_NOT',
-              'LOGICAL_NOT', 'ADDRESS_OF', 'PTR'),
+    ('right', 'INCREMENT', 'DECREMENT', 'UADD', 'USUBSTRACT', 'CCAST', 'BITWISE_NOT', 'LOGICAL_NOT', 'ADDRESS_OF',
+     'PTR'),
     ('left', 'PINCREMENT', 'PDECREMENT', 'PERIOD', 'DEREFERENCE', 'FUNCTION_CALL', 'ARRAY'),
     ('left', 'GROUP'),
     ('left', 'SCOPE2'),
     ('left', 'SCOPE'),
 )
+
 
 def p_unary_operator(p):
     """
@@ -96,7 +97,7 @@ def p_ternary_operator(p):
     """
         value : value CONDITIONAL value COLON value                         %prec TERNARY
     """
-    p[0] = '%s%s%s%s%s' % (p[1], p[2]. p[3], p[4], p[5])
+    p[0] = '%s%s%s%s%s' % (p[1], p[2].p[3], p[4], p[5])
 
 
 def p_value_constant(p):

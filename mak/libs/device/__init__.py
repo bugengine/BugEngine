@@ -1,4 +1,4 @@
-from mak.libs.waflib import Errors
+from waflib import Errors
 from .protocol import Protocol
 from .platform import Platform
 from copy import copy
@@ -48,7 +48,7 @@ class Device:
                 raise Errors.WafError('Unknwon protocol: %s' % self.protocol_name)
             else:
                 with protocol.connect() as c:
-                    return Status(*(c.status() + ('',)))
+                    return Status(*(c.status() + ('', )))
         except Exception as e:
             return Status('error', None, None, None, str(e))
 

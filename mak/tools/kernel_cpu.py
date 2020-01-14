@@ -1,7 +1,6 @@
 import os
 import sys
-sys.path.append(os.path.split(os.path.split(os.path.dirname(os.path.realpath(__file__)))[0])[0])
-from mak.libs.clt import cl_parser
+from clt import cl_parser
 from optparse import OptionParser
 import traceback
 try:
@@ -14,11 +13,14 @@ except ImportError:
 
 option_decl = OptionParser()
 option_decl.set_usage('kernel_cpu.py [options] input output')
-option_decl.add_option("-d", dest="macro_file", action="append", help="Add the content of <macrofile> to the macros, one macro per line")
-option_decl.add_option("-p", "--pch", dest="pch", help="Insert an include for precompiled header at the start of the file")
+option_decl.add_option(
+    "-d", dest="macro_file", action="append", help="Add the content of <macrofile> to the macros, one macro per line"
+)
+option_decl.add_option(
+    "-p", "--pch", dest="pch", help="Insert an include for precompiled header at the start of the file"
+)
 option_decl.add_option("-m", "--module", dest="module", help="Module root")
 option_decl.add_option("-t", "--tmp", dest="tmp_dir", help="Directory to store temporary/cached files", default=".")
-
 
 global_macro_map = {
     "__declspec": True,
@@ -31,8 +33,7 @@ global_macro_map = {
     "PASCAL": False,
 }
 
-
-template="""
+template = """
 %(pch)s
 #include    <kernel/compilers.hh>
 #include    <kernel/simd.hh>
@@ -62,7 +63,6 @@ _BE_PLUGIN_EXPORT void _kmain(const u32 index, const u32 total,
 _BE_REGISTER_PLUGIN(BE_KERNEL_ID, BE_KERNEL_NAME);
 _BE_REGISTER_METHOD(BE_KERNEL_ID, _kmain);
 """
-
 
 if __name__ == '__main__':
     (options, arguments) = option_decl.parse_args()
@@ -97,30 +97,29 @@ if __name__ == '__main__':
                 for t in arg.tags:
                     if t[0] == 'kernel_param':
                         bugengine_names = {
-                            'be_segment':      '::Kernel::Segment',
-                            'be_segments':     '::Kernel::Segments',
-                            'be_stream':       '::Kernel::Stream',
-                            'be_texture1d':    '::Kernel::Texture1d',
-                            'be_texture2d':    '::Kernel::Texture2d',
-                            'be_texture3d':    '::Kernel::Texture3d',
+                            'be_segment': '::Kernel::Segment',
+                            'be_segments': '::Kernel::Segments',
+                            'be_stream': '::Kernel::Stream',
+                            'be_texture1d': '::Kernel::Texture1d',
+                            'be_texture2d': '::Kernel::Texture2d',
+                            'be_texture3d': '::Kernel::Texture3d',
                         }
                         try:
                             bugengine_name = bugengine_names[t[1]]
                         except KeyError:
-                            raise Exception('invalid kernel input type: %s:\n'
-                                            'type %s is not a valid kernel type' % (name, t[1]))
+                            raise Exception(
+                                'invalid kernel input type: %s:\n'
+                                'type %s is not a valid kernel type' % (name, t[1])
+                            )
                         args.append((arg.name, arg.type, bugengine_name, t[1]))
                         break
                 else:
-                    raise Exception('invalid kernel input type: %s\n'
-                                    'mark it with be_in, be_out or be_inout' % name)
+                    raise Exception('invalid kernel input type: %s\n' 'mark it with be_in, be_out or be_inout' % name)
 
             params = {
-                'pch':      '#include <%s>\n'%options.pch if options.pch else '',
-                'source':   arguments[0],
-                'args':     ',\n          '.join('%s< %s >(0, 0, 0)'
-                                                 % (arg[2], arg[1])
-                                                 for i, arg in enumerate(args))
+                'pch': '#include <%s>\n' % options.pch if options.pch else '',
+                'source': arguments[0],
+                'args': ',\n          '.join('%s< %s >(0, 0, 0)' % (arg[2], arg[1]) for i, arg in enumerate(args))
             }
             with open(arguments[1], 'w') as out:
                 out.write(template % params)

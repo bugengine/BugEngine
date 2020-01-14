@@ -19,4 +19,3 @@ class AddCommand(Command):
     def help(self, out):
         out.write('    %s <name> <protocol>://[protocol_parameters]\n' % self.bold_name())
         out.write('        Adds a device connected through the specified protocol\n')
-

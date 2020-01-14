@@ -22,12 +22,10 @@ class BootCommand(Command):
         else:
             raise Exception('Unknown device %s' % device_name)
 
-
     @classmethod
     def help(self, out):
         out.write('    %s <device_name>\n' % self.bold_name())
         out.write('        Boots the registered device\n')
-
 
 
 class ShutdownCommand(Command):
@@ -48,9 +46,7 @@ class ShutdownCommand(Command):
         else:
             raise Exception('Unknown device %s' % device_name)
 
-
     @classmethod
     def help(self, out):
         out.write('    %s <device_name>\n' % self.bold_name())
         out.write('        Shuts down the registered device\n')
-

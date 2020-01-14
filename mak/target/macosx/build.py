@@ -18,9 +18,7 @@ def install_plist_darwin(self, node):
         bld_env = self.bld.env
         if bld_env.SUB_TOOLCHAINS:
             bld_env = self.bld.all_envs[bld_env.SUB_TOOLCHAINS[0]]
-        self.install_files(os.path.join(self.bld.env.PREFIX, self.bld.optim,
-                                        bld_env.DEPLOY_ROOTDIR),
-                           [node])
+        self.install_files(os.path.join(self.bld.env.PREFIX, self.bld.optim, bld_env.DEPLOY_ROOTDIR), [node])
 
 
 @feature('cshlib', 'cxxshlib')
@@ -30,16 +28,18 @@ def set_osx_shlib_name(self):
     if 'macosx' in self.env.VALID_PLATFORMS:
         if 'plugin' in self.features:
             self.env.append_unique('LINKFLAGS', [
-                    '-install_name', os.path.join('@executable_path', '..', 'share', 'bugengine', 'plugin', self.link_task.outputs[0].name)
-                ])
+                '-install_name',
+                os.path.join('@executable_path', '..', 'share', 'bugengine', 'plugin', self.link_task.outputs[0].name)
+            ])
         elif 'kernel' in self.features:
             self.env.append_unique('LINKFLAGS', [
-                    '-install_name', os.path.join('@executable_path', '..', 'share', 'bugengine', 'plugin', self.link_task.outputs[0].name)
-                ])
+                '-install_name',
+                os.path.join('@executable_path', '..', 'share', 'bugengine', 'plugin', self.link_task.outputs[0].name)
+            ])
         else:
-            self.env.append_unique('LINKFLAGS', [
-                    '-install_name', os.path.join('@loader_path', self.link_task.outputs[0].name)
-                ])
+            self.env.append_unique(
+                'LINKFLAGS',
+                ['-install_name', os.path.join('@loader_path', self.link_task.outputs[0].name)])
 
 
 @feature('cprogram', 'cxxprogram', 'cshlib', 'cxxshlib')
@@ -47,8 +47,8 @@ def set_osx_shlib_name(self):
 def add_objc_lib(self):
     if 'darwin' in self.env.VALID_PLATFORMS:
         self.env.append_unique('LINKFLAGS', [
-                '-lobjc',
-            ])
+            '-lobjc',
+        ])
 
 
 @feature('cprogram', 'cxxprogram')
@@ -64,6 +64,8 @@ strip = '${STRIP} ${STRIPFLAGS} -S -o ${TGT[0].abspath()} ${SRC[0].abspath()}'
 Task.task_factory('strip', strip, color='BLUE')
 lipo = '${LIPO} ${LIPOFLAGS} ${SRC} -create -output ${TGT[0].abspath()}'
 Task.task_factory('lipo', lipo, color='BLUE')
+
+
 class codesign(Task.Task):
     def run(self):
         with open(self.outputs[0].abspath(), 'wb') as out:
@@ -76,7 +78,7 @@ def darwin_postlink_task(self, link_task):
     appname = getattr(Context.g_module, Context.APPNAME, self.bld.srcnode.name)
 
     bldnode = self.bld.bldnode
-    out_rootdir = os.path.join(appname+'.app.dSYM', 'Contents')
+    out_rootdir = os.path.join(appname + '.app.dSYM', 'Contents')
     out_rootnode = bldnode.make_node(out_rootdir)
     out_dsymdir = out_rootnode.make_node('Resources/DWARF')
 
@@ -91,15 +93,13 @@ def darwin_postlink_task(self, link_task):
     if not dsymtask:
         infoplist = out_rootnode.make_node('Info.plist')
         dsymtask = self.bld.dsym_task = self.create_task('dsym', [], [infoplist])
-        self.install_as(os.path.join(self.bld.env.PREFIX, self.bld.optim,
-                                     infoplist.path_from(bldnode)),
-                        infoplist)
+        self.install_as(os.path.join(self.bld.env.PREFIX, self.bld.optim, infoplist.path_from(bldnode)), infoplist)
 
     dsymtask.set_inputs(out_node)
     dsymtask.set_outputs(out_dsymdir.make_node(out_node.name))
-    self.install_as(os.path.join(self.bld.env.PREFIX, self.bld.optim, appname+'.app.dSYM',
-                                 'Contents', 'Resources', 'DWARF', out_node.name),
-                    dsymtask.outputs[-1])
+    self.install_as(
+        os.path.join(self.bld.env.PREFIX, self.bld.optim, appname + '.app.dSYM', 'Contents', 'Resources', 'DWARF',
+                     out_node.name), dsymtask.outputs[-1])
     return self.sign_task
 
 

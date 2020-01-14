@@ -1,18 +1,34 @@
 from .cppobject import CppObject
+from .ast_templates import Template
 
 
 class Name:
-    def __init__(self, lexer, name, position, target=None, template=None, arguments=None,
-                 template_bindings=None, parent=None, data=None, shadow=False, errors=[]):
+    def __init__(
+        self,
+        lexer,
+        name,
+        position,
+        target=None,
+        template=None,
+        arguments=None,
+        template_bindings=None,
+        parent=None,
+        data=None,
+        shadow=False,
+        errors=[]
+    ):
+        # type: (ClLexer, str, Position, Optional[CppObject], Optional[Template], Optional[List[Union[Value, TypeRef]]], Optional[ClLexer.TemplateBind], Optional[Name], Optional[CppObject], bool, List[str]) -> None
         self.lexer = lexer
         self.name = name
         self.position = position
         self.target = target
         self.template = template
         self.arguments = arguments
-        self.template_bindings = template_bindings or (parent and parent.template_bindings)
+        self.template_bindings = template_bindings or (
+            (parent is not None) and parent.template_bindings or None
+        )                                                             # type: Optional[ClLexer.TemplateBind]
         self.parent = parent
-        self.dependent = parent and parent.dependent or False
+        self.dependent = parent and parent.dependent or False         # type: bool
         self.errors = errors[:]
         self.shadow = shadow
         if shadow:
@@ -20,6 +36,7 @@ class Name:
         self.data = data
 
     def __str__(self):
+        # type: () -> str
         if self.arguments:
             name = '%s<%s>' % (self.name, (', '.join(str(a) for a in self.arguments)))
         else:
@@ -30,24 +47,34 @@ class Name:
             return name
 
     def equals(self, other, template_bindings):
+        # type: (Optional[Name], Dict[BaseTemplateParameter, Tuple[int, Template]]) -> bool
         if not other:
             return False
         if self.dependent:
-            if self.parent and not self.parent.equals(other.parent, template_bindings):
-                return False
-            if not self.parent and other.parent:
-                return False
+            if self.parent is not None and other.parent is not None:
+                if not self.parent.equals(other.parent, template_bindings):
+                    return False
             if self.name != other.name:
                 return False
             if self.template != other.template:
                 return False
-            if self.template:
-                args1 = self.template.expand_template_arg_list(self.arguments)
-                args2 = self.template.expand_template_arg_list(other.arguments)
-                if not self.template.equal_parameters(args1, args2, template_bindings):
+            if isinstance(self.template, Template):
+                assert self.arguments is not None
+                if other.arguments is not None:
+                    s1 = ';'.join(
+                        a.signature(template_bindings) for a in self.template.expand_template_arg_list(self.arguments)
+                    )
+                    s2 = ';'.join(
+                        a.signature(template_bindings) for a in self.template.expand_template_arg_list(other.arguments)
+                    )
+                    if s1 != s2:
+                        return False
+                else:
                     return False
             else:
-                if not CppObject.equal_parameters(self.arguments or [], other.arguments or [], template_bindings):
+                s1 = ';'.join(a.signature(template_bindings) for a in (self.arguments or []))
+                s2 = ';'.join(a.signature(template_bindings) for a in (other.arguments or []))
+                if s1 != s2:
                     return False
             return True
         else:
@@ -55,31 +82,50 @@ class Name:
         return False
 
     def get_type(self):
+        # type: () -> str
         if self.target:
             return self.target.get_token_type()
         else:
             return 'ID'
 
     def is_dependent(self):
+        # type: () -> bool
         return self.dependent
 
     def is_shadow(self):
+        # type: () -> bool
         return self.shadow
 
     def is_qualified(self):
+        # type: () -> bool
         return self.parent != None
-    
+
     def bind(self):
+        # type: () -> Name
         if self.template:
             if not self.template_bindings:
                 #assert self.shadow, self
                 pass
             else:
                 self.template_bindings.template.bind(self.template)
-        self.parent and self.parent.bind()
+        if self.parent:
+            self.parent.bind()
         return self
-    
+
     def show_errors(self):
-        self.parent and self.parent.show_errors()
+        # type: () -> None
+        if self.parent:
+            self.parent.show_errors()
         for error in self.errors:
             self.lexer.error(error, self.position)
+
+
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from typing import Dict, List, Optional, Tuple, Union
+    from ..cl_lexer import ClLexer
+    from .position import Position
+    from .ast_templates import BaseTemplateParameter
+    from .argument_list import ArgumentList
+    from .typeref import TypeRef
+    from .value import Value

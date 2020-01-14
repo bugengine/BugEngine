@@ -1,7 +1,6 @@
 import os
 import sys
-sys.path.append(os.path.split(os.path.split(os.path.dirname(os.path.realpath(__file__)))[0])[0])
-from mak.libs.cpp import parser
+from cpp import parser
 from optparse import OptionParser
 import traceback
 try:
@@ -14,8 +13,12 @@ except ImportError:
 
 option_decl = OptionParser()
 option_decl.set_usage('ddf.py [options] input out_def out_instances out_doc out_namespaces')
-option_decl.add_option("-d", dest="macro_file", action="append", help="Add the content of <macrofile> to the macros, one macro per line")
-option_decl.add_option("-p", "--pch", dest="pch", help="Insert an include for precompiled header at the start of the file")
+option_decl.add_option(
+    "-d", dest="macro_file", action="append", help="Add the content of <macrofile> to the macros, one macro per line"
+)
+option_decl.add_option(
+    "-p", "--pch", dest="pch", help="Insert an include for precompiled header at the start of the file"
+)
 option_decl.add_option("-m", "--module", dest="module", help="Module root")
 option_decl.add_option("-t", "--tmp", dest="tmp_dir", help="Directory to store temporary/cached files", default=".")
 
@@ -29,8 +32,9 @@ if __name__ == '__main__':
         sys.exit(1)
     else:
         try:
-            result = parser.parse(args[0], os.path.join(options.tmp_dir, 'cpp_grammar.pickle'),
-                                  options.macro_file, options.module)
+            result = parser.parse(
+                args[0], os.path.join(options.tmp_dir, 'cpp_grammar.pickle'), options.macro_file, options.module
+            )
             classes = StringIO()
             instances = StringIO()
             docs = StringIO()
@@ -51,4 +55,3 @@ if __name__ == '__main__':
             print(e)
             traceback.print_exc()
             sys.exit(1)
-

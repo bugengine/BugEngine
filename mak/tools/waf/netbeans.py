@@ -3,11 +3,13 @@ import os
 import sys
 from xml.dom.minidom import Document
 
+
 def relpath(i, node):
     if isinstance(i, str):
         return i
     else:
         return i.path_from(node)
+
 
 def gather_includes_defines(task_gen):
     defines = getattr(task_gen, 'defines', [])
@@ -27,11 +29,13 @@ def gather_includes_defines(task_gen):
                 defines = defines + getattr(t, 'defines ', [])
     return includes, defines
 
+
 def setAttributes(node, attrs):
     for k, v in attrs.items():
         node.setAttribute(k, v)
 
-def add(doc, parent, tag, value = None):
+
+def add(doc, parent, tag, value=None):
     el = doc.createElement(tag)
     if (value):
         if type(value) == type(str()):
@@ -41,17 +45,19 @@ def add(doc, parent, tag, value = None):
     parent.appendChild(el)
     return el
 
+
 class NbFolder:
     def __init__(self, name, document, xml):
         self.xml = add(document, xml, 'logicalFolder', {'name': name, 'displayName': name, 'projectFiles': 'true'})
         self.subfolders = {}
 
+
 class Netbeans(Build.BuildContext):
     "creates projects for NetBeans (latest version)"
-    cmd		= 'netbeans'
-    fun		= 'build'
-    optim	= 'debug'
-    version	= 79
+    cmd = 'netbeans'
+    fun = 'build'
+    optim = 'debug'
+    version = 79
 
     def generateProjectXml(self, appname, bld):
         doc = Document()
@@ -96,8 +102,13 @@ class Netbeans(Build.BuildContext):
     def generateConfigurationsXml(self, task_gens, bld, out):
         doc = Document()
         doc.encoding = "UTF-8"
-        cd = add(doc, doc, 'configurationDescriptor', {'version':'%i'%self.__class__.version})
-        lf = add(doc, cd, 'logicalFolder', {'name': 'root', 'displayName': 'root', 'projectFiles': 'true', 'kind': "ROOT"})
+        cd = add(doc, doc, 'configurationDescriptor', {'version': '%i' % self.__class__.version})
+        lf = add(doc, cd, 'logicalFolder', {
+            'name': 'root',
+            'displayName': 'root',
+            'projectFiles': 'true',
+            'kind': "ROOT"
+        })
         self.subfolders = {}
         options = []
         for task_gen in task_gens:
@@ -121,7 +132,12 @@ class Netbeans(Build.BuildContext):
             #		f, subs = subs[subname]
             #f.setAttribute('displayName', '['+project[-1]+']')
             #self.addSourceTree(doc, f, source, source.prefix)
-        impfiles = add(doc, lf, 'logicalFolder', {'name': 'ExternalFiles', 'displayName': 'waf', 'projectFiles': 'false', 'kind':'IMPORTANT_FILES_FOLDER'})
+        impfiles = add(doc, lf, 'logicalFolder', {
+            'name': 'ExternalFiles',
+            'displayName': 'waf',
+            'projectFiles': 'false',
+            'kind': 'IMPORTANT_FILES_FOLDER'
+        })
         add(doc, impfiles, 'itemPath', sys.argv[0])
         #add(doc, cd, 'sourceFolderFilter')
         srl = add(doc, cd, 'sourceRootList')
@@ -143,7 +159,7 @@ class Netbeans(Build.BuildContext):
             options.append((platform_includes, platform_defines))
 
             for variant in bld.env.ALL_VARIANTS:
-                conf = add(doc, confs, 'conf', { 'name': '%s:%s'%(toolchain, variant), 'type': '0' })
+                conf = add(doc, confs, 'conf', {'name': '%s:%s' % (toolchain, variant), 'type': '0'})
                 toolsSet = add(doc, conf, 'toolsSet')
                 if self.__class__.version >= 70:
                     add(doc, toolsSet, 'remote-sources-mode', 'LOCAL_SOURCES')
@@ -155,12 +171,15 @@ class Netbeans(Build.BuildContext):
                 mtype = add(doc, conf, 'makefileType')
                 mtool = add(doc, mtype, 'makeTool')
                 add(doc, mtool, 'buildCommandWorkingDir', '.')
-                add(doc, mtool, 'buildCommand', '%s %s build:%s:%s'%(sys.executable, sys.argv[0], toolchain, variant))
-                add(doc, mtool, 'cleanCommand', '%s %s clean:%s:%s'%(sys.executable, sys.argv[0], toolchain, variant))
+                add(doc, mtool, 'buildCommand', '%s %s build:%s:%s' % (sys.executable, sys.argv[0], toolchain, variant))
+                add(doc, mtool, 'cleanCommand', '%s %s clean:%s:%s' % (sys.executable, sys.argv[0], toolchain, variant))
                 if env.ABI == 'mach_o':
-                    add(doc, mtool, 'executablePath', os.path.join(bld_env.PREFIX, variant, getattr(Context.g_module, 'APPNAME', 'noname')+'.app'))
+                    add(doc, mtool, 'executablePath',
+                        os.path.join(bld_env.PREFIX, variant,
+                                     getattr(Context.g_module, 'APPNAME', 'noname') + '.app'))
                 else:
-                    add(doc, mtool, 'executablePath', os.path.join(bld_env.PREFIX, variant, env.DEPLOY_BINDIR, env.cxxprogram_PATTERN%out.target))
+                    add(doc, mtool, 'executablePath',
+                        os.path.join(bld_env.PREFIX, variant, env.DEPLOY_BINDIR, env.cxxprogram_PATTERN % out.target))
                 if self.__class__.version >= 70:
                     ctool = add(doc, mtool, 'cTool')
                     cincdir = add(doc, ctool, 'incDir')
@@ -176,7 +195,7 @@ class Netbeans(Build.BuildContext):
                     ccincdir = add(doc, cctool, 'includeDirectories')
                     ccdefines = add(doc, cctool, 'preprocessorList')
                 add(doc, mtype, 'requiredProjects')
-                includes=set([])
+                includes = set([])
                 defines = set([])
                 for d in ['be_api(x)=', 'BE_EXPORT='] + env.DEFINES:
                     add(doc, cdefines, 'Elem', d)
@@ -203,7 +222,7 @@ class Netbeans(Build.BuildContext):
         self.restore()
         if not self.all_envs:
             self.load_envs()
-        self.env.PROJECTS=[self.__class__.cmd]
+        self.env.PROJECTS = [self.__class__.cmd]
         self.env.TOOLCHAIN = '$(TOOLCHAIN)'
         self.env.VARIANT = '$(CONFIG)'
         self.env.PREFIX = '$(PREFIX)'
@@ -217,7 +236,6 @@ class Netbeans(Build.BuildContext):
         self.env.DEPLOY_KERNELDIR = '$(DEPLOY_KERNELDIR)'
         self.features = ['GUI']
         self.recurse([self.run_dir])
-
 
         appname = getattr(Context.g_module, Context.APPNAME, os.path.basename(self.srcnode.abspath()))
         path = self.srcnode.make_node('nbproject')
@@ -235,7 +253,6 @@ class Netbeans(Build.BuildContext):
                 if not 'kernel' in tg.features:
                     deps.append(tg)
 
-
         p = self.generateProjectXml(appname, self)
         project.write(p.toxml())
         c = self.generateConfigurationsXml(deps, self, out)
@@ -247,11 +264,13 @@ class Netbeans7(Netbeans):
     cmd = 'netbeans7'
     fun = 'build'
 
+
 class Netbeans6(Netbeans):
     "creates projects for NetBeans 6.x"
-    cmd		= 'netbeans6'
-    fun		= 'build'
-    version	= 51
+    cmd = 'netbeans6'
+    fun = 'build'
+    version = 51
+
 
 class SunStudio(Netbeans6):
     "creates projects for SunStudio"
