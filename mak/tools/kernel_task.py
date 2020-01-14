@@ -1,7 +1,6 @@
 import os
 import sys
-sys.path.append(os.path.split(os.path.split(os.path.dirname(os.path.realpath(__file__)))[0])[0])
-from mak.libs.cpp import parser, tree
+from cpp import parser, tree
 from optparse import OptionParser
 import traceback
 try:
@@ -12,14 +11,18 @@ except ImportError:
     except ImportError:
         from io import StringIO
 
-
 option_decl = OptionParser()
 option_decl.set_usage('kernel_task.py kernel_name kernel_input task_output.cc task_output.hh')
-option_decl.add_option("-d", dest="macro_file", action="append", help="Add the content of <macrofile> to the macros, one macro per line")
-option_decl.add_option("-p", "--pch", dest="pch", help="Insert an include for precompiled header at the start of the file")
+option_decl.add_option("-d",
+                       dest="macro_file",
+                       action="append",
+                       help="Add the content of <macrofile> to the macros, one macro per line")
+option_decl.add_option("-p",
+                       "--pch",
+                       dest="pch",
+                       help="Insert an include for precompiled header at the start of the file")
 option_decl.add_option("-m", "--module", dest="module", help="Module root")
 option_decl.add_option("-t", "--tmp", dest="tmp_dir", help="Directory to store temporary/cached files", default=".")
-
 
 global_macro_map = {
     "__declspec": True,
@@ -31,7 +34,6 @@ global_macro_map = {
     "__stdcall": False,
     "PASCAL": False,
 }
-
 
 template_h = """
 /* BugEngine <bugengine.devel@gmail.com> / 2008-2015
@@ -78,7 +80,6 @@ published:
 #endif
 """
 
-
 template_cc = """
 %(pch)s
 #include "%(header)s"
@@ -124,7 +125,6 @@ ref< %(Name)sTask::%(Name)sKernel > %(Name)sTask::s_kernel = ref< %(Name)sTask::
 %(end_Namespace)s
 """
 
-
 if __name__ == '__main__':
     (options, arguments) = option_decl.parse_args()
     if not arguments:
@@ -135,8 +135,8 @@ if __name__ == '__main__':
         sys.exit(1)
     else:
         try:
-            result = parser.parse(arguments[1], os.path.join(options.tmp_dir, 'cpp_grammar.pickle'),
-                                  options.macro_file, options.module)
+            result = parser.parse(arguments[1], os.path.join(options.tmp_dir, 'cpp_grammar.pickle'), options.macro_file,
+                                  options.module)
             if not result:
                 sys.exit(1)
             kernel_namespace = ['Kernels'] + arguments[0].split('.')
@@ -161,41 +161,61 @@ if __name__ == '__main__':
                 args.append((arg.name, arg.type))
 
             argument_assign = '\n    ,   '.join(('m_%s(%s)' % (arg[0], arg[0]) for arg in args))
-            callback_assign = '\n    ,   '.join(('m_%sChain(%s->producer(), m_task->startCallback())' % (arg[0], arg[0])
-                                                for arg in args))
-            argument_out_assign = '\n    ,   '.join(('%s(ref< const BugEngine::KernelScheduler::Product< BugEngine::KernelScheduler::ParamTypeToKernelType< %s >::Type > >::create(BugEngine::Arena::task(), %s, m_task))' % (arg[0], arg[1], arg[0])
-                                                    for arg in args))
+            callback_assign = '\n    ,   '.join(
+                ('m_%sChain(%s->producer(), m_task->startCallback())' % (arg[0], arg[0]) for arg in args))
+            argument_out_assign = '\n    ,   '.join((
+                '%s(ref< const BugEngine::KernelScheduler::Product< BugEngine::KernelScheduler::ParamTypeToKernelType< %s >::Type > >::create(BugEngine::Arena::task(), %s, m_task))'
+                % (arg[0], arg[1], arg[0]) for arg in args))
             params = {
-                'header': arguments[3],
-                'Namespace':' { '.join('namespace %s' % n.capitalize() for n in kernel_namespace[:-1]) + '\n{\n',
-                'end_Namespace': '}'* (len(kernel_namespace) -1),
-                'name':     kernel_name,
-                'Name':     kernel_name.capitalize(),
-                'NAME':     kernel_name.upper(),
-                'kernel_full_name': '.'.join(kernel_full_name),
-                'pch':      '#include <%s>\n'%options.pch if options.pch else '',
-                'PLUGIN':   options.module.upper(),
-                'module':   options.module,
-                'plugin':   options.module.replace('_', '.'),
-                'includes': '\n'.join(result.includes),
-                'argument_count': len(args),
+                'header':
+                    arguments[3],
+                'Namespace':
+                    ' { '.join('namespace %s' % n.capitalize() for n in kernel_namespace[:-1]) + '\n{\n',
+                'end_Namespace':
+                    '}' * (len(kernel_namespace) - 1),
+                'name':
+                    kernel_name,
+                'Name':
+                    kernel_name.capitalize(),
+                'NAME':
+                    kernel_name.upper(),
+                'kernel_full_name':
+                    '.'.join(kernel_full_name),
+                'pch':
+                    '#include <%s>\n' % options.pch if options.pch else '',
+                'PLUGIN':
+                    options.module.upper(),
+                'module':
+                    options.module,
+                'plugin':
+                    options.module.replace('_', '.'),
+                'includes':
+                    '\n'.join(result.includes),
+                'argument_count':
+                    len(args),
                 'argument_field':
-                    '\n    '.join(('weak< const BugEngine::KernelScheduler::Product< BugEngine::KernelScheduler::ParamTypeToKernelType< %s >::Type > > const m_%s;' % (arg[1], arg[0])
-                                   for arg in args)),
+                    '\n    '.join((
+                        'weak< const BugEngine::KernelScheduler::Product< BugEngine::KernelScheduler::ParamTypeToKernelType< %s >::Type > > const m_%s;'
+                        % (arg[1], arg[0]) for arg in args)),
                 'callbacks':
-                    '\n    '.join(('BugEngine::Task::ITask::CallbackConnection const m_%sChain;' % (arg[0])
-                                   for arg in args)),
+                    '\n    '.join(
+                        ('BugEngine::Task::ITask::CallbackConnection const m_%sChain;' % (arg[0]) for arg in args)),
                 'argument_result_assign':
                     '\n    '.join(('result[%d] = m_%s->parameter();' % (i, arg[0]) for i, arg in enumerate(args))),
                 'argument_outs':
-                    '\n    '.join(('ref< const BugEngine::KernelScheduler::Product< BugEngine::KernelScheduler::ParamTypeToKernelType< %s >::Type > > const %s;' % (arg[1], arg[0])
-                                   for arg in args)),
+                    '\n    '.join((
+                        'ref< const BugEngine::KernelScheduler::Product< BugEngine::KernelScheduler::ParamTypeToKernelType< %s >::Type > > const %s;'
+                        % (arg[1], arg[0]) for arg in args)),
                 'argument_params':
-                    ', '.join(('weak< const BugEngine::KernelScheduler::Product< BugEngine::KernelScheduler::ParamTypeToKernelType< %s >::Type > > %s' % (arg[1], arg[0])
-                                   for arg in args)),
-                'argument_assign': argument_assign and (argument_assign + '\n    ,   ') or '/* no arguments */\n        ',
-                'callback_assign': callback_assign and ('\n    ,   ' + callback_assign) or '\n        /* no callbacks */',
-                'argument_out_assign': argument_out_assign and ('\n    ,   ' + argument_out_assign) or '\n        /* no arguments out */',
+                    ', '.join((
+                        'weak< const BugEngine::KernelScheduler::Product< BugEngine::KernelScheduler::ParamTypeToKernelType< %s >::Type > > %s'
+                        % (arg[1], arg[0]) for arg in args)),
+                'argument_assign':
+                    argument_assign and (argument_assign + '\n    ,   ') or '/* no arguments */\n        ',
+                'callback_assign':
+                    callback_assign and ('\n    ,   ' + callback_assign) or '\n        /* no callbacks */',
+                'argument_out_assign':
+                    argument_out_assign and ('\n    ,   ' + argument_out_assign) or '\n        /* no arguments out */',
             }
             with open(arguments[2], 'w') as out:
                 out.write(template_cc % params)

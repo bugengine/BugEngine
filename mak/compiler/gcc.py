@@ -8,16 +8,18 @@ import sys
 def check_gcc_o_space(self, mode='c'):
     pass
 
+
 @Configure.conf
 def gcc_modifier_platform(conf):
     pass
 
+
 class GCC(Configure.ConfigurationContext.GnuCompiler):
     DEFINES = ['__GNUC__', '__GNUG__']
-    NAMES = ('GCC',)
+    NAMES = ('GCC', )
     TOOLS = 'gcc gxx'
 
-    def __init__(self, gcc, gxx, extra_args = {}):
+    def __init__(self, gcc, gxx, extra_args={}):
         Configure.ConfigurationContext.GnuCompiler.__init__(self, gcc, gxx, extra_args)
 
     def set_warning_options(self, conf):
@@ -37,11 +39,14 @@ class GCC(Configure.ConfigurationContext.GnuCompiler):
     def load_in_env(self, conf, platform):
         Configure.ConfigurationContext.GnuCompiler.load_in_env(self, conf, platform)
         v = conf.env
-        if self.version_number < (4,3,):
+        if self.version_number < (
+                4,
+                3,
+        ):
             v.append_unique('CFLAGS', ['-static-libgcc'])
             v.append_unique('CXXFLAGS', ['-static-libgcc'])
             v.append_unique('LINKFLAGS', ['-static-libgcc'])
-        if self.version_number >= (4,):
+        if self.version_number >= (4, ):
             if platform.NAME != 'windows':
                 v.append_unique('CFLAGS', ['-fvisibility=hidden'])
                 v.append_unique('CXXFLAGS', ['-fvisibility=hidden'])
@@ -53,14 +58,13 @@ class LLVM(GCC):
     DEFINES = ['__GNUC__', '__GNUG__']
     NAMES = ('LLVM', 'GCC')
 
-    def __init__(self, gcc, gxx, extra_args = {}):
+    def __init__(self, gcc, gxx, extra_args={}):
         GCC.__init__(self, gcc, gxx, extra_args)
 
 
 def detect_gcc_from_path(conf, path, seen):
     gcc_compilers = []
-    for subdir, relative in [('', '../..'), ('lib/gcc', '../../../..'), ('gcc', '../../..'),
-                             ('llvm', '../../..')]:
+    for subdir, relative in [('', '../..'), ('lib/gcc', '../../../..'), ('gcc', '../../..'), ('llvm', '../../..')]:
         libdir = os.path.join(path, subdir)
         if not os.path.isdir(libdir):
             continue
@@ -84,22 +88,22 @@ def detect_gcc_from_path(conf, path, seen):
                     '.'.join(v[0:2]),
                     ''.join(v[0:2]),
                     v[0],
-                    '-'+'.'.join(v),
-                    '-'+''.join(v),
-                    '-'+'.'.join(v[0:2]),
-                    '-'+''.join(v[0:2]),
-                    '-'+v[0],
+                    '-' + '.'.join(v),
+                    '-' + ''.join(v),
+                    '-' + '.'.join(v[0:2]),
+                    '-' + ''.join(v[0:2]),
+                    '-' + v[0],
                     '',
                 ]
 
                 def find_target_gcc(gcc_name_prefix, cls):
                     cc = cxx = None
                     for v in versions:
-                        cc = conf.detect_executable('%s-gcc%s'%(gcc_name_prefix, v), path_list=[bindir])
+                        cc = conf.detect_executable('%s-gcc%s' % (gcc_name_prefix, v), path_list=[bindir])
                         if cc:
                             break
                     for v in versions:
-                        cxx = conf.detect_executable('%s-g++%s'%(gcc_name_prefix, v), path_list=[bindir])
+                        cxx = conf.detect_executable('%s-g++%s' % (gcc_name_prefix, v), path_list=[bindir])
                         if cxx:
                             break
                     if cc and cxx:
@@ -118,6 +122,7 @@ def detect_gcc_from_path(conf, path, seen):
                                 conf.compilers.append(c)
 
                             return c
+
                 c = find_target_gcc(target, GCC)
                 if c:
                     gcc_compilers.append(c)

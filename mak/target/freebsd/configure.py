@@ -5,8 +5,10 @@ import re
 
 class FreeBSD(Configure.ConfigurationContext.Platform):
     NAME = 'FreeBSD'
-    SUPPORTED_TARGETS = (re.compile('.*-freebsd[0-9\.]*'),
-                         re.compile('^freebsd[0-9\.]*'),)
+    SUPPORTED_TARGETS = (
+        re.compile('.*-freebsd[0-9\.]*'),
+        re.compile('^freebsd[0-9\.]*'),
+    )
 
     def __init__(self):
         Configure.ConfigurationContext.Platform.__init__(self)
@@ -25,9 +27,9 @@ class FreeBSD(Configure.ConfigurationContext.Platform):
                 env.append_unique('CPPFLAGS', ['-mfloat-abi=hard', '-mfpu=vfp'])
                 env.append_unique('CFLAGS', ['-mfloat-abi=hard', '-mfpu=vfp'])
                 env.append_unique('CXXFLAGS', ['-std=gnu++11', '-mfloat-abi=hard', '-mfpu=vfp'])
-                if compiler.version_number < (3,4):
+                if compiler.version_number < (3, 4):
                     env.append_unique('CXXFLAGS', ['-std=gnu++11'])
-                if compiler.version_number < (3,5):
+                if compiler.version_number < (3, 5):
                     env.append_unique('CFLAGS', ['-Wa,-meabi=5'])
                     env.append_unique('CXXFLAGS', ['-Wa,-meabi=5'])
                 if '-target' not in env.CFLAGS and not env.SYSROOT and env.FREEBSD_HOST_TRIPLE:
@@ -52,9 +54,9 @@ class FreeBSD(Configure.ConfigurationContext.Platform):
         env.append_unique('CXXFLAGS', ['-fPIC'])
         env.RPATH = ['$ORIGIN/../share/bugengine/plugin:$ORIGIN/../lib:$ORIGIN:$ORIGIN/../plugin:$ORIGIN/../../../lib']
         env.append_unique('LIB', ['rt', 'pthread', 'm'])
-        env.append_unique('CFLAGS', ['-I%s/usr/local/include'%(compiler.sysroot or '')])
-        env.append_unique('CXXFLAGS', ['-I%s/usr/local/include'%(compiler.sysroot or '')])
-        env.append_unique('LIBPATH', ['%s/usr/local/lib'%(compiler.sysroot or '')])
+        env.append_unique('CFLAGS', ['-I%s/usr/local/include' % (compiler.sysroot or '')])
+        env.append_unique('CXXFLAGS', ['-I%s/usr/local/include' % (compiler.sysroot or '')])
+        env.append_unique('LIBPATH', ['%s/usr/local/lib' % (compiler.sysroot or '')])
         env.append_unique('DEFINES', ['_BSD_SOURCE'])
         env.append_unique('LINKFLAGS_dynamic', ['-rdynamic', '-Wl,-E', '-Wl,-z,origin'])
 
@@ -65,4 +67,3 @@ def options(opt):
 
 def configure(conf):
     conf.platforms.append(FreeBSD())
-

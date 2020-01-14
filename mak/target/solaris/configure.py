@@ -8,6 +8,7 @@ import os, sys
 def options(opt):
     pass
 
+
 @conf
 def set_sunos_options(self):
     self.env.ABI = 'elf'
@@ -28,16 +29,21 @@ def set_sunos_options(self):
         self.env.append_unique('RPATH', [os.path.join(os.path.dirname(i), 'lib')])
     self.env.append_unique('LIB', ['dl', 'rt', 'pthread', 'm'])
 
+
 @conf
 def set_sunos_suncc_options(conf, arch):
     v = conf.env
     if arch in ['x86', 'i386', 'i486', 'i586', 'i686']:
         v.append_unique('CFLAGS', ['-m32'])
-        v.append_unique('CXXFLAGS', ['-m32', os.path.join(conf.bugenginenode.abspath(), 'mak/compiler/suncc/interlocked-a=x86.il')])
+        v.append_unique(
+            'CXXFLAGS',
+            ['-m32', os.path.join(conf.bugenginenode.abspath(), 'mak/compiler/suncc/interlocked-a=x86.il')])
         v.append_unique('LINKFLAGS', ['-m32'])
     elif arch in ['x86_64', 'x64', 'amd64']:
         v.append_unique('CFLAGS', ['-m64'])
-        v.append_unique('CXXFLAGS', ['-m64', os.path.join(conf.bugenginenode.abspath(), 'mak/compiler/suncc/interlocked-a=amd64.il')])
+        v.append_unique(
+            'CXXFLAGS',
+            ['-m64', os.path.join(conf.bugenginenode.abspath(), 'mak/compiler/suncc/interlocked-a=amd64.il')])
         v.append_unique('LINKFLAGS', ['-m64'])
     v.append_unique('CFLAGS', ['-mt', '-xldscope=hidden', '-Kpic', '-DPIC', '-D__PIC__'])
     v.append_unique('CXXFLAGS', ['-mt', '-xldscope=hidden', '-Kpic', '-DPIC', '-D__PIC__'])
@@ -48,23 +54,29 @@ def set_sunos_suncc_options(conf, arch):
     v['CFLAGS_warnnone'] = ['-w', '-errtags=yes', '-erroff=%all']
     v['CXXFLAGS_warnnone'] = ['-w', '-errtags=yes', '-erroff=%all']
     v['CFLAGS_warnall'] = ['-errtags=yes']
-    v['CXXFLAGS_warnall'] = ['-errtags=yes', '-erroff=fieldsemicolonw,notused,unknownpragma,wunreachable,doubunder,wvarhidenmem,wvarhidemem,reftotemp,truncwarn,badargtype2w,hidef,wemptydecl,notemsource,nonewline,inllargeuse']
+    v['CXXFLAGS_warnall'] = [
+        '-errtags=yes',
+        '-erroff=fieldsemicolonw,notused,unknownpragma,wunreachable,doubunder,wvarhidenmem,wvarhidemem,reftotemp,truncwarn,badargtype2w,hidef,wemptydecl,notemsource,nonewline,inllargeuse'
+    ]
 
     v['CFLAGS_debug'] = ['-g', '-D_DEBUG']
     v['CXXFLAGS_debug'] = ['-g', '-D_DEBUG']
     v['LINKFLAGS_debug'] = ['-g']
 
     v['CFLAGS_profile'] = ['-g', '-DNDEBUG', '-fast']
-    v['CXXFLAGS_profile'] = ['-g', '-DNDEBUG', '-fast',
-                            '-features=no%except', '-features=mutable',
-                            '-features=localfor', '-features=bool', '-features=no%split_init']
+    v['CXXFLAGS_profile'] = [
+        '-g', '-DNDEBUG', '-fast', '-features=no%except', '-features=mutable', '-features=localfor', '-features=bool',
+        '-features=no%split_init'
+    ]
     v['LINKFLAGS_profile'] = ['-g']
 
     v['CFLAGS_final'] = ['-g', '-DNDEBUG', '-fast']
-    v['CXXFLAGS_final'] = ['-g', '-DNDEBUG', '-fast',
-                            '-features=no%except', '-features=mutable',
-                            '-features=localfor', '-features=bool', '-features=no%split_init']
+    v['CXXFLAGS_final'] = [
+        '-g', '-DNDEBUG', '-fast', '-features=no%except', '-features=mutable', '-features=localfor', '-features=bool',
+        '-features=no%split_init'
+    ]
     v['LINKFLAGS_final'] = ['-g']
+
 
 @conf
 def set_sunos_gcc_options(conf, flags, version):
@@ -77,7 +89,9 @@ def set_sunos_gcc_options(conf, flags, version):
     v.CFLAGS_warnnone = ['-w']
     v.CXXFLAGS_warnnone = ['-w']
     v.CFLAGS_warnall = ['-std=c99', '-Wall', '-Wextra', '-pedantic', '-Winline', '-Werror']
-    v.CXXFLAGS_warnall = ['-Wall', '-Wextra', '-Werror', '-Wno-sign-compare', '-Woverloaded-virtual', '-Wno-invalid-offsetof']
+    v.CXXFLAGS_warnall = [
+        '-Wall', '-Wextra', '-Werror', '-Wno-sign-compare', '-Woverloaded-virtual', '-Wno-invalid-offsetof'
+    ]
     if version_number >= 4.8:
         v.CXXFLAGS_warnall.append('-Wno-unused-local-typedefs')
 
@@ -96,11 +110,12 @@ def set_sunos_gcc_options(conf, flags, version):
     v.ASFLAGS_final = ['-pipe', '-g', '-DNDEBUG', '-O3']
     v.LINKFLAGS_final = ['-pipe', '-g']
 
+
 @conf
 def set_sunos_clang_options(conf, version):
     v = conf.env
     version = version.split('.')
-    version = float(version[0]) + float(version[1])/10
+    version = float(version[0]) + float(version[1]) / 10
     v.CFLAGS = options + ['-fPIC']
     v.CXXFLAGS = options + ['-fPIC']
     v.LINKFLAGS = options + ['-rdynamic', '-Wl,-E']
@@ -109,7 +124,9 @@ def set_sunos_clang_options(conf, version):
     v.CFLAGS_warnnone = ['-w']
     v.CXXFLAGS_warnnone = ['-w']
     v.CFLAGS_warnall = ['-std=c99', '-Wall', '-Wextra', '-pedantic', '-Winline', '-Werror']
-    v.CXXFLAGS_warnall = ['-Wall', '-Wextra', '-Werror', '-Wno-sign-compare', '-Woverloaded-virtual', '-Wno-invalid-offsetof']
+    v.CXXFLAGS_warnall = [
+        '-Wall', '-Wextra', '-Werror', '-Wno-sign-compare', '-Woverloaded-virtual', '-Wno-invalid-offsetof'
+    ]
 
     v.CFLAGS_debug = ['-pipe', '-g', '-D_DEBUG']
     v.CXXFLAGS_debug = ['-pipe', '-g', '-D_DEBUG']
@@ -133,7 +150,7 @@ def configure(conf):
         position = target.find('solaris')
         if position != -1:
             os = 'sunos'
-            toolchain = '%s-%s-%s-%s'%(os, arch, name, version)
+            toolchain = '%s-%s-%s-%s' % (os, arch, name, version)
             if toolchain not in seen:
                 seen.add(toolchain)
                 env = conf.env.derive()
@@ -167,7 +184,7 @@ def configure(conf):
         if target.find('solaris') != -1:
             arch_name, options = arch
             target = 'sunos'
-            toolchain = '%s-%s-%s-%s'%(target, arch_name, 'clang', version)
+            toolchain = '%s-%s-%s-%s' % (target, arch_name, 'clang', version)
             if toolchain not in seen:
                 seen.add(toolchain)
                 env = conf.env.derive()
@@ -197,11 +214,10 @@ def configure(conf):
                         conf.variant = ''
                         Logs.pprint('GREEN', 'configured for toolchain %s' % (toolchain))
 
-
     for directory, target, arch, version in conf.env.SUNCC_TARGETS:
         if target.find('SunOS') != -1:
             target = 'sunos'
-            toolchain = '%s-%s-%s-%s'%(target, arch, 'suncc', version)
+            toolchain = '%s-%s-%s-%s' % (target, arch, 'suncc', version)
             if toolchain not in seen:
                 seen.add(toolchain)
                 env = conf.env.derive()
@@ -230,4 +246,3 @@ def configure(conf):
                     else:
                         conf.variant = ''
                         Logs.pprint('GREEN', 'configured for toolchain %s' % (toolchain))
-

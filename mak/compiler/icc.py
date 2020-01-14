@@ -5,7 +5,7 @@ import sys
 
 class ICC(Configure.ConfigurationContext.GnuCompiler):
     DEFINES = ['__INTEL_COMPILER', '__GNUC__', '_MSC_VER']
-    NAMES = ('ICC',)
+    NAMES = ('ICC', )
     ICC_PLATFORMS = {
         '__gnu_linux__': 'linux-gnu',
         '__APPLE__': 'darwin',
@@ -16,16 +16,25 @@ class ICC(Configure.ConfigurationContext.GnuCompiler):
     }
     TOOLS = 'icc icpc'
     VECTORIZED_FLAGS = {
-        'x86':      (('.sse3', ['-mssse3']),
-                     ('.sse4', ['-msse4.2',]),
-                     ('.avx', ['-mavx']),
-                     ('.avx2', ['-march=core-avx2']),),
-        'amd64':    (('.sse3', ['-mssse3']),
-                     ('.sse4', ['-msse4.2',]),
-                     ('.avx', ['-mavx']),
-                     ('.avx2', ['-march=core-avx2']),),
+        'x86': (
+            ('.sse3', ['-mssse3']),
+            ('.sse4', [
+                '-msse4.2',
+            ]),
+            ('.avx', ['-mavx']),
+            ('.avx2', ['-march=core-avx2']),
+        ),
+        'amd64': (
+            ('.sse3', ['-mssse3']),
+            ('.sse4', [
+                '-msse4.2',
+            ]),
+            ('.avx', ['-mavx']),
+            ('.avx2', ['-march=core-avx2']),
+        ),
     }
     ARCHIVER = 'xiar'
+
     def __init__(self, icc, icpc, extra_args={}, extra_env={}):
         Configure.ConfigurationContext.GnuCompiler.__init__(self, icc, icpc, extra_args, extra_env)
 
@@ -45,7 +54,7 @@ class ICC(Configure.ConfigurationContext.GnuCompiler):
                     value = None
                 else:
                     macro = l[:sp]
-                    value = l[sp+1:]
+                    value = l[sp + 1:]
                 if macro in self.ICC_PLATFORMS:
                     platform = self.ICC_PLATFORMS[macro]
                 elif macro in self.ICC_ARCHS:
@@ -56,7 +65,7 @@ class ICC(Configure.ConfigurationContext.GnuCompiler):
                     major = value[:-2]
                     version = '%s.%s%s' % (major, minor, patch if patch != '0' else '')
         self.target = '%s-%s' % (arch, platform)
-        self.targets = (self.target,)
+        self.targets = (self.target, )
         return version, platform, arch
 
     def set_optimisation_options(self, conf):
@@ -80,11 +89,11 @@ class ICC(Configure.ConfigurationContext.GnuCompiler):
         v.append_unique('CFLAGS', ['-fPIC', '-D__PURE_INTEL_C99_HEADERS__=1', '-diag-disable', '1292'])
         v.append_unique('CXXFLAGS', ['-fPIC', '-D__PURE_INTEL_C99_HEADERS__=1', '-diag-disable', '1292'])
         if platform.NAME != 'windows':
-            if self.version_number >= (10,):
+            if self.version_number >= (10, ):
                 v.append_unique('LINKFLAGS', ['-static-intel'])
             else:
                 v.append_unique('LINKFLAGS', ['-i-static'])
-        if self.version_number >= (11,):
+        if self.version_number >= (11, ):
             v.append_unique('CFLAGS', ['-fvisibility=hidden'])
             v.append_unique('CXXFLAGS', ['-fvisibility=hidden'])
             v.CFLAGS_exportall = ['-fvisibility=default']
@@ -107,6 +116,7 @@ class ICC(Configure.ConfigurationContext.GnuCompiler):
                 if e.find('command line warning') != -1:
                     result = 1
         return result == 0
+
 
 def detect_icc(conf):
     environ = getattr(conf, 'environ', os.environ)

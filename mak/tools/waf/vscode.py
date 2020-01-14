@@ -1,16 +1,19 @@
 from waflib import Context, Build, TaskGen, Logs
-import os, sys
+import os
+import sys
 
 
 def unique(seq):
     seen = set()
     seen_add = seen.add
-    return [ x for x in seq if x not in seen and not seen_add(x)]
+    return [x for x in seq if x not in seen and not seen_add(x)]
 
 
 def gather_includes_defines(task_gen):
-    defines = getattr(task_gen, 'defines', []) + getattr(task_gen, 'export_defines', []) + getattr(task_gen, 'extra_defines', [])
-    includes = getattr(task_gen, 'includes', []) + getattr(task_gen, 'export_includes', []) + getattr(task_gen, 'extra_includes', [])
+    defines = getattr(task_gen, 'defines', []) + getattr(task_gen, 'export_defines',
+                                                         []) + getattr(task_gen, 'extra_defines', [])
+    includes = getattr(task_gen, 'includes', []) + getattr(task_gen, 'export_includes',
+                                                           []) + getattr(task_gen, 'extra_includes', [])
     seen = set([])
     use = getattr(task_gen, 'use', []) + getattr(task_gen, 'private_use', [])
     while use:
@@ -23,8 +26,11 @@ def gather_includes_defines(task_gen):
                 pass
             else:
                 use = use + getattr(t, 'use', [])
-                includes = includes + getattr(t, 'includes', []) + getattr(t, 'export_includes', []) + getattr(task_gen, 'extra_includes', [])
-                defines = defines + getattr(t, 'defines', []) + getattr(t, 'export_defines', []) + getattr(task_gen, 'extra_defines', [])
+                includes = includes + getattr(t, 'includes',
+                                              []) + getattr(t, 'export_includes',
+                                                            []) + getattr(task_gen, 'extra_includes', [])
+                defines = defines + getattr(t, 'defines', []) + getattr(t, 'export_defines',
+                                                                        []) + getattr(task_gen, 'extra_defines', [])
     return unique(includes), unique(defines)
 
 
@@ -41,6 +47,21 @@ class vscode(Build.BuildContext):
     fun = 'build'
     optim = 'debug'
 
+    SETTINGS = '  {\n' \
+               '    "editor.formatOnSave": true,\n' \
+               '    "editor.formatOnType": true,\n' \
+               '    "python.formatting.provider": "autopep8",\n' \
+               '    "python.linting.mypyArgs": [\n' \
+               '      "--follow-imports=silent"\n' \
+               '    ],\n' \
+               '    "python.linting.mypyEnabled": true,\n' \
+               '    "python.linting.pylintEnabled": false,\n' \
+               '    "python.formatting.autopep8Path": "yapf",\n' \
+               '    "python.formatting.autopep8Args": [\n' \
+               '      "--style=%(bugenginepath)s/setup.cfg"\n' \
+               '    ]\n' \
+               '  }\n'
+
     def execute(self):
         """
         Entry point
@@ -48,7 +69,7 @@ class vscode(Build.BuildContext):
         self.restore()
         if not self.all_envs:
             self.load_envs()
-        self.env.PROJECTS=[self.__class__.cmd]
+        self.env.PROJECTS = [self.__class__.cmd]
 
         self.env.VARIANT = '${Variant}'
         self.env.TOOLCHAIN = '${Toolchain}'
@@ -65,7 +86,39 @@ class vscode(Build.BuildContext):
         self.features = ['GUI']
 
         self.recurse([self.run_dir])
+        self.write_workspace()
 
+    def write_workspace(self):
+        appname = getattr(Context.g_module, Context.APPNAME, self.srcnode.name)
+
+        workspace_node = self.srcnode.make_node('%s.code-workspace' % appname)
+        extra_node = self.bugenginenode.make_node('extra')
+
+        with open(workspace_node.abspath(), 'w') as workspace:
+            workspace.write(
+                '{\n'
+                '  "folders": [\n'
+                '    {\n'
+                '      "path": ".",\n'
+                '      "name": "%s"\n'
+                '    }\n'
+                '  ],\n' % appname
+            )
+            workspace.write(
+                '  "settings": %s\n'
+                '}\n' % (self.SETTINGS % {
+                    'bugenginepath': self.bugenginenode.abspath()
+                })
+            )
+
+
+class vscode_folders(vscode):
+    "creates projects for Visual Studio Code"
+    cmd = 'vscode_folders'
+    fun = 'build'
+    optim = 'debug'
+
+    def write_workspace(self):
         appname = getattr(Context.g_module, Context.APPNAME, self.srcnode.name)
 
         workspace_node = self.srcnode.make_node('%s.code-workspace' % appname)
@@ -96,27 +149,37 @@ class vscode(Build.BuildContext):
                                     sub_env = env
                                 for variant in tg.bld.env.ALL_VARIANTS:
                                     all_defines = ('"%s"' % d for d in sub_env.DEFINES + defines)
-                                    all_includes = ('"%s"' % path_from(p, tg.bld) for p in (includes + sub_env.INCLUDES + sub_env.SYSTEM_INCLUDES + [os.path.join(sub_env.SYSROOT or '', 'usr', 'include')]))
-                                    configs.append('    {\n'
-                                                   '      "name": "%s:%s",\n'
-                                                   '      "includePath": [\n'
-                                                   '        %s\n'
-                                                   '      ],\n'
-                                                   '      "defines": [\n'
-                                                   '        %s\n'
-                                                   '      ]\n'
-                                                   '    }' % (toolchain, variant,
-                                                              ',\n        '.join(all_includes),
-                                                              ',\n        '.join(all_defines)))
+                                    all_includes = (
+                                        '"%s"' % path_from(p, tg.bld) for p in (
+                                            includes + sub_env.INCLUDES + sub_env.SYSTEM_INCLUDES +
+                                            [os.path.join(sub_env.SYSROOT or '', 'usr', 'include')]
+                                        )
+                                    )
+                                    configs.append(
+                                        '    {\n'
+                                        '      "name": "%s:%s",\n'
+                                        '      "includePath": [\n'
+                                        '        %s\n'
+                                        '      ],\n'
+                                        '      "defines": [\n'
+                                        '        %s\n'
+                                        '      ]\n'
+                                        '    }' % (
+                                            toolchain, variant, ',\n        '.join(all_includes),
+                                            ',\n        '.join(all_defines)
+                                        )
+                                    )
                             settings.write('{\n  "configurations": [\n%s\n  ]\n}\n' % (',\n'.join(configs)))
                         if node.is_child_of(extra_node):
                             while node.parent != extra_node:
                                 node = node.parent
-                            name += '[%s]'%node.name
-                        workspace.write('    {\n'
-                                        '        "name": "%s",\n'
-                                        '        "path": "%s"\n'
-                                        '    },\n' % (name, path))
+                            name += '[%s]' % node.name
+                        workspace.write(
+                            '    {\n'
+                            '        "name": "%s",\n'
+                            '        "path": "%s"\n'
+                            '    },\n' % (name, path)
+                        )
 
                     if 'Makefile' in tg.features:
                         root = tg.source_nodes[0]
@@ -130,31 +193,47 @@ class vscode(Build.BuildContext):
                             else:
                                 env = bld_env
                             for variant in self.env.ALL_VARIANTS:
-                                tasks.append('    {\n'
-                                             '      "label": "build:%(toolchain)s:%(variant)s",\n'
-                                             '      "type": "process",\n'
-                                             '      "command": ["%(python)s"],\n'
-                                             '      "args": ["%(waf)s", %(cl)s],\n'
-                                             '      "options":{\n'
-                                             '        "cwd": "%(pwd)s"\n'
-                                             '      },\n'
-                                             '      "problemMatcher": [\n'
-                                             '        "$gcc",\n'
-                                             '        "$msCompile"\n'
-                                             '      ],\n'
-                                             '      "group": {\n'
-                                             '        "kind": "build",\n'
-                                             '        "isDefault": true\n'
-                                             '      }\n'
-                                             '    }\n' % {'python': sys.executable,
-                                                          'waf': sys.argv[0],
-                                                          'toolchain': env_name,
-                                                          'variant': variant,
-                                                          'cl': ', '.join('"%s"'%o for o in options + ['build:%s:%s' % (env_name, variant)]),
-                                                          'pwd': tg.bld.srcnode.abspath()})
+                                tasks.append(
+                                    '    {\n'
+                                    '      "label": "build:%(toolchain)s:%(variant)s",\n'
+                                    '      "type": "process",\n'
+                                    '      "command": ["%(python)s"],\n'
+                                    '      "args": ["%(waf)s", %(cl)s],\n'
+                                    '      "options":{\n'
+                                    '        "cwd": "%(pwd)s"\n'
+                                    '      },\n'
+                                    '      "problemMatcher": [\n'
+                                    '        "$gcc",\n'
+                                    '        "$msCompile"\n'
+                                    '      ],\n'
+                                    '      "group": {\n'
+                                    '        "kind": "build",\n'
+                                    '        "isDefault": true\n'
+                                    '      }\n'
+                                    '    }\n' % {
+                                        'python':
+                                            sys.executable,
+                                        'waf':
+                                            sys.argv[0],
+                                        'toolchain':
+                                            env_name,
+                                        'variant':
+                                            variant,
+                                        'cl':
+                                            ', '.join(
+                                                '"%s"' % o for o in options + ['build:%s:%s' % (env_name, variant)]
+                                            ),
+                                        'pwd':
+                                            tg.bld.srcnode.abspath()
+                                    }
+                                )
                         with open(vscode_node.make_node('tasks.json').abspath(), 'w') as task_file:
                             task_file.write('{\n  "version":"2.0.0",\n  "tasks": [\n')
                             task_file.write(',\n'.join(tasks))
                             task_file.write('\n  ]\n}\n')
-            workspace.write('  ]\n}n')
-
+            workspace.write(
+                '  "settings": %s\n'
+                '}\n' % (self.SETTINGS % {
+                    'bugenginepath': self.bugenginenode.abspath()
+                })
+            )

@@ -33,6 +33,7 @@ cls.scan = scan
 
 namespace_register = 'BE_REGISTER_NAMESPACE_%d_NAMED(%s, %s)\n'
 
+
 class docgen(Task.Task):
     def process_node(self, node):
         return []
@@ -58,8 +59,7 @@ class nsdef(Task.Task):
                             namespace = cPickle.load(in_file)
                             if '::'.join(namespace) not in seen:
                                 seen.add('::'.join(namespace))
-                                line = namespace_register % (len(namespace),
-                                                             self.generator.env.PLUGIN,
+                                line = namespace_register % (len(namespace), self.generator.env.PLUGIN,
                                                              ', '.join(namespace))
                                 namespace_file.write(line)
                         except EOFError:
@@ -70,7 +70,7 @@ class nsdef(Task.Task):
 @extension('.h', '.hh', '.hxx')
 def datagen(self, node):
     outs = []
-    out_node = self.make_bld_node('src', node.parent, '%s.cc'%node.name[:node.name.rfind('.')])
+    out_node = self.make_bld_node('src', node.parent, '%s.cc' % node.name[:node.name.rfind('.')])
     outs.append(out_node)
     outs.append(out_node.change_ext('-instances.cc'))
     outs.append(out_node.change_ext('.doc'))
@@ -82,6 +82,8 @@ def datagen(self, node):
     tsk.path = self.bld.variant_dir
     tsk.env.PCH_HEADER = ['--pch']
     tsk.env.PCH = self.pchstop and [self.pchstop] or []
+    tsk.env.env = dict(os.environ)
+    tsk.env.env['PYTHONPATH'] = os.path.join(self.bld.bugenginenode.abspath(), 'mak', 'libs')
     out_node.parent.mkdir()
     tsk.dep_nodes = [self.bld.bugenginenode.find_node('mak/tools/ddf.py')]
     tsk.dep_nodes += self.bld.bugenginenode.find_node('mak/libs/cpp').ant_glob('**/*.py')

@@ -11,9 +11,9 @@ class Darwin(Configure.ConfigurationContext.Platform):
     NAME = 'Darwin'
     SDK_NAME = 'Darwin'
     OS_NAME = 'darwin'
-    SUPPORTED_TARGETS = (re.compile('.*-darwin.*'),)
+    SUPPORTED_TARGETS = (re.compile('.*-darwin.*'), )
 
-    def __init__(self, conf, sdk = None):
+    def __init__(self, conf, sdk=None):
         Configure.ConfigurationContext.Platform.__init__(self)
         self.sdk = sdk
         self.conf = conf
@@ -53,8 +53,7 @@ class Darwin(Configure.ConfigurationContext.Platform):
         return result
 
     def get_root_dirs(self, appname):
-        return (os.path.join(appname + '.app', 'Contents'),
-                os.path.join(appname + '.app', 'Contents', 'MacOS'))
+        return (os.path.join(appname + '.app', 'Contents'), os.path.join(appname + '.app', 'Contents', 'MacOS'))
 
     def load_in_env(self, conf, compiler):
         self.CFLAGS_cshlib = ['-fPIC']
@@ -88,19 +87,23 @@ class Darwin(Configure.ConfigurationContext.Platform):
         conf.env.XCODE_SDK_PATH = self.sdk[1]
         conf.env.SYSROOT = self.sdk[1]
         conf.env.MACOSX_SDK_MIN = self.sdk[3]
-        conf.env.append_unique('CPPFLAGS', ['-m%s-version-min=%s'%(self.OS_NAME, self.sdk[3]), '-isysroot', self.sdk[1]])
-        conf.env.append_unique('CFLAGS', ['-m%s-version-min=%s'%(self.OS_NAME, self.sdk[3]), '-isysroot', self.sdk[1]])
-        conf.env.append_unique('CXXFLAGS', ['-m%s-version-min=%s'%(self.OS_NAME, self.sdk[3]),
-                                            '-isysroot', self.sdk[1]])
-        conf.env.append_unique('LINKFLAGS', ['-m%s-version-min=%s'%(self.OS_NAME, self.sdk[3]),
-                                             '-isysroot', self.sdk[1], '-L%s/usr/lib'%self.sdk[1]])
+        conf.env.append_unique('CPPFLAGS',
+                               ['-m%s-version-min=%s' % (self.OS_NAME, self.sdk[3]), '-isysroot', self.sdk[1]])
+        conf.env.append_unique('CFLAGS',
+                               ['-m%s-version-min=%s' % (self.OS_NAME, self.sdk[3]), '-isysroot', self.sdk[1]])
+        conf.env.append_unique('CXXFLAGS',
+                               ['-m%s-version-min=%s' % (self.OS_NAME, self.sdk[3]), '-isysroot', self.sdk[1]])
+        conf.env.append_unique('LINKFLAGS', [
+            '-m%s-version-min=%s' % (self.OS_NAME, self.sdk[3]), '-isysroot', self.sdk[1],
+            '-L%s/usr/lib' % self.sdk[1]
+        ])
         conf.env.CFLAGS_cshlib = ['-fPIC']
         conf.env.CXXFLAGS_cxxshlib = ['-fPIC']
         conf.env.env = dict(os.environ)
 
-
     platform_sdk_re = re.compile('.*/Platforms/\w*\.platform/Developer/SDKs/[\.\w]*\.sdk')
     old_sdk_re = re.compile('.*/SDKs/[\.\w]*\.sdk')
+
     def match(self, compiler, sdk_path, all_sdks):
         def get_paths(sdk_path):
             if self.platform_sdk_re.match(sdk_path):
@@ -120,6 +123,7 @@ class Darwin(Configure.ConfigurationContext.Platform):
             if developer_path[-1] != '/':
                 developer_path += '/'
             return platform_path, developer_path
+
         compiler_path = os.path.normpath(compiler.compiler_c)
         platform_path, developer_path = get_paths(sdk_path)
         if compiler_path.startswith(platform_path):
@@ -173,7 +177,7 @@ class Darwin(Configure.ConfigurationContext.Platform):
         obj_node = src_node.change_ext('')
         exe_node = src_node.change_ext('')
         all_archs = []
-        for compiler in sorted(compilers, key = lambda x: x.name()):
+        for compiler in sorted(compilers, key=lambda x: x.name()):
             if compiler.arch not in all_archs:
                 all_archs.append(compiler.arch)
 
@@ -188,7 +192,7 @@ class Darwin(Configure.ConfigurationContext.Platform):
             sdk_number_max = ''
         sdk_number_max = sdk_number_max and sdk_number_max.split('.') or []
         sdks = []
-        relpath = os.path.join('Platforms', '%s.platform'%self.SDK_NAME, 'Developer', 'SDKs')
+        relpath = os.path.join('Platforms', '%s.platform' % self.SDK_NAME, 'Developer', 'SDKs')
 
         try:
             all_sdks = self.conf.darwin_sdks[self.SDK_NAME]
@@ -200,38 +204,52 @@ class Darwin(Configure.ConfigurationContext.Platform):
                 if len(best_sdk[2]) >= len(sdk_archs):
                     break
                 os_version_min = getattr(self, 'OS_VERSION_MIN', sdk_version)
-                sdk_option = '-m%s-version-min=%s'%(self.OS_NAME, '.'.join(os_version_min))
+                sdk_option = '-m%s-version-min=%s' % (self.OS_NAME, '.'.join(os_version_min))
                 if sdk_number_max and sdk_version > sdk_number_max:
                     continue
                 if sdk_number_min and sdk_version < sdk_number_min:
                     continue
                 sdk_compilers = []
-                sdk_bin_paths = [i for i in [
+                sdk_bin_paths = [
+                    i for i in [
                         os.path.normpath(os.path.join(sdk_path, 'usr', 'bin')),
                         os.path.normpath(os.path.join(sdk_path, '..', '..', 'usr', 'bin')),
                         os.path.normpath(os.path.join(sdk_path, '..', '..', '..', '..', '..', 'usr', 'bin')),
-                        os.path.normpath(os.path.join(sdk_path, '..', '..', '..', '..', '..', 'Toolchains', 'XcodeDefault.xctoolchain', 'usr', 'bin')),
-                    ] if os.path.isdir(i) and i != '/usr/bin']
+                        os.path.normpath(
+                            os.path.join(sdk_path, '..', '..', '..', '..', '..', 'Toolchains',
+                                         'XcodeDefault.xctoolchain', 'usr', 'bin')),
+                    ] if os.path.isdir(i) and i != '/usr/bin'
+                ]
                 strip = self.conf.detect_executable('strip', path_list=sdk_bin_paths)
                 for a in sdk_archs:
                     for c in compilers:
                         if self.match(c, sdk_path, all_sdks) and c.arch == a:
-                            try: obj_node.delete()
-                            except Exception: pass
-                            try: exe_node.delete()
-                            except Exception: pass
+                            try:
+                                obj_node.delete()
+                            except Exception:
+                                pass
+                            try:
+                                exe_node.delete()
+                            except Exception:
+                                pass
                             env = copy(os.environ)
                             env['PATH'] = os.path.pathsep.join(sdk_bin_paths + c.directories + [env['PATH']])
-                            r, out, err = c.run_cxx([sdk_option, '-g', '-O2',
-                                                     '-c', '-o', obj_node.abspath(),
-                                                     '-isysroot', sdk_path, src_node.abspath()], env=env)
+                            r, out, err = c.run_cxx([
+                                sdk_option, '-g', '-O2', '-c', '-o',
+                                obj_node.abspath(), '-isysroot', sdk_path,
+                                src_node.abspath()
+                            ],
+                                                    env=env)
                             if r == 0:
                                 r, out, err = c.run([strip, '-S', obj_node.abspath()], env=env)
                                 if r == 0:
-                                    r, out, err = c.run_cxx([sdk_option,
-                                                             '-framework', 'Foundation', '-framework', 'CoreFoundation',
-                                                             '-o', exe_node.abspath(), '-L%s'%os.path.join(sdk_path, 'usr', 'lib'),
-                                                             '-isysroot', sdk_path, obj_node.abspath(), '-lobjc'], env=env)
+                                    r, out, err = c.run_cxx([
+                                        sdk_option, '-framework', 'Foundation', '-framework', 'CoreFoundation', '-o',
+                                        exe_node.abspath(),
+                                        '-L%s' % os.path.join(sdk_path, 'usr', 'lib'), '-isysroot', sdk_path,
+                                        obj_node.abspath(), '-lobjc'
+                                    ],
+                                                            env=env)
                                     if r == 0:
                                         r, out, err = c.run([strip, '-S', exe_node.abspath()], env=env)
                                         if r == 0:
@@ -256,22 +274,22 @@ class MacOSX(Darwin):
     OS_NAME = 'macosx'
     OS_VERSION_MIN = ('10', '5')
 
-    def __init__(self, conf, sdk = None):
+    def __init__(self, conf, sdk=None):
         Darwin.__init__(self, conf, sdk)
 
 
 def options(opt):
     gr = opt.get_option_group('SDK paths and options')
-    gr.add_option( '--macosx-sdk-min',
-                    action='store',
-                    default='',
-                    dest='macosx_sdk_min',
-                    help='Minimum version of the MacOS X SDK to target')
-    gr.add_option( '--macosx-sdk-max',
-                    action='store',
-                    default='',
-                    dest='macosx_sdk_max',
-                    help='Maximum version of the MacOS X SDK to target')
+    gr.add_option('--macosx-sdk-min',
+                  action='store',
+                  default='',
+                  dest='macosx_sdk_min',
+                  help='Minimum version of the MacOS X SDK to target')
+    gr.add_option('--macosx-sdk-max',
+                  action='store',
+                  default='',
+                  dest='macosx_sdk_max',
+                  help='Maximum version of the MacOS X SDK to target')
 
 
 def configure(conf):

@@ -8,33 +8,40 @@ from waflib.Configure import conf
 def add_build_command(toolchain, optimisation):
     c = {}
     for command in (BuildContext, CleanContext, ListContext):
-        name = command.__name__.replace('Context','').lower()
+        name = command.__name__.replace('Context', '').lower()
+
         class Command(command):
             optim = optimisation
             cmd = name + ':' + toolchain + ':' + optimisation
             bugengine_variant = toolchain
             variant = os.path.join(toolchain, optimisation)
+
         c[command] = Command
+
     class Deploy(c[BuildContext]):
-        cmd = 'deploy:%s:%s' %(toolchain, optimisation)
+        cmd = 'deploy:%s:%s' % (toolchain, optimisation)
         bugengine_variant = toolchain
         variant = os.path.join(toolchain, optimisation)
+
         def execute(self):
             if super(Deploy, self).execute() == "SKIP":
                 return "SKIP"
             else:
                 self.fun = 'deploy'
                 self.recurse(self.bugenginenode.make_node('mak').abspath())
+
     class Run(Deploy):
-        cmd = 'run:%s:%s' %(toolchain, optimisation)
+        cmd = 'run:%s:%s' % (toolchain, optimisation)
+
         def execute(self):
             if super(Run, self).execute() == "SKIP":
                 return "SKIP"
             else:
                 self.fun = 'run'
                 self.recurse(self.bugenginenode.make_node('mak').abspath())
+
     class Debug(Deploy):
-        cmd = 'debug:%s:%s' %(toolchain, optimisation)
+        cmd = 'debug:%s:%s' % (toolchain, optimisation)
 
         def execute(self):
             if super(Debug, self).execute() == "SKIP":
@@ -42,6 +49,7 @@ def add_build_command(toolchain, optimisation):
             else:
                 self.fun = 'debug'
                 self.recurse(self.bugenginenode.make_node('mak').abspath())
+
 
 @conf
 class Platform:
@@ -57,8 +65,8 @@ class Platform:
         return result
 
     def add_toolchain(self, conf, compiler, sub_compilers=[], add=True):
-        toolchain = '%s_%s-%s_%s-%s' % (self.NAME.lower(), compiler.arch, compiler.NAMES[0].lower(),
-                                        compiler.arch_name, compiler.version)
+        toolchain = '%s_%s-%s_%s-%s' % (self.NAME.lower(), compiler.arch, compiler.NAMES[0].lower(), compiler.arch_name,
+                                        compiler.version)
         if sub_compilers:
             toolchain = '%s-%s-%s' % (self.NAME.lower(), compiler.NAMES[0].lower(), compiler.version)
         if add:
@@ -74,11 +82,11 @@ class Platform:
             v = conf.env
             v.ARCH_NAME = compiler.arch
             v.TOOLCHAIN = toolchain
-            v.append_unique('DEFINES', ['BE_PLATFORM=platform_%s'%v.VALID_PLATFORMS[0]])
+            v.append_unique('DEFINES', ['BE_PLATFORM=platform_%s' % v.VALID_PLATFORMS[0]])
             if not add:
                 v.ENV_PREFIX = compiler.arch
             if not sub_compilers:
-                conf.recurse(conf.bugenginenode.abspath()+'/mak/arch/%s'%compiler.arch, once=False)
+                conf.recurse(conf.bugenginenode.abspath() + '/mak/arch/%s' % compiler.arch, once=False)
                 self.add_kernel_toolchains(conf)
         except Exception as e:
             conf.end_msg(e, color='RED')
@@ -87,7 +95,7 @@ class Platform:
         else:
             conf.end_msg(' ')
             if not sub_compilers:
-                conf.recurse(conf.bugenginenode.abspath()+'/mak', name='setup', once=False)
+                conf.recurse(conf.bugenginenode.abspath() + '/mak', name='setup', once=False)
             if v.STATIC:
                 v.append_unique('DEFINES', ['BE_STATIC=1'])
             conf.variant = ''
@@ -109,8 +117,8 @@ class Platform:
 
     def add_multiarch_toolchain(self, toolchain):
         e = self.env
-        e.TOOLCHAIN=toolchain
-        e.append_unique('DEFINES', ['BE_PLATFORM=platform_%s'%e.VALID_PLATFORMS[0]])
+        e.TOOLCHAIN = toolchain
+        e.append_unique('DEFINES', ['BE_PLATFORM=platform_%s' % e.VALID_PLATFORMS[0]])
         e.PREFIX = os.path.join('bld', toolchain)
         if e.STATIC:
             e.append_unique('DEFINES', ['BE_STATIC=1'])
@@ -119,21 +127,18 @@ class Platform:
         self.variant = ''
         self.env.append_unique('ALL_TOOLCHAINS', toolchain)
 
+
 Configure.ConfigurationContext.Platform = Platform
+
 
 def options(opt):
     gr = opt.add_option_group('configure options')
     for target in opt.path.make_node('target').listdir():
-        opt.recurse('target/%s/configure.py'%target)
+        opt.recurse('target/%s/configure.py' % target)
     for extra in opt.bugenginenode.make_node('extra').listdir():
         if os.path.isfile(os.path.join(opt.bugenginenode.abspath(), 'extra', extra, 'wscript')):
             opt.recurse(os.path.join(opt.bugenginenode.abspath(), 'extra', extra))
-    gr.add_option( '--platforms',
-                    action='store',
-                    default='',
-                    dest='platforms',
-                    help='List of platform to configure for')
-
+    gr.add_option('--platforms', action='store', default='', dest='platforms', help='List of platform to configure for')
 
 
 def configure(conf):
@@ -143,7 +148,7 @@ def configure(conf):
     platforms = platforms.split(',') if platforms else []
     for target in conf.path.make_node('target').listdir():
         if not platforms or target in platforms:
-            conf.recurse('target/%s/configure.py'%target)
+            conf.recurse('target/%s/configure.py' % target)
     for extra in conf.bugenginenode.make_node('extra').listdir():
         if not platforms or extra in platforms:
             if os.path.isfile(os.path.join(conf.bugenginenode.abspath(), 'extra', extra, 'wscript')):
@@ -163,7 +168,8 @@ def recurse_build(build_context, fun):
         if os.path.isdir(os.path.join(build_context.bugenginenode.abspath(), 'extra', platform)):
             build_context.recurse(os.path.join(build_context.bugenginenode.abspath(), 'extra', platform))
         if os.path.isdir(os.path.join(build_context.path.abspath(), 'target', platform)):
-            build_context.recurse('target/%s/%s.py'%(platform, fun))
+            build_context.recurse('target/%s/%s.py' % (platform, fun))
+
 
 def build(build_context):
     recurse_build(build_context, 'build')

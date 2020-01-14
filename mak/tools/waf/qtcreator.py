@@ -12,38 +12,31 @@ from xml.dom.minidom import parse
 
 
 if sys.platform == 'win32':
-    HOME_DIRECTORY=os.path.join(os.getenv('APPDATA'), 'QtProject', 'qtcreator')
+    HOME_DIRECTORY = os.path.join(os.getenv('APPDATA'), 'QtProject', 'qtcreator')
 else:
-    HOME_DIRECTORY=os.path.join(os.path.expanduser('~'), '.config', 'QtProject', 'qtcreator')
+    HOME_DIRECTORY = os.path.join(os.path.expanduser('~'), '.config', 'QtProject', 'qtcreator')
 try:
     import hashlib
-    createMd5=hashlib.md5
+    createMd5 = hashlib.md5
 except:
     import md5
-    createMd5=md5.new
-
+    createMd5 = md5.new
 
 if sys.hexversion >= 0x3000000:
     unicode = str
 
-
 VAR_PATTERN = '${%s}' if sys.platform != 'win32' else '%%%s%%'
 
-
-IGNORE_PATTERNS=[
+IGNORE_PATTERNS = [
     re.compile('.*\.pyc'),
     re.compile('.*__pycache__.*'),
 ]
 
 
 def qbsArch(arch_name):
-    archs = {
-        'amd64': 'x86_64',
-        'x64': 'x86_64',
-        'x86_amd64': 'x86_64',
-        'aarch64': 'arm64'
-    }
+    archs = {'amd64': 'x86_64', 'x64': 'x86_64', 'x86_amd64': 'x86_64', 'aarch64': 'arm64'}
     return archs.get(arch_name, arch_name)
+
 
 def qbsPlatform(env):
     if 'iphonesimulator' in env.VALID_PLATFORMS:
@@ -53,6 +46,7 @@ def qbsPlatform(env):
     else:
         return env.VALID_PLATFORMS[0]
 
+
 def qbsPlatformList(env):
     if 'iphonesimulator' in env.VALID_PLATFORMS:
         return '["ios-simulator","ios","darwin","bsd","unix"]'
@@ -60,6 +54,7 @@ def qbsPlatformList(env):
         return '["ios","darwin","bsd","unix"]'
     else:
         return None
+
 
 def _hexdigest(s):
     """Return a string as a string of hex characters.
@@ -121,7 +116,8 @@ def write_value(node, value, key=''):
         elif isinstance(v, datetime.datetime):
             return 'QDateTime', v.strftime('%Y-%m-%dT%H:%M:%S')
         else:
-            raise Exception('key \'%s\': unknown type in a map: %s'%(key, v.__class__.__name__))
+            raise Exception('key \'%s\': unknown type in a map: %s' % (key, v.__class__.__name__))
+
     type, strvalue = convert_value(value)
     attrs = [('type', type)]
     if key:
@@ -167,13 +163,13 @@ def read_value(node):
         if node.childNodes:
             time = node.childNodes[0].wholeText.strip()
             if len(time) == 19:
-              value = datetime.datetime.strptime(time, '%Y-%m-%dT%H:%M:%S')
+                value = datetime.datetime.strptime(time, '%Y-%m-%dT%H:%M:%S')
             elif len(time) == 23:
-              value = datetime.datetime.strptime(time, '%Y-%m-%dT%H:%M:%S.000')
+                value = datetime.datetime.strptime(time, '%Y-%m-%dT%H:%M:%S.000')
             else:
                 raise ValueError('invalid date format: %s' % time)
         else:
-            value = datetime.datetime(1970,1,1)
+            value = datetime.datetime(1970, 1, 1)
     else:
         Logs.warn('unknown Qt type: %s' % node.toxml())
         value = ''
@@ -186,14 +182,14 @@ def read_value(node):
 
 class QtObject:
     def load_from_node(self, xml_node):
-        assert(xml_node.nodeName == 'valuemap')
+        assert (xml_node.nodeName == 'valuemap')
         for node in xml_node.childNodes:
             if node.nodeType == node.ELEMENT_NODE:
                 name, value = read_value(node)
                 var_name = name.replace('.', '_')
                 for n, u in self.__class__.published_vars:
                     if n == name:
-                        break;
+                        break
                 else:
                     self.__class__.published_vars.append((name, True))
                 setattr(self, var_name, value)
@@ -246,50 +242,44 @@ class QtToolchain(QtObject):
     def get_platform(self, env):
         target = env.COMPILER_TARGET
         supported_os = (
-                ('linux', 'linux'),
-                ('windows', 'windows'),
-                ('mingw', 'windows'),
-                ('freebsd', 'bsd'),
-            )
+            ('linux', 'linux'),
+            ('windows', 'windows'),
+            ('mingw', 'windows'),
+            ('freebsd', 'bsd'),
+        )
         supported_platform = (
-                ('android', 'android'),
-                ('mingw', 'msys'),
-                ('msvc 7.0', 'msvc2002'),
-                ('msvc 7.1', 'msvc2003'),
-                ('msvc 8.0', 'msvc2005'),
-                ('msvc 9.0', 'msvc2008'),
-                ('msvc 10.0', 'msvc2010'),
-                ('msvc 11.0', 'msvc2012'),
-                ('msvc 12.0', 'msvc2013'),
-                ('msvc 14.0', 'msvc2015'),
-                ('msvc 15.', 'msvc2017'),
-            )
+            ('android', 'android'),
+            ('mingw', 'msys'),
+            ('msvc 7.0', 'msvc2002'),
+            ('msvc 7.1', 'msvc2003'),
+            ('msvc 8.0', 'msvc2005'),
+            ('msvc 9.0', 'msvc2008'),
+            ('msvc 10.0', 'msvc2010'),
+            ('msvc 11.0', 'msvc2012'),
+            ('msvc 12.0', 'msvc2013'),
+            ('msvc 14.0', 'msvc2015'),
+            ('msvc 15.', 'msvc2017'),
+        )
         for o, o_name in supported_os:
             if target.find(o) != -1:
-                os=o_name
+                os = o_name
                 break
         else:
-            os='unknown'
+            os = 'unknown'
         for p, p_name in supported_platform:
             if target.find(p) != -1:
-                platform=p_name
+                platform = p_name
                 break
         else:
-            platform='generic'
+            platform = 'generic'
         return (os, platform)
 
     def __init__(self, language=None, env_name=None, env=None):
         if env_name:
-            assert(env)
-            arch,variant = self.get_architecture(env)
-            os,platform = self.get_platform(env)
-            abi = '%s-%s-%s-%s-%s'%(
-                arch,
-                os,
-                platform,
-                env.DEST_BINFMT,
-                variant
-            )
+            assert (env)
+            arch, variant = self.get_architecture(env)
+            os, platform = self.get_platform(env)
+            abi = '%s-%s-%s-%s-%s' % (arch, os, platform, env.DEST_BINFMT, variant)
             compiler = env.CC if language == 1 else env.CXX
             original_flags = env.CFLAGS[:] if language == 1 else env.CXXFLAGS[:]
             flags = []
@@ -297,7 +287,7 @@ class QtToolchain(QtObject):
                 f = original_flags.pop(0)
                 if f == '-target':
                     f = original_flags.pop(0)
-                    flags.append('--target=%s'%f)
+                    flags.append('--target=%s' % f)
                 else:
                     for undesirable_flag in ['-triple', '-arch', '-march']:
                         if f.startswith(undesirable_flag):
@@ -317,52 +307,61 @@ class QtToolchain(QtObject):
                 self.ProjectExplorer_GccToolChain_PlatformCodeGenFlags = tuple(flags)
                 self.ProjectExplorer_GccToolChain_PlatformLinkerFlags = tuple()
                 if platform == 'android':
-                    toolchain_id =  'Qt4ProjectManager.ToolChain.Android:%s' % generateGUID('BugEngine:toolchain:%s:%d'%(env_name, language))
+                    toolchain_id = 'Qt4ProjectManager.ToolChain.Android:%s' % generateGUID('BugEngine:toolchain:%s:%d' %
+                                                                                           (env_name, language))
                     self.Qt4ProjectManager_Android_NDK_TC_VERION = env_name.split('-')[-1]
                 else:
-                    toolchain_id =  'ProjectExplorer.ToolChain.Gcc:%s' % generateGUID('BugEngine:toolchain:%s:%d'%(env_name, language))
+                    toolchain_id = 'ProjectExplorer.ToolChain.Gcc:%s' % generateGUID('BugEngine:toolchain:%s:%d' %
+                                                                                     (env_name, language))
             elif env.COMPILER_NAME in ('clang', 'llvm'):
                 self.ProjectExplorer_GccToolChain_Path = compiler
                 self.ProjectExplorer_GccToolChain_TargetAbi = abi
                 self.ProjectExplorer_GccToolChain_PlatformCodeGenFlags = tuple(flags)
                 self.ProjectExplorer_GccToolChain_PlatformLinkerFlags = tuple()
                 if platform == 'android':
-                    toolchain_id =  'Qt4ProjectManager.ToolChain.Android:%s' % generateGUID('BugEngine:toolchain:%s:%d'%(env_name, language))
+                    toolchain_id = 'Qt4ProjectManager.ToolChain.Android:%s' % generateGUID('BugEngine:toolchain:%s:%d' %
+                                                                                           (env_name, language))
                     self.Qt4ProjectManager_Android_NDK_TC_VERION = env_name.split('-')[-1]
                 else:
-                    toolchain_id =  'ProjectExplorer.ToolChain.Clang:%s' % generateGUID('BugEngine:toolchain:%s:%d'%(env_name, language))
+                    toolchain_id = 'ProjectExplorer.ToolChain.Clang:%s' % generateGUID('BugEngine:toolchain:%s:%d' %
+                                                                                       (env_name, language))
             elif env.COMPILER_NAME == 'icc':
                 self.ProjectExplorer_GccToolChain_Path = compiler
                 self.ProjectExplorer_GccToolChain_TargetAbi = abi
-                toolchain_id =  'ProjectExplorer.ToolChain.LinuxIcc:%s' % generateGUID('BugEngine:toolchain:%s:%d'%(env_name, language))
+                toolchain_id = 'ProjectExplorer.ToolChain.LinuxIcc:%s' % generateGUID('BugEngine:toolchain:%s:%d' %
+                                                                                      (env_name, language))
             elif env.COMPILER_NAME == 'suncc':
                 self.ProjectExplorer_GccToolChain_Path = compiler
                 self.ProjectExplorer_GccToolChain_TargetAbi = abi
                 self.ProjectExplorer_GccToolChain_PlatformCodeGenFlags = tuple(flags)
                 self.ProjectExplorer_GccToolChain_PlatformLinkerFlags = tuple()
-                toolchain_id =  'ProjectExplorer.ToolChain.Gcc:%s' % generateGUID('BugEngine:toolchain:%s:%d'%(env_name, language))
+                toolchain_id = 'ProjectExplorer.ToolChain.Gcc:%s' % generateGUID('BugEngine:toolchain:%s:%d' %
+                                                                                 (env_name, language))
             elif env.COMPILER_NAME == 'msvc' and env.MSVC_COMPILER != 'intel':
                 self.ProjectExplorer_MsvcToolChain_VarsBat = env.MSVC_BATFILE[0].replace('\\', '/')
                 self.ProjectExplorer_MsvcToolChain_VarsBatArg = env.MSVC_BATFILE[1] or ''
                 self.ProjectExplorer_MsvcToolChain_SupportedAbi = abi
-                toolchain_id =  'ProjectExplorer.ToolChain.Msvc:%s' % generateGUID('BugEngine:toolchain:%s:%d'%(env_name, language))
+                toolchain_id = 'ProjectExplorer.ToolChain.Msvc:%s' % generateGUID('BugEngine:toolchain:%s:%d' %
+                                                                                  (env_name, language))
             else:
                 self.ProjectExplorer_CustomToolChain_CompilerPath = compiler
                 self.ProjectExplorer_CustomToolChain_Cxx11Flags = ()
                 self.ProjectExplorer_CustomToolChain_ErrorPattern = ''
                 self.ProjectExplorer_CustomToolChain_FileNameCap = 1
-                self.ProjectExplorer_CustomToolChain_HeaderPaths = tuple(i.replace('\\', '/') for i in env.INCLUDES + env.SYSTEM_INCLUDES)
+                self.ProjectExplorer_CustomToolChain_HeaderPaths = tuple(
+                    i.replace('\\', '/') for i in env.INCLUDES + env.SYSTEM_INCLUDES)
                 self.ProjectExplorer_CustomToolChain_LineNumberCap = 2
                 self.ProjectExplorer_CustomToolChain_MakePath = ''
                 self.ProjectExplorer_CustomToolChain_MessageCap = 3
                 self.ProjectExplorer_CustomToolChain_Mkspecs = ''
                 self.ProjectExplorer_CustomToolChain_OutputParser = 0
-                toolchain_id =  'ProjectExplorer.ToolChain.Custom:%s' % generateGUID('BugEngine:toolchain:%s:%d'%(env_name, language))
+                toolchain_id = 'ProjectExplorer.ToolChain.Custom:%s' % generateGUID('BugEngine:toolchain:%s:%d' %
+                                                                                    (env_name, language))
                 self.ProjectExplorer_CustomToolChain_PredefinedMacros = tuple(env.DEFINES + env.SYSTEM_DEFINES)
                 self.ProjectExplorer_CustomToolChain_TargetAbi = abi
             self.ProjectExplorer_ToolChain_Language = language
             self.ProjectExplorer_ToolChain_Autodetect = False
-            self.ProjectExplorer_ToolChain_DisplayName = 'BugEngine:toolchain:'+env_name
+            self.ProjectExplorer_ToolChain_DisplayName = 'BugEngine:toolchain:' + env_name
             self.ProjectExplorer_ToolChain_Id = toolchain_id
 
 
@@ -376,10 +375,11 @@ class QtDebugger(QtObject):
         ('Id', False),
         ('Debugger_Information', ''),
     ]
+
     def __init__(self, env_name=None, env=None, toolchain=None):
         if env_name:
-            assert(env)
-            assert(toolchain)
+            assert (env)
+            assert (toolchain)
             if env.CDB:
                 self.Binary = env.CDB[0]
                 self.EngineType = 4
@@ -393,8 +393,8 @@ class QtDebugger(QtObject):
             abi = abi or getattr(toolchain, 'ProjectExplorer_GccToolChain_TargetAbi', None)
             abi = abi or getattr(toolchain, 'ProjectExplorer_MsvcToolChain_TargetAbi', None)
             self.AutoDetected = False
-            self.DisplayName = 'BugEngine:debugger:'+env_name
-            self.Id = generateGUID('BugEngine:debugger:%s'%env_name)
+            self.DisplayName = 'BugEngine:debugger:' + env_name
+            self.Id = generateGUID('BugEngine:debugger:%s' % env_name)
 
 
 class QtDevice(QtObject):
@@ -412,9 +412,10 @@ class QtPlatform(QtObject):
         ('PE.Profile.Name', True),
         ('PE.Profile.SDK', False),
     ]
+
     def __init__(self, bld, env_name=None, env=None, toolchain_c=None, toolchain_cxx=None, debugger=None):
         if env_name:
-            assert(env)
+            assert (env)
             sysroot = env.SYSROOT or ''
             self.PE_Profile_AutoDetected = False
             if False and 'android' in env.VALID_PLATFORMS:
@@ -424,33 +425,33 @@ class QtPlatform(QtObject):
                 device = 'Desktop Device'
                 device_type = 'Desktop'
             self.PE_Profile_Data = [
-                    ('Debugger.Information', debugger),
-                    ('PE.Profile.Device', device),
-                    ('PE.Profile.DeviceType', device_type),
-                    ('PE.Profile.SysRoot', sysroot),
-                    ('PE.Profile.ToolChain', toolchain_c),
-                    ('PE.Profile.ToolChains', [('C', toolchain_c), ('Cxx', toolchain_cxx)]),
-                    ('PE.Profile.ToolChainsV3', [('C', toolchain_c), ('Cxx', toolchain_cxx)]),
-                    ('QtPM4.mkSPecInformation', ''),
-                    ('QtSupport.QtInformation', -1),
-                ]
-            icon_path = os.path.join(bld.bugenginenode.abspath(), 'mak', 'target',
-                                     env.VALID_PLATFORMS[0], 'icon.png')
-            icon_extra = os.path.join(bld.bugenginenode.abspath(), 'extra',
-                                      env.VALID_PLATFORMS[0], 'icon.png')
+                ('Debugger.Information', debugger),
+                ('PE.Profile.Device', device),
+                ('PE.Profile.DeviceType', device_type),
+                ('PE.Profile.SysRoot', sysroot),
+                ('PE.Profile.ToolChain', toolchain_c),
+                ('PE.Profile.ToolChains', [('C', toolchain_c), ('Cxx', toolchain_cxx)]),
+                ('PE.Profile.ToolChainsV3', [('C', toolchain_c), ('Cxx', toolchain_cxx)]),
+                ('QtPM4.mkSPecInformation', ''),
+                ('QtSupport.QtInformation', -1),
+            ]
+            icon_path = os.path.join(bld.bugenginenode.abspath(), 'mak', 'target', env.VALID_PLATFORMS[0], 'icon.png')
+            icon_extra = os.path.join(bld.bugenginenode.abspath(), 'extra', env.VALID_PLATFORMS[0], 'icon.png')
             if os.path.isfile(icon_path):
                 self.PE_Profile_Icon = icon_path
             elif os.path.isfile(icon_extra):
                 self.PE_Profile_Icon = icon_extra
             else:
                 self.PE_Profile_Icon = ':///Desktop///'
-            self.PE_Profile_Id = self.guid = generateGUID('BugEngine:profile:'+env_name)
+            self.PE_Profile_Id = self.guid = generateGUID('BugEngine:profile:' + env_name)
             self.PE_Profile_MutableInfo = ()
             self.PE_Profile_Name = 'BugEngine:profile:' + env_name
             self.PE_Profile_SDK = False
 
+
 def to_var(name):
-    return VAR_PATTERN%name
+    return VAR_PATTERN % name
+
 
 class QtCreator(Build.BuildContext):
     PROJECT_TYPE = 'GenericProjectManager.GenericBuildConfiguration'
@@ -459,7 +460,7 @@ class QtCreator(Build.BuildContext):
         self.restore()
         if not self.all_envs:
             self.load_envs()
-        self.env.PROJECTS=[self.__class__.cmd]
+        self.env.PROJECTS = [self.__class__.cmd]
         self.env.VARIANT = to_var('Variant')
         self.env.TOOLCHAIN = to_var('Toolchain')
         self.env.PREFIX = to_var('Prefix')
@@ -477,7 +478,7 @@ class QtCreator(Build.BuildContext):
         self.environment_id = self.get_environment_id()
         self.build_platform_list()
         appname = getattr(Context.g_module, Context.APPNAME, self.srcnode.name)
-        self.base_node = self.srcnode.make_node('%s.qtcreator'%appname)
+        self.base_node = self.srcnode.make_node('%s.qtcreator' % appname)
         self.base_node.mkdir()
         try:
             os.makedirs(os.path.join(HOME_DIRECTORY, 'codestyles', 'Cpp'))
@@ -518,7 +519,7 @@ class QtCreator(Build.BuildContext):
             return bytearray(b'{9807fb0e-3785-4641-a197-bb1a10ccc985}')
 
     def get_platform_guid(self, env_name):
-        guid = generateGUID('BugEngine:profile:'+env_name)
+        guid = generateGUID('BugEngine:profile:' + env_name)
         for platform_name, platform in self.platforms:
             if platform_name == guid:
                 return guid
@@ -578,7 +579,6 @@ class QtCreator(Build.BuildContext):
         else:
             pass
 
-
     def load_platform_list(self):
         self.platforms = []
         self.platforms_to_remove = []
@@ -607,7 +607,6 @@ class QtCreator(Build.BuildContext):
                             if platform.PE_Profile_Name.startswith('BugEngine:'):
                                 self.platforms_to_remove.append(platform)
 
-
     def build_platform_list(self):
         self.load_toolchain_list()
         if self.__class__.version[0] > 2:
@@ -622,7 +621,7 @@ class QtCreator(Build.BuildContext):
                 bld_env = env
             toolchains = [None, None]
             for l in (0, 1):
-                toolchains[l] = QtToolchain(l+1, env_name, bld_env)
+                toolchains[l] = QtToolchain(l + 1, env_name, bld_env)
 
                 for t_name, t in self.toolchains:
                     if t_name == toolchains[l].ProjectExplorer_ToolChain_Id:
@@ -661,10 +660,8 @@ class QtCreator(Build.BuildContext):
                 else:
                     self.debuggers.append((debugger.Id, debugger))
                 debugger = debugger.Id
-            platform = QtPlatform(self, env_name, env,
-                                  toolchains[0].ProjectExplorer_ToolChain_Id,
-                                  toolchains[1].ProjectExplorer_ToolChain_Id,
-                                  debugger)
+            platform = QtPlatform(self, env_name, env, toolchains[0].ProjectExplorer_ToolChain_Id,
+                                  toolchains[1].ProjectExplorer_ToolChain_Id, debugger)
             for p_name, p in self.platforms:
                 if p_name == platform.PE_Profile_Id:
                     p.copy_from(platform)
@@ -675,14 +672,14 @@ class QtCreator(Build.BuildContext):
 
         if not os.path.exists(HOME_DIRECTORY):
             os.makedirs(HOME_DIRECTORY)
-        with XmlDocument(open(os.path.join(HOME_DIRECTORY, 'profiles.xml'), 'w'),
-                         'UTF-8', [('DOCTYPE', 'QtCreatorProfiles')]) as document:
+        with XmlDocument(open(os.path.join(HOME_DIRECTORY, 'profiles.xml'), 'w'), 'UTF-8',
+                         [('DOCTYPE', 'QtCreatorProfiles')]) as document:
             with XmlNode(document, 'qtcreator') as creator:
                 profile_index = 0
                 for platform_name, platform in self.platforms:
                     if platform not in self.platforms_to_remove:
                         with XmlNode(creator, 'data') as data:
-                            XmlNode(data, 'variable', 'Profile.%d'%profile_index)
+                            XmlNode(data, 'variable', 'Profile.%d' % profile_index)
                             platform.write(data)
                         profile_index += 1
                 with XmlNode(creator, 'data') as data:
@@ -695,14 +692,14 @@ class QtCreator(Build.BuildContext):
                     XmlNode(data, 'variable', 'Version')
                     XmlNode(data, 'value', '1', [('type', 'int')])
 
-        with XmlDocument(open(os.path.join(HOME_DIRECTORY, 'debuggers.xml'), 'w'),
-                         'UTF-8', [('DOCTYPE', 'QtCreatorDebugger')]) as document:
+        with XmlDocument(open(os.path.join(HOME_DIRECTORY, 'debuggers.xml'), 'w'), 'UTF-8',
+                         [('DOCTYPE', 'QtCreatorDebugger')]) as document:
             with XmlNode(document, 'qtcreator') as creator:
                 debugger_index = 0
                 for debugger_name, debugger in self.debuggers:
                     if debugger not in self.debuggers_to_remove:
                         with XmlNode(creator, 'data') as data:
-                            XmlNode(data, 'variable', 'DebuggerItem.%d'%debugger_index)
+                            XmlNode(data, 'variable', 'DebuggerItem.%d' % debugger_index)
                             debugger.write(data)
                         debugger_index += 1
                 with XmlNode(creator, 'data') as data:
@@ -712,14 +709,14 @@ class QtCreator(Build.BuildContext):
                     XmlNode(data, 'variable', 'Version')
                     XmlNode(data, 'value', '1', [('type', 'int')])
 
-        with XmlDocument(open(os.path.join(HOME_DIRECTORY, 'toolchains.xml'), 'w'),
-                         'UTF-8', [('DOCTYPE', 'QtCreatorToolChains')]) as document:
+        with XmlDocument(open(os.path.join(HOME_DIRECTORY, 'toolchains.xml'), 'w'), 'UTF-8',
+                         [('DOCTYPE', 'QtCreatorToolChains')]) as document:
             with XmlNode(document, 'qtcreator') as creator:
                 toolchain_index = 0
                 for toolchain_name, toolchain in self.toolchains:
                     if toolchain not in self.toolchains_to_remove:
                         with XmlNode(creator, 'data') as data:
-                            XmlNode(data, 'variable', 'ToolChain.%d'%toolchain_index)
+                            XmlNode(data, 'variable', 'ToolChain.%d' % toolchain_index)
                             toolchain.write(data)
                         toolchain_index += 1
                 with XmlNode(creator, 'data') as data:
@@ -728,7 +725,6 @@ class QtCreator(Build.BuildContext):
                 with XmlNode(creator, 'data') as data:
                     XmlNode(data, 'variable', 'Version')
                     XmlNode(data, 'value', '1', [('type', 'int')])
-
 
     def gather_includes_defines(self, task_gen):
         def gather_includes_defines_recursive(task_gen):
@@ -746,15 +742,15 @@ class QtCreator(Build.BuildContext):
                         pass
                     else:
                         use_includes, use_defines = gather_includes_defines_recursive(t)
-                        includes = includes+use_includes
-                        defines = defines+use_defines
+                        includes = includes + use_includes
+                        defines = defines + use_defines
                 task_gen.bug_qtcreator_cache = (includes, defines)
                 return task_gen.bug_qtcreator_cache
+
         includes, defines = gather_includes_defines_recursive(task_gen)
         includes = includes + [path_from(i, self.base_node) for i in getattr(task_gen, 'includes', [])]
         defines = defines + getattr(task_gen, 'defines', [])
         return unique(includes), unique(defines)
-
 
     def write_codestyle(self, file):
         with XmlDocument(file, 'UTF-8', [('DOCTYPE', 'QtCreatorCodeStyle')]) as cs:
@@ -762,43 +758,41 @@ class QtCreator(Build.BuildContext):
                 with XmlNode(qtcreator, 'data') as data:
                     XmlNode(data, 'variable', 'CodeStyleData').close()
                     write_value(data, [
-                            ("AlignAssignments", True),
-                            ("AutoSpacesForTabs", False),
-                            ("BindStarToIdentifier", False),
-                            ("BindStarToLeftSpecifier", True),
-                            ("BindStarToRightSpecifier", False),
-                            ("BindStarToTypeName", True),
-                            ("ExtraPaddingForConditionsIfConfusingAlign", False),
-                            ("IndentAccessSpecifiers", False),
-                            ("IndentBlockBody", True),
-                            ("IndentBlockBraces", False),
-                            ("IndentBlocksRelativeToSwitchLabels", True),
-                            ("IndentClassBraces", False),
-                            ("IndentControlFlowRelativeToSwitchLabels", True),
-                            ("IndentDeclarationsRelativeToAccessSpecifiers", True),
-                            ("IndentEnumBraces", False),
-                            ("IndentFunctionBody", True),
-                            ("IndentFunctionBraces", False),
-                            ("IndentNamespaceBody", False),
-                            ("IndentNamespaceBraces", False),
-                            ("IndentSize", 4),
-                            ("IndentStatementsRelativeToSwitchLabels", True),
-                            ("IndentSwitchLabels", False),
-                            ("PaddingMode", 2),
-                            ("ShortGetterName", True),
-                            ("SpacesForTabs", True),
-                            ("TabSize", 4),
-                        ])
+                        ("AlignAssignments", True),
+                        ("AutoSpacesForTabs", False),
+                        ("BindStarToIdentifier", False),
+                        ("BindStarToLeftSpecifier", True),
+                        ("BindStarToRightSpecifier", False),
+                        ("BindStarToTypeName", True),
+                        ("ExtraPaddingForConditionsIfConfusingAlign", False),
+                        ("IndentAccessSpecifiers", False),
+                        ("IndentBlockBody", True),
+                        ("IndentBlockBraces", False),
+                        ("IndentBlocksRelativeToSwitchLabels", True),
+                        ("IndentClassBraces", False),
+                        ("IndentControlFlowRelativeToSwitchLabels", True),
+                        ("IndentDeclarationsRelativeToAccessSpecifiers", True),
+                        ("IndentEnumBraces", False),
+                        ("IndentFunctionBody", True),
+                        ("IndentFunctionBraces", False),
+                        ("IndentNamespaceBody", False),
+                        ("IndentNamespaceBraces", False),
+                        ("IndentSize", 4),
+                        ("IndentStatementsRelativeToSwitchLabels", True),
+                        ("IndentSwitchLabels", False),
+                        ("PaddingMode", 2),
+                        ("ShortGetterName", True),
+                        ("SpacesForTabs", True),
+                        ("TabSize", 4),
+                    ])
                 with XmlNode(qtcreator, 'data') as data:
                     XmlNode(data, 'variable', 'DisplayName').close()
                     write_value(data, 'BugEngine')
 
-
     def write_project(self, task_gen):
-        node = self.base_node.make_node('%s.creator'%task_gen.target)
+        node = self.base_node.make_node('%s.creator' % task_gen.target)
         node.write('[General]')
         return node
-
 
     def write_files(self, task_gen):
         file_list = []
@@ -807,16 +801,13 @@ class QtCreator(Build.BuildContext):
                 file_list += [node.path_from(self.base_node) for node in source_node.ant_glob('**')]
             except Exception:
                 pass
-        self.base_node.make_node('%s.files'%task_gen.target).write('\n'.join(file_list))
-
+        self.base_node.make_node('%s.files' % task_gen.target).write('\n'.join(file_list))
 
     def write_includes(self, task_gen, includes):
-        self.base_node.make_node('%s.includes'%task_gen.target).write('\n'.join(includes))
-
+        self.base_node.make_node('%s.includes' % task_gen.target).write('\n'.join(includes))
 
     def write_defines(self, task_gen, defines):
-        self.base_node.make_node('%s.config'%task_gen.target).write('\n'.join(defines))
-
+        self.base_node.make_node('%s.config' % task_gen.target).write('\n'.join(defines))
 
     def write_user(self, file, task_gens):
         with XmlDocument(file, 'UTF-8', [('DOCTYPE', 'QtCreatorProject')]) as project:
@@ -844,7 +835,7 @@ class QtCreator(Build.BuildContext):
                         ('EditorConfiguration.CodeStyle.Count', 2),
                         ('EditorConfiguration.Codec', bytearray(b'UTF-8')),
                         ('EditorConfiguration.ConstrainToolTips', False),
-                        ('EditorConfiguration.IndentSize',  4),
+                        ('EditorConfiguration.IndentSize', 4),
                         ('EditorConfiguration.KeyboardTooltips', False),
                         ('EditorConfiguration.MarginColumn', 100),
                         ('EditorConfiguration.MouseNavigation', True),
@@ -869,7 +860,7 @@ class QtCreator(Build.BuildContext):
                     target_index = 0
                     options = [a for a in sys.argv if a[0] == '-']
                     for env_name in self.env.ALL_TOOLCHAINS:
-                        XmlNode(data, 'variable', 'ProjectExplorer.Project.Target.%d'%target_index).close()
+                        XmlNode(data, 'variable', 'ProjectExplorer.Project.Target.%d' % target_index).close()
                         bld_env = self.all_envs[env_name]
                         if bld_env.SUB_TOOLCHAINS:
                             env = self.all_envs[bld_env.SUB_TOOLCHAINS[0]]
@@ -880,107 +871,71 @@ class QtCreator(Build.BuildContext):
                         build_configuration_index = 0
                         for variant in self.env.ALL_VARIANTS:
                             target_os = qbsPlatformList(env)
-                            extraPlatformFlags = target_os and [('qbs.targetOS', target_os),] or []
-                            build_configurations.append((
-                                'ProjectExplorer.Target.BuildConfiguration.%d'%build_configuration_index,
-                                [
-                                    ('ProjectExplorer.BuildConfiguration.BuildDirectory',
-                                       self.bldnode.make_node('qtcreator').abspath()),
-                                    ('GenericProjectManager.GenericBuildConfiguration.BuildDirectory',
-                                       self.bldnode.make_node('qtcreator').abspath()),
-                                    ('ProjectExplorer.BuildConfiguration.BuildStepList.0', [
-                                        ('ProjectExplorer.BuildStepList.Step.0', [
-                                            ('ProjectExplorer.BuildStep.Enabled',
-                                              False),
-                                            ('ProjectExplorer.ProjectConfiguration.DefaultDisplayName',
-                                              'Qbs configuration'),
-                                            ('ProjectExplorer.ProjectConfiguration.DisplayName', ''),
-                                            ('Qbs.Configuration', [
-                                                ('qbs.buildVariant', 'debug'),
-                                                ('qbs.architecture', qbsArch(env.TARGET_ARCH)),
-                                                ('qbs.targetPlatform', qbsPlatform(env)),
-                                            ] + extraPlatformFlags),
-                                            ('ProjectExplorer.ProjectConfiguration.Id',
-                                              'Qbs.BuildStep')
-                                        ]),
-                                        ('ProjectExplorer.BuildStepList.Step.1', [
-                                            ('ProjectExplorer.BuildStep.Enabled',
-                                              True),
-                                            ('ProjectExplorer.ProcessStep.Arguments',
-                                              '%s build:%s:%s %s'%(sys.argv[0], env_name, variant, ' '.join(options))),
-                                            ('ProjectExplorer.ProcessStep.Command',
-                                              sys.executable),
-                                            ('ProjectExplorer.ProcessStep.WorkingDirectory',
-                                              self.srcnode.abspath()),
-                                            ('ProjectExplorer.ProjectConfiguration.DefaultDisplayName',
-                                              'Waf configuration'),
-                                            ('ProjectExplorer.ProjectConfiguration.DisplayName',
-                                              ''),
-                                            ('ProjectExplorer.ProjectConfiguration.Id',
-                                              'ProjectExplorer.ProcessStep'),
-                                        ]),
-                                        ('ProjectExplorer.BuildStepList.StepsCount',
-                                          2),
+                            extraPlatformFlags = target_os and [
+                                ('qbs.targetOS', target_os),
+                            ] or []
+                            build_configurations.append(
+                                ('ProjectExplorer.Target.BuildConfiguration.%d' % build_configuration_index,
+                                 [('ProjectExplorer.BuildConfiguration.BuildDirectory',
+                                   self.bldnode.make_node('qtcreator').abspath()),
+                                  ('GenericProjectManager.GenericBuildConfiguration.BuildDirectory',
+                                   self.bldnode.make_node('qtcreator').abspath()),
+                                  ('ProjectExplorer.BuildConfiguration.BuildStepList.0',
+                                   [('ProjectExplorer.BuildStepList.Step.0',
+                                     [('ProjectExplorer.BuildStep.Enabled', False),
+                                      ('ProjectExplorer.ProjectConfiguration.DefaultDisplayName', 'Qbs configuration'),
+                                      ('ProjectExplorer.ProjectConfiguration.DisplayName', ''),
+                                      ('Qbs.Configuration', [
+                                          ('qbs.buildVariant', 'debug'),
+                                          ('qbs.architecture', qbsArch(env.TARGET_ARCH)),
+                                          ('qbs.targetPlatform', qbsPlatform(env)),
+                                      ] + extraPlatformFlags),
+                                      ('ProjectExplorer.ProjectConfiguration.Id', 'Qbs.BuildStep')]),
+                                    ('ProjectExplorer.BuildStepList.Step.1', [
+                                        ('ProjectExplorer.BuildStep.Enabled', True),
+                                        ('ProjectExplorer.ProcessStep.Arguments',
+                                         '%s build:%s:%s %s' % (sys.argv[0], env_name, variant, ' '.join(options))),
+                                        ('ProjectExplorer.ProcessStep.Command', sys.executable),
+                                        ('ProjectExplorer.ProcessStep.WorkingDirectory', self.srcnode.abspath()),
                                         ('ProjectExplorer.ProjectConfiguration.DefaultDisplayName',
-                                          'Build'),
-                                        ('ProjectExplorer.ProjectConfiguration.DisplayName',
-                                          ''),
-                                        ('ProjectExplorer.ProjectConfiguration.Id',
-                                          'ProjectExplorer.BuildSteps.Build')
-                                    ]),
-                                    ('ProjectExplorer.BuildConfiguration.BuildStepList.1', [
-                                        ('ProjectExplorer.BuildStepList.Step.0', [
-                                            ('ProjectExplorer.BuildStep.Enabled',
-                                              True),
-                                            ('ProjectExplorer.ProcessStep.Arguments',
-                                              '%s clean:%s:%s'%(sys.argv[0], env_name, variant)),
-                                            ('ProjectExplorer.ProcessStep.Command',
-                                              sys.executable),
-                                            ('ProjectExplorer.ProcessStep.WorkingDirectory',
-                                              self.srcnode.abspath()),
-                                            ('ProjectExplorer.ProjectConfiguration.DefaultDisplayName',
-                                              'Waf configuration'),
-                                            ('ProjectExplorer.ProjectConfiguration.DisplayName',
-                                              ''),
-                                            ('ProjectExplorer.ProjectConfiguration.Id',
-                                              'ProjectExplorer.ProcessStep')
-                                        ]),
-                                        ('ProjectExplorer.BuildStepList.StepsCount',
-                                          1),
-                                        ('ProjectExplorer.ProjectConfiguration.DefaultDisplayName',
-                                          'Clean'),
-                                        ('ProjectExplorer.ProjectConfiguration.DisplayName',
-                                          ''),
-
-                                        ('ProjectExplorer.ProjectConfiguration.Id', 'ProjectExplorer.BuildSteps.Clean')
-                                    ]),
-                                    ('ProjectExplorer.BuildConfiguration.BuildStepListCount', 2),
-                                    ('ProjectExplorer.BuildConfiguration.ClearSystemEnvironment', False),
-                                    ('ProjectExplorer.BuildConfiguration.UserEnvironmentChanges', tuple(
-                                        '%s=%s'%(var_name, bld_env[var_name.upper()])
-                                        for var_name in ('Toolchain', 'Prefix', 'Deploy_RootDir',
-                                                         'Deploy_BinDir', 'Deploy_RunBinDir',
-                                                         'Deploy_LibDir', 'Deploy_IncludeDir',
-                                                         'Deploy_DataDir')
-                                    ) + ('OUT_NAME=%s' % os.path.join(
-                                            self.srcnode.abspath(),
-                                            bld_env.PREFIX, variant, env.DEPLOY_BINDIR,
-                                            env.cxxprogram_PATTERN%self.launcher[0][0].target),
-                                         'OUT_DIR=%s' % os.path.join(self.srcnode.abspath(),
-                                                                     bld_env.PREFIX, variant),
-                                         'RUNBIN_DIR=%s' % os.path.join(self.srcnode.abspath(),
-                                                                        bld_env.PREFIX, variant,
-                                                                        env.DEPLOY_RUNBINDIR),
-                                         'TERM=msys',
-                                         'Python="%s"' % sys.executable,
-                                         'SrcDir="%s"'% self.srcnode.abspath(),
-                                         'Variant=%s' % variant,
-                                         'PATH=%s' % os.environ['PATH']
-                                        )),
-                                    ('ProjectExplorer.ProjectConfiguration.DefaultDisplayName', 'Default'),
-                                    ('ProjectExplorer.ProjectConfiguration.DisplayName', variant),
-                                    ('ProjectExplorer.ProjectConfiguration.Id', self.PROJECT_TYPE)
-                                ]))
+                                         'Waf configuration'),
+                                        ('ProjectExplorer.ProjectConfiguration.DisplayName', ''),
+                                        ('ProjectExplorer.ProjectConfiguration.Id', 'ProjectExplorer.ProcessStep'),
+                                    ]), ('ProjectExplorer.BuildStepList.StepsCount', 2),
+                                    ('ProjectExplorer.ProjectConfiguration.DefaultDisplayName', 'Build'),
+                                    ('ProjectExplorer.ProjectConfiguration.DisplayName', ''),
+                                    ('ProjectExplorer.ProjectConfiguration.Id', 'ProjectExplorer.BuildSteps.Build')]),
+                                  ('ProjectExplorer.BuildConfiguration.BuildStepList.1',
+                                   [('ProjectExplorer.BuildStepList.Step.0',
+                                     [('ProjectExplorer.BuildStep.Enabled', True),
+                                      ('ProjectExplorer.ProcessStep.Arguments',
+                                       '%s clean:%s:%s' % (sys.argv[0], env_name, variant)),
+                                      ('ProjectExplorer.ProcessStep.Command', sys.executable),
+                                      ('ProjectExplorer.ProcessStep.WorkingDirectory', self.srcnode.abspath()),
+                                      ('ProjectExplorer.ProjectConfiguration.DefaultDisplayName', 'Waf configuration'),
+                                      ('ProjectExplorer.ProjectConfiguration.DisplayName', ''),
+                                      ('ProjectExplorer.ProjectConfiguration.Id', 'ProjectExplorer.ProcessStep')]),
+                                    ('ProjectExplorer.BuildStepList.StepsCount', 1),
+                                    ('ProjectExplorer.ProjectConfiguration.DefaultDisplayName', 'Clean'),
+                                    ('ProjectExplorer.ProjectConfiguration.DisplayName', ''),
+                                    ('ProjectExplorer.ProjectConfiguration.Id', 'ProjectExplorer.BuildSteps.Clean')]),
+                                  ('ProjectExplorer.BuildConfiguration.BuildStepListCount', 2),
+                                  ('ProjectExplorer.BuildConfiguration.ClearSystemEnvironment', False),
+                                  ('ProjectExplorer.BuildConfiguration.UserEnvironmentChanges',
+                                   tuple('%s=%s' % (var_name, bld_env[var_name.upper()])
+                                         for var_name in ('Toolchain', 'Prefix', 'Deploy_RootDir', 'Deploy_BinDir',
+                                                          'Deploy_RunBinDir', 'Deploy_LibDir', 'Deploy_IncludeDir',
+                                                          'Deploy_DataDir')) +
+                                   ('OUT_NAME=%s' %
+                                    os.path.join(self.srcnode.abspath(), bld_env.PREFIX, variant, env.DEPLOY_BINDIR,
+                                                 env.cxxprogram_PATTERN % self.launcher[0][0].target), 'OUT_DIR=%s' %
+                                    os.path.join(self.srcnode.abspath(), bld_env.PREFIX, variant), 'RUNBIN_DIR=%s' %
+                                    os.path.join(self.srcnode.abspath(), bld_env.PREFIX, variant, env.DEPLOY_RUNBINDIR),
+                                    'TERM=msys', 'Python="%s"' % sys.executable, 'SrcDir="%s"' % self.srcnode.abspath(),
+                                    'Variant=%s' % variant, 'PATH=%s' % os.environ['PATH'])),
+                                  ('ProjectExplorer.ProjectConfiguration.DefaultDisplayName', 'Default'),
+                                  ('ProjectExplorer.ProjectConfiguration.DisplayName', variant),
+                                  ('ProjectExplorer.ProjectConfiguration.Id', self.PROJECT_TYPE)]))
                             build_configuration_index += 1
                         run_configurations = []
                         index = 0
@@ -992,8 +947,7 @@ class QtCreator(Build.BuildContext):
                                 else:
                                     arguments = task_gen.target
                                     executable = to_var('OUT_NAME')
-                                run_configurations.append((
-                                    'ProjectExplorer.Target.RunConfiguration.%d'%index, [
+                                run_configurations.append(('ProjectExplorer.Target.RunConfiguration.%d' % index, [
                                     ('Analyzer.Valgrind.AddedSuppressionFiles', ()),
                                     ('Analyzer.Valgrind.Callgrind.CollectBusEvents', False),
                                     ('Analyzer.Valgrind.Callgrind.CollectSystime', False),
@@ -1011,16 +965,21 @@ class QtCreator(Build.BuildContext):
                                     ('Analyzer.Valgrind.ShowReachable', False),
                                     ('Analyzer.Valgrind.TrackOrigins', True),
                                     ('Analyzer.Valgrind.ValgrindExecutable', 'valgrind'),
-                                    ('Analyzer.Valgrind.VisibleErrorKinds', (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14)),
+                                    ('Analyzer.Valgrind.VisibleErrorKinds', (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13,
+                                                                             14)),
                                     ('PE.EnvironmentAspect.Base', 2),
                                     ('PE.EnvironmentAspect.Changes', ()),
                                     ('ProjectExplorer.CustomExecutableRunConfiguration.Arguments', arguments),
                                     ('ProjectExplorer.CustomExecutableRunConfiguration.Executable', executable),
                                     ('ProjectExplorer.CustomExecutableRunConfiguration.UseTerminal', False),
-                                    ('ProjectExplorer.CustomExecutableRunConfiguration.WorkingDirectory', to_var('OUT_DIR')),
-                                    ('ProjectExplorer.ProjectConfiguration.DefaultDisplayName', 'Run %s' % task_gen.target),
-                                    ('ProjectExplorer.ProjectConfiguration.DisplayName', '%s:%s'%(self.launcher[0][0].target, task_gen.name)),
-                                    ('ProjectExplorer.ProjectConfiguration.Id', 'ProjectExplorer.CustomExecutableRunConfiguration'),
+                                    ('ProjectExplorer.CustomExecutableRunConfiguration.WorkingDirectory',
+                                     to_var('OUT_DIR')),
+                                    ('ProjectExplorer.ProjectConfiguration.DefaultDisplayName',
+                                     'Run %s' % task_gen.target),
+                                    ('ProjectExplorer.ProjectConfiguration.DisplayName',
+                                     '%s:%s' % (self.launcher[0][0].target, task_gen.name)),
+                                    ('ProjectExplorer.ProjectConfiguration.Id',
+                                     'ProjectExplorer.CustomExecutableRunConfiguration'),
                                     ('RunConfiguration.QmlDebugServerPort', 3768),
                                     ('RunConfiguration.UseCppDebugger', True),
                                     ('RunConfiguration.UseCppDebuggerAuto', False),
@@ -1030,8 +989,7 @@ class QtCreator(Build.BuildContext):
                                 ]))
                                 index += 1
                             elif 'python_module' in task_gen.features:
-                                run_configurations.append((
-                                    'ProjectExplorer.Target.RunConfiguration.%d'%index, [
+                                run_configurations.append(('ProjectExplorer.Target.RunConfiguration.%d' % index, [
                                     ('Analyzer.Valgrind.AddedSuppressionFiles', ()),
                                     ('Analyzer.Valgrind.Callgrind.CollectBusEvents', False),
                                     ('Analyzer.Valgrind.Callgrind.CollectSystime', False),
@@ -1049,16 +1007,21 @@ class QtCreator(Build.BuildContext):
                                     ('Analyzer.Valgrind.ShowReachable', False),
                                     ('Analyzer.Valgrind.TrackOrigins', True),
                                     ('Analyzer.Valgrind.ValgrindExecutable', 'valgrind'),
-                                    ('Analyzer.Valgrind.VisibleErrorKinds', (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14)),
+                                    ('Analyzer.Valgrind.VisibleErrorKinds', (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13,
+                                                                             14)),
                                     ('PE.EnvironmentAspect.Base', 2),
                                     ('PE.EnvironmentAspect.Changes', ()),
-                                    ('ProjectExplorer.CustomExecutableRunConfiguration.Arguments', '-i -c "import %s"' % task_gen.target),
+                                    ('ProjectExplorer.CustomExecutableRunConfiguration.Arguments',
+                                     '-i -c "import %s"' % task_gen.target),
                                     ('ProjectExplorer.CustomExecutableRunConfiguration.Executable', sys.executable),
                                     ('ProjectExplorer.CustomExecutableRunConfiguration.UseTerminal', True),
-                                    ('ProjectExplorer.CustomExecutableRunConfiguration.WorkingDirectory', to_var('RUNBIN_DIR')),
-                                    ('ProjectExplorer.ProjectConfiguration.DefaultDisplayName', 'python:%s' % task_gen.target),
+                                    ('ProjectExplorer.CustomExecutableRunConfiguration.WorkingDirectory',
+                                     to_var('RUNBIN_DIR')),
+                                    ('ProjectExplorer.ProjectConfiguration.DefaultDisplayName',
+                                     'python:%s' % task_gen.target),
                                     ('ProjectExplorer.ProjectConfiguration.DisplayName', ''),
-                                    ('ProjectExplorer.ProjectConfiguration.Id', 'ProjectExplorer.CustomExecutableRunConfiguration'),
+                                    ('ProjectExplorer.ProjectConfiguration.Id',
+                                     'ProjectExplorer.CustomExecutableRunConfiguration'),
                                     ('RunConfiguration.QmlDebugServerPort', 3768),
                                     ('RunConfiguration.UseCppDebugger', True),
                                     ('RunConfiguration.UseCppDebuggerAuto', False),
@@ -1068,38 +1031,42 @@ class QtCreator(Build.BuildContext):
                                 ]))
                                 index += 1
 
-                        write_value(data, [
-                            ('ProjectExplorer.ProjectConfiguration.DefaultDisplayName', env_name),
-                            ('ProjectExplorer.ProjectConfiguration.DisplayName', env_name),
-                            ('ProjectExplorer.ProjectConfiguration.Id', self.get_platform_guid(env_name)),
-                            ('ProjectExplorer.Target.ActiveBuildConfiguration', 0),
-                            ('ProjectExplorer.Target.ActiveDeployConfiguration', 0),
-                            ('ProjectExplorer.Target.ActiveRunConfiguration', 0),
-                        ] + build_configurations + [
-                            ('ProjectExplorer.Target.BuildConfigurationCount', len(build_configurations)),
-                            ('ProjectExplorer.Target.DeployConfiguration.0', [
-                                ('ProjectExplorer.BuildConfiguration.BuildStepList.0', [
-                                    ('ProjectExplorer.BuildStepList.Step.0', [
-                                        ('ProjectExplorer.BuildStep.Enabled', True),
-                                        ('ProjectExplorer.ProcessStep.Arguments', '%s deploy:%s:%s' % (sys.argv[0], to_var('Toolchain'), to_var('Variant'))),
-                                        ('ProjectExplorer.ProcessStep.Command', sys.executable),
-                                        ('ProjectExplorer.ProcessStep.WorkingDirectory', self.srcnode.abspath()),
-                                        ('ProjectExplorer.ProjectConfiguration.DefaultDisplayName', 'Custom Process Step'),
-                                        ('ProjectExplorer.ProjectConfiguration.DisplayName', ''),
-                                        ('ProjectExplorer.ProjectConfiguration.Id', 'ProjectExplorer.ProcessStep'),]),
-                                    ('ProjectExplorer.BuildStepList.StepsCount', 1),
-                                    ('ProjectExplorer.ProjectConfiguration.DefaultDisplayName', 'Deploy'),
-                                    ('ProjectExplorer.ProjectConfiguration.DisplayName', ''),
-                                    ('ProjectExplorer.ProjectConfiguration.Id', 'ProjectExplorer.BuildSteps.Deploy'),]),
-                                ('ProjectExplorer.BuildConfiguration.BuildStepListCount', 1),
-                                ('ProjectExplorer.ProjectConfiguration.DefaultDisplayName', 'Deploy locally'),
-                                ('ProjectExplorer.ProjectConfiguration.DisplayName', 'Qbs Install'),
-                                ('ProjectExplorer.ProjectConfiguration.Id', 'Qbs.Deploy'),]),
-                            ('ProjectExplorer.Target.DeployConfigurationCount', 1),
-                            ('ProjectExplorer.Target.PluginSettings', [])
-                        ] + run_configurations + [
-                            ('ProjectExplorer.Target.RunConfigurationCount', len(run_configurations)),
-                        ])
+                        write_value(
+                            data, [
+                                ('ProjectExplorer.ProjectConfiguration.DefaultDisplayName', env_name),
+                                ('ProjectExplorer.ProjectConfiguration.DisplayName', env_name),
+                                ('ProjectExplorer.ProjectConfiguration.Id', self.get_platform_guid(env_name)),
+                                ('ProjectExplorer.Target.ActiveBuildConfiguration', 0),
+                                ('ProjectExplorer.Target.ActiveDeployConfiguration', 0),
+                                ('ProjectExplorer.Target.ActiveRunConfiguration', 0),
+                            ] + build_configurations +
+                            [('ProjectExplorer.Target.BuildConfigurationCount', len(build_configurations)),
+                             ('ProjectExplorer.Target.DeployConfiguration.0', [
+                                 ('ProjectExplorer.BuildConfiguration.BuildStepList.0', [
+                                     ('ProjectExplorer.BuildStepList.Step.0', [
+                                         ('ProjectExplorer.BuildStep.Enabled', True),
+                                         ('ProjectExplorer.ProcessStep.Arguments', '%s deploy:%s:%s' %
+                                          (sys.argv[0], to_var('Toolchain'), to_var('Variant'))),
+                                         ('ProjectExplorer.ProcessStep.Command', sys.executable),
+                                         ('ProjectExplorer.ProcessStep.WorkingDirectory', self.srcnode.abspath()),
+                                         ('ProjectExplorer.ProjectConfiguration.DefaultDisplayName',
+                                          'Custom Process Step'),
+                                         ('ProjectExplorer.ProjectConfiguration.DisplayName', ''),
+                                         ('ProjectExplorer.ProjectConfiguration.Id', 'ProjectExplorer.ProcessStep'),
+                                     ]),
+                                     ('ProjectExplorer.BuildStepList.StepsCount', 1),
+                                     ('ProjectExplorer.ProjectConfiguration.DefaultDisplayName', 'Deploy'),
+                                     ('ProjectExplorer.ProjectConfiguration.DisplayName', ''),
+                                     ('ProjectExplorer.ProjectConfiguration.Id', 'ProjectExplorer.BuildSteps.Deploy'),
+                                 ]),
+                                 ('ProjectExplorer.BuildConfiguration.BuildStepListCount', 1),
+                                 ('ProjectExplorer.ProjectConfiguration.DefaultDisplayName', 'Deploy locally'),
+                                 ('ProjectExplorer.ProjectConfiguration.DisplayName', 'Qbs Install'),
+                                 ('ProjectExplorer.ProjectConfiguration.Id', 'Qbs.Deploy'),
+                             ]), ('ProjectExplorer.Target.DeployConfigurationCount', 1),
+                             ('ProjectExplorer.Target.PluginSettings', [])] + run_configurations + [
+                                 ('ProjectExplorer.Target.RunConfigurationCount', len(run_configurations)),
+                             ])
                         target_index += 1
                 with XmlNode(qtcreator, 'data') as data:
                     XmlNode(data, 'variable', 'ProjectExplorer.Project.TargetCount').close()
@@ -1111,9 +1078,8 @@ class QtCreator(Build.BuildContext):
                     XmlNode(data, 'variable', 'Version').close()
                     write_value(data, self.__class__.version[1])
 
-
     def write_workspace(self, projects, appname, launcher):
-        workspace_file = os.path.join(HOME_DIRECTORY, '%s.qws'%appname)
+        workspace_file = os.path.join(HOME_DIRECTORY, '%s.qws' % appname)
         try:
             document = parse(workspace_file)
         except Exception:
@@ -1121,24 +1087,24 @@ class QtCreator(Build.BuildContext):
                 with XmlNode(document, 'qtcreator') as creator:
                     with XmlNode(creator, 'data') as data:
                         XmlNode(data, 'variable', 'Color').close()
-                        XmlNode(data, 'value', '#666666', {'type':'QString'}).close()
+                        XmlNode(data, 'value', '#666666', {'type': 'QString'}).close()
                     with XmlNode(creator, 'data') as data:
                         XmlNode(data, 'variable', 'EditorSettings').close()
-                        XmlNode(data, 'value', '', {'type':'QByteArray'}).close()
+                        XmlNode(data, 'value', '', {'type': 'QByteArray'}).close()
                     with XmlNode(creator, 'data') as data:
                         XmlNode(data, 'variable', 'ProjectDependencies').close()
-                        XmlNode(data, 'valuemap', '', {'type':'QVariantMap'}).close()
+                        XmlNode(data, 'valuemap', '', {'type': 'QVariantMap'}).close()
                     with XmlNode(creator, 'data') as data:
                         XmlNode(data, 'variable', 'ProjectList').close()
-                        with XmlNode(data, 'valuelist', '', {'type':'QVariantList'}) as project_list:
+                        with XmlNode(data, 'valuelist', '', {'type': 'QVariantList'}) as project_list:
                             for project in projects:
                                 XmlNode(project_list, 'value', project.abspath(), {'type': 'QString'}).close()
                     with XmlNode(creator, 'data') as data:
                         XmlNode(data, 'variable', 'StartupProject').close()
-                        XmlNode(data, 'value', launcher.abspath(), {'type':'QString'}).close()
+                        XmlNode(data, 'value', launcher.abspath(), {'type': 'QString'}).close()
                     with XmlNode(creator, 'data') as data:
                         XmlNode(data, 'variable', 'valueKeys').close()
-                        XmlNode(data, 'valuelist', '', {'type':'QVariantList'}).close()
+                        XmlNode(data, 'valuelist', '', {'type': 'QVariantList'}).close()
         else:
             new_valuelist = document.createElement('valuelist')
             new_valuelist.setAttribute('type', 'QVariantList')
@@ -1167,7 +1133,7 @@ class Qbs(QtCreator):
         self.restore()
         if not self.all_envs:
             self.load_envs()
-        self.env.PROJECTS=[self.__class__.cmd]
+        self.env.PROJECTS = [self.__class__.cmd]
         self.env.VARIANT = to_var('Variant')
         self.env.TOOLCHAIN = to_var('Toolchain')
         self.env.PREFIX = to_var('Prefix')
@@ -1186,15 +1152,15 @@ class Qbs(QtCreator):
         self.build_platform_list()
         appname = getattr(Context.g_module, Context.APPNAME, self.srcnode.name)
         self.base_node = self.srcnode
-        qbs_project = self.base_node.make_node('%s.qbs'%appname)
-        qbs_user = self.base_node.make_node('%s.qbs.user'%appname)
+        qbs_project = self.base_node.make_node('%s.qbs' % appname)
+        qbs_user = self.base_node.make_node('%s.qbs.user' % appname)
         try:
             os.makedirs(os.path.join(HOME_DIRECTORY, 'codestyles', 'Cpp'))
         except OSError:
             pass
         with open(os.path.join(HOME_DIRECTORY, 'codestyles', 'Cpp', 'bugengine.xml'), 'w') as codestyle:
             self.write_codestyle(codestyle)
-        projects = { }
+        projects = {}
         project_list = []
         for group in self.groups:
             for task_gen in group:
@@ -1220,8 +1186,7 @@ class Qbs(QtCreator):
         with open(qbs_user.abspath(), 'w') as f:
             self.write_user(f, project_list)
 
-
-    def write_project_list(self, project_file, project_list, indent = '    '):
+    def write_project_list(self, project_file, project_list, indent='    '):
         for k in sorted(project_list.keys()):
             p = project_list[k]
             if isinstance(p, dict):
@@ -1272,7 +1237,6 @@ class Qbs(QtCreator):
                 project_file.write('%s}\n' % indent)
 
 
-
 class QtCreator2(QtCreator):
     "creates projects for QtCreator 2.x"
     cmd = 'qtcreator2'
@@ -1319,4 +1283,3 @@ class Qbs4(Qbs):
     fun = 'build'
     optim = 'debug'
     version = (4, 18)
-

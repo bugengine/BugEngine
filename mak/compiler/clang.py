@@ -5,10 +5,10 @@ import sys
 
 class Clang(Configure.ConfigurationContext.GnuCompiler):
     DEFINES = ['__clang__', '__GNUC__', '__GNUG__']
-    NAMES = ('Clang',)
+    NAMES = ('Clang', )
     TOOLS = 'clang clangxx'
 
-    def __init__(self, clang, clangxx, extra_args = {}):
+    def __init__(self, clang, clangxx, extra_args={}):
         Configure.ConfigurationContext.GnuCompiler.__init__(self, clang, clangxx, extra_args)
 
     def has_arch_flag(self):
@@ -35,10 +35,12 @@ class Clang(Configure.ConfigurationContext.GnuCompiler):
                 if arch_name in seen:
                     continue
                 try:
-                    c = self.__class__(self.compiler_c, self.compiler_cxx,
-                                       {'c': self.extra_args.get('c', []) + ['-arch', arch_target],
-                                        'cxx': self.extra_args.get('cxx', []) + ['-arch', arch_target],
-                                        'link': self.extra_args.get('link', []) + ['-arch', arch_target],})
+                    c = self.__class__(
+                        self.compiler_c, self.compiler_cxx, {
+                            'c': self.extra_args.get('c', []) + ['-arch', arch_target],
+                            'cxx': self.extra_args.get('cxx', []) + ['-arch', arch_target],
+                            'link': self.extra_args.get('link', []) + ['-arch', arch_target],
+                        })
                 except Exception as e:
                     pass
                 else:
@@ -73,12 +75,12 @@ class Clang(Configure.ConfigurationContext.GnuCompiler):
                                     if a in seen:
                                         continue
                                     try:
-                                        c = self.__class__(self.compiler_c, self.compiler_cxx,
-                                                           {
-                                                               'c': self.extra_args.get('c', []) + ['-target', x],
-                                                               'cxx': self.extra_args.get('cxx', []) + ['-target', x],
-                                                               'link': self.extra_args.get('link', []) + ['-target', x],
-                                                           })
+                                        c = self.__class__(
+                                            self.compiler_c, self.compiler_cxx, {
+                                                'c': self.extra_args.get('c', []) + ['-target', x],
+                                                'cxx': self.extra_args.get('cxx', []) + ['-target', x],
+                                                'link': self.extra_args.get('link', []) + ['-target', x],
+                                            })
                                     except Exception:
                                         pass
                                     else:
@@ -94,13 +96,15 @@ class Clang(Configure.ConfigurationContext.GnuCompiler):
         Configure.ConfigurationContext.GnuCompiler.load_in_env(self, conf, platform)
         env = conf.env
         if self.version_number < (3, 1):
-            env.append_value('CXXFLAGS', ['-include', 'bits/c++config.h',
-                                          '-include', os.path.join(conf.bugenginenode.abspath(),
-                                                                   'mak/compiler/clang/no_atomic_builtin.h')])
+            env.append_value('CXXFLAGS', [
+                '-include', 'bits/c++config.h', '-include',
+                os.path.join(conf.bugenginenode.abspath(), 'mak/compiler/clang/no_atomic_builtin.h')
+            ])
         # Typedef of __float128 on older clangs
         if self.version_number < (3, 9):
-            env.append_value('CXXFLAGS', ['-include', os.path.join(conf.bugenginenode.abspath(),
-                                                                   'mak/compiler/clang/float128.h')])
+            env.append_value(
+                'CXXFLAGS',
+                ['-include', os.path.join(conf.bugenginenode.abspath(), 'mak/compiler/clang/float128.h')])
         # Add multiarch directories
         sysroot = env.SYSROOT or '/'
         for target in self.targets:
@@ -124,11 +128,10 @@ class Clang(Configure.ConfigurationContext.GnuCompiler):
             while True:
                 index = line.index(':', 3)
                 result.append(line[:index])
-                line = line[index+1:]
+                line = line[index + 1:]
         except ValueError:
             pass
         return result
-
 
 
 def detect_clang(conf):
@@ -146,8 +149,8 @@ def detect_clang(conf):
                             libdirs.append(b)
 
     seen = {}
-    for path in libdirs+bindirs:
-        clang =  conf.detect_executable('clang', path_list=[path])
+    for path in libdirs + bindirs:
+        clang = conf.detect_executable('clang', path_list=[path])
         clangxx = conf.detect_executable('clang++', path_list=[path])
         if clang and clangxx:
             clang = os.path.normpath(clang)

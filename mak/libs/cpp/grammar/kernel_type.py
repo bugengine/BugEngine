@@ -1,5 +1,6 @@
 from ..tree import Parameter
 
+
 def p_kernel_method_inout(p):
     """
         param_type : BE_SEGMENT
@@ -7,6 +8,7 @@ def p_kernel_method_inout(p):
                    | BE_STREAM
     """
     p[0] = p[1]
+
 
 def p_kernel_method_arg(p):
     """

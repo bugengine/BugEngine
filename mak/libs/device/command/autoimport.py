@@ -14,10 +14,12 @@ class AutoimportCommand(Command):
                 for device in platform.list_devices():
                     for existing_device in self.all_devices():
                         if existing_device.matches(device):
-                            print('skipping import of already registered device at address %s://%s' % (device.protocol_name, device.connection_info))
+                            print('skipping import of already registered device at address %s://%s' %
+                                  (device.protocol_name, device.connection_info))
                             break
                     else:
-                        print('importing %s at address %s://%s' % (device.name, device.protocol_name, device.connection_info))
+                        print('importing %s at address %s://%s' %
+                              (device.name, device.protocol_name, device.connection_info))
                         try:
                             self.devices[device.platform.__class__.__name__].append(device)
                         except KeyError:

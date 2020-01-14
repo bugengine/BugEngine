@@ -47,7 +47,7 @@ def p_method_operator_2(p):
         method_operator : LEFT_BRACKET RIGHT_BRACKET
                         | LEFT_PARENTHESIS RIGHT_PARENTHESIS
     """
-    p[0] = '%s%s'%(p[1], p[2])
+    p[0] = '%s%s' % (p[1], p[2])
 
 
 def p_method_return_type(p):
@@ -109,7 +109,7 @@ def p_method_arg(p):
     """
         method_arg : tag_list type method_arg_optional_id method_arg_optional_array method_arg_optional_value
     """
-    p[0] = Parameter(p[2]+p[4], p[3], p[5])
+    p[0] = Parameter(p[2] + p[4], p[3], p[5])
     p[0].add_tags(p[1])
 
 
@@ -235,7 +235,7 @@ def p_method_prototype_operator_cast(p):
         method_prototype : name_operator type LEFT_PARENTHESIS method_args RIGHT_PARENTHESIS method_attribute_right_list
     """
     if not p[1]:
-        p[0] = Method('#%s'%p[2], p[2], p[4], p[6])
+        p[0] = Method('#%s' % p[2], p[2], p[4], p[6])
 
 
 def p_method_prototype_constructor(p):

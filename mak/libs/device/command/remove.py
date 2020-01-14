@@ -13,4 +13,3 @@ class RemoveCommand(Command):
     def help(self, out):
         out.write('    %s <device_name>\n' % self.bold_name())
         out.write('        Removes the device by name\n')
-

@@ -5,18 +5,15 @@ import re
 
 class Windows(Configure.ConfigurationContext.Platform):
     NAME = 'windows'
-    SUPPORTED_TARGETS = (re.compile('.*mingw32.*'),
-                         re.compile('.*windows-gnu'),
-                         re.compile('.*windows-msvc'),
-                         re.compile('.*windows-intel'),
-                         re.compile('.*windows-wsdk'))
+    SUPPORTED_TARGETS = (re.compile('.*mingw32.*'), re.compile('.*windows-gnu'), re.compile('.*windows-msvc'),
+                         re.compile('.*windows-intel'), re.compile('.*windows-wsdk'))
 
     def is_valid(self, compiler):
         node = self.conf.bldnode.make_node('main.cxx')
         tgtnode = node.change_ext('')
         node.write('#include <cstdio>\nint main() {}\n')
         try:
-            result, out, err = compiler.run_cxx([node.abspath(), '-x', 'c++',  '-o', tgtnode.abspath()])
+            result, out, err = compiler.run_cxx([node.abspath(), '-x', 'c++', '-o', tgtnode.abspath()])
         except Exception as e:
             #print(e)
             return False
@@ -69,14 +66,17 @@ class Windows(Configure.ConfigurationContext.Platform):
         else:
             env.MS_PROJECT_PLATFORM = 'Win32'
 
-        env.append_unique('DEFINES', ['_WIN32_WINNT=0x0502', 'WINVER=0x0502', '_CRT_SECURE_NO_DEPRECATE=1', '_CRT_SECURE_NO_WARNINGS=1'])
+        env.append_unique(
+            'DEFINES',
+            ['_WIN32_WINNT=0x0502', 'WINVER=0x0502', '_CRT_SECURE_NO_DEPRECATE=1', '_CRT_SECURE_NO_WARNINGS=1'])
 
     def find_winres(self, conf, compiler):
-        winres = conf.find_program(compiler.target + '-windres', var='WINRC',
-                                   path_list=compiler.directories, mandatory=False)
+        winres = conf.find_program(compiler.target + '-windres',
+                                   var='WINRC',
+                                   path_list=compiler.directories,
+                                   mandatory=False)
         if not winres:
-            winres = conf.find_program('windres', var='WINRC', path_list=compiler.directories,
-                                       mandatory=False)
+            winres = conf.find_program('windres', var='WINRC', path_list=compiler.directories, mandatory=False)
         if not winres:
             winres = conf.find_program('windres', var='WINRC', mandatory=False)
         conf.load('winres_patch', tooldir=[os.path.join(conf.bugenginenode.abspath(), 'mak', 'tools', 'waf')])
@@ -133,4 +133,3 @@ def options(opt):
 
 def configure(conf):
     conf.platforms.append(Windows(conf))
-

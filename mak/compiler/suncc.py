@@ -5,11 +5,11 @@ import sys
 
 class SunCC(Configure.ConfigurationContext.GnuCompiler):
     DEFINES = ['__SUNPRO_CC']
-    NAMES = ('SunCC',)
+    NAMES = ('SunCC', )
     SUNCC_PLATFORMS = {
-        '__gnu_linux__':    'linux-gnu',
-        '__gnu__linux__':   'linux-gnu',
-        '__sun':            'sunos',
+        '__gnu_linux__': 'linux-gnu',
+        '__gnu__linux__': 'linux-gnu',
+        '__sun': 'sunos',
     }
     SUNCC_ARCHS = {
         '__i386__': 'x86',
@@ -17,44 +17,63 @@ class SunCC(Configure.ConfigurationContext.GnuCompiler):
     }
     TOOLS = 'suncc suncxx'
     VECTORIZED_FLAGS = {
-        'x86':      (('.sse3', ['-xarch=sse3', '-xarch=ssse3',
-                                '-D__MMX__=1', '-D__SSE__=1', '-D__SSE2__=1',
-                                '-D__SSE3__=1', '-D__SSSE3__=1']),
-                     ('.sse4', ['-xarch=sse4_1', '-xarch=sse4_2',
-                                '-D__MMX__=1', '-DSSE__=1', '-DSSE2__=1',
-                                '-D__SSE3__=1', '-D__SSSE3__=1',
-                                '-D__SSE4_1__=1', '-D__SSE4_2__=1', '-D__POPCNT__=1']),
-                     ('.avx', ['-xarch=avx',
-                               '-D__MMX__=1', '-D__SSE__=1', '-D__SSE2__=1',
-                               '-D__SSE3__=1', '-D__SSSE3__=1',
-                                '-D__SSE4_1__=1', '-D__SSE4_2__=1', '-D__POPCNT__=1',
-                                '-D___AVX__=1', '-D__XSAVE__=1']),
-                     ('.avx2', ['-xarch=avx2',
-                                '-D__MMX__=1', '-D__SSE__=1', '-D__SSE2__=1',
-                                '-D__SSE3__=1', '-D__SSSE3__=1',
-                                '-D__SSE4_1__=1', '-D__SSE4_2__=1', '-D__POPCNT__=1',
-                                '-D__AVX__=1', '-D__XSAVE__=1',
-                                '-D__AVX2__=1',]),),
-        'amd64':    (('.sse3', ['-xarch=sse3', '-xarch=ssse3',
-                                '-D__MMX__=1', '-D__SSE__=1', '-D__SSE2__=1',
-                                '-D__SSE3__=1', '-D__SSSE3__=1']),
-                     ('.sse4', ['-xarch=sse4_1', '-xarch=sse4_2',
-                                '-D__MMX__=1', '-D__SSE__=1', '-D__SSE2__=1',
-                                '-D__SSE3__=1', '-D__SSSE3__=1',
-                                '-D__SSE4_1__=1', '-D__SSE4_2__=1', '-D__POPCNT__=1']),
-                     ('.avx', ['-xarch=avx',
-                               '-D__MMX__=1', '-D__SSE__=1', '-D__SSE2__=1',
-                               '-D__SSE3__=1', '-D__SSSE3__=1',
-                                '-D__SSE4_1__=1', '-D__SSE4_2__=1', '-D__POPCNT__=1',
-                                '-D___AVX__=1', '-D__XSAVE__=1']),
-                     ('.avx2', ['-xarch=avx2',
-                                '-D__MMX__=1', '-D__SSE__=1', '-D__SSE2__=1',
-                                '-D__SSE3__=1', '-D__SSSE3__=1',
-                                '-D__SSE4_1__=1', '-D__SSE4_2__=1', '-D__POPCNT__=1',
-                                '-D__AVX__=1', '-D__XSAVE__=1',
-                                '-D__AVX2__=1',]),),
+        'x86': (
+            ('.sse3', [
+                '-xarch=sse3', '-xarch=ssse3', '-D__MMX__=1', '-D__SSE__=1', '-D__SSE2__=1', '-D__SSE3__=1',
+                '-D__SSSE3__=1'
+            ]),
+            ('.sse4', [
+                '-xarch=sse4_1', '-xarch=sse4_2', '-D__MMX__=1', '-DSSE__=1', '-DSSE2__=1', '-D__SSE3__=1',
+                '-D__SSSE3__=1', '-D__SSE4_1__=1', '-D__SSE4_2__=1', '-D__POPCNT__=1'
+            ]),
+            ('.avx', [
+                '-xarch=avx', '-D__MMX__=1', '-D__SSE__=1', '-D__SSE2__=1', '-D__SSE3__=1', '-D__SSSE3__=1',
+                '-D__SSE4_1__=1', '-D__SSE4_2__=1', '-D__POPCNT__=1', '-D___AVX__=1', '-D__XSAVE__=1'
+            ]),
+            ('.avx2', [
+                '-xarch=avx2',
+                '-D__MMX__=1',
+                '-D__SSE__=1',
+                '-D__SSE2__=1',
+                '-D__SSE3__=1',
+                '-D__SSSE3__=1',
+                '-D__SSE4_1__=1',
+                '-D__SSE4_2__=1',
+                '-D__POPCNT__=1',
+                '-D__AVX__=1',
+                '-D__XSAVE__=1',
+                '-D__AVX2__=1',
+            ]),
+        ),
+        'amd64': (
+            ('.sse3', [
+                '-xarch=sse3', '-xarch=ssse3', '-D__MMX__=1', '-D__SSE__=1', '-D__SSE2__=1', '-D__SSE3__=1',
+                '-D__SSSE3__=1'
+            ]),
+            ('.sse4', [
+                '-xarch=sse4_1', '-xarch=sse4_2', '-D__MMX__=1', '-D__SSE__=1', '-D__SSE2__=1', '-D__SSE3__=1',
+                '-D__SSSE3__=1', '-D__SSE4_1__=1', '-D__SSE4_2__=1', '-D__POPCNT__=1'
+            ]),
+            ('.avx', [
+                '-xarch=avx', '-D__MMX__=1', '-D__SSE__=1', '-D__SSE2__=1', '-D__SSE3__=1', '-D__SSSE3__=1',
+                '-D__SSE4_1__=1', '-D__SSE4_2__=1', '-D__POPCNT__=1', '-D___AVX__=1', '-D__XSAVE__=1'
+            ]),
+            ('.avx2', [
+                '-xarch=avx2',
+                '-D__MMX__=1',
+                '-D__SSE__=1',
+                '-D__SSE2__=1',
+                '-D__SSE3__=1',
+                '-D__SSSE3__=1',
+                '-D__SSE4_1__=1',
+                '-D__SSE4_2__=1',
+                '-D__POPCNT__=1',
+                '-D__AVX__=1',
+                '-D__XSAVE__=1',
+                '-D__AVX2__=1',
+            ]),
+        ),
     }
-
 
     def __init__(self, suncc, sunCC, extra_args={}, extra_env={}):
         Configure.ConfigurationContext.GnuCompiler.__init__(self, suncc, sunCC, extra_args, extra_env)
@@ -87,7 +106,7 @@ class SunCC(Configure.ConfigurationContext.GnuCompiler):
                     value = None
                 else:
                     macro = l[:sp]
-                    value = l[sp+1:]
+                    value = l[sp + 1:]
                 if macro in self.SUNCC_PLATFORMS:
                     platform = self.SUNCC_PLATFORMS[macro]
                 elif macro in self.SUNCC_ARCHS:
@@ -98,7 +117,7 @@ class SunCC(Configure.ConfigurationContext.GnuCompiler):
                     major = value[2:-3]
                     version = '%s.%s%s' % (major, minor, patch if patch != '0' else '')
         self.target = '%s-%s' % (arch, platform)
-        self.targets = (self.target,)
+        self.targets = (self.target, )
         return version, platform, arch
 
     def set_optimisation_options(self, conf):
@@ -110,17 +129,19 @@ class SunCC(Configure.ConfigurationContext.GnuCompiler):
 
         v['CPPFLAGS_profile'] = ['-DNDEBUG']
         v['CFLAGS_profile'] = ['-g', '-DNDEBUG', '-fast']
-        v['CXXFLAGS_profile'] = ['-g', '-DNDEBUG', '-fast',
-                                '-features=mutable',
-                                '-features=localfor', '-features=bool', '-features=no%split_init']
+        v['CXXFLAGS_profile'] = [
+            '-g', '-DNDEBUG', '-fast', '-features=mutable', '-features=localfor', '-features=bool',
+            '-features=no%split_init'
+        ]
         v['LINKFLAGS_profile'] = ['-g']
 
         v['CPPFLAGS_final'] = ['-DNDEBUG']
         v['CFLAGS_final'] = ['-g', '-DNDEBUG', '-fast']
-        v['CXXFLAGS_final'] = ['-g', '-DNDEBUG', '-fast',
-                                '-features=mutable',
-                                '-features=localfor', '-features=bool', '-features=no%split_init']
-        if self.version_number[0:2] != (5,13):
+        v['CXXFLAGS_final'] = [
+            '-g', '-DNDEBUG', '-fast', '-features=mutable', '-features=localfor', '-features=bool',
+            '-features=no%split_init'
+        ]
+        if self.version_number[0:2] != (5, 13):
             v['CXXFLAGS_profile'] += ['-features=no%except']
             v['CXXFLAGS_final'] += ['-features=no%except']
         v['LINKFLAGS_final'] = ['-g']
@@ -130,10 +151,12 @@ class SunCC(Configure.ConfigurationContext.GnuCompiler):
         v['CFLAGS_warnnone'] = ['-w', '-errtags=yes', '-erroff=%all']
         v['CXXFLAGS_warnnone'] = ['-w', '-errtags=yes', '-erroff=%all']
         v['CFLAGS_warnall'] = ['+w2', '-errtags=yes']
-        v['CXXFLAGS_warnall'] = ['+w2', '-errtags=yes', '-erroff=fieldsemicolonw,notused,'
-                                 'unknownpragma,wunreachable,doubunder,wvarhidenmem,wvarhidemem,'
-                                 'reftotemp,truncwarn,badargtype2w,hidef,wemptydecl,notemsource,'
-                                 'nonewline,inllargeuse']
+        v['CXXFLAGS_warnall'] = [
+            '+w2', '-errtags=yes', '-erroff=fieldsemicolonw,notused,'
+            'unknownpragma,wunreachable,doubunder,wvarhidenmem,wvarhidemem,'
+            'reftotemp,truncwarn,badargtype2w,hidef,wemptydecl,notemsource,'
+            'nonewline,inllargeuse'
+        ]
 
     def error_flag(self):
         return ['-errwarn=%all']
@@ -141,7 +164,9 @@ class SunCC(Configure.ConfigurationContext.GnuCompiler):
     def is_valid(self, conf, extra_flags=[]):
         node = conf.bldnode.make_node('main.cxx')
         tgtnode = node.change_ext('')
-        node.write('#ifndef _GNU_SOURCE\n# define _GNU_SOURCE\n#endif\n#include <cstdlib>\n#include <iostream>\nint main() {}\n')
+        node.write(
+            '#ifndef _GNU_SOURCE\n# define _GNU_SOURCE\n#endif\n#include <cstdlib>\n#include <iostream>\nint main() {}\n'
+        )
         try:
             result, out, err = self.run_cxx([node.abspath(), '-c', '-o', tgtnode.abspath()] + extra_flags)
         except Exception as e:
@@ -168,19 +193,19 @@ class SunCC(Configure.ConfigurationContext.GnuCompiler):
             if self.arch == 'x86':
                 v.append_unique('SYSTEM_LIBPATHS', ['=/usr/lib/i386-linux-gnu'])
                 v.CFLAGS += ['-xtarget=opteron', '-I/usr/include/i386-linux-gnu']
-                v.CXXFLAGS += [os.path.join(conf.bugenginenode.abspath(),
-                                            'mak/compiler/suncc/interlocked-a=x86.il'),
-                               '-xarch=sse2', '-xchip=generic', '-xcache=64/64/2:1024/64/16',
-                               '-I/usr/include/i386-linux-gnu',
-                               '-include', 'math.h']
+                v.CXXFLAGS += [
+                    os.path.join(conf.bugenginenode.abspath(),
+                                 'mak/compiler/suncc/interlocked-a=x86.il'), '-xarch=sse2', '-xchip=generic',
+                    '-xcache=64/64/2:1024/64/16', '-I/usr/include/i386-linux-gnu', '-include', 'math.h'
+                ]
             elif self.arch == 'amd64':
                 v.append_unique('SYSTEM_LIBPATHS', ['=/usr/lib/x86_64-linux-gnu'])
                 v.CFLAGS += ['-xtarget=opteron', '-I/usr/include/x86_64-linux-gnu']
-                v.CXXFLAGS += [os.path.join(conf.bugenginenode.abspath(),
-                                            'mak/compiler/suncc/interlocked-a=amd64.il'),
-                               '-xarch=sse2', '-xchip=generic', '-xcache=64/64/2:1024/64/16',
-                               '-I/usr/include/x86_64-linux-gnu',
-                               '-include', 'math.h']
+                v.CXXFLAGS += [
+                    os.path.join(conf.bugenginenode.abspath(),
+                                 'mak/compiler/suncc/interlocked-a=amd64.il'), '-xarch=sse2', '-xchip=generic',
+                    '-xcache=64/64/2:1024/64/16', '-I/usr/include/x86_64-linux-gnu', '-include', 'math.h'
+                ]
             v.append_unique('CFLAGS', ['-mt', '-xldscope=hidden', '-Kpic', '-DPIC', '-D__PIC__'])
             v.append_unique('CXXFLAGS', ['-mt', '-xldscope=hidden', '-Kpic', '-DPIC', '-D__PIC__'])
             v.append_unique('LINKFLAGS', ['-lrt', '-mt', '-znow', '-xldscope=hidden']) #, '-z', 'absexec', '-Kpic'])

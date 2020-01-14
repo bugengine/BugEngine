@@ -10,10 +10,16 @@ from waflib import Options, Utils
 
 
 def options(opt):
-    sdks = ['/%s'%d for d in os.listdir('/') if d.startswith('Developer')]
-    sdks += [os.path.join('/', 'Applications', d, 'Contents', 'Developer') for d in os.listdir('/Applications') if d.startswith('Xcode')]
+    sdks = ['/%s' % d for d in os.listdir('/') if d.startswith('Developer')]
+    sdks += [
+        os.path.join('/', 'Applications', d, 'Contents', 'Developer') for d in os.listdir('/Applications')
+        if d.startswith('Xcode')
+    ]
     try:
-        p = Utils.subprocess.Popen(['xcode-select', '--print-path'], stdin=Utils.subprocess.PIPE, stdout=Utils.subprocess.PIPE, stderr=Utils.subprocess.PIPE)
+        p = Utils.subprocess.Popen(['xcode-select', '--print-path'],
+                                   stdin=Utils.subprocess.PIPE,
+                                   stdout=Utils.subprocess.PIPE,
+                                   stderr=Utils.subprocess.PIPE)
         out = p.communicate()[0]
     except Exception:
         pass
@@ -23,16 +29,17 @@ def options(opt):
         out = out.split('\n')[0]
         if out not in sdks:
             sdks.append(out)
-    opt.add_option( '--xcode-sdks',
-                    action='store',
-                    default=','.join(sdks),
-                    dest='xcode_sdks',
-                    help='Paths of the different XCode SDKs')
+    opt.add_option('--xcode-sdks',
+                   action='store',
+                   default=','.join(sdks),
+                   dest='xcode_sdks',
+                   help='Paths of the different XCode SDKs')
 
 
 def run_command(cmd, input=None, env=None):
     try:
-        p = Utils.subprocess.Popen(cmd, stdin=Utils.subprocess.PIPE,
+        p = Utils.subprocess.Popen(cmd,
+                                   stdin=Utils.subprocess.PIPE,
                                    stdout=Utils.subprocess.PIPE,
                                    stderr=Utils.subprocess.PIPE,
                                    env=env)
@@ -51,7 +58,7 @@ def run_command(cmd, input=None, env=None):
 
 def configure(conf):
     environ = getattr(conf, 'environ', os.environ)
-    environ['PATH'] = '/System/Library/Frameworks/OpenCL.framework/Libraries:'+environ['PATH']
+    environ['PATH'] = '/System/Library/Frameworks/OpenCL.framework/Libraries:' + environ['PATH']
     conf.darwin_sdks = {}
     os_sdk_paths = []
     os_sdk_regexp = re.compile('([a-zA-Z]+)([0-9\\.]+)u?\\.sdk')
@@ -60,30 +67,30 @@ def configure(conf):
             os_sdk_paths.append(os.path.normpath(os.path.join(p, 'SDKs')))
         try:
             for platform in os.listdir(os.path.join(p, 'Platforms')):
-                environ['PATH'] = os.pathsep.join((os.path.join(p, 'Platforms', platform, 'Developer', 'usr', 'bin'),
-                                                   environ['PATH']))
+                environ['PATH'] = os.pathsep.join((os.path.join(p, 'Platforms', platform, 'Developer', 'usr',
+                                                                'bin'), environ['PATH']))
                 s_path = os.path.normpath(os.path.join(p, 'Platforms', platform, 'Developer', 'SDKs'))
                 if os.path.isdir(s_path):
                     os_sdk_paths.append(s_path)
         except OSError:
             pass
-        environ['PATH'] = ('%s/Toolchains/XcodeDefault.xctoolchain/usr/bin:%s/usr/bin:'%(p,p))+environ['PATH']
+        environ['PATH'] = ('%s/Toolchains/XcodeDefault.xctoolchain/usr/bin:%s/usr/bin:' % (p, p)) + environ['PATH']
     conf.find_program('file')
 
     archs = {
-        'ppc':      'ppc',
+        'ppc': 'ppc',
         'ppc_7400': 'ppc',
-        'ppc64':    'ppc64',
-        'x86_64':   'amd64',
-        'i386':     'x86',
-        'arm_v6':   'armv6',
-        'armv7':    'armv7a',
-        'arm_v7':   'armv7a',
-        'armv7s':   'armv7s',
-        'arm_v7s':  'armv7s',
-        'armv7k':   'armv7k',
-        'arm_v7k':  'armv7k',
-        'arm64':    'arm64',
+        'ppc64': 'ppc64',
+        'x86_64': 'amd64',
+        'i386': 'x86',
+        'arm_v6': 'armv6',
+        'armv7': 'armv7a',
+        'arm_v7': 'armv7a',
+        'armv7s': 'armv7s',
+        'arm_v7s': 'armv7s',
+        'armv7k': 'armv7k',
+        'arm_v7k': 'armv7k',
+        'arm64': 'arm64',
     }
 
     for p in os_sdk_paths:
@@ -132,7 +139,7 @@ def configure(conf):
                 except KeyError:
                     conf.darwin_sdks[sdk_os] = [(sdk_version, sdk_archs, sdk_path)]
     for sdk_os in conf.darwin_sdks.keys():
-        conf.darwin_sdks[sdk_os] = sorted(conf.darwin_sdks[sdk_os], key = lambda x: (-len(x[1]), x[0]))
+        conf.darwin_sdks[sdk_os] = sorted(conf.darwin_sdks[sdk_os], key=lambda x: (-len(x[1]), x[0]))
 
     # find valid code signing identity
     process = Utils.subprocess.Popen(['security', 'find-identity', '-p', 'codesigning', '-v'],
@@ -155,10 +162,10 @@ def build(bld):
     for p in Options.options.xcode_sdks.split(',')[::-1]:
         try:
             for platform in os.listdir(os.path.join(p, 'Platforms')):
-                environ['PATH'] = ('%s/Platforms/%s/Developer/usr/bin:'%(p, platform))+environ['PATH']
+                environ['PATH'] = ('%s/Platforms/%s/Developer/usr/bin:' % (p, platform)) + environ['PATH']
         except:
             pass
-        environ['PATH'] = ('%s/Toolchains/XcodeDefault.xctoolchain/usr/bin:%s/usr/bin:'%(p,p))+environ['PATH']
+        environ['PATH'] = ('%s/Toolchains/XcodeDefault.xctoolchain/usr/bin:%s/usr/bin:' % (p, p)) + environ['PATH']
 
 
 def plugins(bld):

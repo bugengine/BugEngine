@@ -1,8 +1,8 @@
 import os
 import sys
-from mak.libs import device
+import device
 from waflib import Configure, Context, Options, Errors, Logs
-from mak.libs.device.command import Command
+from device.command import Command
 try:
     import cPickle as pickle
 except ImportError:
@@ -99,9 +99,6 @@ class DeviceContext(Context.Context):
 
 
 def options(option_context):
-    option_context.add_option('--device',
-                              action='store',
-                              default='clamps',
-                              dest='device',
-                              help='Default device to deploy to')
-
+    option_context.add_option(
+        '--device', action='store', default='clamps', dest='device', help='Default device to deploy to'
+    )

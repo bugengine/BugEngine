@@ -5,5 +5,6 @@ class Protocol(object):
             if subclass.name == name:
                 return subclass
 
+
 from .localhost import LocalhostProtocol
 from .ssh import SSHProtocol

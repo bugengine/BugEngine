@@ -27,12 +27,10 @@ def configure(conf):
         add_ld_so(conf, '/etc/ld.so.conf', lib_paths)
     if os.path.isdir('/etc/ld.so.conf.d'):
         for f in sorted(os.listdir('/etc/ld.so.conf.d')):
-            add_ld_so(conf, '/etc/ld.so.conf.d/'+f, lib_paths)
+            add_ld_so(conf, '/etc/ld.so.conf.d/' + f, lib_paths)
     conf.env.ALL_ARCH_LIBPATHS = lib_paths
     try:
-        p = Utils.subprocess.Popen(['/usr/bin/cc', '-v'],
-                                   stdout=Utils.subprocess.PIPE,
-                                   stderr=Utils.subprocess.PIPE)
+        p = Utils.subprocess.Popen(['/usr/bin/cc', '-v'], stdout=Utils.subprocess.PIPE, stderr=Utils.subprocess.PIPE)
         out, err = p.communicate()
     except BaseException:
         pass
@@ -52,4 +50,3 @@ def build(bld):
 
 def plugins(bld):
     pass
-

@@ -27,4 +27,3 @@ class ListCommand(Command):
     def help(self, out):
         out.write('    %s %s\n' % (self.bold_name(), '|'.join(sorted(self.categories.keys()))))
         out.write('        Displays a lits of registered items of the specified category\n')
-
