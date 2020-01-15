@@ -203,6 +203,6 @@ def p_statemen_do_while_error(p):
     """
 
 
-from typing import TYPE_CHECKING
+from be_typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from ply.yacc import YaccProduction

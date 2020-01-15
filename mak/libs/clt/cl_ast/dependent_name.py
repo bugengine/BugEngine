@@ -166,7 +166,7 @@ class DependentName(Type, Value):
         raise NotImplementedError
 
 
-from typing import TYPE_CHECKING
+from be_typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from typing import Dict, List, Optional, Tuple, Union
     from ..cl_lexer import ClLexer

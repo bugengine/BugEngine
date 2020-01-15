@@ -7,7 +7,7 @@ from ..value import Value
 from ..argument_list import ArgumentList
 from .parameter_template import TemplateTemplateParameter
 from .parameter_type import TemplateTypenameParameter
-from typing import cast, TYPE_CHECKING
+from be_typing import cast, TYPE_CHECKING
 
 
 class Template(BaseTemplateObject):
