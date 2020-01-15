@@ -1,7 +1,7 @@
 from .base_template_object import BaseTemplateParameter, BaseTemplateObject
 from ..typeref import TypeRef
 from ..type import Type, CastError
-from typing import cast, List
+from be_typing import cast
 
 
 class TemplateTemplateParameter(BaseTemplateParameter, BaseTemplateObject):
@@ -96,7 +96,7 @@ class TemplateTemplateParameter(BaseTemplateParameter, BaseTemplateObject):
             return result
 
 
-from typing import TYPE_CHECKING
+from be_typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from typing import Dict, List, Optional, Tuple, Union
     from ...cl_lexer import ClLexer

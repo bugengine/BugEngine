@@ -39,7 +39,7 @@ class Array(Type):
         return '[]' + self.type.signature(template_bindings)
 
 
-from typing import TYPE_CHECKING
+from be_typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from typing import Dict, Optional, Tuple
     from ...cl_lexer import ClLexer

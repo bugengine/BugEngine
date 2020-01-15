@@ -1,7 +1,7 @@
 from ..cl_ast.ast_types import Array, Pointer
 from ..cl_ast import CastError, CastOptions
 from ..cl_ast import Variable
-from typing import TYPE_CHECKING
+from be_typing import TYPE_CHECKING
 
 
 def p_variable_initial_value_opt(p):

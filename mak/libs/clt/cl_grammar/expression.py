@@ -1,5 +1,5 @@
 from ..cl_ast import ast_values
-from typing import TYPE_CHECKING
+from be_typing import TYPE_CHECKING
 
 
 def p_value_constant(p):

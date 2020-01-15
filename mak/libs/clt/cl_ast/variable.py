@@ -1,6 +1,6 @@
 from .cppobject import CppObject
 from .value import Value
-from typing import cast
+from be_typing import cast
 
 
 class Variable(Value):
@@ -51,7 +51,7 @@ class Variable(Value):
         pass
 
 
-from typing import TYPE_CHECKING
+from be_typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from typing import List, Optional
     from ..cl_lexer import ClLexer

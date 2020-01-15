@@ -1,5 +1,5 @@
 from ..cl_ast.ast_types import Struct
-from typing import TYPE_CHECKING
+from be_typing import TYPE_CHECKING
 
 
 def p_struct_keyword(p):

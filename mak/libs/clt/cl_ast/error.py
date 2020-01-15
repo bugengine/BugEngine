@@ -6,7 +6,7 @@ class CppError(Exception):
         self.inner_error = inner_error
 
 
-from typing import TYPE_CHECKING
+from be_typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from typing import Optional
     from .position import Position

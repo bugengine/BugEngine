@@ -1,4 +1,4 @@
-from typing import cast, TYPE_CHECKING
+from be_typing import cast, TYPE_CHECKING
 
 
 class ArgumentList:
