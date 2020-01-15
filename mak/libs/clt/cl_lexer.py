@@ -2,7 +2,7 @@ from ply import lex
 from clt import cl_ast
 import sys
 import copy
-from typing import cast, Dict, List, Optional, Tuple, TYPE_CHECKING
+from be_typing import cast, TYPE_CHECKING
 
 color_list = {
     'BOLD': '\x1b[01;1m',
@@ -736,6 +736,7 @@ class ClLexer:
 
 
 if TYPE_CHECKING:
+    from typing import Dict, List, Optional, Tuple
     from clt.cl_ast.cppobject import CppObject
     from clt.cl_ast.scope import Scope
     from clt.cl_ast.position import Position

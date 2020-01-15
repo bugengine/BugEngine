@@ -2,7 +2,7 @@ from .base_template_object import BaseTemplateParameter
 from .template import Template
 from ..value import Value
 from ..type import Type, CastOptions
-from typing import cast
+from be_typing import cast
 
 
 class TemplateValueParameter(BaseTemplateParameter, Value):
@@ -83,7 +83,7 @@ class TemplateValueParameter(BaseTemplateParameter, Value):
         return self
 
 
-from typing import TYPE_CHECKING
+from be_typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from typing import Dict, List, Optional, Tuple, Union
     from ...cl_lexer import ClLexer

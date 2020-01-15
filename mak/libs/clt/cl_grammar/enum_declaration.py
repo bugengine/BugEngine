@@ -1,5 +1,5 @@
 from ..cl_ast.ast_types import Enum, EnumItem
-from typing import TYPE_CHECKING
+from be_typing import TYPE_CHECKING
 from ply.lex import LexToken
 
 

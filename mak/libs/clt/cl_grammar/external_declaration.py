@@ -1,5 +1,5 @@
 from ..cl_ast import Specifier
-from typing import TYPE_CHECKING
+from be_typing import TYPE_CHECKING
 
 
 def p_declaration_specifier(p):

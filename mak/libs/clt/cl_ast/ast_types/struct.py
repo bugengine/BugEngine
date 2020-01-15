@@ -4,7 +4,7 @@ from ..position import Position
 from ..ast_templates import TemplateTypenameParameter
 from ..dependent_name import DependentName
 from ..cppobject import CppObject
-from typing import cast
+from be_typing import cast
 
 
 class StructScope(Scope):
@@ -159,7 +159,7 @@ class Struct(Type):
                     self.scope.write_to(struct)
 
 
-from typing import TYPE_CHECKING
+from be_typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from typing import Dict, List, Optional, Set, Tuple, Union
     from ...cl_lexer import ClLexer
