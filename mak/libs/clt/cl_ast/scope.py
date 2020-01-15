@@ -66,7 +66,7 @@ class Scope:
             object.write_to(document)
 
 
-from typing import TYPE_CHECKING
+from be_typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from typing import Optional, List, Tuple
     from .cppobject import CppObject

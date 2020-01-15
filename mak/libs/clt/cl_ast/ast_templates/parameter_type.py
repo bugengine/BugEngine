@@ -2,7 +2,7 @@ from .base_template_object import BaseTemplateParameter
 from ..type import Type, CastOptions, CastError
 from ..scope import Scope
 from ..typeref import TypeRef
-from typing import cast, TYPE_CHECKING
+from be_typing import cast, TYPE_CHECKING
 
 
 class TemplateTypenameParameter(BaseTemplateParameter, Type):

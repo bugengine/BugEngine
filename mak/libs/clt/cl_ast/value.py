@@ -1,7 +1,7 @@
 from .cppobject import CppObject
 from .type import CastError, Type
 from abc import abstractmethod
-from typing import TYPE_CHECKING
+from be_typing import TYPE_CHECKING
 
 
 class Value(CppObject):

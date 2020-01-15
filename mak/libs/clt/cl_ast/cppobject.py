@@ -1,7 +1,7 @@
 from .scope import Scope, ScopeError
 from .argument_list import ArgumentList
 from .position import Position
-from typing import cast, List, Tuple, TypeVar, TYPE_CHECKING
+from be_typing import cast, List, Tuple, TypeVar, TYPE_CHECKING
 from abc import abstractmethod
 
 TemplateCacheList = List[Tuple['ArgumentList', 'Position', 'Template', 'CppObject']]

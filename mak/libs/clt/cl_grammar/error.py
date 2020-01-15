@@ -1,7 +1,7 @@
 import sys
 import traceback
 from ..cl_ast import Position
-from typing import TYPE_CHECKING
+from be_typing import TYPE_CHECKING
 
 
 def p_error(p):

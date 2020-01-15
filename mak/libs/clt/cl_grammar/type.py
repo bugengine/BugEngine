@@ -1,7 +1,7 @@
 from ..cl_ast import TypeRef
 from ..cl_ast.type import Type
 from ..cl_ast.ast_types import BuiltIn, Void, Pointer, Array, Reference, TypeDef
-from typing import TYPE_CHECKING
+from be_typing import TYPE_CHECKING
 
 
 def p_type_builtin(p):

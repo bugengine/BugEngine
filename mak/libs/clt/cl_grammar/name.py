@@ -1,7 +1,7 @@
 from ..cl_ast import Name, CppError, CastOptions, CastError, DependentName
 from ..cl_ast.ast_types import Struct
 from ..cl_ast.ast_templates import Template, BaseTemplateObject, TemplateTemplateParameter
-from typing import cast, TYPE_CHECKING
+from be_typing import cast, TYPE_CHECKING
 from ply.lex import LexToken
 
 

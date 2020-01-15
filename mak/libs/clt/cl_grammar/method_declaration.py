@@ -1,5 +1,5 @@
 from ..cl_ast import Name, Method, SpecialMethod, Parameter, TypeRef
-from typing import cast, TYPE_CHECKING
+from be_typing import cast, TYPE_CHECKING
 
 
 def p_parameter_name_none(p):

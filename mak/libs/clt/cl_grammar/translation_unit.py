@@ -1,5 +1,5 @@
 from ..cl_ast.namespaces import RootNamespace
-from typing import TYPE_CHECKING
+from be_typing import TYPE_CHECKING
 
 
 def p_translation_unit_start(p):

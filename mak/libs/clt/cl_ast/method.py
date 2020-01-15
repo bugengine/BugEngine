@@ -1,7 +1,7 @@
 from .cppobject import CppObject
 from .scope import Scope, ScopeError
 from .type import CastOptions, CastError
-from typing import cast
+from be_typing import cast
 
 
 class Parameter(CppObject):
@@ -217,7 +217,7 @@ class SpecialMethod(Method):
         return 'SPECIAL_METHOD_ID'
 
 
-from typing import TYPE_CHECKING
+from be_typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from typing import Dict, List, Optional, Tuple
     from ..cl_lexer import ClLexer

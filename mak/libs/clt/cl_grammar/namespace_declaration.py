@@ -1,5 +1,5 @@
 from ..cl_ast import Namespace, AnonymousNamespace
-from typing import TYPE_CHECKING
+from be_typing import TYPE_CHECKING
 
 
 def p_namespace_declaration_new(p):
