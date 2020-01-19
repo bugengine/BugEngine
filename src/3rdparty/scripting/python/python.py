@@ -13,6 +13,7 @@ def check_python_test(self):
     bld(features='cxx cxxprogram', source='main.cc', target='app',
         cxxflags=self.cxxflags, linkflags=self.ldflags, lib=self.libs, use=self.use)
 
+
 @conf
 def python_config(conf, version, var=''):
     version_number = version.replace('.', '')
@@ -55,7 +56,7 @@ def options(opt):
                   action='store',
                   dest='python_versions',
                   help='List of Python version to support in plugins',
-                  default='2.6,2.7,3.0,3.1,3.2,3.3,3.4,3.5,3.6')
+                  default='2.6,2.7,3.0,3.1,3.2,3.3,3.4,3.5,3.6,3.7,3.8')
 
 
 def setup(conf):

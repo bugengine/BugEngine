@@ -10,7 +10,6 @@ def build_externals(bld):
     """
     bld.external('3rdparty.system.zlib')
     bld.external('3rdparty.system.minizip')
-    bld.external('3rdparty.mak')
     bld.external('3rdparty.system.console')
     bld.external('3rdparty.system.X11')
     bld.external('3rdparty.system.win32')
@@ -46,7 +45,7 @@ def build_bugengine(bld):
     bld.library('engine.minitl',
                 bld.platforms+['engine.kernel.generic'])
     bld.library('engine.core',
-                ['3rdparty.mak', 'engine.minitl', 'engine.kernel.generic'])
+                ['engine.minitl', 'engine.kernel.generic'])
     bld.library('engine.network',
                 ['engine.core'])
     bld.library('engine.rtti',

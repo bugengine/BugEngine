@@ -52,11 +52,11 @@ def kernel_build_cpu_source(self, source):
     preprocessed = self.make_bld_node('src', source.parent.make_node('cpu'), source.name[:-2]+'cc')
     t = self.create_task('clt', [source], [preprocessed])
     t.path = self.bld.variant_dir
-    t.env.KERNEL_CLT = self.bld.bugenginenode.find_node('mak/tools/cl_translate.py').abspath()
+    t.env.KERNEL_CLT = self.bld.bugenginenode.find_node('mak/bin/cl_translate.py').abspath()
     t.env.TMPDIR = self.bld.bldnode.parent.parent.abspath()
     t.env.env = dict(os.environ)
     t.env.env['PYTHONPATH'] = os.path.join(self.bld.bugenginenode.abspath(), 'mak', 'libs')
-    t.dep_nodes = [self.bld.bugenginenode.find_node('mak/tools/cl_translate.py')]
+    t.dep_nodes = [self.bld.bugenginenode.find_node('mak/bin/cl_translate.py')]
     t.dep_nodes += self.bld.bugenginenode.find_node('mak/libs/clt').ant_glob('**/*.py')
     t.dep_nodes += self.bld.bugenginenode.find_node('mak/libs/ply').ant_glob('**/*.py')
     t.dep_nodes += self.bld_env.KERNEL_CLT_TARGET.ant_glob('**/*.py')
