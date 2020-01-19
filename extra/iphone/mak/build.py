@@ -1,7 +1,7 @@
 # set iPhone(Simulator) build rules
 from waflib.TaskGen import feature, after_method
 import os
-from build_framework.target_build.macos
+from build_framework.target_build import macos
 
 
 def build(build_context):
