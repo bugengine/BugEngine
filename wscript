@@ -31,7 +31,6 @@ def build(build_context):
     build_framework.build(build_context)
     build_context.recurse('src/build.py')
     build_framework.plugins(build_context)
-    build_framework.deploy(build_context)
 
 
 def deploy(build_context):
