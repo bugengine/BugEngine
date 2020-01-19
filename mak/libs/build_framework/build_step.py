@@ -907,7 +907,8 @@ def make_bld_node(self, category, path, name):
     else:
         node = node.make_node(path)
         node = node.make_node(name)
-    node.parent.mkdir()
+    if not self.env.PROJECTS:
+        node.parent.mkdir()
     return node
 
 

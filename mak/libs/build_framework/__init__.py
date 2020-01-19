@@ -36,6 +36,7 @@ def options(opt):
     opt.load('eclipse', tooldir=[os.path.join(opt.path.abspath(), 'mak', 'tools')])
     opt.load('qtcreator', tooldir=[os.path.join(opt.path.abspath(), 'mak', 'tools')])
     opt.load('vscode', tooldir=[os.path.join(opt.path.abspath(), 'mak', 'tools')])
+    opt.load('sublime', tooldir=[os.path.join(opt.path.abspath(), 'mak', 'tools')])
 
     device.options(opt)
     build_step.options(opt)

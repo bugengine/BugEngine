@@ -39,11 +39,11 @@ class CppObject(object):
         self.lexer = lexer
         self.position = position
         self.name = name
-        self.parent_scope = self.lexer.scopes and self.lexer.scopes[-1] or None # type: Optional[Scope]
-        self.parent = self.parent_scope and self.parent_scope.owner or self     # type: CppObject
-        self.scope = self.INITIAL_SCOPE(self, self.position)                    # type: Scope
-        self.templates = []                                                     # type: List[Template]
-        self.instances = []                                                     # type:  TemplateCacheList
+        self.parent_scope = self.lexer.scopes and self.lexer.scopes[-1] or None  # type: Optional[Scope]
+        self.parent = self.parent_scope and self.parent_scope.owner or self      # type: CppObject
+        self.scope = self.INITIAL_SCOPE(self, self.position)                     # type: Scope
+        self.templates = []                                                      # type: List[Template]
+        self.instances = []                                                      # type:  TemplateCacheList
         parent = self.parent
         while id(parent) != id(parent.parent):
             if isinstance(parent, Template):
@@ -76,7 +76,7 @@ class CppObject(object):
         # type: (T, ArgumentList) -> Optional[T]
         s = arguments.signature()
         for args, _, __, instance in self.instances:
-            #assert len(args) == len(arguments)
+            # assert len(args) == len(arguments)
             if s == args.signature():
                 return cast(T, instance)
         return None

@@ -4,6 +4,7 @@ import sys
 import copy
 from be_typing import cast, TYPE_CHECKING
 
+
 color_list = {
     'BOLD': '\x1b[01;1m',
     'BLACK': '\x1b[30m',

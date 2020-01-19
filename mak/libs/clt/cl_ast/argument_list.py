@@ -4,7 +4,7 @@ from be_typing import cast, TYPE_CHECKING
 class ArgumentList:
     def __init__(self, arguments):
         # type: (Dict[int,CppObject]) -> None
-        args = [None] * len(arguments) # type: List[Optional[CppObject]]
+        args = [None] * len(arguments)  # type: List[Optional[CppObject]]
 
         for index, arg in arguments.items():
             args[index] = arg
