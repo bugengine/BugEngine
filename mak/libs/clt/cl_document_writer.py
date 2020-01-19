@@ -1,5 +1,5 @@
-from abc import abstractmethod
 from .cl_ast.position import Position
+from be_typing import TYPE_CHECKING
 
 
 class ClDocumentWriter(object):
@@ -36,7 +36,6 @@ class ClDocumentWriter(object):
         raise NotImplementedError
 
 
-from be_typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from typing import List, Optional, Type
     from types import TracebackType
