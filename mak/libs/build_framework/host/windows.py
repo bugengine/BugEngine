@@ -7,12 +7,12 @@ def options(opt):
 
 def configure(conf):
     environ = getattr(conf, 'environ', os.environ)
-    environ['PATH'] = os.pathsep.join([conf.path.make_node("win32/bin").abspath(), environ['PATH']])
+    environ['PATH'] = os.pathsep.join([conf.bugenginenode.make_node("mak/host/win32/bin").abspath(), environ['PATH']])
 
 
 def build(bld):
     environ = getattr(bld, 'environ', os.environ)
-    environ['PATH'] = os.pathsep.join([bld.path.make_node("win32/bin").abspath(), environ['PATH']])
+    environ['PATH'] = os.pathsep.join([bld.bugenginenode.make_node("mak/host/win32/bin").abspath(), environ['PATH']])
 
 
 def plugins(bld):
