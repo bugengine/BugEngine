@@ -37,7 +37,7 @@ def plugins(build_context):
 
 def deploy(build_context):
     build_context.recurse('mak/deploy.py', name='deploy')
- 
+
 
 def debug(build_context):
     build_context.recurse('mak/debug.py', name='debug')
