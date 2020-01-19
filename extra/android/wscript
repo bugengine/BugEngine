@@ -5,13 +5,14 @@ import re
 import sys
 from copy import deepcopy
 from waflib import Configure, Context, Errors, Options
+from build_framework.target_conf.platform import Platform
 
 
-class AndroidPlatform(Configure.ConfigurationContext.Platform):
+class AndroidPlatform(Platform):
     NAME = 'android'
 
     def __init__(self, conf, ndk_root, sdk_root, version):
-        Configure.ConfigurationContext.Platform.__init__(self)
+        Platform.__init__(self)
         self.NAME = self.__class__.NAME + '_' + self.get_android_version(version)
         self.ndk_path = ndk_root
         self.sdk_path = sdk_root
@@ -174,12 +175,12 @@ class AndroidPlatform(Configure.ConfigurationContext.Platform):
         conf.env.append_value('LINKFLAGS', sysroot_ld_options)
 
 
-class AndroidLoader(Configure.ConfigurationContext.Platform):
+class AndroidLoader(Platform):
     NAME = 'android'
 
     def __init__(self, conf):
         self.conf = conf
-        Configure.ConfigurationContext.Platform.__init__(self)
+        Platform.__init__(self)
 
         conf.load('javaw')
         conf.env.append_value('JAVACFLAGS', ['-source', '1.6', '-target', '1.6'])
@@ -375,7 +376,12 @@ class AndroidLoader(Configure.ConfigurationContext.Platform):
                 c = compilers[0]
                 clang_compilers = []
                 targets = os.path.normpath(os.path.join(c.compiler_c, '..', '..', 'lib', 'gcc'))
-                for target in os.listdir(targets):
+                try:
+                    targets = os.listdir(targets)
+                except FileNotFoundError:
+                    print(targets)
+                    targets = []
+                for target in targets:
                     extra_args = deepcopy(c.extra_args)
                     extra_args['c'] += ['-target', target]
                     extra_args['cxx'] += ['-target', target]
@@ -464,7 +470,8 @@ def host_configure(configuration_context):
                     toolchain_path = os.path.join(toolchains_path, toolchain, 'prebuilt')
                     if os.path.isdir(toolchain_path):
                         for platform in os.listdir(toolchain_path):
-                            compiler_paths.append(os.path.join(toolchain_path, platform, 'bin'))
+                            if os.path.isdir(os.path.join(toolchain_path, platform, 'bin')):
+                                compiler_paths.append(os.path.join(toolchain_path, platform, 'bin'))
         configuration_context.env.append_unique('EXTRA_PATH', compiler_paths)
 
 
