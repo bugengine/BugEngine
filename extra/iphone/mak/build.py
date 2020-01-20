@@ -8,7 +8,7 @@ def build(build_context):
     macos.build(build_context)
 
 
-def plugins(bld):
+def plugins(build_context):
     macos.plugins(build_context)
 
 
