@@ -3,6 +3,7 @@ from waflib import Configure, Utils
 from waflib.Configure import conf
 from waflib.Tools import msvc
 import os
+import re
 
 
 class MSVC(Compiler):
