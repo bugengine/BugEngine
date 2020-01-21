@@ -160,7 +160,7 @@ class ConfigurationContext(Configure.ConfigurationContext):
                     if m.__file__ not in self.files:
                         self.files.append(m.__file__)
                         self.hash = Utils.h_list((self.hash, Utils.readf(m.__file__, 'rb')))
-            except AttributeError:
+            except (AttributeError, FileNotFoundError):
                 pass
 
     def store_options(self):
