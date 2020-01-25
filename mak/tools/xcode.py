@@ -534,7 +534,6 @@ class xcode(Build.BuildContext):
     fun = 'build'
     optim = 'debug'
     version = ('Xcode 3.1', 45)
-    variant = 'projects/xcode'
 
     def execute(self):
         """

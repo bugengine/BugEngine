@@ -1,9 +1,10 @@
 #! /usr/bin/env python
 # encoding: utf-8
 
+from waflib.TaskGen import feature
+from waflib.Configure import conf
 from waflib import TaskGen, Context, Build
-import os
-import sys
+import os, sys
 from minixml import XmlNode, XmlDocument
 
 oe_cdt = 'org.eclipse.cdt'
@@ -57,7 +58,6 @@ class eclipse(Build.BuildContext):
     cmd = 'eclipse'
     fun = 'build'
     optim = 'debug'
-    variant = 'projects/eclipse'
 
     def execute(self):
         """
@@ -96,7 +96,7 @@ class eclipse(Build.BuildContext):
         self.settings.mkdir()
         settings = self.bugenginenode.find_node('mak/tools/eclipse')
         for f in settings.listdir():
-            n = settings.find_node(f)
+            n = settings.find_or_declare(f)
             self.settings.make_node(f).write(n.read())
             setting_files.append(f)
 
@@ -234,10 +234,9 @@ class eclipse(Build.BuildContext):
                                         with XmlNode(launchConfig, 'listAttribute',
                                                      {'key': 'org.eclipse.cdt.dsf.gdb.AUTO_SOLIB_LIST'}) as soLibList:
                                             pass
-                                        gdb = env.GDB[0] or 'gdb'
                                         XmlNode(launchConfig, 'stringAttribute', {
                                             'key': 'org.eclipse.cdt.dsf.gdb.DEBUG_NAME',
-                                            'value': gdb
+                                            'value': env.GDB or 'gdb'
                                         }).close()
                                         XmlNode(launchConfig, 'booleanAttribute', {
                                             'key': 'org.eclipse.cdt.dsf.gdb.DEBUG_ON_FORK',

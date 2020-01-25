@@ -4,7 +4,6 @@ from clt import cl_parser
 from optparse import OptionParser
 import logging
 
-
 option_decl = OptionParser()
 option_decl.set_usage('clt.py [options] in_file out_file translate_script')
 option_decl.add_option("-t", "--tmp", dest="tmp_dir", help="Directory to store temporary/cached files", default=".")

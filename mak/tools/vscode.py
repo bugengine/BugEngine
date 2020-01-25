@@ -1,4 +1,4 @@
-from waflib import Context, Build, TaskGen
+from waflib import Context, Build, TaskGen, Logs
 import os
 import sys
 
@@ -46,7 +46,6 @@ class vscode(Build.BuildContext):
     cmd = 'vscode'
     fun = 'build'
     optim = 'debug'
-    variant = 'projects/vscode'
 
     SETTINGS = '  {\n' \
                '    "editor.formatOnSave": true,\n' \
@@ -135,8 +134,6 @@ class vscode_folders(vscode):
                         tg.post()
                     includes, defines = gather_includes_defines(tg)
                     for node in tg.source_nodes:
-                        if not node.isdir():
-                            continue
                         name = tg.name
                         path = node.path_from(self.srcnode)
                         vscode_node = node.make_node('.vscode')
@@ -186,7 +183,7 @@ class vscode_folders(vscode):
 
                     if 'Makefile' in tg.features:
                         root = tg.source_nodes[0]
-                        vscode_node = root.make_node('.vscode')
+                        vscode_node = node.make_node('.vscode')
                         tasks = []
                         options = [a for a in sys.argv if a[0] == '-']
                         for env_name in self.env.ALL_TOOLCHAINS:

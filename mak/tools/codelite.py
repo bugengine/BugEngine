@@ -102,7 +102,6 @@ class codelite(Build.BuildContext):
     cmd = 'codelite'
     fun = 'build'
     optim = 'debug'
-    variant = 'projects/codelite'
 
     def execute(self):
         """
