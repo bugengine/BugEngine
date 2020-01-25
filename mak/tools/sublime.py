@@ -125,6 +125,14 @@ class sublime3(Build.BuildContext):
                         name += '[%s]' % node.name
                     folders.append('\t\t{\n\t\t\t"name": "%s",\n\t\t\t"path": "%s"\n\t\t}' % (name, path))
 
+        systems = []
+        for env_name in self.env.ALL_TOOLCHAINS:
+            for variant in self.env.ALL_VARIANTS:
+                systems.append('\t\t{\n'
+                               '\t\t\t"name": "%s - %s",\n'
+                               '\t\t\t"cmd": ["%s", "%s", "build:%s:%s"]\n'
+                               '\t\t}' % (env_name, variant, sys.executable, sys.argv[0], env_name, variant))
+
         with open(workspace_node.abspath(), 'w') as workspace:
             workspace.write('{\n\t"folders":\n\t[\n')
             workspace.write(',\n'.join(folders))
@@ -143,8 +151,12 @@ class sublime3(Build.BuildContext):
                             '\t\t\t\t"enabled": true\n'
                             '\t\t\t}\n'
                             '\t\t}\n'
-                            '\t}\n'
-                            '}\n')
+                            '\t},\n'
+                            '\t"build_systems":\n'
+                            '\t[\n'
+                            '%s'
+                            '\t]\n'
+                            '}\n' % (',\n'.join(systems)))
 
         with open(clangd_node.abspath(), 'w') as clangd:
             clangd.write('[\n')

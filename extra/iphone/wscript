@@ -1,17 +1,19 @@
+#! /usr/bin/env python
 # set iPhone(Simulator) specific options
+
 
 def options(option_context):
     gr = option_context.get_option_group('SDK paths and options')
-    gr.add_option( '--iphone-sdk-min',
-                    action='store',
-                    default='',
-                    dest='iphone_sdk_min',
-                    help='Minimum version of the iPhone SDK to target')
-    gr.add_option( '--iphone-sdk-max',
-                    action='store',
-                    default='',
-                    dest='iphone_sdk_max',
-                    help='Maximum version of the iPhone SDK to target')
+    gr.add_option('--iphone-sdk-min',
+                  action='store',
+                  default='',
+                  dest='iphone_sdk_min',
+                  help='Minimum version of the iPhone SDK to target')
+    gr.add_option('--iphone-sdk-max',
+                  action='store',
+                  default='',
+                  dest='iphone_sdk_max',
+                  help='Maximum version of the iPhone SDK to target')
     option_context.recurse('mak/device.py')
 
 
@@ -45,4 +47,3 @@ def debug(build_context):
 
 def run(build_context):
     build_context.recurse('mak/run.py', name='run')
-

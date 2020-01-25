@@ -25,6 +25,7 @@ Utils.get_process = Utils.alloc_process_pool = Utils.nada
 
 
 def options(opt):
+    # type: (Options.OptionsContext) -> None
     "Creates main option groups and load options for the host and all targets"
     opt.add_option_group('SDK paths and options')
     opt.add_option_group('3rd party libraries')
@@ -56,6 +57,7 @@ def options(opt):
 
 
 def configure(conf):
+    # type: (Configure.ConfigurationContext) -> None
     "Recursively calls configure on host and all targets to create all available toolchains"
     conf.bugenginenode = conf.path
     checks.configure(conf)
@@ -73,6 +75,7 @@ def configure(conf):
 
 
 def setup(conf):
+    # type: (Configure.ConfigurationContext) -> None
     "setup step before the build: recursively cals setup on every third party library"
     third_party_node = conf.bugenginenode.make_node('src').make_node('3rdparty')
     extra = conf.bugenginenode.make_node('extra')
@@ -91,6 +94,7 @@ def setup(conf):
 
 
 def build(bld):
+    # type: (Build.BuildContext) -> None
     "Loads main build file as well as the target-specific build file that can declare extra modules"
     from . import compiler_build
     from . import target_build
@@ -114,19 +118,22 @@ def build(bld):
 
     if bld.env.PROJECTS:
         def rc_hook(self, node):
+            # type: (TaskGen.task_gen, Node.Node) -> None
             "creates RC hook to silence waf error"
-            #pylint: disable=unused-argument
+            # pylint: disable=unused-argument
             pass
         if '.rc' not in TaskGen.task_gen.mappings:
             TaskGen.task_gen.mappings['.rc'] = rc_hook
 
 
 def deploy(build_context):
+    # type: (Build.BuildContext) -> None
     from . import target_build
     target_build.deploy(build_context)
 
 
 def plugins(build_context):
+    # type: (Build.BuildContext) -> None
     """
         Recursively calls plugins for host/target so each OS can declare their own platform-specific
         plugins
@@ -142,28 +149,25 @@ class ConfigurationContext(Configure.ConfigurationContext):
         for configure so it can be restored during a reconfigure.
     """
     cmd = 'configure'
-    def __init__(self, **kw):
-        "main init"
-        super(ConfigurationContext, self).__init__(**kw)
 
     def store(self):
+        # type: () -> None
         """
             Stores the current status that can be checked during the reconfiguration step
         """
         super(ConfigurationContext, self).store()
         self.store_options()
-        self.files = []
-        self.hash = 0
         for m in sys.modules.values():
             try:
                 if m.__file__.startswith(self.path.abspath()):
                     if m.__file__ not in self.files:
                         self.files.append(m.__file__)
                         self.hash = Utils.h_list((self.hash, Utils.readf(m.__file__, 'rb')))
-            except (AttributeError, FileNotFoundError):
+            except (AttributeError, OSError):
                 pass
 
     def store_options(self):
+        # type: () -> None
         """
             Store last good configuration. This allows the build to automatically
             reconfigure when an environemnt variable changes, or a file changes on disc.
@@ -181,11 +185,9 @@ class ConfigurationContext(Configure.ConfigurationContext):
 class ReconfigurationContext(Configure.ConfigurationContext):
     "reconfigures the project with the same options as the last call to configure"
     cmd = 'reconfigure'
-    def __init__(self, **kw):
-        "main init"
-        super(ReconfigurationContext, self).__init__(**kw)
 
     def execute(self):
+        # type: () -> None
         """
             restores the environment as it was during the last run, then reconfigures
             the project.
@@ -196,6 +198,7 @@ class ReconfigurationContext(Configure.ConfigurationContext):
         Options.options = opt
 
     def restore_options(self):
+        # type: () -> None
         """
             Restores the environment as it was during the configure step. This allows
             reconfigure to discover the same compilers, even if the reconfigure step
@@ -213,10 +216,13 @@ class ReconfigurationContext(Configure.ConfigurationContext):
 
 
 def autoreconfigure(execute_method):
+    # type: (Any) -> Any
     """
         Decorator used to set the commands that can be reconfigured automatically
     """
+
     def execute(self):
+        # type: (Build.BuildContext) -> str
         """
             First check if reconfiguration is needed, then triggers the
             normal execute.
@@ -240,10 +246,12 @@ def autoreconfigure(execute_method):
             Options.commands.insert(0, self.cmd)
             Options.commands.insert(0, 'reconfigure')
             return "SKIP"
-
         return execute_method(self)
+
     return execute
-Build.BuildContext.execute = autoreconfigure(Build.BuildContext.execute)
+
+
+setattr(Build.BuildContext, 'execute', autoreconfigure(Build.BuildContext.execute))
 
 
 class ListToolchainsContext(Build.BuildContext):
@@ -253,11 +261,13 @@ class ListToolchainsContext(Build.BuildContext):
     cmd = 'list_toolchains'
 
     def execute(self):
+        # type: () -> None
         self.restore()
         if not self.all_envs:
             self.load_envs()
         for toolchain in self.env.ALL_TOOLCHAINS:
             print(toolchain)
+
 
 class ListVariantsContext(Build.BuildContext):
     """
@@ -266,8 +276,15 @@ class ListVariantsContext(Build.BuildContext):
     cmd = 'list_variants'
 
     def execute(self):
+        # type: () -> None
         self.restore()
         if not self.all_envs:
             self.load_envs()
         for variant in self.env.ALL_VARIANTS:
             print(variant)
+
+
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from waflib import Node
+    from typing import Any
