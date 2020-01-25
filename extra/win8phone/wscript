@@ -1,78 +1,89 @@
+#! /usr/bin/env python
 # set WinRT Phone specific options
 
 import os
-from waflib import Context, Errors
-from waflib.Logs import info,warn,pprint
-from waflib.TaskGen import feature, before_method, after_method
 from waflib.Configure import conf
+
 
 # adds MSVC vars to environment
 @conf
 def add_msvc_winprt_to_env(conf, compiler, version, target):
-	conf.env['MSVC_VERSIONS'] = [compiler+' '+version]
-	conf.env['MSVC_TARGETS'] = [target]
-	conf.env['MSVC_MANIFEST'] = False
-	conf.load('msvc')
+    conf.env['MSVC_VERSIONS'] = [compiler+' '+version]
+    conf.env['MSVC_TARGETS'] = [target]
+    conf.env['MSVC_MANIFEST'] = False
+    conf.load('msvc')
 
-	conf.env.append_unique('CFLAGS', ['/DWINAPI_FAMILY=WINAPI_FAMILY_PHONE_APP'] + ['/AI%s'%p for p in conf.env.LIBPATH])
-	conf.env.append_unique('CXXFLAGS', ['/EHsc', '/ZW', '/TP', '/DWINAPI_FAMILY=WINAPI_FAMILY_PHONE_APP'] + ['/AI%s'%p for p in conf.env.LIBPATH])
-	conf.env.append_unique('LINKFLAGS', ['/MANIFEST:NO', '/WINMD:NO', '/NODEFAULTLIB:ole32.lib', 'PhoneAppModelHost.lib'])
-	conf.env['CFLAGS_warnall'] = ['/D_CRT_SECURE_NO_WARNINGS=1', '/W4', '/WX']
-	conf.env['CFLAGS_warnnone'] = ['/D_CRT_SECURE_NO_WARNINGS=1', '/W0']
-	conf.env['CXXFLAGS_warnall'] = ['/D_CRT_SECURE_NO_WARNINGS=1', '/W4', '/WX']
-	conf.env['CXXFLAGS_warnnone'] = ['/D_CRT_SECURE_NO_WARNINGS=1', '/W0']
+    conf.env.append_unique('CFLAGS', ['/DWINAPI_FAMILY=WINAPI_FAMILY_PHONE_APP'])
+    conf.env.append_unique('CFLAGS', ['/AI%s' % p for p in conf.env.LIBPATH])
+    conf.env.append_unique('CXXFLAGS', ['/EHsc', '/ZW', '/TP', '/DWINAPI_FAMILY=WINAPI_FAMILY_PHONE_APP'])
+    conf.env.append_unique('CXXFLAGS',  + ['/AI%s' % p for p in conf.env.LIBPATH])
+    conf.env.append_unique('LINKFLAGS', ['/MANIFEST:NO', '/WINMD:NO', '/NODEFAULTLIB:ole32.lib',
+                                         'PhoneAppModelHost.lib'])
+    conf.env['CFLAGS_warnall'] = ['/D_CRT_SECURE_NO_WARNINGS=1', '/W4', '/WX']
+    conf.env['CFLAGS_warnnone'] = ['/D_CRT_SECURE_NO_WARNINGS=1', '/W0']
+    conf.env['CXXFLAGS_warnall'] = ['/D_CRT_SECURE_NO_WARNINGS=1', '/W4', '/WX']
+    conf.env['CXXFLAGS_warnnone'] = ['/D_CRT_SECURE_NO_WARNINGS=1', '/W0']
 
-	conf.env['CFLAGS_debug'] = ['/Od', '/Ob1', '/MDd', '/RTC1', '/RTCc', '/Zi', '/D_DEBUG']
-	conf.env['CXXFLAGS_debug'] = ['/Od', '/Ob1', '/MDd', '/RTC1', '/RTCc', '/Zi', '/D_DEBUG', '/GR']
-	conf.env['LINKFLAGS_debug'] = ['/DEBUG']
+    conf.env['CFLAGS_debug'] = ['/Od', '/Ob1', '/MDd', '/RTC1', '/RTCc', '/Zi', '/D_DEBUG']
+    conf.env['CXXFLAGS_debug'] = ['/Od', '/Ob1', '/MDd', '/RTC1', '/RTCc', '/Zi', '/D_DEBUG', '/GR']
+    conf.env['LINKFLAGS_debug'] = ['/DEBUG']
 
-	conf.env['CFLAGS_profile'] = ['/DNDEBUG', '/MD', '/Ox', '/Ob2', '/Oi', '/Ot', '/Oy', '/GT', '/GL', '/GF', '/FD', '/GS-', '/Gy', '/GR-']
-	conf.env['CXXFLAGS_profile'] = ['/DNDEBUG', '/MD', '/Ox', '/Ob2', '/Oi', '/Ot', '/Oy', '/GT', '/GL', '/GF', '/FD', '/GS-', '/Gy', '/GR-']
-	conf.env['LINKFLAGS_profile'] = ['/DEBUG']
+    conf.env['CFLAGS_profile'] = ['/DNDEBUG', '/MD', '/Ox', '/Ob2', '/Oi', '/Ot', '/Oy',
+                                  '/GT', '/GL', '/GF', '/FD', '/GS-', '/Gy', '/GR-']
+    conf.env['CXXFLAGS_profile'] = ['/DNDEBUG', '/MD', '/Ox', '/Ob2', '/Oi', '/Ot', '/Oy',
+                                    '/GT', '/GL', '/GF', '/FD', '/GS-', '/Gy', '/GR-']
+    conf.env['LINKFLAGS_profile'] = ['/DEBUG']
 
-	conf.env['CFLAGS_final'] = ['/DNDEBUG', '/MD', '/Ox', '/Ob2', '/Oi', '/Ot', '/Oy', '/GT', '/GL', '/GF', '/FD', '/GS-', '/Gy', '/GR-']
-	conf.env['CXXFLAGS_final'] = ['/DNDEBUG', '/MD', '/Ox', '/Ob2', '/Oi', '/Ot', '/Oy', '/GT', '/GL', '/GF', '/FD', '/GS-', '/Gy', '/GR-']
-	conf.env['LINKFLAGS_final'] = ['/DEBUG']
+    conf.env['CFLAGS_final'] = ['/DNDEBUG', '/MD', '/Ox', '/Ob2', '/Oi', '/Ot', '/Oy',
+                                '/GT', '/GL', '/GF', '/FD', '/GS-', '/Gy', '/GR-']
+    conf.env['CXXFLAGS_final'] = ['/DNDEBUG', '/MD', '/Ox', '/Ob2', '/Oi', '/Ot', '/Oy',
+                                  '/GT', '/GL', '/GF', '/FD', '/GS-', '/Gy', '/GR-']
+    conf.env['LINKFLAGS_final'] = ['/DEBUG']
+
 
 @conf
 def add_win32_winprt_flags_to_env(conf, name, arch):
-	conf.env['PLATFORM'] = mak.allplatforms['winprt']
-	conf.env['ABI'] = 'pe'
-	conf.env['library_PATTERN'] = '%s.lib'
-	conf.env['shlib_PATTERN']	= '%s.dll'
-	conf.env['program_PATTERN'] = '%s.exe'
+    conf.env['PLATFORM'] = ['winprt']
+    conf.env['ABI'] = 'pe'
+    conf.env['library_PATTERN'] = '%s.lib'
+    conf.env['shlib_PATTERN'] = '%s.dll'
+    conf.env['program_PATTERN'] = '%s.exe'
 
-	conf.env.append_unique('DEFINES', ['BE_PLATFORM=platform_winphone', 'WINPRT', '_WINPRT', '_WINPRT_', '__WINPRT__'])
-	if arch in ['amd64', 'x64', 'x86_64']:
-		conf.env.append_unique('DEFINES', ['_WIN64'])
-	conf.env['PREFIX']			= os.path.abspath(os.path.join('build', name))
-	conf.env['DEPLOY']			= { 'prefix':	'',
-									'bin':		'',
-									'etc':		'conf',
-									'runbin':	'',
-									'api':		os.path.join('dev','include'),
-									'lib':		os.path.join('dev','lib'),
-									'data':		'data',
-									'plugin':	os.path.join('data', 'plugins'),
-									'kernel':	os.path.join('data', 'kernels') }
-	conf.env.KERNELS = [conf.env.ENVNAME]
+    conf.env.append_unique('DEFINES', ['BE_PLATFORM=platform_winphone', 'WINPRT', '_WINPRT', '_WINPRT_', '__WINPRT__'])
+    if arch in ['amd64', 'x64', 'x86_64']:
+        conf.env.append_unique('DEFINES', ['_WIN64'])
+    conf.env['PREFIX'] = os.path.abspath(os.path.join('build', name))
+    conf.env['DEPLOY'] = {'prefix': '',
+                          'bin':    '',
+                          'etc':    'conf',
+                          'runbin': '',
+                          'api':    os.path.join('dev', 'include'),
+                          'lib':    os.path.join('dev', 'lib'),
+                          'data':   'data',
+                          'plugin': os.path.join('data', 'plugins'),
+                          'kernel': os.path.join('data', 'kernels')}
+    conf.env.KERNELS = [conf.env.ENVNAME]
 
 
 def options(opt):
-	pass
+    pass
+
 
 def host_configure(conf):
-	pass
+    pass
+
 
 def configure(conf):
-	pass
+    pass
+
 
 def setup(conf):
-	pass
+    pass
+
 
 def build(bld):
-	pass
+    pass
+
 
 def plugins(bld):
-	pass
-
+    pass

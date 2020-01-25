@@ -57,6 +57,7 @@ class Netbeans(Build.BuildContext):
     cmd = 'netbeans'
     fun = 'build'
     optim = 'debug'
+    variant = 'projects/netbeans'
     version = 79
 
     def generateProjectXml(self, appname, bld):
