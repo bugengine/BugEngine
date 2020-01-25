@@ -1164,7 +1164,6 @@ class Qbs(QtCreator):
         project_list = []
         for group in self.groups:
             for task_gen in group:
-                task_gen.post()
                 try:
                     name = task_gen.module_path.split('.')
                 except AttributeError:
@@ -1227,17 +1226,13 @@ class Qbs(QtCreator):
                 project_file.write('%s    ]\n' % (indent))
                 project_file.write('%s    files: [\n' % indent)
                 for source_node in getattr(p, 'source_nodes', []):
-                    if source_node.isdir():
-                        for node in source_node.ant_glob('**'):
-                            for r in IGNORE_PATTERNS:
-                                if r.match(node.abspath()):
-                                    break
-                            else:
-                                node_path = node.path_from(self.srcnode).replace('\\', '/')
-                                project_file.write('%s        "%s",\n' % (indent, node_path))
-                    else:
-                        node_path = source_node.path_from(self.srcnode).replace('\\', '/')
-                        project_file.write('%s        "%s",\n' % (indent, node_path))
+                    for node in source_node.ant_glob('**'):
+                        for r in IGNORE_PATTERNS:
+                            if r.match(node.abspath()):
+                                break
+                        else:
+                            node_path = node.path_from(self.srcnode).replace('\\', '/')
+                            project_file.write('%s        "%s",\n' % (indent, node_path))
                 project_file.write('%s    ]\n' % indent)
                 project_file.write('%s}\n' % indent)
 
@@ -1247,7 +1242,6 @@ class QtCreator2(QtCreator):
     cmd = 'qtcreator2'
     fun = 'build'
     optim = 'debug'
-    variant = 'projects/qtcreator2'
     version = (2, 12)
 
 
@@ -1256,7 +1250,6 @@ class QtCreator3(QtCreator):
     cmd = 'qtcreator3'
     fun = 'build'
     optim = 'debug'
-    variant = 'projects/qtcreator3'
     version = (3, 15)
 
 
@@ -1265,7 +1258,6 @@ class QtCreator4(QtCreator):
     cmd = 'qtcreator4'
     fun = 'build'
     optim = 'debug'
-    variant = 'projects/qtcreator4'
     version = (4, 18)
 
 
@@ -1274,7 +1266,6 @@ class Qbs2(Qbs):
     cmd = 'qbs2'
     fun = 'build'
     optim = 'debug'
-    variant = 'projects/qbs2'
     version = (2, 12)
 
 
@@ -1283,7 +1274,6 @@ class Qbs3(Qbs):
     cmd = 'qbs3'
     fun = 'build'
     optim = 'debug'
-    variant = 'projects/qbs3'
     version = (3, 15)
 
 
@@ -1292,5 +1282,4 @@ class Qbs4(Qbs):
     cmd = 'qbs4'
     fun = 'build'
     optim = 'debug'
-    variant = 'projects/qbs4'
     version = (4, 18)
