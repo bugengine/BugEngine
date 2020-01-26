@@ -1,9 +1,18 @@
+<<<<<<< HEAD
+from waflib import Task, Options, Build, Logs, Utils, Errors, TaskGen, Node, ConfigSet, Context
+=======
 from waflib import Task, Options, Build, Logs, Utils, Errors, TaskGen, Node
+>>>>>>> 5e612ab0998fab14399c57aedafb34cea2cd39da
 from waflib.Configure import conf
 from waflib.TaskGen import feature, taskgen_method, extension, before_method, after_method
 import os
 import re
 import shutil
+<<<<<<< HEAD
+import sys
+import importlib
+=======
+>>>>>>> 5e612ab0998fab14399c57aedafb34cea2cd39da
 from waflib.Tools import ccroot, c, cxx, winres, c_osx
 
 Build.PROTOCOL = 2
@@ -144,8 +153,14 @@ def add_feature(self, feature, env=None):
 
 
 @conf
+<<<<<<< HEAD
+def module(bld, name, module_path, depends=[], private_depends=[], valid_platforms=[], features=[], build_features=[],
+           extra_includes=[], extra_defines=[], extra_public_includes=[], extra_public_defines=[], use_master=False,
+           warnings=True, export_all=False, root=None):
+=======
 def module(bld, name, module_path, depends, private_depends, valid_platforms, features, build_features, extra_includes,
            extra_defines, extra_public_includes, extra_public_defines, use_master, warnings, export_all):
+>>>>>>> 5e612ab0998fab14399c57aedafb34cea2cd39da
     platforms = bld.env.VALID_PLATFORMS
     archs = bld.env.ARCHITECTURES
     build = len(valid_platforms) == 0
@@ -153,10 +168,19 @@ def module(bld, name, module_path, depends, private_depends, valid_platforms, fe
         if p in platforms:
             build = True
 
+<<<<<<< HEAD
+    if root is None:
+        root = bld.path
+    if module_path != '.':
+        source_node = root.make_node(module_path.replace('.', '/'))
+    else:
+        source_node = root
+=======
     if module_path != '.':
         source_node = bld.path.make_node(module_path.replace('.', '/'))
     else:
         source_node = bld.path
+>>>>>>> 5e612ab0998fab14399c57aedafb34cea2cd39da
     try:
         bld.recurse(os.path.join(source_node.path_from(bld.path), 'build.py'))
     except Errors.WafError:
@@ -753,6 +777,37 @@ def objects_feature(task):
     pass
 
 
+<<<<<<< HEAD
+@feature('Makefile')
+def makefile_feature(task):
+    task_root = task.source_nodes[0].abspath()
+    project_root = task.bld.srcnode.abspath()
+    env = ConfigSet.ConfigSet()
+    env.load(os.path.join(Context.top_dir, Options.lockfile))
+    for module in sys.modules.values():
+        try:
+            if module.__file__.startswith(project_root):
+                env.files.append(module.__file__)
+        except AttributeError as e:
+            pass
+    for f in env.files:
+        if not f.startswith(task_root):
+            f = f[len(project_root) + 1:]
+            if sys.version_info.major < 3:
+                base_name, ext = os.path.splitext(f)
+                if ext == '.pyc':
+                    f = basename + '.py'
+            else:
+                try:
+                    f = importlib.util.source_from_cache(f)
+                except ValueError:
+                    pass
+            if os.path.isfile(f):
+                task.source_nodes.append(task.bld.srcnode.make_node(f))
+
+
+=======
+>>>>>>> 5e612ab0998fab14399c57aedafb34cea2cd39da
 @feature('cxx')
 @before_method('process_source')
 def process_export_all_flag(self):

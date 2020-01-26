@@ -25,6 +25,10 @@ Utils.get_process = Utils.alloc_process_pool = Utils.nada
 
 
 def options(opt):
+<<<<<<< HEAD
+    # type: (Options.OptionsContext) -> None
+=======
+>>>>>>> 5e612ab0998fab14399c57aedafb34cea2cd39da
     "Creates main option groups and load options for the host and all targets"
     opt.add_option_group('SDK paths and options')
     opt.add_option_group('3rd party libraries')
@@ -56,6 +60,10 @@ def options(opt):
 
 
 def configure(conf):
+<<<<<<< HEAD
+    # type: (Configure.ConfigurationContext) -> None
+=======
+>>>>>>> 5e612ab0998fab14399c57aedafb34cea2cd39da
     "Recursively calls configure on host and all targets to create all available toolchains"
     conf.bugenginenode = conf.path
     checks.configure(conf)
@@ -73,6 +81,10 @@ def configure(conf):
 
 
 def setup(conf):
+<<<<<<< HEAD
+    # type: (Configure.ConfigurationContext) -> None
+=======
+>>>>>>> 5e612ab0998fab14399c57aedafb34cea2cd39da
     "setup step before the build: recursively cals setup on every third party library"
     third_party_node = conf.bugenginenode.make_node('src').make_node('3rdparty')
     extra = conf.bugenginenode.make_node('extra')
@@ -91,6 +103,10 @@ def setup(conf):
 
 
 def build(bld):
+<<<<<<< HEAD
+    # type: (Build.BuildContext) -> None
+=======
+>>>>>>> 5e612ab0998fab14399c57aedafb34cea2cd39da
     "Loads main build file as well as the target-specific build file that can declare extra modules"
     from . import compiler_build
     from . import target_build
@@ -114,19 +130,33 @@ def build(bld):
 
     if bld.env.PROJECTS:
         def rc_hook(self, node):
+<<<<<<< HEAD
+            # type: (TaskGen.task_gen, Node.Node) -> None
+            "creates RC hook to silence waf error"
+            # pylint: disable=unused-argument
+=======
             "creates RC hook to silence waf error"
             #pylint: disable=unused-argument
+>>>>>>> 5e612ab0998fab14399c57aedafb34cea2cd39da
             pass
         if '.rc' not in TaskGen.task_gen.mappings:
             TaskGen.task_gen.mappings['.rc'] = rc_hook
 
 
 def deploy(build_context):
+<<<<<<< HEAD
+    # type: (Build.BuildContext) -> None
+=======
+>>>>>>> 5e612ab0998fab14399c57aedafb34cea2cd39da
     from . import target_build
     target_build.deploy(build_context)
 
 
 def plugins(build_context):
+<<<<<<< HEAD
+    # type: (Build.BuildContext) -> None
+=======
+>>>>>>> 5e612ab0998fab14399c57aedafb34cea2cd39da
     """
         Recursively calls plugins for host/target so each OS can declare their own platform-specific
         plugins
@@ -142,18 +172,27 @@ class ConfigurationContext(Configure.ConfigurationContext):
         for configure so it can be restored during a reconfigure.
     """
     cmd = 'configure'
+<<<<<<< HEAD
+
+    def store(self):
+        # type: () -> None
+=======
     def __init__(self, **kw):
         "main init"
         super(ConfigurationContext, self).__init__(**kw)
 
     def store(self):
+>>>>>>> 5e612ab0998fab14399c57aedafb34cea2cd39da
         """
             Stores the current status that can be checked during the reconfiguration step
         """
         super(ConfigurationContext, self).store()
         self.store_options()
+<<<<<<< HEAD
+=======
         self.files = []
         self.hash = 0
+>>>>>>> 5e612ab0998fab14399c57aedafb34cea2cd39da
         for m in sys.modules.values():
             try:
                 if m.__file__.startswith(self.path.abspath()):
@@ -164,6 +203,10 @@ class ConfigurationContext(Configure.ConfigurationContext):
                 pass
 
     def store_options(self):
+<<<<<<< HEAD
+        # type: () -> None
+=======
+>>>>>>> 5e612ab0998fab14399c57aedafb34cea2cd39da
         """
             Store last good configuration. This allows the build to automatically
             reconfigure when an environemnt variable changes, or a file changes on disc.
@@ -181,11 +224,17 @@ class ConfigurationContext(Configure.ConfigurationContext):
 class ReconfigurationContext(Configure.ConfigurationContext):
     "reconfigures the project with the same options as the last call to configure"
     cmd = 'reconfigure'
+<<<<<<< HEAD
+
+    def execute(self):
+        # type: () -> None
+=======
     def __init__(self, **kw):
         "main init"
         super(ReconfigurationContext, self).__init__(**kw)
 
     def execute(self):
+>>>>>>> 5e612ab0998fab14399c57aedafb34cea2cd39da
         """
             restores the environment as it was during the last run, then reconfigures
             the project.
@@ -196,6 +245,10 @@ class ReconfigurationContext(Configure.ConfigurationContext):
         Options.options = opt
 
     def restore_options(self):
+<<<<<<< HEAD
+        # type: () -> None
+=======
+>>>>>>> 5e612ab0998fab14399c57aedafb34cea2cd39da
         """
             Restores the environment as it was during the configure step. This allows
             reconfigure to discover the same compilers, even if the reconfigure step
@@ -213,10 +266,20 @@ class ReconfigurationContext(Configure.ConfigurationContext):
 
 
 def autoreconfigure(execute_method):
+<<<<<<< HEAD
+    # type: (Any) -> Any
+    """
+        Decorator used to set the commands that can be reconfigured automatically
+    """
+
+    def execute(self):
+        # type: (Build.BuildContext) -> str
+=======
     """
         Decorator used to set the commands that can be reconfigured automatically
     """
     def execute(self):
+>>>>>>> 5e612ab0998fab14399c57aedafb34cea2cd39da
         """
             First check if reconfiguration is needed, then triggers the
             normal execute.
@@ -240,10 +303,19 @@ def autoreconfigure(execute_method):
             Options.commands.insert(0, self.cmd)
             Options.commands.insert(0, 'reconfigure')
             return "SKIP"
+<<<<<<< HEAD
+        return execute_method(self)
+
+    return execute
+
+
+setattr(Build.BuildContext, 'execute', autoreconfigure(Build.BuildContext.execute))
+=======
 
         return execute_method(self)
     return execute
 Build.BuildContext.execute = autoreconfigure(Build.BuildContext.execute)
+>>>>>>> 5e612ab0998fab14399c57aedafb34cea2cd39da
 
 
 class ListToolchainsContext(Build.BuildContext):
@@ -253,12 +325,20 @@ class ListToolchainsContext(Build.BuildContext):
     cmd = 'list_toolchains'
 
     def execute(self):
+<<<<<<< HEAD
+        # type: () -> None
+=======
+>>>>>>> 5e612ab0998fab14399c57aedafb34cea2cd39da
         self.restore()
         if not self.all_envs:
             self.load_envs()
         for toolchain in self.env.ALL_TOOLCHAINS:
             print(toolchain)
 
+<<<<<<< HEAD
+
+=======
+>>>>>>> 5e612ab0998fab14399c57aedafb34cea2cd39da
 class ListVariantsContext(Build.BuildContext):
     """
         Command that will print all available variants to stdout
@@ -266,8 +346,21 @@ class ListVariantsContext(Build.BuildContext):
     cmd = 'list_variants'
 
     def execute(self):
+<<<<<<< HEAD
+        # type: () -> None
+=======
+>>>>>>> 5e612ab0998fab14399c57aedafb34cea2cd39da
         self.restore()
         if not self.all_envs:
             self.load_envs()
         for variant in self.env.ALL_VARIANTS:
             print(variant)
+<<<<<<< HEAD
+
+
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from waflib import Node
+    from typing import Any
+=======
+>>>>>>> 5e612ab0998fab14399c57aedafb34cea2cd39da
