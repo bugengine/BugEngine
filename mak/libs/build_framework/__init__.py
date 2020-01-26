@@ -284,7 +284,7 @@ class ListVariantsContext(Build.BuildContext):
             print(variant)
 
 
-from typing import TYPE_CHECKING
+from be_typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from waflib import Node
     from typing import Any
