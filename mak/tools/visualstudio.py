@@ -649,7 +649,7 @@ class vs2003(Build.BuildContext):
         appname = getattr(Context.g_module, Context.APPNAME, self.srcnode.name)
 
         solution_node = self.srcnode.make_node(appname + '.' + version + '.sln')
-        projects = self.srcnode.make_node('.build').make_node(version)
+        projects = self.srcnode.make_node('bld').make_node(version)
         projects.mkdir()
 
         solution = Solution(self, appname, version_number, version_name, folders, ide_version)

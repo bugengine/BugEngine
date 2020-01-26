@@ -35,6 +35,7 @@ def build_bugengine(bld):
     """
         Declares the main library and entry point
     """
+    bld.module('engine.mak', 'mak', features=['Makefile'], root=bld.bugenginenode)
     bld.headers('engine.kernel.generic',
                 [],
                 extra_public_includes=[bld.path.make_node('engine/kernel/api/generic')])
@@ -43,7 +44,7 @@ def build_bugengine(bld):
                 path='engine.kernel',
                 extra_public_includes=[bld.path.make_node('engine/kernel/api/cpu')])
     bld.library('engine.minitl',
-                bld.platforms+['engine.kernel.generic'])
+                bld.platforms+['engine.mak', 'engine.kernel.generic'])
     bld.library('engine.core',
                 ['engine.minitl', 'engine.kernel.generic'])
     bld.library('engine.network',
