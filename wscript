@@ -9,19 +9,40 @@ APPNAME = "BugEngine"
 top = '.'           #pylint: disable=invalid-name
 out = 'bld/.waf'    #pylint: disable=invalid-name
 
+import build_framework
 
-def options(opt):
+def options(option_context):
     "recursively declare options to the parser"
-    opt.recurse('mak')
+    build_framework.options(option_context)
 
 
-def configure(conf):
+def configure(configuration_context):
     "entry point for build system configuration"
-    conf.recurse('mak')
+    build_framework.configure(configuration_context)
 
 
-def build(bld):
+def setup(configuration_context):
+    "setup a platform environment in the current configuration context"
+    build_framework.setup(configuration_context)
+
+
+def build(build_context):
     "set up build targets and executes the build"
-    bld.recurse('mak')
-    bld.recurse('src/build.py')
-    bld.recurse('mak', name='plugins', once=False)
+    build_framework.build(build_context)
+    build_context.recurse('src/build.py')
+    build_framework.plugins(build_context)
+
+
+def deploy(build_context):
+    "deploy a build to a device"
+    build_framework.deploy(build_context)
+
+
+def run(build_context):
+    "run a deployed build on a device"
+    build_framework.run(build_context)
+
+
+def debug(build_context):
+    "start a debugging session on a device"
+    build_framework.debug(build_context)

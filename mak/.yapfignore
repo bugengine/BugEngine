@@ -1,0 +1,3 @@
+libs/ply/*
+libs/waflib/*
+host/win32/*

@@ -13,7 +13,5 @@ def p_unit(p):
     """
         unit : unit_start exprs
     """
-    assert(len(p.parser.stack) == 1)
+    assert (len(p.parser.stack) == 1)
     p[0] = p[1]
-
-

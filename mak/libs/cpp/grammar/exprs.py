@@ -14,11 +14,7 @@ def p_exprs_end(p):
     """
         exprs :
     """
-    p[0] = {
-        'methods': '{0}',
-        'objects': '{0}',
-        'properties': '{0}'
-    }
+    p[0] = {'methods': '{0}', 'objects': '{0}', 'properties': '{0}'}
 
 
 def p_exprs(p):
