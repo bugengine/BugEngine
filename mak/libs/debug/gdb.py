@@ -2,6 +2,7 @@ import shlex
 import subprocess
 import sys
 
+
 class Gdb:
     def __init__(self, gdb_path, options=[]):
         self.process = subprocess.Popen([gdb_path] + options,
@@ -28,6 +29,7 @@ class Gdb:
                 self.run_command(cmd.strip())
             else:
                 self.process.communicate()
+
 
 if __name__ == '__main__':
     Gdb('gdb', ['/bin/ls']).run()

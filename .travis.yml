@@ -319,11 +319,11 @@ matrix:
       dist: trusty
       env: COMPILER=gcc_x86 COMPILER_VERSION=4.2.1 TARGET_OS=windows_x86 FLAVOR=final
     - os: osx
-      env: COMPILER=appleclang COMPILER_VERSION=9.1.0 TARGET_OS=macosx10.13 FLAVOR=debug
+      env: COMPILER=appleclang COMPILER_VERSION=9.1.0 TARGET_OS=macos10.13 FLAVOR=debug
     - os: osx
-      env: COMPILER=appleclang COMPILER_VERSION=9.1.0 TARGET_OS=macosx10.13 FLAVOR=profile
+      env: COMPILER=appleclang COMPILER_VERSION=9.1.0 TARGET_OS=macos10.13 FLAVOR=profile
     - os: osx
-      env: COMPILER=appleclang COMPILER_VERSION=9.1.0 TARGET_OS=macosx10.13 FLAVOR=final
+      env: COMPILER=appleclang COMPILER_VERSION=9.1.0 TARGET_OS=macos10.13 FLAVOR=final
     - os: osx
       env: COMPILER=appleclang_arm64 COMPILER_VERSION=9.1.0 TARGET_OS=iphone11.4_arm64 FLAVOR=debug
     - os: osx

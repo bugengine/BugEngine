@@ -156,7 +156,7 @@ def find_lib():
 	return dir
 
 wafdir = find_lib()
-sys.path.insert(0, os.path.dirname(os.path.abspath(sys.argv[0])))
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(sys.argv[0])), 'mak', 'libs'))
 sys.path.insert(0, wafdir)
 
 if __name__ == '__main__':

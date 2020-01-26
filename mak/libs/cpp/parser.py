@@ -1,20 +1,16 @@
 from .tokens import tokens
 from . import lexer
 from .grammar import *
-from ..ply import lex, yacc
+from ply import lex, yacc
 import sys
 
 
 def build_parser(pickle_file):
-    return yacc.yacc(start='unit',
-                     picklefile=pickle_file,
-                     debugfile=pickle_file+'.debug',
-                     debug=1)
+    return yacc.yacc(start='unit', picklefile=pickle_file, debugfile=pickle_file + '.debug', debug=1)
 
 
 def p_error(p):
-    sys.stderr.write("%s:%d: error: Syntax error near unexpected token %s\n" %
-            (p.lexer.source, p.lineno, p.value))
+    sys.stderr.write("%s:%d: error: Syntax error near unexpected token %s\n" % (p.lexer.source, p.lineno, p.value))
     p.lexer.error_count += 1
 
 

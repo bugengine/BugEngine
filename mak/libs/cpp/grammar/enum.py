@@ -1,5 +1,6 @@
 from ..tree import Class, AnonymousClass, EnumValue
 
+
 def p_enum_value(p):
     """
         enum_value : ID
@@ -24,7 +25,6 @@ def p_enum_values_empty(p):
         enum_values :
     """
     p[0] = []
-
 
 
 def p_enum_name_opt(p):
