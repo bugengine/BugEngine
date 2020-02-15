@@ -1,3 +1,6 @@
+namespace UnitTest_Sruct
+{
+
 struct Test
 {
     i32 m_testValue;
@@ -20,4 +23,6 @@ class Test3::Test4
 int kmain(u32 index, u32 total)
 {
     Test3 test;
+}
+
 }

@@ -18,7 +18,7 @@ def set_position_absolute(p, s1, position):
 def position(p, s):
     # type: (yacc.YaccProduction, int) -> Position
     if s >= 0:
-        return Position(getattr(p.slice[s], 'filename', ''), p.lineno(s), *p.lexspan(s))
+        return Position(getattr(p.slice[s], 'filename', ''), p.lineno(s), *p.lexspan(s), lexdata=p.lexer.lexdata())
     else:
         production = p.stack[s]
         try:
@@ -26,7 +26,10 @@ def position(p, s):
         except AttributeError:
             startpos = getattr(production, 'lexpos', 0)
             endpos = getattr(production, 'endlexpos', startpos)
-            return Position(getattr(production, 'filename', ''), getattr(production, 'lineno', 0), startpos, endpos)
+            return Position(
+                getattr(production, 'filename', ''), getattr(production, 'lineno', 0), startpos, endpos,
+                p.lexer.lexdata()
+            )
 
 
 setattr(yacc.YaccProduction, 'set_position', set_position)
@@ -47,13 +50,18 @@ class ClParser:
             debug=True
         )
 
-    def parse(self, error_format, filename):
-        # type: (str, str)->namespaces.RootNamespace
+    def parse(self, logger, filename):
+        # type: (Logger, str)->namespaces.RootNamespace
         with open(filename, 'r') as input:
-            self.lexer = cl_lexer.ClLexer(filename, error_format)
-            self.lexer.parser = self.parser
+            self.lexer = cl_lexer.ClLexer(filename, logger)
             result = self.parser.parse(input.read(), lexer=self.lexer)
         if result:
             # result.debug_dump()
-            result.error_count = self.lexer.error_count
+            result.error_count = logger._error_count
+            pass
         return result
+
+
+from be_typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from .cl_messages import Logger

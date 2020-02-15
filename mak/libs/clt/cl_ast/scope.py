@@ -41,7 +41,7 @@ class Scope:
             if result:
                 return result
         if is_current_scope:
-            raise ScopeError("no member named '%s' in %s" % (name, self.owner.pretty_name()), position)
+            raise ScopeError(self.owner.lexer.logger.C0103, position, lookup=name, owner=self.owner.pretty_name())
         else:
             return None
 

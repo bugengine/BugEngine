@@ -104,18 +104,18 @@ class Enum(Type):
                 d = Type.Distance(cast=1)
                 return d.match_attributes(cast_options.allowed_cast, typeref, other_typeref)
             else:
-                raise CastError('type %s is not compatible with %s' % (self, other), self.position)
+                raise CastError(self.lexer.logger.C0300, self.position, from_type=typeref, to_type=other_typeref)
         elif isinstance(other, Enum):
             if cast_options.allowed_cast >= cast_options.CAST_STATIC:
                 d = Type.Distance(cast=1)
                 return d.match_attributes(cast_options.allowed_cast, typeref, other_typeref)
             else:
-                raise CastError('type %s is not compatible with %s' % (self, other), self.position)
+                raise CastError(self.lexer.logger.C0300, self.position, from_type=typeref, to_type=other_typeref)
         elif cast_options.allowed_cast == cast_options.CAST_UNRELATED:
             d = Type.Distance(variant=-1)
             return d.match_attributes(cast_options.allowed_cast, typeref, other_typeref)
         else:
-            raise CastError('type %s is not compatible with %s' % (self, other), self.position)
+            raise CastError(self.lexer.logger.C0300, self.position, from_type=typeref, to_type=other_typeref)
 
     def _create_template_instance(self, template, arguments, position):
         # type: (Template, ArgumentList, Position) -> Enum

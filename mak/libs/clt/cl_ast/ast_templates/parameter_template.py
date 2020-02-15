@@ -6,7 +6,7 @@ from be_typing import cast
 
 class TemplateTemplateParameter(BaseTemplateParameter, BaseTemplateObject):
     def __init__(self, lexer, position, name, parameters, default_value):
-        # type: (ClLexer, Position, Optional[str], List[BaseTemplateParameter], Optional[CppObject]) -> None
+        # type: (ClLexer, Position, Optional[str], List[Union[Value, BaseTemplateObject, TypeRef]], Optional[CppObject]) -> None
         BaseTemplateObject.__init__(self, lexer, position, name)
         BaseTemplateParameter.__init__(self, default_value)
         self.template_params = parameters[:]
@@ -32,27 +32,30 @@ class TemplateTemplateParameter(BaseTemplateParameter, BaseTemplateObject):
         )
 
     def find_instance(self, parameter_binds, arguments, position):
-        # type: (Dict[BaseTemplateParameter, Tuple[int, Template]], List[Union[Value, TypeRef]], Position) -> Optional[CppObject]
+        # type: (Dict[BaseTemplateParameter, Tuple[int, BaseTemplateObject]], List[Union[Value, BaseTemplateObject, TypeRef]], Position) -> Optional[CppObject]
         return None
 
     def instantiate(self, arguments, position):
-        # type: (List[Union[Value, TypeRef]], Position) -> Optional[CppObject]
+        # type: (List[Union[Value, BaseTemplateObject, TypeRef]], Position) -> Optional[CppObject]
         return None
 
     def distance(self, cast_to, cast_options):
         # type: (CppObject, CastOptions) -> Type.Distance
-        raise CastError('type %s is not compatible with %s' % (self, cast_to), self.position)
+        raise CastError(self.lexer.logger.C0300, self.position, from_type=self, to_type=cast_to)
 
     def template_parameter_match(self, type, cast_options, typeref_from, typeref_typename):
         # type: (Union[TypeRef, BaseTemplateObject], CastOptions, TypeRef, BaseTemplateObject) -> Type.Distance
         from .template import Template
 
         def _distance(parameters, value):
-            # type: (List[CppObject], BaseTemplateObject) -> Type.Distance
+            # type: (List[Union[BaseTemplateObject, Value, TypeRef]], BaseTemplateObject) -> Type.Distance
             assert self.parameter_bind
             if len(self.template_params) != len(parameters):
                 raise CastError(
-                    'type %s is not compatible with %s' % (typeref_from, typeref_typename), typeref_typename.position
+                    self.lexer.logger.C0300,
+                    typeref_typename.position,
+                    from_type=typeref_from,
+                    to_type=typeref_typename
                 )
             d = Type.Distance(matches={self.parameter_bind[0]: value})
             for p1, p2 in zip(self.template_params, parameters):
@@ -69,14 +72,17 @@ class TemplateTemplateParameter(BaseTemplateParameter, BaseTemplateObject):
             if type_parameter_bind and type_parameter_bind == self.parameter_bind:
                 return Type.Distance(matches={self.parameter_bind[0]: type})
             elif type_parameter_bind and type_parameter_bind[1] == cast_options.current_template:
-                return _distance(cast(List[CppObject], type.template_params), self)
+                return _distance(type.template_params, self)
             else:
                 raise CastError(
-                    'type %s is not compatible with %s' % (typeref_from, typeref_typename), typeref_typename.position
+                    self.lexer.logger.C0300,
+                    typeref_typename.position,
+                    from_type=typeref_from,
+                    to_type=typeref_typename
                 )
         else:
             raise CastError(
-                'type %s is not compatible with %s' % (typeref_from, typeref_typename), typeref_typename.position
+                self.lexer.logger.C0300, typeref_typename.position, from_type=typeref_from, to_type=typeref_typename
             )
 
     def _create_template_instance(self, template, arguments, position):
@@ -95,6 +101,17 @@ class TemplateTemplateParameter(BaseTemplateParameter, BaseTemplateObject):
             result.bind(self.parameter_bind[0], template_parent)
             return result
 
+    def expand_template_arg_list(self, argument_list):
+        # type: (List[Union[Value, BaseTemplateObject, TypeRef]]) -> List[Union[Value, BaseTemplateObject, TypeRef]]
+        result = argument_list[:]
+        #for i in range(len(argument_list), len(self.template_params)):
+        #    scope = cast(Template.Scope, self.scope)
+        #    value = scope.parameters[i].default_value
+        #    assert value is not None
+        #    assert isinstance(value, Value) or isinstance(value, TypeRef)
+        #    result.append(value)
+        return result
+
 
 from be_typing import TYPE_CHECKING
 if TYPE_CHECKING:
@@ -106,4 +123,4 @@ if TYPE_CHECKING:
     from ..argument_list import ArgumentList
     from ..value import Value
     from ..type import CastOptions
-    from .template import Template
+    from .template import BaseTemplateObject, Template

@@ -15,8 +15,8 @@ def p_namespace_declaration_new(p):
             p[0] = name.target
             p[0].push_scope(name.position)
         else:
-            p.lexer.error("redefinition of '%s' as a different kind of symbol" % name, p.position(1))
-            p.lexer.note('previous definition is here', name.target.position)
+            p.lexer.logger.C0114(p.position(1), name)
+            p.lexer.logger.I0001(name.target.position)
             p[0] = Namespace(p.lexer, p.position(2), name.name)
             p[0].push_scope(name.position)
     else:

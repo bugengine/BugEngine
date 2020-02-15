@@ -1,5 +1,5 @@
 from .cppobject import CppObject
-from .ast_templates import Template
+from .ast_templates import BaseTemplateObject, Template
 
 
 class Name:
@@ -17,7 +17,7 @@ class Name:
         shadow=False,
         errors=[]
     ):
-        # type: (ClLexer, str, Position, Optional[CppObject], Optional[Template], Optional[List[Union[Value, TypeRef]]], Optional[ClLexer.TemplateBind], Optional[Name], Optional[CppObject], bool, List[str]) -> None
+        # type: (ClLexer, str, Position, Optional[CppObject], Optional[BaseTemplateObject], Optional[List[Union[Value, BaseTemplateObject, TypeRef]]], Optional[ClLexer.TemplateBind], Optional[Name], Optional[CppObject], bool, List[Tuple[Callable[..., Dict[str, Any]], Dict[str, Any]]]) -> None
         self.lexer = lexer
         self.name = name
         self.position = position
@@ -47,7 +47,7 @@ class Name:
             return name
 
     def equals(self, other, template_bindings):
-        # type: (Optional[Name], Dict[BaseTemplateParameter, Tuple[int, Template]]) -> bool
+        # type: (Optional[Name], Dict[BaseTemplateParameter, Tuple[int, BaseTemplateObject]]) -> bool
         if not other:
             return False
         if self.dependent:
@@ -58,7 +58,7 @@ class Name:
                 return False
             if self.template != other.template:
                 return False
-            if isinstance(self.template, Template):
+            if isinstance(self.template, BaseTemplateObject):
                 assert self.arguments is not None
                 if other.arguments is not None:
                     s1 = ';'.join(
@@ -107,6 +107,7 @@ class Name:
                 #assert self.shadow, self
                 pass
             else:
+                assert isinstance(self.template, Template)
                 self.template_bindings.template.bind(self.template)
         if self.parent:
             self.parent.bind()
@@ -116,16 +117,16 @@ class Name:
         # type: () -> None
         if self.parent:
             self.parent.show_errors()
-        for error in self.errors:
-            self.lexer.error(error, self.position)
+        for error, arguments in self.errors:
+            error(self.position, **arguments)
 
 
 from be_typing import TYPE_CHECKING
 if TYPE_CHECKING:
-    from typing import Dict, List, Optional, Tuple, Union
+    from typing import Any, Dict, List, Optional, Tuple, Union, Callable
     from ..cl_lexer import ClLexer
     from .position import Position
-    from .ast_templates import BaseTemplateParameter
+    from .ast_templates import BaseTemplateObject, BaseTemplateParameter
     from .argument_list import ArgumentList
     from .typeref import TypeRef
     from .value import Value

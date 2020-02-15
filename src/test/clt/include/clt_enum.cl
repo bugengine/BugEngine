@@ -1,3 +1,6 @@
+namespace UnitTest_Enum
+{
+    
 namespace F
 {
     template< typename T >
@@ -30,4 +33,6 @@ struct ByteEnum
 void kmain(u32 index, u32 total)
 {
     F::X<F::EnumWrapper<ByteEnum>::Enum> e;
+}
+
 }

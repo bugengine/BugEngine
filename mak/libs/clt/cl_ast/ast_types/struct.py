@@ -17,7 +17,7 @@ class StructScope(Scope):
                 isinstance(parent, Struct) or isinstance(parent, DependentName)
                 or isinstance(parent, TemplateTypenameParameter)
             ):
-                owner.lexer.error('expected struct name', position)
+                owner.lexer.logger.C0306(position)
         self.parent_visibility = parent_visibility
         self.parent = parent
         self.constructor = None    # type: Optional[Method]
@@ -72,7 +72,7 @@ class Struct(Type):
     def define(self, parent_visibility, parent, position):
         # type: (Optional[str], Optional[Type], Position) -> None
         if self.struct_type == 'union' and parent:
-            self.lexer.error('unions cannot have a base class', position)
+            self.lexer.logger.C0307(position)
         self.push_scope_recursive(
             position,
             StructScope(self, position, self.default_visibility, parent_visibility or self.default_visibility, parent)
@@ -100,13 +100,13 @@ class Struct(Type):
         if isinstance(cast_to, Struct):
             if cast_options.allowed_cast <= cast_options.CAST_ATTRIB:
                 if cast_to != self:
-                    raise CastError('type %s is not compatible with %s' % (typeref_from, typeref_to), self.position)
+                    raise CastError(self.lexer.logger.C0300, self.position, from_type=typeref_from, to_type=typeref_to)
                 else:
                     d = Type.Distance()
                     return d.match_attributes(cast_options.allowed_cast, typeref_from, typeref_to)
             cast = 0
             variant = 0
-            p = self                                                                                            # type: Optional[Type]
+            p = self                                                                                               # type: Optional[Type]
             while p:
                 if p == cast_to:
                     break
@@ -123,18 +123,18 @@ class Struct(Type):
                     else:
                         if cast_options.allowed_cast < cast_options.CAST_UNRELATED:
                             raise CastError(
-                                'type %s is not compatible with %s' % (typeref_from, typeref_to), self.position
+                                self.lexer.logger.C0300, self.position, from_type=typeref_from, to_type=typeref_to
                             )
                         variant = -1
                         cast = 0
                 else:
-                    raise CastError('type %s is not compatible with %s' % (typeref_from, typeref_to), self.position)
+                    raise CastError(self.lexer.logger.C0300, self.position, from_type=typeref_from, to_type=typeref_to)
             d = Type.Distance(variant=variant, cast=cast)
             return d.match_attributes(cast_options.allowed_cast, typeref_from, typeref_to)
         elif cast_options.allowed_cast == cast_options.CAST_UNRELATED:
             return Type.Distance(variant=-1)
         else:
-            raise CastError('type %s is not compatible with %s' % (typeref_from, typeref_to), self.position)
+            raise CastError(self.lexer.logger.C0300, self.position, from_type=typeref_from, to_type=typeref_to)
 
     def __str__(self):
         # type: () -> str
@@ -145,7 +145,7 @@ class Struct(Type):
         return "%s '%s'" % (self.struct_type, str(self))
 
     def signature(self, template_bindings={}):
-        # type: (Dict[BaseTemplateParameter, Tuple[int, Template]]) -> str
+        # type: (Dict[BaseTemplateParameter, Tuple[int, BaseTemplateObject]]) -> str
         return '\\{\\}%s_%d' % (self.name or 'anonymous', self.index)
 
     def write_to(self, writer):
@@ -164,7 +164,7 @@ if TYPE_CHECKING:
     from typing import Dict, List, Optional, Set, Tuple, Union
     from ...cl_lexer import ClLexer
     from ...cl_document_writer import ClDocumentWriter
-    from ..ast_templates import BaseTemplateParameter, Template
+    from ..ast_templates import BaseTemplateParameter, BaseTemplateObject, Template
     from ..argument_list import ArgumentList
     from ..typeref import TypeRef
     from ..type import CastOptions

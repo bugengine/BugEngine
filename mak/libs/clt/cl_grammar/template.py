@@ -96,7 +96,7 @@ def p_template_parameter_name(p):
     """
     name = p[1][1]
     if name.is_qualified():
-        p.lexer.error('erf', name.position)
+        p.lexer.logger.C0015(name.position)
     p[0] = name.name
     p.set_position_absolute(0, name.position)
 
@@ -118,7 +118,7 @@ def p_template_parameter_value(p):
         template_parameter : template_specifier_opt_detach type template_parameter_name template_parameter_default_value_opt
     """
     if p[1]:
-        p.lexer.error("unexpected template specifier", p[1][0].position)
+        p.lexer.logger.C0016(p[1][0].position)
     p[0] = TemplateValueParameter(p.lexer, p[3] and p.position(3) or p[2].position, p[3], p[2], p[4])
     p[0].register()
     for t in p[1][::-1]:
@@ -135,7 +135,7 @@ def p_template_parameter_typename(p):
         p.lexer.pop_scope(t.scope)
     if p[1]:
         if len(p[1]) > 1:
-            p.lexer.error("extraneous 'template<>' in parameter declaration", p[1][1].position)
+            p.lexer.logger.C0401(p[1][1].position)
         p[0] = TemplateTemplateParameter(
             p.lexer, p[3] and p.position(3) or p.position(2), p[3], p[1][0].parameters, p[4]
         )

@@ -1,3 +1,5 @@
+namespace UnitTest_TemplateCast
+{
 
 template< typename T >
 struct X
@@ -51,4 +53,6 @@ X::operator T*() const
 
 void kmain(u32 index, u32 total)
 {
+}
+
 }

@@ -16,18 +16,15 @@ def p_enum_declaration(p):
     if object_type != 'ID' and (name.is_qualified() or not name.is_shadow()):
         if object_type == 'STRUCT_ID':
             if name.target.struct_type != struct_type:
-                p.lexer.warning(
-                    "'%s' declared as %s here, but first declared as %s" % (name, struct_type, name.target.struct_type),
-                    p.position(2)
-                )
-                p.lexer.note('previously declared here', name.target.position)
+                p.lexer.logger.C0108(p.position(2), name)
+                p.lexer.logger.I0000(name.target.position)
             p[0] = (name.target, None)
         else:
             if name.is_qualified():
-                p.lexer.error('qualified name %s does not name a struct' % name, name.position)
+                p.lexer.logger.C0109(name.position, name.name, 'enum', name.parent.target.pretty_name())
             else:
-                p.lexer.error('name %s does not name a struct' % name, name.position)
-            p.lexer.note('previously declared here', name.target.position)
+                p.lexer.logger.C0109(name.position, name.name, 'enum', 'current namespace')
+            p.lexer.logger.I0000(name.target.position)
             p[0] = (None, Enum(p.lexer, name.position, name.name))
     elif name.target:
         # optimistically use provided declaration, but if definition, it will be overriden
@@ -139,8 +136,8 @@ def p_enum_value_name_shadows(p):
         owner = p.slice[1].found_object.parent
         enum_namespace = p.lexer.scopes[-2].owner
         if owner == enum_namespace:
-            p.lexer.error("redefinition of '%s'" % p[1], p.position(1))
-            p.lexer.note('previous definition is here', p.slice[1].found_object.position)
+            p.lexer.logger.C0100(p.position(1), p[1])
+            p.lexer.logger.I0001(p.slice[1].found_object.position)
     p[0] = p[1]
     p.set_position(0, 1)
 

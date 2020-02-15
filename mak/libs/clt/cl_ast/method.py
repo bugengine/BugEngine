@@ -50,7 +50,7 @@ class OverloadScope(CodeBlock):
                 if v.name == name:
                     return v
             if not result and is_current_scope:
-                raise ScopeError("no member named '%s' in %s" % (name, self.owner.pretty_name()), position)
+                raise ScopeError(self.owner.lexer.logger.C0103, position, lookup=name, owner=self.owner.pretty_name())
         return result
 
 
@@ -70,7 +70,7 @@ class Overload(CppObject):
         self.push_scope_recursive(position, OverloadScope(self, position))
 
     def match(self, parameters, position, return_type, attributes, binding):
-        # type: (List[Parameter], Position, Optional[TypeRef], List[str], Dict[BaseTemplateParameter, Tuple[int, Template]]) -> bool
+        # type: (List[Parameter], Position, Optional[TypeRef], List[str], Dict[BaseTemplateParameter, Tuple[int, BaseTemplateObject]]) -> bool
         #attributes should be reflected in argument signature instread
         if 'const' in self.attributes and not 'const' in attributes:
             return False
@@ -88,24 +88,24 @@ class Overload(CppObject):
                     return False
         for p1, p2 in zip(self.parameters, parameters):
             if p1.default_value and p2.default_value:
-                self.lexer.error('redefinition of default argument', p2.position)
-                self.lexer.note('previous definition is here', p1.position)
-        if self.return_type and return_type:
+                self.lexer.logger.C0201(p2.position)
+                self.lexer.logger.I0001(p1.position)
+        if self.return_type is not None and return_type is not None:
             try:
                 return_type.distance(self.return_type,
                                      CastOptions(CastOptions.CAST_NONE, template_bindings=binding))
             except CastError:
                 return_type.distance(self.return_type,
                                      CastOptions(CastOptions.CAST_NONE, template_bindings=binding))
-                self.lexer.error('functions that differ only by return type cannot be overloaded', return_type.position)
-                self.lexer.note('previous declaration is here', self.return_type.position)
-        elif return_type:
+                self.lexer.logger.C0200(return_type.position)
+                self.lexer.logger.I0000(self.return_type.position)
+        elif return_type is not None:
             if not return_type.is_void():
-                self.lexer.error('functions that differ only by return type cannot be overloaded', return_type.position)
-                self.lexer.note('previous declaration is here', self.position)
-        elif self.return_type:
-            self.lexer.error('functions that differ only by return type cannot be overloaded', position)
-            self.lexer.note('previous declaration is here', self.return_type.position)
+                self.lexer.logger.C0200(return_type.position)
+                self.lexer.logger.I0000(self.position)
+        elif self.return_type is not None:
+            self.lexer.logger.C0200(position)
+            self.lexer.logger.I0000(self.return_type.position)
         return True
 
     def _create_template_instance(self, template, arguments, position):
@@ -154,9 +154,9 @@ class Method(CppObject):
         # type: (Optional[Template], List[Parameter], Position, Optional[TypeRef], List[str]) -> Optional[Overload]
         for o in self.overloads:
             if bool(template) == bool(o.template):
-                binding = {} # type: Dict[BaseTemplateParameter, Tuple[int, Template]]
+                binding = {} # type: Dict[BaseTemplateParameter, Tuple[int, BaseTemplateObject]]
                 if template:
-                    assert o.template
+                    assert o.template is not None
                     if len(template.parameters) != len(o.template.parameters):
                         continue
                     binding = template.fill_temporary_binding(o.template, binding)
@@ -225,6 +225,6 @@ if TYPE_CHECKING:
     from .position import Position
     from .typeref import TypeRef
     from .value import Value
-    from .ast_templates import BaseTemplateParameter, Template
+    from .ast_templates import BaseTemplateParameter, BaseTemplateObject, Template
     from .argument_list import ArgumentList
     from .specifier import Specifier

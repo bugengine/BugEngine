@@ -1,3 +1,6 @@
+namespace UnitTest_TemplateSwap
+{
+
 template< typename X >
 struct A
 {
@@ -26,4 +29,6 @@ A<X>::B<Y>::operator typename A<Y>::template B<X>()
 void kmain(u32 index, u32 total)
 {
     A<u32>::B<i32> test;
+}
+
 }

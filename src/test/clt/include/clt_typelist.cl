@@ -1,3 +1,6 @@
+namespace UnitTest_TemplateTypelist
+{
+
 template< typename T, typename Tail >
 struct TypeList : public Tail
 {
@@ -16,3 +19,4 @@ void kmain(u32 current, u32 total)
     total = List::Size;
 }
 
+}

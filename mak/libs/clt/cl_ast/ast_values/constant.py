@@ -37,7 +37,7 @@ class Constant(Value):
         return '(%s)%s' % (self.type, self.value)
 
     def signature(self, template_bindings={}):
-        # type: (Dict[BaseTemplateParameter, Tuple[int, Template]]) -> str
+        # type: (Dict[BaseTemplateParameter, Tuple[int, BaseTemplateObject]]) -> str
         return '#%s' % str(self.value)
 
     def write_to(self, writer):
@@ -52,5 +52,5 @@ if TYPE_CHECKING:
     from ...cl_lexer import ClLexer
     from ...cl_document_writer import ClDocumentWriter
     from ..position import Position
-    from ..ast_templates import BaseTemplateParameter, Template
+    from ..ast_templates import BaseTemplateParameter, BaseTemplateObject, Template
     from ..argument_list import ArgumentList

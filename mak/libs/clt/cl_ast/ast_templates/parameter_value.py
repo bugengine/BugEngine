@@ -1,7 +1,7 @@
 from .base_template_object import BaseTemplateParameter
 from .template import Template
 from ..value import Value
-from ..type import Type, CastOptions
+from ..type import Type, CastOptions, CastError
 from be_typing import cast
 
 
@@ -47,7 +47,8 @@ class TemplateValueParameter(BaseTemplateParameter, Value):
                     )
                     return d
             else:
-                raise CastError("", Position('', 0, 0, 0))
+                # TODO!
+                raise CastError(self.lexer.logger.C0000, Position('', 0, 0, 0, ''))
         d = t.distance(
             self.type,
             CastOptions(

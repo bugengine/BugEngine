@@ -1,3 +1,6 @@
+namespace UnitTest_Namespace
+{
+
 namespace A
 {
     struct X;
@@ -20,4 +23,6 @@ void kmain(u32 index, u32 total)
 {
     A::X x;
     Y y;
+}
+
 }

@@ -1,3 +1,6 @@
+namespace UnitTest_TemplateSpecialization
+{
+
 template< typename T >
 struct Test
 {
@@ -42,4 +45,6 @@ void kmain(u32 index, u32 total)
     Test<i32> y2;
     Test<i32*> z;
     Test<u32*> w;
+}
+
 }

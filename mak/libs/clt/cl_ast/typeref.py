@@ -48,7 +48,7 @@ class TypeRef(CppObject):
         return result
 
     def instantiate(self, arguments, position):
-        # type: (List[Union[Value, TypeRef]], Position) -> Optional[CppObject]
+        # type: (List[Union[Value, BaseTemplateObject, TypeRef]], Position) -> Optional[CppObject]
         assert self.template_origin
         return self.template_origin.instantiate(arguments, position)
 
@@ -58,7 +58,7 @@ class TypeRef(CppObject):
         from .ast_templates import TemplateTypenameParameter, TemplateTemplateParameter
         if isinstance(other, TypeRef):
             if self.type is None:
-                raise CastError('type %s is not compatible with %s' % (self, other), self.position)
+                raise CastError(self.lexer.logger.C0300, self.position, from_type=self, to_type=other)
             if isinstance(other.type, TypeDef):
                 d = self.distance(other.type.type, cast_options)
                 return d.match_attributes(cast_options.allowed_cast, self, other)
@@ -70,7 +70,7 @@ class TypeRef(CppObject):
         elif isinstance(other, TemplateTemplateParameter):
             return other.template_parameter_match(self, cast_options, self, other)
         else:
-            raise CastError('type %s is not compatible with %s' % (self, other), self.position)
+            raise CastError(self.lexer.logger.C0300, self.position, from_type=self, to_type=other)
 
     def _create_template_instance(self, template, arguments, position):
         # type: (Template, ArgumentList, Position) -> TypeRef
@@ -106,7 +106,7 @@ class TypeRef(CppObject):
             return self.template_origin.get_unresolved_parameters()
 
     def signature(self, template_bindings={}):
-        # type: (Dict[BaseTemplateParameter, Tuple[int, Template]]) -> str
+        # type: (Dict[BaseTemplateParameter, Tuple[int, BaseTemplateObject]]) -> str
         assert self.type
         s = self.type.signature(template_bindings)
         for a in self.qualifiers:
@@ -128,7 +128,7 @@ if TYPE_CHECKING:
     from typing import Dict, List, Optional, Set, Tuple, Union
     from ..cl_lexer import ClLexer
     from ..cl_document_writer import ClDocumentWriter
-    from .ast_templates import BaseTemplateParameter, Template
+    from .ast_templates import BaseTemplateParameter, BaseTemplateObject, Template
     from .argument_list import ArgumentList
     from .position import Position
     from .value import Value

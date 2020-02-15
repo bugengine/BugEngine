@@ -1,3 +1,6 @@
+namespace UnitTest_Method
+{
+    
 namespace NS
 {
 
@@ -84,4 +87,6 @@ static typename X<T>::Z operation(const T& t);
 
 void kmain(u32 index, u32 total)
 {
+}
+
 }

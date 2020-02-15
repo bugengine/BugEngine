@@ -1,3 +1,6 @@
+namespace UnitTest_Template
+{
+
 template <int X, int Y>
 struct Test;
 
@@ -48,4 +51,6 @@ void kmain(u32 index, u32 total)
     Test<1, 4>::getY();
     Test<1, 3>::getZ<3>();
     Test<1, 4>::getZero();
+}
+
 }

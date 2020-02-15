@@ -5,13 +5,22 @@ from abc import abstractmethod
 class BaseTemplateObject(CppObject):
     @abstractmethod
     def find_instance(self, parameter_binds, arguments, position):
-        # type: (Dict[BaseTemplateParameter, Tuple[int, Template]], List[Union[Value, TypeRef]], Position) -> Optional[CppObject]
+        # type: (Dict[BaseTemplateParameter, Tuple[int, BaseTemplateObject]], List[Union[Value, BaseTemplateObject, TypeRef]], Position) -> Optional[CppObject]
         raise NotImplementedError
 
     @abstractmethod
     def instantiate(self, arguments, position):
-        # type: (List[Union[Value, TypeRef]], Position) -> Optional[CppObject]
+        # type: (List[Union[Value, BaseTemplateObject, TypeRef]], Position) -> Optional[CppObject]
         raise NotImplementedError
+
+    @abstractmethod
+    def expand_template_arg_list(self, argument_list):
+        # type: (List[Union[Value, BaseTemplateObject, TypeRef]]) -> List[Union[Value, BaseTemplateObject, TypeRef]]
+        raise NotImplementedError
+
+    def simplify(self):
+        # type: () -> BaseTemplateObject
+        return self
 
 
 class BaseTemplateParameter(CppObject):
@@ -52,7 +61,7 @@ class BaseTemplateParameter(CppObject):
         raise NotImplementedError
 
     def signature(self, template_bindings={}):
-        # type: (Dict[BaseTemplateParameter, Tuple[int, Template]]) -> str
+        # type: (Dict[BaseTemplateParameter, Tuple[int, BaseTemplateObject]]) -> str
         parameter_bind = self.parameter_bind or template_bindings.get(self)
         if parameter_bind:
             return '<%s:%d>' % (parameter_bind[1].signature(), parameter_bind[0])

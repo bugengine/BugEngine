@@ -1,3 +1,6 @@
+namespace UnitTest_TemplateParameter
+{
+
 template< typename T >
 struct list
 {
@@ -31,4 +34,6 @@ void kmain(u32 index, u32 total)
 {
     abstract_container<u32, vector> vec;
     abstract_container<u32, list> lst;
+}
+
 }

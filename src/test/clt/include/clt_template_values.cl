@@ -1,3 +1,6 @@
+namespace UnitTest_TemplateValues
+{
+
 template <u32 X>
 struct Fibonacci
 {
@@ -28,4 +31,6 @@ struct Fibonacci<0>
 void kmain(u32 current, u32 total)
 {
     u32 x = Fibonacci<37>::Value;
+}
+
 }

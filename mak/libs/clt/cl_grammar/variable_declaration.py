@@ -78,18 +78,15 @@ def p_variable_declaration(p):
     object_type = name.get_type()
     if object_type != 'ID' and (name.is_qualified() or not name.is_shadow()):
         if object_type != 'VARIABLE_ID':
-            p.lexer.error('%s redeclared as different kind of symbol' % name, name.position)
-            p.lexer.note('previous declaration of %s' % name, name.target.position)
+            p.lexer.logger.C0114(name.position, name)
+            p.lexer.logger.I0001(name.target.position)
             p[0] = Variable(p.lexer, name.position, name.name, variable_type, p[2], attributes)
         else:
             try:
                 name.target.type.distance(variable_type, CastOptions(CastOptions.CAST_NONE))
             except CastError:
-                p.lexer.error(
-                    "redefinition of '%s' with a different type: '%s' vs '%s'" %
-                    (name, variable_type.pretty_name(), name.target.type.pretty_name()), name.position
-                )
-                p.lexer.note('previous declaration of %s' % name, name.target.position)
+                p.lexer.logger.C0207(name.position, name, variable_type.pretty_name(), name.target.type.pretty_name())
+                p.lexer.logger.I0000(name.target.position)
             p[0] = [name.target]
     else:
         v = Variable(p.lexer, name.position, name.name, variable_type, p[2], attributes)
@@ -97,7 +94,7 @@ def p_variable_declaration(p):
         p[0] = [v]
         for s in attributes:
             if s.specifier == 'inline':
-                p.lexer.error('inline can only be used on functions', s.position)
+                p.lexer.logger.C0208(s.position)
 
 
 def p_extract_original_type(p):
@@ -118,18 +115,15 @@ def p_variable_declaration_cted(p):
     variable_type = p[6]
     if object_type != 'ID' and (name.is_qualified() or not name.is_shadow()):
         if name.get_type() != 'VARIABLE_ID':
-            p.lexer.error('%s redeclared as different kind of symbol', name.position)
-            p.lexer.note('previous declaration of %s' % name, name.target.position)
+            p.lexer.logger.C0114(name.position, str(name))
+            p.lexer.logger.I0000(name.target.position)
             p[0] = Variable(p.lexer, name.position, name.name, variable_type, p[7], p[1][0].attributes)
         else:
             try:
                 name.target.distance(variable_type, CastOptions(CastOptions.CAST_NONE))
             except CastError:
-                p.lexer.error(
-                    "redefinition of '%s' with a different type: '%s' vs '%s'" %
-                    (name, variable_type.pretty_name(), name.target.type.pretty_name()), name.position
-                )
-                p.lexer.note('previous declaration of %s' % name, name.target.position)
+                p.lexer.logger.C0207(name.position, name, variable_type.pretty_name(), name.target.type.pretty_name())
+                p.lexer.logger.I0000(name.target.position)
             p[0] = [name.target]
     else:
         v = Variable(p.lexer, name.position, name.name, variable_type, p[7], p[1][0].attributes)
@@ -137,7 +131,7 @@ def p_variable_declaration_cted(p):
         p[0] = [v]
         for s in p[1]:
             if s.specifier == 'inline':
-                p.lexer.error('inline can only be used on functions', s.position)
+                p.lexer.logger.C0208(s.position)
 
 
 if TYPE_CHECKING:

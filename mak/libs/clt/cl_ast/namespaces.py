@@ -52,7 +52,7 @@ class AnonymousNamespace(Namespace):
 class RootNamespace(CppObject):
     def __init__(self, lexer):
         # type: (ClLexer) -> None
-        CppObject.__init__(self, lexer, Position(lexer.filename, 1, 1, 1), None)
+        CppObject.__init__(self, lexer, Position(lexer.filename, 1, 1, 1, lexer.lexdata()), None)
 
     def write_to(self, writer):
         # type: (ClDocumentWriter) -> None

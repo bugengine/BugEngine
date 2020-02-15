@@ -1,3 +1,6 @@
+namespace UnitTest_TemplateParameter2
+{
+
 template< class T >
 class W
 {
@@ -32,4 +35,6 @@ void kmain(u32 index, u32 total)
 {
     Cls<u32> c;
     c.main();
+}
+
 }

@@ -5,48 +5,6 @@ import copy
 from be_typing import cast, TYPE_CHECKING
 
 
-color_list = {
-    'BOLD': '\x1b[01;1m',
-    'BLACK': '\x1b[30m',
-    'RED': '\x1b[31m',
-    'GREEN': '\x1b[32m',
-    'YELLOW': '\x1b[33m',
-    'BLUE': '\x1b[34m',
-    'PINK': '\x1b[35m',
-    'CYAN': '\x1b[36m',
-    'WHITE': '\x1b[37m',
-    'BBLACK': '\x1b[01;30m',
-    'BRED': '\x1b[01;31m',
-    'BGREEN': '\x1b[01;32m',
-    'BYELLOW': '\x1b[01;33m',
-    'BBLUE': '\x1b[01;34m',
-    'BPINK': '\x1b[01;35m',
-    'BCYAN': '\x1b[01;36m',
-    'BWHITE': '\x1b[01;37m',
-    'NORMAL': '\x1b[0m',
-}
-
-default_color_pattern = (
-    color_list['BWHITE'], color_list['BWHITE'], color_list['NORMAL'], color_list['BGREEN'], color_list['NORMAL']
-)
-
-color_pattern = {
-    'note':
-        (color_list['BBLACK'], color_list['BWHITE'], color_list['NORMAL'], color_list['BGREEN'], color_list['NORMAL']),
-    'info':
-        (color_list['BWHITE'], color_list['BWHITE'], color_list['NORMAL'], color_list['BGREEN'], color_list['NORMAL']),
-    'warning':
-        (color_list['BYELLOW'], color_list['BWHITE'], color_list['NORMAL'], color_list['BGREEN'], color_list['NORMAL']),
-    'error':
-        (color_list['BRED'], color_list['BWHITE'], color_list['BWHITE'], color_list['BGREEN'], color_list['NORMAL']),
-}
-
-ide_format = {
-    'msvc': '%(f)s(%(l)d,%(c)d) :',
-    'unix': '%(f)s:%(l)d:%(c)d:',
-}
-
-
 class ClLexer:
     class UnknownScope(cl_ast.scope.Scope):
         def __init__(self):
@@ -64,7 +22,7 @@ class ClLexer:
             self.template = template
             self.next_bind = bind_index + 1
             self.parameter_binds = previous_bind and previous_bind.parameter_binds or {} \
-                # type: Dict[BaseTemplateParameter, Tuple[int, Template]]
+                # type: Dict[BaseTemplateParameter, Tuple[int, BaseTemplateObject]]
 
         def temporary_bind(self, template):
             # type: (Template) -> ClLexer.TemplateBind
@@ -83,7 +41,7 @@ class ClLexer:
             self.template_list = template_list[:]
 
         def bind(self, template, current_bind):
-            # type: (Optional[Template], Optional[ClLexer.TemplateBind]) -> Optional[ClLexer.TemplateBind]
+            # type: (Optional[BaseTemplateObject], Optional[ClLexer.TemplateBind]) -> Optional[ClLexer.TemplateBind]
             bind_index = current_bind and current_bind.next_bind or 0
             if bind_index >= len(self.template_list):
                 return None
@@ -119,13 +77,12 @@ class ClLexer:
             except IndexError:
                 return None
 
-    def __init__(self, filename, error_format):
-        # type: (str, str) -> None
-        self.lexer = lex.lex(object=self)
+    def __init__(self, filename, logger):
+        # type: (str, Logger) -> None
+        self._lexer = lex.lex(object=self)
         self.filename = filename
-        self.error_count = 0
+        self.logger = logger
         self.last_token = None         # type: Optional[lex.LexToken]
-        self.parser = None             # type: Optional[ClParser]
         self.scopes = []               # type: List[Scope]
         self.owner_scopes = []         # type: List[Scope]
         self.current_scope = None      # type: Optional[Scope]
@@ -134,43 +91,18 @@ class ClLexer:
         self.template_stack = None     # type: Optional[ClLexer.TemplateStack]
         self._template_stack = None    # type: Optional[ClLexer.TemplateStack]
         self._template_stack_count = 0
-        try:
-            self.error_format = ide_format[error_format]
-            self.error_color = error_format == 'unix' and sys.stderr.isatty()
-        except KeyError:
-            self.error_format = ide_format['unix']
-            self.error_color = False
         self.base_types = {}           # type: Dict[str, cl_ast.TypeRef]
-        p = cl_ast.Position('<built-in>', 0, 0, 0)
+        p = cl_ast.Position('<built-in>', 0, 0, 0, '')
         for t in ('bool', 'float', 'double', 'i8', 'u8', 'i16', 'u16', 'i32', 'u32', 'i64', 'u64'):
             type = cl_ast.TypeRef(self, p, cl_ast.ast_types.BuiltIn(self, p, t))
             type.qualifiers.add('const')
             self.base_types[t] = type
 
-    def note(self, msg, pos):
-        # type: (str, Position) -> None
-        self._msg('note', msg, pos)
-
-    def info(self, msg, pos):
-        # type: (str, Position) -> None
-        self._msg('info', msg, pos)
-
-    def warning(self, msg, pos):
-        # type: (str, Position) -> None
-        self._msg('warning', msg, pos)
-
-    def error(self, msg, pos):
-        # type: (str, Position) -> None
-        self.error_count += 1
-        self._msg('error', msg, pos)
-
     def log_cpperror(self, e):
         # type: (CppError) -> None
         if e.inner_error:
             self.log_cpperror(e.inner_error)
-            self.note(e.message, e.position)
-        else:
-            self.error(e.message, e.position)
+        e.error(e.position, e.arguments)
 
     def push_scope(self, scope, owner_scope=True):
         # type: (Scope, bool) -> None
@@ -262,7 +194,11 @@ class ClLexer:
 
     def input(self, text):
         # type: (str) -> None
-        self.lexer.input(text)
+        self._lexer.input(text)
+
+    def lexdata(self):
+        # type: () -> str
+        return self._lexer.lexdata
 
     def token(self):
         # type: () -> Optional[lex.LexToken]
@@ -274,7 +210,7 @@ class ClLexer:
             new_token = copy.copy(self.last_token)
             new_token.type = 'BRACE_MARKER'
         else:
-            new_token = self.lexer.token()
+            new_token = self._lexer.token()
             if new_token:
                 new_token.lexer = self
                 new_token.filename = self.filename
@@ -293,7 +229,7 @@ class ClLexer:
                 elif new_token.type in scope_breaks:
                     self.clear_search_scope()
         self.last_token = new_token
-        # print(new_token)
+                                   # print(new_token)
         return new_token
 
     def _execute_pragma(self, pragma):
@@ -302,38 +238,8 @@ class ClLexer:
 
     def _position(self, token):
         # type: (lex.LexToken) -> Position
-        return cl_ast.Position(self.filename, token.lineno, token.lexpos, token.lexpos + len(token.value))
-
-    def _msg(self, error_type, msg, pos):
-        # type: (str, str, Position) -> None
-        if self.error_color:
-            (color_error_type, color_filename, color_msg, color_caret,
-             color_off) = color_pattern.get(error_type, default_color_pattern)
-        else:
-            color_error_type = ''
-            color_filename = ''
-            color_msg = ''
-            color_caret = ''
-            color_off = ''
-        filename = pos.filename
-        lineno = pos.line_number
-        offset = pos.start_position
-        end = pos.end_position
-        while offset > 0 and self.lexer.lexdata[offset - 1] != '\n':
-            offset -= 1
-        while end < len(self.lexer.lexdata) and self.lexer.lexdata[end] != '\n':
-            end += 1
-        location = self.error_format % {'f': filename, 'l': lineno, 'c': pos.start_position - offset + 1}
-        sys.stderr.write(
-            '%s%s%s%s %s:%s %s%s%s\n' %
-            (color_filename, location, color_off, color_error_type, error_type, color_off, color_msg, msg, color_off)
-        )
-        sys.stderr.write(self.lexer.lexdata[offset:end + 1])
-        sys.stderr.write(
-            '%s%s%s%s\n' % (
-                ' ' * (pos.start_position - offset), color_caret, '^' *
-                (pos.end_position - pos.start_position), color_off
-            )
+        return cl_ast.Position(
+            self.filename, token.lineno, token.lexpos, token.lexpos + len(token.value), self.lexdata()
         )
 
     # Lexer rules ##
@@ -407,14 +313,14 @@ class ClLexer:
     def t_NEWLINE(self, t):
         # type: (lex.LexToken) -> Optional[lex.LexToken]
         r'\n+'
-        self.lexer.lineno += t.value.count("\n")
+        self._lexer.lineno += t.value.count("\n")
         return None
 
     # Rules for the ppident state
     @lex.TOKEN(r'\#[ \t]*ident')
     def t_PREPROC_IDENT(self, t):
         # type: (lex.LexToken) -> Optional[lex.LexToken]
-        self.lexer.begin('ppident')
+        self._lexer.begin('ppident')
         return None
 
     t_ppident_ignore = ' \t'
@@ -427,20 +333,20 @@ class ClLexer:
     def t_ppident_NEWLINE(self, t):
         # type: (lex.LexToken) -> Optional[lex.LexToken]
         r'\n'
-        self.lexer.begin('INITIAL')
+        self._lexer.begin('INITIAL')
         return None
 
     def t_ppident_error(self, t):
         # type: (lex.LexToken) -> Optional[lex.LexToken]
-        self.error('invalid #ident directive', self._position(t))
-        self.lexer.skip(1)
+        self.logger.C0003(self._position(t), str(t))
+        self._lexer.skip(1)
         return None
 
     # Rules for the pppragma state
     @lex.TOKEN(r'\#[ \t]*pragma')
     def t_PREPROC_PRAGMA(self, t):
         # type: (lex.LexToken) -> Optional[lex.LexToken]
-        self.lexer.begin('pppragma')
+        self._lexer.begin('pppragma')
         self._pragma = []  # type: List[lex.LexToken]
         return None
 
@@ -472,30 +378,30 @@ class ClLexer:
     def t_pppragma_NEWLINE(self, t):
         # type: (lex.LexToken) -> Optional[lex.LexToken]
         r'\n'
-        self.lexer.begin('INITIAL')
+        self._lexer.begin('INITIAL')
         self._execute_pragma(self._pragma)
         self._pragma = []
         return None
 
     def t_pppragma_error(self, t):
         # type: (lex.LexToken) -> Optional[lex.LexToken]
-        self.error('invalid #pragma directive', self._position(t))
-        self.lexer.skip(1)
+        self.logger.C0004(self._position(t), str(t))
+        self._lexer.skip(1)
         return None
 
     # Rules for the ppline state
     @lex.TOKEN(r'\#')
     def t_PREPROC_LINE(self, t):
         # type: (lex.LexToken) -> Optional[lex.LexToken]
-        self.lexer.begin('ppline')
+        self._lexer.begin('ppline')
         return None
 
     @lex.TOKEN(string_literal)
     def t_ppline_FILENAME(self, t):
         # type: (lex.LexToken) -> Optional[lex.LexToken]
         if self.pp_line is None:
-            self.error('filename before line number in #line', self._position(t))
-            self.lexer.skip(1)
+            self.logger.C0005(self._position(t))
+            self._lexer.skip(1)
         else:
             self.pp_filename = t.value.lstrip('"').rstrip('"')
         return None
@@ -515,14 +421,14 @@ class ClLexer:
         # type: (lex.LexToken) -> Optional[lex.LexToken]
         r'\n'
         if self.pp_line is None:
-            self.error('line number missing in #line', self._position(t))
-            # self.lexer.skip(1)
+            self.logger.C0006(self._position(t))
+            # self._lexer.skip(1)
         else:
-            self.lexer.lineno = int(self.pp_line)
+            self._lexer.lineno = int(self.pp_line)
             if self.pp_filename is not None:
                 self.filename = self.pp_filename
         self.pp_line = None
-        self.lexer.begin('INITIAL')
+        self._lexer.begin('INITIAL')
         return None
 
     def t_ppline_PPLINE(self, t):
@@ -534,8 +440,8 @@ class ClLexer:
 
     def t_ppline_error(self, t):
         # type: (lex.LexToken) -> Optional[lex.LexToken]
-        self.error('invalid #line directive', self._position(t))
-        self.lexer.skip(1)
+        self.logger.C0007(self._position(t))
+        self._lexer.skip(1)
         return None
 
     # Operators
@@ -651,9 +557,8 @@ class ClLexer:
     @lex.TOKEN(bad_octal_constant)
     def t_BAD_CONST_OCT(self, t):
         # type: (lex.LexToken) -> Optional[lex.LexToken]
-        msg = "Invalid octal constant"
-        self.error(msg, self._position(t))
-        self.lexer.skip(1)
+        self.logger.C0008(self._position(t), 'octal')
+        self._lexer.skip(1)
         return None
 
     @lex.TOKEN(octal_constant)
@@ -676,7 +581,7 @@ class ClLexer:
         exec("x = u%s" % t.value, globals(), l)
         x = l['x']
         if ord(x) > 255:
-            self.error("invalid character constant", self._position(t))
+            self.logger.C0008(self._position(t), 'character')
         setattr(t, 'constant_value', ord(x) % 256)
         setattr(t, 'constant_type', self.base_types['u8'])
         return t
@@ -694,17 +599,15 @@ class ClLexer:
     @lex.TOKEN(unmatched_quote)
     def t_UNMATCHED_QUOTE(self, t):
         # type: (lex.LexToken) -> Optional[lex.LexToken]
-        msg = "Unmatched '"
-        self.error(msg, self._position(t))
-        self.lexer.skip(1)
+        self.logger.C0009(self._position(t))
+        self._lexer.skip(1)
         return None
 
     @lex.TOKEN(bad_char_const)
     def t_BAD_CHAR_CONST(self, t):
         # type: (lex.LexToken) -> Optional[lex.LexToken]
-        msg = "Invalid char constant %s" % t.value
-        self.error(msg, self._position(t))
-        self.lexer.skip(1)
+        self.logger.C0008(self._position(t), 'char')
+        self._lexer.skip(1)
         return None
 
     @lex.TOKEN(wstring_literal)
@@ -718,9 +621,8 @@ class ClLexer:
     @lex.TOKEN(bad_string_literal)
     def t_BAD_STRING_LITERAL(self, t):
         # type: (lex.LexToken) -> Optional[lex.LexToken]
-        msg = "String contains invalid escape code"
-        self.error(msg, self._position(t))
-        self.lexer.skip(1)
+        self.logger.C0010(self._position(t))
+        self._lexer.skip(1)
         return t
 
     @lex.TOKEN(identifier)
@@ -731,8 +633,8 @@ class ClLexer:
 
     def t_error(self, t):
         # type: (lex.LexToken) -> Optional[lex.LexToken]
-        self.error('Illegal character %s' % repr(t.value[0]), self._position(t))
-        self.lexer.skip(1)
+        self.logger.C0000(self._position(t), repr(t.value[0]))
+        self._lexer.skip(1)
         return None
 
 
@@ -741,6 +643,7 @@ if TYPE_CHECKING:
     from clt.cl_ast.cppobject import CppObject
     from clt.cl_ast.scope import Scope
     from clt.cl_ast.position import Position
-    from clt.cl_ast.ast_templates import BaseTemplateParameter, Template
+    from clt.cl_ast.ast_templates import BaseTemplateParameter, BaseTemplateObject, Template
     from clt.cl_ast.error import CppError
     from clt.cl_parser import ClParser
+    from clt.cl_messages import Logger

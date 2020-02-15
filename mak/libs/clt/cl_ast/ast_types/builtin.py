@@ -19,7 +19,7 @@ class BuiltIn(Type):
                     d = Type.Distance(cast=1)
                     return d.match_attributes(cast_options.allowed_cast, typeref, other_typeref)
                 else:
-                    raise CastError('type %s is not compatible with %s' % (self, other), self.position)
+                    raise CastError(self.lexer.logger.C0300, self.position, from_type=typeref, to_type=other_typeref)
             else:
                 d = Type.Distance(cast=0)
                 return d.match_attributes(cast_options.allowed_cast, typeref, other_typeref)
@@ -27,7 +27,7 @@ class BuiltIn(Type):
             d = Type.Distance(variant=-1)
             return d.match_attributes(cast_options.allowed_cast, typeref, other_typeref)
         else:
-            raise CastError('type %s is not compatible with %s' % (self, other), self.position)
+            raise CastError(self.lexer.logger.C0300, self.position, from_type=typeref, to_type=other_typeref)
 
     def pretty_name(self):
         # type: () -> str
@@ -38,7 +38,7 @@ class BuiltIn(Type):
         return self
 
     def signature(self, template_bindings={}):
-        # type: (Dict[BaseTemplateParameter, Tuple[int, Template]]) -> str
+        # type: (Dict[BaseTemplateParameter, Tuple[int, BaseTemplateObject]]) -> str
         return '~%s' % (self.builtin)
 
 
@@ -64,14 +64,14 @@ class Void(Type):
             d = Type.Distance(variant=-1)
             return d.match_attributes(cast_options.allowed_cast, typeref, other_typeref)
         else:
-            raise CastError('type %s is not compatible with %s' % (self, other), self.position)
+            raise CastError(self.lexer.logger.C0300, self.position, from_type=typeref, to_type=other_typeref)
 
     def _create_template_instance(self, template, arguments, position):
         # type: (Template, ArgumentList, Position) -> Void
         return self
 
     def signature(self, template_bindings={}):
-        # type: (Dict[BaseTemplateParameter, Tuple[int, Template]]) -> str
+        # type: (Dict[BaseTemplateParameter, Tuple[int, BaseTemplateObject]]) -> str
         return '~void'
 
     def pretty_name(self):
@@ -84,7 +84,7 @@ if TYPE_CHECKING:
     from typing import Dict, List, Optional, Set, Tuple, Union
     from ...cl_lexer import ClLexer
     from ...cl_document_writer import ClDocumentWriter
-    from ..ast_templates import BaseTemplateParameter, Template
+    from ..ast_templates import BaseTemplateParameter, BaseTemplateObject, Template
     from ..argument_list import ArgumentList
     from ..typeref import TypeRef
     from ..type import CastOptions
