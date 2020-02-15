@@ -47,7 +47,7 @@ class Template(BaseTemplateObject):
         BaseTemplateObject.__init__(self, lexer, position)
         self.back_link = self
         self.siblings = []         # type: List[Template]
-        self.parameters = []       # type: List[CppObject]
+        self.parameters = []       # type: List[Union[Value, TypeRef, BaseTemplateObject]]
         self.specializations = []  # type: List[Tuple[List[CppObject], CppObject]]
         self.push_scope(position, Template.Scope(self, position))
 
@@ -63,11 +63,11 @@ class Template(BaseTemplateObject):
         return not (self == other)
 
     def signature(self, template_bindings={}):
-        # type: (Dict[BaseTemplateParameter, Tuple[int, Template]]) -> str
+        # type: (Dict[BaseTemplateParameter, Tuple[int, BaseTemplateObject]]) -> str
         return '$%d' % id(self.back_link)
 
     def expand_template_arg_list(self, argument_list):
-        # type: (List[Union[Value, TypeRef]]) -> List[Union[Value, TypeRef]]
+        # type: (List[Union[Value, BaseTemplateObject, TypeRef]]) -> List[Union[Value, BaseTemplateObject, TypeRef]]
         if id(self) != id(self.back_link):
             return self.back_link.expand_template_arg_list(argument_list)
         else:
@@ -85,6 +85,7 @@ class Template(BaseTemplateObject):
         if isinstance(parameter, TemplateTypenameParameter):
             self.parameters.append(TypeRef(self.lexer, parameter.position, parameter))
         else:
+            assert isinstance(parameter, (BaseTemplateObject, Value))
             self.parameters.append(parameter)
 
     def get_token_type_raw(self):
@@ -134,25 +135,25 @@ class Template(BaseTemplateObject):
             if id(self) == id(cast_target):
                 return Type.Distance()
             else:
-                raise CastError('type %s is not compatible with %s' % (self, cast_to), self.position)
+                raise CastError(self.lexer.logger.C0300, self.position, from_type=self, to_type=cast_to)
         elif isinstance(cast_target, TemplateTemplateParameter):
             params = cast_target.template_params
         else:
-            raise CastError('type %s is not compatible with %s' % (self, cast_to), self.position)
+            raise CastError(self.lexer.logger.C0300, self.position, from_type=self, to_type=cast_to)
         if len(params) != len(scope.parameters):
-            raise CastError('type %s is not compatible with %s' % (self, cast_to), self.position)
+            raise CastError(self.lexer.logger.C0300, self.position, from_type=self, to_type=cast_to)
         d = Type.Distance()
         #for p1, p2 in zip(self.parameters, params):
         #    d += p1.distance(p2, cast)
         return d
 
     def instantiate(self, arguments, position):
-        # type: (List[Union[Value, TypeRef]], Position) -> Optional[CppObject]
+        # type: (List[Union[Value, BaseTemplateObject, TypeRef]], Position) -> Optional[CppObject]
         #self.lexer.note('creating instance of template %s'%self.scope[0][1].name, position)
         assert id(self) == id(self.back_link)
         arguments = [a.simplify() for a in arguments]
         matches, specialization, scores = self.find_specialization(position, arguments)
-        unresolved_params = []                                                                              # type: List[BaseTemplateParameter]
+        unresolved_params = []                                                                            # type: List[BaseTemplateParameter]
         for a in arguments:
             unresolved_params += a.get_unresolved_parameters()
         if unresolved_params:
@@ -173,9 +174,17 @@ class Template(BaseTemplateObject):
         except Template.InstantiationError as e:
             self.parent.pop_scope()
             specialization.pop_scope_recursive()
-            args = ', '.join(str(a) for a in arguments)
+            scope = cast(Template.Scope, self.scope)
+            match_str = ', '.join(
+                '%s = %s' % (scope.parameters[i].name or '<anonymous>', v) for i, v in enumerate(matches)
+            )
             raise Template.InstantiationError(
-                'in instantiation of template %s<%s>' % (self.scope[0][1].pretty_name(), args), position, e
+                self.lexer.logger.I0003,
+                position,
+                e,
+                template_name=self.scope[0][1].pretty_name(),
+                template_parameters=', '.join(str(x) for x in scope.parameters),
+                arguments=match_str
             )
         except:
             self.parent.pop_scope()
@@ -187,14 +196,14 @@ class Template(BaseTemplateObject):
             return result
 
     def fill_temporary_binding(self, template, binding):
-        # type: (Template, Dict[BaseTemplateParameter, Tuple[int, Template]]) -> Dict[BaseTemplateParameter, Tuple[int, Template]]
+        # type: (Template, Dict[BaseTemplateParameter, Tuple[int, BaseTemplateObject]]) -> Dict[BaseTemplateParameter, Tuple[int, BaseTemplateObject]]
         scope = cast(Template.Scope, self.scope)
         for i, p in enumerate(scope.parameters):
             binding[p] = (i, template)
         return binding
 
     def find_instance(self, parameter_binds, arguments, position):
-        # type: (Dict[BaseTemplateParameter, Tuple[int, Template]], List[Union[Value, TypeRef]], Position) -> Optional[CppObject]
+        # type: (Dict[BaseTemplateParameter, Tuple[int, BaseTemplateObject]], List[Union[Value, TypeRef, BaseTemplateObject]], Position) -> Optional[CppObject]
         arguments = self.match(arguments, position)
         assert len(arguments) == len(self.parameters)
         if parameter_binds is not None:
@@ -261,7 +270,7 @@ class Template(BaseTemplateObject):
         self.specializations.append((arguments, specialization))
 
     def find_exact_specialization(self, position, parameter_binds, arguments):
-        # type: (Position, Dict[BaseTemplateParameter, Tuple[int, Template]], List[Union[Value, TypeRef]]) -> Optional[CppObject]
+        # type: (Position, Dict[BaseTemplateParameter, Tuple[int, BaseTemplateObject]], List[Union[Value, BaseTemplateObject, TypeRef]]) -> Optional[CppObject]
         for specialization_arguments, specialization in self.specializations:
             try:
                 matches, scores = self.argument_match(specialization_arguments, arguments, parameter_binds)
@@ -275,7 +284,7 @@ class Template(BaseTemplateObject):
         return None
 
     def find_specialization(self, position, arguments):
-        # type: (Position, List[Union[Value, TypeRef]]) -> Tuple[Optional[ArgumentList], Optional[CppObject], Optional[List[Type.Distance]]]
+        # type: (Position, List[Union[Value, BaseTemplateObject, TypeRef]]) -> Tuple[Optional[ArgumentList], Optional[CppObject], Optional[List[Type.Distance]]]
         specializations = []
         for specialization_arguments, specialization in self.specializations:
             try:
@@ -287,7 +296,16 @@ class Template(BaseTemplateObject):
         try:
             matches, score = self.argument_match(self.parameters, arguments, {})
         except CastError as e:
-            raise Template.InstantiationError('when instantiating template', position, e)
+            assert isinstance(self.scope, Template.Scope)
+            params = ', '.join(str(a) for a in self.scope.parameters)
+            raise Template.InstantiationError(
+                self.lexer.logger.I0005,
+                position,
+                e,
+                template_name=self.scope[0][1].name,
+                template_parameters=params,
+                arguments=', '.join(str(a) for a in arguments)
+            )
         else:
             try:
                 specializations.append((score, matches, self.scope[0][1]))
@@ -297,17 +315,16 @@ class Template(BaseTemplateObject):
             specializations = sorted(specializations, key=lambda x: x[0])
             score, matches, result = specializations[0]
             if len(specializations) > 1 and specializations[0][0] == specializations[1][0]:
-                args = ', '.join(str(x) for x in arguments)
-                self.lexer.error(
-                    'ambiguous partial specializations of %s<%s>' % (self.scope[0][1].name, args), position
-                )
+                args = ', '.join(str(a) for a in arguments)
+                assert self.scope[0][1].name is not None
+                self.lexer.logger.C0400(position, self.scope[0][1].name, args)
                 for s, m, r in specializations:
                     if s == score:
                         scope = cast(Template.Scope, r.parent.scope)
                         match_str = ', '.join(
                             '%s = %s' % (scope.parameters[i].name or '<anonymous>', v) for i, v in sorted(m.items())
                         )
-                        self.lexer.note('partial specialization matches [%s]' % match_str, r.position)
+                        self.lexer.logger.I0003(r.position, match_str)
                     else:
                         break
             return ArgumentList(matches), result, score
@@ -318,16 +335,18 @@ class Template(BaseTemplateObject):
         return []
 
     def argument_match(self, parameters, arguments, template_bindings):
-        # type: (List[CppObject], List[Union[Value, TypeRef]], Dict[BaseTemplateParameter, Tuple[int, Template]]) -> Tuple[Dict[int, CppObject], List[Type.Distance]]
-        if len(arguments) != len(parameters):
-            raise CastError('invalid number of parameters', self.position)
+        # type: (Sequence[CppObject], List[Union[Value, BaseTemplateObject, TypeRef]], Dict[BaseTemplateParameter, Tuple[int, BaseTemplateObject]]) -> Tuple[Dict[int, CppObject], List[Type.Distance]]
+        if len(arguments) < len(parameters):
+            raise CastError(self.lexer.logger.C0301, self.position, pretty_name=self.scope[0][1].pretty_name())
+        if len(arguments) > len(parameters):
+            raise CastError(self.lexer.logger.C0302, self.position, pretty_name=self.scope[0][1].pretty_name())
         matches = {}   # type: Dict[int, CppObject]
         result = []
         for a, p in zip(arguments, parameters):
             try:
                 score = a.distance(p, CastOptions(CastOptions.CAST_NONE, matches, template_bindings, self))
             except CastError:
-                raise CastError('template argument for template parameter %s is incompatible' % str(p), p.position)
+                raise CastError(self.lexer.logger.C0303, p.position, parameter_name=str(p))
             for k, v in score.matches.items():
                 if k not in matches:
                     matches[k] = v
@@ -356,21 +375,32 @@ class Template(BaseTemplateObject):
             print(indent + ' `-- end specialization')
 
     def match(self, arguments, position):
-        # type: (List[Union[Value, TypeRef]], Position) -> List[Union[Value, TypeRef]]
+        # type: (List[Union[Value, BaseTemplateObject, TypeRef]], Position) -> List[Union[Value, BaseTemplateObject, TypeRef]]
         scope = cast(Template.Scope, self.scope)
         if len(arguments) > len(scope.parameters):
-            raise Template.InstantiationError('Too many template arguments', arguments[len(scope.parameters)].position)
+            raise Template.InstantiationError(
+                self.lexer.logger.C0302,
+                arguments[len(scope.parameters)].position,
+                pretty_name=self.scope[0][1].pretty_name()
+            )
         for missing_parameter in scope.parameters[len(arguments):]:
             default_value = missing_parameter.default_value
             if not default_value:
-                raise Template.InstantiationError('too few template arguments', position)
+                raise Template.InstantiationError(
+                    self.lexer.logger.C0301,
+                    arguments[len(scope.parameters)].position,
+                    pretty_name=self.scope[0][1].pretty_name()
+                )
             assert isinstance(default_value, Value) or isinstance(default_value, TypeRef)
             arguments.append(default_value)
         for p, a in zip(scope.parameters, arguments):
             if not p.is_compatible(a):
                 raise self.InstantiationError(
-                    'Invalid template argument: expected %s, got %s' %
-                    (p.get_template_parameter_type(), a.__class__.__name__), a.position
+                    self.lexer.logger.C0304,
+                    a.position,
+                    parameter_name=str(p),
+                    expected_type=p.get_template_parameter_type(),
+                    got_type=a.__class__.__name__
                 )
         return arguments
 
@@ -385,7 +415,7 @@ class Template(BaseTemplateObject):
 
 
 if TYPE_CHECKING:
-    from typing import Dict, List, Optional, Tuple, Union
+    from typing import Dict, List, Optional, Tuple, Union, Sequence
     from ...cl_lexer import ClLexer
     from ...cl_document_writer import ClDocumentWriter
     from ..cppobject import CppObject

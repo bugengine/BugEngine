@@ -130,13 +130,13 @@ def p_template_object(p):
     parent = p[-1]
     template_stack = p.lexer.template_stack
     arguments = p[2]
-    errors = []
+    errors = [] # type: List[Tuple[Callable[..., Dict[str, Any]], Dict[str, Any]]]
     is_shadow = not p[1][0] and p.slice[1].type.endswith('_SHADOW')
     n = Name(p.lexer, p[1], p.position(1), parent=parent[0], target=None, template=template, arguments=arguments)
     if template_stack:
         bindings = template_stack.bind(template, parent[1] and parent[1].template_bindings or None)
         if not bindings:
-            errors.append('template specialization requires template<>')
+            errors.append((p.lexer.logger.C0402, {}))
         try:
             specialization = template.find_instance(bindings and bindings.parameter_binds or {}, arguments, p.position(1))
         except Template.InstantiationError as e:
@@ -182,7 +182,7 @@ def p_template_object_error(p):
                       | TYPENAME_ID template_arguments
                       | TYPENAME_ID_SHADOW template_arguments
     """
-    p.lexer.error("'%s' is not a template" % p[1], p.position(1))
+    p.lexer.logger.C0104(p.position(1), p[1])
     parent = p[-1]
     assert isinstance(p.slice[1], LexToken)
     is_shadow = not parent[0] and p.slice[1].type.endswith('_SHADOW')
@@ -208,7 +208,7 @@ def p_template_undefined(p):
               template=bindings and bindings.template,
               arguments=p[3],
               template_bindings=bindings,
-              errors=['expected qualified name'])
+              errors=[(p.lexer.logger.C0115, {})])
     n2.target = DependentName(p.lexer, p.position(1), n2)
     p[0] = (n, n2)
 
@@ -243,7 +243,7 @@ def p_qualifier_template(p):
     p[0][1].target = p[0][1].target.scope[0][1]
     p[0][0].template_bindings = bindings
     p[0][1].template_bindings = bindings
-    p.lexer.error("template class '%s' used without template arguments" % p[0][1], p[0][0].position)
+    p.lexer.logger.C0105(p[0][0].position, p[0][1])
 
 
 def p_name_end_template(p):
@@ -274,11 +274,9 @@ def p_name_end_tpl_error(p):
             name.data = name.target.find_instance(bindings.parameter_binds, bindings.template.parameters, name.position)
             if not name.data:
                 arg_list = ', '.join(str(p) for p in name.template.parameters)
-                p.lexer.error(
-                    "type/value mismatch in template parameter list for template<%s> class '%s'" % (arg_list, name),
-                    name.position)
+                p.lexer.logger.C0107(name.position, name, arg_list)
         elif not name.is_shadow:
-            p.lexer.error("template class '%s' used without template arguments" % name, name.position)
+            p.lexer.logger.C0105(name.position, name)
     # locate more precise definition for templated objects if the template is on the stack
     if not name.data and name.is_shadow:
         for scope in p.lexer.scopes[::-1]:
@@ -451,7 +449,7 @@ def p_object_name_operator_overload(p):
         try:
             value = p[1][1].target.scope.find(name, p.position(2), None, True)
         except CppError as e:
-            p.lexer.error(e.message, e.position)
+            p.lexer.log_cpperror(e)
     else:
         value = p.lexer.lookup_by_name(name, p.position(2))[1]
     p[0] = (Name(p.lexer, name, p.position(2), target=value,
@@ -479,7 +477,7 @@ def p_type_name_typename_error(p):
     """
     n = p[1][0]
     if p.lexer.template_stack:
-        p.lexer.error("need 'typename' before dependent scope name %s" % n, n.position)
+        p.lexer.logger.C0106(n.position, n)
     p[0] = (n, None)
 
 
@@ -499,8 +497,8 @@ def p_type_name_template_name(p):
         p[0][1].data = tpl
     elif isinstance(p[0][0].target, Template):
         if not p[0][0].is_shadow():
-            p.lexer.error("use of class template '%s' without template arguments" % n, n.position)
-            p.lexer.note("template is declared here", p[0][0].target.position)
+            p.lexer.logger.C0105(n.position, n)
+            p.lexer.logger.I0004(p[0][0].target.position)
             p[0][0].data = p[0][0].target
             p[0][1].data = p[0][1].target
             p[0][0].target = None
@@ -523,4 +521,5 @@ def p_type_name_typename(p):
     p[0] = (n, None)
 
 if TYPE_CHECKING:
+    from typing import Any, Callable, Dict, List, Tuple
     from ply.yacc import YaccProduction

@@ -1,4 +1,4 @@
-void kmain(u32 index, u32 total)
+void clt_base_values()
 {
     4;
     4l;

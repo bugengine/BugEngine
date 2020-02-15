@@ -180,7 +180,8 @@ def t_preprocessor(t):
     r'\#([^\\\n]|(\\.)|(\\\n))*'
     t.lexer.lineno += t.value.count('\n')
     if t.value.find('include') != -1:
-        t.lexer.includes.append(t.value)
+        if t.value[-4:-1] != '.cl':
+            t.lexer.includes.append(t.value)
 
 
 # Operators

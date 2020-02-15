@@ -28,22 +28,22 @@ def p_struct_declaration(p):
     if object_type != 'ID' and (name.is_qualified() or not name.is_shadow()):
         if object_type == 'STRUCT_ID':
             if name.target.struct_type != struct_type:
-                p.lexer.warning(
-                    "'%s' declared as %s here, but first declared as %s" % (name, p[1], name.target.struct_type),
-                    p.position(1)
-                )
-                p.lexer.note('previously declared here', name.target.position)
+                if name.target.struct_type == 'enum' or name.target.struct_type == 'union' or struct_type == 'union':
+                    p.lexer.logger.C0108(p.position(1), name)
+                else:
+                    p.lexer.logger.W0100(p.position(1), name, name.target.struct_type, struct_type)
+                p.lexer.logger.I0000(name.target.position)
             #if name.template:
             #    p.lexer.error("redefinition of '%s' as a different kind of symbol" % name, name.position)
-            #    p.lexer.note('previous definition is here', name.target.position)
+            #    p.lexer.logger.I0001(name.target.position)
             #    p[0] = (None, Struct(p.lexer, name.position, struct_type, name.name))
             p[0] = (name.target, None)
         else:
             if name.is_qualified():
-                p.lexer.error('qualified name %s does not name a struct' % name, name.position)
+                p.lexer.logger.C0109(name.position, name.name, struct_type, name.parent.target.pretty_name())
             else:
-                p.lexer.error('name %s does not name a struct' % name, name.position)
-            p.lexer.note('previously declared here', name.target.position)
+                p.lexer.logger.C0109(name.position, name.name, struct_type, 'current namespace')
+            p.lexer.logger.I0000(name.target.position)
             p[0] = (None, Struct(p.lexer, name.position, struct_type, name.name))
     elif name.target and object_type == 'STRUCT_ID':
         # optimistically use provided declaration, but if definition, it will be overriden
@@ -115,7 +115,7 @@ def p_struct_parent_error(p):
         struct_parent_opt : COLON struct_parent_visibility_opt object_name
     """
     name = p[3][0]
-    p.lexer.error('expected class name', name.position)
+    p.lexer.logger.C0110(name.position)
 
 
 def p_struct_define(p):
@@ -175,11 +175,11 @@ def p_type_struct_declaration(p):
         p[0].register()
     elif p[1][1]:
         if p[1][0].struct_type != p[1][1].struct_type:
-            p.lexer.warning(
-                "'%s' declared as %s here, but first declared as %s" %
-                (p[1][1].name, p[1][1].struct_type, p[1][0].struct_type), p[1][1].position
-            )
-            p.lexer.note('previously declared here', p[1][0].position)
+            if p[1][0].struct_type == 'enum' or p[1][0].target.struct_type == 'union' or p[1][1].struct_type == 'union':
+                p.lexer.logger.C0108(p[1][1].position, p[1][1].name)
+            else:
+                p.lexer.logger.W0100(p[1][1].position, p[1][1].name, p[1][0].struct_type, p[1][1].struct_type)
+            p.lexer.logger.I0000(p[1][0].position)
     p.set_position(0, 1)
 
 

@@ -138,7 +138,7 @@ def p_type_deprecated(p):
         'unsigned': ('u%(b)s', ['uchar', 'ushort', 'uint', 'ulong', 'signed']),
     }
     if len(p[1]) > 1 or p[1][0][0] != 'int':
-        p.lexer.warning("old style C type", p.position(1))
+        p.lexer.logger.W0000(p.position(1))
     for s in p[1]:
         rebuild = {'r': result[:1], 'b': result[1:]}
         rebuild_pattern, incompatible_kw = kw_data[s[0]]
@@ -146,7 +146,7 @@ def p_type_deprecated(p):
             if s2 == s:
                 break
             if s2[0] in incompatible_kw:
-                p.lexer.error("cannot combine with previous '%s' declaration specifier" % s2[0], s[1])
+                p.lexer.logger.C0013(s[1], s2[0])
         result = rebuild_pattern % rebuild
     builtin = BuiltIn(p.lexer, p.position(1), result)
     p[0] = TypeRef(p.lexer, builtin.position, builtin)
@@ -167,7 +167,7 @@ def p_type_type_name(p):
         )
     else:
         if not isinstance(name.target, Type):
-            p.lexer.error("name '%s' does not refer to a type" % name, name.position)
+            p.lexer.logger.C0111(name.position, name)
         p[0] = TypeRef(p.lexer, name.target.position, name.target.simplify(), name.data)
 
 

@@ -1,3 +1,6 @@
+namespace UnitTest_TemplateMethods3
+{
+    
 template< typename T >
 struct vector
 {
@@ -16,4 +19,6 @@ typename vector<U>::iterator vector<U>::begin()
 void kmain(u32 index, u32 total)
 {
     vector<i32> v;
+}
+
 }

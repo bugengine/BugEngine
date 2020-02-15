@@ -74,7 +74,7 @@ def p_method_parameters(p):
     if len(p[1]) == 1:
         if p[1][0].type.is_void():
             if p[1][0].name:
-                p.lexer.error("argument '%s' may not have void type" % p[1][0].name, p[1][0].position)
+                p.lexer.logger.C0202(p[1][0].position, p[1][0].name)
             p[0] = []
         else:
             p[0] = p[1]
@@ -116,10 +116,10 @@ def find_or_create_method(p, name, owner):
             return name.target
         else:
             if name.is_qualified():
-                p.lexer.error('qualified name %s does not name a method' % name, name.position)
+                p.lexer.logger.C0112(name.position, str(name))
             else:
-                p.lexer.error('name %s does not name a method' % name, name.position)
-            p.lexer.note('previously declared here', name.target.position)
+                p.lexer.logger.C0113(name.position, str(name))
+            p.lexer.logger.I0000(name.target.position)
             return create_method_container(p.lexer, name)
     elif name.target and object_type == 'METHOD_ID':
         return create_method_container(p.lexer, name)
@@ -144,7 +144,7 @@ def p_create_special_method(p):
         assert klass, 'resolution of %s failed' % name
         assert klass.scope, '%s is not defined' % name
         if name.name[1:] != klass.name:
-            p.lexer.error("expected the class name after '~' to name the enclosing class", name.position)
+            p.lexer.logger.C0203(name.position)
         scope = cast('StructScope', klass.scope)
         if scope.destructor:
             p[0] = scope.destructor
@@ -313,7 +313,7 @@ def p_method_declaration_prefix_ctor_2(p):
     klass = name.target
     if not name.is_qualified():
         if name.name != p.lexer.scopes[-1].scope_owner.name:
-            p.lexer.error('expected enclosing class name', name.position)
+            p.lexer.logger.C0204(name.position)
             p[0] = (None, p[1], SpecialMethod(p.lexer, p.position(2), name.name, klass), p[3])
             return
     assert klass, 'resolution of %s failed' % name
@@ -344,10 +344,7 @@ def p_method_declaration(p):
         p[0] = m.find_overload(t, p[3], p.position(2), p[1][0], p[1][1] + p[5])
         if not p[0]:
             if p[1][3].is_qualified():
-                p.lexer.error(
-                    "out-of-line definition of '%s' does not match any declaration in %s" %
-                    (p[1][3].name, m.owner.pretty_name()), p.position(2)
-                )
+                p.lexer.logger.C0205(p.position(2), p[1][3].name, m.owner.pretty_name())
             p[0] = m.create_overload(t, p[3], p.position(2), p[1][0], p[1][1] + p[5])
     finally:
         p.set_position(0, 2)
@@ -364,7 +361,7 @@ def p_method_declaration_from_object(p):
     attributes, return_type, name, owner, array_specifier = p[1]
     owner.pop_scope_recursive()
     if id(array_specifier) != id(return_type):
-        p.lexer.error("'%s' declared as an array of functions" % name, array_specifier.position)
+        p.lexer.logger.C0206(array_specifier.position, name)
     assert isinstance(return_type, TypeRef), return_type
     m = find_or_create_method(p, name, owner)
     if name.template_bindings and name.template:
@@ -376,10 +373,7 @@ def p_method_declaration_from_object(p):
         p[0] = m.find_overload(t, p[3], p.position(2), return_type, attributes + p[5])
         if not p[0]:
             if name.is_qualified():
-                p.lexer.error(
-                    "out-of-line definition of '%s' does not match any declaration in %s" % (name, owner.pretty_name()),
-                    p.position(2)
-                )
+                p.lexer.logger.C0205(p.position(2), name, owner.pretty_name())
             p[0] = m.create_overload(t, p[3], p.position(2), return_type, attributes + p[5])
     finally:
         p.set_position(0, 2)

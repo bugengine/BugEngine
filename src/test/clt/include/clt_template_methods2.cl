@@ -1,3 +1,6 @@
+namespace UnitTest_TemplateMethods2
+{
+
 template< typename T >
 struct vector
 {
@@ -23,4 +26,6 @@ vector<T>::base_iterator<POLICY>::base_iterator(const base_iterator<OTHERPOLICY>
 void kmain(u32 index, u32 total)
 {
     
+}
+
 }

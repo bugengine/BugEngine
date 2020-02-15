@@ -1,3 +1,6 @@
+namespace UnitTest_TemplateDependentName
+{
+
 template< typename T >
 struct vector
 {
@@ -31,4 +34,6 @@ struct IntermediateStore
 void kmain(u32 index, u32 total)
 {
     IntermediateStore<i32> intermediateStorage;
+}
+
 }

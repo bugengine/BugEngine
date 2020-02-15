@@ -24,7 +24,7 @@ class Reference(Type):
         elif cast_options.allowed_cast == cast_options.CAST_UNRELATED:
             return Type.Distance(variant=-1)
         else:
-            raise CastError('type %s is not compatible with %s' % (typeref_from, typeref_to), self.position)
+            raise CastError(self.lexer.logger.C0300, self.position, from_type=typeref_from, to_type=typeref_to)
 
     def _create_template_instance(self, template, arguments, position):
         # type: (Template, ArgumentList, Position) -> Reference
@@ -33,7 +33,7 @@ class Reference(Type):
         )
 
     def signature(self, template_bindings={}):
-        # type: (Dict[BaseTemplateParameter, Tuple[int, Template]]) -> str
+        # type: (Dict[BaseTemplateParameter, Tuple[int, BaseTemplateObject]]) -> str
         return '&' + self.type.signature(template_bindings)
 
 
@@ -42,7 +42,7 @@ if TYPE_CHECKING:
     from typing import Dict, Tuple
     from ...cl_lexer import ClLexer
     from ...cl_document_writer import ClDocumentWriter
-    from ..ast_templates import BaseTemplateParameter, Template
+    from ..ast_templates import BaseTemplateParameter, BaseTemplateObject, Template
     from ..argument_list import ArgumentList
     from ..position import Position
     from ..typeref import TypeRef

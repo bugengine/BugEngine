@@ -1,3 +1,6 @@
+namespace UnitTest_TemplateNested
+{
+    
 template< typename T >
 struct Test
 {
@@ -51,4 +54,6 @@ void kmain(u32 index, u32 total)
     Test<u32>::NestedTest<i32> x;
     Test<i32>::NestedTest<i32> y;
     Test<i32*>::NestedTest<i32> z;
+}
+
 }

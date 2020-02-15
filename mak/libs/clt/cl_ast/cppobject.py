@@ -13,7 +13,7 @@ class CppObject(object):
         def find(self, name, position, source_context, is_current_scope):
             # type: (str, Position, Optional[CppObject], bool) -> Optional[CppObject]
             if is_current_scope:
-                raise ScopeError("%s is not a class, namespace or enumeration" % (self.owner.pretty_name()), position)
+                raise ScopeError(self.owner.lexer.logger.C0101, position, object_name=self.owner.pretty_name())
             else:
                 return None
 
@@ -25,8 +25,10 @@ class CppObject(object):
             # type: (str, Position, CppObject, bool) -> Optional[CppObject]
             if is_current_scope:
                 raise ScopeError(
-                    "forward declaration of %s" % (self.owner.pretty_name()), self.owner.position,
-                    ScopeError("incomplete type '%s' named in nested name specifier" % (self.owner.name), position)
+                    self.owner.lexer.logger.I0002,
+                    self.owner.position,
+                    ScopeError(self.owner.lexer.logger.C0102, position, object_name=self.owner.pretty_name()),
+                    object_name=self.owner.pretty_name()
                 )
             else:
                 return None
@@ -39,11 +41,11 @@ class CppObject(object):
         self.lexer = lexer
         self.position = position
         self.name = name
-        self.parent_scope = self.lexer.scopes and self.lexer.scopes[-1] or None  # type: Optional[Scope]
-        self.parent = self.parent_scope and self.parent_scope.owner or self      # type: CppObject
-        self.scope = self.INITIAL_SCOPE(self, self.position)                     # type: Scope
-        self.templates = []                                                      # type: List[Template]
-        self.instances = []                                                      # type:  TemplateCacheList
+        self.parent_scope = self.lexer.scopes and self.lexer.scopes[-1] or None # type: Optional[Scope]
+        self.parent = self.parent_scope and self.parent_scope.owner or self     # type: CppObject
+        self.scope = self.INITIAL_SCOPE(self, self.position)                    # type: Scope
+        self.templates = []                                                     # type: List[Template]
+        self.instances = []                                                     # type:  TemplateCacheList
         parent = self.parent
         while id(parent) != id(parent.parent):
             if isinstance(parent, Template):
@@ -99,9 +101,10 @@ class CppObject(object):
         if isinstance(self.scope, self.INITIAL_SCOPE):
             self.scope = scope or Scope(self, position)
         elif scope and scope != self.scope:
-            self.lexer.error('redefinition of object %s' % self.name, position)
-            self.lexer.note('first defined here', self.scope.position)
-            self.lexer.note('first declared here', self.position)
+            assert self.name is not None
+            self.lexer.logger.C0100(position, self.name)
+            self.lexer.logger.I0001(self.scope.position)
+            self.lexer.logger.I0000(self.position)
             self.scope = scope
         self.lexer.push_scope(self.scope, owner_scope)
 
@@ -120,14 +123,6 @@ class CppObject(object):
         self.lexer.pop_scope(self.scope)
         if id(self.parent) != id(self):
             self.parent.pop_scope_recursive()
-
-    def _error(self, message):
-        # type: (str) -> None
-        self.lexer.error(message, self.position)
-
-    def _note(self, message):
-        # type: (str) -> None
-        self.lexer.note(message, self.position)
 
     def find(self, name):
         # type: (str) -> Optional[CppObject]
@@ -150,7 +145,7 @@ class CppObject(object):
         self.scope.debug_dump(indent)
 
     def signature(self, template_bindings={}):
-        # type: (Dict[BaseTemplateParameter, Tuple[int, Template]]) -> str
+        # type: (Dict[BaseTemplateParameter, Tuple[int, BaseTemplateObject]]) -> str
         return '?%s' % id(self)
 
     @abstractmethod
@@ -177,4 +172,4 @@ if TYPE_CHECKING:
     from ..cl_lexer import ClLexer
     from ..cl_document_writer import ClDocumentWriter
     from .type import Type as AstType, CastOptions
-    from .ast_templates import BaseTemplateParameter, Template
+    from .ast_templates import BaseTemplateParameter, BaseTemplateObject, Template

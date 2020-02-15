@@ -15,8 +15,11 @@ class TypeDef(Type):
                     return scope.find(name, position, source_context, is_current_scope)
                 except CppError as e:
                     raise e.__class__(
-                        "with '%s' defined as %s" % (self.owner.name, self.owner.type.type.pretty_name()),
-                        self.position, e
+                        self.owner.lexer.logger.I0006,
+                        self.position,
+                        e,
+                        typedef_name=self.owner.name,
+                        typedef_target=self.owner.type.type.pretty_name()
                     )
             else:
                 return None
@@ -44,7 +47,13 @@ class TypeDef(Type):
             return self.type.distance(typeref_to, cast_options)
         except CppError as e:
             assert self.type.type is not None
-            raise e.__class__("with '%s' defined as %s" % (self.name, self.type.type.pretty_name()), self.position, e)
+            raise e.__class__(
+                self.lexer.logger.I0006,
+                self.position,
+                e,
+                typedef_name=self.name,
+                typedef_target=self.type.type.pretty_name()
+            )
 
     def get_unresolved_parameters(self):
         # type: () -> List[BaseTemplateParameter]

@@ -47,7 +47,7 @@ class DependentName(Type, Value):
                 try:
                     result = current_object.scope.find(name.name, name.position, self, True)
                 except CppError as e:
-                    raise Template.InstantiationError(e.message, e.position, e.inner_error)
+                    raise Template.InstantiationError(e.error, e.position, e.inner_error, **e.arguments)
             else:
                 return None
         else:
@@ -64,8 +64,15 @@ class DependentName(Type, Value):
                         ], name.position
                     )
                 except Template.InstantiationError as e:
+                    assert result is not None
+                    assert isinstance(result.scope, Template.Scope)
                     raise Template.InstantiationError(
-                        "in instantiation of template '%s' requested here" % name, name.position, e
+                        self.lexer.logger.I0005,
+                        name.position,
+                        e,
+                        template_name=name,
+                        template_parameters=', '.join(str(p) for p in result.scope.parameters),
+                        arguments=', '.join(str(a) for a in name.arguments)
                     )
         return result
 
@@ -100,7 +107,7 @@ class DependentName(Type, Value):
                 if isinstance(s.owner, Template) and s.owner != template:
                     return self._create_partial_template_instance(template, arguments, position)
                 elif not s.owner.parent:
-                    raise Template.InstantiationError('no', position)
+                    raise Template.InstantiationError(self.lexer.logger.C0014, position)
             else:
                 assert False
         return result  # type: ignore
@@ -118,7 +125,7 @@ class DependentName(Type, Value):
                         try:
                             result = result.scope.find(name.name, name.position, self, True)
                         except CppError as e:
-                            self.lexer.error(e.message, e.position)
+                            self.lexer.log_cpperror(e)
                     else:
                         return None
                 else:
@@ -146,7 +153,7 @@ class DependentName(Type, Value):
                     d = Type.Distance(variant=-1)
                     return d.match_attributes(cast_options.allowed_cast, typeref, other_typeref)
                 else:
-                    raise CastError('type %s is not compatible with %s' % (self, other), self.position)
+                    raise CastError(self.lexer.logger.C0300, self.position, from_type=typeref, to_type=other_typeref)
             else:
                 d = Type.Distance(cast=0)
                 return d.match_attributes(cast_options.allowed_cast, typeref, other_typeref)
@@ -154,10 +161,10 @@ class DependentName(Type, Value):
             d = Type.Distance(variant=-1)
             return d.match_attributes(cast_options.allowed_cast, typeref, other_typeref)
         else:
-            raise CastError('type %s is not compatible with %s' % (self, other), self.position)
+            raise CastError(self.lexer.logger.C0300, self.position, from_type=typeref, to_type=other_typeref)
 
     def signature(self, template_bindings={}):
-        # type: (Dict[BaseTemplateParameter, Tuple[int, Template]]) -> str
+        # type: (Dict[BaseTemplateParameter, Tuple[int, BaseTemplateObject]]) -> str
         return '<%s>' % self.qualified_name
 
     def return_type(self):
@@ -176,4 +183,4 @@ if TYPE_CHECKING:
     from .argument_list import ArgumentList
     from .type import CastOptions
     from .typeref import TypeRef
-    from .ast_templates import BaseTemplateParameter, Template
+    from .ast_templates import BaseTemplateParameter, BaseTemplateObject, Template

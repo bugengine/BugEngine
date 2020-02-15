@@ -1,3 +1,6 @@
+namespace UnitTest_TemplateMethods
+{
+
 template< typename T >
 struct X
 {
@@ -30,4 +33,6 @@ typename T::reference X<T>::main()
 void kmain(u32 index, u32 total)
 {
     method();
+}
+
 }

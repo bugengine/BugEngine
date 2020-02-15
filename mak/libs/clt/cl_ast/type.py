@@ -18,7 +18,7 @@ class CastOptions:
     CAST_UNRELATED = 6
 
     def __init__(self, allowed_cast, template_parameter_matches={}, template_bindings={}, current_template=None):
-        # type: (int, Dict[int, CppObject], Dict[BaseTemplateParameter, Tuple[int, Template]], Optional[Template]) -> None
+        # type: (int, Dict[int, CppObject], Dict[BaseTemplateParameter, Tuple[int, BaseTemplateObject]], Optional[Template]) -> None
         self.allowed_cast = allowed_cast
         self.template_parameter_matches = template_parameter_matches
         self.template_bindings = template_bindings
@@ -56,8 +56,11 @@ class Type(CppObject):
                 for a in attrs1:
                     if a not in attrs2:
                         raise CastError(
-                            "invalid cast from '%s' to '%s': cannot discard '%s' qualifier" %
-                            (typeref_from, typeref_to, a), typeref_to.position
+                            typeref_from.lexer.logger.C0305,
+                            typeref_to.position,
+                            from_type=typeref_from,
+                            to_type=typeref_to,
+                            qualifier=a
                         )
             cast_cost = 0
             for a in attrs2:
@@ -65,7 +68,12 @@ class Type(CppObject):
                     cast_cost += 1
             if not allowed_cast:
                 if cast_cost:
-                    raise CastError("invalid cast from '%s' to '%s'" % (typeref_from, typeref_to), typeref_to.position)
+                    raise CastError(
+                        typeref_from.lexer.logger.C0300,
+                        typeref_from.position,
+                        from_type=typeref_from,
+                        to_type=typeref_to
+                    )
             self.distance = (self.distance[0], self.distance[1], self.distance[2] + cast_cost)
             return self
 
@@ -113,7 +121,8 @@ class Type(CppObject):
                 if k in self.matches:
                     d = v.distance(self.matches[k], CastOptions(CastOptions.CAST_NONE))
                     if not d.exact_match():
-                        raise CastError('', Position('', 0, 0, 0))
+                        # TODO!
+                        raise CastError(None, Position('', 0, 0, 0, ''))
                 else:
                     self.matches[k] = v
             self.distance = (
@@ -140,7 +149,7 @@ class Type(CppObject):
         return []
 
     def simplify(self):
-        # type: ()  -> Type
+        # type: ()  -> Union[Value, Type]
         return self
 
     @abstractmethod
@@ -159,9 +168,10 @@ class Type(CppObject):
 
 from be_typing import TYPE_CHECKING
 if TYPE_CHECKING:
-    from typing import Dict, List, Optional, Tuple
+    from typing import Dict, List, Optional, Tuple, Union
     from ..cl_lexer import ClLexer
     from ..cl_document_writer import ClDocumentWriter
-    from .ast_templates import BaseTemplateParameter, Template
+    from .ast_templates import BaseTemplateParameter, BaseTemplateObject, Template
     from .argument_list import ArgumentList
     from .typeref import TypeRef
+    from .value import Value

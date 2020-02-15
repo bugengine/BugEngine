@@ -65,12 +65,14 @@ class TemplateTypenameParameter(BaseTemplateParameter, Type):
                     return Type.Distance(variant=-1)
                 else:
                     raise CastError(
-                        'type %s is not compatible with %s' % (typeref_from, typeref_typename),
-                        typeref_typename.position
+                        self.lexer.logger.C0300,
+                        typeref_typename.position,
+                        from_type=typeref_from,
+                        to_type=typeref_typename
                     )
             #for a in typeref_from.qualifiers:
             #    if a not in typeref_typename.qualifiers:
-            #        raise CastError('type %s is not compatible with %s' % (typeref_from, typeref_typename), self.position)
+            #        raise CastError(self.lexer.logger.C0300, typeref_typename.position, from_type=typeref_from, to_type=typeref_typename)
             return d
 
         if isinstance(type, TemplateTypenameParameter):
@@ -91,7 +93,10 @@ class TemplateTypenameParameter(BaseTemplateParameter, Type):
                 return Type.Distance(variant=-1)
             else:
                 raise CastError(
-                    'type %s is not compatible with %s' % (typeref_from, typeref_typename), typeref_typename.position
+                    self.lexer.logger.C0300,
+                    typeref_typename.position,
+                    from_type=typeref_from,
+                    to_type=typeref_typename
                 )
         elif self.parameter_bind and self.parameter_bind[0] in cast_options.template_parameter_matches:
             return old_match()
@@ -99,12 +104,12 @@ class TemplateTypenameParameter(BaseTemplateParameter, Type):
             return make_match()
         else:
             raise CastError(
-                'type %s is not compatible with %s' % (typeref_from, typeref_typename), typeref_typename.position
+                self.lexer.logger.C0300, typeref_typename.position, from_type=typeref_from, to_type=typeref_typename
             )
 
     def _distance(self, cast_to, cast_options, typeref_from, typeref_to):
         # type: (Type, CastOptions, TypeRef, TypeRef) -> Type.Distance
-        raise CastError('type %s is not compatible with %s' % (typeref_from, typeref_to), self.position)
+        raise CastError(self.lexer.logger.C0300, typeref_to.position, from_type=typeref_from, to_type=typeref_to)
 
     def _create_template_instance(self, template, arguments, position):
         # type: (Template, ArgumentList, Position) -> TemplateTypenameParameter

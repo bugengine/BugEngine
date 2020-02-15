@@ -14,9 +14,9 @@ class Value(CppObject):
             if self == other:
                 return Type.Distance()
             else:
-                raise CastError('error', self.position)
+                raise CastError(self.lexer.logger.C0300, self.position, from_type=self, to_type=other)
         else:
-            raise CastError('error', self.position)
+            raise CastError(self.lexer.logger.C0300, self.position, from_type=self, to_type=other)
 
     @abstractmethod
     def simplify(self):

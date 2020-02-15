@@ -60,7 +60,7 @@ def p_statement_expression(p):
         statement : declaration_specifier_list expression SEMI
     """
     for s in p[1]:
-        p.lexer.error('Unexpected specifier: %s' % s.specifier, s.position)
+        p.lexer.logger.C1000(s.position, s.specifier)
 
 
 def p_variable_declaration_opt(p):

@@ -1,3 +1,6 @@
+namespace UnitTest_Vector
+{
+
 namespace minitl
 {
 
@@ -153,27 +156,27 @@ struct forward_iterator_tag : public input_iterator_tag                 { };
 struct bidirectional_iterator_tag : public forward_iterator_tag         { };
 struct random_access_iterator_tag : public bidirectional_iterator_tag   { };
 
-template< typename T, typename DIFF = ::minitl::difference_type >
+template< typename T, typename DIFF = minitl::difference_type >
 struct input_iterator
 {
 };
 
-template< typename T, typename DIFF = ::minitl::difference_type >
+template< typename T, typename DIFF = minitl::difference_type >
 struct output_iterator
 {
 };
 
-template< typename T, typename DIFF = ::minitl::difference_type >
+template< typename T, typename DIFF = minitl::difference_type >
 struct forward_iterator : public input_iterator<T,DIFF>
 {
 };
 
-template< typename T, typename DIFF = ::minitl::difference_type >
+template< typename T, typename DIFF = minitl::difference_type >
 struct bidirectional_iterator : public forward_iterator<T,DIFF>
 {
 };
 
-template< typename T, typename DIFF = ::minitl::difference_type >
+template< typename T, typename DIFF = minitl::difference_type >
 struct random_access_iterator : public bidirectional_iterator<T,DIFF>
 {
 };
@@ -778,4 +781,6 @@ void kmain(u32 index, u32 total)
 {
     minitl::vector<u32> u;
     minitl::vector<u32>::const_iterator it = u.begin();
+}
+
 }
