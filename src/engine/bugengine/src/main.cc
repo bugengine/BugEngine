@@ -142,13 +142,13 @@ int beMain(int argc, const char *argv[])
                 Environment::getEnvironment().getHomeDirectory(),
                 DiskFolder::ScanRecursive,
                 DiskFolder::CreateOne);
+        ScopedLogListener console(scoped<ConsoleLogListener>::create(Arena::debug()));
         ref<DiskFolder> home = ref<DiskFolder>::create(
                 Arena::general(),
                 Environment::getEnvironment().getGameHomeDirectory(),
                 DiskFolder::ScanRecursive,
                 DiskFolder::CreateOne);
         Settings::CommandLineSettingsProvider settings(argc, argv, home);
-        ScopedLogListener console(scoped<ConsoleLogListener>::create(Arena::debug()));
         Plugin::Plugin<minitl::pointer> platformAssert(
                 inamespace("plugin.debug.assert"),
                 Plugin::Context(weak<Resource::ResourceManager>(), ref<Folder>(), weak<Scheduler>()));

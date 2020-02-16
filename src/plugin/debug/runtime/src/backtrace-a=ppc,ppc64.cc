@@ -45,7 +45,11 @@ BE_NOINLINE size_t Callstack::backtrace(Address* buffer, size_t count, size_t sk
         }
         else
         {
-            buffer[result].m_address = (u64)*(stackPointer+1);
+#ifdef _POWERPC64
+            buffer[result].m_address = reinterpret_cast<u64>(*(stackPointer+1));
+#else
+            buffer[result].m_address = reinterpret_cast<u32>(*(stackPointer+1));
+#endif
             result++;
         }
         stackPointer = st_next(stackPointer);

@@ -86,7 +86,7 @@ public:
     inamespace& operator+=(const inamespace& other);
     inamespace& operator+=(const istring& component);
 
-    Path str() const;
+    Path str(char separator = Separator) const;
 };
 
 be_api(CORE) inamespace operator+(const istring& str1, const istring& str2);
@@ -111,7 +111,7 @@ public:
     explicit ifilename(const ipath& path);
     ~ifilename() {}
 
-    Filename str() const;
+    Filename str(char separator = Separator) const;
 };
 
 class be_api(CORE) ipath : public igenericnamespace
@@ -130,7 +130,7 @@ public:
     ~ipath() {}
 
     ipath& operator+=(const ipath& other);
-    Filename str() const;
+    Filename str(char separator = Separator) const;
 };
 
 be_api(CORE) ipath     operator+(const ipath& path1, const ipath& path2);

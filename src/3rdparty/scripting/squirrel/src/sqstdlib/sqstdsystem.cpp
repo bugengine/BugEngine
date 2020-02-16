@@ -20,6 +20,7 @@
 #define screname rename
 #endif
 
+#if 0
 static SQInteger _system_getenv(HSQUIRRELVM v)
 {
     const SQChar *s;
@@ -30,7 +31,6 @@ static SQInteger _system_getenv(HSQUIRRELVM v)
     return 0;
 }
 
-#if 0
 static SQInteger _system_system(HSQUIRRELVM v)
 {
     const SQChar *s;
@@ -119,8 +119,8 @@ static SQInteger _system_date(HSQUIRRELVM v)
 
 #define _DECL_FUNC(name,nparams,pmask) {_SC(#name),_system_##name,nparams,pmask}
 static const SQRegFunction systemlib_funcs[]={
-    _DECL_FUNC(getenv,2,_SC(".s")),
 #if 0
+    _DECL_FUNC(getenv,2,_SC(".s")),
     _DECL_FUNC(system,2,_SC(".s")),
 #endif
     _DECL_FUNC(clock,0,NULL),

@@ -24,7 +24,7 @@ static void createDirectory(const ipath& path, Folder::CreatePolicy policy)
         parent.pop_back();
         createDirectory(parent, policy);
     }
-    ipath::Filename pathname = path.str();
+    ipath::Filename pathname = path.str('\\');
     if (!CreateDirectoryA(pathname.name, 0))
     {
         int err = GetLastError();
@@ -34,16 +34,7 @@ static void createDirectory(const ipath& path, Folder::CreatePolicy policy)
         }
         else
         {
-            char *errorMessage = 0;
-            FormatMessage (FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,
-                NULL,
-                err,
-                MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-                reinterpret_cast<LPSTR>(&errorMessage),
-                0,
-                NULL);
-            be_info("Directory %s could not be created: error code %d (%s)" | path | err | errorMessage);
-            ::LocalFree(errorMessage);
+            be_info("directory %s could not be created: error code %d" | pathname.name | err);
         }
     }
 
@@ -56,8 +47,8 @@ DiskFolder::DiskFolder(const ipath& diskpath, Folder::ScanPolicy scanPolicy, Fol
     ,   m_index(s_diskIndex++)
     ,   m_watch()
 {
-    if(createPolicy != Folder::CreateNone) { createDirectory(diskpath, createPolicy); }
-    ipath::Filename pathname = m_path.str();
+    if (createPolicy != Folder::CreateNone) { createDirectory(diskpath, createPolicy); }
+    ipath::Filename pathname = m_path.str('\\');
     m_handle.ptrHandle = CreateFileA (pathname.name,
                                       GENERIC_READ,
                                       FILE_SHARE_READ|FILE_SHARE_WRITE|FILE_SHARE_DELETE,
@@ -67,17 +58,8 @@ DiskFolder::DiskFolder(const ipath& diskpath, Folder::ScanPolicy scanPolicy, Fol
                                       0);
     if(m_handle.ptrHandle == INVALID_HANDLE_VALUE)
     {
-        char *errorMessage = 0;
         int errorCode = ::GetLastError();
-        FormatMessage (FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,
-            NULL,
-            errorCode,
-            MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-            reinterpret_cast<LPSTR>(&errorMessage),
-            0,
-            NULL);
-        be_info("Directory %s could not be opened: (%d) %s" | diskpath | errorCode | errorMessage);
-        ::LocalFree(errorMessage);
+        be_info("Directory %s could not be opened: (%d)" | pathname.name | errorCode);
     }
     else
     {
@@ -101,7 +83,7 @@ void DiskFolder::doRefresh(Folder::ScanPolicy scanPolicy)
     if (m_handle.ptrHandle)
     {
         WIN32_FIND_DATA data;
-        ifilename::Filename pathname = (m_path+ifilename("*")).str();
+        ifilename::Filename pathname = (m_path+ifilename("*")).str('\\');
         HANDLE h = FindFirstFile(pathname.name, &data);
         if (h != INVALID_HANDLE_VALUE)
         {
@@ -139,7 +121,7 @@ void DiskFolder::doRefresh(Folder::ScanPolicy scanPolicy)
 
 weak<File> DiskFolder::createFile(const istring& name)
 {
-    const ifilename::Filename path = (m_path+ifilename(name)).str();
+    const ifilename::Filename path = (m_path+ifilename(name)).str('\\');
     HANDLE h = CreateFileA ( path.name,
                              GENERIC_WRITE,
                              0,
@@ -149,17 +131,8 @@ weak<File> DiskFolder::createFile(const istring& name)
                              0);
     if (h == INVALID_HANDLE_VALUE)
     {
-        char *errorMessage = 0;
         int errorCode = ::GetLastError();
-        FormatMessage (FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,
-            NULL,
-            errorCode,
-            MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-            reinterpret_cast<LPSTR>(&errorMessage),
-            0,
-            NULL);
-        be_error("File %s could not be created: CreateFile returned an error (%d) %s" | m_path | errorCode | errorMessage);
-        ::LocalFree(errorMessage);
+        be_info("file %s (%s) could not be opened: CreateFile returned an error (%d)" | m_path | path.name | errorCode);
         return weak<File>();
     }
     else
@@ -169,17 +142,8 @@ weak<File> DiskFolder::createFile(const istring& name)
         h = FindFirstFile(path.name, &data);
         if (h == INVALID_HANDLE_VALUE)
         {
-            char *errorMessage = 0;
             int errorCode = ::GetLastError();
-            FormatMessage (FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,
-                NULL,
-                errorCode,
-                MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-                reinterpret_cast<LPSTR>(&errorMessage),
-                0,
-                NULL);
-            be_error("File %s could not be created: FindFirstFile returned an error (%d) %s" | m_path | errorCode | errorMessage);
-            ::LocalFree(errorMessage);
+            be_info("file %s (%s) could not be opened: CreateFile returned an error (%d)" | m_path | path.name | errorCode);
             return weak<File>();
         }
         FindClose(h);
@@ -207,7 +171,7 @@ void DiskFolder::onChanged()
     if (m_handle.ptrHandle)
     {
         WIN32_FIND_DATA data;
-        ifilename::Filename pathname = (m_path+ifilename("*")).str();
+        ifilename::Filename pathname = (m_path+ifilename("*")).str('\\');
         HANDLE h = FindFirstFile(pathname.name, &data);
         if (h != INVALID_HANDLE_VALUE)
         {

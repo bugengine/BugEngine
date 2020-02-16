@@ -653,10 +653,10 @@ inamespace operator+(const inamespace& ns1, const inamespace& ns2)
     return result;
 }
 
-inamespace::Path inamespace::str() const
+inamespace::Path inamespace::str(char separator) const
 {
     Path p;
-    igenericnamespace::str(p.name, Separator, sizeof(p.name));
+    igenericnamespace::str(p.name, separator, sizeof(p.name));
     return p;
 }
 
@@ -695,10 +695,10 @@ ipath operator+(const ipath& path1, const ipath& path2)
     return result;
 }
 
-ipath::Filename ipath::str() const
+ipath::Filename ipath::str(char separator) const
 {
     Filename p;
-    igenericnamespace::str(p.name, Separator, sizeof(p.name));
+    igenericnamespace::str(p.name, separator, sizeof(p.name));
     return p;
 }
 
@@ -733,10 +733,10 @@ ifilename operator+(const ipath& path, const ifilename& file)
     return result;
 }
 
-ifilename::Filename ifilename::str() const
+ifilename::Filename ifilename::str(char separator) const
 {
     Filename p;
-    igenericnamespace::str(p.name, Separator, sizeof(p.name));
+    igenericnamespace::str(p.name, separator, sizeof(p.name));
     return p;
 }
 

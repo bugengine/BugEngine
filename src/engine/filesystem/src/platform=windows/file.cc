@@ -37,7 +37,7 @@ static void setFilePointer(const char *debugName, HANDLE file, i64 wantedOffset)
 void Win32File::doFillBuffer(weak<File::Ticket> ticket) const
 {
     be_assert(ticket->file == this, "trying to read wrong file");
-    ifilename::Filename pathname = m_filename.str();
+    ifilename::Filename pathname = m_filename.str('\\');
     HANDLE h = CreateFileA ( pathname.name,
                              GENERIC_READ,
                              FILE_SHARE_READ,
@@ -47,18 +47,9 @@ void Win32File::doFillBuffer(weak<File::Ticket> ticket) const
                              0);
     if (h == INVALID_HANDLE_VALUE)
     {
-        char *errorMessage = 0;
         int errorCode = ::GetLastError();
-        FormatMessage (FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,
-            NULL,
-            errorCode,
-            MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-            reinterpret_cast<LPSTR>(&errorMessage),
-            0,
-            NULL);
-        be_info("file %s could not be opened: CreateFile returned an error (%d) %s" | m_filename | errorCode | errorMessage);
+        be_info("file %s (%s) could not be opened: CreateFile returned an error (%d)" | m_filename | pathname.name | errorCode);
         ticket->error = true;
-        ::LocalFree(errorMessage);
     }
     else
     {
@@ -123,7 +114,7 @@ void Win32File::doFillBuffer(weak<File::Ticket> ticket) const
 void Win32File::doWriteBuffer(weak<Ticket> ticket) const
 {
     be_assert(ticket->file == this, "trying to read wrong file");
-    ifilename::Filename pathname = m_filename.str();
+    ifilename::Filename pathname = m_filename.str('\\');
     HANDLE h = CreateFileA ( pathname.name,
                              GENERIC_WRITE,
                              0,
@@ -133,18 +124,9 @@ void Win32File::doWriteBuffer(weak<Ticket> ticket) const
                              0);
     if (h == INVALID_HANDLE_VALUE)
     {
-        char *errorMessage = 0;
         int errorCode = ::GetLastError();
-        FormatMessage (FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,
-            NULL,
-            errorCode,
-            MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-            reinterpret_cast<LPSTR>(&errorMessage),
-            0,
-            NULL);
-        be_info("file %s could not be opened: CreateFile returned an error (%d) %s" | m_filename | errorCode | errorMessage);
+        be_info("file %s (%s) could not be opened: CreateFile returned an error (%d)" | m_filename | pathname.name | errorCode);
         ticket->error = true;
-        ::LocalFree(errorMessage);
     }
     else
     {
