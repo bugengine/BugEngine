@@ -15,7 +15,7 @@ Callstack::Address::Address()
 }
 
 Callstack::Address::Address(const void* address)
-#ifdef _POWERPC64
+#ifdef _LP64
 :   m_address(reinterpret_cast<u64>(address))
 #else
 :   m_address(reinterpret_cast<u32>(address))
