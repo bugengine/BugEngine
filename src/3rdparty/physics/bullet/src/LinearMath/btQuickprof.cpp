@@ -43,6 +43,7 @@
 
 #ifdef _XBOX
 	#include <Xtl.h>
+#define GetTickCount64 GetTickCount
 #else //_XBOX
 	#include <windows.h>
 
