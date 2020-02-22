@@ -112,7 +112,7 @@ class DependentName(Type, Value):
                 assert False
         return result  # type: ignore
 
-    def simplify(self):
+    def _simplify(self):
         # type: () -> Union[Value, Type]
         def _simplify(name):
             # type: (Name) -> Optional[CppObject]
@@ -144,6 +144,18 @@ class DependentName(Type, Value):
         except Template.InstantiationError as e:
             self.lexer.log_cpperror(e)
             return self
+
+    def simplify_value(self):
+        # type: () -> Value
+        result = self._simplify()
+        assert isinstance(result, Value)
+        return result
+
+    def simplify_type(self):
+        # type: () -> Type
+        result = self._simplify()
+        assert isinstance(result, Type)
+        return result
 
     def _distance(self, other, cast_options, typeref, other_typeref):
         # type: (Type, CastOptions, TypeRef, TypeRef) -> Type.Distance

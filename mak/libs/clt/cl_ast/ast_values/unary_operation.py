@@ -9,9 +9,9 @@ class UnaryOperation(Value):
         self.operation = operation
         self.operand = operand
 
-    def simplify(self):
+    def simplify_value(self):
         # type: () -> Value
-        self.operand = self.operand.simplify()
+        self.operand = self.operand.simplify_value()
         if isinstance(self.operand, Constant):
             return Constant(self.lexer, self.position, self.return_type(), self.evaluate(self.operand, self.operation))
         else:

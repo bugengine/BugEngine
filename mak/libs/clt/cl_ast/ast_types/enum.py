@@ -24,7 +24,7 @@ class EnumItem(Value):
                 )
             else:
                 value = Constant(lexer, position, lexer.base_types['u32'], 0)
-        self.value = value.simplify()  # type: Value
+        self.value = value.simplify_value() # type: Value
 
     def get_token_type(self):
         # type: () -> str
@@ -49,7 +49,7 @@ class EnumItem(Value):
             (indent, self.__class__.__name__, self.name and (' %s' % self.name) or '', self.value, self.position)
         )
 
-    def simplify(self):
+    def simplify_value(self):
         # type: () -> Value
         return self.value
 

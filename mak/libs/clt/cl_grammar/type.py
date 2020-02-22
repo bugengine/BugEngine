@@ -168,7 +168,7 @@ def p_type_type_name(p):
     else:
         if not isinstance(name.target, Type):
             p.lexer.logger.C0111(name.position, name)
-        p[0] = TypeRef(p.lexer, name.target.position, name.target.simplify(), name.data)
+        p[0] = TypeRef(p.lexer, name.target.position, name.target.simplify_type(), name.data)
 
 
 def p_type_type_decl(p):

@@ -128,6 +128,12 @@ class TemplateTypenameParameter(BaseTemplateParameter, Type):
             result.bind(self.parameter_bind[0], template_parent)
             return result
 
+    def simplify(self, cpp_object):
+        # type: (Union[Value, BaseTemplateObject, TypeRef]) -> Union[Value, BaseTemplateObject, TypeRef]
+        if isinstance(cpp_object, TypeRef):
+            return cpp_object.simplify_type()
+        return cpp_object
+
 
 if TYPE_CHECKING:
     from typing import Dict, List, Optional, Tuple, Union
@@ -138,3 +144,4 @@ if TYPE_CHECKING:
     from ..argument_list import ArgumentList
     from ..cppobject import CppObject
     from .template import Template
+    from .base_template_object import BaseTemplateObject

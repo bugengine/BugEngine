@@ -18,7 +18,7 @@ class TypeRef(CppObject):
         self.qualifiers = set([])  # type: Set[str]
         self.template_origin = template
 
-    def simplify(self):
+    def simplify_type(self):
         # type: () -> TypeRef
         return self
 

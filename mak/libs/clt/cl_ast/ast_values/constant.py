@@ -8,7 +8,7 @@ class Constant(Value):
         self.type = type
         self.value = value
 
-    def simplify(self):
+    def simplify_value(self):
         # type: () -> Value
         return self
 
