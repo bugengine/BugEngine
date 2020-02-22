@@ -16,9 +16,9 @@ class VariableReference(Value):
         # type: () -> List[BaseTemplateParameter]
         return self.target.get_unresolved_parameters()
 
-    def simplify(self):
+    def simplify_value(self):
         # type: () -> Value
-        return self.target.simplify()
+        return self.target.simplify_value()
 
     def _create_template_instance(self, template, arguments, position):
         # type: (Template, ArgumentList, Position) -> VariableReference

@@ -151,7 +151,8 @@ class Template(BaseTemplateObject):
         # type: (List[Union[Value, BaseTemplateObject, TypeRef]], Position) -> Optional[CppObject]
         #self.lexer.note('creating instance of template %s'%self.scope[0][1].name, position)
         assert id(self) == id(self.back_link)
-        arguments = [a.simplify() for a in arguments]
+        assert isinstance(self.scope, Template.Scope)
+        arguments = [p.simplify(a) for p, a in zip(self.scope.parameters, arguments)]
         matches, specialization, scores = self.find_specialization(position, arguments)
         unresolved_params = []                                                                            # type: List[BaseTemplateParameter]
         for a in arguments:

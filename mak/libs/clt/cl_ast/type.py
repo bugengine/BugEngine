@@ -113,16 +113,15 @@ class Type(CppObject):
                 raise TypeError
             return self.distance >= other.distance
 
-        def __iadd__(self, other):
-            # type: (object) -> Type.Distance
+        def add(self, other, lexer, position):
+            # type: (object, ClLexer, Position) -> Type.Distance
             if not isinstance(other, Type.Distance):
                 raise TypeError
             for k, v in other.matches.items():
                 if k in self.matches:
                     d = v.distance(self.matches[k], CastOptions(CastOptions.CAST_NONE))
                     if not d.exact_match():
-                        # TODO!
-                        raise CastError(None, Position('', 0, 0, 0, ''))
+                        raise CastError(lexer.logger.C0403, position)
                 else:
                     self.matches[k] = v
             self.distance = (
@@ -148,8 +147,8 @@ class Type(CppObject):
         # type: () -> List[BaseTemplateParameter]
         return []
 
-    def simplify(self):
-        # type: ()  -> Union[Value, Type]
+    def simplify_type(self):
+        # type: ()  -> Type
         return self
 
     @abstractmethod

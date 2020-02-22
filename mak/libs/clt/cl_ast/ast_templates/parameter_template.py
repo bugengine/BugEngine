@@ -112,6 +112,10 @@ class TemplateTemplateParameter(BaseTemplateParameter, BaseTemplateObject):
         #    result.append(value)
         return result
 
+    def simplify(self, cpp_object):
+        # type: (Union[Value, BaseTemplateObject, TypeRef]) -> Union[Value, BaseTemplateObject, TypeRef]
+        return cpp_object
+
 
 from be_typing import TYPE_CHECKING
 if TYPE_CHECKING:

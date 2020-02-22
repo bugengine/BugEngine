@@ -56,7 +56,7 @@ class TemplateValueParameter(BaseTemplateParameter, Value):
                 cast_options.current_template
             )
         )
-        d += Type.Distance(100000, matches={self.parameter_bind[0]: value})
+        d.add(Type.Distance(100000, matches={self.parameter_bind[0]: value}), self.lexer, self.position)
         return d
 
     def _create_template_instance(self, template, arguments, position):
@@ -79,9 +79,15 @@ class TemplateValueParameter(BaseTemplateParameter, Value):
         # type: () -> TypeRef
         return self.type
 
-    def simplify(self):
+    def simplify_value(self):
         # type: () -> Value
         return self
+
+    def simplify(self, cpp_object):
+        # type: (Union[Value, BaseTemplateObject, TypeRef]) -> Union[Value, BaseTemplateObject, TypeRef]
+        if isinstance(cpp_object, Value):
+            return cpp_object.simplify_value()
+        return cpp_object
 
 
 from be_typing import TYPE_CHECKING
@@ -93,3 +99,4 @@ if TYPE_CHECKING:
     from ..position import Position
     from ..argument_list import ArgumentList
     from ..typeref import TypeRef
+    from .base_template_object import BaseTemplateObject

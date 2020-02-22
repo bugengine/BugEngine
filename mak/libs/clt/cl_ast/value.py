@@ -19,7 +19,7 @@ class Value(CppObject):
             raise CastError(self.lexer.logger.C0300, self.position, from_type=self, to_type=other)
 
     @abstractmethod
-    def simplify(self):
+    def simplify_value(self):
         # type: () -> Value
         raise NotImplementedError
 

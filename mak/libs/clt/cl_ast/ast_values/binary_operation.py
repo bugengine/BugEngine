@@ -10,10 +10,10 @@ class BinaryOperation(Value):
         self.left_operand = left_operand
         self.right_operand = right_operand
 
-    def simplify(self):
+    def simplify_value(self):
         # type: () -> Value
-        self.left_operand = self.left_operand.simplify()
-        self.right_operand = self.right_operand.simplify()
+        self.left_operand = self.left_operand.simplify_value()
+        self.right_operand = self.right_operand.simplify_value()
         if isinstance(self.left_operand, Constant) and isinstance(self.right_operand, Constant):
             return Constant(
                 self.lexer, self.position, self.return_type(),

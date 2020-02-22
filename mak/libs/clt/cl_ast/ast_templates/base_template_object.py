@@ -18,10 +18,6 @@ class BaseTemplateObject(CppObject):
         # type: (List[Union[Value, BaseTemplateObject, TypeRef]]) -> List[Union[Value, BaseTemplateObject, TypeRef]]
         raise NotImplementedError
 
-    def simplify(self):
-        # type: () -> BaseTemplateObject
-        return self
-
 
 class BaseTemplateParameter(CppObject):
     def __init__(self, default_value):
@@ -71,6 +67,11 @@ class BaseTemplateParameter(CppObject):
     @abstractmethod
     def get_template_parameter_type(self):
         # type: () -> str
+        raise NotImplementedError
+
+    @abstractmethod
+    def simplify(self, cpp_object):
+        # type: (Union[Value, BaseTemplateObject, TypeRef]) -> Union[Value, BaseTemplateObject, TypeRef]
         raise NotImplementedError
 
 

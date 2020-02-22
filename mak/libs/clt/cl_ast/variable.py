@@ -28,7 +28,7 @@ class Variable(Value):
         # type: () -> TypeRef
         return self.type
 
-    def simplify(self):
+    def simplify_value(self):
         # type: () -> Value
         for s in self.attributes:
             if s.specifier == 'const' and self.value is not None:

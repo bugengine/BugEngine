@@ -575,6 +575,12 @@ class Logger:
         """template specialization requires template<>"""
         return locals()
 
+    @error
+    def C0403(self, position, type_1, type_2):
+        # type: (Logger, Position, str, str) -> Dict[str, Any]
+        """template parameter mismatch: {type_1} vs {type_2}"""
+        return locals()
+
     #
     # Statements
     #
