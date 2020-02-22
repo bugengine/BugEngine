@@ -764,6 +764,7 @@ def makefile_feature(task):
     project_root = task.bld.srcnode.abspath()
     env = ConfigSet.ConfigSet()
     env.load(os.path.join(Context.top_dir, Options.lockfile))
+    seen = set([])
     for module in sys.modules.values():
         try:
             if module.__file__.startswith(project_root):
@@ -783,7 +784,9 @@ def makefile_feature(task):
                 except ValueError:
                     pass
             if os.path.isfile(f):
-                task.source_nodes.append(task.bld.srcnode.make_node(f))
+                if f not in seen:
+                    task.source_nodes.append(task.bld.srcnode.make_node(f))
+                    seen.add(f)
 
 
 @feature('cxx')
