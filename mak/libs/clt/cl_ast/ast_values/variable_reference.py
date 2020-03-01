@@ -31,8 +31,8 @@ class VariableReference(Value):
         # type: () -> str
         return str(self.object_name)
 
-    def write_to(self, writer):
-        # type: (ClDocumentWriter) -> None
+    def write_to(self, namespace, writer):
+        # type: (List[str], ClDocumentWriter) -> None
         pass
 
 
@@ -41,7 +41,7 @@ if TYPE_CHECKING:
     from typing import Dict, List, Optional, Tuple, Union
     from ..typeref import TypeRef
     from ...cl_lexer import ClLexer
-    from ...cl_document_writer import ClDocumentWriter
+    from ...cl_codegen import ClDocumentWriter
     from ..position import Position
     from ..ast_templates import BaseTemplateParameter, Template
     from ..argument_list import ArgumentList

@@ -1,6 +1,5 @@
 from ply import lex
 from clt import cl_ast
-import sys
 import copy
 from be_typing import cast, TYPE_CHECKING
 

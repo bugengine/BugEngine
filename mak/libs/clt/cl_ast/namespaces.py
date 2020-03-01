@@ -14,10 +14,10 @@ class Namespace(CppObject):
         # type: () -> str
         return 'NAMESPACE_ID'
 
-    def write_to(self, writer):
-        # type: (ClDocumentWriter) -> None
-        with writer.create_namespace(self.position, self.name or '') as namespace:
-            self.scope.write_to(namespace)
+    def write_to(self, namespace, writer):
+        # type: (List[str], ClDocumentWriter) -> None
+        name = self.name if self.name is not None else 'anonymous_namespace'
+        self.scope.write_to(namespace + [name], writer)
 
     def pretty_name(self):
         # type: () -> str
@@ -54,10 +54,13 @@ class RootNamespace(CppObject):
         # type: (ClLexer) -> None
         CppObject.__init__(self, lexer, Position(lexer.filename, 1, 1, 1, lexer.lexdata()), None)
 
-    def write_to(self, writer):
+    def write_to(self, namespace, writer):
+        # type: (List[str], ClDocumentWriter) -> None
+        self.scope.write_to(namespace, writer)
+
+    def write_document(self, document_writer):
         # type: (ClDocumentWriter) -> None
-        with writer.create_document() as document:
-            self.scope.write_to(document)
+        self.write_to([], document_writer)
 
     def pretty_name(sef):
         # type: () -> str
@@ -76,6 +79,6 @@ from be_typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from typing import List, Optional
     from ..cl_lexer import ClLexer
-    from ..cl_document_writer import ClDocumentWriter
+    from ..cl_codegen import ClDocumentWriter
     from .ast_templates import BaseTemplateParameter, Template
     from .argument_list import ArgumentList

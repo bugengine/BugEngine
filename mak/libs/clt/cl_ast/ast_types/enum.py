@@ -57,8 +57,8 @@ class EnumItem(Value):
         # type: () -> List[BaseTemplateParameter]
         return self.value.get_unresolved_parameters()
 
-    def write_to(self, writer):
-        # type: (ClDocumentWriter) -> None
+    def write_to(self, namespace, writer):
+        # type: (List[str], ClDocumentWriter) -> None
         pass
 
 
@@ -70,6 +70,7 @@ class EnumScope(Scope):
 
 class Enum(Type):
     INITIAL_SCOPE = CppObject.NotDefinedScope
+    ID = 1
 
     def __init__(self, lexer, position, name):
         # type: (ClLexer, Position, Optional[str]) -> None
@@ -77,6 +78,8 @@ class Enum(Type):
         self.struct_type = 'enum'
         self.type = TypeRef(lexer, position, self)
         self.type.qualifiers.add('const')
+        self._id = self.ID
+        self.ID += 1
 
     def get_token_type(self):
         # type: () -> str
@@ -90,8 +93,8 @@ class Enum(Type):
         # type: (str) -> Optional[CppObject]
         return self.scope.find(name, self.position, self, False) or Type.find(self, name)
 
-    def write_to(self, writer):
-        # type: (ClDocumentWriter) -> None
+    def write_to(self, namespace, writer):
+        # type: (List[str], ClDocumentWriter) -> None
         pass
 
     def _distance(self, other, cast_options, typeref, other_typeref):
@@ -133,12 +136,16 @@ class Enum(Type):
             else:
                 result.pop_scope_recursive()
 
+    def transform(self, writer):
+        # type: (ClTypeWriter) -> ClType
+        return writer.enum(self.name, self._id)
+
 
 from be_typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from typing import List, Optional
     from ...cl_lexer import ClLexer
-    from ...cl_document_writer import ClDocumentWriter
+    from ...cl_codegen import ClDocumentWriter, ClTypeWriter, ClType
     from ..ast_templates import BaseTemplateParameter, Template
     from ..argument_list import ArgumentList
     from ..type import CastOptions

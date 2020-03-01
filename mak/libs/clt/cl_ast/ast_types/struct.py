@@ -148,22 +148,26 @@ class Struct(Type):
         # type: (Dict[BaseTemplateParameter, Tuple[int, BaseTemplateObject]]) -> str
         return '\\{\\}%s_%d' % (self.name or 'anonymous', self.index)
 
-    def write_to(self, writer):
-        # type: (ClDocumentWriter) -> None
+    def write_to(self, namespace, writer):
+        # type: (List[str], ClDocumentWriter) -> None
+        name = namespace + [self.name or ('anonymous_%d' % self.index)]
         if isinstance(self.scope, StructScope):
-            with writer.create_struct(
-                self.position, self.index, self.name or '', self.scope.parent_visibility,
-                self.scope.parent and cast(Struct, self.scope.parent).index or None
-            ) as struct:
-                if self.scope:
-                    self.scope.write_to(struct)
+            struct = writer.create_struct(
+                self.position, name, self.index, self.scope.parent and cast(Struct, self.scope.parent).index or None
+            )
+            if self.scope:
+                self.scope.write_to(name, writer)
+
+    def transform(self, writer):
+        # type: (ClTypeWriter) -> ClType
+        return writer.struct(self.name, self.index)
 
 
 from be_typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from typing import Dict, List, Optional, Set, Tuple, Union
     from ...cl_lexer import ClLexer
-    from ...cl_document_writer import ClDocumentWriter
+    from ...cl_codegen import ClDocumentWriter, ClTypeWriter, ClType
     from ..ast_templates import BaseTemplateParameter, BaseTemplateObject, Template
     from ..argument_list import ArgumentList
     from ..typeref import TypeRef

@@ -60,10 +60,10 @@ class Scope:
         for visibility, element in self.items:
             target_scope.items.append((visibility, element.create_template_instance(template, arguments, position)))
 
-    def write_to(self, document):
-        # type: (ClDocumentWriter) -> None
+    def write_to(self, namespace, writer):
+        # type: (List[str], ClDocumentWriter) -> None
         for _, object in self.items:
-            object.write_to(document)
+            object.write_to(namespace, writer)
 
 
 from be_typing import TYPE_CHECKING
@@ -73,4 +73,4 @@ if TYPE_CHECKING:
     from .position import Position
     from .ast_templates import Template
     from .argument_list import ArgumentList
-    from ..cl_document_writer import ClDocumentWriter
+    from ..cl_codegen import ClDocumentWriter

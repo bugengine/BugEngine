@@ -134,11 +134,15 @@ class TemplateTypenameParameter(BaseTemplateParameter, Type):
             return cpp_object.simplify_type()
         return cpp_object
 
+    def transform(self, writer):
+        # type: (ClTypeWriter) -> ClType
+        raise NotImplementedError
+
 
 if TYPE_CHECKING:
     from typing import Dict, List, Optional, Tuple, Union
     from ...cl_lexer import ClLexer
-    from ...cl_document_writer import ClDocumentWriter
+    from ...cl_codegen import ClDocumentWriter, ClTypeWriter, ClType
     from ..position import Position
     from ..value import Value
     from ..argument_list import ArgumentList

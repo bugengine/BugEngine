@@ -65,16 +65,20 @@ class TypeDef(Type):
             self.lexer, self.position, self.name, self.type.create_template_instance(template, arguments, position)
         )
 
-    def write_to(self, writer):
-        # type: (ClDocumentWriter) -> None
+    def write_to(self, namespace, writer):
+        # type: (List[str], ClDocumentWriter) -> None
         pass
+
+    def transform(self, writer):
+        # type: (ClTypeWriter) -> ClType
+        return self.type.transform(writer)
 
 
 from be_typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from typing import Dict, List, Optional, Set, Tuple, Union
     from ...cl_lexer import ClLexer
-    from ...cl_document_writer import ClDocumentWriter
+    from ...cl_codegen import ClDocumentWriter, ClTypeWriter, ClType
     from ..ast_templates import BaseTemplateParameter, Template
     from ..cppobject import CppObject
     from ..argument_list import ArgumentList

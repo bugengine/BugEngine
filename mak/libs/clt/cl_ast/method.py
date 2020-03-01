@@ -19,8 +19,8 @@ class Parameter(CppObject):
         # type: () -> List[BaseTemplateParameter]
         return []
 
-    def write_to(self, writer):
-        # type: (ClDocumentWriter) -> None
+    def write_to(self, namespace, writer):
+        # type: (List[str], ClDocumentWriter) -> None
         raise NotImplementedError
 
     def _create_template_instance(self, template, arguments, position):
@@ -110,7 +110,10 @@ class Overload(CppObject):
 
     def _create_template_instance(self, template, arguments, position):
         # type: (Template, ArgumentList, Position) -> Overload
-        return Overload(self.lexer, self.position, self.name, self.template and self.template.create_template_instance(template, arguments, position),
+        overload_template = None # type: Optional[Template]
+        if self.template is not None and self.template != template:
+            overload_template = self.template.create_template_instance(template, arguments, position)
+        return Overload(self.lexer, self.position, self.name, overload_template,
                         [p.create_template_instance(template, arguments, position)
                          for p in self.parameters], self.return_type
                         and self.return_type.create_template_instance(template, arguments, position), self.attributes)
@@ -119,8 +122,8 @@ class Overload(CppObject):
         # type: () -> List[BaseTemplateParameter]
         return []
 
-    def write_to(self, writer):
-        # type: (ClDocumentWriter) -> None
+    def write_to(self, namespace, writer):
+        # type: (List[str], ClDocumentWriter) -> None
         raise NotImplementedError
 
     def debug_dump(self, indent=''):
@@ -195,11 +198,18 @@ class Method(CppObject):
         for o in self.overloads:
             result.overloads.append(o.create_template_instance(template, arguments, position))
 
-    def write_to(self, writer):
-        # type: (ClDocumentWriter) -> None
+    def write_to(self, namespace, writer):
+        # type: (List[str], ClDocumentWriter) -> None
+        assert self.name is not None
+        name = namespace + [self.name]
         for i, o in enumerate(self.overloads):
-            with writer.create_method(o.position, self.id, self.name or 'anonymous', i) as method:
-                pass
+            if o.template is not None:
+                o.template.write_to(name, writer)
+            else:
+                method = writer.create_method(o.position, name, self.id, i,
+                                            o.return_type and o.return_type.transform(writer.typewriter) or None)
+                for p in o.parameters:
+                    method.add_parameter(p.type.transform(writer.typewriter), p.name)
 
     def debug_dump(self, indent=''):
         # type: (str) -> None
@@ -221,7 +231,7 @@ from be_typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from typing import Dict, List, Optional, Tuple
     from ..cl_lexer import ClLexer
-    from ..cl_document_writer import ClDocumentWriter
+    from ..cl_codegen import ClDocumentWriter
     from .position import Position
     from .typeref import TypeRef
     from .value import Value

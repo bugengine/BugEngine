@@ -52,8 +52,8 @@ class BaseTemplateParameter(CppObject):
         # type: (int, Template) -> None
         self.parameter_bind = (argument_position, template)
 
-    def write_to(self, writer):
-        # type: (ClDocumentWriter) -> None
+    def write_to(self, namespace, writer):
+        # type: (List[str], ClDocumentWriter) -> None
         raise NotImplementedError
 
     def signature(self, template_bindings={}):
@@ -79,7 +79,7 @@ from be_typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from typing import Dict, List, Optional, Tuple, Union
     from ...cl_lexer import ClLexer
-    from ...cl_document_writer import ClDocumentWriter
+    from ...cl_codegen import ClDocumentWriter
     from ..position import Position
     from ..value import Value
     from ..typeref import TypeRef

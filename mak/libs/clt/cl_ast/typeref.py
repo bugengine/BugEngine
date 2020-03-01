@@ -118,8 +118,13 @@ class TypeRef(CppObject):
                 assert False
         return s
 
-    def write_to(self, writer):
-        # type: (ClDocumentWriter) -> None
+    def transform(self, writer):
+        # type: (ClTypeWriter) -> ClType
+        assert self.type is not None
+        return self.type.transform(writer)
+
+    def write_to(self, namespace, writer):
+        # type: (List[str], ClDocumentWriter) -> None
         raise NotImplementedError
 
 
@@ -127,7 +132,7 @@ from be_typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from typing import Dict, List, Optional, Set, Tuple, Union
     from ..cl_lexer import ClLexer
-    from ..cl_document_writer import ClDocumentWriter
+    from ..cl_codegen import ClDocumentWriter, ClTypeWriter, ClType
     from .ast_templates import BaseTemplateParameter, BaseTemplateObject, Template
     from .argument_list import ArgumentList
     from .position import Position

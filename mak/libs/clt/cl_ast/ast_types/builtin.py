@@ -41,6 +41,10 @@ class BuiltIn(Type):
         # type: (Dict[BaseTemplateParameter, Tuple[int, BaseTemplateObject]]) -> str
         return '~%s' % (self.builtin)
 
+    def transform(self, writer):
+        # type: (ClTypeWriter) -> ClType
+        return writer.builtin(str(self))
+
 
 class Void(Type):
     def __init__(self, lexer, position):
@@ -78,12 +82,16 @@ class Void(Type):
         # type: () -> str
         return "builtin type 'void'"
 
+    def transform(self, writer):
+        # type: (ClTypeWriter) -> ClType
+        return writer.builtin(str(self))
+
 
 from be_typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from typing import Dict, List, Optional, Set, Tuple, Union
     from ...cl_lexer import ClLexer
-    from ...cl_document_writer import ClDocumentWriter
+    from ...cl_codegen import ClDocumentWriter, ClTypeWriter, ClType
     from ..ast_templates import BaseTemplateParameter, BaseTemplateObject, Template
     from ..argument_list import ArgumentList
     from ..typeref import TypeRef

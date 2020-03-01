@@ -154,8 +154,8 @@ class CppObject(object):
         raise NotImplementedError
 
     @abstractmethod
-    def write_to(self, writer):
-        # type: (ClDocumentWriter) -> None
+    def write_to(self, namespace, writer):
+        # type: (List[str], ClDocumentWriter) -> None
         raise NotImplementedError
 
     def distance(self, other, cast_options):
@@ -170,6 +170,6 @@ class CppObject(object):
 if TYPE_CHECKING:
     from typing import Dict, Optional, Type, ClassVar
     from ..cl_lexer import ClLexer
-    from ..cl_document_writer import ClDocumentWriter
+    from ..cl_codegen import ClDocumentWriter
     from .type import Type as AstType, CastOptions
     from .ast_templates import BaseTemplateParameter, BaseTemplateObject, Template

@@ -405,19 +405,23 @@ class Template(BaseTemplateObject):
                 )
         return arguments
 
-    def write_to(self, writer):
-        # type: (ClDocumentWriter) -> None
+    def write_to(self, namespace, writer):
+        # type: (List[str], ClDocumentWriter) -> None
         if self.scope and not self.scope.empty():
             for _, _, _, instance in self.scope[0][-1].instances:
-                instance.write_to(writer)
+                instance.write_to(namespace, writer)
             for _, specialization in self.specializations:
                 for _, _, _, instance in specialization.instances:
-                    instance.write_to(writer)
+                    instance.write_to(namespace, writer)
+
+    def transform(self, writer):
+        # type: (ClTypeWriter) -> ClType
+        raise NotImplementedError
 
 
 if TYPE_CHECKING:
     from typing import Dict, List, Optional, Tuple, Union, Sequence
     from ...cl_lexer import ClLexer
-    from ...cl_document_writer import ClDocumentWriter
+    from ...cl_codegen import ClDocumentWriter, ClTypeWriter, ClType
     from ..cppobject import CppObject
     from ..position import Position
