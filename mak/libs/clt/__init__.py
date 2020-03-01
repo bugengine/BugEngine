@@ -43,7 +43,7 @@ def run():
             sys.path.append(path)
             s = __import__(module)
             with open(arguments.output, 'wb') as out_file:
-                result.write_to(s.writer(out_file))
+                result.write_document(s.writer(out_file).create_document())
     except (SyntaxError, ExceptionType) as exception:
         logging.exception(exception)
         sys.exit(255)

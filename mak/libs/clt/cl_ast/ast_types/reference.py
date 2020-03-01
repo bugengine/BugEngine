@@ -36,12 +36,16 @@ class Reference(Type):
         # type: (Dict[BaseTemplateParameter, Tuple[int, BaseTemplateObject]]) -> str
         return '&' + self.type.signature(template_bindings)
 
+    def transform(self, writer):
+        # type: (ClTypeWriter) -> ClType
+        return writer.reference(self.type.transform(writer))
+
 
 from be_typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from typing import Dict, Tuple
     from ...cl_lexer import ClLexer
-    from ...cl_document_writer import ClDocumentWriter
+    from ...cl_codegen import ClDocumentWriter, ClTypeWriter, ClType
     from ..ast_templates import BaseTemplateParameter, BaseTemplateObject, Template
     from ..argument_list import ArgumentList
     from ..position import Position

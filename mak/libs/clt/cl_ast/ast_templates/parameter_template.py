@@ -116,12 +116,16 @@ class TemplateTemplateParameter(BaseTemplateParameter, BaseTemplateObject):
         # type: (Union[Value, BaseTemplateObject, TypeRef]) -> Union[Value, BaseTemplateObject, TypeRef]
         return cpp_object
 
+    def transform(self, writer):
+        # type: (ClTypeWriter) -> ClType
+        raise NotImplementedError
+
 
 from be_typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from typing import Dict, List, Optional, Tuple, Union
     from ...cl_lexer import ClLexer
-    from ...cl_document_writer import ClDocumentWriter
+    from ...cl_codegen import ClDocumentWriter, ClTypeWriter, ClType
     from ..cppobject import CppObject
     from ..position import Position
     from ..argument_list import ArgumentList

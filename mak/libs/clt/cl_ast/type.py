@@ -160,8 +160,13 @@ class Type(CppObject):
         # type: () -> bool
         return False
 
-    def write_to(self, writer):
-        # type: (ClDocumentWriter) -> None
+    def write_to(self, namespace, writer):
+        # type: (List[str], ClDocumentWriter) -> None
+        raise NotImplementedError
+
+    @abstractmethod
+    def transform(self, writer):
+        # type: (ClTypeWriter) -> ClType
         raise NotImplementedError
 
 
@@ -169,7 +174,7 @@ from be_typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from typing import Dict, List, Optional, Tuple, Union
     from ..cl_lexer import ClLexer
-    from ..cl_document_writer import ClDocumentWriter
+    from ..cl_codegen import ClDocumentWriter, ClTypeWriter, ClType
     from .ast_templates import BaseTemplateParameter, BaseTemplateObject, Template
     from .argument_list import ArgumentList
     from .typeref import TypeRef

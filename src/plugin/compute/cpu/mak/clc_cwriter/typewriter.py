@@ -1,35 +1,50 @@
-from clt.cl_document_writer import ClDocumentWriter
+from clt.cl_codegen import ClTypeWriter, ClType
+from be_typing import TYPE_CHECKING
 
 
-class Type:
+class Type(ClType):
     def __init__(self, name):
-        self.type = name
+        # type: (str) -> None
+        self._type = name
 
-    def add_modifier(self, modifier, position):
-        self.type += ' %s' % modifier
+    def add_modifier(self, modifier):
+        # type: (str) -> None
+        self._type += ' %s' % modifier
 
     def __str__(self):
-        return self.type
+        # type: () -> str
+        return self._type
 
 
-class TypeWriter(ClDocumentWriter):
-    def __init__(self, document):
-        self.document = document
-
-    def builtin(self, typename, position):
+class TypeWriter(ClTypeWriter):
+    def builtin(self, typename):
+        # type: (str) -> Type
         return Type(typename)
 
-    def struct(self, struct_name, struct_id, position):
+    def struct(self, struct_name, struct_id):
+        # type: (Optional[str], int) -> Type
         return Type('struct_%d' % struct_id)
 
-    def pointer(self, pointee, position):
-        return Type(pointee.type + '*')
+    def enum(self, enum_name, enum_id):
+        # type: (Optional[str], int) -> Type
+        return Type('enum_%d' % enum_id)
 
-    def reference(self, pointee, position):
-        return Type(pointee.type + '*')
+    def pointer(self, pointee):
+        # type: (ClType) -> Type
+        return Type('%s*' % pointee)
 
-    def array(self, pointee, count, position):
-        if count:
-            return Type(pointee.type + '[%d]' % count)
+    def reference(self, pointee):
+        # type: (ClType) -> Type
+        return Type('%s*' % pointee)
+
+    def array(self, pointee, count):
+        # type: (ClType, Optional[int]) -> Type
+        if count is not None:
+            return Type('%s[%d]' % (pointee, count))
         else:
-            return Type(pointee.type + '[]')
+            return Type('%s[]' % pointee)
+
+
+if TYPE_CHECKING:
+    from typing import List, Optional
+    from clt.cl_codegen import ClDocumentWriter

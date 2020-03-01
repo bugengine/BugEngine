@@ -1,10 +1,16 @@
-from io import BytesIO
 from .document import Document
+from be_typing import TYPE_CHECKING
 
 
 class ClcCWriter:
     def __init__(self, out_file):
-        self.out_file = out_file
+        # type: (BinaryIO) -> None
+        self._out_file = out_file
 
     def create_document(self):
-        return Document(self.out_file)
+        # type: () -> Document
+        return Document(self._out_file)
+
+
+if TYPE_CHECKING:
+    from typing import BinaryIO

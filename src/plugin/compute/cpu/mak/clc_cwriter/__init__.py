@@ -1,4 +1,1 @@
-from .clc_cwriter import ClcCWriter
-
-
-writer = ClcCWriter
+from .clc_cwriter import ClcCWriter as writer
