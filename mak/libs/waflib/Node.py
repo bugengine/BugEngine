@@ -55,6 +55,9 @@ exclude_regs = '''
 **/_darcs
 **/_darcs/**
 **/.intlcache
+**/.mypy_cache
+**/.mypy_cache/**
+**/*.pyc
 **/.DS_Store'''
 """
 Ant patterns for files and folders to exclude while doing the
