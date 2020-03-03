@@ -13,7 +13,6 @@ old_log_display = Task.Task.log_display
 
 
 def to_string(self):
-    bld = self.generator.bld
     if self.outputs:
         tgt_str = ' '.join([a.name for a in self.outputs][:1])
     else:
@@ -27,9 +26,9 @@ def log_display(self, bld):
         old_log_display(self, bld)
 
 
-Task.Task.__str__ = to_string
-Task.Task.log_display = log_display
-Task.Task.keyword = (lambda self: '')
+setattr(Task.Task, '__str__', to_string)
+setattr(Task.Task, 'log_display', log_display)
+setattr(Task.Task, 'keyword', (lambda self: ''))
 
 
 class install(Task.Task):
@@ -41,7 +40,7 @@ class install(Task.Task):
             for source, target, chmod in self.install_step:
                 d, _ = os.path.split(target)
                 if not d:
-                    raise Errors.WafError('Invalid installation given %r->%r' % (src, tgt))
+                    raise Errors.WafError('Invalid installation given %r->%r' % (source, target))
 
                 try:
                     st1 = os.stat(target)
@@ -401,7 +400,8 @@ def thirdparty(bld, name, feature='', path='', var='', use=[], private_use=[]):
     source_node = bld.path.make_node(path and path.replace('.', '/') or '.')
     project_path = source_node.parent.path_from(bld.srcnode).replace('/', '.')
     project_path = '%s.%s' % (project_path, name.split('.')[-1])
-    if not var: var = bld.path.name
+    if not var:
+        var = bld.path.name
 
     internal_deps = []
     supported = False
