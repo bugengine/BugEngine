@@ -59,10 +59,14 @@ static HMODULE getPythonModuleHandle()
                 {
                     return modules[i-1];
                 }
+                if (strncmp(f, "libpython", 9) == 0)
+                {
+                    return modules[i-1];
+                }
             }
             else
             {
-                be_warning("GetModuleFileName failed on module %p" | modules[i]);
+                be_warning("GetModuleFileName failed on module %p with error %d" | modules[i-1] | GetLastError());
             }
         }
         be_error("Could not locate python: could not locate module with name Python");
@@ -158,6 +162,7 @@ PythonLibrary::PythonLibrary(const char* pythonLibraryName)
         be_get_func(PyEval_ReleaseThread);
         be_get_func(PyEval_ReleaseLock);
         be_get_func(PyRun_SimpleString);
+        be_get_func(PyRun_InteractiveLoopFlags);
         be_get_func(_Py_NoneStruct);
         be_get_func(PyObject_SetAttrString);
         be_get_func(PyObject_GetAttrString);
