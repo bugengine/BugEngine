@@ -33,8 +33,6 @@ void Application::registerInterruptions()
     if (GetConsoleWindow())
     {
         SetConsoleCtrlHandler(&HandleControlEvent, TRUE);
-        int error = GetLastError();
-        be_info("%d" | error);
     }
 }
 
