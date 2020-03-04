@@ -760,7 +760,7 @@ def objects_feature(task):
 
 @feature('Makefile')
 def makefile_feature(task):
-    task_root = task.source_nodes[0].abspath()
+    task_roots = [source_node.abspath() for source_node in task.source_nodes]
     project_root = task.bld.srcnode.abspath()
     env = ConfigSet.ConfigSet()
     env.load(os.path.join(Context.top_dir, Options.lockfile))
@@ -772,7 +772,10 @@ def makefile_feature(task):
         except AttributeError as e:
             pass
     for f in env.files:
-        if not f.startswith(task_root):
+        for task_root in task_roots:
+            if f.startswith(task_root):
+                break
+        else:
             f = f[len(project_root) + 1:]
             if sys.version_info.major < 3:
                 base_name, ext = os.path.splitext(f)
