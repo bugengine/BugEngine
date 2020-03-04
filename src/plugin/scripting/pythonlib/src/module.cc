@@ -21,8 +21,19 @@ namespace BugEngine { namespace Python
 tls<PythonLibrary>  s_library;
 PyObject*           s_moduleObject;
 
+
+static PyObject* run(PyObject* self, PyObject* args)
+{
+    be_forceuse(self);
+    be_forceuse(args);
+    s_library->m_PyRun_InteractiveLoopFlags(stdin, "<interactive>", 0);
+    Py_INCREF(s_library->m__Py_NoneStruct);
+    return s_library->m__Py_NoneStruct;
+}
+
 static PyMethodDef s_methods[] =
 {
+    {"run", &run, METH_NOARGS, NULL},
     {NULL, NULL, 0, NULL}
 };
 

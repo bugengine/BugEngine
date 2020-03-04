@@ -95,6 +95,7 @@ PythonLibrary::PythonLibrary(const char* pythonLibraryName)
         be_get_func(PyEval_ReleaseThread);
         be_get_func(PyEval_ReleaseLock);
         be_get_func(PyRun_SimpleString);
+        be_get_func(PyRun_InteractiveLoopFlags);
         be_get_func(_Py_NoneStruct);
         be_get_func(PyObject_SetAttrString);
         be_get_func(PyObject_GetAttrString);
