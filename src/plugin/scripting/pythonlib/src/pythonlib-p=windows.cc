@@ -42,34 +42,15 @@ static HMODULE getPythonModuleHandle()
 
         for (u64 i = modules.count(); i > 0; --i)
         {
-            char filename[1024];
-            DWORD len = GetModuleFileNameA(modules[i-1], filename, sizeof(filename));
-            if (len)
+            if (GetProcAddress(modules[i-1], "Py_InitializeEx"))
             {
-                char *f = filename + len;
-                while (f != filename && *(f-1) != '/' && *(f-1) != '\\')
-                {
-                    if (*f >= 'A' && *f <= 'Z')
-                    {
-                        *f = *f + 'a' - 'A';
-                    }
-                    --f;
-                }
-                if (strncmp(f, "python", 6) == 0)
-                {
-                    return modules[i-1];
-                }
-                if (strncmp(f, "libpython", 9) == 0)
-                {
-                    return modules[i-1];
-                }
-            }
-            else
-            {
-                be_warning("GetModuleFileName failed on module %p with error %d" | modules[i-1] | GetLastError());
+                char filename[1024];
+                if (GetModuleFileNameA(modules[i-1], filename, sizeof(filename)))
+                    be_info("using %s" | filename);
+                return modules[i-1];
             }
         }
-        be_error("Could not locate python: could not locate module with name Python");
+        be_error("Could not locate python: could not locate module with Py_InitializeEx");
         return NULL;
     }
     else
@@ -97,8 +78,7 @@ PythonLibrary::PythonLibrary(const char* pythonLibraryName)
     {
 #   define be_get_func_name_opt(f, dest)                                        \
         do {                                                                    \
-            void* tmp = (void*)(                                \
-                            GetProcAddress((HMODULE)m_handle, #f));             \
+            void* tmp = (void*)(GetProcAddress((HMODULE)m_handle, #f));         \
             if (tmp)                                                            \
                 memcpy(&m_##dest, &tmp, sizeof(dest##Type));                    \
         } while(0)

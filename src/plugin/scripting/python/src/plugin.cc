@@ -20,6 +20,8 @@ public:
 static ref<PythonVersion> create(const BugEngine::Plugin::Context &context)
 {
     static const char* versions[] = {
+        "38",
+        "37",
         "36",
         "35",
         "34",
