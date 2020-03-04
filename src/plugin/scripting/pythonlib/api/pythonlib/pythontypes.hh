@@ -24,7 +24,7 @@ struct PyMethodDef;
 struct PyModuleDef;
 struct PyMemberDef;
 struct PyGetSetDef;
-
+struct PyCompilerFlags;
 
 typedef void (*Py_SetPythonHome2Type)(const char* home);
 typedef void (*Py_SetPythonHome3Type)(const wchar_t* home);
@@ -53,10 +53,11 @@ typedef void (*PyEval_ReleaseThreadType)(PyThreadState* tstate);
 typedef void (*PyEval_ReleaseLockType)();
 
 typedef int (*PyRun_SimpleStringType)(const char* command);
+typedef int(*PyRun_InteractiveLoopFlagsType)(FILE* fp, const char* filename, PyCompilerFlags* flags);
 typedef PyCodeObject* (*Py_CompileStringFlagsType)(const char* str, const char* filename,
-                                                   int start, void* flags);
+                                                   int start, PyCompilerFlags* flags);
 typedef PyCodeObject* (*Py_CompileStringExFlagsType)(const char* str, const char* filename,
-                                                     int start, void* flags, int optimize);
+                                                     int start, PyCompilerFlags* flags, int optimize);
 typedef PyObject* (*PyEval_EvalCodeExType)(PyCodeObject *co, PyObject* globals, PyObject* locals,
                                            PyObject** args, int argcount,
                                            PyObject** kws, int kwcount,

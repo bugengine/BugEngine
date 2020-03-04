@@ -481,6 +481,10 @@ class VCxproj:
                             (env.DEPLOY_BINDIR, sub_env.cxxprogram_PATTERN % task_gen.bld.launcher[0][0].target))
                         self.vcxproj._add(properties, 'LocalDebuggerCommand', '$(NMakeOutput)')
                         self.vcxproj._add(properties, 'LocalDebuggerCommandArguments', task_gen.target)
+                    elif 'python_module' in task_gen.features:
+                        self.vcxproj._add(properties, 'LocalDebuggerCommand', sys.executable)
+                        self.vcxproj._add(properties, 'LocalDebuggerCommandArguments', '-c "import {target}; {target}.run()"'.format(target=task_gen.target))
+                        self.vcxproj._add(properties, 'LocalDebuggerWorkingDirectory', '$(OutDir)')
                     self.vcxproj._add(properties, 'NMakePreprocessorDefinitions',
                                       ';'.join(defines + sub_env.DEFINES + sub_env.SYSTEM_DEFINES))
                     if sub_env.SYS_ROOT:
@@ -508,6 +512,8 @@ class VCxproj:
                             'Condition': "'$(Configuration)|$(Platform)'=='%s-%s|%s'" % (toolchain, variant, platform),
                             'Project': target
                         })
+        properties = self.vcxproj._add(project, 'PropertyGroup')
+        self.vcxproj._add(properties, 'LocalDebuggerWorkingDirectory', '$(OutDir)')
 
     def write(self, nodes):
         self.vcxproj.write(nodes[0])

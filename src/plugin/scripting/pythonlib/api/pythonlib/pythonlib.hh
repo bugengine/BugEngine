@@ -69,6 +69,7 @@ private: // friend ThreadLock
     PyEval_ReleaseLockType                  m_PyEval_ReleaseLock;
 public:
     PyRun_SimpleStringType                  m_PyRun_SimpleString;
+    PyRun_InteractiveLoopFlagsType          m_PyRun_InteractiveLoopFlags;
     Py_CompileStringFlagsType               m_Py_CompileStringFlags;
     Py_CompileStringExFlagsType             m_Py_CompileStringExFlags;
     PyEval_EvalCodeExType                   m_PyEval_EvalCodeEx;
