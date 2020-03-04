@@ -12,6 +12,7 @@ try:
     import cPickle as pickle
 except ImportError:
     import pickle
+from be_typing import TYPE_CHECKING
 from . import device
 from . import build_step
 from . import host
@@ -49,7 +50,7 @@ def options(opt):
     for category in third_party_node.listdir():
         category_node = third_party_node.make_node(category)
         for third_party in category_node.listdir():
-            opt.recurse('src/3rdparty/%s/%s/%s.py'%(category, third_party, third_party))
+            opt.recurse('src/3rdparty/%s/%s/%s.py' % (category, third_party, third_party))
     option_file = opt.bugenginenode.find_node('options')
     if option_file:
         with open(option_file.abspath(), 'r') as file:
@@ -83,12 +84,12 @@ def setup(conf):
         conf.start_msg('      `- [%s]' % category)
         category_node = third_party_node.make_node(category)
         for third_party in category_node.listdir():
-            conf.recurse('src/3rdparty/%s/%s/%s.py'%(category, third_party, third_party),
+            conf.recurse('src/3rdparty/%s/%s/%s.py' % (category, third_party, third_party),
                          name='setup',
                          once=False)
         conf.end_msg(' ')
     if conf.env.VALID_PLATFORMS:
-        extra_dir = os.path.join(conf.bugenginenode.abspath(), 'extra', conf.env.VALID_PLATFORMS[0])
+        extra_dir = os.path.join(extra.bugenginenode.abspath(), conf.env.VALID_PLATFORMS[0])
         if os.path.isdir(extra_dir):
             conf.recurse(extra_dir, name='setup', once=False)
 
@@ -284,7 +285,6 @@ class ListVariantsContext(Build.BuildContext):
             print(variant)
 
 
-from be_typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from waflib import Node
     from typing import Any
