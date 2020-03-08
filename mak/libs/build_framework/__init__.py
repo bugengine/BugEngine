@@ -84,12 +84,10 @@ def setup(conf):
         conf.start_msg('      `- [%s]' % category)
         category_node = third_party_node.make_node(category)
         for third_party in category_node.listdir():
-            conf.recurse('src/3rdparty/%s/%s/%s.py' % (category, third_party, third_party),
-                         name='setup',
-                         once=False)
+            conf.recurse('src/3rdparty/%s/%s/%s.py' % (category, third_party, third_party), name='setup', once=False)
         conf.end_msg(' ')
     if conf.env.VALID_PLATFORMS:
-        extra_dir = os.path.join(extra.bugenginenode.abspath(), conf.env.VALID_PLATFORMS[0])
+        extra_dir = os.path.join(extra.abspath(), conf.env.VALID_PLATFORMS[0])
         if os.path.isdir(extra_dir):
             conf.recurse(extra_dir, name='setup', once=False)
 
@@ -103,12 +101,13 @@ def build(bld):
     bld.common_env = bld.env
     if not bld.env.PROJECTS:
         if bld.bugengine_variant == '':
-            raise Errors.WafError('Call %s %s %s:toolchain:variant, '
-                                  'with toolchain in\n\t%s\nvariant in\n\t%s' %
-                                  (sys.executable, sys.argv[0],
-                                   bld.cmd,
-                                   '\n\t'.join(bld.env.ALL_TOOLCHAINS),
-                                   '\n\t'.join(bld.env.ALL_VARIANTS)))
+            raise Errors.WafError(
+                'Call %s %s %s:toolchain:variant, '
+                'with toolchain in\n\t%s\nvariant in\n\t%s' % (
+                    sys.executable, sys.argv[0], bld.cmd, '\n\t'.join(bld.env.ALL_TOOLCHAINS
+                                                                      ), '\n\t'.join(bld.env.ALL_VARIANTS)
+                )
+            )
         bld.env = bld.all_envs[bld.bugengine_variant]
     bld.platforms = []
     build_step.build(bld)
@@ -118,11 +117,13 @@ def build(bld):
     install.build(bld)
 
     if bld.env.PROJECTS:
+
         def rc_hook(self, node):
             # type: (TaskGen.task_gen, Node.Node) -> None
             "creates RC hook to silence waf error"
             # pylint: disable=unused-argument
             pass
+
         if '.rc' not in TaskGen.task_gen.mappings:
             TaskGen.task_gen.mappings['.rc'] = rc_hook
 
@@ -221,7 +222,6 @@ def autoreconfigure(execute_method):
     """
         Decorator used to set the commands that can be reconfigured automatically
     """
-
     def execute(self):
         # type: (Build.BuildContext) -> str
         """
