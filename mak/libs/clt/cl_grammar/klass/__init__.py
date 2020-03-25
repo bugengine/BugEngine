@@ -46,8 +46,10 @@ def p_class_specifier(p):
 def p_class_head(p):
     # type: (YaccProduction) -> None
     """
-        class-head : class-key attribute-specifier-seq-opt class-head-name class-virt-specifier-seq-opt base-clause-opt
-                   | class-key attribute-specifier-seq-opt base-clause-opt
+        class-head : class-key attribute-specifier-seq class-head-name class-virt-specifier-seq-opt base-clause-opt
+                   | class-key attribute-specifier-seq base-clause-opt
+                   | class-key class-head-name class-virt-specifier-seq-opt base-clause-opt
+                   | class-key base-clause-opt
     """
     # TODO: base must be class
 

@@ -49,6 +49,7 @@ def p_attribute_specifier_seq_opt(p):
     # type: (YaccProduction) -> None
     """
         attribute-specifier-seq-opt : attribute-specifier-seq
+                                    | empty
     """
     # TODO: empty
 
@@ -121,6 +122,7 @@ def p_attribute_argument_clause(p):
     # type: (YaccProduction) -> None
     """
         attribute-argument-clause : LPAREN balanced-token-seq RPAREN
+                                  | LPAREN RPAREN
     """
 
 
@@ -138,16 +140,18 @@ def p_balanced_token_seq(p):
     """
         balanced-token-seq : balanced-token
                            | balanced-token-seq balanced-token
-                           | empty
     """
 
 
 def p_balanced_token(p):
     # type: (YaccProduction) -> None
     """
-        balanced-token : attribute-argument-clause
+        balanced-token : LPAREN balanced-token-seq RPAREN
+                       | LPAREN RPAREN
                        | LBRACKET balanced-token-seq RBRACKET
+                       | LBRACKET RBRACKET
                        | LBRACE balanced-token-seq RBRACE
+                       | LBRACE RBRACE
                        | KW_AUTO
     """
 

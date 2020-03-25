@@ -23,8 +23,10 @@ def p_using_declaration(p):
 def p_using_directive(p):
     # type: (YaccProduction) -> None
     """
-        using-directive : attribute-specifier-seq-opt KW_USING KW_NAMESPACE OP_SCOPE nested-name-specifier-opt namespace-name SEMI
-                        | attribute-specifier-seq-opt KW_USING KW_NAMESPACE nested-name-specifier-opt namespace-name SEMI
+        using-directive : attribute-specifier-seq KW_USING KW_NAMESPACE OP_SCOPE nested-name-specifier-opt namespace-name SEMI
+                        | attribute-specifier-seq KW_USING KW_NAMESPACE nested-name-specifier-opt namespace-name SEMI
+                        | KW_USING KW_NAMESPACE OP_SCOPE nested-name-specifier-opt namespace-name SEMI
+                        | KW_USING KW_NAMESPACE nested-name-specifier-opt namespace-name SEMI
     """
 
 

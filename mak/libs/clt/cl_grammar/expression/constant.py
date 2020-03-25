@@ -17,8 +17,8 @@ def p_constant_expression_opt(p):
     # type: (YaccProduction) -> None
     """
         constant-expression-opt : constant-expression
+                                | empty
     """
-    # TODO: empty
 
 
 if TYPE_CHECKING:

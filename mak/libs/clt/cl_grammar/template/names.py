@@ -26,6 +26,12 @@ def p_simple_template_id(p):
     """
 
 
+def p_class_template_id(p):
+    # type: (YaccProduction) -> None
+    """
+        class-template-id : class-template-name OP_LT template-argument-list-opt OP_GT
+    """
+
 def p_template_id(p):
     # type: (YaccProduction) -> None
     """
@@ -38,6 +44,13 @@ def p_template_name(p):
     # type: (YaccProduction) -> None
     """
         template-name : TEMPLATE_IDENTIFIER
+    """
+
+
+def p_class_template_name(p):
+    # type: (YaccProduction) -> None
+    """
+        class-template-name : CLASS_TEMPLATE_IDENTIFIER
     """
 
 

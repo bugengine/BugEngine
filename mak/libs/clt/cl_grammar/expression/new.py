@@ -71,8 +71,10 @@ def p_new_declarator_opt(p):
 def p_noptr_new_declarator(p):
     # type: (YaccProduction) -> None
     """
-        noptr-new-declarator : LBRACKET expression RBRACKET attribute-specifier-seq-opt
-                             | noptr-new-declarator LBRACKET constant-expression RBRACKET attribute-specifier-seq-opt
+        noptr-new-declarator : LBRACKET expression RBRACKET attribute-specifier-seq
+                             | noptr-new-declarator LBRACKET constant-expression RBRACKET attribute-specifier-seq
+                             | LBRACKET expression RBRACKET
+                             | noptr-new-declarator LBRACKET constant-expression RBRACKET
     """
 
 

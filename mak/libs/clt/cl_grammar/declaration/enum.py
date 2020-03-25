@@ -46,15 +46,18 @@ def p_enum_specifier(p):
 def p_enum_head(p):
     # type: (YaccProduction) -> None
     """
-        enum-head : enum-key attribute-specifier-seq-opt identifier-opt enum-base-opt
-                  | enum-key attribute-specifier-seq-opt nested-name-specifier identifier enum-base-opt
+        enum-head : enum-key attribute-specifier-seq identifier-opt enum-base-opt
+                  | enum-key attribute-specifier-seq nested-name-specifier identifier enum-base-opt
+                  | enum-key identifier-opt enum-base-opt
+                  | enum-key nested-name-specifier identifier enum-base-opt
     """
 
 
 def p_opaque_enum_declaration(p):
     # type: (YaccProduction) -> None
     """
-        opaque-enum-declaration : enum-key attribute-specifier-seq-opt identifier enum-base-opt SEMI
+        opaque-enum-declaration : enum-key attribute-specifier-seq identifier enum-base-opt SEMI
+                                | enum-key identifier enum-base-opt SEMI
     """
 
 
