@@ -63,6 +63,7 @@ def p_unqualified_id(p):
                        | OP_NOT type-name
                        | OP_NOT decltype-specifier
                        | template-id
+                       | KW_TEMPLATE unknown-template-id
     """
     # does not accept simple-template-id
 
@@ -78,6 +79,7 @@ def p_qualified_id(p):
                      | OP_SCOPE operator-function-id
                      | OP_SCOPE literal-operator-id
                      | OP_SCOPE template-id
+                     | OP_SCOPE KW_TEMPLATE unknown-template-id
     """
 
 

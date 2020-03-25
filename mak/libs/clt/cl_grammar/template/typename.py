@@ -7,7 +7,7 @@ typename-specifier:
 from be_typing import TYPE_CHECKING
 
 
-def p_tyename_specifier(p):
+def p_typename_specifier(p):
     # type: (YaccProduction) -> None
     """
         typename-specifier : KW_TYPENAME OP_SCOPE nested-name-specifier identifier

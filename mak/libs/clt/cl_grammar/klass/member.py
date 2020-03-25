@@ -83,7 +83,8 @@ def p_member_declarator(p):
     # type: (YaccProduction) -> None
     """
         member-declarator : declarator virt-specifier-seq-opt brace-or-equal-initializer-opt
-                          | identifier-opt attribute-specifier-seq virt-specifier-seq-opt COLON constant-expression
+                          | identifier attribute-specifier-seq virt-specifier-seq-opt COLON constant-expression
+                          | virt-specifier-seq-opt COLON constant-expression
                           | identifier-opt virt-specifier-seq-opt COLON constant-expression
     """
     # pure specifier is covered in equal-initializer
