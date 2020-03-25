@@ -26,6 +26,13 @@ def p_simple_template_id(p):
     """
 
 
+def p_unknown_template_id(p):
+    # type: (YaccProduction) -> None
+    """
+        unknown-template-id : KW_TEMPLATE IDENTIFIER OP_LT template-argument-list-opt OP_GT
+    """
+
+
 def p_class_template_id(p):
     # type: (YaccProduction) -> None
     """

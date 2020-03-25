@@ -15,10 +15,10 @@ def p_elaborate_type_specifier(p):
                                   | class-key attribute-specifier-seq nested-name-specifier-opt identifier
                                   | class-key OP_SCOPE nested-name-specifier-opt identifier
                                   | class-key nested-name-specifier-opt identifier
-                                  | class-key OP_SCOPE nested-name-specifier-opt KW_TEMPLATE simple-template-id
-                                  | class-key nested-name-specifier-opt KW_TEMPLATE simple-template-id
-                                  | class-key OP_SCOPE nested-name-specifier-opt simple-template-id
-                                  | class-key nested-name-specifier-opt simple-template-id
+                                  | class-key OP_SCOPE nested-name-specifier-opt unknown-template-id
+                                  | class-key nested-name-specifier-opt unknown-template-id
+                                  | class-key OP_SCOPE nested-name-specifier-opt class-template-id
+                                  | class-key nested-name-specifier-opt class-template-id
                                   | enum-key attribute-specifier-seq OP_SCOPE nested-name-specifier-opt identifier
                                   | enum-key attribute-specifier-seq nested-name-specifier-opt identifier
                                   | enum-key OP_SCOPE nested-name-specifier-opt identifier

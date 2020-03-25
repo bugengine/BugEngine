@@ -35,8 +35,8 @@ def p_simple_type_specifier(p):
         simple-type-specifier : OP_SCOPE nested-name-specifier-opt type-name                    %prec OP_SCOPE
                               | nested-name-specifier type-name                                 %prec OP_SCOPE
                               | type-name                                                       %prec SCOPE_REDUCTION
-                              | OP_SCOPE nested-name-specifier KW_TEMPLATE simple-template-id
-                              | nested-name-specifier KW_TEMPLATE simple-template-id
+                              | OP_SCOPE nested-name-specifier unknown-template-id
+                              | nested-name-specifier unknown-template-id
                               | KW_CHAR
                               | KW_CHAR16_T
                               | KW_CHAR32_T
@@ -61,7 +61,7 @@ def p_type_name(p):
         type-name : class-name
                   | enum-name
                   | typedef-name
-                  | simple-template-id
+                  | class-template-id
     """
 
 
