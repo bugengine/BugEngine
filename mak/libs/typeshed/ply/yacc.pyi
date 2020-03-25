@@ -1,10 +1,10 @@
-from clt.cl_ast.position import Position
+from clt.cl_position import ClPosition
 from typing import Any, List, Optional, Tuple, Union, TYPE_CHECKING
 from .lex import LexToken
 
 
 class YaccSymbol:
-    position: Position
+    position: ClPosition
 
 
 class YaccProduction:
@@ -25,10 +25,10 @@ class YaccProduction:
     def set_position(self, s1: int, s2: int) -> None:
         ...
 
-    def set_position_absolute(self, s1: int, position: Position) -> None:
+    def set_position_absolute(self, s1: int, position: ClPosition) -> None:
         ...
 
-    def position(self, s: int) -> Position:
+    def position(self, s: int) -> ClPosition:
         ...
 
     def lexspan(self, s: int) -> Tuple[int, int]:
