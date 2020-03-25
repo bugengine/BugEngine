@@ -1,6 +1,5 @@
 import sys
 from .logger import Logger
-from clt.cl_ast import Position
 from be_typing import TYPE_CHECKING
 
 

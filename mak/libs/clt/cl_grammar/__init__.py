@@ -1,15 +1,36 @@
-from .precedence import precedence
-from .translation_unit import *
-from .template import *
-from .external_declaration import *
-from .namespace_declaration import *
-from .struct_declaration import *
-from .enum_declaration import *
-from .variable_declaration import *
-from .method_declaration import *
-from .statement import *
+from . import lex
+
+from .basic import *
 from .expression import *
-from .type import *
-from .name import *
-from .error import *
-from .token_list import *
+from .statement import *
+from .declaration import *
+from .namespace import *
+from .klass import *
+from .overload import *
+from .template import *
+from .exception import *
+
+from be_typing import TYPE_CHECKING
+
+
+def p_error(p):
+    # type: (YaccProduction) -> None
+    """
+        error :
+    """
+
+
+def p_empty(p):
+    # type: (YaccProduction) -> None
+    """
+        empty :
+    """
+    p[0] = None
+
+
+precedence = (('left', 'SCOPE_REDUCTION'), ('left', 'OP_SCOPE'))
+
+tokens = lex.tokens
+
+if TYPE_CHECKING:
+    from ply.yacc import YaccProduction

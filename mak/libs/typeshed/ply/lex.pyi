@@ -12,14 +12,16 @@ class LexToken:
     lineno: int
     lexpos: int
     endlexpos: int
-    position: 'Position'
-    lexer: 'cl_lexer.ClLexer'
+    position: 'ClPosition'
+    lexer: 'Lexer'
+    cl_lexer: 'cl_lexer.ClLexer'
     found_object: Optional['cl_ast.cppobject.CppObject']
 
 
 class Lexer:
     lexdata: str
     lineno: int
+    cl_lexer: 'cl_lexer.ClLexer'
 
     def token(self) -> Optional[LexToken]:
         ...
@@ -49,7 +51,7 @@ def lex(
     ...
 
 
-_LexRule = Callable[['cl_lexer.ClLexer', LexToken], Optional[LexToken]]
+_LexRule = Callable[..., Optional[LexToken]]
 
 
 def TOKEN(r: str) -> Callable[[_LexRule], _LexRule]:
@@ -58,4 +60,4 @@ def TOKEN(r: str) -> Callable[[_LexRule], _LexRule]:
 
 if TYPE_CHECKING:
     from clt import cl_ast, cl_lexer
-    from clt.cl_ast.position import Position
+    from clt.cl_position import ClPosition
