@@ -16,6 +16,7 @@ tokens = tuple('KW_' + kw.upper() for kw in keywords) + (
     'NAMESPACE_ALIAS_IDENTIFIER',
     'ENUM_IDENTIFIER',
     'TEMPLATE_IDENTIFIER',
+    'CLASS_TEMPLATE_IDENTIFIER',
     'TYPEDEF_IDENTIFIER',
     'FLOATING_LITERAL',
     'INTEGER_LITERAL',

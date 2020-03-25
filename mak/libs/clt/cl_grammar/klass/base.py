@@ -48,10 +48,14 @@ def p_base_specifier_list(p):
 def p_base_specifier(p):
     # type: (YaccProduction) -> None
     """
-        base-specifier : attribute-specifier-seq-opt base-type-specifier
-                       | attribute-specifier-seq-opt KW_VIRTUAL access-specifier-opt base-type-specifier
-                       | attribute-specifier-seq-opt access-specifier KW_VIRTUAL base-type-specifier
-                       | attribute-specifier-seq-opt access-specifier base-type-specifier
+        base-specifier : attribute-specifier-seq base-type-specifier
+                       | attribute-specifier-seq KW_VIRTUAL access-specifier-opt base-type-specifier
+                       | attribute-specifier-seq access-specifier KW_VIRTUAL base-type-specifier
+                       | attribute-specifier-seq access-specifier base-type-specifier
+                       | base-type-specifier
+                       | KW_VIRTUAL access-specifier-opt base-type-specifier
+                       | access-specifier KW_VIRTUAL base-type-specifier
+                       | access-specifier base-type-specifier
     """
 
 

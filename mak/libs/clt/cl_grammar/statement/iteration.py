@@ -37,7 +37,8 @@ def p_for_init_statement(p):
 def p_for_range_declaration(p):
     # type: (YaccProduction) -> None
     """
-        for-range-declaration : attribute-specifier-seq-opt type-specifier-seq declarator
+        for-range-declaration : attribute-specifier-seq type-specifier-seq declarator
+                              | type-specifier-seq declarator
     """
 
 

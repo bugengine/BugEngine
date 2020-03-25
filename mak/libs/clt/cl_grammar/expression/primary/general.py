@@ -28,6 +28,8 @@ nested-name-specifier:
       decltype-specifier ::     C++0x
       nested-name-specifier identifier ::
       nested-name-specifier templateopt simple-template-id ::
+CHANGES:
+    moved lambda-expression into expression (comma.py) to avoid constant-expression to match lambdas
 """
 
 from be_typing import TYPE_CHECKING
@@ -40,7 +42,6 @@ def p_primary_expression(p):
                            | KW_THIS
                            | LPAREN expression RPAREN
                            | id-expression
-                           | lambda-expression
     """
 
 
@@ -77,7 +78,6 @@ def p_qualified_id(p):
                      | OP_SCOPE operator-function-id
                      | OP_SCOPE literal-operator-id
                      | OP_SCOPE template-id
-                     | OP_SCOPE simple-template-id
     """
 
 
@@ -119,7 +119,7 @@ def p_indentifier(p):
 def p_indentifier_opt(p):
     # type: (YaccProduction) -> None
     """
-        identifier-opt : IDENTIFIER
+        identifier-opt : identifier
     """
     # TODO: empty
 

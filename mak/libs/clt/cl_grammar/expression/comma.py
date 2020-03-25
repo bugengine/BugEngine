@@ -2,6 +2,8 @@
 expression:
       assignment-expression
       expression , assignment-expression
+CHANGES:
+    moved lambda-expression into expression to avoid constant-expression to match lambdas
 """
 
 from .primary import *
@@ -35,6 +37,7 @@ def p_expression(p):
     """
         expression : assignment-expression
                    | expression COMMA assignment-expression
+                   | lambda-expression
     """
 
 
