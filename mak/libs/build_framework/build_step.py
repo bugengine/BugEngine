@@ -346,7 +346,7 @@ def module(
         result.append(task_gen)
         if target_prefix:
             internal_deps.append(target_prefix + name)
-    multiarch = bld(target=multiarch_target, features=['multiarch'], use=internal_deps) if internal_deps else None
+    multiarch = bld(target=name, features=['multiarch'], use=internal_deps) if internal_deps else None
 
     if multiarch or result:
         install_tg = multiarch if multiarch else result[0]
