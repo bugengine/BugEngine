@@ -35,9 +35,6 @@
 # define __local
 # define __constant
 # define __kernel
-# define global
-# define local
-# define constant
 #endif
 
 /**************************************************************************************************/
