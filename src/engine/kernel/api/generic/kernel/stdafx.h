@@ -6,6 +6,8 @@
 /**************************************************************************************************/
 #include    <kernel/compilers.hh>
 
+#define     be_forceuse(p)  (static_cast<void>(&p))
+
 namespace BugEngine
 {
 

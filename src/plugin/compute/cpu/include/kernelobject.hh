@@ -4,7 +4,7 @@
 #ifndef BE_COMPUTE_CPU_KERNELOBJECT_HH_
 #define BE_COMPUTE_CPU_KERNELOBJECT_HH_
 /**************************************************************************************************/
-#include    <stdafx.h>
+#include    <cpu/stdafx.h>
 #include    <plugin/dynobject.hh>
 #include    <scheduler/task/task.hh>
 

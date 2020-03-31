@@ -4,7 +4,7 @@
 #ifndef BE_COMPUTE_CPU_MEMORYBUFFER_HH_
 #define BE_COMPUTE_CPU_MEMORYBUFFER_HH_
 /**************************************************************************************************/
-#include    <stdafx.h>
+#include    <cpu/stdafx.h>
 #include    <scheduler/kernel/imemorybuffer.hh>
 #include    <kernel/input/segment_part.hh>
 

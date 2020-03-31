@@ -5,19 +5,6 @@ import os
 
 
 def build(bld):
-    cls = Task.classes.get('cpp', None)
-    derived = type('cpp', (cls, ), {})
-
-    def exec_command_stdout(self, *k, **kw):
-        if self.env.CC_NAME == 'msvc':
-            with open(self.outputs[0].abspath(), 'w') as out:
-                kw['stdout'] = out
-                return super(derived, self).exec_command(*k, **kw)
-        else:
-            return super(derived, self).exec_command(*k, **kw)
-
-    derived.exec_command = exec_command_stdout
-
     def wrap_class(cls_name):
         cls = Task.classes.get(cls_name, None)
         derived = type(cls_name, (cls, ), {})

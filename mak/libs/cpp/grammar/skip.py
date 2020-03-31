@@ -35,6 +35,11 @@ def p_skip_keyword(p):
                      | OPERATOR
                      | TYPEDEF
                      | THROW
+                     | __GLOBAL
+                     | __LOCAL
+                     | __CONSTANT
+                     | __KERNEL
+                     | KERNEL
                      | BE_TAG
                      | BE_SEGMENT
                      | BE_SEGMENTS

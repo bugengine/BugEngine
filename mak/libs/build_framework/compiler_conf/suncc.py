@@ -18,62 +18,80 @@ class SunCC(GnuCompiler):
     }
     TOOLS = 'suncc suncxx'
     VECTORIZED_FLAGS = {
-        'x86': (
-            ('.sse3', [
-                '-xarch=sse3', '-xarch=ssse3', '-D__MMX__=1', '-D__SSE__=1', '-D__SSE2__=1', '-D__SSE3__=1',
-                '-D__SSSE3__=1'
-            ]),
-            ('.sse4', [
-                '-xarch=sse4_1', '-xarch=sse4_2', '-D__MMX__=1', '-DSSE__=1', '-DSSE2__=1', '-D__SSE3__=1',
-                '-D__SSSE3__=1', '-D__SSE4_1__=1', '-D__SSE4_2__=1', '-D__POPCNT__=1'
-            ]),
-            ('.avx', [
-                '-xarch=avx', '-D__MMX__=1', '-D__SSE__=1', '-D__SSE2__=1', '-D__SSE3__=1', '-D__SSSE3__=1',
-                '-D__SSE4_1__=1', '-D__SSE4_2__=1', '-D__POPCNT__=1', '-D___AVX__=1', '-D__XSAVE__=1'
-            ]),
-            ('.avx2', [
-                '-xarch=avx2',
-                '-D__MMX__=1',
-                '-D__SSE__=1',
-                '-D__SSE2__=1',
-                '-D__SSE3__=1',
-                '-D__SSSE3__=1',
-                '-D__SSE4_1__=1',
-                '-D__SSE4_2__=1',
-                '-D__POPCNT__=1',
-                '-D__AVX__=1',
-                '-D__XSAVE__=1',
-                '-D__AVX2__=1',
-            ]),
-        ),
-        'amd64': (
-            ('.sse3', [
-                '-xarch=sse3', '-xarch=ssse3', '-D__MMX__=1', '-D__SSE__=1', '-D__SSE2__=1', '-D__SSE3__=1',
-                '-D__SSSE3__=1'
-            ]),
-            ('.sse4', [
-                '-xarch=sse4_1', '-xarch=sse4_2', '-D__MMX__=1', '-D__SSE__=1', '-D__SSE2__=1', '-D__SSE3__=1',
-                '-D__SSSE3__=1', '-D__SSE4_1__=1', '-D__SSE4_2__=1', '-D__POPCNT__=1'
-            ]),
-            ('.avx', [
-                '-xarch=avx', '-D__MMX__=1', '-D__SSE__=1', '-D__SSE2__=1', '-D__SSE3__=1', '-D__SSSE3__=1',
-                '-D__SSE4_1__=1', '-D__SSE4_2__=1', '-D__POPCNT__=1', '-D___AVX__=1', '-D__XSAVE__=1'
-            ]),
-            ('.avx2', [
-                '-xarch=avx2',
-                '-D__MMX__=1',
-                '-D__SSE__=1',
-                '-D__SSE2__=1',
-                '-D__SSE3__=1',
-                '-D__SSSE3__=1',
-                '-D__SSE4_1__=1',
-                '-D__SSE4_2__=1',
-                '-D__POPCNT__=1',
-                '-D__AVX__=1',
-                '-D__XSAVE__=1',
-                '-D__AVX2__=1',
-            ]),
-        ),
+        'x86':
+            (
+                (
+                    '.sse3', [
+                        '-xarch=sse3', '-xarch=ssse3', '-D__MMX__=1', '-D__SSE__=1', '-D__SSE2__=1', '-D__SSE3__=1',
+                        '-D__SSSE3__=1'
+                    ]
+                ),
+                (
+                    '.sse4', [
+                        '-xarch=sse4_1', '-xarch=sse4_2', '-D__MMX__=1', '-DSSE__=1', '-DSSE2__=1', '-D__SSE3__=1',
+                        '-D__SSSE3__=1', '-D__SSE4_1__=1', '-D__SSE4_2__=1', '-D__POPCNT__=1'
+                    ]
+                ),
+                (
+                    '.avx', [
+                        '-xarch=avx', '-D__MMX__=1', '-D__SSE__=1', '-D__SSE2__=1', '-D__SSE3__=1', '-D__SSSE3__=1',
+                        '-D__SSE4_1__=1', '-D__SSE4_2__=1', '-D__POPCNT__=1', '-D___AVX__=1', '-D__XSAVE__=1'
+                    ]
+                ),
+                (
+                    '.avx2', [
+                        '-xarch=avx2',
+                        '-D__MMX__=1',
+                        '-D__SSE__=1',
+                        '-D__SSE2__=1',
+                        '-D__SSE3__=1',
+                        '-D__SSSE3__=1',
+                        '-D__SSE4_1__=1',
+                        '-D__SSE4_2__=1',
+                        '-D__POPCNT__=1',
+                        '-D__AVX__=1',
+                        '-D__XSAVE__=1',
+                        '-D__AVX2__=1',
+                    ]
+                ),
+            ),
+        'amd64':
+            (
+                (
+                    '.sse3', [
+                        '-xarch=sse3', '-xarch=ssse3', '-D__MMX__=1', '-D__SSE__=1', '-D__SSE2__=1', '-D__SSE3__=1',
+                        '-D__SSSE3__=1'
+                    ]
+                ),
+                (
+                    '.sse4', [
+                        '-xarch=sse4_1', '-xarch=sse4_2', '-D__MMX__=1', '-D__SSE__=1', '-D__SSE2__=1', '-D__SSE3__=1',
+                        '-D__SSSE3__=1', '-D__SSE4_1__=1', '-D__SSE4_2__=1', '-D__POPCNT__=1'
+                    ]
+                ),
+                (
+                    '.avx', [
+                        '-xarch=avx', '-D__MMX__=1', '-D__SSE__=1', '-D__SSE2__=1', '-D__SSE3__=1', '-D__SSSE3__=1',
+                        '-D__SSE4_1__=1', '-D__SSE4_2__=1', '-D__POPCNT__=1', '-D___AVX__=1', '-D__XSAVE__=1'
+                    ]
+                ),
+                (
+                    '.avx2', [
+                        '-xarch=avx2',
+                        '-D__MMX__=1',
+                        '-D__SSE__=1',
+                        '-D__SSE2__=1',
+                        '-D__SSE3__=1',
+                        '-D__SSSE3__=1',
+                        '-D__SSE4_1__=1',
+                        '-D__SSE4_2__=1',
+                        '-D__POPCNT__=1',
+                        '-D__AVX__=1',
+                        '-D__XSAVE__=1',
+                        '-D__AVX2__=1',
+                    ]
+                ),
+            ),
     }
 
     def __init__(self, suncc, sunCC, extra_args={}, extra_env={}):
@@ -177,8 +195,8 @@ class SunCC(GnuCompiler):
             tgtnode.delete()
         err = err.split('\n')
         if not result:
-            for e in err:
-                if e.find('illegal value ignored') != -1:
+            for msg in err:
+                if msg.find('illegal value ignored') != -1:
                     result = 1
         return result == 0
 

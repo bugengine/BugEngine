@@ -71,13 +71,14 @@ def configure(conf):
     conf.load('flex', tooldir=[os.path.join(conf.path.abspath(), 'mak', 'tools')])
     conf.load('bison', tooldir=[os.path.join(conf.path.abspath(), 'mak', 'tools')])
     compiler_conf.configure(conf)
+    conf.recurse('src/configure.py')
     target_conf.configure(conf)
     conf.env.ALL_TOOLCHAINS.sort(key=lambda x: x.split('-'))
 
 
 def setup(conf):
     # type: (Configure.ConfigurationContext) -> None
-    "setup step before the build: recursively cals setup on every third party library"
+    "setup step before the build: recursively calls setup on every third party library"
     third_party_node = conf.bugenginenode.make_node('src').make_node('3rdparty')
     extra = conf.bugenginenode.make_node('extra')
     for category in third_party_node.listdir():

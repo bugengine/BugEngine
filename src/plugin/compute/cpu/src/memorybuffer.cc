@@ -1,7 +1,7 @@
 /* BugEngine <bugengine.devel@gmail.com> / 2008-2014
    see LICENSE for detail */
 
-#include    <stdafx.h>
+#include    <cpu/stdafx.h>
 #include    <cpu/memorybuffer.hh>
 #include    <memoryhost.hh>
 

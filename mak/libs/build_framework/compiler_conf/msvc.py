@@ -16,8 +16,9 @@ class MSVC(Compiler):
         self.path = path
         self.args = args
         self.arch_name = target_arch
-        self.includes = [os.path.join(i, target_arch)
-                         for i in includes if os.path.isdir(os.path.join(i, target_arch))] + includes
+        self.includes = [
+            os.path.join(i, target_arch) for i in includes if os.path.isdir(os.path.join(i, target_arch))
+        ] + includes
         self.libdirs = libdirs
         self.target = self.platform
         self.targets = [self.target]
@@ -25,28 +26,35 @@ class MSVC(Compiler):
     def set_optimisation_options(self, conf):
         conf.env.append_unique('CPPFLAGS_debug', ['/Od', '/Ob1', '/EHsc', '/RTC1', '/RTCc', '/Zi', '/MTd', '/D_DEBUG'])
         conf.env.append_unique('CFLAGS_debug', ['/Od', '/Ob1', '/EHsc', '/RTC1', '/RTCc', '/Zi', '/MTd', '/D_DEBUG'])
-        conf.env.append_unique('CXXFLAGS_debug',
-                               ['/Od', '/Ob1', '/EHsc', '/RTC1', '/RTCc', '/Zi', '/MTd', '/D_DEBUG', '/GR'])
+        conf.env.append_unique(
+            'CXXFLAGS_debug', ['/Od', '/Ob1', '/EHsc', '/RTC1', '/RTCc', '/Zi', '/MTd', '/D_DEBUG', '/GR']
+        )
         conf.env.append_unique('LINKFLAGS_debug', ['/DEBUG', '/INCREMENTAL:no'])
         conf.env.append_unique('ARFLAGS_debug', [])
 
-        conf.env.append_unique('CPPFLAGS_profile',
-                               ['/DNDEBUG', '/MT', '/Ox', '/Ob2', '/Oi', '/Ot', '/GT', '/GF', '/FD', '/Gy', '/GR-'])
-        conf.env.append_unique('CFLAGS_profile',
-                               ['/DNDEBUG', '/MT', '/Ox', '/Ob2', '/Oi', '/Ot', '/GT', '/GF', '/FD', '/Gy', '/GR-'])
+        conf.env.append_unique(
+            'CPPFLAGS_profile', ['/DNDEBUG', '/MT', '/Ox', '/Ob2', '/Oi', '/Ot', '/GT', '/GF', '/FD', '/Gy', '/GR-']
+        )
+        conf.env.append_unique(
+            'CFLAGS_profile', ['/DNDEBUG', '/MT', '/Ox', '/Ob2', '/Oi', '/Ot', '/GT', '/GF', '/FD', '/Gy', '/GR-']
+        )
         conf.env.append_unique(
             'CXXFLAGS_profile',
-            ['/DNDEBUG', '/D_HAS_EXCEPTIONS=0', '/MT', '/Ox', '/Ob2', '/Oi', '/Ot', '/GT', '/GF', '/FD', '/Gy', '/GR-'])
+            ['/DNDEBUG', '/D_HAS_EXCEPTIONS=0', '/MT', '/Ox', '/Ob2', '/Oi', '/Ot', '/GT', '/GF', '/FD', '/Gy', '/GR-']
+        )
         conf.env.append_unique('LINKFLAGS_profile', ['/DEBUG', '/INCREMENTAL:no'])
         conf.env.append_unique('ARFLAGS_profile', [])
 
-        conf.env.append_unique('CPPFLAGS_final',
-                               ['/DNDEBUG', '/MT', '/Ox', '/Ob2', '/Oi', '/Ot', '/GT', '/GF', '/FD', '/Gy', '/GR-'])
-        conf.env.append_unique('CFLAGS_final',
-                               ['/DNDEBUG', '/MT', '/Ox', '/Ob2', '/Oi', '/Ot', '/GT', '/GF', '/FD', '/Gy', '/GR-'])
+        conf.env.append_unique(
+            'CPPFLAGS_final', ['/DNDEBUG', '/MT', '/Ox', '/Ob2', '/Oi', '/Ot', '/GT', '/GF', '/FD', '/Gy', '/GR-']
+        )
+        conf.env.append_unique(
+            'CFLAGS_final', ['/DNDEBUG', '/MT', '/Ox', '/Ob2', '/Oi', '/Ot', '/GT', '/GF', '/FD', '/Gy', '/GR-']
+        )
         conf.env.append_unique(
             'CXXFLAGS_final',
-            ['/DNDEBUG', '/D_HAS_EXCEPTIONS=0', '/MT', '/Ox', '/Ob2', '/Oi', '/Ot', '/GT', '/GF', '/FD', '/Gy', '/GR-'])
+            ['/DNDEBUG', '/D_HAS_EXCEPTIONS=0', '/MT', '/Ox', '/Ob2', '/Oi', '/Ot', '/GT', '/GF', '/FD', '/Gy', '/GR-']
+        )
         conf.env.append_unique('LINKFLAGS_final', ['/DEBUG', '/INCREMENTAL:no'])
         conf.env.append_unique('ARFLAGS_final', [])
 
@@ -93,17 +101,16 @@ class MSVC(Compiler):
         env.COMPILER_NAME = 'msvc'
         env.COMPILER_TARGET = 'windows-win32-msvc-%s' % version
         conf.load('msvc')
-        if ((self.NAMES[0] == 'msvc' and version_number >= 8) or (self.NAMES[0] == 'wsdk' and version_number >= 6)
-                or (self.NAMES[0] == 'intel' and version_number >= 11)):
+        if (
+            (self.NAMES[0] == 'msvc' and version_number >= 8) or (self.NAMES[0] == 'wsdk' and version_number >= 6)
+            or (self.NAMES[0] == 'intel' and version_number >= 11)
+        ):
             env.append_unique('LINKFLAGS', ['/MANIFEST:NO'])
 
     def load_in_env(self, conf, platform):
         Compiler.load_in_env(self, conf, platform)
         env = conf.env
         env.IDIRAFTER = '/I'
-        env.CC_CPP = Utils.to_list(env.CC) + ['/nologo', '/TC', '/X', '/E']
-        env.CC_CPP_SRC_F = ''
-        env.CC_CPP_TGT_F = ['/Fo']     # will actually be ignored
         env.append_unique('STLIB', [conf.bugenginenode.make_node('mak/compiler/msvc/set_conditional').abspath()])
         if os_platform().endswith('64'):
             conf.find_program('cdb64', var='CDB', mandatory=False)
@@ -133,8 +140,9 @@ def gather_icl_versions(conf, versions):
     version_pattern = re.compile('^...?.?\....?.?')
     version_pattern_old = re.compile('^..')
     try:
-        all_versions = Utils.winreg.OpenKey(Utils.winreg.HKEY_LOCAL_MACHINE,
-                                            r'SOFTWARE\Wow6432node\Intel\Compilers\C++')
+        all_versions = Utils.winreg.OpenKey(
+            Utils.winreg.HKEY_LOCAL_MACHINE, r'SOFTWARE\Wow6432node\Intel\Compilers\C++'
+        )
     except OSError:
         try:
             all_versions = Utils.winreg.OpenKey(Utils.winreg.HKEY_LOCAL_MACHINE, r'SOFTWARE\Intel\Compilers\C++')
@@ -210,8 +218,9 @@ def gather_intel_composer_versions(conf, versions):
                     else:
                         batch_file = os.path.join(path, 'bin', 'iclvars.bat')
                         if os.path.isfile(batch_file):
-                            targets[target_arg] = msvc.target_compiler(conf, 'intel', arch, version_str, target_arg,
-                                                                       batch_file)
+                            targets[target_arg] = msvc.target_compiler(
+                                conf, 'intel', arch, version_str, target_arg, batch_file
+                            )
                 versions['intel ' + version_str] = targets
 
 
@@ -247,9 +256,11 @@ def configure(conf):
                 target_compiler.evaluate()
                 if target_compiler.is_valid:
                     cl = conf.detect_executable(name == 'intel' and 'icl' or 'cl', target_compiler.bindirs)
-                    c = MSVC(cl, name, version, target_name, target_compiler.cpu, target_compiler.bat,
-                             target_compiler.bat_target, target_compiler.bindirs, target_compiler.incdirs,
-                             target_compiler.libdirs)
+                    c = MSVC(
+                        cl, name, version, target_name, target_compiler.cpu, target_compiler.bat,
+                        target_compiler.bat_target, target_compiler.bindirs, target_compiler.incdirs,
+                        target_compiler.libdirs
+                    )
                     if c.name() in seen:
                         continue
                     seen.add(c.name())

@@ -1,7 +1,7 @@
 /* BugEngine <bugengine.devel@gmail.com> / 2008-2014
    see LICENSE for detail */
 
-#include    <stdafx.h>
+#include    <cpu/stdafx.h>
 #include    <codeloader.hh>
 #include    <kernelobject.hh>
 #include    <scheduler/kernel/kernel.script.hh>

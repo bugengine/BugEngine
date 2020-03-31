@@ -4,7 +4,8 @@
 #ifndef BE_CPU_KERNEL_STDAFX_H_
 #define BE_CPU_KERNEL_STDAFX_H_
 /**************************************************************************************************/
-#include    <generic/kernel/compilers.hh>
+
+#include <generic/kernel/compilers.hh>
 
 /**************************************************************************************************/
 #endif

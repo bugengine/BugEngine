@@ -30,5 +30,15 @@
 # include <kernel/compilers/syntax.hh>
 #endif
 
+#ifndef _CLC
+# define __global
+# define __local
+# define __constant
+# define __kernel
+# define global
+# define local
+# define constant
+#endif
+
 /**************************************************************************************************/
 #endif
