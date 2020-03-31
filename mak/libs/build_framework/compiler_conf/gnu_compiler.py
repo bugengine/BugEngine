@@ -11,24 +11,26 @@ class GnuCompiler(Compiler):
         'arm': ['-march=armv7-a'],
     }
     VECTORIZED_FLAGS = {
-        'x86': (
-            ('.sse3', ['-msse3', '-mssse3']),
-            ('.sse4', [
-                '-msse4.1',
-                '-msse4.2',
-            ]),
-            ('.avx', ['-mavx']),
-            ('.avx2', ['-mavx2']),
-        ),
-        'amd64': (
-            ('.sse3', ['-msse3', '-mssse3']),
-            ('.sse4', [
-                '-msse4.1',
-                '-msse4.2',
-            ]),
-            ('.avx', ['-mavx']),
-            ('.avx2', ['-mavx2']),
-        ),
+        'x86':
+            (
+                ('.sse3', ['-msse3', '-mssse3']),
+                ('.sse4', [
+                    '-msse4.1',
+                    '-msse4.2',
+                ]),
+                ('.avx', ['-mavx']),
+                ('.avx2', ['-mavx2']),
+            ),
+        'amd64':
+            (
+                ('.sse3', ['-msse3', '-mssse3']),
+                ('.sse4', [
+                    '-msse4.1',
+                    '-msse4.2',
+                ]),
+                ('.avx', ['-mavx']),
+                ('.avx2', ['-mavx2']),
+            ),
         'ppc': (('.altivec', ['-maltivec']), ),
         'ppc64': (('.altivec', ['-maltivec']), ),
         'armv6': (('.neon', ['-mfpu=neon']), ),
@@ -48,9 +50,9 @@ class GnuCompiler(Compiler):
         'mips64': ((['-m32'], 'mips'), ),
         'mips64el': ((['-m32'], 'mipsel'), ),
         'arm': [(['-march=%s' % a], a) for a in ALL_ARM_ARCHS],
-        #'armv4':    [(['-march=%s'%a], a) for a in ALL_ARM_ARCHS],
-        #'armv5':    [(['-march=%s'%a], a) for a in ALL_ARM_ARCHS],
-        #'armv7':    [(['-march=%s'%a], a) for a in ALL_ARM_ARCHS],
+                                                                       #'armv4':    [(['-march=%s'%a], a) for a in ALL_ARM_ARCHS],
+                                                                       #'armv5':    [(['-march=%s'%a], a) for a in ALL_ARM_ARCHS],
+                                                                       #'armv7':    [(['-march=%s'%a], a) for a in ALL_ARM_ARCHS],
         'armv7a': [(['-march=%s' % a], a) for a in ALL_ARM_ARCHS],
         'armv7k': [(['-march=%s' % a], a) for a in ALL_ARM_ARCHS],
         'armv7l': [(['-march=%s' % a], a) for a in ALL_ARM_ARCHS],
@@ -207,11 +209,13 @@ class GnuCompiler(Compiler):
             result = []
             for multilib in multilibs:
                 try:
-                    c = self.__class__(self.compiler_c, self.compiler_cxx, {
-                        'c': multilib[0][:],
-                        'cxx': multilib[0][:],
-                        'link': multilib[0][:],
-                    })
+                    c = self.__class__(
+                        self.compiler_c, self.compiler_cxx, {
+                            'c': multilib[0][:],
+                            'cxx': multilib[0][:],
+                            'link': multilib[0][:],
+                        }
+                    )
                     result.append(c)
                 except Exception as e:
                     pass
@@ -256,8 +260,9 @@ class GnuCompiler(Compiler):
 
         v.CPPFLAGS_final = ['-DNDEBUG'] + v.CPPFLAGS_final
         v.CFLAGS_final = ['-pipe', '-g', '-DNDEBUG', '-O3'] + v.CFLAGS_final
-        v.CXXFLAGS_final = ['-pipe', '-Wno-unused-parameter', '-g', '-DNDEBUG', '-O3', '-fno-rtti', '-fno-exceptions'
-                            ] + v.CXXFLAGS_final
+        v.CXXFLAGS_final = [
+            '-pipe', '-Wno-unused-parameter', '-g', '-DNDEBUG', '-O3', '-fno-rtti', '-fno-exceptions'
+        ] + v.CXXFLAGS_final
         v.ASFLAGS_final = ['-pipe', '-g', '-DNDEBUG', '-O3'] + v.ASFLAGS_final
         v.LINKFLAGS_final = ['-pipe', '-g'] + v.LINKFLAGS_final
 
@@ -266,8 +271,8 @@ class GnuCompiler(Compiler):
         v.CFLAGS_warnnone = ['-w'] + v.CFLAGS_warnnone
         v.CXXFLAGS_warnnone = ['-w'] + v.CXXFLAGS_warnnone
         if 'Clang' in self.NAMES or 'GCC' in self.NAMES and self.version_number >= (
-                3,
-                4,
+            3,
+            4,
         ):
             extra_flags = ['-Wextra', '-Wno-invalid-offsetof']
         else:
@@ -323,10 +328,10 @@ class GnuCompiler(Compiler):
         env.SYSROOT = env.SYSROOT or self.sysroot
 
         conf.end_msg(' ')
-        conf.start_msg('      `- [cpu compute variants]')
+        conf.start_msg('      `- [vectorize flags]')
         for variant_name, flags in self.VECTORIZED_FLAGS.get(self.arch, []):
             if self.is_valid(conf, flags + self.error_flag()):
-                conf.env.append_unique('KERNEL_OPTIM_VARIANTS', [variant_name])
+                conf.env.append_unique('VECTOR_OPTIM_VARIANTS', [variant_name])
                 conf.env['CFLAGS_%s' % variant_name] = flags
                 conf.env['CXXFLAGS_%s' % variant_name] = flags
                 Logs.pprint('GREEN', '+%s' % variant_name, sep=' ')
@@ -335,9 +340,6 @@ class GnuCompiler(Compiler):
 
         env.COMPILER_NAME = self.__class__.__name__.lower()
         env.COMPILER_TARGET = self.arch + '-' + self.platform
-        env.CC_CPP = Utils.to_list(env.CC) + ['-nostdinc', '-x', 'c', '-E']
-        env.CC_CPP_SRC_F = ''
-        env.CC_CPP_TGT_F = ['-o']
         self.populate_useful_variables(conf, env.SYSROOT)
 
     def populate_useful_variables(self, conf, sysroot):
@@ -384,4 +386,3 @@ class GnuCompiler(Compiler):
 
     def split_path_list(self, line):
         return line.split(os.pathsep)
-

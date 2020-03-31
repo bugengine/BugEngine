@@ -8,6 +8,7 @@
 #include    <scheduler/kernel/parameters/iparameter.script.hh>
 #include    <scheduler/kernel/parameters/parameters.hh>
 #include    <kernel/input/segments.hh>
+#include    <minitl/typemanipulation.hh>
 
 
 namespace BugEngine { namespace KernelScheduler

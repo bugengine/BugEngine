@@ -145,9 +145,24 @@ def add_feature(self, feature, env=None):
 
 
 @conf
-def module(bld, name, module_path, depends=[], private_depends=[], valid_platforms=[], features=[], build_features=[],
-           extra_includes=[], extra_defines=[], extra_public_includes=[], extra_public_defines=[], use_master=False,
-           warnings=True, export_all=False, root=None):
+def module(
+    bld,
+    name,
+    module_path,
+    depends=[],
+    private_depends=[],
+    valid_platforms=[],
+    features=[],
+    build_features=[],
+    extra_includes=[],
+    extra_defines=[],
+    extra_public_includes=[],
+    extra_public_defines=[],
+    use_master=False,
+    warnings=True,
+    export_all=False,
+    root=None
+):
     platforms = bld.env.VALID_PLATFORMS
     archs = bld.env.ARCHITECTURES
     build = len(valid_platforms) == 0
@@ -230,24 +245,31 @@ def module(bld, name, module_path, depends=[], private_depends=[], valid_platfor
         extra_features = ['warnnone', bld.__class__.optim] + (bld.env.STATIC and [] or ['dynamic'])
 
     result = []
-    internal_deps = {}
+    internal_deps = []
 
     if build and not bld.env.PROJECTS:
-        preprocess = bld(env=bld.common_env.derive(),
-                         target=name + '.preprocess',
-                         parent=name,
-                         features=['preprocess'],
-                         pchstop=pchstop,
-                         source=preprocess_sources,
-                         kernels=[],
-                         source_nodes=[source_node] + [e for _, e in extras])
+        preprocess = bld(
+            env=bld.common_env.derive(),
+            target=name + '.preprocess',
+            parent=name,
+            features=['preprocess'],
+            pchstop=pchstop,
+            source=preprocess_sources,
+            kernels=[],
+            source_nodes=[source_node] + [e for _, e in extras]
+        )
         preprocess.env.PLUGIN = plugin_name
         if os.path.isdir(os.path.join(source_node.abspath(), 'kernels')):
             kernelspath = source_node.make_node('kernels')
             for kernel in kernelspath.ant_glob('**'):
                 kernel_name = os.path.splitext(kernel.path_from(kernelspath))[0]
                 kernel_name = re.split('[\\\\/]', kernel_name)
-                preprocess.kernels.append((kernel_name, kernel))
+                preprocess.kernels.append(
+                    (
+                        kernel_name, kernel,
+                        preprocess.make_bld_node('src/kernels', None, '%s.ast' % (os.path.join(*kernel_name)))
+                    )
+                )
     else:
         preprocess = None
 
@@ -293,76 +315,38 @@ def module(bld, name, module_path, depends=[], private_depends=[], valid_platfor
                 features.remove('cxxprogram')
             if 'cxxstlib' in features:
                 features.remove('cxxstlib')
-        task_gen = bld(env=env.derive(),
-                       bld_env=env,
-                       target=target_prefix + name,
-                       target_name=name,
-                       module_path=project_path,
-                       use=[target_prefix + d for d in depends],
-                       private_use=[target_prefix + d for d in private_depends],
-                       features=features,
-                       extra_use=extra_features,
-                       defines=[
-                           'building_%s' % safe_name(name.split('.')[-1]),
-                           'BE_PROJECTID=%s' % name.replace('.', '_'),
-                           'BE_PROJECTNAME=%s' % name
-                       ] + extra_defines,
-                       export_defines=[] + extra_public_defines,
-                       includes=extra_includes + api + platform_api + include + platform_include + master_includes +
-                       [bld.bugenginenode],
-                       libs=[],
-                       lib_paths=lib_paths,
-                       export_includes=api + platform_api + extra_public_includes,
-                       frameworks=[],
-                       source=sources[:],
-                       pchstop=pchstop,
-                       preprocess=preprocess,
-                       export_all=export_all,
-                       source_nodes=[source_node] + [e for _, e in extras])
+        task_gen = bld(
+            env=env.derive(),
+            bld_env=env,
+            target=target_prefix + name,
+            target_name=name,
+            module_path=project_path,
+            use=[target_prefix + d for d in depends],
+            private_use=[target_prefix + d for d in private_depends],
+            features=features,
+            extra_use=extra_features,
+            defines=[
+                'building_%s' % safe_name(name.split('.')[-1]),
+                'BE_PROJECTID=%s' % name.replace('.', '_'),
+                'BE_PROJECTNAME=%s' % name
+            ] + extra_defines,
+            export_defines=[] + extra_public_defines,
+            includes=extra_includes + api + platform_api + include + platform_include + master_includes +
+            [bld.bugenginenode],
+            libs=[],
+            lib_paths=lib_paths,
+            export_includes=api + platform_api + extra_public_includes,
+            frameworks=[],
+            source=sources[:],
+            pchstop=pchstop,
+            preprocess=preprocess,
+            export_all=export_all,
+            source_nodes=[source_node] + [e for _, e in extras]
+        )
         result.append(task_gen)
         if target_prefix:
-            try:
-                internal_deps[name].append(target_prefix + name)
-            except KeyError:
-                internal_deps[name] = [target_prefix + name]
-        for kernel_type, toolchain in env.KERNEL_TOOLCHAINS:
-            kernels = preprocess and preprocess.kernels or []
-            kernel_env = bld.all_envs[toolchain]
-            for kernel, kernel_source in kernels:
-                for variant in [''] + kernel_env.KERNEL_OPTIM_VARIANTS:
-                    target_suffix = '.'.join([kernel_type] + ([variant[1:]] if variant else []))
-                    kernel_target = name + '.' + '.'.join(kernel) + '.' + target_suffix
-                    kernel_task_gen = bld(
-                        env=env.derive(),
-                        bld_env=env,
-                        kernel_env=kernel_env,
-                        target=target_prefix + kernel_target,
-                        target_name=target_prefix + name,
-                        kernel=kernel,
-                        features=['cxx', bld.env.STATIC and 'cxxobjects' or 'cxxshlib', 'kernel'],
-                        extra_use=task_gen.extra_use,
-                        defines=task_gen.defines + [
-                            'BE_BUILD_KERNEL=1',
-                            'BE_KERNEL_ID=%s_%s' % (name.replace('.', '_'), kernel_target.replace('.', '_')),
-                            'BE_KERNEL_NAME=%s.%s' % (name, kernel_target),
-                            'BE_KERNEL_TARGET=%s' % kernel_type,
-                            'BE_KERNEL_ARCH=%s' % variant
-                        ],
-                        includes=task_gen.includes,
-                        source=[kernel_source],
-                        use=task_gen.use + ([variant] if variant else []),
-                    )
-                    kernel_task_gen.env.PLUGIN = plugin_name
-                    if target_prefix:
-                        try:
-                            internal_deps[kernel_target].append(target_prefix + kernel_target)
-                        except KeyError:
-                            internal_deps[kernel_target] = [target_prefix + kernel_target]
-    multiarch = None
-    for multiarch_target, deps in internal_deps.items():
-        tgt = bld(target=multiarch_target, features=['multiarch'], use=deps)
-        if multiarch_target == name:
-            multiarch = tgt
+            internal_deps.append(target_prefix + name)
+    multiarch = bld(target=multiarch_target, features=['multiarch'], use=internal_deps) if internal_deps else None
 
     if multiarch or result:
         install_tg = multiarch if multiarch else result[0]
@@ -412,20 +396,22 @@ def thirdparty(bld, name, feature='', path='', var='', use=[], private_use=[]):
             if feature:
                 bld.add_feature(feature, env)
             supported = True
-            tg = bld(target=target_name,
-                     features=['cxx'],
-                     module_path=project_path,
-                     export_includes=env['check_%s_includes' % var],
-                     export_defines=env['check_%s_defines' % var],
-                     export_libpath=env['check_%s_libpath' % var],
-                     export_lib=env['check_%s_libs' % var],
-                     export_framework=env['check_%s_frameworks' % var],
-                     export_cflags=env['check_%s_cflags' % var],
-                     export_cxxflags=env['check_%s_cxxflags' % var],
-                     export_linkflags=env['check_%s_ldflags' % var],
-                     source_nodes=[source_node],
-                     use=[target_prefix + u for u in use],
-                     private_use=[target_prefix + u for u in private_use])
+            tg = bld(
+                target=target_name,
+                features=['cxx'],
+                module_path=project_path,
+                export_includes=env['check_%s_includes' % var],
+                export_defines=env['check_%s_defines' % var],
+                export_libpath=env['check_%s_libpath' % var],
+                export_lib=env['check_%s_libs' % var],
+                export_framework=env['check_%s_frameworks' % var],
+                export_cflags=env['check_%s_cflags' % var],
+                export_cxxflags=env['check_%s_cxxflags' % var],
+                export_linkflags=env['check_%s_ldflags' % var],
+                source_nodes=[source_node],
+                use=[target_prefix + u for u in use],
+                private_use=[target_prefix + u for u in private_use]
+            )
             if target_prefix:
                 internal_deps.append(tg)
             archs = env.VALID_ARCHITECTURES
@@ -469,122 +455,137 @@ def thirdparty(bld, name, feature='', path='', var='', use=[], private_use=[]):
 
 
 @conf
-def library(bld,
-            name,
-            depends=[],
-            private_use=[],
-            features=[],
-            platforms=[],
-            extra_includes=[],
-            extra_defines=[],
-            extra_public_includes=[],
-            extra_public_defines=[],
-            extra_tasks=[],
-            path='',
-            use_master=True,
-            warnings=True,
-            export_all=False):
+def library(
+    bld,
+    name,
+    depends=[],
+    private_use=[],
+    features=[],
+    platforms=[],
+    extra_includes=[],
+    extra_defines=[],
+    extra_public_includes=[],
+    extra_public_defines=[],
+    extra_tasks=[],
+    path='',
+    use_master=True,
+    warnings=True,
+    export_all=False
+):
     if not path: path = name
     if not bld.env.PROJECTS:
         for p in platforms:
             if p not in bld.env.VALID_PLATFORMS:
                 return None
-    return module(bld, name, path, depends, private_use, platforms,
-                  extra_tasks + (bld.env.DYNAMIC and ['cxx', 'cxxshlib', 'shared_lib'] or ['cxx', 'cxxobjects']),
-                  features, extra_includes, extra_defines, extra_public_includes, extra_public_defines, use_master,
-                  warnings, export_all)
+    return module(
+        bld, name, path, depends, private_use, platforms,
+        extra_tasks + (bld.env.DYNAMIC and ['cxx', 'cxxshlib', 'shared_lib'] or ['cxx', 'cxxobjects']), features,
+        extra_includes, extra_defines, extra_public_includes, extra_public_defines, use_master, warnings, export_all
+    )
 
 
 @conf
-def headers(bld,
-            name,
-            depends=[],
-            private_use=[],
-            features=[],
-            platforms=[],
-            extra_public_includes=[],
-            extra_public_defines=[],
-            extra_tasks=[],
-            path='',
-            use_master=True,
-            warnings=True,
-            export_all=False):
+def headers(
+    bld,
+    name,
+    depends=[],
+    private_use=[],
+    features=[],
+    platforms=[],
+    extra_public_includes=[],
+    extra_public_defines=[],
+    extra_tasks=[],
+    path='',
+    use_master=True,
+    warnings=True,
+    export_all=False
+):
     if not path: path = name
     if not bld.env.PROJECTS:
         for p in platforms:
             if p not in bld.env.VALID_PLATFORMS:
                 return None
-    return module(bld, name, path, depends, private_use, platforms, extra_tasks + ['cxx'], features, [], [],
-                  extra_public_includes, extra_public_defines, use_master, warnings, export_all)
+    return module(
+        bld, name, path, depends, private_use, platforms, extra_tasks + ['cxx'], features, [], [],
+        extra_public_includes, extra_public_defines, use_master, warnings, export_all
+    )
 
 
 @conf
-def static_library(bld,
-                   name,
-                   depends=[],
-                   private_use=[],
-                   features=[],
-                   platforms=[],
-                   extra_includes=[],
-                   extra_defines=[],
-                   extra_public_includes=[],
-                   extra_public_defines=[],
-                   extra_tasks=[],
-                   path='',
-                   use_master=True,
-                   warnings=True):
+def static_library(
+    bld,
+    name,
+    depends=[],
+    private_use=[],
+    features=[],
+    platforms=[],
+    extra_includes=[],
+    extra_defines=[],
+    extra_public_includes=[],
+    extra_public_defines=[],
+    extra_tasks=[],
+    path='',
+    use_master=True,
+    warnings=True
+):
     if not path: path = name
     if not bld.env.PROJECTS:
         for p in platforms:
             if p not in bld.env.VALID_PLATFORMS:
                 return None
-    return module(bld, name, path, depends, private_use, platforms, extra_tasks + ['cxx', 'cxxstlib'], features,
-                  extra_includes, extra_defines, extra_public_includes, extra_public_defines, use_master, warnings,
-                  False)
+    return module(
+        bld, name, path, depends, private_use, platforms, extra_tasks + ['cxx', 'cxxstlib'], features, extra_includes,
+        extra_defines, extra_public_includes, extra_public_defines, use_master, warnings, False
+    )
 
 
 @conf
-def shared_library(bld,
-                   name,
-                   depends=[],
-                   private_use=[],
-                   features=[],
-                   platforms=[],
-                   extra_includes=[],
-                   extra_defines=[],
-                   extra_public_includes=[],
-                   extra_public_defines=[],
-                   extra_tasks=[],
-                   path='',
-                   use_master=True,
-                   warnings=True,
-                   export_all=False):
+def shared_library(
+    bld,
+    name,
+    depends=[],
+    private_use=[],
+    features=[],
+    platforms=[],
+    extra_includes=[],
+    extra_defines=[],
+    extra_public_includes=[],
+    extra_public_defines=[],
+    extra_tasks=[],
+    path='',
+    use_master=True,
+    warnings=True,
+    export_all=False
+):
     if not path: path = name
     if not bld.env.PROJECTS:
         for p in platforms:
             if p not in bld.env.VALID_PLATFORMS:
                 return None
-    return module(bld, name, path, depends, private_use, platforms,
-                  extra_tasks + (bld.env.STATIC and ['cxx', 'cxxobjects'] or ['cxx', 'cxxshlib', 'shared_lib']),
-                  features, extra_includes, extra_defines, extra_public_includes, extra_public_defines, use_master,
-                  warnings, export_all)
+    return module(
+        bld, name, path, depends, private_use, platforms,
+        extra_tasks + (bld.env.STATIC and ['cxx', 'cxxobjects'] or ['cxx', 'cxxshlib', 'shared_lib']), features,
+        extra_includes, extra_defines, extra_public_includes, extra_public_defines, use_master, warnings, export_all
+    )
 
 
 @conf
-def engine(bld,
-           name,
-           depends=[],
-           private_use=[],
-           features=[],
-           platforms=[],
-           extra_includes=[],
-           extra_defines=[],
-           extra_public_includes=[],
-           extra_public_defines=[],
-           extra_tasks=[],
-           path='',
-           use_master=True,
-           warnings=True):
+def engine(
+    bld,
+    name,
+    depends=[],
+    private_use=[],
+    features=[],
+    platforms=[],
+    extra_includes=[],
+    extra_defines=[],
+    extra_public_includes=[],
+    extra_public_defines=[],
+    extra_tasks=[],
+    path='',
+    use_master=True,
+    warnings=True
+):
     if getattr(bld, 'launcher', None) != None:
         raise Errors.WafError('Only one engine can be defined')
     if not path: path = name
@@ -592,72 +593,81 @@ def engine(bld,
         for p in platforms:
             if p not in bld.env.VALID_PLATFORMS:
                 return None
-    bld.launcher = module(bld, name, path, depends + ['3rdparty.system.console'], private_use, platforms,
-                          extra_tasks + ['cxx', 'cxxprogram', 'launcher'], features, extra_includes, extra_defines,
-                          extra_public_includes, extra_public_defines, use_master, warnings, False)
+    bld.launcher = module(
+        bld, name, path, depends + ['3rdparty.system.console'], private_use, platforms,
+        extra_tasks + ['cxx', 'cxxprogram', 'launcher'], features, extra_includes, extra_defines, extra_public_includes,
+        extra_public_defines, use_master, warnings, False
+    )
     if 'windows' in bld.env.VALID_PLATFORMS:
-        module(bld, name + 'w', path, depends, private_use, platforms, extra_tasks + ['cxx', 'cxxprogram', 'launcher'],
-               features, extra_includes, extra_defines, extra_public_includes, extra_public_defines, use_master,
-               warnings, False)
+        module(
+            bld, name + 'w', path, depends, private_use, platforms, extra_tasks + ['cxx', 'cxxprogram', 'launcher'],
+            features, extra_includes, extra_defines, extra_public_includes, extra_public_defines, use_master, warnings,
+            False
+        )
 
 
 @conf
-def game(bld,
-         name,
-         depends=[],
-         private_use=[],
-         features=[],
-         platforms=[],
-         extra_includes=[],
-         extra_defines=[],
-         extra_public_includes=[],
-         extra_public_defines=[],
-         extra_tasks=[],
-         path='',
-         use_master=True,
-         warnings=True):
+def game(
+    bld,
+    name,
+    depends=[],
+    private_use=[],
+    features=[],
+    platforms=[],
+    extra_includes=[],
+    extra_defines=[],
+    extra_public_includes=[],
+    extra_public_defines=[],
+    extra_tasks=[],
+    path='',
+    use_master=True,
+    warnings=True
+):
     if not path: path = name
     if not bld.env.PROJECTS:
         for p in platforms:
             if p not in bld.env.VALID_PLATFORMS:
                 return None
-    return module(bld, name, path, depends, private_use, platforms,
-                  extra_tasks + ['cxx', bld.env.STATIC and 'cxxobjects' or 'cxxshlib', 'plugin', 'game'], features,
-                  extra_includes, extra_defines, extra_public_includes, extra_public_defines, use_master, warnings,
-                  False)
+    return module(
+        bld, name, path, depends, private_use, platforms,
+        extra_tasks + ['cxx', bld.env.STATIC and 'cxxobjects' or 'cxxshlib', 'plugin', 'game'], features,
+        extra_includes, extra_defines, extra_public_includes, extra_public_defines, use_master, warnings, False
+    )
 
 
 @conf
-def plugin(bld,
-           name,
-           depends=[],
-           private_use=[],
-           features=[],
-           platforms=[],
-           extra_includes=[],
-           extra_defines=[],
-           extra_public_includes=[],
-           extra_public_defines=[],
-           extra_tasks=[],
-           path='',
-           use_master=True,
-           warnings=True):
+def plugin(
+    bld,
+    name,
+    depends=[],
+    private_use=[],
+    features=[],
+    platforms=[],
+    extra_includes=[],
+    extra_defines=[],
+    extra_public_includes=[],
+    extra_public_defines=[],
+    extra_tasks=[],
+    path='',
+    use_master=True,
+    warnings=True
+):
     if not path: path = name
     for p in platforms:
         if p not in bld.env.VALID_PLATFORMS:
             return None
-    return module(bld, name, path, depends, private_use, platforms,
-                  extra_tasks + ['cxx', bld.env.STATIC and 'cxxobjects' or 'cxxshlib', 'plugin'], features,
-                  extra_includes, extra_defines, extra_public_includes, extra_public_defines, use_master, warnings,
-                  False)
+    return module(
+        bld, name, path, depends, private_use, platforms,
+        extra_tasks + ['cxx', bld.env.STATIC and 'cxxobjects' or 'cxxshlib', 'plugin'], features, extra_includes,
+        extra_defines, extra_public_includes, extra_public_defines, use_master, warnings, False
+    )
 
 
 def build(bld):
     bld.load('cpp_parser', tooldir=[os.path.join(bld.bugenginenode.abspath(), 'mak', 'tools')])
     bld.load('data', tooldir=[os.path.join(bld.bugenginenode.abspath(), 'mak', 'tools')])
+    bld.load('kernel_ast', tooldir=[os.path.join(bld.bugenginenode.abspath(), 'mak', 'tools')])
     bld.load('kernel_task', tooldir=[os.path.join(bld.bugenginenode.abspath(), 'mak', 'tools')])
-    bld.load('clc', tooldir=[os.path.join(bld.bugenginenode.abspath(), 'mak', 'tools')])
-    bld.load('kernel_cpu', tooldir=[os.path.join(bld.bugenginenode.abspath(), 'mak', 'tools')])
     bld.env.STATIC = bld.env.STATIC or Options.options.static
     bld.env.DYNAMIC = Options.options.dynamic
     if bld.env.STATIC and bld.env.DYNAMIC:
@@ -804,14 +814,8 @@ def process_export_all_flag(self):
 @feature('cxx')
 @before_method('process_source')
 def set_extra_flags(self):
-    for f in getattr(self, 'extra_use', []):
-        self.env.append_unique('CPPFLAGS', self.env['CPPFLAGS_%s' % f])
-        self.env.append_unique('CFLAGS', self.env['CFLAGS_%s' % f])
-        self.env.append_unique('CXXFLAGS', self.env['CXXFLAGS_%s' % f])
-        self.env.append_unique('LINKFLAGS', self.env['LINKFLAGS_%s' % f])
-        self.env.append_unique('LIB', self.env['LIB_%s' % f])
-        self.env.append_unique('STLIB', self.env['STLIB_%s' % f])
-    for f in getattr(self, 'features', []):
+    for f in getattr(self, 'extra_use', []) + getattr(self, 'features', []):
+        self.env.append_unique('CLT_CXXFLAGS', self.env['CLT_CXXFLAGS_%s' % f])
         self.env.append_unique('CPPFLAGS', self.env['CPPFLAGS_%s' % f])
         self.env.append_unique('CFLAGS', self.env['CFLAGS_%s' % f])
         self.env.append_unique('CXXFLAGS', self.env['CXXFLAGS_%s' % f])
@@ -1072,7 +1076,8 @@ def c_hook(self, node):
         except KeyError:
             output = self.make_bld_node(
                 'src', None,
-                'master-c-%s-%d.%s' % (node.parent.name, len(self.mastertasks_c_folders), self.objc and 'm' or 'c'))
+                'master-c-%s-%d.%s' % (node.parent.name, len(self.mastertasks_c_folders), self.objc and 'm' or 'c')
+            )
             mastertask_c = self.create_task('master', [node], [output])
             self.mastertasks_c_folders[node.parent] = mastertask_c
             self.create_compiled_task('c', output)
@@ -1082,8 +1087,9 @@ def c_hook(self, node):
             if len(mastertask_c.inputs) <= 10:
                 mastertask_c.set_inputs([node])
             else:
-                output = self.make_bld_node('src', None,
-                                            'master-c-%d.%s' % (len(self.mastertasks_c), self.objc and 'm' or 'c'))
+                output = self.make_bld_node(
+                    'src', None, 'master-c-%d.%s' % (len(self.mastertasks_c), self.objc and 'm' or 'c')
+                )
                 mastertask_c = self.create_task('master', [node], [output])
                 self.mastertasks_c.append(mastertask_c)
                 self.create_compiled_task('c', output)
@@ -1103,15 +1109,17 @@ def cc_hook(self, node):
             mastertask_cxx = self.mastertasks_cxx_folders[node.parent]
             mastertask_cxx.set_inputs([node])
         except AttributeError:
-            output = self.make_bld_node('src', None,
-                                        'master-c-%s-0.%s' % (node.parent.name, self.objc and 'mm' or 'cc'))
+            output = self.make_bld_node(
+                'src', None, 'master-c-%s-0.%s' % (node.parent.name, self.objc and 'mm' or 'cc')
+            )
             mastertask_cxx = self.create_task('master', [node], [output])
             self.mastertasks_cxx_folders = {node.parent: mastertask_cxx}
             self.create_compiled_task('cxx', output)
         except KeyError:
             output = self.make_bld_node(
                 'src', None,
-                'master-c-%s-%d.%s' % (node.parent.name, len(self.mastertasks_cxx_folders), self.objc and 'mm' or 'cc'))
+                'master-c-%s-%d.%s' % (node.parent.name, len(self.mastertasks_cxx_folders), self.objc and 'mm' or 'cc')
+            )
             mastertask_cxx = self.create_task('master', [node], [output])
             self.mastertasks_cxx_folders[node.parent] = mastertask_cxx
             self.create_compiled_task('cxx', output)
@@ -1130,7 +1138,8 @@ def cc_hook(self, node):
                     mastertask_cxx.set_inputs([node])
                 else:
                     output = self.make_bld_node(
-                        'src', None, 'master-cxx-%d.%s' % (len(self.mastertasks_cxx), self.objc and 'mm' or 'cc'))
+                        'src', None, 'master-cxx-%d.%s' % (len(self.mastertasks_cxx), self.objc and 'mm' or 'cc')
+                    )
                     mastertask_cxx = self.create_task('master', [node], [output])
                     self.mastertasks_cxx.append(mastertask_cxx)
                     self.create_compiled_task('cxx', output)
@@ -1216,7 +1225,8 @@ Task.task_factory('dbg_strip', '${STRIP} ${STRIPFLAGS} -S -o ${TGT[0].abspath()}
 dbg_link_cls = Task.task_factory(
     'dbg_link',
     '${OBJCOPY} --add-gnu-debuglink=${SRC[0].path_from(tsk.inputs[1].parent)} ${SRC[1].abspath()} ${TGT[0].abspath()}',
-    color='BLUE')
+    color='BLUE'
+)
 dbg_link_cls.exec_command = exec_command_objcopy
 
 

@@ -4,7 +4,7 @@
 #ifndef BE_COMPUTE_CPU_CPUKERNELSCHEDULER_HH_
 #define BE_COMPUTE_CPU_CPUKERNELSCHEDULER_HH_
 /**************************************************************************************************/
-#include    <stdafx.h>
+#include    <cpu/stdafx.h>
 #include    <scheduler/kernel/ischeduler.hh>
 #include    <scheduler/kernel/parameters/iparameter.script.hh>
 #include    <plugin/plugin.hh>

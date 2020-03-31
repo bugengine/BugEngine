@@ -66,8 +66,9 @@ class Platform:
         return result
 
     def add_toolchain(self, conf, compiler, sub_compilers=[], add=True):
-        toolchain = '%s_%s-%s_%s-%s' % (self.NAME.lower(), compiler.arch, compiler.NAMES[0].lower(), compiler.arch_name,
-                                        compiler.version)
+        toolchain = '%s_%s-%s_%s-%s' % (
+            self.NAME.lower(), compiler.arch, compiler.NAMES[0].lower(), compiler.arch_name, compiler.version
+        )
         if sub_compilers:
             toolchain = '%s-%s-%s' % (self.NAME.lower(), compiler.NAMES[0].lower(), compiler.version)
         if add:
@@ -88,7 +89,6 @@ class Platform:
                 v.ENV_PREFIX = compiler.arch
             if not sub_compilers:
                 arch.configure(conf, compiler.arch)
-                self.add_kernel_toolchains(conf)
         except Exception as e:
             conf.end_msg(e, color='RED')
             conf.variant = ''
@@ -99,7 +99,6 @@ class Platform:
                 conf.recurse(conf.bugenginenode.abspath(), name='setup', once=False)
             if v.STATIC:
                 v.append_unique('DEFINES', ['BE_STATIC=1'])
-            conf.variant = ''
             v.TMPDIR = os.path.join(conf.bldnode.abspath(), toolchain)
             v.PREFIX = os.path.join('bld', toolchain)
             conf.variant = ''
@@ -112,9 +111,6 @@ class Platform:
                     add_build_command(toolchain, optim)
                 conf.env.append_unique('ALL_TOOLCHAINS', toolchain)
             return toolchain
-
-    def add_kernel_toolchains(self, conf):
-        conf.env.KERNEL_TOOLCHAINS += [('cpu', conf.env.TOOLCHAIN)]
 
     def add_multiarch_toolchain(self, toolchain):
         e = self.env

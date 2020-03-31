@@ -3,14 +3,14 @@
     Main wscript for the BugENgine
 """
 
-
 VERSION = "0.2.0"
 APPNAME = "BugEngine"
 
-top = '.'           #pylint: disable=invalid-name
-out = 'bld/.waf'    #pylint: disable=invalid-name
+top = '.'          #pylint: disable=invalid-name
+out = 'bld/.waf'   #pylint: disable=invalid-name
 
 import build_framework
+
 
 def options(option_context):
     "recursively declare options to the parser"
@@ -25,6 +25,7 @@ def configure(configuration_context):
 def setup(configuration_context):
     "setup a platform environment in the current configuration context"
     build_framework.setup(configuration_context)
+    configuration_context.recurse('src/configure.py', name='setup', once=False)
 
 
 def build(build_context):
