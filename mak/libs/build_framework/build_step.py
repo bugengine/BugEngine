@@ -790,7 +790,7 @@ def makefile_feature(task):
             if sys.version_info.major < 3:
                 base_name, ext = os.path.splitext(f)
                 if ext == '.pyc':
-                    f = basename + '.py'
+                    f = base_name + '.py'
             else:
                 try:
                     f = importlib.util.source_from_cache(f)
