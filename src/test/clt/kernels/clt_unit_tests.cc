@@ -7,3 +7,4 @@ __kernel void kmain(u32 index, u32 total, Kernel::segments<float> a, Kernel::seg
     be_forceuse(a);
     be_forceuse(b);
 }
+
