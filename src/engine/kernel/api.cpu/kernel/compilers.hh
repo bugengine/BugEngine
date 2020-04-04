@@ -30,6 +30,7 @@
 # include <kernel/compilers/syntax.hh>
 #endif
 
+#define __host
 #define __device
 
 namespace BugEngine

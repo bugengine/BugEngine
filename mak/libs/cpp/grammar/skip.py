@@ -38,6 +38,7 @@ def p_skip_keyword(p):
                      | __GLOBAL
                      | __LOCAL
                      | __CONSTANT
+                     | __HOST
                      | __DEVICE
                      | BE_TAG
                      | BE_SEGMENT

@@ -53,60 +53,60 @@ private:
 private:
     value_t m_value;
 public:
-    static interlocked<T> create(T value)
+    __host __device static interlocked<T> create(T value)
     {
         interlocked<T> result;
         result.m_value = value_t(value);
         return result;
     }
 
-    operator T() const
+    __host __device operator T() const
     {
         return static_cast<T>(m_value);
     }
-    T operator=(T value)
+    __host __device T operator=(T value)
     {
         return static_cast<T>(impl::set_and_fetch(&m_value, value));
     }
-    T operator=(const interlocked& value)
+    __host __device T operator=(const interlocked& value)
     {
         return static_cast<T>(impl::set_and_fetch(&m_value, value));
     }
-    T exchange(T value)
+    __host __device T exchange(T value)
     {
         return static_cast<T>(impl::fetch_and_set(&m_value, value));
     }
-    T addExchange(T value)
+    __host __device T addExchange(T value)
     {
         return static_cast<T>(impl::fetch_and_add(&m_value, value));
     }
 
-    T operator++()
+    __host __device T operator++()
     {
         return static_cast<T>(impl::fetch_and_add(&m_value, 1)+1);
     }
-    T operator++(int)
+    __host __device T operator++(int)
     {
         return static_cast<T>(impl::fetch_and_add(&m_value, 1));
     }
-    T operator+=(T value)
+    __host __device T operator+=(T value)
     {
         return static_cast<T>(impl::fetch_and_add(&m_value, value)+value);
     }
-    T operator--()
+    __host __device T operator--()
     {
         return static_cast<T>(impl::fetch_and_sub(&m_value, 1)-1);
     }
-    T operator--(int)
+    __host __device T operator--(int)
     {
         return static_cast<T>(impl::fetch_and_sub(&m_value, 1));
     }
-    T operator-=(T value)
+    __host __device T operator-=(T value)
     {
         return static_cast<T>(impl::fetch_and_sub(&m_value, value)-value);
     }
 
-    T setConditional(T value, T condition)
+    __host __device T setConditional(T value, T condition)
     {
         return static_cast<T>(impl::set_conditional(&m_value, value, condition));
     }
@@ -124,37 +124,37 @@ private:
 private:
     value_t m_value;
 public:
-    iptr(T* t)
+    __host __device iptr(T* t)
         :   m_value((typename impl::value_t)(t))
     {
     }
-    operator const T*() const
+    __host __device operator const T*() const
     {
         return reinterpret_cast<T*>(impl::fetch_and_add(const_cast<value_t*>(&m_value), 0));
     }
-    operator T*()
+    __host __device operator T*()
     {
         return reinterpret_cast<T*>(impl::fetch_and_add(&m_value, 0));
     }
-    T* operator->()
+    __host __device T* operator->()
     {
         return reinterpret_cast<T*>(impl::fetch_and_add(&m_value, 0));
     }
-    const T* operator->() const
+    __host __device const T* operator->() const
     {
         return reinterpret_cast<T*>(impl::fetch_and_add(&m_value, 0));
     }
 
-    T* operator=(T* value)
+    __host __device T* operator=(T* value)
     {
         return reinterpret_cast<T*>(impl::set_and_fetch((value_t*)&m_value, (value_t)value));
     }
-    T* exchange(T* value)
+    __host __device T* exchange(T* value)
     {
         return reinterpret_cast<T*>(impl::fetch_and_set((value_t*)&m_value, (value_t)value));
     }
 
-    T* setConditional(T* value, T* condition)
+    __host __device T* setConditional(T* value, T* condition)
     {
         return reinterpret_cast<T*>(impl::set_conditional((value_t*)&m_value, (value_t)value, (value_t)condition));
     }

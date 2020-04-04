@@ -274,13 +274,14 @@ class GnuCompiler(Compiler):
             3,
             4,
         ):
-            extra_flags = ['-Wextra', '-Wno-invalid-offsetof']
+            extra_flags_c = ['-Wextra']
+            extra_flags_cxx = ['-Wextra', '-Wno-invalid-offsetof', '-Wno-extra-semi']
         else:
-            extra_flags = []
-        v.CFLAGS_warnall = ['-std=c99', '-Wall'] + extra_flags + [
+            extra_flags_c = extra_flags_cxx = []
+        v.CFLAGS_warnall = ['-std=c99', '-Wall'] + extra_flags_c + [
             '-pedantic', '-Winline', '-Werror', '-Wstrict-aliasing'
         ] + v.CFLAGS_warnall
-        v.CXXFLAGS_warnall = ['-Wall'] + extra_flags + [
+        v.CXXFLAGS_warnall = ['-Wall'] + extra_flags_cxx + [
             '-Werror', '-Wno-sign-compare', '-Woverloaded-virtual', '-Wstrict-aliasing'
         ] + v.CXXFLAGS_warnall
 

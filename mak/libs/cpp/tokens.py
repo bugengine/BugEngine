@@ -44,6 +44,7 @@ reserved = {
     '__global': '__GLOBAL',
     'restrict': 'RESTRICT',
     '__restrict': '__RESTRICT',
+    '__host': '__HOST',
     '__device': '__DEVICE',
 }
 

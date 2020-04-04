@@ -158,6 +158,7 @@ def p_attribute_left(p):
                        | INLINE
                        | EXPLICIT
                        | MUTABLE
+                       | __HOST
                        | __DEVICE
     """
     p[0] = p[1]
