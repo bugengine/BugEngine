@@ -18,12 +18,12 @@ struct InterlockedType<4>
 {
     typedef __attribute__ ((aligned(4))) i32 value_t;
 
-    static inline __device value_t fetch_and_add(value_t *p, value_t incr);
-    static inline __device value_t fetch_and_sub(value_t *p, value_t incr);
+    static inline __host __device value_t fetch_and_add(value_t *p, value_t incr);
+    static inline __host __device value_t fetch_and_sub(value_t *p, value_t incr);
 
-    static inline __device value_t set_conditional(value_t *p, value_t v, value_t condition);
-    static inline __device value_t set_and_fetch(value_t *p, value_t v);
-    static inline __device value_t fetch_and_set(value_t *p, value_t v);
+    static inline __host __device value_t set_conditional(value_t *p, value_t v, value_t condition);
+    static inline __host __device value_t set_and_fetch(value_t *p, value_t v);
+    static inline __host __device value_t fetch_and_set(value_t *p, value_t v);
 
     /* not defined, host only */
     struct tagged_t
@@ -51,12 +51,12 @@ struct InterlockedType<8>
 {
     typedef __attribute__ ((aligned(8))) u64 value_t;
 
-    static inline __device value_t fetch_and_add(value_t *p, value_t incr);
-    static inline __device value_t fetch_and_sub(value_t *p, value_t incr);
+    static inline __host __device value_t fetch_and_add(value_t *p, value_t incr);
+    static inline __host __device value_t fetch_and_sub(value_t *p, value_t incr);
 
-    static inline __device value_t fetch_and_set(value_t *p, value_t v);
-    static inline __device value_t set_conditional(value_t *p, value_t v, value_t condition);
-    static inline __device value_t set_and_fetch(value_t *p, value_t v);
+    static inline __host __device value_t fetch_and_set(value_t *p, value_t v);
+    static inline __host __device value_t set_conditional(value_t *p, value_t v, value_t condition);
+    static inline __host __device value_t set_and_fetch(value_t *p, value_t v);
 
     /* not defined, host only */
     struct tagged_t
@@ -77,22 +77,38 @@ namespace _Kernel
 
 __device InterlockedType<4>::value_t InterlockedType<4>::fetch_and_add(value_t *p, value_t incr)
 {
+#ifdef __CUDA_ARCH__
     return atomicAdd(p, incr);
+#else
+    return 0;
+#endif
 }
 
 __device InterlockedType<4>::value_t InterlockedType<4>::fetch_and_sub(value_t *p, value_t incr)
 {
+#ifdef __CUDA_ARCH__
     return atomicSub(p, incr);
+#else
+    return 0;
+#endif
 }
 
 __device InterlockedType<4>::value_t InterlockedType<4>::fetch_and_set(value_t *p, value_t v)
 {
+#ifdef __CUDA_ARCH__
     return atomicExch(p, v);
+#else
+    return 0;
+#endif
 }
 
 __device InterlockedType<4>::value_t InterlockedType<4>::set_conditional(value_t *p, value_t v, value_t condition)
 {
+#ifdef __CUDA_ARCH__
     return atomicCAS(p, condition, v);
+#else
+    return 0;
+#endif
 }
 
 __device InterlockedType<4>::value_t InterlockedType<4>::set_and_fetch(value_t *p, value_t v)
@@ -103,22 +119,38 @@ __device InterlockedType<4>::value_t InterlockedType<4>::set_and_fetch(value_t *
 
 __device InterlockedType<8>::value_t InterlockedType<8>::fetch_and_add(value_t *p, value_t incr)
 {
+#ifdef __CUDA_ARCH__
     return atomicAdd(p, incr);
+#else
+    return 0;
+#endif
 }
 
 __device InterlockedType<8>::value_t InterlockedType<8>::fetch_and_sub(value_t *p, value_t incr)
 {
+#ifdef __CUDA_ARCH__
     return atomicAdd(p, -incr);
+#else
+    return 0;
+#endif
 }
 
 __device InterlockedType<8>::value_t InterlockedType<8>::fetch_and_set(value_t *p, value_t v)
 {
+#ifdef __CUDA_ARCH__
     return atomicExch(p, v);
+#else
+    return 0;
+#endif
 }
 
 __device InterlockedType<8>::value_t InterlockedType<8>::set_conditional(value_t *p, value_t v, value_t condition)
 {
+#ifdef __CUDA_ARCH__
     return atomicCAS(p, condition, v);
+#else
+    return 0;
+#endif
 }
 
 __device InterlockedType<8>::value_t InterlockedType<8>::set_and_fetch(value_t *p, value_t v)

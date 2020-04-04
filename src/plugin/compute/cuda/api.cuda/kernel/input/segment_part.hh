@@ -1,8 +1,8 @@
 /* BugEngine <bugengine.devel@gmail.com> / 2008-2014
    see LICENSE for detail */
 
-#ifndef BE_KERNEL_INPUT_SEGMENT_PART_HH_
-#define BE_KERNEL_INPUT_SEGMENT_PART_HH_
+#ifndef BE_KERNEL_CUDA_INPUT_SEGMENT_PART_HH_
+#define BE_KERNEL_CUDA_INPUT_SEGMENT_PART_HH_
 /**************************************************************************************************/
 #include    <kernel/stdafx.h>
 

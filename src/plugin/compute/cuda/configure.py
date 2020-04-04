@@ -86,15 +86,10 @@ def configure(configuration_context):
         v.NVCC_CXX_SRC_F = ''
         v.NVCC_CXX_TGT_F = ['-o']
         v.NVCC_ARCH_ST = ['-arch']
-        v.NVCC_FRAMEWORKPATH_ST = ['-F%s']
+        v.NVCC_FRAMEWORKPATH_ST = '-F%s'
         v.NVCC_FRAMEWORK_ST = ['-framework']
-        v.NVCC_CPPPATH_ST = ['-I']
-        v.NVCC_DEFINES_ST = ['-D']
-        v.NVCC_CXXFLAGS_warnnone = ['-w']
-        v.NVCC_CXXFLAGS_warnall = [
-            '-Wall', '-Wextra', '-Wno-invalid-offsetof', '-Werror', '-Wno-sign-compare', '-Woverloaded-virtual',
-            '-Wstrict-aliasing'
-        ]
+        v.NVCC_CPPPATH_ST = '-I%s'
+        v.NVCC_DEFINES_ST = '-D%s'
 
     configuration_context.end_msg(
         ', '.join('.'.join(str(x) for x in p[0]) for p in configuration_context.env.NVCC_COMPILERS)
@@ -113,6 +108,12 @@ def setup(configuration_context):
             v = configuration_context.env
             v.NVCC_CXX = compiler
             v.append_value('NVCC_CXXFLAGS', ['--compiler-bindir', v.CXX[0]])
+            if v.ARCH_LP64:
+                v.append_value('NVCC_CXXFLAGS', ['-m64'])
+            else:
+                v.append_value('NVCC_CXXFLAGS', ['-m32'])
+            for flag in v.CXXFLAGS:
+                v.append_value('NVCC_CXXFLAGS', ['-Xcompiler', flag])
             try:
                 target_path = configuration_context.check_nvcc(compiler)
             except Exception as e:
@@ -122,9 +123,14 @@ def setup(configuration_context):
             else:
                 cuda_available = True
                 pprint('GREEN', '+{}'.format(version), sep=' ')
+
+                #for feature in 'warnnone', 'warnall', 'debug', 'profile', 'final':
+                #    for flag in v['CXXFLAGS_{}'.format(feature)]:
+                #        v.append_value('NVCC_CXXFLAGS_{}'.format(feature), ['-Xcompiler', flag])
+
                 configuration_context.setenv(toolchain)
-                configuration_context.env.append_value('INCLUDES', [os.path.join(target_path, 'include')])
-                configuration_context.env.append_value('STLIBPATH', [os.path.join(target_path, 'lib')])
+                configuration_context.env.append_value('INCLUDES_cuda', [os.path.join(target_path, 'include')])
+                configuration_context.env.append_value('STLIBPATH_cuda', [os.path.join(target_path, 'lib')])
                 configuration_context.env.append_value('CUDA_VERSIONS', [('cuda{}'.format(version), cuda_toolchain)])
                 configuration_context.env.append_value('FEATURES', ['cuda'])
         if cuda_available:

@@ -42,11 +42,11 @@ public:
     }
     typename POLICY::reference operator*() const
     {
-        return static_cast<typename POLICY::item*>(m_current.operator->())->value;
+        return static_cast<typename POLICY::item_type*>(m_current.operator->())->value;
     }
     typename POLICY::pointer operator->() const
     {
-        return &(static_cast<typename POLICY::item*>(m_current.operator->()))->value;
+        return &(static_cast<typename POLICY::item_type*>(m_current.operator->()))->value;
     }
 
     iterator_base& operator++()
@@ -91,7 +91,7 @@ struct hashmap<Key, Value, Hash>::iterator_policy
     typedef typename hashmap<Key, Value, Hash>::value_type  value_type;
     typedef typename hashmap<Key, Value, Hash>::value_type& reference;
     typedef typename hashmap<Key, Value, Hash>::value_type* pointer;
-    typedef typename hashmap<Key, Value, Hash>::item item;
+    typedef typename hashmap<Key, Value, Hash>::item item_type;
     typedef typename hashmap<Key, Value, Hash>::list_iterator iterator;
 };
 template< typename Key, typename Value, typename Hash >
@@ -100,7 +100,7 @@ struct hashmap<Key, Value, Hash>::const_iterator_policy
     typedef const typename hashmap<Key, Value, Hash>::value_type  value_type;
     typedef const typename hashmap<Key, Value, Hash>::value_type& reference;
     typedef const typename hashmap<Key, Value, Hash>::value_type* pointer;
-    typedef const typename hashmap<Key, Value, Hash>::item item;
+    typedef const typename hashmap<Key, Value, Hash>::item item_type;
     typedef typename hashmap<Key, Value, Hash>::const_list_iterator iterator;
 };
 
@@ -378,7 +378,7 @@ void hashmap<Key, Value, Hash>::swap(hashmap& other)
     m_index.swap(other.m_index);
     m_items.swap(other.m_items);
     m_itemPool.swap(other.m_itemPool);
-    swap(m_count, other.m_count);
+    minitl::swap(m_count, other.m_count);
 }
 
 }

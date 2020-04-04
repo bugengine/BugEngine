@@ -14,10 +14,6 @@ template< typename T, int INDEX >
 class intrusive_list<T, INDEX>::item
 {
     friend class intrusive_list<T, INDEX>;
-    friend struct intrusive_list<T, INDEX>::iterator_policy;
-    friend struct intrusive_list<T, INDEX>::const_iterator_policy;
-    friend struct intrusive_list<T, INDEX>::reverse_iterator_policy;
-    friend struct intrusive_list<T, INDEX>::const_reverse_iterator_policy;
 private:
     mutable const item* m_next;
     mutable const item* m_previous;
@@ -376,6 +372,7 @@ typename intrusive_list<T, INDEX>::iterator                 intrusive_list<T, IN
         ++first;
         i->unhook();
     }
+    return first;
 }
 
 

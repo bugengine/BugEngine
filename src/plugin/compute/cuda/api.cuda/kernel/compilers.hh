@@ -5,6 +5,7 @@
 #define BE_KERNEL_CUDA_COMPILERS_HH_
 /**************************************************************************************************/
 
+#define __host    __host__
 #define __device  __device__
 
 typedef signed char         i8;
