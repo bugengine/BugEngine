@@ -68,10 +68,6 @@ public:
     {
         return static_cast<T>(impl::set_and_fetch(&m_value, value));
     }
-    __host __device T operator=(const interlocked& value)
-    {
-        return static_cast<T>(impl::set_and_fetch(&m_value, value));
-    }
     __host __device T exchange(T value)
     {
         return static_cast<T>(impl::fetch_and_set(&m_value, value));

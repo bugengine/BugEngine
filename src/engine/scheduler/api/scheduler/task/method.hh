@@ -27,6 +27,10 @@ public:
     ~MethodCaller()
     {
     }
+    MethodCaller(const MethodCaller& other)
+        :   m_owner(other.m_owner)
+    {
+    }
 
     Range prepare() { return Range(); }
     void operator()(const Range& /*r*/) const
@@ -51,6 +55,10 @@ public:
     ~ProcedureCaller()
     {
     }
+    ProcedureCaller(const ProcedureCaller& other)
+    {
+    }
+
 
     range_onestep prepare() { return range_onestep(); }
     void operator()(const range_onestep& /*r*/) const

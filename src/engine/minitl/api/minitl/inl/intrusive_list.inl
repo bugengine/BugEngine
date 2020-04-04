@@ -104,8 +104,14 @@ private:
 public:
     base_iterator();
     explicit base_iterator(item_ptr it);
-    base_iterator(const base_iterator<typename POLICY::mutable_policy>& other);
+    base_iterator(const base_iterator& other);
+    //base_iterator(const base_iterator<typename POLICY::mutable_policy>& other);
     ~base_iterator();
+    base_iterator& operator=(const base_iterator& other)
+    {
+        m_iterator = other.m_iterator;
+        return *this;
+    }
 public:
     bool operator==(const base_iterator<POLICY>& other) const;
     bool operator!=(const base_iterator<POLICY>& other) const;
@@ -152,10 +158,17 @@ intrusive_list<T, INDEX>::base_iterator<POLICY>::base_iterator(item_ptr it)
 
 template< typename T, int INDEX >
 template< typename POLICY >
+intrusive_list<T, INDEX>::base_iterator<POLICY>::base_iterator(const base_iterator& other)
+:   m_iterator(other.m_iterator)
+{
+}
+
+/*template< typename T, int INDEX >
+template< typename POLICY >
 intrusive_list<T, INDEX>::base_iterator<POLICY>::base_iterator(const base_iterator<typename POLICY::mutable_policy>& other)
 :   m_iterator(other.operator->())
 {
-}
+}*/
 
 template< typename T, int INDEX >
 template< typename POLICY >

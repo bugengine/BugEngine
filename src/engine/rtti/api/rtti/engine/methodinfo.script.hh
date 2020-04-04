@@ -29,8 +29,6 @@ published:
         Value getTag(raw<const Class> type) const;
     public:
         static const Value s_noDefaultValue;
-    private:
-        Parameter& operator=(const Parameter&);
     };
     struct be_api(RTTI) Overload
     {
@@ -44,8 +42,6 @@ published:
         Value getTag(raw<const Class> tagType) const;
     public:
         Value (*call)(Value* params, u32 nparams);
-    private:
-        Overload& operator=(const Overload&);
     };
 
 published:
@@ -55,8 +51,6 @@ published:
     raw<const Method>             call;
 published:
     Value doCall(Value* params, u32 nparams) const;
-private:
-    Method& operator=(const Method&);
 };
 
 }}

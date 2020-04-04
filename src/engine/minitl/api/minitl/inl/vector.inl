@@ -31,6 +31,7 @@ public:
     base_iterator();
     template< typename OTHERPOLICY >
     base_iterator(const base_iterator<OTHERPOLICY>& other);
+    base_iterator(const base_iterator& other);
     ~base_iterator();
 public:
     bool operator==(const base_iterator<POLICY>& other);
@@ -105,6 +106,14 @@ template< typename POLICY >
 vector<T>::base_iterator<POLICY>::base_iterator(const vector<T>* owner, typename POLICY::pointer it)
 :   m_owner(owner)
 ,   m_iterator(it)
+{
+}
+
+template< typename T >
+template< typename POLICY >
+vector<T>::base_iterator<POLICY>::base_iterator(const base_iterator<POLICY>& other)
+:   m_owner(other.m_owner)
+,   m_iterator(other.m_iterator)
 {
 }
 

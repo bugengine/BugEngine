@@ -312,10 +312,11 @@ template< typename Key, typename Value, typename Hash >
 typename hashmap<Key, Value, Hash>::const_iterator hashmap<Key, Value, Hash>::find(const Key& key) const
 {
     u32 hash = Hash()(key) % (u32)(m_index.count()-1);
-    list_iterator it = list_iterator(m_index[hash].second);
-    for (++it; it != m_index[hash+1].second; ++it)
+    const_list_iterator it(const_list_iterator(m_index[hash].second.operator->()));
+    const_list_iterator stop(const_list_iterator(m_index[hash+1].second.operator->()));
+    for (++it; it != stop; ++it)
     {
-        if (Hash()(static_cast<item*>(it.operator->())->value.first, key))
+        if (Hash()(static_cast<const item*>(it.operator->())->value.first, key))
         {
             return const_iterator(*this, it);
         }
