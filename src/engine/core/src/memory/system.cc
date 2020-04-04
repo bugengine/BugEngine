@@ -41,7 +41,7 @@ SystemAllocator::~SystemAllocator()
 void* SystemAllocator::allocate()
 {
     ++ m_used;
-    itaggedptr<Block>::ticket_t ticket;
+    minitl::itaggedptr<Block>::ticket_t ticket;
     Block* result;
     do
     {
@@ -64,7 +64,7 @@ void* SystemAllocator::allocate()
 void  SystemAllocator::free(void* memory)
 {
     -- m_used;
-    itaggedptr<Block>::ticket_t ticket;
+    minitl::itaggedptr<Block>::ticket_t ticket;
     Block* block;
     do
     {

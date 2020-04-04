@@ -5,6 +5,7 @@
 #define BE_CORE_MEMORY_ALLOCATORS_SYSTEM_HH_
 /**************************************************************************************************/
 #include    <core/stdafx.h>
+#include    <kernel/interlocked_stack.hh>
 #include    <minitl/allocator.hh>
 #include    <core/threads/mutex.hh>
 
@@ -31,13 +32,13 @@ public:
 private:
     struct Block
     {
-        itaggedptr<Block> next;
+        minitl::itaggedptr<Block> next;
     };
-    itaggedptr<Block>   m_head;
-    i_u32               m_capacity;
-    i_u32               m_used;
-    const BlockSize     m_blockSize;
-    Mutex               m_allocLock;
+    minitl::itaggedptr<Block>   m_head;
+    i_u32                       m_capacity;
+    i_u32                       m_used;
+    const BlockSize             m_blockSize;
+    Mutex                       m_allocLock;
 private:
     u32     platformPageSize();
     byte*   platformReserve(u32 size);

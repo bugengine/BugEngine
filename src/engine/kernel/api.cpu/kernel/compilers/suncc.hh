@@ -12,10 +12,9 @@
 # error Platform not supported
 #endif
 
-#ifndef _CLC
-# include <stdint.h>
-# include <stdlib.h>
-# include <alloca.h>
+#include <stdint.h>
+#include <stdlib.h>
+#include <alloca.h>
 typedef int8_t                  i8;
 typedef int16_t                 i16;
 typedef int32_t                 i32;
@@ -33,8 +32,6 @@ extern "C" void* __builtin_alloca(size_t);
 
 #undef __REDIRECT
 #include <cerrno>
-
-#endif
 
 #define    override
 #define BE_NOINLINE

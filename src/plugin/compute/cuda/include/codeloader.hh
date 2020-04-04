@@ -1,22 +1,22 @@
 /* BugEngine <bugengine.devel@gmail.com> / 2008-2014
    see LICENSE for detail */
 
-#ifndef BE_COMPUTE_CPU_CODELOADER_HH_
-#define BE_COMPUTE_CPU_CODELOADER_HH_
+#ifndef BE_COMPUTE_CUDA_CODELOADER_HH_
+#define BE_COMPUTE_CUDA_CODELOADER_HH_
 /**************************************************************************************************/
-#include <cpu/stdafx.h>
+#include <cuda/stdafx.h>
 #include <scheduler/kernel/icodeloader.hh>
 
-namespace BugEngine { namespace KernelScheduler { namespace CPU
+namespace BugEngine { namespace KernelScheduler { namespace Cuda
 {
 
 class CodeLoader : public ICodeLoader
 {
 private:
-    const inamespace m_cpuVariant;
+    const inamespace m_cudaVersion;
 
 public:
-    CodeLoader(const inamespace &cpuVariant);
+    CodeLoader(const inamespace &cudaVersion);
     ~CodeLoader();
 
     virtual void load(weak<const Resource::Description> kernelDescription, Resource::Resource &resource) override;

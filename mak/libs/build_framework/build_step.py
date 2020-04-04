@@ -451,7 +451,9 @@ def thirdparty(bld, name, feature='', path='', var='', use=[], private_use=[]):
             for bin_path in bin_paths:
                 tg.deploy_directory(bld.env, bin_path, '', 'DEPLOY_RUNBINDIR')
             bld.env.append_unique('THIRDPARTIES_FIRST', name)
-    return supported
+        return tg
+    else:
+        return None
 
 
 @conf

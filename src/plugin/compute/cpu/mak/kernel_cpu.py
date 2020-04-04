@@ -70,7 +70,7 @@ class cpu_header(Task.Task):
     def scan(self):
         return ([], [])
 
-    vars = ['KERNEL_OPTIM_VARIANTS']
+    vars = ['VECTOR_OPTIM_VARIANTS']
 
     def run(self):
         with open(self.outputs[0].abspath(), 'w') as out:

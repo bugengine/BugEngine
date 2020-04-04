@@ -8,7 +8,11 @@
 #include    <kernel/stdafx.h>
 
 
+#if defined(BE_COMPUTE)
+#define     be_api(module)
+#else
 #define     be_api(module)  module##EXPORT
+#endif
 
 #if defined(building_minitl) || defined(MINITL_EXPORTS)
 # define    MINITLEXPORT         BE_EXPORT
