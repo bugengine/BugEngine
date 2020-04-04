@@ -41,8 +41,6 @@ private:
     {
         T& value;
         explicit ByRefType(T& t) : value(t) { }
-    private:
-        ByRefType& operator=(const ByRefType& other);
     };
     void* unpackAs(const Type& ti, ref<minitl::refcountable>& rptr, weak<minitl::refcountable>& wptr, minitl::refcountable*& ptr);
     void store(const void* src);
