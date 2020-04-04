@@ -275,7 +275,7 @@ class GnuCompiler(Compiler):
             4,
         ):
             extra_flags_c = ['-Wextra']
-            extra_flags_cxx = ['-Wextra', '-Wno-invalid-offsetof', '-Wno-extra-semi']
+            extra_flags_cxx = ['-Wextra', '-Wno-invalid-offsetof']
         else:
             extra_flags_c = extra_flags_cxx = []
         v.CFLAGS_warnall = ['-std=c99', '-Wall'] + extra_flags_c + [
