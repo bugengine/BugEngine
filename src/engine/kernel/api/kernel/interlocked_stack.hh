@@ -11,6 +11,50 @@ namespace minitl
 {
 
 template< typename T >
+struct itaggedptr
+{
+private:
+    typedef _Kernel::InterlockedType< sizeof(T*) > impl;
+    typedef typename impl::tagged_t                type_t;
+    typedef typename type_t::value_t               value_t;
+private:
+    type_t m_value;
+public:
+    itaggedptr(T* t)
+        :   m_value((typename type_t::value_t)(t))
+    {
+    }
+    typedef typename type_t::tag_t                 ticket_t;
+
+    operator const T*() const
+    {
+        return static_cast<T*>(m_value.value());
+    }
+    operator T*()
+    {
+        return static_cast<T*>(m_value.value());
+    }
+    T* operator->()
+    {
+        return static_cast<T*>(m_value.value());
+    }
+    const T* operator->() const
+    {
+        return static_cast<T*>(m_value.value());
+    }
+
+    ticket_t getTicket()
+    {
+        return impl::get_ticket(m_value);
+    }
+    bool setConditional(T* value, const ticket_t& condition)
+    {
+        return impl::set_conditional(&m_value, reinterpret_cast<value_t>(value), condition);
+    }
+};
+
+
+template< typename T >
 class istack
 {
 public:

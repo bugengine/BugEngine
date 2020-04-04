@@ -46,9 +46,8 @@
 
 #ifndef _WIN32
 
-#ifndef _CLC
-# include <unistd.h>
-# include <stdint.h>
+#include <unistd.h>
+#include <stdint.h>
 typedef signed __int8           i8;
 typedef signed __int16          i16;
 typedef signed __int32          i32;
@@ -58,8 +57,6 @@ typedef unsigned __int16        u16;
 typedef unsigned __int32        u32;
 typedef unsigned __int64        u64;
 typedef u8                      byte;
-
-#endif
 
 # define override
 # define BE_NOINLINE            __attribute__((noinline))
@@ -75,7 +72,6 @@ typedef u8                      byte;
 
 #else
 
-#ifndef _CLC
 typedef signed __int8           i8;
 typedef signed __int16          i16;
 typedef signed __int32          i32;
@@ -85,7 +81,6 @@ typedef unsigned __int16        u16;
 typedef unsigned __int32        u32;
 typedef unsigned __int64        u64;
 typedef u8                      byte;
-#endif
 
 # define BE_EXPORT              __declspec(dllexport)
 # define BE_IMPORT              __declspec(dllimport)

@@ -165,6 +165,7 @@ bool InterlockedType<4>::set_conditional(tagged_t *p, tagged_t::value_t v,
              : "S"(p), "a"(condition.taggedvalue.tag), "d"(condition.taggedvalue.value), "c"(v)
              : "memory", "cc"
     );
+    be_forceuse(unused);
     return result;
 }
 

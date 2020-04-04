@@ -19,6 +19,7 @@ def build_externals(bld):
     bld.external('3rdparty.graphics.OpenGL')
     bld.external('3rdparty.graphics.OpenGLES2')
     bld.external('3rdparty.compute.OpenCL')
+    bld.external('3rdparty.compute.CUDA')
     bld.external('3rdparty.audio.OpenAL')
     bld.external('3rdparty.audio.oggvorbis')
     bld.external('3rdparty.physics.bullet')
@@ -36,14 +37,9 @@ def build_bugengine(bld):
         Declares the main library and entry point
     """
     bld.module('engine.mak', 'mak', features=['Makefile'], root=bld.bugenginenode)
-    bld.headers('engine.kernel.generic', [], extra_public_includes=[bld.path.make_node('engine/kernel/api/generic')])
-    bld.headers(
-        'engine.kernel.cpu', [],
-        path='engine.kernel',
-        extra_public_includes=[bld.path.make_node('engine/kernel/api/cpu')]
-    )
-    bld.library('engine.minitl', bld.platforms + ['engine.mak', 'engine.kernel.generic'])
-    bld.library('engine.core', ['engine.minitl', 'engine.kernel.generic'])
+    bld.headers('engine.kernel', [], extra_public_includes=[bld.path.make_node('engine/kernel/api.cpu')])
+    bld.library('engine.minitl', bld.platforms + ['engine.mak', 'engine.kernel'])
+    bld.library('engine.core', ['engine.minitl', 'engine.kernel'])
     bld.library('engine.network', ['engine.core'])
     bld.library('engine.rtti', ['engine.core', 'engine.network'], ['3rdparty.system.zlib'])
     bld.library('engine.filesystem', ['engine.core', 'engine.rtti'], ['3rdparty.system.minizip'])
@@ -120,12 +116,6 @@ def build_plugins(bld):
             )
 
     bld.plugin('plugin.compute.cpu', ['engine.bugengine'], extra_tasks=['generate_cpu_variants'])
-    #bld.plugin('plugin.compute.glcompute',
-    #		   ['engine.bugengine', 'plugin.compute.cpu'])
-    #bld.plugin('plugin.compute.directcompute',
-    #		   ['engine.bugengine', 'plugin.compute.cpu'])
-    #bld.plugin('plugin.compute.cuda',
-    #		   ['engine.bugengine', 'plugin.compute.cpu'])
     bld.plugin(
         'plugin.compute.opencl', ['engine.bugengine', 'plugin.compute.cpu'], ['3rdparty.compute.OpenCL'],
         features=['OpenCL']
@@ -135,6 +125,10 @@ def build_plugins(bld):
         ['engine.bugengine', 'plugin.graphics.GL4', 'plugin.compute.opencl', 'plugin.compute.cpu'],
         ['3rdparty.graphics.OpenGL', '3rdparty.compute.OpenCL'],
         features=['OpenGL', 'OpenCL', 'GUI']
+    )
+    bld.plugin(
+        'plugin.compute.cuda', ['engine.bugengine'], ['3rdparty.compute.CUDA'],
+        features=['cuda'], extra_tasks=['generate_cuda_versions']
     )
 
     bld.plugin(
@@ -207,6 +201,7 @@ def build(bld):
     """
         Declares each bugengine module and their dependencies
     """
+    bld.env.KERNEL_BACKEND = 'cpu'
     build_externals(bld)
     build_bugengine(bld)
     build_plugins(bld)

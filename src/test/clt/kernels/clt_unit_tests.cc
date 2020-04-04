@@ -1,6 +1,6 @@
 #include <kernel/input/segments.hh>
 
-__kernel void kmain(u32 index, u32 total, Kernel::segments<float> a, Kernel::segments<float> b)
+__device void kmain(u32 index, u32 total, Kernel::segments<float> a, Kernel::segments<float> b)
 {
     be_forceuse(index);
     be_forceuse(total);
