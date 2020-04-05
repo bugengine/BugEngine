@@ -77,9 +77,9 @@ def configure(configuration_context):
 
     if compilers:
         v.NVCC_COMPILERS = sorted(compilers)
-        v.NVCC_CXXFLAGS_debug = ['-D_DEBUG']
-        v.NVCC_CXXFLAGS_profile = ['-DNDEBUG', '-fno-rtti', '-fno-exceptions']
-        v.NVCC_CXXFLAGS_final = ['-DNDEBUG', '-fno-rtti', '-fno-exceptions']
+        v.NVCC_CXXFLAGS_debug = ['-D_DEBUG', '-G']
+        v.NVCC_CXXFLAGS_profile = ['-DNDEBUG', '-O2', '--generate-line-info']
+        v.NVCC_CXXFLAGS_final = ['-DNDEBUG', '-O2']
         v.NVCC_CXXFLAGS = [
             '-c', '-x', 'cu', '-I%s' % configuration_context.path.make_node('api.cuda').abspath()
         ]
