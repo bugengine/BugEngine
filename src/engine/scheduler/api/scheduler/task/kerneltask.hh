@@ -25,7 +25,7 @@ namespace BugEngine { namespace Task
 class be_api(SCHEDULER) KernelTask : public ITask
 {
     friend class ::BugEngine::Scheduler;
-    BE_NOCOPY(KernelTask)
+    BE_NOCOPY(KernelTask);
 private:
     weak<const KernelScheduler::Kernel> const                m_kernel;
     minitl::array< weak<KernelScheduler::IParameter> > const m_parameters;
