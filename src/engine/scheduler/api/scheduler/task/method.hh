@@ -57,6 +57,7 @@ public:
     }
     ProcedureCaller(const ProcedureCaller& other)
     {
+        be_forceuse(other);
     }
 
 
