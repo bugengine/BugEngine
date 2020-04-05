@@ -77,7 +77,7 @@ def configure(configuration_context):
 
     if compilers:
         v.NVCC_COMPILERS = sorted(compilers)
-        v.NVCC_CXXFLAGS_debug = ['-D_DEBUG', '-G']
+        v.NVCC_CXXFLAGS_debug = ['-D_DEBUG', '--generate-line-info']
         v.NVCC_CXXFLAGS_profile = ['-DNDEBUG', '-O2', '--generate-line-info']
         v.NVCC_CXXFLAGS_final = ['-DNDEBUG', '-O2']
         v.NVCC_CXXFLAGS = [
