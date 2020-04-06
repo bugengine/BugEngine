@@ -110,7 +110,7 @@ class bin2c(Task.Task):
 
     def run(self):
         with open(self.outputs[0].abspath(), 'w') as out:
-            out.write("const char* s_cudaKernel[] = { %s };\n" % '')
+            out.write("const char* s_cudaKernel[] = { %s };\n" % '0')
 
 
 @extension('.cu')
