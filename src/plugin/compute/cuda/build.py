@@ -38,8 +38,8 @@ __device__ void _kmain(const u32 index, const u32 total, Parameter* parameters)
 
 class nvcc(Task.Task):
     "nvcc"
-    run_str = '${NVCC_CXX} ${NVCC_CXXFLAGS} --cubin ${NVCC_FRAMEWORKPATH_ST:FRAMEWORKPATH} ${NVCC_CPPPATH_ST:INCPATHS} -DBE_COMPUTE=1 ${NVCC_DEFINES_ST:DEFINES} -D_NVCC=1 ${NVCC_CXX_SRC_F}${SRC[0].abspath()} ${NVCC_CXX_TGT_F} ${TGT}'
-    ext_out = ['.cubin']
+    run_str = '${NVCC_CXX} ${NVCC_CXXFLAGS} --fatbin -arch compute_30 ${NVCC_FRAMEWORKPATH_ST:FRAMEWORKPATH} ${NVCC_CPPPATH_ST:INCPATHS} -DBE_COMPUTE=1 ${NVCC_DEFINES_ST:DEFINES} -D_NVCC=1 ${NVCC_CXX_SRC_F}${SRC[0].abspath()} ${NVCC_CXX_TGT_F} ${TGT}'
+    ext_out = ['.fatbin']
 
     def scan(self):
         try:
@@ -115,7 +115,7 @@ class bin2c(Task.Task):
 
 @extension('.cu')
 def process_cuda_source(task_gen, cuda_source):
-    cuda_bin = task_gen.make_bld_node('obj', cuda_source.parent, cuda_source.name[:-2] + 'cubin')
+    cuda_bin = task_gen.make_bld_node('obj', cuda_source.parent, cuda_source.name[:-2] + 'fatbin')
     cuda_cc = task_gen.make_bld_node('src', cuda_source.parent, cuda_source.name[:-2] + 'cc')
     task_gen.create_task('nvcc', [cuda_source], [cuda_bin])
     task_gen.create_task('bin2c', [cuda_bin], [cuda_cc])
