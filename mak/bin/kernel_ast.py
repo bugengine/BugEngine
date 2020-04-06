@@ -1,5 +1,6 @@
 import os
 import sys
+sys.path.append(os.path.join(os.path.dirname(os.path.dirname(sys.argv[0])), 'libs'))
 from cpp import parser, tree
 from optparse import OptionParser
 import traceback
