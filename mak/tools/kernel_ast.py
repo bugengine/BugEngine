@@ -28,8 +28,6 @@ def kernel_generate_ast(self):
         tsk.env.MACROS_IGNORE = self.bld.bugenginenode.find_node('mak/libs/cpp/macros_ignore').abspath(),
         tsk.env.TMPDIR = self.bld.bldnode.parent.parent.abspath()
         tsk.env.PYTHON = sys.executable
-        tsk.env.env = dict(os.environ)
-        tsk.env.env['PYTHONPATH'] = os.path.join(self.bld.bugenginenode.abspath(), 'mak', 'libs')
         mak_node = self.bld.bugenginenode.make_node('mak')
         tsk.dep_nodes = [mak_node.find_node('bin/kernel_ast.py')]
         tsk.dep_nodes += mak_node.find_node('libs/cpp').ant_glob('**/*.py')

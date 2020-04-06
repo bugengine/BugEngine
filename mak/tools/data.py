@@ -82,8 +82,6 @@ def datagen(self, node):
     tsk.path = self.bld.variant_dir
     tsk.env.PCH_HEADER = ['--pch']
     tsk.env.PCH = self.pchstop and [self.pchstop] or []
-    tsk.env.env = dict(os.environ)
-    tsk.env.env['PYTHONPATH'] = os.path.join(self.bld.bugenginenode.abspath(), 'mak', 'libs')
     out_node.parent.mkdir()
     tsk.dep_nodes = [self.bld.bugenginenode.find_node('mak/bin/ddf.py')]
     tsk.dep_nodes += self.bld.bugenginenode.find_node('mak/libs/cpp').ant_glob('**/*.py')
