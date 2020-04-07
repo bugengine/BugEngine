@@ -28,6 +28,7 @@
 #pragma warning disable 1419    // external declaration in primary source file
 #pragma warning disable 1740    // dllexport/dllimport conflict with "XXX" (declared at line YY); dllexport assumed
 #pragma warning disable 1292    // unknown attribute "xxx"
+#pragma warning disable 654     // overloaded virtual function "X:xxx" is only partially overridden in class "Y"
 
 #if __ICL >= 1200
 # pragma warning disable 791    // calling convention specified more than once
