@@ -16,7 +16,7 @@ struct InterlockedType;
 template<>
 struct InterlockedType<4>
 {
-    typedef __attribute__ ((aligned(4))) i32 value_t;
+    typedef i32 value_t;
 
     static inline __host __device value_t fetch_and_add(value_t *p, value_t incr);
     static inline __host __device value_t fetch_and_sub(value_t *p, value_t incr);
@@ -49,7 +49,7 @@ struct InterlockedType<2> : public InterlockedType<4>
 template<>
 struct InterlockedType<8>
 {
-    typedef __attribute__ ((aligned(8))) u64 value_t;
+    typedef u64 value_t;
 
     static inline __host __device value_t fetch_and_add(value_t *p, value_t incr);
     static inline __host __device value_t fetch_and_sub(value_t *p, value_t incr);

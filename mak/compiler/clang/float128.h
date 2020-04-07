@@ -1,3 +1,6 @@
+#pragma once
+
+#if __cplusplus
 struct __float128
 {
     __float128(int);
@@ -13,3 +16,4 @@ struct __float128
     float operator/(__float128) const;
     float operator-() const;
 };
+#endif

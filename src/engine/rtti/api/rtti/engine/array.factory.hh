@@ -198,7 +198,7 @@ const RTTI::Method::Overload array_BugHelper<T>::s_method_Index_overloads[] = {
 
 template< typename T >
 const RTTI::ScriptingArrayAPI array_BugHelper<T>::scriptingArrayAPI = {
-    value_type,
+    be_typeid<T>::type(),
     &array_size,
     &index,
     &indexConst
