@@ -19,6 +19,7 @@ class ParticleRain : public Application
 {
 private:
     Plugin::Plugin<Resource::ILoader>   const   m_packageManager;
+    Plugin::Plugin<Resource::ILoader>   const   m_computeModule;
     ref<const Package>                  const   m_mainPackage;
 public:
     ParticleRain(const Plugin::Context& context);

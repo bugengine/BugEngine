@@ -238,9 +238,13 @@ class GnuCompiler(Compiler):
     def set_optimisation_options(self, conf):
         v = conf.env
         if 'Clang' in self.NAMES:
-            v.append_unique('CXXFLAGS', ['-fno-threadsafe-statics'])
+            v.append_unique('CXXFLAGS_debug', ['-fno-threadsafe-statics'])
+            v.append_unique('CXXFLAGS_profile', ['-fno-threadsafe-statics'])
+            v.append_unique('CXXFLAGS_final', ['-fno-threadsafe-statics'])
         if 'GCC' in self.NAMES and self.version_number >= (4, ):
-            v.append_unique('CXXFLAGS', ['-fno-threadsafe-statics'])
+            v.append_unique('CXXFLAGS_debug', ['-fno-threadsafe-statics'])
+            v.append_unique('CXXFLAGS_profile', ['-fno-threadsafe-statics'])
+            v.append_unique('CXXFLAGS_final', ['-fno-threadsafe-statics'])
         v.CPPFLAGS_debug = ['-D_DEBUG'] + v.CPPFLAGS_debug
         v.CFLAGS_debug = ['-pipe', '-g', '-D_DEBUG'] + v.CFLAGS_debug
         v.CXXFLAGS_debug = ['-pipe', '-g', '-D_DEBUG'] + v.CXXFLAGS_debug

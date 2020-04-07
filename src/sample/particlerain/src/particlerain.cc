@@ -16,6 +16,7 @@ ParticleRain::ParticleRain(const Plugin::Context& context)
                     context.resourceManager,
                     context.scheduler)
     ,   m_packageManager("plugin.scripting.package", pluginContext())
+    ,   m_computeModule("plugin.compute.cuda", pluginContext())
     ,   m_mainPackage(ref<Package>::create(Arena::game(), pluginContext().dataFolder->openFile(ifilename("particlerain/particlerain.pkg"))))
 {
     pluginContext().resourceManager->load(m_mainPackage);

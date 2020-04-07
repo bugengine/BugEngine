@@ -53,7 +53,7 @@ KernelObject::KernelObject(const inamespace& name)
     ,   m_callback(scoped<Callback>::create(Arena::task()))
     ,   m_callbackConnection(m_task, m_callback)
 {
-    be_debug("kernel entry point: %p" | m_entryPoint);
+    be_debug("kernel entry point: %p"  | m_entryPoint);
 }
 
 KernelObject::~KernelObject()

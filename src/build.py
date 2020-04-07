@@ -127,8 +127,7 @@ def build_plugins(bld):
         features=['OpenGL', 'OpenCL', 'GUI']
     )
     bld.plugin(
-        'plugin.compute.cuda', ['engine.bugengine'], ['3rdparty.compute.CUDA'],
-        features=['cuda'], extra_tasks=['generate_cuda_versions']
+        'plugin.compute.cuda', ['engine.bugengine'], ['3rdparty.compute.CUDA'], features=['cuda']
     )
 
     bld.plugin(

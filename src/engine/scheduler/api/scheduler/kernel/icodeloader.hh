@@ -12,7 +12,7 @@ namespace BugEngine { namespace KernelScheduler
 
 class be_api(SCHEDULER) ICodeLoader : public Resource::ILoader
 {
-    BE_NOCOPY(ICodeLoader)
+    BE_NOCOPY(ICodeLoader);
 protected:
     ICodeLoader();
     ~ICodeLoader();
