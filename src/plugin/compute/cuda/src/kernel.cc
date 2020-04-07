@@ -44,16 +44,16 @@ private:
 };
 
 
-KernelObject::KernelObject(const inamespace& name)
+KernelObject::KernelObject(const inamespace& name, const istring& cudaVersion)
     :   m_kernel(name, ipath("kernel"))
-    ,   m_entryPoint(m_kernel.getSymbol<KernelMain>("_kmain"))
+    ,   m_entryPoint(m_kernel.getSymbol<KernelMain>((minitl::format<256u>("_kmain_%s") | cudaVersion).c_str()))
     ,   m_task(scoped< Task::Task<CudaKernelTask> >::create(Arena::task(), istring(name.str().name),
                                                            Colors::make(231, 231, 231, 0),
                                                            CudaKernelTask(this)))
     ,   m_callback(scoped<Callback>::create(Arena::task()))
     ,   m_callbackConnection(m_task, m_callback)
 {
-    be_debug("kernel entry point: %p" | m_entryPoint);
+    be_debug("kernel entry point[%s]: %p" | cudaVersion | m_entryPoint);
 }
 
 KernelObject::~KernelObject()
