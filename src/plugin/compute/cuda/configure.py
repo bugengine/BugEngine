@@ -3,6 +3,7 @@ from waflib.Logs import pprint
 from waflib.Configure import conf
 import os
 import sys
+import shlex
 
 ARCHS = [
     (3, 0),
@@ -41,32 +42,29 @@ def check_nvcc(configuration_context, nvcc):
     source_node = configuration_context.bldnode.make_node('test.cu')
     try:
         source_node.write("__global__ void kernel_main() { }; int main() { return 0; }\n")
-        out, err = run_nvcc(nvcc, configuration_context.env.NVCC_CXXFLAGS + ['-v', source_node.abspath(), '-arch', 'compute_30'])
-        target_path = None
+        out, err = run_nvcc(nvcc, configuration_context.env.NVCC_CXXFLAGS + ['-v', '-std', 'c++03', source_node.abspath(), '-arch', 'compute_30'])
+        target_includes = None
+        target_libs = None
         for line in out.split('\n') + err.split('\n'):
-            if line.startswith('#$ _TARGET_DIR_='):
-                target_path = line.split('=')[1]
-                platform = ''
-            elif line.startswith('#$ _WIN_PLATFORM_='):
-                target_path = ''
-                platform = line.split('=')[1]
-        if target_path is None:
+            if line.startswith('#$ LIBRARIES='):
+                target_libs = shlex.split(line.split('=')[1].strip())
+            elif line.startswith('#$ INCLUDES='):
+                target_includes = shlex.split(line.split('=')[1].strip())
+        if target_includes is None or target_libs is None:
             raise Exception('could not deduce target path')
         archs = []
         for a in ARCHS:
             try:
                 run_nvcc(nvcc, configuration_context.env.NVCC_CXXFLAGS + [
-                    '-gencode', 'arch=compute_{0}{1},code=sm_{0}{1}'.format(*a), '--version'
+                    '-arch', 'compute_{0}{1}'.format(*a), '--version'
                 ])
             except Exception as e:
                 pass
             else:
                 archs.append(a)
         if not archs:
-            raise Exception('no viabe arch found')
-        return (os.path.join(os.path.dirname(os.path.dirname(nvcc[0])), target_path, 'include'),
-                os.path.join(os.path.dirname(os.path.dirname(nvcc[0])), target_path, 'lib', platform),
-                archs)
+            raise Exception('no viable arch found')
+        return (target_includes, target_libs, archs)
     finally:
         source_node.delete()
 
@@ -205,7 +203,7 @@ def setup(configuration_context):
             for flag in v.CXXFLAGS:
                 v.append_value('NVCC_CXXFLAGS', ['-Xcompiler', flag])
             try:
-                include_path, lib_path, archs = configuration_context.check_nvcc(compiler)
+                include_paths, lib_paths, archs = configuration_context.check_nvcc(compiler)
             except Exception as e:
                 #print(e)
                 #pprint('YELLOW', '-{}'.format(version), sep=' ')
@@ -217,8 +215,8 @@ def setup(configuration_context):
                 cuda_available = True
 
                 configuration_context.setenv(toolchain)
-                configuration_context.env.append_value('INCLUDES_cuda', [include_path])
-                configuration_context.env.append_value('STLIBPATH_cuda', [lib_path])
+                configuration_context.env.append_value('INCLUDES_cuda', include_paths)
+                configuration_context.env.append_value('STLIBPATH_cuda', lib_paths)
                 configuration_context.env.append_value('FEATURES', ['cuda'])
                 break
         if cuda_available:
