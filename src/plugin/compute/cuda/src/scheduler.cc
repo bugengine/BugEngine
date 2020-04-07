@@ -11,7 +11,6 @@
 #include    <scheduler/scheduler.hh>
 #include    <scheduler/task/itask.hh>
 #include    <scheduler/kernel/kernel.script.hh>
-#include    <cuda_versions.hh>
 
 namespace BugEngine { namespace KernelScheduler { namespace Cuda
 {
@@ -19,32 +18,22 @@ namespace BugEngine { namespace KernelScheduler { namespace Cuda
 Scheduler::Scheduler(const Plugin::Context& context)
     :   IScheduler("Cuda", context.scheduler)
     ,   m_resourceManager(context.resourceManager)
-    ,   m_cudaLoaders(Arena::task(), s_cudaVersionCount)
+    ,   m_cudaLoader(ref<CodeLoader>::create(Arena::task()))
     ,   m_memoryHost(scoped<MemoryHost>::create(Arena::task()))
 {
-    for (i32 i = 0; i < s_cudaVersionCount; ++i)
-    {
-        be_info("registering optimised Cuda kernel loader for %s" | s_cudaVersions[i]);
-        m_cudaLoaders.push_back(ref<CodeLoader>::create(Arena::task(), istring(s_cudaVersions[i])));
-        m_resourceManager->attach<Kernel>(m_cudaLoaders[i]);
-    }
+    m_resourceManager->attach<Kernel>(m_cudaLoader);
 }
 
 Scheduler::~Scheduler()
 {
-    for (minitl::vector< ref<CodeLoader> >::const_reverse_iterator it = m_cudaLoaders.rbegin();
-         it != m_cudaLoaders.rend();
-         ++it)
-    {
-        m_resourceManager->detach<Kernel>(*it);
-    }
+    m_resourceManager->detach<Kernel>(m_cudaLoader);
 }
 
 void Scheduler::run(weak<Task::KernelTask> task,
                     weak<const Kernel> kernel,
                     const minitl::array< weak<const IMemoryBuffer> >& parameters)
 {
-    weak<KernelObject> object = kernel->getResource(m_cudaLoaders[0]).getRefHandle<KernelObject>();
+    weak<KernelObject> object = kernel->getResource(m_cudaLoader).getRefHandle<KernelObject>();
     be_assert(object, "kernel is not loaded");
     CudaKernelTask& taskBody = object->m_task->body;
     taskBody.sourceTask = task;
