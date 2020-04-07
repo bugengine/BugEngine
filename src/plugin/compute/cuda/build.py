@@ -123,13 +123,13 @@ def create_cuda_kernels(task_gen):
     internal_deps = []
 
     for kernel, kernel_source, kernel_ast in task_gen.kernels:
+        kernel_target = '.'.join([task_gen.parent, '.'.join(kernel), 'cuda'])
         for env in task_gen.bld.multiarch_envs:
             for kernel_type, toolchain in env.KERNEL_TOOLCHAINS:
                 if kernel_type != 'cuda':
                     continue
                 kernel_env = task_gen.bld.all_envs[toolchain]
                 target_prefix = (env.ENV_PREFIX + '/') if env.ENV_PREFIX else ''
-                kernel_target = '.'.join([task_gen.parent, '.'.join(kernel), kernel_type])
                 if target_prefix:
                     internal_deps.append(target_prefix + kernel_target)
                 tgen = task_gen.bld.get_tgen_by_name(target_prefix + task_gen.parent)
@@ -157,7 +157,7 @@ def create_cuda_kernels(task_gen):
                 )
                 kernel_task_gen.env.PLUGIN = kernel_task_gen.env.plugin_name
         if internal_deps:
-            tgt = task_gen.bld(target=multiarch_target, features=['multiarch'], use=internal_deps)
+            tgt = task_gen.bld(target=kernel_target, features=['multiarch'], use=internal_deps)
 
 
 def build(build_context):
