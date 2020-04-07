@@ -12,7 +12,7 @@ def check_nvcc(configuration_context, nvcc):
         source_node.write("__global__ void kernel_main() { }; int main() { return 0; }\n")
         try:
             p = Utils.subprocess.Popen(
-                nvcc + configuration_context.env.NVCC_CXXFLAGS + ['-v', source_node.abspath()],
+                nvcc + configuration_context.env.NVCC_CXXFLAGS + ['-v', source_node.abspath(), '-arch', 'compute_30'],
                 stdin=Utils.subprocess.PIPE,
                 stdout=Utils.subprocess.PIPE,
                 stderr=Utils.subprocess.PIPE
