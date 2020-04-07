@@ -42,7 +42,7 @@ def check_nvcc(configuration_context, nvcc):
     source_node = configuration_context.bldnode.make_node('test.cu')
     try:
         source_node.write("__global__ void kernel_main() { }; int main() { return 0; }\n")
-        out, err = run_nvcc(nvcc, configuration_context.env.NVCC_CXXFLAGS + ['-v', '-std', 'c++03', source_node.abspath(), '-arch', 'compute_30'])
+        out, err = run_nvcc(nvcc, configuration_context.env.NVCC_CXXFLAGS + ['-v', source_node.abspath(), '-arch', 'compute_30'])
         target_includes = None
         target_libs = None
         for line in out.split('\n') + err.split('\n'):
@@ -200,8 +200,15 @@ def setup(configuration_context):
                 v.append_value('NVCC_CXXFLAGS', ['-m64'])
             else:
                 v.append_value('NVCC_CXXFLAGS', ['-m32'])
+            carry = False
             for flag in v.CXXFLAGS:
-                v.append_value('NVCC_CXXFLAGS', ['-Xcompiler', flag])
+                if flag == '-include':
+                    carry = True
+                elif carry:
+                    v.append_value('NVCC_CXXFLAGS', ['-include', flag])
+                    carry = False
+                else:
+                    v.append_value('NVCC_CXXFLAGS', ['-Xcompiler', flag])
             try:
                 include_paths, lib_paths, archs = configuration_context.check_nvcc(compiler)
             except Exception as e:
