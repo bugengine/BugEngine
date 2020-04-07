@@ -21,7 +21,7 @@ class Scheduler : public IScheduler
 {
 private:
     weak<Resource::ResourceManager>     m_resourceManager;
-    minitl::vector< ref<CodeLoader> >   m_cpuLoaders;
+    minitl::vector< ref<CodeLoader> >   m_cudaLoaders;
     scoped<MemoryHost>                  m_memoryHost;
 public:
     Scheduler(const Plugin::Context& context);

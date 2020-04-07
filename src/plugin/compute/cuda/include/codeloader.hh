@@ -13,10 +13,10 @@ namespace BugEngine { namespace KernelScheduler { namespace Cuda
 class CodeLoader : public ICodeLoader
 {
 private:
-    const inamespace m_cudaVersion;
+    const istring m_cudaVersion;
 
 public:
-    CodeLoader(const inamespace &cudaVersion);
+    CodeLoader(const istring &cudaVersion);
     ~CodeLoader();
 
     virtual void load(weak<const Resource::Description> kernelDescription, Resource::Resource &resource) override;

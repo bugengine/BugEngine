@@ -70,7 +70,7 @@ private:
     scoped< Task::ITask::ICallback >    m_callback;
     Task::ITask::CallbackConnection     m_callbackConnection;
 public:
-    KernelObject(const inamespace& name);
+    KernelObject(const inamespace& name, const istring& version);
     ~KernelObject();
 
     void run(const u32 index, const u32 total,
