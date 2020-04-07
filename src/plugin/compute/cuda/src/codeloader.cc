@@ -9,9 +9,8 @@
 namespace BugEngine { namespace KernelScheduler { namespace Cuda
 {
 
-CodeLoader::CodeLoader(const istring& cudaVersion)
+CodeLoader::CodeLoader()
     :   ICodeLoader()
-    ,   m_cudaVersion(cudaVersion)
 {
 }
 
@@ -25,7 +24,7 @@ void CodeLoader::load(weak<const Resource::Description> kernelDescription,
     be_info("loading Cuda kernel %s"
           | be_checked_cast<const Kernel>(kernelDescription)->name());
     inamespace name = be_checked_cast<const Kernel>(kernelDescription)->name() + inamespace("cuda");
-    resource.setRefHandle(ref<KernelObject>::create(Arena::task(), name, m_cudaVersion));
+    resource.setRefHandle(ref<KernelObject>::create(Arena::task(), name));
 }
 
 void CodeLoader::reload(weak<const Resource::Description> /*oldKernelDescription*/,

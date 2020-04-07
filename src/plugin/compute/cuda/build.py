@@ -38,7 +38,7 @@ __device__ void _kmain(const u32 index, const u32 total, Parameter* parameters)
 
 class nvcc(Task.Task):
     "nvcc"
-    run_str = '${NVCC_CXX} ${NVCC_CXXFLAGS} --fatbin -arch compute_30 ${NVCC_FRAMEWORKPATH_ST:FRAMEWORKPATH} ${NVCC_CPPPATH_ST:INCPATHS} -DBE_COMPUTE=1 ${NVCC_DEFINES_ST:DEFINES} -D_NVCC=1 ${NVCC_CXX_SRC_F}${SRC[0].abspath()} ${NVCC_CXX_TGT_F} ${TGT}'
+    run_str = '${NVCC_CXX} ${NVCC_CXXFLAGS} --fatbin ${NVCC_FRAMEWORKPATH_ST:FRAMEWORKPATH} ${NVCC_CPPPATH_ST:INCPATHS} -DBE_COMPUTE=1 ${NVCC_DEFINES_ST:DEFINES} -D_NVCC=1 ${NVCC_CXX_SRC_F}${SRC[0].abspath()} ${NVCC_CXX_TGT_F} ${TGT}'
     ext_out = ['.fatbin']
 
     def scan(self):
@@ -76,31 +76,10 @@ class cudac(Task.Task):
             'pch': '#include <%s>\n' % self.generator.pchstop if self.generator.pchstop else '',
             'source': source,
             'args': ',\n          '.join('%s(0, 0, 0)' % arg[1] for i, arg in enumerate(args)),
-            'variant_name': self.generator.variant_name
         }
 
         with open(self.outputs[0].abspath(), 'w') as out:
             out.write(template % params)
-
-
-class cuda_header(Task.Task):
-    color = 'PINK'
-
-    def scan(self):
-        return ([], [])
-
-    vars = ['CUDA_VERSIONS']
-
-    def run(self):
-        with open(self.outputs[0].abspath(), 'w') as out:
-            out.write(
-                "static const char* s_cudaVersions[] = { %s };\n"
-                "static const i32 s_cudaVersionCount = %d;\n"
-                "" % (
-                    ', '.join('"%s"' % o
-                              for o in [v[0].replace('.', '_') for v in self.env.CUDA_VERSIONS]), len(self.env.CUDA_VERSIONS)
-                )
-            )
 
 
 class bin2c(Task.Task):
@@ -111,7 +90,7 @@ class bin2c(Task.Task):
 
     def run(self):
         with open(self.outputs[0].abspath(), 'w') as out:
-            out.write("const char* s_cudaKernel_%s[] = { %s };\n" % (self.generator.variant_name, '0'))
+            out.write("const char* s_cudaKernel[] = { %s };\n" % ('0'))
 
 
 @extension('.cu')
@@ -123,23 +102,11 @@ def process_cuda_source(task_gen, cuda_source):
     task_gen.source.append(cuda_cc)
 
 
-@feature('generate_cuda_versions')
-@before_method('process_source')
-def generate_cuda_version_header(self):
-    for kernel_name, toolchain in self.env.KERNEL_TOOLCHAINS:
-        if kernel_name == 'cuda':
-            env = self.bld.all_envs[toolchain]
-            out_header = self.make_bld_node('include', None, 'cuda_versions.hh')
-            task = self.create_task('cuda_header', [], [out_header])
-            task.env = env
-            self.env.append_unique('INCLUDES', [out_header.parent.abspath()])
-
-
 @feature('cudakernel_create')
 @before_method('process_source')
 def build_cuda_kernels(task_gen):
     ast = task_gen.kernel_source
-    out = ast.change_ext('.%s.cu' % task_gen.variant_name)
+    out = ast.change_ext('.cu')
     task_gen.create_task('cudac', [ast], [out])
     task_gen.source.append(out)
 
@@ -165,39 +132,8 @@ def create_cuda_kernels(task_gen):
                 kernel_target = '.'.join([task_gen.parent, '.'.join(kernel), kernel_type])
                 if target_prefix:
                     internal_deps.append(target_prefix + kernel_target)
-                variants = []
-                for variant, toolchain in kernel_env.CUDA_VERSIONS:
-                    variant = variant.replace('.', '_')
-                    variant_env = task_gen.bld.all_envs[toolchain]
-                    tgen = task_gen.bld.get_tgen_by_name(target_prefix + task_gen.parent)
-                    target_suffix = '.'.join([kernel_type, variant])
-                    variant_target = kernel_target + '.' + target_suffix
+                tgen = task_gen.bld.get_tgen_by_name(target_prefix + task_gen.parent)
 
-                    tg = task_gen.bld(
-                        env=variant_env.derive(),
-                        bld_env=env,
-                        target=target_prefix + variant_target,
-                        target_name=target_prefix + task_gen.parent,
-                        variant_name=variant,
-                        kernel=kernel,
-                        features=[
-                            'cxx', 'cxxobjects', 'cudakernel_create'
-                        ],
-                        extra_use=tgen.extra_use,
-                        pchstop=tgen.pchstop,
-                        defines=tgen.defines + [
-                            'BE_BUILD_KERNEL=1',
-                            'BE_KERNEL_ID=%s_%s' % (task_gen.parent.replace('.', '_'), variant_target.replace('.', '_')),
-                            'BE_KERNEL_NAME=%s.%s' % (task_gen.parent, variant_target),
-                            'BE_KERNEL_TARGET=%s' % kernel_type,
-                            'BE_KERNEL_ARCH=%s' % variant
-                        ],
-                        includes=tgen.includes,
-                        kernel_source=kernel_ast,
-                        use=tgen.use + ['plugin.compute.cuda'],
-                    )
-                    tg.env.PLUGIN = tg.env.plugin_name
-                    variants.append(tg.target)
                 kernel_task_gen = task_gen.bld(
                     env=kernel_env.derive(),
                     bld_env=env,
@@ -205,11 +141,21 @@ def create_cuda_kernels(task_gen):
                     target_name=target_prefix + task_gen.parent,
                     kernel=kernel,
                     features=[
-                        'cxx', task_gen.bld.env.STATIC and 'cxxobjects' or 'cxxshlib', 'kernel'
+                        'cxx', task_gen.bld.env.STATIC and 'cxxobjects' or 'cxxshlib', 'kernel', 'cudakernel_create'
                     ],
                     extra_use=tgen.extra_use,
-                    use=tgen.use + variants,
+                    pchstop=tgen.pchstop,
+                    defines=tgen.defines + [
+                        'BE_BUILD_KERNEL=1',
+                        'BE_KERNEL_ID=%s_%s' % (task_gen.parent.replace('.', '_'), kernel_type),
+                        'BE_KERNEL_NAME=%s.%s' % (task_gen.parent, kernel_type),
+                        'BE_KERNEL_TARGET=%s' % kernel_type,
+                    ],
+                    includes=tgen.includes,
+                    kernel_source=kernel_ast,
+                    use=tgen.use + ['plugin.compute.cuda'],
                 )
+                kernel_task_gen.env.PLUGIN = kernel_task_gen.env.plugin_name
         if internal_deps:
             tgt = task_gen.bld(target=multiarch_target, features=['multiarch'], use=internal_deps)
 
