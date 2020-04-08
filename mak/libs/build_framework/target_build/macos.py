@@ -6,6 +6,15 @@ import os
 
 def build(bld):
     bld.platforms.append(bld.external('3rdparty.system.cocoa'))
+    def wrap_class(cls_name):
+        cls = Task.classes.get(cls_name, None)
+        derived = type(cls_name, (cls, ), {})
+        def exec_command_clean(self, *k, **kw):
+            self.outputs[0].delete()
+            return cls.exec_command(self, *k, **kw)
+        derived.exec_command = exec_command_clean
+    for cls_name in 'cshlib', 'cxxshlib', 'cprogram', 'cxxprogram':
+        wrap_class(cls_name)
 
 
 def plugins(bld):
@@ -47,7 +56,7 @@ def set_osx_shlib_name(self):
 def add_objc_lib(self):
     if 'darwin' in self.env.VALID_PLATFORMS:
         self.env.append_unique('LINKFLAGS', [
-            '-lobjc',
+            '-l', 'objc',
         ])
 
 
@@ -60,7 +69,7 @@ def set_osx_program_name(self):
 
 dsym = '${DSYMUTIL} ${DSYMUTILFLAGS} ${SRC} -o ${TGT[0].parent.parent.abspath()}'
 Task.task_factory('dsym', dsym, color='BLUE')
-strip = '${STRIP} ${STRIPFLAGS} -S -o ${TGT[0].abspath()} ${SRC[0].abspath()}'
+strip = '${STRIP} ${STRIPFLAGS} -S -x -o ${TGT[0].abspath()} ${SRC[0].abspath()}'
 Task.task_factory('strip', strip, color='BLUE')
 lipo = '${LIPO} ${LIPOFLAGS} ${SRC} -create -output ${TGT[0].abspath()}'
 Task.task_factory('lipo', lipo, color='BLUE')
@@ -116,6 +125,7 @@ def apply_postlink_darwin(self):
 @feature('multiarch')
 @after_method('apply_link')
 @after_method('process_use')
+@after_method('apply_postlink_darwin')
 @before_method('install_step')
 def apply_multiarch_darwin(self):
     if 'darwin' in self.env.VALID_PLATFORMS:
