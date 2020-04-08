@@ -182,6 +182,8 @@ def configure(configuration_context):
 
 
 def setup(configuration_context):
+    if configuration_context.env.COMPILER_NAME == 'suncc':
+        return
     if configuration_context.env.NVCC_COMPILERS:
         cuda_available = False
         configuration_context.start_msg('      `- [cuda]')
