@@ -37,11 +37,25 @@ def run_nvcc(nvcc, flags):
             raise Exception(err)
         return out, err
 
+
+_CUDA_SNIPPET = """
+#include <cuda_runtime_api.h>
+__global__ void kernel_main()
+{
+}
+
+int main(int argc, const char *argv[])
+{
+    cudaChooseDevice(0, 0);
+    return 0;
+}
+"""
+
 @conf
 def check_nvcc(configuration_context, nvcc):
     source_node = configuration_context.bldnode.make_node('test.cu')
     try:
-        source_node.write("__global__ void kernel_main() { }; int main() { return 0; }\n")
+        source_node.write(_CUDA_SNIPPET)
         out, err = run_nvcc(nvcc, configuration_context.env.NVCC_CXXFLAGS + ['-v', source_node.abspath(), '-arch', 'compute_30'])
         target_includes = None
         target_libs = None
