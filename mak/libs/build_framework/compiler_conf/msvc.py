@@ -1,3 +1,6 @@
+
+
+
 from .compiler import Compiler
 from waflib import Configure, Utils
 from waflib.Configure import conf
@@ -9,11 +12,10 @@ import re
 class MSVC(Compiler):
     def __init__(self, cl, name, version, target_arch, arch, bat, args, path, includes, libdirs):
         self.NAMES = [name, 'msvc']
-        p = os.pathsep.join([os.environ.get('PATH', '')] + path)
         flags = ['/I%s' % i for i in includes] + ['/LIBPATH:%i' for l in libdirs]
-        Compiler.__init__(self, cl, cl, version, 'windows-%s' % name, arch, {}, {'PATH': p})
+        Compiler.__init__(self, cl, cl, version, 'windows-%s' % name, arch, {}, {'PATH': ';'.join(path)})
         self.batfile = bat
-        self.path = path
+        self.path = [p for p in path if p not in os.environ.get('PATH', '').split(os.pathsep)]
         self.args = args
         self.arch_name = target_arch
         self.includes = [
@@ -90,9 +92,10 @@ class MSVC(Compiler):
         version = '%s %s' % (self.NAMES[0], self.version)
         version_number = float(self.version.replace('Exp', ''))
         env.NO_MSVC_DETECT = 1
-        env.PATH = self.path
         env.INCLUDES = self.includes
         env.LIBPATH = self.libdirs
+        env.PATH = self.path + os.environ['PATH'].split(os.pathsep)
+        env.MSVC_PATH = self.path
         env.MSVC_COMPILER = self.NAMES[0]
         env.MSVC_VERSION = version_number
         env.MSVC_MANIFEST = 0
