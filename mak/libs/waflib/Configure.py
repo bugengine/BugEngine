@@ -15,6 +15,11 @@ A :py:class:`waflib.Configure.ConfigurationContext` instance is created when ``w
 import os, re, shlex, shutil, sys, time, traceback
 from waflib import ConfigSet, Utils, Options, Logs, Context, Build, Errors
 
+try:
+	unicode
+except NameError:
+	unicode = str
+
 WAF_CONFIG_LOG = 'config.log'
 """Name of the configuration log file"""
 
@@ -363,7 +368,7 @@ def cmd_to_list(self, cmd):
 	:param cmd: command
 	:type cmd: a string or a list of string
 	"""
-	if isinstance(cmd, str):
+	if isinstance(cmd, str) or isinstance(cmd, unicode):
 		if os.path.isfile(cmd):
 			# do not take any risk
 			return [cmd]

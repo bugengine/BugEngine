@@ -75,6 +75,11 @@ except ImportError:
 			pass
 	threading.Lock = threading.Thread = Lock
 
+try:
+	unicode
+except NameError:
+	unicode = str
+
 SIG_NIL = 'SIG_NIL_SIG_NIL_'.encode()
 """Arbitrary null value for hashes. Modify this value according to the hash function in use"""
 
@@ -427,7 +432,7 @@ def to_list(val):
 	:rtype: list
 	:return: Argument converted to list
 	"""
-	if isinstance(val, str):
+	if isinstance(val, str) or isinstance(val, unicode):
 		return val.split()
 	else:
 		return val
