@@ -210,7 +210,7 @@ def setup(configuration_context):
             v.NVCC_CXX = compiler
             cxx_compiler = v.CXX[0]
             if v.MSVC_COMPILER:
-                cxx_compiler = cxx_compiler.lower()
+                cxx_compiler = configuration_context.find_program('cl', path_list=configuration_context.env.MSVC_PATH)[0]
             v.append_value('NVCC_CXXFLAGS', ['--compiler-bindir', cxx_compiler])
             if v.ARCH_LP64:
                 v.append_value('NVCC_CXXFLAGS', ['-m64'])
