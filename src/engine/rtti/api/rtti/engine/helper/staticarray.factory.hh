@@ -208,8 +208,8 @@ raw<const RTTI::Class> be_typeid< RTTI::staticarray<T> >::klass()
         {2, s_methods},
         {0},
         {&staticarray_BugHelper<T>::scriptingAPI},
-        &RTTI::wrapCopy< RTTI::staticarray<T> >,
-        &RTTI::wrapDestroy< RTTI::staticarray<T> >
+        &RTTI::wrap< RTTI::staticarray<T> >::copy,
+        &RTTI::wrap< RTTI::staticarray<T> >::destroy
     };
     raw< const RTTI::Class > result = { &s_class };
     return result;

@@ -178,8 +178,8 @@ raw<const RTTI::Class> be_typeid< minitl::tuple<T1, T2, T3> >::klass()
         /* .methods */            { 1, tuple3_BugHelper<T1, T2, T3>::s_methods },
         /* .constructor */        {tuple3_BugHelper<T1, T2, T3>::s_methods},
         /* .apiMethods */         {0},
-        /* .copyconstructor */    &RTTI::wrapCopy< minitl::tuple<T1, T2, T3> >,
-        /* .destructor */         &RTTI::wrapDestroy< minitl::tuple<T1, T2, T3> >
+        /* .copyconstructor */    &RTTI::wrap< minitl::tuple<T1, T2, T3> >::copy,
+        /* .destructor */         &RTTI::wrap< minitl::tuple<T1, T2, T3> >::destroy
     };
 
     raw< const RTTI::Class > result = { &s_class };

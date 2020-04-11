@@ -170,8 +170,6 @@ def build_plugins(bld):
     bld.plugin('plugin.ui.console', ['engine.bugengine'], ['3rdparty.system.ncurses'], platforms=['pc'])
 
     bld.plugin('tool.bugeditor.ui', ['engine.bugengine'], platforms=['pc'])
-    if Options.options.tests:
-        bld.plugin('test.clt', ['plugin.compute.cpu'])
 
 
 def build_games(bld):
@@ -183,7 +181,6 @@ def build_games(bld):
         path='tool.bugeditor.main',
         platforms=['pc']
     )
-    bld.game('sample.particlerain', ['engine.bugengine', 'plugin.scripting.package'])
     bld.game('sample.text', ['engine.bugengine', 'plugin.scripting.package', 'plugin.graphics.3d'])
     bld.game('sample.python', ['engine.bugengine', 'plugin.scripting.package'])
     bld.game('sample.lua', ['engine.bugengine', 'plugin.scripting.package', 'plugin.scripting.lua'])
@@ -194,13 +191,13 @@ def build_games(bld):
     )
     if Options.options.tests:
         bld.game('test.settings', ['engine.bugengine'])
+        bld.game('test.compute.copy', ['engine.bugengine'])
 
 
 def build(bld):
     """
         Declares each bugengine module and their dependencies
     """
-    bld.env.KERNEL_BACKEND = 'cpu'
     build_externals(bld)
     build_bugengine(bld)
     build_plugins(bld)
