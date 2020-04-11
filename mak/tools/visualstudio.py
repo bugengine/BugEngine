@@ -227,6 +227,7 @@ class VCproj:
     extensions = ['vcproj']
 
     def __init__(self, task_gen, version, version_project, use_folders):
+        options = [a for a in sys.argv if a[0] == '-']
         if use_folders:
             self.name = task_gen.target.split('.')[-1]
         else:
@@ -267,17 +268,18 @@ class VCproj:
                             command = getattr(task_gen, 'command', '')
                             if command:
                                 command = command % {'toolchain': toolchain, 'variant': variant}
-                                tool['BuildCommandLine'] = 'cd $(SolutionDir) && %s %s %s' % (sys.executable,
-                                                                                              sys.argv[0], command)
+                                tool['BuildCommandLine'] = 'cd $(SolutionDir) && %s %s %s %s' % (sys.executable,
+                                                                                                 sys.argv[0], command,
+                                                                                                 ' '.join(options))
                             else:
-                                tool['BuildCommandLine'] = 'cd $(SolutionDir) && %s %s build:%s:%s --targets=%s' % (
-                                    sys.executable, sys.argv[0], toolchain, variant, task_gen.target)
-                                tool['CleanCommandLine'] = 'cd $(SolutionDir) && %s %s clean:%s:%s --targets=%s' % (
-                                    sys.executable, sys.argv[0], toolchain, variant, task_gen.target)
+                                tool['BuildCommandLine'] = 'cd $(SolutionDir) && %s %s build:%s:%s %s --targets=%s' % (
+                                    sys.executable, sys.argv[0], toolchain, variant, ' '.join(options), task_gen.target)
+                                tool['CleanCommandLine'] = 'cd $(SolutionDir) && %s %s clean:%s:%s %s --targets=%s' % (
+                                    sys.executable, sys.argv[0], toolchain, variant, ' '.join(options), task_gen.target)
                                 tool[
-                                    'ReBuildCommandLine'] = 'cd $(SolutionDir) && %s %s clean:%s:%s instal:%s:%s --targets=%s' % (
+                                    'ReBuildCommandLine'] = 'cd $(SolutionDir) && %s %s clean:%s:%s instal:%s:%s %s --targets=%s' % (
                                         sys.executable, sys.argv[0], toolchain, variant, toolchain, variant,
-                                        task_gen.target)
+                                        ' '.join(options), task_gen.target)
                             if 'cxxprogram' in task_gen.features:
                                 tool['Output'] = '$(OutDir)\\%s\\%s' % (env.DEPLOY_BINDIR,
                                                                         sub_env.cxxprogram_PATTERN % task_gen.target)
@@ -340,6 +342,7 @@ class VCxproj:
     extensions = ['vcxproj', 'vcxproj.filters']
 
     def __init__(self, task_gen, version, version_project, use_folders):
+        options = [a for a in sys.argv if a[0] == '-']
         self.vcxproj = XmlFile()
         self.vcxfilters = XmlFile()
         if use_folders:
@@ -459,18 +462,18 @@ class VCxproj:
                 if command:
                     command = command % {'toolchain': toolchain, 'variant': variant}
                     self.vcxproj._add(properties, 'NMakeBuildCommandLine',
-                                      'cd $(SolutionDir) && %s %s %s' % (sys.executable, sys.argv[0], command))
+                                      'cd $(SolutionDir) && %s %s %s %s' % (sys.executable, sys.argv[0], command, ' '.join(options)))
                 else:
                     self.vcxproj._add(
-                        properties, 'NMakeBuildCommandLine', 'cd $(SolutionDir) && %s %s build:%s:%s --targets=%s' %
-                        (sys.executable, sys.argv[0], toolchain, variant, task_gen.target))
+                        properties, 'NMakeBuildCommandLine', 'cd $(SolutionDir) && %s %s build:%s:%s %s --targets=%s' %
+                        (sys.executable, sys.argv[0], toolchain, variant, ' '.join(options), task_gen.target))
                     self.vcxproj._add(
                         properties, 'NMakeReBuildCommandLine',
-                        'cd $(SolutionDir) && %s %s clean:%s:%s build:%s:%s --targets=%s' %
-                        (sys.executable, sys.argv[0], toolchain, variant, toolchain, variant, task_gen.target))
+                        'cd $(SolutionDir) && %s %s clean:%s:%s build:%s:%s %s --targets=%s' %
+                        (sys.executable, sys.argv[0], toolchain, variant, ' '.join(options), toolchain, variant, task_gen.target))
                     self.vcxproj._add(
-                        properties, 'NMakeCleanCommandLine', 'cd $(SolutionDir) && %s %s clean:%s:%s --targets=%s' %
-                        (sys.executable, sys.argv[0], toolchain, variant, task_gen.target))
+                        properties, 'NMakeCleanCommandLine', 'cd $(SolutionDir) && %s %s clean:%s:%s %s --targets=%s' %
+                        (sys.executable, sys.argv[0], toolchain, variant, ' '.join(options),  task_gen.target))
                     if 'cxxprogram' in task_gen.features:
                         self.vcxproj._add(
                             properties, 'NMakeOutput',
@@ -683,18 +686,6 @@ class vs2003(Build.BuildContext):
         pydbg_node = projects.make_node('build.debug.pyproj')
         project.write(pydbg_node)
         solution.add(pydbg_task_gen, project, pydbg_node.path_from(self.srcnode).replace('/', '\\'), False)
-
-        pyclt_task_gen = lambda: None
-        pyclt_task_gen.target = 'build.clt'
-        pyclt_task_gen.command = command
-        pyclt_task_gen.bld = self
-        pyclt_task_gen.all_sources = [self.bugenginenode.make_node('mak/tools/clt.py')]
-        pyclt_task_gen.all_sources += self.bugenginenode.make_node('mak/libs/clt').ant_glob('**/*.py')
-        pyclt_task_gen.all_sources += self.srcnode.ant_glob('**/*.cl')
-        project = PyProj(pyclt_task_gen, version, version_project, folders)
-        pyclt_node = projects.make_node('build.clt.pyproj')
-        project.write(pyclt_node)
-        solution.add(pyclt_task_gen, project, pyclt_node.path_from(self.srcnode).replace('/', '\\'), False)
 
         for g in self.groups:
             for tg in g:
