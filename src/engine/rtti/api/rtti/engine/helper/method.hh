@@ -18,17 +18,36 @@ static inline Value call(Value& _this, Value* params, u32 paramCount)
 }
 
 template< typename T >
-static inline void wrapCopy(const void* src, void* dst)
+struct wrap
 {
-    new(dst) T(*(T*)src);
-}
+    static inline void copy(const void* src, void* dst)
+    {
+        new(dst) T(*(T*)src);
+    }
 
-template< typename T >
-static inline void wrapDestroy(void* src)
+    static inline void destroy(void* src)
+    {
+        ((T*)src)->~T();
+    }
+};
+
+template< typename T, u32 Count >
+struct wrap<T[Count]>
 {
-    be_forceuse(src);
-    ((T*)src)->~T();
-}
+    typedef T ArrayType[Count];
+
+    static inline void copy(const void* src, void* dst)
+    {
+        for (u32 i = 0; i < Count; ++i)
+            new (&static_cast<T*>(dst)[i]) T(static_cast<const T*>(src)[i]);
+    }
+
+    static inline void destroy(void* src)
+    {
+        for (u32 i = 0; i < Count; ++i)
+            static_cast<const T*>(src)[i].~T();
+    }
+};
 
 template< size_t size >
 inline void nullconstructor(const void* src, void* dst)

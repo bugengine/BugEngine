@@ -226,8 +226,8 @@ raw<const RTTI::Class> be_typeid< minitl::tuple<T1, T2, T3, T4, T5> >::klass()
         /* .methods */            { 1, tuple5_BugHelper<T1, T2, T3, T4, T5>::s_methods },
         /* .constructor */        {tuple5_BugHelper<T1, T2, T3, T4, T5>::s_methods},
         /* .apiMethods */         {0},
-        /* .copyconstructor */    &RTTI::wrapCopy< minitl::tuple<T1, T2, T3, T4, T5> >,
-        /* .destructor */         &RTTI::wrapDestroy< minitl::tuple<T1, T2, T3, T4, T5> >
+        /* .copyconstructor */    &RTTI::wrap< minitl::tuple<T1, T2, T3, T4, T5> >::copy,
+        /* .destructor */         &RTTI::wrap< minitl::tuple<T1, T2, T3, T4, T5> >::destroy
     };
 
     raw< const RTTI::Class > result = { &s_class };

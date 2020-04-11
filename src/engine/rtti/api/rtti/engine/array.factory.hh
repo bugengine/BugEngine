@@ -249,8 +249,8 @@ raw<const RTTI::Class> be_typeid< minitl::array<T> >::klass()
         { 3, s_methods },
         {s_methods},
         {&array_BugHelper<T>::scriptingAPI},
-        &RTTI::wrapCopy< minitl::array<T> >,
-        &RTTI::wrapDestroy< minitl::array<T> >
+        &RTTI::wrap< minitl::array<T> >::copy,
+        &RTTI::wrap< minitl::array<T> >::destroy
     };
     raw< const RTTI::Class > result = { &s_class };
     return result;

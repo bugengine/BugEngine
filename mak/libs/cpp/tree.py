@@ -710,8 +710,8 @@ class Class(Container):
             self.constructor.write_content(self, struct_owners, prefix, namespace, definition, instance)
 
         if self.type in ('struct', 'be_pod', 'enum', 'union'):
-            params['COPYCONSTRUCTOR'] = '&::BugEngine::RTTI::wrapCopy< %(CPP_NAME)s >' % params
-            params['DESTRUCTOR'] = '&::BugEngine::RTTI::wrapDestroy< %(CPP_NAME)s >' % params
+            params['COPYCONSTRUCTOR'] = '&::BugEngine::RTTI::wrap< %(CPP_NAME)s >::copy' % params
+            params['DESTRUCTOR'] = '&::BugEngine::RTTI::wrap< %(CPP_NAME)s >::destroy' % params
         else:
             params['COPYCONSTRUCTOR'] = '0'
             params['DESTRUCTOR'] = '0'
@@ -960,6 +960,7 @@ class Root(Container):
         definition.write('#include <rtti/engine/objectinfo.script.hh>\n')
         definition.write('#include <rtti/engine/propertyinfo.script.hh>\n')
         definition.write('#include <rtti/engine/array.factory.hh>\n')
+        definition.write('#include <rtti/engine/carray.factory.hh>\n')
         definition.write('#include <rtti/engine/map.factory.hh>\n')
         definition.write('#include <rtti/engine/tuple.factory.hh>\n')
         definition.write('#include <rtti/engine/taginfo.script.hh>\n')
