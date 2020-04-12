@@ -15,11 +15,16 @@ CopyApplication::CopyApplication(const Plugin::Context& context)
                                             Environment::getEnvironment().getDataDirectory() + ipath("test/compute/copy")),
                     context.resourceManager,
                     context.scheduler)
+    ,   m_packageManager("plugin.scripting.package", pluginContext())
+    ,   m_computeModule("plugin.compute.cuda", pluginContext())
+    ,   m_mainPackage(ref<Package>::create(Arena::game(), pluginContext().dataFolder->openFile(ifilename("copy.pkg"))))
 {
+    pluginContext().resourceManager->load(m_mainPackage);
 }
 
 CopyApplication::~CopyApplication()
 {
+    pluginContext().resourceManager->unload(m_mainPackage);
 }
 
 }}}}

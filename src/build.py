@@ -191,7 +191,8 @@ def build_games(bld):
     )
     if Options.options.tests:
         bld.game('test.settings', ['engine.bugengine'])
-        bld.game('test.compute.copy', ['engine.bugengine'])
+        bld.game('test.compute.copy', ['engine.bugengine', 'plugin.scripting.package'],
+                 root_namespace='BugEngine::Test::Compute::Copy')
 
 
 def build(bld):

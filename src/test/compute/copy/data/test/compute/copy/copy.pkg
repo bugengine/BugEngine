@@ -1,0 +1,16 @@
+load test.compute.copy as copy;
+
+storage = copy.Storage
+(
+)
+
+task = copy.Kernels.CopyTask
+(
+    inout = storage.CopyComponent;
+)
+
+world = bugengine.World.World
+(
+    storage = storage;
+    products = [task.inout];
+)

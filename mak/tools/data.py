@@ -2,7 +2,7 @@
 # encoding: utf-8
 
 from waflib import Task
-from waflib.TaskGen import extension
+from waflib.TaskGen import extension, feature, before_method
 import os
 import sys
 from waflib import Task
@@ -32,6 +32,7 @@ cls = Task.task_factory('datagen', ddf, [], 'PINK', ext_in='.h .hh .hxx', ext_ou
 cls.scan = scan
 
 namespace_register = 'BE_REGISTER_NAMESPACE_%d_NAMED(%s, %s)\n'
+namespace_alias =    'BE_REGISTER_ROOT_NAMESPACE(%s, %s, %s)\n'
 
 
 class docgen(Task.Task):
@@ -46,7 +47,8 @@ class docgen(Task.Task):
 
 class nsdef(Task.Task):
     def run(self):
-        seen = set(['BugEngine'])
+        seen = set([])
+        root_namespace = self.generator.root_namespace.split('::')
         with open(self.outputs[0].abspath(), 'w') as namespace_file:
             pch = getattr(self, 'pch', '')
             if pch:
@@ -59,8 +61,13 @@ class nsdef(Task.Task):
                             namespace = cPickle.load(in_file)
                             if '::'.join(namespace) not in seen:
                                 seen.add('::'.join(namespace))
-                                line = namespace_register % (len(namespace), self.generator.env.PLUGIN,
-                                                             ', '.join(namespace))
+                                if namespace == root_namespace:
+                                    line = namespace_alias % (self.generator.env.PLUGIN,
+                                                              '_'+'_'.join(root_namespace[:-1]) if len(root_namespace) > 1 else '',
+                                                              root_namespace[-1])
+                                else:
+                                    line = namespace_register % (len(namespace), self.generator.env.PLUGIN,
+                                                                 ', '.join(namespace))
                                 namespace_file.write(line)
                         except EOFError:
                             break
@@ -90,16 +97,45 @@ def datagen(self, node):
     except:
         self.out_sources = outs[:2]
     self.source.append(out_node.change_ext('.doc'))
-    self.source.append(out_node.change_ext('.namespaces'))
+    self.out_sources.append(out_node.change_ext('.namespaces'))
+
+
+@feature('cxxshlib', 'cshlib', 'cxxprogran', 'cprogram')
+@before_method('process_source')
+def nsgen(self):
+    # gather all namespaces of dependencies
+    seen = set([])
+    use = getattr(self, 'use', [])[:]
+    while (use):
+        x = use.pop()
+        if x in seen:
+            continue
+        seen.add(x)
+        try:
+            y = self.bld.get_tgen_by_name(x)
+        except:
+            pass
+        else:
+            y.post()
+            if 'cxxobjects' in y.features:
+                use += getattr(y, 'use', [])
+                for s in y.source:
+                    if s.name.endswith('.namespaces'):
+                        self.add_namespace_file(s)
+
 
 
 @extension('.namespaces')
-def nsgen(self, node):
+def add_namespace_file(self, node):
+    if 'cobjects' in self.features:
+        return
+    if 'cxxobjects' in self.features:
+        return
     try:
         self.namespace_task.set_inputs([node])
     except AttributeError:
-        out_node = self.make_bld_node('src', node.parent, 'namespace_definition.cc')
-        self.out_sources.append(out_node)
+        out_node = self.make_bld_node('src', None, 'namespace_definition.cc')
+        self.source.append(out_node)
         self.namespace_task = self.create_task('nsdef', [node], [out_node])
 
 

@@ -6,13 +6,18 @@
 /**************************************************************************************************/
 #include    <stdafx.h>
 #include    <bugengine/application.hh>
-
+#include    <plugin/plugin.hh>
+#include    <package/package.script.hh>
 
 namespace BugEngine { namespace Test { namespace Compute { namespace Copy
 {
 
 class CopyApplication : public Application
 {
+private:
+    Plugin::Plugin<Resource::ILoader>   const   m_packageManager;
+    Plugin::Plugin<Resource::ILoader>   const   m_computeModule;
+    ref<const Package>                  const   m_mainPackage;
 public:
     CopyApplication(const Plugin::Context& context);
     ~CopyApplication();
