@@ -481,12 +481,4 @@ raw<RTTI::Class> be_bugengine_Namespace()
     return result;
 }
 
-raw<RTTI::Class> be_bugengine_Namespace_BugEngine()
-{
-    return be_bugengine_Namespace();
-}
-
-static RTTI::ObjectInfo ob = { be_bugengine_Namespace_BugEngine()->objects, {0}, "BugEngine", RTTI::Value(be_bugengine_Namespace()) };
-BE_EXPORT const RTTI::ObjectInfo* obptr = (be_bugengine_Namespace_BugEngine()->objects.m_ptr = &ob);
-
 }

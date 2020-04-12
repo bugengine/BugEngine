@@ -129,6 +129,25 @@ namespace BugEngine                                                             
 #define BE_REGISTER_NAMESPACE_5(n1, n2, n3, n4, n5)                     \
     BE_REGISTER_NAMESPACE_5_(BE_PROJECTID, n1, n2, n3, n4, n5)
 
+#define BE_REGISTER_ROOT_NAMESPACE_(id, parent, name)                   \
+    namespace BugEngine                                                 \
+    {                                                                   \
+        raw<RTTI::Class> be_##id##_Namespace##parent();                 \
+        raw<RTTI::Class> be_##id##_Namespace##parent##_##name()         \
+        {                                                               \
+            return be_##id##_Namespace();                               \
+        }                                                               \
+        static RTTI::ObjectInfo ob = {                                  \
+            be_##id##_Namespace##parent()->objects, {0},                \
+            #name, RTTI::Value(be_##id##_Namespace())                   \
+        };                                                              \
+        BE_EXPORT const RTTI::ObjectInfo* s_namespaceRegistration =     \
+            (be_##id##_Namespace##parent()->objects.m_ptr = &ob);       \
+    }
+#define BE_REGISTER_ROOT_NAMESPACE(id, ns, parent)                      \
+    BE_REGISTER_ROOT_NAMESPACE_(id, ns, parent)
+
+
 /**************************************************************************************************/
 #endif
 

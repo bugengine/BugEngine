@@ -161,7 +161,8 @@ def module(
     use_master=False,
     warnings=True,
     export_all=False,
-    root=None
+    root=None,
+    root_namespace=None
 ):
     platforms = bld.env.VALID_PLATFORMS
     archs = bld.env.ARCHITECTURES
@@ -256,7 +257,8 @@ def module(
             pchstop=pchstop,
             source=preprocess_sources,
             kernels=[],
-            source_nodes=[source_node] + [e for _, e in extras]
+            source_nodes=[source_node] + [e for _, e in extras],
+            root_namespace=root_namespace
         )
         preprocess.env.PLUGIN = plugin_name
         if os.path.isdir(os.path.join(source_node.abspath(), 'kernels')):
@@ -341,8 +343,10 @@ def module(
             pchstop=pchstop,
             preprocess=preprocess,
             export_all=export_all,
-            source_nodes=[source_node] + [e for _, e in extras]
+            source_nodes=[source_node] + [e for _, e in extras],
+            root_namespace=root_namespace
         )
+        task_gen.env.PLUGIN = plugin_name
         result.append(task_gen)
         if target_prefix:
             internal_deps.append(target_prefix + name)
@@ -472,7 +476,8 @@ def library(
     path='',
     use_master=True,
     warnings=True,
-    export_all=False
+    export_all=False,
+    root_namespace='BugEngine'
 ):
     if not path: path = name
     if not bld.env.PROJECTS:
@@ -482,7 +487,7 @@ def library(
     return module(
         bld, name, path, depends, private_use, platforms,
         extra_tasks + (bld.env.DYNAMIC and ['cxx', 'cxxshlib', 'shared_lib'] or ['cxx', 'cxxobjects']), features,
-        extra_includes, extra_defines, extra_public_includes, extra_public_defines, use_master, warnings, export_all
+        extra_includes, extra_defines, extra_public_includes, extra_public_defines, use_master, warnings, export_all, None, root_namespace
     )
 
 
@@ -500,7 +505,8 @@ def headers(
     path='',
     use_master=True,
     warnings=True,
-    export_all=False
+    export_all=False,
+    root_namespace='BugEngine'
 ):
     if not path: path = name
     if not bld.env.PROJECTS:
@@ -509,7 +515,7 @@ def headers(
                 return None
     return module(
         bld, name, path, depends, private_use, platforms, extra_tasks + ['cxx'], features, [], [],
-        extra_public_includes, extra_public_defines, use_master, warnings, export_all
+        extra_public_includes, extra_public_defines, use_master, warnings, export_all, None, root_namespace
     )
 
 
@@ -528,7 +534,8 @@ def static_library(
     extra_tasks=[],
     path='',
     use_master=True,
-    warnings=True
+    warnings=True,
+    root_namespace='BugEngine'
 ):
     if not path: path = name
     if not bld.env.PROJECTS:
@@ -537,7 +544,7 @@ def static_library(
                 return None
     return module(
         bld, name, path, depends, private_use, platforms, extra_tasks + ['cxx', 'cxxstlib'], features, extra_includes,
-        extra_defines, extra_public_includes, extra_public_defines, use_master, warnings, False
+        extra_defines, extra_public_includes, extra_public_defines, use_master, warnings, False, None, root_namespace
     )
 
 
@@ -557,7 +564,8 @@ def shared_library(
     path='',
     use_master=True,
     warnings=True,
-    export_all=False
+    export_all=False,
+    root_namespace='BugEngine'
 ):
     if not path: path = name
     if not bld.env.PROJECTS:
@@ -567,7 +575,7 @@ def shared_library(
     return module(
         bld, name, path, depends, private_use, platforms,
         extra_tasks + (bld.env.STATIC and ['cxx', 'cxxobjects'] or ['cxx', 'cxxshlib', 'shared_lib']), features,
-        extra_includes, extra_defines, extra_public_includes, extra_public_defines, use_master, warnings, export_all
+        extra_includes, extra_defines, extra_public_includes, extra_public_defines, use_master, warnings, export_all, None, root_namespace
     )
 
 
@@ -586,7 +594,8 @@ def engine(
     extra_tasks=[],
     path='',
     use_master=True,
-    warnings=True
+    warnings=True,
+    root_namespace='BugEngine'
 ):
     if getattr(bld, 'launcher', None) != None:
         raise Errors.WafError('Only one engine can be defined')
@@ -604,7 +613,7 @@ def engine(
         module(
             bld, name + 'w', path, depends, private_use, platforms, extra_tasks + ['cxx', 'cxxprogram', 'launcher'],
             features, extra_includes, extra_defines, extra_public_includes, extra_public_defines, use_master, warnings,
-            False
+            False, None, root_namespace
         )
 
 
@@ -623,7 +632,8 @@ def game(
     extra_tasks=[],
     path='',
     use_master=True,
-    warnings=True
+    warnings=True,
+    root_namespace='BugEngine'
 ):
     if not path: path = name
     if not bld.env.PROJECTS:
@@ -633,7 +643,7 @@ def game(
     return module(
         bld, name, path, depends, private_use, platforms,
         extra_tasks + ['cxx', bld.env.STATIC and 'cxxobjects' or 'cxxshlib', 'plugin', 'game'], features,
-        extra_includes, extra_defines, extra_public_includes, extra_public_defines, use_master, warnings, False
+        extra_includes, extra_defines, extra_public_includes, extra_public_defines, use_master, warnings, False, None, root_namespace
     )
 
 
@@ -652,7 +662,8 @@ def plugin(
     extra_tasks=[],
     path='',
     use_master=True,
-    warnings=True
+    warnings=True,
+    root_namespace='BugEngine'
 ):
     if not path: path = name
     for p in platforms:
@@ -661,7 +672,7 @@ def plugin(
     return module(
         bld, name, path, depends, private_use, platforms,
         extra_tasks + ['cxx', bld.env.STATIC and 'cxxobjects' or 'cxxshlib', 'plugin'], features, extra_includes,
-        extra_defines, extra_public_includes, extra_public_defines, use_master, warnings, False
+        extra_defines, extra_public_includes, extra_public_defines, use_master, warnings, False, None, root_namespace
     )
 
 

@@ -35,10 +35,6 @@ namespace BugEngine { namespace Plugin
             raw<RTTI::Class> ptr = {&ci};                                                           \
             return ptr;                                                                             \
         }                                                                                           \
-        raw<RTTI::Class> be_##name##_Namespace_BugEngine()                                          \
-        {                                                                                           \
-            return be_##name##_Namespace();                                                         \
-        }                                                                                           \
     }
 #define BE_PLUGIN_NAMESPACE_REGISTER_NAMED__(name, id)                                              \
     BE_PLUGIN_REGISTER_KERNELS_(id)                                                                 \

@@ -27,6 +27,7 @@ struct wrap
 
     static inline void destroy(void* src)
     {
+        be_forceuse(src);
         ((T*)src)->~T();
     }
 };
