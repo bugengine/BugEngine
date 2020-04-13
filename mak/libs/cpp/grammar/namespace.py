@@ -7,7 +7,7 @@ def p_namespace_header(p):
                          | NAMESPACE LEFT_BRACE
     """
     if len(p) == 4:
-        p[0] = Namespace(p.parser.root_namespace, p.parser.stack[-1].name + [p[2]])
+        p[0] = Namespace(p.parser.root_namespace, p.parser.stack[-1].name + [p[2]], p.parser.root_alias)
     else:
         p[0] = AnonymousNamespace()
     p.parser.stack.append(p[0])

@@ -21,6 +21,7 @@ option_decl.add_option(
     "-p", "--pch", dest="pch", help="Insert an include for precompiled header at the start of the file"
 )
 option_decl.add_option("-m", "--module", dest="module", help="Module root")
+option_decl.add_option("-r", "--root", dest="root", help="Namespace root")
 option_decl.add_option("-t", "--tmp", dest="tmp_dir", help="Directory to store temporary/cached files", default=".")
 
 if __name__ == '__main__':
@@ -34,7 +35,7 @@ if __name__ == '__main__':
     else:
         try:
             result = parser.parse(
-                args[0], os.path.join(options.tmp_dir, 'cpp_grammar.pickle'), options.macro_file, options.module
+                args[0], os.path.join(options.tmp_dir, 'cpp_grammar.pickle'), options.macro_file, options.module, options.root
             )
             classes = StringIO()
             instances = StringIO()

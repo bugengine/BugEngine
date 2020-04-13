@@ -15,7 +15,7 @@ def python_module(bld, name, depends, path, platforms=[]):
         build_features=[],
         extra_includes=[], extra_defines=[],
         extra_public_includes=[], extra_public_defines=[],
-        use_master=True, warnings=True, export_all=False)
+        use_master=True, warnings=True, export_all=False, root_namespace='BugEngine')
     if module_list[0].preprocess:
         module_list[0].preprocess.env.PLUGIN = name.replace('.', '_')
     for module in module_list:

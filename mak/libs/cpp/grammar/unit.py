@@ -5,7 +5,7 @@ def p_unit_start(p):
     """
         unit_start :
     """
-    p[0] = tree.Root(p.parser.root_namespace)
+    p[0] = tree.Root(p.parser.root_namespace, p.parser.root_alias)
     p.parser.stack = [p[0]]
 
 
