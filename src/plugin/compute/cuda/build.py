@@ -172,7 +172,7 @@ def create_cuda_kernels(task_gen):
                     ],
                     includes=tgen.includes,
                     kernel_source=kernel_ast,
-                    use=tgen.use + ['plugin.compute.cuda'],
+                    use=tgen.use + [target_prefix + +'plugin.compute.cuda'],
                 )
                 kernel_task_gen.env.PLUGIN = kernel_task_gen.env.plugin_name
         if internal_deps:
