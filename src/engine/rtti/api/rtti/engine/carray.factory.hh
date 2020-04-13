@@ -89,7 +89,9 @@ RTTI::Value carray_BugHelper<T, Count>::trampoline_method_Index_overload_0(RTTI:
 {
     be_forceuse(parameters);
     be_forceuse(parameterCount);
-    return RTTI::Value(RTTI::Value::ByRef(parameters[0].as< const ArrayType& >()[parameters[1].as< u32  >()]));
+    const ArrayType& array = parameters[0].as< const ArrayType& >();
+    u32 index = parameters[1].as< u32  >();
+    return RTTI::Value(RTTI::Value::ByRef(array[index]));
 }
 
 template< typename T, u32 Count >
@@ -97,7 +99,9 @@ RTTI::Value carray_BugHelper<T, Count>::trampoline_method_Index_overload_1(RTTI:
 {
     be_forceuse(parameters);
     be_forceuse(parameterCount);
-    return RTTI::Value(RTTI::Value::ByRef(parameters[0].as< ArrayType& >()[parameters[1].as< u32  >()]));
+    ArrayType& array = parameters[0].as< ArrayType& >();
+    u32 index = parameters[1].as< u32  >();
+    return RTTI::Value(RTTI::Value::ByRef(array[index]));
 }
 
 
