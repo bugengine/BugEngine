@@ -141,7 +141,7 @@ def create_cpu_kernels(task_gen):
                         ],
                         includes=tgen.includes,
                         kernel_source=kernel_ast,
-                        use=tgen.use + ['plugin.compute.cpu'] + ([variant] if variant else []),
+                        use=tgen.use + [target_prefix + 'plugin.compute.cpu'] + ([variant] if variant else []),
                     )
                     kernel_task_gen.env.PLUGIN = task_gen.env.plugin_name
                     if target_prefix:
