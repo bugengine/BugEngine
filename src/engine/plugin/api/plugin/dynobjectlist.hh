@@ -72,19 +72,21 @@ public:
     static void showList();
 };
 
-#define _BE_PLUGIN_VAR_EXPORT               extern
-#define _BE_PLUGIN_EXPORT                   static
-#define _BE_REGISTER_PLUGIN_(id, name)      BE_EXPORT BugEngine::Plugin::DynamicObjectList s_plugin_##id (#name);
-#define _BE_REGISTER_PLUGIN(id, name)       _BE_REGISTER_PLUGIN_(id, name)
-#define _BE_REGISTER_METHOD_(id, x)         BE_EXPORT bool s_symbol_##id##_##x = s_plugin_##id.registerSymbol(x,#x);
-#define _BE_REGISTER_METHOD(id, x)          _BE_REGISTER_METHOD_(id, x)
+#define _BE_PLUGIN_VAR_EXPORT                   extern
+#define _BE_PLUGIN_EXPORT                       static
+#define _BE_REGISTER_PLUGIN_(id, name)          BE_EXPORT BugEngine::Plugin::DynamicObjectList s_plugin_##id (#name);
+#define _BE_REGISTER_PLUGIN(id, name)           _BE_REGISTER_PLUGIN_(id, name)
+#define _BE_REGISTER_METHOD_(id, x, name)       BE_EXPORT bool s_symbol_##id##_##x = s_plugin_##id.registerSymbol(x,#name);
+#define _BE_REGISTER_METHOD(id, x)              _BE_REGISTER_METHOD_(id, x, x)
+#define _BE_REGISTER_METHOD_NAMED(id, x, name)  _BE_REGISTER_METHOD_(id, x, name)
 
 #else
 
-#define _BE_PLUGIN_VAR_EXPORT               BE_EXPORT
-#define _BE_PLUGIN_EXPORT                   extern "C" BE_EXPORT
-#define _BE_REGISTER_PLUGIN(id, name)       
-#define _BE_REGISTER_METHOD(id, x)          
+#define _BE_PLUGIN_VAR_EXPORT                   BE_EXPORT
+#define _BE_PLUGIN_EXPORT                       extern "C" BE_EXPORT
+#define _BE_REGISTER_PLUGIN(id, name)           
+#define _BE_REGISTER_METHOD(id, x)              
+#define _BE_REGISTER_METHOD_NAMED(id, x, name)  
 
 #endif
 

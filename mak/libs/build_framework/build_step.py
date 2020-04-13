@@ -606,7 +606,7 @@ def engine(
     bld.launcher = module(
         bld, name, path, depends + ['3rdparty.system.console'], private_use, platforms,
         extra_tasks + ['cxx', 'cxxprogram', 'launcher'], features, extra_includes, extra_defines, extra_public_includes,
-        extra_public_defines, use_master, warnings, False
+        extra_public_defines, use_master, warnings, False, None, root_namespace
     )
     if 'windows' in bld.env.VALID_PLATFORMS:
         module(
@@ -759,7 +759,8 @@ def static_dependencies(self):
             for task_gen in g:
                 if not isinstance(task_gen, TaskGen.task_gen):
                     continue
-                if ('plugin' in task_gen.features) and 'cxx' in task_gen.features:
+                if ('kernel' in task_gen.features or 'plugin' in task_gen.features) and 'cxx' in task_gen.features:
+                    task_gen.post()
                     if task_gen.env.TOOLCHAIN == self.env.TOOLCHAIN:
                         self.use.append(task_gen.target)
 
