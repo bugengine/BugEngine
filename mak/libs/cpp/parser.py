@@ -14,7 +14,7 @@ def p_error(p):
     p.lexer.error_count += 1
 
 
-def parse(filename, pickle_file, macro_files, module_name):
+def parse(filename, pickle_file, macro_files, module_name, root_alias):
     for f in macro_files or []:
         with open(f, 'r') as macro_defs:
             for m in macro_defs.readlines():
@@ -24,6 +24,7 @@ def parse(filename, pickle_file, macro_files, module_name):
         parser = build_parser(pickle_file)
         parser.source = filename
         parser.root_namespace = module_name
+        parser.root_alias = root_alias
 
         result = parser.parse(input.read(), lexer=lexer.lexer)
 

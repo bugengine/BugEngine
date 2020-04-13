@@ -2,7 +2,7 @@
 # encoding: utf-8
 
 from waflib import Task
-from waflib.TaskGen import extension, feature, before_method
+from waflib.TaskGen import extension, feature, before_method, after_method
 import os
 import sys
 from waflib import Task
@@ -21,6 +21,7 @@ ddf = """
 -d ${MACROS_IGNORE}
 ${PCH_HEADER:PCH}
 --module ${PLUGIN}
+--root ${ROOT_ALIAS}
 --tmp ${TMPDIR}
 ${SRC[0].path_from(bld.bldnode)}
 ${TGT[0].abspath()}
@@ -48,7 +49,6 @@ class docgen(Task.Task):
 class nsdef(Task.Task):
     def run(self):
         seen = set([])
-        root_namespace = self.generator.root_namespace.split('::')
         with open(self.outputs[0].abspath(), 'w') as namespace_file:
             pch = getattr(self, 'pch', '')
             if pch:
@@ -58,15 +58,16 @@ class nsdef(Task.Task):
                 with open(input.abspath(), 'rb') as in_file:
                     while True:
                         try:
-                            namespace = cPickle.load(in_file)
-                            if '::'.join(namespace) not in seen:
-                                seen.add('::'.join(namespace))
+                            plugin, root_namespace, namespace = cPickle.load(in_file)
+                            if (plugin, '.'.join(namespace)) not in seen:
+                                root_namespace = root_namespace.split('::')
+                                seen.add((plugin, '.'.join(namespace)))
                                 if namespace == root_namespace:
-                                    line = namespace_alias % (self.generator.env.PLUGIN,
+                                    line = namespace_alias % (plugin,
                                                               '_'+'_'.join(root_namespace[:-1]) if len(root_namespace) > 1 else '',
                                                               root_namespace[-1])
                                 else:
-                                    line = namespace_register % (len(namespace), self.generator.env.PLUGIN,
+                                    line = namespace_register % (len(namespace), plugin,
                                                                  ', '.join(namespace))
                                 namespace_file.write(line)
                         except EOFError:
@@ -89,6 +90,7 @@ def datagen(self, node):
     tsk.path = self.bld.variant_dir
     tsk.env.PCH_HEADER = ['--pch']
     tsk.env.PCH = self.pchstop and [self.pchstop] or []
+    tsk.env.ROOT_ALIAS = self.root_namespace
     out_node.parent.mkdir()
     tsk.dep_nodes = [self.bld.bugenginenode.find_node('mak/bin/ddf.py')]
     tsk.dep_nodes += self.bld.bugenginenode.find_node('mak/libs/cpp').ant_glob('**/*.py')
@@ -100,8 +102,9 @@ def datagen(self, node):
     self.out_sources.append(out_node.change_ext('.namespaces'))
 
 
-@feature('cxxshlib', 'cshlib', 'cxxprogran', 'cprogram')
+@feature('cxxshlib', 'cshlib', 'cxxprogram', 'cprogram')
 @before_method('process_source')
+@after_method('static_dependencies')
 def nsgen(self):
     # gather all namespaces of dependencies
     seen = set([])

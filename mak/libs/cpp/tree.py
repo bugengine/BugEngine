@@ -854,9 +854,10 @@ class Class(Container):
 
 
 class Namespace(Container):
-    def __init__(self, root_namespace, name):
+    def __init__(self, root_namespace, name, root_alias):
         super(Namespace, self).__init__(name)
         self.root_namespace = root_namespace
+        self.root_alias = root_alias
 
     def owner_name(self):
         return '::BugEngine::be_%s_Namespace_%s()' % (self.root_namespace, '_'.join(self.name))
@@ -898,7 +899,7 @@ class Namespace(Container):
         return object_name
 
     def write_namespaces(self, namespace_buffer):
-        cPickle.dump(self.name, namespace_buffer, protocol=0)
+        cPickle.dump((self.root_namespace, self.root_alias, self.name), namespace_buffer, protocol=0)
         for o in self.objects:
             o.write_namespaces(namespace_buffer)
 
@@ -937,9 +938,10 @@ class AnonymousClass(Container):
 
 
 class Root(Container):
-    def __init__(self, root_namespace):
+    def __init__(self, root_namespace, root_alias):
         super(Root, self).__init__([])
         self.root_namespace = root_namespace
+        self.root_alias = root_alias
 
     def owner_name(self):
         return '::BugEngine::be_%s_Namespace()' % self.root_namespace
