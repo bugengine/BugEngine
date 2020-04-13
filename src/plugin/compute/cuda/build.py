@@ -45,6 +45,8 @@ using namespace Kernel;
 _BE_PLUGIN_EXPORT void _kmain(const u32 index, const u32 total,
                               const minitl::array< minitl::weak<const BugEngine::KernelScheduler::IMemoryBuffer> >& /*argv*/)
 {
+    be_forceuse(index);
+    be_forceuse(total);
 }
 _BE_REGISTER_PLUGIN(BE_KERNEL_ID, BE_KERNEL_NAME);
 _BE_REGISTER_METHOD_NAMED(BE_KERNEL_ID, _kmain, _kmain);
@@ -91,7 +93,6 @@ class cudac(Task.Task):
             'source': source,
             'args': ',\n          '.join('%s(0, 0, 0)' % arg[1] for i, arg in enumerate(args)),
         }
-
         with open(self.outputs[0].abspath(), 'w') as out:
             out.write(template % params)
         with open(self.outputs[1].abspath(), 'w') as out:
