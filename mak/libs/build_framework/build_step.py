@@ -181,7 +181,7 @@ def module(
         bld.recurse(os.path.join(source_node.path_from(bld.path), 'build.py'))
     except Errors.WafError:
         pass
-    project_path = source_node.path_from(bld.srcnode).replace('/', '.')
+    project_path = source_node.path_from(bld.srcnode).replace('/', '.').replace('\\', '.')
     if 'plugin' in features:
         plugin_name = name.replace('.', '_')
     else:
@@ -385,7 +385,7 @@ def thirdparty(bld, name, feature='', path='', var='', use=[], private_use=[]):
     platforms = bld.env.VALID_PLATFORMS
     platform_specific = platforms
     source_node = bld.path.make_node(path and path.replace('.', '/') or '.')
-    project_path = source_node.parent.path_from(bld.srcnode).replace('/', '.')
+    project_path = source_node.parent.path_from(bld.srcnode).replace('/', '.').replace('\\', '.')
     project_path = '%s.%s' % (project_path, name.split('.')[-1])
     if not var:
         var = bld.path.name
