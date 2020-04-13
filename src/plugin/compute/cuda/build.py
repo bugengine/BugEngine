@@ -10,11 +10,6 @@ except ImportError:
 template = """
 %(pch)s
 #include    <kernel/compilers.hh>
-#include    <kernel/simd.hh>
-#include    <kernel/input/input.hh>
-#include    <plugin/dynobjectlist.hh>
-#include    <minitl/array.hh>
-#include    <cuda/memorybuffer.hh>
 #include    <scheduler/kernel/parameters/parameters.hh>
 
 using namespace Kernel;
@@ -35,6 +30,25 @@ __device__ void _kmain(const u32 index, const u32 total, Parameter* parameters)
 }
 """
 
+template_cpp = """
+%(pch)s
+#include    <kernel/compilers.hh>
+#include    <kernel/simd.hh>
+#include    <kernel/input/input.hh>
+#include    <plugin/dynobjectlist.hh>
+#include    <minitl/array.hh>
+#include    <cuda/memorybuffer.hh>
+#include    <scheduler/kernel/parameters/parameters.hh>
+
+using namespace Kernel;
+
+_BE_PLUGIN_EXPORT void _kmain(const u32 index, const u32 total,
+                              const minitl::array< minitl::weak<const BugEngine::KernelScheduler::IMemoryBuffer> >& /*argv*/)
+{
+}
+_BE_REGISTER_PLUGIN(BE_KERNEL_ID, BE_KERNEL_NAME);
+_BE_REGISTER_METHOD_NAMED(BE_KERNEL_ID, _kmain, _kmain);
+"""
 
 class nvcc(Task.Task):
     "nvcc"
@@ -59,7 +73,7 @@ class nvcc(Task.Task):
 
 
 class cudac(Task.Task):
-    "Generates a CUDA trampoline to call the C++ kernel"
+    "Generates a CUDA trampoline to call the C++ kernel, and a C++ wrapper"
     color = 'PINK'
 
     def scan(self):
@@ -80,6 +94,8 @@ class cudac(Task.Task):
 
         with open(self.outputs[0].abspath(), 'w') as out:
             out.write(template % params)
+        with open(self.outputs[1].abspath(), 'w') as out:
+            out.write(template_cpp % params)
 
 
 class bin2c(Task.Task):
@@ -107,8 +123,10 @@ def process_cuda_source(task_gen, cuda_source):
 def build_cuda_kernels(task_gen):
     ast = task_gen.kernel_source
     out = ast.change_ext('.cu')
-    task_gen.create_task('cudac', [ast], [out])
+    out_cc = ast.change_ext('.cudacall.cc')
+    task_gen.create_task('cudac', [ast], [out, out_cc])
     task_gen.source.append(out)
+    task_gen.source.append(out_cc)
 
 
 @feature('cudakernel_create')
@@ -147,8 +165,8 @@ def create_cuda_kernels(task_gen):
                     pchstop=tgen.pchstop,
                     defines=tgen.defines + [
                         'BE_BUILD_KERNEL=1',
-                        'BE_KERNEL_ID=%s_%s' % (task_gen.parent.replace('.', '_'), kernel_type),
-                        'BE_KERNEL_NAME=%s.%s' % (task_gen.parent, kernel_type),
+                        'BE_KERNEL_ID=%s_%s' % (task_gen.parent.replace('.', '_'), kernel_target.replace('.', '_')),
+                        'BE_KERNEL_NAME=%s' % (kernel_target),
                         'BE_KERNEL_TARGET=%s' % kernel_type,
                     ],
                     includes=tgen.includes,

@@ -31,7 +31,7 @@
 #endif
 
 #define __host
-#define __device
+#define __device    inline
 
 namespace BugEngine
 {

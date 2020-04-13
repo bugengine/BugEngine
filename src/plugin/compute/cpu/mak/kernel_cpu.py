@@ -27,15 +27,15 @@ struct Parameter
     void* end;
 };
 
-_BE_PLUGIN_EXPORT void _kmain(const u32 index, const u32 total,
-                              const minitl::array< minitl::weak<const BugEngine::KernelScheduler::IMemoryBuffer> >& /*argv*/)
+_BE_PLUGIN_EXPORT void _kmain%(static_variant)s(const u32 index, const u32 total,
+                                                const minitl::array< minitl::weak<const BugEngine::KernelScheduler::IMemoryBuffer> >& /*argv*/)
 {
     kmain(index, total,
           %(args)s
     );
 }
 _BE_REGISTER_PLUGIN(BE_KERNEL_ID, BE_KERNEL_NAME);
-_BE_REGISTER_METHOD(BE_KERNEL_ID, _kmain);
+_BE_REGISTER_METHOD_NAMED(BE_KERNEL_ID, _kmain%(static_variant)s, _kmain);
 """
 
 
@@ -57,7 +57,8 @@ class cpuc(Task.Task):
         params = {
             'pch': '#include <%s>\n' % self.generator.pchstop if self.generator.pchstop else '',
             'source': source,
-            'args': ',\n          '.join('%s(0, 0, 0)' % arg[1] for i, arg in enumerate(args))
+            'args': ',\n          '.join('%s(0, 0, 0)' % arg[1] for i, arg in enumerate(args)),
+            'static_variant': ('_'+self.generator.variant_name[1:]) if self.env.STATIC else ''
         }
 
         with open(self.outputs[0].abspath(), 'w') as out:
@@ -134,7 +135,7 @@ def create_cpu_kernels(task_gen):
                         defines=tgen.defines + [
                             'BE_BUILD_KERNEL=1',
                             'BE_KERNEL_ID=%s_%s' % (task_gen.parent.replace('.', '_'), kernel_target.replace('.', '_')),
-                            'BE_KERNEL_NAME=%s.%s' % (task_gen.parent, kernel_target),
+                            'BE_KERNEL_NAME=%s' % (kernel_target),
                             'BE_KERNEL_TARGET=%s' % kernel_type,
                             'BE_KERNEL_ARCH=%s' % variant
                         ],
