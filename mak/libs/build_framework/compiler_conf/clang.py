@@ -77,9 +77,9 @@ class Clang(GnuCompiler):
                                     try:
                                         c = self.__class__(
                                             self.compiler_c, self.compiler_cxx, {
-                                                'c': self.extra_args.get('c', []) + ['-target', x],
-                                                'cxx': self.extra_args.get('cxx', []) + ['-target', x],
-                                                'link': self.extra_args.get('link', []) + ['-target', x],
+                                                'c': self.extra_args.get('c', []) + ['--target=%s' % x],
+                                                'cxx': self.extra_args.get('cxx', []) + ['--target=%s' % x],
+                                                'link': self.extra_args.get('link', []) + ['--target=%s' % x],
                                             })
                                     except Exception:
                                         pass
