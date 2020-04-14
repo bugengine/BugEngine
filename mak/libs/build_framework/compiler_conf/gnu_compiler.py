@@ -323,14 +323,15 @@ class GnuCompiler(Compiler):
         if not conf.env.LLDB:
             conf.find_program('lldb', var='LLDB', mandatory=False)
         Compiler.load_tools(self, conf, platform)
-        conf.env.CCLNK_TGT_F = ['-o', '']
-        conf.env.CXXLNK_TGT_F = ['-o', '']
+        conf.env.CCLNK_TGT_F = ['-o']
+        conf.env.CXXLNK_TGT_F = ['-o']
 
     def load_in_env(self, conf, platform):
         env = conf.env
         env.IDIRAFTER = '-idirafter'
         Compiler.load_in_env(self, conf, platform)
         env.SYSROOT = env.SYSROOT or self.sysroot
+        env.PATH = self.directories + os.environ['PATH'].split(os.pathsep)
 
         conf.end_msg(' ')
         conf.start_msg('      `- [vectorize flags]')
