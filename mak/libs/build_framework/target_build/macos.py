@@ -13,7 +13,7 @@ def build(bld):
             self.outputs[0].delete()
             return cls.exec_command(self, *k, **kw)
         derived.exec_command = exec_command_clean
-    for cls_name in 'cshlib', 'cxxshlib', 'cprogram', 'cxxprogram':
+    for cls_name in 'cshlib', 'cxxshlib', 'cprogram', 'cxxprogram', 'lipo':
         wrap_class(cls_name)
 
 

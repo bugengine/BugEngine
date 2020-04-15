@@ -323,8 +323,8 @@ class GnuCompiler(Compiler):
         if not conf.env.LLDB:
             conf.find_program('lldb', var='LLDB', mandatory=False)
         Compiler.load_tools(self, conf, platform)
-        conf.env.CCLNK_TGT_F = ['-o']
-        conf.env.CXXLNK_TGT_F = ['-o']
+        conf.env.CCLNK_TGT_F = ['-o', '']
+        conf.env.CXXLNK_TGT_F = ['-o', '']
 
     def load_in_env(self, conf, platform):
         env = conf.env
