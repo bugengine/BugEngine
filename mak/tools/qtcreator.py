@@ -259,6 +259,7 @@ class QtToolchain(QtObject):
             ('msvc 12.0', 'msvc2013'),
             ('msvc 14.0', 'msvc2015'),
             ('msvc 15.', 'msvc2017'),
+            ('freebsd', 'freebsd'),
         )
         for o, o_name in supported_os:
             if target.find(o) != -1:
@@ -271,7 +272,7 @@ class QtToolchain(QtObject):
                 platform = p_name
                 break
         else:
-            platform = 'generic'
+            platform = 'unknown'
         return (os, platform)
 
     def __init__(self, language=None, env_name=None, env=None):
@@ -380,14 +381,17 @@ class QtDebugger(QtObject):
         if env_name:
             assert (env)
             assert (toolchain)
-            if env.CDB:
+            if env.GDB:
+                self.Binary = env.GDB[0]
+                self.EngineType = 1
+            elif env.CDB:
                 self.Binary = env.CDB[0]
                 self.EngineType = 4
             elif env.LLDB:
                 self.Binary = env.LLDB[0]
                 self.EngineType = 256
             else:
-                self.Binary = env.GDB and env.GDB[0] or '/usr/bin/gdb'
+                self.Binary = '/usr/bin/gdb'
                 self.EngineType = 1
             abi = getattr(toolchain, 'ProjectExplorer_CustomToolChain_TargetAbi', None)
             abi = abi or getattr(toolchain, 'ProjectExplorer_GccToolChain_TargetAbi', None)
@@ -1019,7 +1023,8 @@ class QtCreator(Build.BuildContext):
                                      to_var('RUNBIN_DIR')),
                                     ('ProjectExplorer.ProjectConfiguration.DefaultDisplayName',
                                      'python:%s' % task_gen.target),
-                                    ('ProjectExplorer.ProjectConfiguration.DisplayName', ''),
+                                    ('ProjectExplorer.ProjectConfiguration.DisplayName',
+                                     'python:%s' % (task_gen.name)),
                                     ('ProjectExplorer.ProjectConfiguration.Id',
                                      'ProjectExplorer.CustomExecutableRunConfiguration'),
                                     ('RunConfiguration.QmlDebugServerPort', 3768),

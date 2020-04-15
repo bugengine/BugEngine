@@ -111,6 +111,55 @@ class vscode(Build.BuildContext):
                     'bugenginepath': self.bugenginenode.abspath()
                 })
             )
+        options = [a for a in sys.argv if a[0] == '-']
+        tasks = []
+        vscode_node = self.srcnode.make_node('.vscode')
+        vscode_node.mkdir()
+        for env_name in self.env.ALL_TOOLCHAINS:
+            bld_env = self.all_envs[env_name]
+            if bld_env.SUB_TOOLCHAINS:
+                env = self.all_envs[bld_env.SUB_TOOLCHAINS[0]]
+            else:
+                env = bld_env
+            for variant in self.env.ALL_VARIANTS:
+                tasks.append(
+                    '    {\n'
+                    '      "label": "build:%(toolchain)s:%(variant)s",\n'
+                    '      "type": "process",\n'
+                    '      "command": ["%(python)s"],\n'
+                    '      "args": ["%(waf)s", %(cl)s],\n'
+                    '      "options":{\n'
+                    '        "cwd": "%(pwd)s"\n'
+                    '      },\n'
+                    '      "problemMatcher": [\n'
+                    '        "$gcc",\n'
+                    '        "$msCompile"\n'
+                    '      ],\n'
+                    '      "group": {\n'
+                    '        "kind": "build",\n'
+                    '        "isDefault": true\n'
+                    '      }\n'
+                    '    }\n' % {
+                        'python':
+                            sys.executable,
+                        'waf':
+                            sys.argv[0],
+                        'toolchain':
+                            env_name,
+                        'variant':
+                            variant,
+                        'cl':
+                            ', '.join(
+                                '"%s"' % o for o in options + ['build:%s:%s' % (env_name, variant)]
+                            ),
+                        'pwd':
+                            self.srcnode.abspath()
+                    }
+                )
+        with open(vscode_node.make_node('tasks.json').abspath(), 'w') as task_file:
+            task_file.write('{\n  "version":"2.0.0",\n  "tasks": [\n')
+            task_file.write(',\n'.join(tasks))
+            task_file.write('\n  ]\n}\n')
 
 
 class vscode_folders(vscode):
