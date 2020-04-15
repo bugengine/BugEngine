@@ -1,3 +1,4 @@
+import os
 import tempfile
 from waflib import Task
 
@@ -14,10 +15,16 @@ def clang_exec_command(exec_command):
                 resp_file_arguments.append(arg)
             else:
                 command.append(arg)
-        with tempfile.NamedTemporaryFile('w+') as response_file:
-            response_file.write('\n'.join(resp_file_arguments))
-            response_file.flush()
-            return exec_command(task, [cmd[0], '@%s'%response_file.name] + command, **kw_args)
+        response_file, response_filename = tempfile.mkstemp(dir=task.generator.bld.bldnode.abspath(), text=True)
+        try:
+            os.write(response_file, '\n'.join(resp_file_arguments).encode())
+            os.close(response_file)
+            return exec_command(task, [cmd[0], '@%s'%response_filename] + command, **kw_args)
+        finally:
+            try:
+                os.remove(response_filename)
+            except OSError:
+                pass
     return exec_command_response_file
 
 
