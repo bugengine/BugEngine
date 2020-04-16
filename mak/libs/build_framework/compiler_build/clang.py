@@ -10,16 +10,16 @@ def clang_exec_command(exec_command):
         inputs = set((x.bldpath() for x in task.inputs))
         for arg in cmd[1:]:
             if arg in inputs:
-                resp_file_arguments.append(arg)
+                resp_file_arguments.append('"%s"'%arg.replace('\\', '\\\\'))
             elif arg[0:2] in ('-I', '-L', '-D'):
-                resp_file_arguments.append(arg)
+                resp_file_arguments.append('%s"%s"' % (arg[:2], arg[2:].replace('\\', '\\\\')))
             else:
-                command.append(arg.replace('\\', '/'))
+                command.append(arg)
         response_file, response_filename = tempfile.mkstemp(dir=task.generator.bld.bldnode.abspath(), text=True)
         try:
             os.write(response_file, '\n'.join(resp_file_arguments).encode())
             os.close(response_file)
-            return exec_command(task, [cmd[0], '@%s'%response_filename] + command, **kw_args)
+            return exec_command(task, [cmd[0]] + command + ['@%s'%response_filename], **kw_args)
         finally:
             try:
                 os.remove(response_filename)

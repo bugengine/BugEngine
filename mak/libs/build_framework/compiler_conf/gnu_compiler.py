@@ -102,6 +102,9 @@ class GnuCompiler(Compiler):
         extra_args = deepcopy(extra_args)
         version, platform, arch = self.get_version(compiler_cxx, extra_args, extra_env)
         Compiler.__init__(self, compiler_c, compiler_cxx, version, platform, arch, extra_args, extra_env)
+        target = self.target.split('-')
+        if len(target) == 4:
+            self.arch_name = self.arch_name + '_' + target[-1]
         for t in self.targets:
             target_dir = os.path.normpath(os.path.join(self.directories[0], '..', t, 'bin'))
             if os.path.isdir(target_dir):

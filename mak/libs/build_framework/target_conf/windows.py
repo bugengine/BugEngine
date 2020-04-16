@@ -12,11 +12,10 @@ class Windows(Platform):
     def is_valid(self, compiler):
         node = self.conf.bldnode.make_node('main.cxx')
         tgtnode = node.change_ext('')
-        node.write('#include <cstdio>\nint main() {}\n')
+        node.write('#include <cstdio>\n#include <cfloat>\nint main() {}\n')
         try:
             result, out, err = compiler.run_cxx([node.abspath(), '-x', 'c++', '-o', tgtnode.abspath()])
         except Exception as e:
-            #print(e)
             return False
         finally:
             node.delete()

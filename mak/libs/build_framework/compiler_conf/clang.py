@@ -50,8 +50,22 @@ class Clang(GnuCompiler):
                     seen.add(c.arch)
         target_tuple = self.target.split('-')
         arch = target_tuple[0]
-        r, out, err = self.run_cxx(['-x', 'c++', '-v', '-E', '-'], '\n')
+        if target_tuple[-1] == 'msvc':
+            gnu_tuple = '-'.join(target_tuple[:-1] + ['gnu'])
+            try:
+                c = self.__class__(
+                    self.compiler_c, self.compiler_cxx, {
+                        'c': self.extra_args.get('c', []) + ['--target=%s' % gnu_tuple],
+                        'cxx': self.extra_args.get('cxx', []) + ['--target=%s' % gnu_tuple],
+                        'link': self.extra_args.get('link', []) + ['--target=%s' % gnu_tuple],
+                    }
+                )
+            except Exception:
+                pass
+            else:
+                result.append(c)
 
+        r, out, err = self.run_cxx(['-x', 'c++', '-v', '-E', '-'], '\n')
         out = out.split('\n') + err.split('\n')
         while out:
             line = out.pop(0)
@@ -157,7 +171,7 @@ def detect_clang(conf):
             clangxx = os.path.normpath(clangxx)
             try:
                 c = Clang(clang, clangxx)
-            except Exception:
+            except Exception as e:
                 pass
             else:
                 if not c.is_valid(conf):
