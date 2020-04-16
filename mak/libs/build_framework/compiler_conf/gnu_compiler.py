@@ -331,7 +331,6 @@ class GnuCompiler(Compiler):
         env.IDIRAFTER = '-idirafter'
         Compiler.load_in_env(self, conf, platform)
         env.SYSROOT = env.SYSROOT or self.sysroot
-        env.PATH = self.directories + os.environ['PATH'].split(os.pathsep)
 
         conf.end_msg(' ')
         conf.start_msg('      `- [vectorize flags]')
