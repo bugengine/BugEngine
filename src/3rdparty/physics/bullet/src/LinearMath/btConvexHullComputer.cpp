@@ -627,9 +627,10 @@ class btConvexHullInternal
 					p11 += high(p01);
 					p11 += high(p10);
 					p11 += high(p0110);
-					shlHalf(p0110);
-					p00 += p0110;
-					if (p00 < p0110)
+					UWord p0110h = UWord(low(p0110));
+					shlHalf(p0110h);
+					p00 += p0110h;
+					if (p00 < p0110h)
 					{
 						++p11;
 					}
