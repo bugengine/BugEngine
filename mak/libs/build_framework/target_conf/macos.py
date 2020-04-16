@@ -5,7 +5,6 @@ from waflib.Configure import conf
 from .platform import Platform
 import os
 import re
-from copy import copy
 
 
 class Darwin(Platform):
@@ -233,7 +232,7 @@ class Darwin(Platform):
                                 exe_node.delete()
                             except Exception:
                                 pass
-                            env = copy(os.environ)
+                            env = dict(os.environ)
                             env['PATH'] = os.path.pathsep.join(sdk_bin_paths + c.directories + [env['PATH']])
                             r, out, err = c.run_cxx([
                                 sdk_option, '-g', '-O2', '-c', '-o',

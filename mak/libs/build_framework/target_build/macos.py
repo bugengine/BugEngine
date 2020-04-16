@@ -10,7 +10,7 @@ def build(bld):
         cls = Task.classes.get(cls_name, None)
         derived = type(cls_name, (cls, ), {})
         def exec_command_clean(self, *k, **kw):
-            self.outputs[0].delete()
+            self.outputs[0].delete(evict=False)
             return cls.exec_command(self, *k, **kw)
         derived.exec_command = exec_command_clean
     for cls_name in 'cshlib', 'cxxshlib', 'cprogram', 'cxxprogram', 'lipo':
