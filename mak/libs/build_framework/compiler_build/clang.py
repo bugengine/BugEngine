@@ -14,7 +14,7 @@ def clang_exec_command(exec_command):
             elif arg[0:2] in ('-I', '-L', '-D'):
                 resp_file_arguments.append(arg)
             else:
-                command.append(arg.replace('\\', '/')
+                command.append(arg.replace('\\', '/'))
         response_file, response_filename = tempfile.mkstemp(dir=task.generator.bld.bldnode.abspath(), text=True)
         try:
             os.write(response_file, '\n'.join(resp_file_arguments).encode())
