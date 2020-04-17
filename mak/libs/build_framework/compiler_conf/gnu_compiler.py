@@ -103,8 +103,6 @@ class GnuCompiler(Compiler):
         version, platform, arch = self.get_version(compiler_cxx, extra_args, extra_env)
         Compiler.__init__(self, compiler_c, compiler_cxx, version, platform, arch, extra_args, extra_env)
         target = self.target.split('-')
-        if len(target) == 4:
-            self.arch_name = self.arch_name + '_' + target[-1]
         for t in self.targets:
             target_dir = os.path.normpath(os.path.join(self.directories[0], '..', t, 'bin'))
             if os.path.isdir(target_dir):
@@ -126,7 +124,13 @@ class GnuCompiler(Compiler):
 
         def split_triple(t):
             t = t.split('-')
-            return t[0], '-'.join(t[1:])
+            platform = t[-2:]
+            for useless in ('pc', 'generic', 'unknown'):
+                try:
+                    platform.remove(useless)
+                except ValueError:
+                    pass
+            return t[0], '-'.join(platform)
 
         arch = None
         platform = None

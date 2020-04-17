@@ -30,6 +30,7 @@ class Windows(Platform):
         result = []
         for c in compiler_list:
             for regexp in self.SUPPORTED_TARGETS:
+                print(c.platform)
                 if regexp.match(c.platform):
                     if 'Clang' in c.NAMES:
                         if self.is_valid(c):
@@ -84,6 +85,9 @@ class Windows(Platform):
             conf.env.append_unique('WINRCFLAGS', ['--target=pe-i386'])
         elif compiler.arch == 'amd64':
             conf.env.append_unique('WINRCFLAGS', ['--target=pe-x86-64'])
+
+    def platform_name(self, compiler):
+        return compiler.platform_name
 
 
 class Windows_Clang(Windows):

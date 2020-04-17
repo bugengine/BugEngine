@@ -64,6 +64,7 @@ class Clang(GnuCompiler):
                 pass
             else:
                 result.append(c)
+                result += GnuCompiler.get_multilib_compilers(c)
 
         r, out, err = self.run_cxx(['-x', 'c++', '-v', '-E', '-'], '\n')
         out = out.split('\n') + err.split('\n')

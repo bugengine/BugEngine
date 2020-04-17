@@ -23,6 +23,7 @@ class MSVC(Compiler):
         ] + includes
         self.libdirs = libdirs
         self.target = self.platform
+        self.platform_name = 'windows'
         self.targets = [self.target]
 
     def set_optimisation_options(self, conf):

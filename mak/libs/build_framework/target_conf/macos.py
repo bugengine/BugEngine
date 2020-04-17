@@ -21,6 +21,9 @@ class Darwin(Platform):
             self.NAME = self.__class__.NAME + sdk[0]
             self.directories += sdk[2]
 
+    def platform_name(self, compiler):
+        return self.__class__.NAME.lower() + self.sdk[0]
+
     def get_available_compilers(self, compiler_list):
         result = []
         compiler_sets = {}

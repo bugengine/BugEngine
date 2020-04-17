@@ -65,9 +65,12 @@ class Platform:
                     result.append((c, [], self))
         return result
 
+    def platform_name(self, compiler):
+        return self.NAME.lower()
+
     def add_toolchain(self, conf, compiler, sub_compilers=[], add=True):
         toolchain = '%s_%s-%s_%s-%s' % (
-            self.NAME.lower(), compiler.arch, compiler.NAMES[0].lower(), compiler.arch_name, compiler.version
+            self.platform_name(compiler), compiler.arch, compiler.NAMES[0].lower(), compiler.arch_name, compiler.version
         )
         if sub_compilers:
             toolchain = '%s-%s-%s' % (self.NAME.lower(), compiler.NAMES[0].lower(), compiler.version)

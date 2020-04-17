@@ -293,31 +293,31 @@ matrix:
         - unzip -q android-ndk-r19c-linux-x86_64.zip
     - os: linux
       dist: trusty
-      env: COMPILER=gcc_amd64 COMPILER_VERSION=4.8.4 TARGET_OS=linux_amd64 FLAVOR=debug
+      env: COMPILER=gcc_amd64 COMPILER_VERSION=4.8.4 TARGET_OS=linux_gnu_amd64 FLAVOR=debug
     - os: linux
       dist: trusty
-      env: COMPILER=gcc_amd64 COMPILER_VERSION=4.8.4 TARGET_OS=linux_amd64 FLAVOR=profile
+      env: COMPILER=gcc_amd64 COMPILER_VERSION=4.8.4 TARGET_OS=linux_gnu_amd64 FLAVOR=profile
     - os: linux
       dist: trusty
-      env: COMPILER=gcc_amd64 COMPILER_VERSION=4.8.4 TARGET_OS=linux_amd64 FLAVOR=final
+      env: COMPILER=gcc_amd64 COMPILER_VERSION=4.8.4 TARGET_OS=linux_gnu_amd64 FLAVOR=final
     - os: linux
       dist: trusty
-      env: COMPILER=clang_amd64 COMPILER_VERSION=5.0.0 TARGET_OS=linux_amd64 FLAVOR=debug
+      env: COMPILER=clang_amd64 COMPILER_VERSION=5.0.0 TARGET_OS=linux_gnu_amd64 FLAVOR=debug
     - os: linux
       dist: trusty
-      env: COMPILER=clang_amd64 COMPILER_VERSION=5.0.0 TARGET_OS=linux_amd64 FLAVOR=profile
+      env: COMPILER=clang_amd64 COMPILER_VERSION=5.0.0 TARGET_OS=linux_gnu_amd64 FLAVOR=profile
     - os: linux
       dist: trusty
-      env: COMPILER=clang_amd64 COMPILER_VERSION=5.0.0 TARGET_OS=linux_amd64 FLAVOR=final
+      env: COMPILER=clang_amd64 COMPILER_VERSION=5.0.0 TARGET_OS=linux_gnu_amd64 FLAVOR=final
     - os: linux
       dist: trusty
-      env: COMPILER=gcc_x86 COMPILER_VERSION=4.2.1 TARGET_OS=windows_x86 FLAVOR=debug
+      env: COMPILER=gcc_x86 COMPILER_VERSION=4.2.1 TARGET_OS=mingw32_x86 FLAVOR=debug
     - os: linux
       dist: trusty
-      env: COMPILER=gcc_x86 COMPILER_VERSION=4.2.1 TARGET_OS=windows_x86 FLAVOR=profile
+      env: COMPILER=gcc_x86 COMPILER_VERSION=4.2.1 TARGET_OS=mingw32_x86 FLAVOR=profile
     - os: linux
       dist: trusty
-      env: COMPILER=gcc_x86 COMPILER_VERSION=4.2.1 TARGET_OS=windows_x86 FLAVOR=final
+      env: COMPILER=gcc_x86 COMPILER_VERSION=4.2.1 TARGET_OS=mingw32_x86 FLAVOR=final
     - os: osx
       env: COMPILER=appleclang COMPILER_VERSION=9.1.0 TARGET_OS=macos10.13 FLAVOR=debug
     - os: osx
