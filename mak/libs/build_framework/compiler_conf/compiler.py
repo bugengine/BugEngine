@@ -64,6 +64,7 @@ class Compiler:
         self.version = version
         self.version_number = to_number(version)
         self.platform = platform
+        self.platform_name = platform.replace('-', '_')
         self.arch = self.to_target_arch(arch)
         self.arch_name = self.arch
         self.siblings = [self]

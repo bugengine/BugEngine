@@ -43,6 +43,9 @@ class Linux(Platform):
         env.append_unique('LIB', ['dl', 'rt', 'pthread', 'm'])
         env.append_unique('LINKFLAGS_dynamic', ['-Wl,--export-dynamic', '-Wl,-E', '-Wl,-z,origin'])
 
+    def platform_name(self, compiler):
+        return compiler.platform_name
+
 
 def options(opt):
     pass

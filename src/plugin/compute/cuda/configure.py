@@ -54,9 +54,10 @@ int main(int argc, const char *argv[])
 @conf
 def check_nvcc(configuration_context, nvcc):
     source_node = configuration_context.bldnode.make_node('test.cu')
+    dest_node = configuration_context.bldnode.make_node('test.obj')
     try:
         source_node.write(_CUDA_SNIPPET)
-        out, err = run_nvcc(nvcc, configuration_context.env.NVCC_CXXFLAGS + ['-v', source_node.abspath(), '-arch', 'compute_30'])
+        out, err = run_nvcc(nvcc, configuration_context.env.NVCC_CXXFLAGS + ['-v', source_node.abspath(), '-o', dest_node.abspath(), '-arch', 'compute_30'])
         target_includes = None
         target_libs = None
         for line in out.split('\n') + err.split('\n'):
