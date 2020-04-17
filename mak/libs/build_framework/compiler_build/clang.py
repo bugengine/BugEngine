@@ -19,7 +19,7 @@ def clang_exec_command(exec_command):
         try:
             os.write(response_file, '\n'.join(resp_file_arguments).encode())
             os.close(response_file)
-            return exec_command(task, [cmd[0]] + command + ['@%s'%response_filename], **kw_args)
+            return exec_command(task, [cmd[0], '@%s'%response_filename] + command, **kw_args)
         finally:
             try:
                 os.remove(response_filename)
