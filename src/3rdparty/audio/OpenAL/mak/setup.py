@@ -10,10 +10,10 @@ def setup(conf):
             conf.pkg_config('openal', var='OpenAL')
         except Exception as e:
             conf.check_lib('openal', var='OpenAL',
-                           libpath=[os.path.join(conf.path.abspath(),
+                           libpath=[os.path.join(conf.path.parent.abspath(),
                                                  'lib.%s.%s'%(conf.env.VALID_PLATFORMS[0], a))
                                     for a in conf.env.VALID_ARCHITECTURES],
-                           includepath=[os.path.join(conf.path.abspath(), 'api')],
+                           includepath=[os.path.join(conf.path.parent.abspath(), 'api')],
                            includes=['AL/alc.h', 'AL/al.h'],
                            functions=['alcOpenDevice']) or pprint('YELLOW', '-openal', sep=' ')
         else:

@@ -14,10 +14,10 @@ def setup(conf):
             break
     else:
         conf.env.SYSTEM_LUA = conf.check_lib('lua', var='lua',
-                       libpath=[os.path.join(conf.path.abspath(),
+                       libpath=[os.path.join(conf.path.parent.abspath(),
                                             'lib.%s.%s'%(conf.env.VALID_PLATFORMS[0], a))
                                 for a in conf.env.VALID_ARCHITECTURES],
-                       includepath=[os.path.join(conf.path.abspath(), 'api')],
+                       includepath=[os.path.join(conf.path.parent.abspath(), 'api')],
                        includes_externc=['lua.h', 'lauxlib.h'],
                        defines=['LUA_LIB'],
                        functions=['luaL_newmetatable'])
