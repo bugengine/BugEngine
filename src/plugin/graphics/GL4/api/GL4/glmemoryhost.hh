@@ -15,6 +15,8 @@ class be_api(GL4) GLMemoryHost : public KernelScheduler::IMemoryHost
 public:
     GLMemoryHost();
     ~GLMemoryHost();
+
+    void release(weak<KernelScheduler::IMemoryBuffer> buffer);
 };
 
 }}

@@ -114,6 +114,9 @@ class OptionsContext(Context.Context):
 	def __init__(self, **kw):
 		super(OptionsContext, self).__init__(**kw)
 
+		self.hash = 0
+		self.files = []
+
 		self.parser = opt_parser(self)
 		"""Instance of :py:class:`waflib.Options.opt_parser`"""
 
@@ -340,3 +343,13 @@ class OptionsContext(Context.Context):
 		self.parse_args()
 		Utils.alloc_process_pool(options.jobs)
 
+	def post_recurse(self, node):
+		"""
+		Records the path and a hash of the scripts visited, see :py:meth:`waflib.Context.Context.post_recurse`
+
+		:param node: script
+		:type node: :py:class:`waflib.Node.Node`
+		"""
+		super(OptionsContext, self).post_recurse(node)
+		self.hash = Utils.h_list((self.hash, node.read('rb')))
+		self.files.append(node.abspath())

@@ -1,10 +1,6 @@
 def configure(configuration_context):
-    configuration_context.recurse('plugin/compute/cpu/configure.py', name='configure')
-    configuration_context.recurse('plugin/compute/opencl/configure.py', name='configure')
-    configuration_context.recurse('plugin/compute/cuda/configure.py', name='configure')
-
-
-def setup(configuration_context):
-    configuration_context.recurse('plugin/compute/cpu/configure.py', name='setup', once=False)
-    configuration_context.recurse('plugin/compute/opencl/configure.py', name='setup', once=False)
-    configuration_context.recurse('plugin/compute/cuda/configure.py', name='setup', once=False)
+    third_party_node = configuration_context.path.make_node('3rdparty')
+    for category in third_party_node.listdir():
+        category_node = third_party_node.make_node(category)
+        for third_party in category_node.listdir():
+            configuration_context.recurse('%s/%s/%s/mak/configure.py' % (third_party_node.abspath(), category, third_party))

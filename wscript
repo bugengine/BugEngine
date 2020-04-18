@@ -9,42 +9,48 @@ APPNAME = "BugEngine"
 top = '.'          #pylint: disable=invalid-name
 out = 'bld/.waf'   #pylint: disable=invalid-name
 
-import build_framework
-
 
 def options(option_context):
     "recursively declare options to the parser"
-    build_framework.options(option_context)
+    option_context.bugenginenode = option_context.path
+    option_context.recurse('mak/libs/build_framework/options/options.py')
+    option_context.recurse('src/options.py')
 
 
 def configure(configuration_context):
     "entry point for build system configuration"
-    build_framework.configure(configuration_context)
+    configuration_context.bugenginenode = configuration_context.path
+    configuration_context.recurse('mak/libs/build_framework/configure/configure.py')
+    configuration_context.recurse('src/configure.py')
 
 
 def setup(configuration_context):
     "setup a platform environment in the current configuration context"
-    build_framework.setup(configuration_context)
-    configuration_context.recurse('src/configure.py', name='setup', once=False)
+    configuration_context.bugenginenode = configuration_context.path
+    configuration_context.recurse('mak/libs/build_framework/setup/setup.py')
+    configuration_context.recurse('src/setup.py')
 
 
 def build(build_context):
     "set up build targets and executes the build"
-    build_framework.build(build_context)
+    build_context.bugenginenode = build_context.path
+    build_context.recurse('mak/libs/build_framework/build/build.py')
     build_context.recurse('src/build.py')
-    build_framework.plugins(build_context)
 
 
 def deploy(build_context):
     "deploy a build to a device"
-    build_framework.deploy(build_context)
+    build_context.bugenginenode = build_context.path
+    #build_context.recurse('mak/libs/build_framework/deploy/deploy.py')
 
 
 def run(build_context):
     "run a deployed build on a device"
-    build_framework.run(build_context)
+    build_context.bugenginenode = build_context.path
+    build_context.recurse('mak/libs/build_framework/run/run.py')
 
 
 def debug(build_context):
     "start a debugging session on a device"
-    build_framework.debug(build_context)
+    build_context.bugenginenode = build_context.path
+    build_context.recurse('mak/libs/build_framework/debug/debug.py')

@@ -5,12 +5,18 @@
 #define BE_SCHEDULER_KERNEL_PARAMETER_SEGMENTS_FACTORY_HH_
 /**************************************************************************************************/
 #include    <scheduler/stdafx.h>
-#include    <scheduler/kernel/parameters/segments.hh>
 #include    <rtti/typeinfo.hh>
 #include    <rtti/classinfo.script.hh>
 
 namespace BugEngine
 {
+
+namespace KernelScheduler
+{
+class IParameter;
+template< typename T >
+class Segments;
+}
 
 template< typename T >
 struct be_typeid<  KernelScheduler::Segments<T> >

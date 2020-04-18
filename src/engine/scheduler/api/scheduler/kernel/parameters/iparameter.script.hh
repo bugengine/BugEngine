@@ -27,7 +27,6 @@ protected:
 public:
     weak<const IMemoryBuffer> getCurrentBank() const;
     weak<const IMemoryBuffer> getBank(weak<const IMemoryHost> host) const;
-    void transfer(weak<const IMemoryHost> to);
 };
 
 }}

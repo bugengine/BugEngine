@@ -15,6 +15,8 @@ class MemoryHost : public IMemoryHost
 public:
     MemoryHost();
     ~MemoryHost();
+
+    void release(weak<KernelScheduler::IMemoryBuffer> buffer);
 };
 
 }}}

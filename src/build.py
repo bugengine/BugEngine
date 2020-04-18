@@ -36,7 +36,7 @@ def build_bugengine(bld):
     """
         Declares the main library and entry point
     """
-    bld.module('engine.mak', 'mak', features=['Makefile'], root=bld.bugenginenode)
+    bld.module('engine.mak', bld.bugenginenode.find_node('mak'), features=['Makefile'])
     bld.headers('engine.kernel', [], extra_public_includes=[bld.path.make_node('engine/kernel/api.cpu')])
     bld.library('engine.minitl', bld.platforms + ['engine.mak', 'engine.kernel'])
     bld.library('engine.core', ['engine.minitl', 'engine.kernel'])
@@ -58,7 +58,7 @@ def build_bugengine(bld):
         ]
     )
 
-    bld.engine('bugengine', ['engine.bugengine'], path='engine.main')
+    bld.engine('bugengine', ['engine.bugengine'], path=bld.path.find_node('engine/main'))
 
 
 def build_plugins(bld):
@@ -99,7 +99,7 @@ def build_plugins(bld):
     bld.plugin('plugin.scripting.python', ['engine.bugengine', 'plugin.scripting.pythonlib'], platforms=['pc'])
     bld.python_module(
         'py_bugengine', ['engine.bugengine', 'plugin.scripting.pythonlib'],
-        path='plugin.scripting.pythonmodule',
+        path=bld.path.find_node('plugin/scripting/pythonmodule'),
         platforms=['pc']
     )
     if bld.env.PROJECTS:
@@ -111,7 +111,7 @@ def build_plugins(bld):
             bld.plugin(
                 'plugin.scripting.python%s' % short_version, ['engine.bugengine', 'plugin.scripting.python'],
                 ['3rdparty.scripting.python%s' % short_version],
-                path='plugin.scripting.pythonbinding',
+                path=bld.path.find_node('plugin/scripting/pythonbinding'),
                 features=['python%s' % version]
             )
 
@@ -178,7 +178,7 @@ def build_games(bld):
     """
     bld.game(
         'bugeditor', ['engine.bugengine', 'tool.bugeditor.ui', 'plugin.scripting.package'],
-        path='tool.bugeditor.main',
+        path=bld.path.find_node('tool/bugeditor/main'),
         platforms=['pc']
     )
     bld.game('sample.text', ['engine.bugengine', 'plugin.scripting.package', 'plugin.graphics.3d'])
@@ -186,7 +186,7 @@ def build_games(bld):
     bld.game('sample.lua', ['engine.bugengine', 'plugin.scripting.package', 'plugin.scripting.lua'])
     bld.game(
         'help', ['engine.bugengine', 'plugin.ui.console', 'plugin.scripting.package'],
-        path='tool.help',
+        path=bld.path.find_node('tool/help'),
         platforms=['pc']
     )
     if Options.options.tests:

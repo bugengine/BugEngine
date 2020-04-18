@@ -16,4 +16,9 @@ GLMemoryHost::~GLMemoryHost()
 {
 }
 
+void GLMemoryHost::release(weak<KernelScheduler::IMemoryBuffer> buffer)
+{
+    be_forceuse(buffer);
+}
+
 }}

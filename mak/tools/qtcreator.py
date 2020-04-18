@@ -439,7 +439,7 @@ class QtPlatform(QtObject):
                 ('QtPM4.mkSPecInformation', ''),
                 ('QtSupport.QtInformation', -1),
             ]
-            icon_path = os.path.join(bld.bugenginenode.abspath(), 'mak', 'target', env.VALID_PLATFORMS[0], 'icon.png')
+            icon_path = os.path.join(bld.bugenginenode.abspath(), 'mak', 'res', '%s.png' % env.VALID_PLATFORMS[0])
             icon_extra = os.path.join(bld.bugenginenode.abspath(), 'extra', env.VALID_PLATFORMS[0], 'icon.png')
             if os.path.isfile(icon_path):
                 self.PE_Profile_Icon = icon_path
@@ -458,6 +458,7 @@ def to_var(name):
 
 
 class QtCreator(Build.BuildContext):
+    cmd = '_qtcreator'
     PROJECT_TYPE = 'GenericProjectManager.GenericBuildConfiguration'
 
     def execute(self):
@@ -1132,6 +1133,7 @@ class QtCreator(Build.BuildContext):
 
 
 class Qbs(QtCreator):
+    cmd = '_qbs'
     PROJECT_TYPE = 'Qbs.QbsBuildConfiguration'
 
     def execute(self):

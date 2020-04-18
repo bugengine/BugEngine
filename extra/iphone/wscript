@@ -18,7 +18,7 @@ def options(option_context):
 
 
 def host_configure(configuration_context):
-    configuration_context.recurse('mak/configure.py', name='host_configure')
+    configuration_context.recurse('mak/host_configure.py', name='host_configure')
 
 
 def configure(configuration_context):
@@ -26,15 +26,11 @@ def configure(configuration_context):
 
 
 def setup(configuration_context):
-    configuration_context.recurse('mak/configure.py', name='setup')
+    configuration_context.recurse('mak/setup.py', name='setup')
 
 
 def build(build_context):
     build_context.recurse('mak/build.py', name='build')
-
-
-def plugins(build_context):
-    build_context.recurse('mak/build.py', name='plugins')
 
 
 def deploy(build_context):

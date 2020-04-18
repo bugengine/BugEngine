@@ -8,6 +8,11 @@
 #include    <plugin/plugin.hh>
 #include    <rtti/engine/namespace.hh>
 
+#ifndef PYTHON_LIBRARY
+# error PYTHON_LIBRARY must be defined to the library name for this module
+#endif
+
+
 static minitl::ref<BugEngine::Python::Context> create(const BugEngine::Plugin::Context &context)
 {
     using namespace BugEngine::Python;

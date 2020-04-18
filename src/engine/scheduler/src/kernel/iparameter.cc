@@ -33,9 +33,4 @@ weak<const IMemoryBuffer> IParameter::getBank(weak<const IMemoryHost> host) cons
     return weak<const IMemoryBuffer>();
 }
 
-/*void transfer(weak<const IMemoryHost> to)
-{
-
-}*/
-
 }}
