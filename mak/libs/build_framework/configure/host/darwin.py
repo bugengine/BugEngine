@@ -6,6 +6,7 @@ import sys
 import re
 import shlex
 from waflib import Options, Utils
+from be_typing import TYPE_CHECKING
 
 
 def run_command(cmd, input=None, env=None):
