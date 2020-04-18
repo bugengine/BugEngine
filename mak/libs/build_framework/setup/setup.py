@@ -17,6 +17,7 @@ def setup(conf):
     "setup step before the build: recursively calls setup on every third party library"
     conf.recurse('checks.py')
     if conf.env.SUB_TOOLCHAINS:
+        conf.setenv(conf.env.TOOLCHAIN + '.setup', conf.all_envs[conf.env.TOOLCHAIN])
         for t in conf.env.SUB_TOOLCHAINS:
             try:
                 setup_toolchain(conf, t)
