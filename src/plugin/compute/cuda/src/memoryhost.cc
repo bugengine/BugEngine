@@ -16,4 +16,9 @@ MemoryHost::~MemoryHost()
 {
 }
 
+void MemoryHost::release(weak<KernelScheduler::IMemoryBuffer> buffer)
+{
+    be_forceuse(buffer);
+}
+
 }}}

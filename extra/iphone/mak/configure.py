@@ -1,9 +1,8 @@
 # set iPhone(Simulator) configuration specific options
 from waflib import Configure
-from build_framework.target_conf.macos import Darwin
 
 
-class iOS(Darwin):
+class iOS(Configure.ConfigurationContext.Darwin):
     NAME = 'iPhone'
     CERTIFICATE_NAME = 'iPhone Developer'
     PLATFORMS = ['iphone', 'darwin']
@@ -11,7 +10,7 @@ class iOS(Darwin):
     OS_NAME = 'iphoneos'
 
     def __init__(self, conf, sdk = None):
-        Darwin.__init__(self, conf, sdk)
+        Configure.ConfigurationContext.Darwin.__init__(self, conf, sdk)
 
     def get_root_dirs(self, appname):
         return (appname + '.app',
@@ -34,15 +33,7 @@ class iOSSimulator(iOS):
         Configure.ConfigurationContext.Darwin.__init__(self, conf, sdk)
 
 
-def host_configure(conf):
-    pass
-
-
 def configure(conf):
     conf.platforms.append(iOS(conf))
     conf.platforms.append(iOSSimulator(conf))
-
-
-def setup(conf):
-    pass
 

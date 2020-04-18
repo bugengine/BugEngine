@@ -5,12 +5,18 @@
 #define BE_SCHEDULER_KERNEL_PARAMETER_IMAGE3D_FACTORY_HH_
 /**************************************************************************************************/
 #include    <scheduler/stdafx.h>
-#include    <scheduler/kernel/parameters/image3d.hh>
 #include    <rtti/typeinfo.hh>
 #include    <rtti/classinfo.script.hh>
 
 namespace BugEngine
 {
+
+namespace KernelScheduler
+{
+class IParameter;
+template< typename T >
+class Image3D;
+}
 
 template< typename T >
 struct be_typeid<  KernelScheduler::Image3D<T> >

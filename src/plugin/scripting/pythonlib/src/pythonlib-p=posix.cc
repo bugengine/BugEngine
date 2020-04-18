@@ -11,10 +11,10 @@ namespace BugEngine { namespace Python
 
 PythonLibrary::PythonLibrary(const char* pythonLibraryName)
     :   m_pythonLibraryName(pythonLibraryName)
-    ,   m_handle(m_pythonLibraryName
+    ,   m_handle((m_pythonLibraryName && *m_pythonLibraryName)
                     ?   dlopen(minitl::format<1024u>("lib%s.so") | m_pythonLibraryName,
                         RTLD_LAZY | RTLD_GLOBAL)
-                    :   0 /*RTLD_DEFAULT*/)
+                    :   RTLD_DEFAULT)
     ,   m_status(dlerror() == 0)
     ,   m_api(1013)
     ,   m_version(0)

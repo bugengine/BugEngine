@@ -19,6 +19,8 @@ private:
 public:
     explicit MemoryHost(const SystemAllocator& pageAllocator);
     ~MemoryHost();
+
+    void release(weak<KernelScheduler::IMemoryBuffer> buffer);
 };
 
 }}

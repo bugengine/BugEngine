@@ -1,15 +1,10 @@
 # set iPhone(Simulator) build rules
 from waflib.TaskGen import feature, after_method
 import os
-from build_framework.target_build import macos
 
 
 def build(build_context):
-    macos.build(build_context)
-
-
-def plugins(build_context):
-    macos.plugins(build_context)
+    build_context.recurse(os.path.join(build_context.bugenginenode.abspath(), 'mak', 'libs', 'build_framework', 'build', 'target', 'macos.py'))
 
 
 @feature('cxxshlib', 'cshlib')

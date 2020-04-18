@@ -1,16 +1,22 @@
 /* BugEngine <bugengine.devel@gmail.com> / 2008-2014
    see LICENSE for detail */
 
-#ifndef BE_SCHEDULER_KERNEL_PARAMETER_IMAGE1D_FACTORY_HH_
-#define BE_SCHEDULER_KERNEL_PARAMETER_IMAGE1D_FACTORY_HH_
+#ifndef BE_SCHEDULER_KERNEL_PARAMETERS_IMAGE1D_FACTORY_HH_
+#define BE_SCHEDULER_KERNEL_PARAMETERS_IMAGE1D_FACTORY_HH_
 /**************************************************************************************************/
 #include    <scheduler/stdafx.h>
-#include    <scheduler/kernel/parameters/image1d.hh>
 #include    <rtti/typeinfo.hh>
 #include    <rtti/classinfo.script.hh>
 
 namespace BugEngine
 {
+
+namespace KernelScheduler
+{
+class IParameter;
+template< typename T >
+class Image1D;
+}
 
 template< typename T >
 struct be_typeid<  KernelScheduler::Image1D<T> >

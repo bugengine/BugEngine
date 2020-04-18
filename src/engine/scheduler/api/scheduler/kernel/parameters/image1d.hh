@@ -1,8 +1,8 @@
 /* BugEngine <bugengine.devel@gmail.com> / 2008-2014
    see LICENSE for detail */
 
-#ifndef BE_SCHEDULER_KERNEL_PARAMETER_IMAGE1D_HH_
-#define BE_SCHEDULER_KERNEL_PARAMETER_IMAGE1D_HH_
+#ifndef BE_SCHEDULER_KERNEL_PARAMETERS_IMAGE1D_HH_
+#define BE_SCHEDULER_KERNEL_PARAMETERS_IMAGE1D_HH_
 /**************************************************************************************************/
 #include    <scheduler/stdafx.h>
 #include    <scheduler/kernel/parameters/iparameter.script.hh>

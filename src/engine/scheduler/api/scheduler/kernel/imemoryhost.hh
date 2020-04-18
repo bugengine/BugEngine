@@ -10,13 +10,18 @@
 namespace BugEngine { namespace KernelScheduler
 {
 
+class IMemoryBuffer;
+
 class be_api(SCHEDULER) IMemoryHost : public minitl::refcountable
 {
+    friend class IMemoryBuffer;
 protected:
     const istring   m_name;
 protected:
     IMemoryHost(const istring& name);
     ~IMemoryHost();
+
+    virtual void release(weak<IMemoryBuffer> buffer) = 0;
 };
 
 }}
