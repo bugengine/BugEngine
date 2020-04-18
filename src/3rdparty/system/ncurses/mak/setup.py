@@ -12,10 +12,10 @@ def setup(conf):
             pprint('YELLOW','menu',sep=' ')
     else:
         conf.env.SYSTEM_NCURSES = conf.check_lib('3rdparty.system.ncurses', var='ncurses',
-                       libpath=[os.path.join(conf.path.abspath(),
+                       libpath=[os.path.join(conf.path.parent.abspath(),
                                             'lib.%s.%s'%(conf.env.VALID_PLATFORMS[0], a))
                                 for a in conf.env.VALID_ARCHITECTURES],
-                       includepath=[os.path.join(conf.path.abspath(), 'api.windows')],
+                       includepath=[os.path.join(conf.path.parent.abspath(), 'api.windows')],
                        includes=['curses.h'],
                        defines=['PDC_DLL_BUILD'],
                        functions=['initscr'])
