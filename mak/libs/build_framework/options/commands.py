@@ -23,7 +23,7 @@ def autoreconfigure(execute_method):
         do_config = False
         try:
             env.load(os.path.join(Context.top_dir, Options.lockfile))
-        except OSError:
+        except IOError:
             raise Errors.WafError('The project was not configured: run "waf configure" first!')
         else:
             if env.run_dir != Context.run_dir:
@@ -61,7 +61,7 @@ def autosetup(execute_method):
         try:
             env = ConfigSet.ConfigSet()
             env.load(os.path.join(self.cache_dir, Options.lockfile + '.%s' % self.bugengine_variant))
-        except (AttributeError, OSError):
+        except (AttributeError, IOError):
             Logs.warn('setup not run; setting up the toolchain')
             do_setup = True
         else:
