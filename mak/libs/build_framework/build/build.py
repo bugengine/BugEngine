@@ -29,32 +29,6 @@ setattr(Task.Task, 'log_display', log_display)
 setattr(Task.Task, 'keyword', (lambda self: ''))
 
 
-for command in ['build', 'clean']:
-    for variant in ['debug', 'profile', 'final']:
-
-        class BuildWrapperVariant(Build.BuildContext):
-            cmd = '%s:all:%s' % (command, variant)
-
-            def execute(self):
-                self.restore()
-                if not self.all_envs:
-                    self.load_envs()
-                for toolchain in self.env.ALL_TOOLCHAINS:
-                    cmd, all, variant = self.cmd.split(':')
-                    Options.commands.append('%s:%s:%s' % (cmd, toolchain, variant))
-
-    class BuildWrapperAll(Build.BuildContext):
-        cmd = '%s:all' % command
-
-        def execute(self):
-            self.restore()
-            if not self.all_envs:
-                self.load_envs()
-            for toolchain in self.env.ALL_TOOLCHAINS:
-                for variant in self.env.ALL_VARIANTS:
-                    Options.commands.append('%s:%s:%s' % (self.cmd[:-4], toolchain, variant))
-
-
 def build(bld):
     # type: (Build.BuildContext) -> None
     "Loads main build file as well as the target-specific build file that can declare extra modules"

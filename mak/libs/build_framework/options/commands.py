@@ -309,6 +309,32 @@ def rebuild_context_commands(configuration_context):
     add_all_build_commands(configuration_context.env)
 
 
+for command in ['build', 'clean']:
+    for variant in ['debug', 'profile', 'final']:
+
+        class BuildWrapperVariant(Build.BuildContext):
+            cmd = '%s:all:%s' % (command, variant)
+
+            def execute(self):
+                self.restore()
+                if not self.all_envs:
+                    self.load_envs()
+                for toolchain in self.env.ALL_TOOLCHAINS:
+                    cmd, all, variant = self.cmd.split(':')
+                    Options.commands.append('%s:%s:%s' % (cmd, toolchain, variant))
+
+    class BuildWrapperAll(Build.BuildContext):
+        cmd = '%s:all' % command
+
+        def execute(self):
+            self.restore()
+            if not self.all_envs:
+                self.load_envs()
+            for toolchain in self.env.ALL_TOOLCHAINS:
+                for variant in self.env.ALL_VARIANTS:
+                    Options.commands.append('%s:%s:%s' % (self.cmd[:-4], toolchain, variant))
+
+
 def options(option_context):
     #for command in (Build.BuildContext, Build.CleanContext, Build.ListContext):
     #    command.cmd = '_%s'%command.cmd
