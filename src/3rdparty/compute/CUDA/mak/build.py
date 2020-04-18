@@ -1,5 +1,5 @@
 def build(bld):
-    if 'cuda' in bld.env.FEATURES:
-        cuda = bld.thirdparty('3rdparty.compute.CUDA')
+    cuda = bld.thirdparty('3rdparty.compute.CUDA')
+    if cuda:
         cuda.export_lib += ['cudart_static']
 
