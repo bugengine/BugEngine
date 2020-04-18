@@ -7,8 +7,8 @@ def build(bld):
             '3rdparty.physics.bullet',
             bld.platforms,
             path=bld.path.parent,
-            extra_includes=[bld.path.make_node('src')],
-            extra_public_includes=[bld.path.make_node('src')],
+            extra_includes=[bld.path.parent.make_node('src')],
+            extra_public_includes=[bld.path.parent.make_node('src')],
             extra_defines=['BT_NO_PROFILE'],
             warnings=False)
     else:

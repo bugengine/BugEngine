@@ -84,28 +84,6 @@ def check_nvcc(configuration_context, nvcc):
         source_node.delete()
 
 
-def find_cuda_registry_paths(all_versions_key):
-    bindirs = []
-    try:
-        root_path, type = Utils.winreg.QueryValueEx(all_versions_key, 'RootInstallDir')
-    except OSError:
-        root_path = ''
-    index = 0
-    while 1:
-        try:
-            version = Utils.winreg.EnumKey(all_versions_key, index)
-            version_key = Utils.winreg.OpenKey(all_versions_key, version)
-        except OSError:
-            break
-        index += 1
-        try:
-            full_path, type = Utils.winreg.QueryValueEx(version_key, 'InstallDir')
-        except OSError:
-            full_path = os.path.join(root_path, version)
-        bindirs.append(os.path.join(full_path, 'bin'))
-    return bindirs
-
-
 def setup(configuration_context):
     if configuration_context.env.COMPILER_NAME == 'suncc':
         return
