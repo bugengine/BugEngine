@@ -24,11 +24,16 @@ def configure(configuration_context):
     configuration_context.recurse('src/configure.py')
 
 
+def multiarch_setup(configuration_context):
+    "setup a set of toolchains in a multi-arch environment (e.g. Android, MacOS)"
+    configuration_context.bugenginenode = configuration_context.path
+    configuration_context.recurse('mak/libs/build_framework/setup/setup.py')
+
 def setup(configuration_context):
     "setup a platform environment in the current configuration context"
     configuration_context.bugenginenode = configuration_context.path
-    configuration_context.recurse('mak/libs/build_framework/setup/setup.py')
-    configuration_context.recurse('src/setup.py')
+    configuration_context.recurse('mak/libs/build_framework/setup/setup.py', once=False)
+    configuration_context.recurse('src/setup.py', once=False)
 
 
 def build(build_context):

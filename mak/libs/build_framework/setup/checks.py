@@ -345,5 +345,5 @@ def pkg_config(conf, name, var=''):
     conf.env['check_%s_libs' % var] += libs
 
 
-def setup(conf):
+def multiarch_setup(conf):
     conf.load('c_config')
