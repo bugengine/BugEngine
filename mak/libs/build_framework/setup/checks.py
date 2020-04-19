@@ -1,6 +1,6 @@
 from waflib import Utils, ConfigSet, Errors, Logs
 from waflib.Configure import conf
-from waflib.TaskGen import feature, before_method, after_method
+from waflib.TaskGen import feature, before_method, after_method, extension
 import platform
 import os
 
@@ -34,6 +34,11 @@ USE_SDK_CODE = """
 int main(int argc, const char *argv[])
 { return EXIT_SUCCESS; }
 """
+
+
+@extension('.mm')
+def mm_hook(self, node):
+    self.create_compiled_task('cxx', node)
 
 
 @feature("link_library")
@@ -215,7 +220,7 @@ def check_framework(self,
         self.env.append_unique('check_%s_libpath' % var, libpath)
         self.env.append_unique('XCODE_FRAMEWORKS', frameworks)
         Logs.pprint('GREEN', '+%s' % var, sep=' ')
-    return self.env['%s_frameworks' % var]
+    return self.env['check_%s_frameworks' % var]
 
 
 @conf
