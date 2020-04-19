@@ -48,7 +48,7 @@ def options(option_context):
                             default=','.join(ndk_paths),
                             dest='android_ndk_path',
                             help='Path to the root of the Android NDK (%s)' % (ndk_paths or 'none detected'))
-    option_context.recurse('mak/device.py')
+    #option_context.recurse('mak/device.py')
 
 
 def host_configure(configuration_context):
