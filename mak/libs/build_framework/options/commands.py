@@ -7,6 +7,7 @@ except ImportError:
     import pickle
 
 
+# cache option context to use in file chnage detection
 OPTION_CONTEXT = None
 
 
@@ -225,6 +226,7 @@ class Setup(Configure.ConfigurationContext):
 
         path = os.path.join(self.bldnode.abspath(), 'setup-%s.log' % self.bugengine_variant)
         self.logger = Logs.make_logger(path, 'cfg')
+        self.run_dir = Context.run_dir
 
         self.env = self.all_envs[self.bugengine_variant]
         self.recurse([Context.run_dir])
@@ -244,7 +246,7 @@ def add_setup_command(toolchain):
         bugengine_variant = toolchain
         bugengine_toolchain = toolchain
         variant = toolchain
-        fun = 'setup'
+        fun = 'multiarch_setup'
 
 
 def add_build_command(toolchain, optimisation):

@@ -232,9 +232,9 @@ class GnuCompiler(Configure.ConfigurationContext.Compiler):
         tgtnode = node.change_ext('')
         node.write('int main() {}\n')
         try:
-            result, out, err = self.run_cxx([node.abspath(), '-c', '-o', tgtnode.abspath()] + extra_flags)
+            result, out, err = self.run_cxx([node.abspath(), '-o', tgtnode.abspath()] + extra_flags)
         except Exception as e:
-            print(e)
+            #print(e)
             return False
         finally:
             node.delete()
