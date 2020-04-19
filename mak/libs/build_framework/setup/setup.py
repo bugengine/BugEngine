@@ -30,6 +30,7 @@ def multiarch_setup(conf):
             finally:
                 conf.setenv(conf.bugengine_variant)
         conf.setenv(conf.bugengine_variant + '.setup', conf.all_envs[conf.bugengine_variant])
+        conf.env.SUB_TOOLCHAINS = [t + '.setup' for t in conf.env.SUB_TOOLCHAINS]
         conf.env.BUGENGINE_SETUP = True
     else:
         t = conf.bugengine_variant

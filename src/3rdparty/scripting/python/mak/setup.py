@@ -43,9 +43,9 @@ def python_config(conf, version, var=''):
                 lib_name = lib
         conf.env['check_%s_defines' % var] = ['PYTHON_LIBRARY=%s' % lib_name]
     elif 'macosx' in conf.env.VALID_PLATFORMS:
-        conf.recurse('../python%s/mak/setup.py' % version_number, name='setup_python', once=False)
+        conf.recurse('../../python%s/mak/setup.py' % version_number, name='setup_python', once=False)
     elif 'windows' in conf.env.VALID_PLATFORMS:
-        conf.recurse('../python%s/mak/setup.py' % version_number, name='setup_python', once=False)
+        conf.recurse('../../python%s/mak/setup.py' % version_number, name='setup_python', once=False)
     else:
         raise Errors.WafError('TODO')
 
@@ -55,7 +55,7 @@ def setup(conf):
     for version in Options.options.python_versions.split(','):
         try:
             conf.python_config(version)
-        except Errors.WafError:
+        except Errors.WafError as e:
             pass
         else:
             conf.env.append_unique('FEATURES', 'python%s'%version)

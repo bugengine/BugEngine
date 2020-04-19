@@ -7,7 +7,9 @@ def _recurse(build_context, fun):
         if os.path.isfile(os.path.join(build_context.path.abspath(), platform + '.py')):
             build_context.recurse(platform + '.py', fun, once=False)
         else:
-            build_context.recurse(os.path.join('extra', platform,), fun, once=False)
+            build_context.recurse(os.path.join(build_context.bugenginenode.abspath(),
+                                               'extra', platform,),
+                                  fun, once=False)
 
 
 def build(build_context):
