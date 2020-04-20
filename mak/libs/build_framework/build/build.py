@@ -60,11 +60,11 @@ def build(bld):
         bld.common_env.append_unique('VALID_PLATFORMS', bld.all_envs[env_name].VALID_PLATFORMS)
     bld.multiarch_envs = [bld.all_envs[envname] for envname in bld.env.SUB_TOOLCHAINS] or [bld.env]
 
+    bld.recurse('install.py')
     bld.recurse('host/host.py')
     bld.recurse('modules/modules.py')
     bld.recurse('target/target.py')
     bld.recurse('compiler/compiler.py')
-    bld.recurse('install.py')
 
     if bld.env.PROJECTS:
         def rc_hook(self, node):
