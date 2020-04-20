@@ -55,6 +55,7 @@ def build(bld):
     if bld.env.STATIC and bld.env.DYNAMIC:
         raise Errors.WafError('Engine requested to be built both as static and dynamic')
     bld.original_env = bld.env
+    bld.common_env = bld.env
 
     bld.recurse('host/host.py')
     bld.recurse('install.py')
@@ -65,7 +66,6 @@ def build(bld):
     bld.recurse('modules/modules.py')
     bld.recurse('target/target.py')
     bld.recurse('compiler/compiler.py')
-    bld.common_env = bld.env
 
     if bld.env.PROJECTS:
         def rc_hook(self, node):
