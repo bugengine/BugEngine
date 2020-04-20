@@ -218,6 +218,7 @@ def module(
             source_nodes=[source_node] + [e for _, e in extras],
             root_namespace=root_namespace
         )
+
         result.append(task_gen)
         if target_prefix:
             internal_deps.append(target_prefix + name)

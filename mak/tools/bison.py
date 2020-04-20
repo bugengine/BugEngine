@@ -55,7 +55,6 @@ def big_bison(self, node):
 
     tsk = self.create_task('bison', node, outs)
     tsk.cwd = out_node.parent.abspath()
-    tsk.env.env = getattr(self.bld, 'environ', os.environ)
 
     # and the c/cxx file must be compiled too
     try:
