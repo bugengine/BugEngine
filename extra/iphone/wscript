@@ -14,7 +14,7 @@ def options(option_context):
                   default='',
                   dest='iphone_sdk_max',
                   help='Maximum version of the iPhone SDK to target')
-    option_context.recurse('mak/device.py')
+    #option_context.recurse('mak/device.py')
 
 
 def host_configure(configuration_context):
