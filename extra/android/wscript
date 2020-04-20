@@ -75,7 +75,7 @@ def configure(configuration_context):
 
 def setup(configuration_context):
     # type: (Configure.ConfigurationContext) -> None
-    configuration_context.recurse('mak/setup.py')
+    configuration_context.recurse('mak/setup.py', once=False)
 
 
 def build(build_context):
