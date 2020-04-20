@@ -32,7 +32,6 @@ setattr(Task.Task, 'keyword', (lambda self: ''))
 def build(bld):
     # type: (Build.BuildContext) -> None
     "Loads main build file as well as the target-specific build file that can declare extra modules"
-    bld.common_env = bld.env
     if not bld.env.PROJECTS:
         if getattr(bld, 'bugengine_variant', None) is None:
             raise Errors.WafError(
@@ -60,11 +59,12 @@ def build(bld):
         bld.common_env.append_unique('VALID_PLATFORMS', bld.all_envs[env_name].VALID_PLATFORMS)
     bld.multiarch_envs = [bld.all_envs[envname] for envname in bld.env.SUB_TOOLCHAINS] or [bld.env]
 
-    bld.recurse('install.py')
     bld.recurse('host/host.py')
+    bld.recurse('install.py')
     bld.recurse('modules/modules.py')
     bld.recurse('target/target.py')
     bld.recurse('compiler/compiler.py')
+    bld.common_env = bld.env
 
     if bld.env.PROJECTS:
         def rc_hook(self, node):
