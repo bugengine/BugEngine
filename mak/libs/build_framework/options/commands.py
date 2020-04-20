@@ -337,6 +337,36 @@ for command in ['build', 'clean']:
                     Options.commands.append('%s:%s:%s' % (self.cmd[:-4], toolchain, variant))
 
 
+class ListToolchainsContext(Build.BuildContext):
+    """
+        Command that will print all available toolchains to stdout
+    """
+    cmd = 'list_toolchains'
+
+    def execute(self):
+        # type: () -> None
+        self.restore()
+        if not self.all_envs:
+            self.load_envs()
+        for toolchain in self.env.ALL_TOOLCHAINS:
+            print(toolchain)
+
+
+class ListVariantsContext(Build.BuildContext):
+    """
+        Command that will print all available variants to stdout
+    """
+    cmd = 'list_variants'
+
+    def execute(self):
+        # type: () -> None
+        self.restore()
+        if not self.all_envs:
+            self.load_envs()
+        for variant in self.env.ALL_VARIANTS:
+            print(variant)
+
+
 def options(option_context):
     #for command in (Build.BuildContext, Build.CleanContext, Build.ListContext):
     #    command.cmd = '_%s'%command.cmd
