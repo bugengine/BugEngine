@@ -20,14 +20,20 @@ template< typename T, u32 Count >
 struct be_typeid< T[Count] >
 {
     static BE_EXPORT raw<const RTTI::Class> klass();
-    static BE_EXPORT RTTI::Type  type();
+    static RTTI::Type  type()
+    {
+        return RTTI::Type::makeType(klass(), RTTI::Type::Value, RTTI::Type::Mutable, RTTI::Type::Mutable);
+    }
 };
 
 template< typename T, u32 Count >
 struct be_typeid< const T[Count] >
 {
     static BE_EXPORT raw<const RTTI::Class> klass();
-    static BE_EXPORT RTTI::Type  type();
+    static RTTI::Type  type()
+    {
+        return RTTI::Type::makeType(klass(), RTTI::Type::Value, RTTI::Type::Mutable, RTTI::Type::Mutable);
+    }
 };
 
 
@@ -241,13 +247,6 @@ raw<const RTTI::Class> be_typeid< T[Count] >::klass()
 
 template< typename T, u32 Count >
 BE_EXPORT
-RTTI::Type be_typeid< T[Count] >::type()
-{
-    return RTTI::Type::makeType(klass(), RTTI::Type::Value, RTTI::Type::Mutable, RTTI::Type::Mutable);
-}
-
-template< typename T, u32 Count >
-BE_EXPORT
 raw<const RTTI::Class> be_typeid< const T[Count] >::klass()
 {
     /* work around Intel compiler issue
@@ -284,13 +283,6 @@ raw<const RTTI::Class> be_typeid< const T[Count] >::klass()
     };
     raw< const RTTI::Class > result = { &s_class };
     return result;
-}
-
-template< typename T, u32 Count >
-BE_EXPORT
-RTTI::Type be_typeid< const T[Count] >::type()
-{
-    return RTTI::Type::makeType(klass(), RTTI::Type::Value, RTTI::Type::Mutable, RTTI::Type::Mutable);
 }
 
 }
