@@ -457,6 +457,7 @@ def rc_file(self, node):
         obj_ext = '.res'
     out = self.make_bld_node('obj', node.parent, node.name[:node.name.rfind('.')] + obj_ext)
     rctask = self.create_task('winrc', node, out)
+    rctask.env.PATH = []
     try:
         self.compiled_tasks.append(rctask)
     except AttributeError:
