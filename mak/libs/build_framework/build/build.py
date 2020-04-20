@@ -55,12 +55,13 @@ def build(bld):
     if bld.env.STATIC and bld.env.DYNAMIC:
         raise Errors.WafError('Engine requested to be built both as static and dynamic')
     bld.original_env = bld.env
+
+    bld.recurse('host/host.py')
+    bld.recurse('install.py')
     for env_name in bld.env.SUB_TOOLCHAINS:
         bld.common_env.append_unique('VALID_PLATFORMS', bld.all_envs[env_name].VALID_PLATFORMS)
     bld.multiarch_envs = [bld.all_envs[envname] for envname in bld.env.SUB_TOOLCHAINS] or [bld.env]
 
-    bld.recurse('host/host.py')
-    bld.recurse('install.py')
     bld.recurse('modules/modules.py')
     bld.recurse('target/target.py')
     bld.recurse('compiler/compiler.py')
