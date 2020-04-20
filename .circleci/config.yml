@@ -10,40 +10,40 @@ jobs:
           command: python waf configure
       - run:
           name: Build GCC Debug
-          command: python waf build:linux_gnu_amd64-gcc_amd64-7.3.1:debug --tests
+          command: python waf build:redhat_linux_amd64-gcc_amd64-7.3.1:debug --tests
       - run:
           name: Build GCC Debug static
-          command: python waf build:linux_gnu_amd64-gcc_amd64-7.3.1:debug --tests --static
+          command: python waf build:redhat_linux_amd64-gcc_amd64-7.3.1:debug --tests --static
       - run:
           name: Build GCC Debug dynamic
-          command: python waf build:linux_gnu_amd64-gcc_amd64-7.3.1:debug --tests --dynamic
+          command: python waf build:redhat_linux_amd64-gcc_amd64-7.3.1:debug --tests --dynamic
       - run:
           name: Build GCC Debug without master
-          command: python waf build:linux_gnu_amd64-gcc_amd64-7.3.1:debug --tests --nomaster
+          command: python waf build:redhat_linux_amd64-gcc_amd64-7.3.1:debug --tests --nomaster
       - run:
           name: Build GCC Profile
-          command: python waf build:linux_gnu_amd64-gcc_amd64-7.3.1:profile --tests
+          command: python waf build:redhat_linux_amd64-gcc_amd64-7.3.1:profile --tests
       - run:
           name: Build GCC Profile static
-          command: python waf build:linux_gnu_amd64-gcc_amd64-7.3.1:profile --tests --static
+          command: python waf build:redhat_linux_amd64-gcc_amd64-7.3.1:profile --tests --static
       - run:
           name: Build GCC Profile dynamic
-          command: python waf build:linux_gnu_amd64-gcc_amd64-7.3.1:profile --tests --dynamic
+          command: python waf build:redhat_linux_amd64-gcc_amd64-7.3.1:profile --tests --dynamic
       - run:
           name: Build GCC Profile without master
-          command: python waf build:linux_gnu_amd64-gcc_amd64-7.3.1:profile --tests --nomaster
+          command: python waf build:redhat_linux_amd64-gcc_amd64-7.3.1:profile --tests --nomaster
       - run:
           name: Build GCC Final
-          command: python waf build:linux_gnu_amd64-gcc_amd64-7.3.1:final --tests
+          command: python waf build:redhat_linux_amd64-gcc_amd64-7.3.1:final --tests
       - run:
           name: Build GCC Final static
-          command: python waf build:linux_gnu_amd64-gcc_amd64-7.3.1:final --tests --static
+          command: python waf build:redhat_linux_amd64-gcc_amd64-7.3.1:final --tests --static
       - run:
           name: Build GCC Final dynamic
-          command: python waf build:linux_gnu_amd64-gcc_amd64-7.3.1:final --tests --dynamic
+          command: python waf build:redhat_linux_amd64-gcc_amd64-7.3.1:final --tests --dynamic
       - run:
           name: Build GCC Final without master
-          command: python waf build:linux_gnu_amd64-gcc_amd64-7.3.1:final --tests --nomaster
+          command: python waf build:redhat_linux_amd64-gcc_amd64-7.3.1:final --tests --nomaster
       - run:
           name: Build Clang Debug
           command: python waf build:linux_gnu_amd64-clang_amd64-4.0.1:debug --tests
