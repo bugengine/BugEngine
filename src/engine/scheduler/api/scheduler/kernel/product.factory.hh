@@ -9,59 +9,36 @@
 #include    <rtti/typeinfo.hh>
 #include    <rtti/classinfo.script.hh>
 
-namespace BugEngine
+namespace BugEngine { namespace RTTI
 {
 
 template< typename T >
-struct be_typeid<  KernelScheduler::Product<T> >
+struct ClassID<  KernelScheduler::Product<T> >
 {
-    static BE_EXPORT istring name();
-    static BE_EXPORT raw<const RTTI::Class> klass();
-    static BE_EXPORT RTTI::Type  type();
+    static BE_EXPORT raw<const RTTI::Class> klass()
+    {
+        static const RTTI::Class s_class = {
+            istring(minitl::format<256u>("Product<%s>") | be_type<T>().name()),
+            u32(sizeof(KernelScheduler::Product<T>)),
+            0,
+            RTTI::ClassType_Object,
+            {0},
+            {be_class< KernelScheduler::IProduct >().m_ptr},
+            {0},
+            { 0 },
+            { 0, 0 },
+            { 0, 0 },
+            { 0 },
+            { 0 },
+            0,
+            0
+        };
+        raw< const RTTI::Class > result = { &s_class };
+        return result;
+    }
 };
 
-template< typename T >
-BE_EXPORT
-istring be_typeid< KernelScheduler::Product<T> >::name()
-{
-    static istring s_result = istring(minitl::format<256u>("Product<%s>") | be_typeid<T>::name());
-    return s_result;
-}
-
-
-template< typename T >
-BE_EXPORT
-raw<const RTTI::Class> be_typeid< KernelScheduler::Product<T> >::klass()
-{
-    static const RTTI::Class s_class = {
-        name(),
-        u32(sizeof(KernelScheduler::Product<T>)),
-        0,
-        RTTI::ClassType_Object,
-        {0},
-        {be_typeid< KernelScheduler::IProduct >::klass().m_ptr},
-        {0},
-        { 0 },
-        { 0, 0 },
-        { 0, 0 },
-        { 0 },
-        { 0 },
-        0,
-        0
-    };
-    raw< const RTTI::Class > result = { &s_class };
-    return result;
-}
-
-template< typename T >
-BE_EXPORT
-RTTI::Type be_typeid<  KernelScheduler::Product<T> >::type()
-{
-    return RTTI::Type::makeType(klass(), RTTI::Type::Value,
-                                RTTI::Type::Mutable, RTTI::Type::Mutable);
-}
-
-}
+}}
 
 /**************************************************************************************************/
 #endif

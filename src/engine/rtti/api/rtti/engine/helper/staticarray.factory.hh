@@ -17,18 +17,11 @@ see LICENSE for detail */
 #include    <rtti/engine/helper/method.hh>
 
 
-namespace BugEngine
+namespace BugEngine { namespace RTTI
 {
 
 template< typename T >
-struct be_typeid< RTTI::staticarray<T> >
-{
-    static BE_EXPORT raw<const RTTI::Class> klass();
-    static BE_EXPORT RTTI::Type  type();
-};
-
-template< typename T >
-struct staticarray_BugHelper
+struct ClassID< RTTI::staticarray<T> >
 {
     static const RTTI::Type value_type;
     static u32 array_size(const RTTI::Value& v);
@@ -46,116 +39,118 @@ struct staticarray_BugHelper
     static const RTTI::Method::Overload s_method_size_overloads[1];
     static const RTTI::ScriptingArrayAPI scriptingArrayAPI;
     static const RTTI::ScriptingAPI scriptingAPI;
+
+    static BE_EXPORT raw<const RTTI::Class> klass();
 };
 
 template< typename T >
-const RTTI::Type staticarray_BugHelper<T>::value_type = be_typeid<T>::type();
+const RTTI::Type ClassID< RTTI::staticarray<T> >::value_type = be_type<T>();
 
 template< typename T >
-u32 staticarray_BugHelper<T>::array_size(const RTTI::Value& v)
+u32 ClassID< RTTI::staticarray<T> >::array_size(const RTTI::Value& v)
 {
     return v.as< const RTTI::staticarray<T>& >().count;
 }
 
 template< typename T >
-RTTI::Value staticarray_BugHelper<T>::index(RTTI::Value& v, u32 i)
+RTTI::Value ClassID< RTTI::staticarray<T> >::index(RTTI::Value& v, u32 i)
 {
     return RTTI::Value(RTTI::Value::ByRef(v.as< RTTI::staticarray<T>& >().operator[](i)));
 }
 
 template< typename T >
-RTTI::Value staticarray_BugHelper<T>::indexConst(const RTTI::Value& v, u32 i)
+RTTI::Value ClassID< RTTI::staticarray<T> >::indexConst(const RTTI::Value& v, u32 i)
 {
     return RTTI::Value(RTTI::Value::ByRef(v.as< const RTTI::staticarray<T>& >().operator[](i)));
 }
 
 template< typename T >
-RTTI::Value staticarray_BugHelper<T>::callStaticArrayOperatorIndex(RTTI::Value* params, u32 paramCount)
+RTTI::Value ClassID< RTTI::staticarray<T> >::callStaticArrayOperatorIndex(RTTI::Value* params, u32 paramCount)
 {
     be_assert(paramCount == 1, "expected 1 parameter; received %d" | paramCount);
     return RTTI::Value(params[0].as< RTTI::staticarray<T>& >().operator[](params[1].as<u32>()));
 }
 
 template< typename T >
-RTTI::Value staticarray_BugHelper<T>::callStaticArraySize(RTTI::Value* params, u32 paramCount)
+RTTI::Value ClassID< RTTI::staticarray<T> >::callStaticArraySize(RTTI::Value* params, u32 paramCount)
 {
     be_assert(paramCount == 1, "expected 1 parameter; received %d" | paramCount);
     return RTTI::Value(params[0].as< const RTTI::staticarray<T>& >().count);
 }
 
 template< typename T >
-RTTI::Value staticarray_BugHelper<T>::callStaticArrayOperatorIndexConst(RTTI::Value* params, u32 paramCount)
+RTTI::Value ClassID< RTTI::staticarray<T> >::callStaticArrayOperatorIndexConst(RTTI::Value* params, u32 paramCount)
 {
     be_assert(paramCount == 2, "expected 2 parameter; received %d" | paramCount);
     return RTTI::Value(params[0].as< const RTTI::staticarray<T>& >().operator[](params[1].as<u32>()));
 }
 
 template< typename T >
-const RTTI::Method::Parameter staticarray_BugHelper<T>::s_index_0_params[2] = {
+const RTTI::Method::Parameter ClassID< RTTI::staticarray<T> >::s_index_0_params[2] = {
     {
         {0},
         istring("this"),
-        be_typeid< RTTI::staticarray<T>& >::type(),
+        be_type< RTTI::staticarray<T>& >(),
         {&::BugEngine::RTTI::Method::Parameter::s_noDefaultValue}
     },
     {
         {0},
         istring("index"),
-        be_typeid< u32  >::type(),
+        be_type< u32  >(),
         {&::BugEngine::RTTI::Method::Parameter::s_noDefaultValue}
     }
 };
 
 template< typename T >
-const RTTI::Method::Parameter staticarray_BugHelper<T>::s_index_1_params[2] = {
+const RTTI::Method::Parameter ClassID< RTTI::staticarray<T> >::s_index_1_params[2] = {
     {
         {0},
         istring("this"),
-        be_typeid< const RTTI::staticarray<T>& >::type(),
+        be_type< const RTTI::staticarray<T>& >(),
         {&::BugEngine::RTTI::Method::Parameter::s_noDefaultValue}
     },
     {
         {0},
         istring("index"),
-        be_typeid< u32  >::type(),
+        be_type< u32  >(),
         {&::BugEngine::RTTI::Method::Parameter::s_noDefaultValue}
     }
 };
 
 template< typename T >
-const RTTI::Method::Overload staticarray_BugHelper<T>::s_method_index_overloads[2] = {
+const RTTI::Method::Overload ClassID< RTTI::staticarray<T> >::s_method_index_overloads[2] = {
     {
         {0},
         {2, s_index_0_params},
-        be_typeid< const T & >::type(),
+        be_type< const T & >(),
         false,
         &callStaticArrayOperatorIndexConst
     },
     {
         {0},
         {2, s_index_1_params},
-        be_typeid< T & >::type(),
+        be_type< T & >(),
         false,
         &callStaticArrayOperatorIndex
     }
 };
 
 template< typename T >
-const RTTI::Method::Parameter staticarray_BugHelper<T>::s_size_params[1] = {
+const RTTI::Method::Parameter ClassID< RTTI::staticarray<T> >::s_size_params[1] = {
     {
         {0},
         istring("this"),
-        be_typeid< const RTTI::staticarray<T>& >::type(),
+        be_type< const RTTI::staticarray<T>& >(),
         {&::BugEngine::RTTI::Method::Parameter::s_noDefaultValue}
     }
 };
 
 template< typename T >
-const RTTI::Method::Overload staticarray_BugHelper<T>::s_method_size_overloads[1] = {
+const RTTI::Method::Overload ClassID< RTTI::staticarray<T> >::s_method_size_overloads[1] = {
     {
         {0},
         {1, s_size_params},
-        be_typeid< u32 >::type(),
+        be_type< u32 >(),
         false,
         &callStaticArraySize
     }
@@ -163,7 +158,7 @@ const RTTI::Method::Overload staticarray_BugHelper<T>::s_method_size_overloads[1
 
 
 template< typename T >
-const RTTI::ScriptingArrayAPI staticarray_BugHelper<T>::scriptingArrayAPI = {
+const RTTI::ScriptingArrayAPI ClassID< RTTI::staticarray<T> >::scriptingArrayAPI = {
     value_type,
     &array_size,
     &index,
@@ -171,13 +166,13 @@ const RTTI::ScriptingArrayAPI staticarray_BugHelper<T>::scriptingArrayAPI = {
 };
 
 template< typename T >
-const RTTI::ScriptingAPI staticarray_BugHelper<T>::scriptingAPI = {
+const RTTI::ScriptingAPI ClassID< RTTI::staticarray<T> >::scriptingAPI = {
     {&scriptingArrayAPI}
 };
 
 template< typename T >
 BE_EXPORT
-raw<const RTTI::Class> be_typeid< RTTI::staticarray<T> >::klass()
+raw<const RTTI::Class> ClassID< RTTI::staticarray<T> >::klass()
 {
     /* work around Intel compiler issue
      * internal error: assertion failed: adjust_cleanup_state_for_aggregate_init: NULL dip
@@ -186,28 +181,28 @@ raw<const RTTI::Class> be_typeid< RTTI::staticarray<T> >::klass()
     static const RTTI::Method s_methods[2] = {
         {
             RTTI::Class::nameOperatorIndex(),
-            {2, staticarray_BugHelper<T>::s_method_index_overloads},
+            {2, ClassID< RTTI::staticarray<T> >::s_method_index_overloads},
             {&s_methods[0]}
         },
         {
             istring("size"),
-            {1, staticarray_BugHelper<T>::s_method_size_overloads},
+            {1, ClassID< RTTI::staticarray<T> >::s_method_size_overloads},
             {&s_methods[1]}
         }
     };
     static const ::BugEngine::RTTI::Class s_class = {
-        istring(minitl::format<1024u>("staticarray<%s>") | be_typeid<T>::klass()->name),
+        istring(minitl::format<1024u>("staticarray<%s>") | be_type<T>().name()),
         u32(sizeof(RTTI::staticarray<T>)),
         0,
         RTTI::ClassType_Array,
         {be_bugengine_Namespace().m_ptr},
-        {be_typeid< void >::klass().m_ptr},
+        {be_class< void >().m_ptr},
         {0},
         {0},
         {0, 0},
         {2, s_methods},
         {0},
-        {&staticarray_BugHelper<T>::scriptingAPI},
+        {&ClassID< RTTI::staticarray<T> >::scriptingAPI},
         &RTTI::wrap< RTTI::staticarray<T> >::copy,
         &RTTI::wrap< RTTI::staticarray<T> >::destroy
     };
@@ -215,14 +210,7 @@ raw<const RTTI::Class> be_typeid< RTTI::staticarray<T> >::klass()
     return result;
 }
 
-template< typename T >
-BE_EXPORT
-RTTI::Type be_typeid< RTTI::staticarray<T> >::type()
-{
-    return RTTI::Type::makeType(klass(), RTTI::Type::Value, RTTI::Type::Mutable, RTTI::Type::Mutable);
-}
-
-}
+}}
 
 /**************************************************************************************************/
 #endif

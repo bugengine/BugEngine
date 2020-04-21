@@ -21,14 +21,14 @@ Float::~Float()
 
 bool Float::isCompatible(const Type &expectedType) const
 {
-    return be_typeid<float>::type().isA(expectedType)
-        || be_typeid<double>::type().isA(expectedType);
+    return be_type<float>().isA(expectedType)
+        || be_type<double>().isA(expectedType);
 }
 
 void Float::doEval(const RTTI::Type& expectedType, RTTI::Value& result) const
 {
     be_assert(isCompatible(expectedType), "invalid conversion from float to %s" | expectedType);
-    if (be_typeid<float>::type().isA(expectedType))
+    if (be_type<float>().isA(expectedType))
         result = RTTI::Value((float)m_value);
     else
         result = RTTI::Value((double)m_value);

@@ -956,15 +956,15 @@ void PyBugObject::unpackAny(PyObject* object, void* buffer)
     }
     else if (object->py_type->tp_flags & Py_TPFLAGS_INT_SUBCLASS)
     {
-        unpackNumber(object, be_typeid<i32>::type(), buffer);
+        unpackNumber(object, be_type<i32>(), buffer);
     }
     else if (object->py_type->tp_flags & Py_TPFLAGS_LONG_SUBCLASS)
     {
-        unpackNumber(object, be_typeid<i64>::type(), buffer);
+        unpackNumber(object, be_type<i64>(), buffer);
     }
     else if (object->py_type == s_library->m_PyFloat_Type)
     {
-        unpackFloat(object, be_typeid<double>::type(), buffer);
+        unpackFloat(object, be_type<double>(), buffer);
     }
     else if (object == s_library->m__Py_NoneStruct)
     {

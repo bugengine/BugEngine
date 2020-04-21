@@ -63,7 +63,7 @@ struct Partition : public TAIL
     }
     static void buildList(minitl::array< raw<const RTTI::Class> >::iterator index)
     {
-        *index = be_typeid<T>::klass();
+        *index = be_class<T>();
         Tail::buildList(index + 1);
     }
 private:
@@ -76,7 +76,7 @@ template< typename T, typename TAIL >
 const istring Partition<T, TAIL>::name()
 {
     return istring(minitl::format<4096u>("%s+%s")
-                   | be_typeid<T>::klass()->name
+                   | be_class<T>()->name
                    | Partition<typename TAIL::Type, typename TAIL::Tail>::name());
 }
 
@@ -102,7 +102,7 @@ public:
     }
     static void buildList(minitl::array< raw<const RTTI::Class> >::iterator index)
     {
-        *index = be_typeid<T>::klass();
+        *index = be_class<T>();
     }
 
 private:
@@ -114,7 +114,7 @@ private:
 template< typename T >
 const istring Partition<T, void>::name()
 {
-    return be_typeid<T>::klass()->name;
+    return be_class<T>()->name;
 }
 
 
@@ -129,9 +129,9 @@ struct PartitionPropertyInfo
                                       typename TAIL::Tail> PropertyParent;
         RTTI::Property property = {
             {0},
-            be_typeid<T>::klass()->name,
-            be_typeid<PARTITION>::type(),
-            be_typeid< weak< const KernelScheduler::Product< KernelScheduler::Segments<T> > > >::type(),
+            be_class<T>()->name,
+            be_type<PARTITION>(),
+            be_type< weak< const KernelScheduler::Product< KernelScheduler::Segments<T> > > >(),
             &PARTITION::template getProduct<T>
         };
         new (&properties[INDEX]) RTTI::Property(property);
@@ -146,9 +146,9 @@ struct PartitionPropertyInfo<PARTITION, INDEX, T, void>
     {
         RTTI::Property property = {
             {0},
-            be_typeid<T>::name(),
-            be_typeid<PARTITION>::type(),
-            be_typeid< weak< const KernelScheduler::Product< KernelScheduler::Segments<T> > > >::type(),
+            be_class<T>()->name,
+            be_type<PARTITION>(),
+            be_type< weak< const KernelScheduler::Product< KernelScheduler::Segments<T> > > >(),
             &PARTITION::template getProduct<T>
         };
         new (&properties[INDEX]) RTTI::Property(property);
@@ -205,13 +205,12 @@ struct MakePartition<>
 }}
 
 
-namespace BugEngine
+namespace BugEngine { namespace RTTI
 {
 
 template< typename T, typename TAIL >
-struct be_typeid< World::Partition<T, TAIL> >
+struct ClassID< World::Partition<T, TAIL> >
 {
-    BE_EXPORT static inline RTTI::Type  type()  { return RTTI::Type::makeType(klass(), RTTI::Type::Value, RTTI::Type::Mutable, RTTI::Type::Mutable); }
     BE_EXPORT static inline raw<const RTTI::Class> klass()
     {
         static const RTTI::Class s_class = {
@@ -220,7 +219,7 @@ struct be_typeid< World::Partition<T, TAIL> >
             0,
             RTTI::ClassType_Object,
             {0},
-            be_typeid<void>::klass(),
+            be_class<void>(),
             {0},
             {0},
             { World::Partition_BugHelper< World::Partition<T, TAIL> >::PropertyCount,
@@ -242,9 +241,9 @@ struct be_typeid< World::Partition<T, TAIL> >
 
 template< typename T, typename TAIL >
 BE_EXPORT
-bool be_typeid< World::Partition<T, TAIL> >::s_propertiesSet = World::Partition_BugHelper< World::Partition<T, TAIL> >::getPartitionProperties();
+bool ClassID< World::Partition<T, TAIL> >::s_propertiesSet = World::Partition_BugHelper< World::Partition<T, TAIL> >::getPartitionProperties();
 
-}
+}}
 
 /**************************************************************************************************/
 #endif

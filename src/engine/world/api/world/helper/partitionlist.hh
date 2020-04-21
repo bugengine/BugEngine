@@ -91,8 +91,8 @@ struct PartitionListPropertyInfo
         RTTI::Property property = {
             {0},
             T::name(),
-            be_typeid<PARTITIONLIST>::type(),
-            be_typeid< const T& >::type(),
+            be_type<PARTITIONLIST>(),
+            be_type< const T& >(),
             &PARTITIONLIST::template getPartition<T>
         };
         new (&properties[INDEX]) RTTI::Property(property);
@@ -108,8 +108,8 @@ struct PartitionListPropertyInfo<PARTITIONLIST, INDEX, T, void>
         RTTI::Property property = {
             {0},
             T::name(),
-            be_typeid<PARTITIONLIST>::type(),
-            be_typeid< const T& >::type(),
+            be_type<PARTITIONLIST>(),
+            be_type< const T& >(),
             &PARTITIONLIST::template getPartition<T>
         };
         new (&properties[INDEX]) RTTI::Property(property);

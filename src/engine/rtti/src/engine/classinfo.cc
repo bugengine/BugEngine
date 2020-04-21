@@ -257,7 +257,7 @@ void Class::destroy(void* src) const
 
 void Class::enumerateObjects(EnumerateRecursion recursion, EnumerateCallback callback) const
 {
-    static raw<const Class> const s_metaClass = be_typeid<Class>::klass();
+    static raw<const Class> const s_metaClass = be_class<Class>();
     raw<const ObjectInfo> o = objects;
     while(o)
     {
@@ -324,7 +324,7 @@ raw<const ObjectInfo> Class::getStaticProperty(istring propertyName) const
 
 Value Class::get(Value& from, istring propname, bool& found) const
 {
-    static raw<const Class> const s_metaClass = be_typeid<Class>::klass();
+    static raw<const Class> const s_metaClass = be_class<Class>();
     if (from.type().metaclass == s_metaClass)
     {
         raw<const Class> cls = from.as< raw<const Class> >();
@@ -361,7 +361,7 @@ Value Class::get(Value& from, istring propname, bool& found) const
 
 Value Class::get(const Value& from, istring propname, bool& found) const
 {
-    static raw<const Class> const s_metaClass = be_typeid<Class>::klass();
+    static raw<const Class> const s_metaClass = be_class<Class>();
     if (from.type().metaclass == s_metaClass)
     {
         raw<const Class> cls = from.as< raw<const Class> >();

@@ -31,7 +31,7 @@ static raw<const RTTI::Method::Overload> getMethodFromClass(raw<const RTTI::Clas
                                                            RTTI::Type::RawPtr,
                                                            RTTI::Type::Const,
                                                            RTTI::Type::Mutable)),
-            RTTI::ArgInfo<RTTI::Type>(be_typeid<World&>::type())
+            RTTI::ArgInfo<RTTI::Type>(be_type<World&>())
         };
         RTTI::CallInfo info = RTTI::resolve(method, args, 2);
         if (info.conversion < RTTI::ConversionCost::s_incompatible)

@@ -39,7 +39,7 @@ struct ComponentList : public TAIL
     }
     static void addComponent(minitl::array< minitl::tuple< raw<const RTTI::Class>, u32 > >& componentList, u32 count = 0)
     {
-        componentList[count].first = be_typeid<T>::klass();
+        componentList[count].first = be_class<T>();
         componentList[count].second = STORAGE;
         TAIL::addComponent(componentList, count + 1);
     }
@@ -62,7 +62,7 @@ struct ComponentList<T, STORAGE, void>
     }
     static void addComponent(minitl::array< minitl::tuple< raw<const RTTI::Class>, u32 > >& componentList, u32 count = 0)
     {
-        componentList[count].first = be_typeid<T>::klass();
+        componentList[count].first = be_class<T>();
         componentList[count].second = STORAGE;
     }
 };
@@ -100,9 +100,9 @@ struct Property
                          (StorageSize)TAIL::Storage, typename TAIL::Tail> PropertyParent;
         RTTI::Property property = {
             {0},
-            be_typeid<T>::klass()->name,
-            be_typeid<LIST>::type(),
-            be_typeid< weak< const KernelScheduler::Product< KernelScheduler::Segments<T> > > >::type(),
+            be_class<T>()->name,
+            be_type<LIST>(),
+            be_type< weak< const KernelScheduler::Product< KernelScheduler::Segments<T> > > >(),
             &LIST::template getProduct<T>
         };
         new (&properties[INDEX]) RTTI::Property(property);
@@ -117,9 +117,9 @@ struct Property<LIST, INDEX, T, STORAGE, void>
     {
         RTTI::Property property = {
             {0},
-            be_typeid<T>::klass()->name,
-            be_typeid<LIST>::type(),
-            be_typeid< weak< const KernelScheduler::Product< KernelScheduler::Segments<T> > > >::type(),
+            be_class<T>()->name,
+            be_type<LIST>(),
+            be_type< weak< const KernelScheduler::Product< KernelScheduler::Segments<T> > > >(),
             &LIST::template getProduct<T>
         };
         new (&properties[INDEX]) RTTI::Property(property);

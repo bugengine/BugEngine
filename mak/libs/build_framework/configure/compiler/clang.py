@@ -59,7 +59,8 @@ class Clang(Configure.ConfigurationContext.GnuCompiler):
                         'link': self.extra_args.get('link', []) + ['--target=%s' % gnu_tuple],
                     }
                 )
-            except Exception:
+            except Exception as e:
+                #print(e)
                 pass
             else:
                 result.append(c)

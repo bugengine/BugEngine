@@ -206,7 +206,7 @@ class Method(CppObject):
                 '    {\n'
                 '        %s,\n'
                 '        ::BugEngine::istring("%s"),\n'
-                '        ::BugEngine::be_typeid< %s >::type(),\n'
+                '        ::be_type< %s >(),\n'
                 '        {%s}\n'
                 '    }' % (t, p[0].name, p[0].type, p[0].default_value and
                            ('&s%s_param%d_default' %
@@ -381,7 +381,7 @@ class OverloadedMethod(CppObject):
             '    {\n'
             '        %s,\n'
             '        %s,\n'
-            '        ::BugEngine::be_typeid< %s >::type(),\n'
+            '        ::be_type< %s >(),\n'
             '        %s,\n'
             '        &%s\n'
             '    }' % (o[1], o[2], o[0].return_type, o[0].vararg and "true" or "false", o[0].trampoline_name(
@@ -484,7 +484,7 @@ class Typedef(CppObject):
                              '    %s,\n'
                              '    ::BugEngine::istring(%s),\n'
                              '    ::BugEngine::RTTI::Value(\n'
-                             '        ::BugEngine::be_typeid< %s >::type())\n'
+                             '        ::be_type< %s >())\n'
                              '};\n' % (helper_static(struct_owners), helper_name(struct_owners), prefix, alias_cpp,
                                        object_name, tag, alias, self.name))
             object_name = '{&%ss%s_object_%s}' % (helper_name(struct_owners), prefix, alias_cpp)
@@ -578,7 +578,7 @@ class Class(Container):
             self.add_constructor(PodConstructorCopy(self))
 
     def owner_name(self):
-        return '::BugEngine::be_typeid< ::%s >::klass()' % '::'.join(self.name)
+        return '::be_class< ::%s >()' % '::'.join(self.name)
 
     def cpp_name(self):
         return '::'.join(self.name)
@@ -717,14 +717,14 @@ class Class(Container):
             params['DESTRUCTOR'] = '0'
 
         if self.parent:
-            params['PARENT'] = '::BugEngine::be_typeid< %s >::klass()' % self.parent
+            params['PARENT'] = '::be_class< %s >()' % self.parent
             params['OFFSET'] = 'i32(ptrdiff_t(static_cast< %s* >((%s*)4))) - 4' % (self.name[-1], self.parent)
         else:
-            params['PARENT'] = '::BugEngine::be_typeid< void >::klass()'
+            params['PARENT'] = '::be_class< void >()'
             params['OFFSET'] = '0'
 
         if self.parent:
-            params['OBJECTS'] = '{::BugEngine::be_typeid< %s >::klass()->objects.m_ptr}' % self.parent
+            params['OBJECTS'] = '{::be_class< %s >()->objects.m_ptr}' % self.parent
         else:
             params['OBJECTS'] = '{0}'
 
@@ -779,8 +779,8 @@ class Class(Container):
                 '    {\n'
                 '        %s,\n'
                 '        %s,\n'
-                '        ::BugEngine::be_typeid< %s >::type(),\n'
-                '        ::BugEngine::be_typeid< %s >::type(),\n'
+                '        ::be_type< %s >(),\n'
+                '        ::be_type< %s >(),\n'
                 '        &::BugEngine::RTTI::PropertyHelper< %s, %s, &%s::%s >::get\n'
                 '    }' % (t, name, self.cpp_name(), p.type, p.type, self.cpp_name(), self.cpp_name(), p.name)
                 for p, name, t in props
@@ -827,16 +827,9 @@ class Class(Container):
                          '}\n\n' % params)
 
         instance.write('template< >\n'
-                       'BE_EXPORT raw< const RTTI::Class > be_typeid< %(CPP_NAME)s >::klass()\n'
+                       'BE_EXPORT raw< const RTTI::Class > ClassID< %(CPP_NAME)s >::klass()\n'
                        '{\n'
                        '    return %(NAMESPACE)s::klass_%(NAME)s();\n'
-                       '}\n'
-                       '\n'
-                       'template< >\n'
-                       'BE_EXPORT istring be_typeid< %(CPP_NAME)s >::name()\n'
-                       '{\n'
-                       '    static istring s_name("%(NAME)s");\n'
-                       '    return s_name;\n'
                        '}\n'
                        '\n' % params)
 
@@ -846,7 +839,7 @@ class Class(Container):
                              '    %s,\n'
                              '    {0},\n'
                              '    ::BugEngine::istring(%s),\n'
-                             '    ::BugEngine::RTTI::Value(::BugEngine::be_typeid< %s >::klass())\n'
+                             '    ::BugEngine::RTTI::Value(::be_class< %s >())\n'
                              '};\n\n' % (helper_static(struct_owners), helper_name(struct_owners), prefix, alias_cpp,
                                          object_name, alias, self.cpp_name()))
             object_name = '{&%ss%s_object_%s}' % (helper_name(struct_owners), prefix, alias_cpp)
@@ -978,12 +971,12 @@ class Root(Container):
             definition.write('}\n')
             for object in self.objects:
                 object.declare(self, [], definition, instance, '')
-            instance.write('\nnamespace BugEngine\n{\n')
+            instance.write('\nnamespace BugEngine { namespace RTTI\n{\n')
             next_object = '%s->objects' % self.owner_name()
             for object in self.objects:
                 object.write_content(self, [], '', [], definition, instance)
                 next_object = object.write_object(self, [], '', [], next_object, definition, instance)
-            instance.write('}\n\n')
+            instance.write('}}\n\n')
         definition.write('\n\n')
 
     def write_namespaces(self, namespace_buffer):

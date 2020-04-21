@@ -14,20 +14,11 @@
 #include    <rtti/engine/helper/method.hh>
 #include    <minitl/tuple.hh>
 
-namespace BugEngine
+namespace BugEngine { namespace RTTI
 {
 
-
 template< typename T1, typename T2 >
-struct be_typeid< minitl::tuple<T1, T2> >
-{
-    static BE_EXPORT raw<const RTTI::Class> klass();
-    static BE_EXPORT RTTI::Type  type();
-    static BE_EXPORT istring name();
-};
-
-template< typename T1, typename T2 >
-struct tuple2_BugHelper
+struct ClassID< minitl::tuple<T1, T2> >
 {
     static RTTI::Value trampoline_method_tuple_overload_0(RTTI::Value* parameters, u32 parameterCount);
     static RTTI::Value trampoline_method_tuple_overload_1(RTTI::Value* parameters, u32 parameterCount);
@@ -37,10 +28,12 @@ struct tuple2_BugHelper
     static const RTTI::Property s_properties[];
     static const RTTI::ObjectInfo s_first_type_object_first_type;
     static const RTTI::ObjectInfo s_second_type_object_second_type;
+
+    static BE_EXPORT raw<const RTTI::Class> klass();
 };
 
 template< typename T1, typename T2 >
-RTTI::Value tuple2_BugHelper<T1, T2>::trampoline_method_tuple_overload_0(RTTI::Value* parameters, u32 parameterCount)
+RTTI::Value ClassID< minitl::tuple<T1, T2> >::trampoline_method_tuple_overload_0(RTTI::Value* parameters, u32 parameterCount)
 {
     be_forceuse(parameters);
     be_forceuse(parameterCount);
@@ -48,7 +41,7 @@ RTTI::Value tuple2_BugHelper<T1, T2>::trampoline_method_tuple_overload_0(RTTI::V
 }
 
 template< typename T1, typename T2 >
-RTTI::Value tuple2_BugHelper<T1, T2>::trampoline_method_tuple_overload_1(RTTI::Value* parameters, u32 parameterCount)
+RTTI::Value ClassID< minitl::tuple<T1, T2> >::trampoline_method_tuple_overload_1(RTTI::Value* parameters, u32 parameterCount)
 {
     be_forceuse(parameters);
     be_forceuse(parameterCount);
@@ -57,59 +50,59 @@ RTTI::Value tuple2_BugHelper<T1, T2>::trampoline_method_tuple_overload_1(RTTI::V
 }
 
 template< typename T1, typename T2 >
-const RTTI::ObjectInfo tuple2_BugHelper<T1, T2>::s_second_type_object_second_type = {
+const RTTI::ObjectInfo ClassID< minitl::tuple<T1, T2> >::s_second_type_object_second_type = {
     { 0 },
     { 0 },
     istring(istring("second_type")),
     RTTI::Value(
-        be_typeid< T2 >::type())
+        be_type< T2 >())
 };
 
 template< typename T1, typename T2 >
-const RTTI::ObjectInfo tuple2_BugHelper<T1, T2>::s_first_type_object_first_type = {
+const RTTI::ObjectInfo ClassID< minitl::tuple<T1, T2> >::s_first_type_object_first_type = {
     {&s_second_type_object_second_type},
     { 0 },
     istring(istring("first_type")),
     RTTI::Value(
-        be_typeid< T1 >::type())
+        be_type< T1 >())
 };
 
 template< typename T1, typename T2 >
-const RTTI::Method::Parameter tuple2_BugHelper<T1, T2>::s_method_tuple_overload_1_params[] = {
+const RTTI::Method::Parameter ClassID< minitl::tuple<T1, T2> >::s_method_tuple_overload_1_params[] = {
     {
         { 0 },
         istring("first"),
-        be_typeid< T1  >::type(),
+        be_type< T1  >(),
         {&RTTI::Method::Parameter::s_noDefaultValue}
     },
     {
         { 0 },
         istring("second"),
-        be_typeid< T2  >::type(),
+        be_type< T2  >(),
         {&RTTI::Method::Parameter::s_noDefaultValue}
     }
 };
 
 template< typename T1, typename T2 >
-const RTTI::Method::Overload tuple2_BugHelper<T1, T2>::s_method_tuple_overloads[] = {
+const RTTI::Method::Overload ClassID< minitl::tuple<T1, T2> >::s_method_tuple_overloads[] = {
     {
         { 0 },
         { 0, 0 },
-        be_typeid< minitl::tuple<T1, T2> >::type(),
+        be_type< minitl::tuple<T1, T2> >(),
         false,
         &trampoline_method_tuple_overload_0
     },
     {
         { 0 },
         { 2, s_method_tuple_overload_1_params },
-        be_typeid< minitl::tuple<T1, T2> >::type(),
+        be_type< minitl::tuple<T1, T2> >(),
         false,
         &trampoline_method_tuple_overload_1
     }
 };
 
 template< typename T1, typename T2 >
-const RTTI::Method tuple2_BugHelper<T1, T2>::s_methods[1] = {
+const RTTI::Method ClassID< minitl::tuple<T1, T2> >::s_methods[1] = {
     {
         istring("tuple"),
         { 2, s_method_tuple_overloads },
@@ -118,19 +111,19 @@ const RTTI::Method tuple2_BugHelper<T1, T2>::s_methods[1] = {
 };
 
 template< typename T1, typename T2 >
-const RTTI::Property tuple2_BugHelper<T1, T2>::s_properties[2] = {
+const RTTI::Property ClassID< minitl::tuple<T1, T2> >::s_properties[2] = {
     {
         { 0 },
         istring("first"),
-        be_typeid< minitl::tuple<T1, T2> >::type(),
-        be_typeid< T1  >::type(),
+        be_type< minitl::tuple<T1, T2> >(),
+        be_type< T1  >(),
         &RTTI::PropertyHelper< T1 , minitl::tuple<T1, T2>, &minitl::tuple<T1, T2>::first >::get
     },
     {
         { 0 },
         istring("second"),
-        be_typeid< minitl::tuple<T1, T2> >::type(),
-        be_typeid< T2  >::type(),
+        be_type< minitl::tuple<T1, T2> >(),
+        be_type< T2  >(),
         &RTTI::PropertyHelper< T2 , minitl::tuple<T1, T2>, &minitl::tuple<T1, T2>::second >::get
     }
 };
@@ -138,21 +131,23 @@ const RTTI::Property tuple2_BugHelper<T1, T2>::s_properties[2] = {
 
 template< typename T1, typename T2 >
 BE_EXPORT
-raw<const RTTI::Class> be_typeid< minitl::tuple<T1, T2> >::klass()
+raw<const RTTI::Class> ClassID< minitl::tuple<T1, T2> >::klass()
 {
     static const
     RTTI::Class s_class = {
-        /* .name */               name(),
+        /* .name */               istring(minitl::format<1024u>("tuple<%s,%s>")
+                                                        | be_type<T1>().name()
+                                                        | be_type<T2>().name()),
         /* .size */               u32(sizeof(minitl::tuple<T1, T2>)),
         /* .offset */             0,
         /* .id */                 RTTI::ClassType_Struct,
         /* .owner */              {be_bugengine_Namespace().m_ptr},
-        /* .parent */             {be_typeid< void >::klass().m_ptr},
-        /* .objects */            {&tuple2_BugHelper<T1, T2>::s_first_type_object_first_type},
+        /* .parent */             {be_class< void >().m_ptr},
+        /* .objects */            {&ClassID< minitl::tuple<T1, T2> >::s_first_type_object_first_type},
         /* .tags */               { 0 },
-        /* .properties */         { 2, tuple2_BugHelper<T1, T2>::s_properties },
-        /* .methods */            { 1, tuple2_BugHelper<T1, T2>::s_methods },
-        /* .constructor */        {tuple2_BugHelper<T1, T2>::s_methods},
+        /* .properties */         { 2, ClassID< minitl::tuple<T1, T2> >::s_properties },
+        /* .methods */            { 1, ClassID< minitl::tuple<T1, T2> >::s_methods },
+        /* .constructor */        {ClassID< minitl::tuple<T1, T2> >::s_methods},
         /* .apiMethods */         {0},
         /* .copyconstructor */    &RTTI::wrap< minitl::tuple<T1, T2> >::copy,
         /* .destructor */         &RTTI::wrap< minitl::tuple<T1, T2> >::destroy
@@ -162,24 +157,7 @@ raw<const RTTI::Class> be_typeid< minitl::tuple<T1, T2> >::klass()
     return result;
 }
 
-template< typename T1, typename T2 >
-BE_EXPORT
-RTTI::Type be_typeid< minitl::tuple<T1, T2> >::type()
-{
-    return RTTI::Type::makeType(klass(), RTTI::Type::Value, RTTI::Type::Mutable, RTTI::Type::Mutable);
-}
-
-template< typename T1, typename T2 >
-BE_EXPORT
-istring be_typeid< minitl::tuple<T1, T2> >::name()
-{
-    static istring s_name(minitl::format<1024u>("tuple<%s,%s>")
-                        | be_typeid<T1>::klass()->name
-                        | be_typeid<T2>::klass()->name);
-    return s_name;
-}
-
-}
+}}
 
 /**************************************************************************************************/
 #endif

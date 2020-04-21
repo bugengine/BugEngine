@@ -13,19 +13,11 @@
 #include    <rtti/engine/scriptingapi.hh>
 #include    <minitl/array.hh>
 
-namespace BugEngine
+namespace BugEngine { namespace RTTI
 {
 
 template< typename T >
-struct be_typeid< minitl::array<T> >
-{
-    static BE_EXPORT raw<const RTTI::Class> klass();
-    static BE_EXPORT RTTI::Type  type();
-};
-
-
-template< typename T >
-struct array_BugHelper
+struct ClassID< minitl::array<T> >
 {
     static const RTTI::Type value_type;
     static u32 array_size(const RTTI::Value& v);
@@ -46,31 +38,34 @@ struct array_BugHelper
     static const RTTI::ObjectInfo s_prop_value_type_object_value_type;
     static const RTTI::ScriptingArrayAPI scriptingArrayAPI;
     static const RTTI::ScriptingAPI scriptingAPI;
+
+    static BE_EXPORT raw<const RTTI::Class> klass();
 };
 
-template< typename T >
-const RTTI::Type array_BugHelper<T>::value_type = be_typeid<T>::type();
 
 template< typename T >
-u32 array_BugHelper<T>::array_size(const RTTI::Value& v)
+const RTTI::Type ClassID< minitl::array<T> >::value_type = be_type<T>();
+
+template< typename T >
+u32 ClassID< minitl::array<T> >::array_size(const RTTI::Value& v)
 {
     return v.as< const minitl::array<T>& >().size();
 }
 
 template< typename T >
-RTTI::Value array_BugHelper<T>::index(RTTI::Value& v, u32 i)
+RTTI::Value ClassID< minitl::array<T> >::index(RTTI::Value& v, u32 i)
 {
     return RTTI::Value(RTTI::Value::ByRef(v.as< minitl::array<T>& >().operator[](i)));
 }
 
 template< typename T >
-RTTI::Value array_BugHelper<T>::indexConst(const RTTI::Value& v, u32 i)
+RTTI::Value ClassID< minitl::array<T> >::indexConst(const RTTI::Value& v, u32 i)
 {
     return RTTI::Value(RTTI::Value::ByRef(v.as< const minitl::array<T>& >().operator[](i)));
 }
 
 template< typename T >
-RTTI::Value array_BugHelper<T>::trampoline_method_size_overload_0(RTTI::Value* parameters, u32 parameterCount)
+RTTI::Value ClassID< minitl::array<T> >::trampoline_method_size_overload_0(RTTI::Value* parameters, u32 parameterCount)
 {
     be_forceuse(parameters);
     be_forceuse(parameterCount);
@@ -78,7 +73,7 @@ RTTI::Value array_BugHelper<T>::trampoline_method_size_overload_0(RTTI::Value* p
 }
 
 template< typename T >
-RTTI::Value array_BugHelper<T>::trampoline_method_Index_overload_0(RTTI::Value* parameters, u32 parameterCount)
+RTTI::Value ClassID< minitl::array<T> >::trampoline_method_Index_overload_0(RTTI::Value* parameters, u32 parameterCount)
 {
     be_forceuse(parameters);
     be_forceuse(parameterCount);
@@ -86,7 +81,7 @@ RTTI::Value array_BugHelper<T>::trampoline_method_Index_overload_0(RTTI::Value* 
 }
 
 template< typename T >
-RTTI::Value array_BugHelper<T>::trampoline_method_Index_overload_1(RTTI::Value* parameters, u32 parameterCount)
+RTTI::Value ClassID< minitl::array<T> >::trampoline_method_Index_overload_1(RTTI::Value* parameters, u32 parameterCount)
 {
     be_forceuse(parameters);
     be_forceuse(parameterCount);
@@ -94,7 +89,7 @@ RTTI::Value array_BugHelper<T>::trampoline_method_Index_overload_1(RTTI::Value* 
 }
 
 template< typename T >
-RTTI::Value array_BugHelper<T>::trampoline_method_array_overload_0(RTTI::Value* parameters, u32 parameterCount)
+RTTI::Value ClassID< minitl::array<T> >::trampoline_method_array_overload_0(RTTI::Value* parameters, u32 parameterCount)
 {
     T* t = (T*)malloca(sizeof(T)*parameterCount);
     for (u32 i = 0; i < parameterCount; ++i)
@@ -107,7 +102,7 @@ RTTI::Value array_BugHelper<T>::trampoline_method_array_overload_0(RTTI::Value* 
 }
 
 template< typename T >
-const RTTI::ObjectInfo array_BugHelper<T>::s_prop_value_type_object_value_type = {
+const RTTI::ObjectInfo ClassID< minitl::array<T> >::s_prop_value_type_object_value_type = {
     {0},
     {0},
     istring(istring("value_type")),
@@ -115,97 +110,97 @@ const RTTI::ObjectInfo array_BugHelper<T>::s_prop_value_type_object_value_type =
 };
 
 template< typename T >
-const RTTI::Method::Overload array_BugHelper<T>::s_method_array_overloads[] = {
+const RTTI::Method::Overload ClassID< minitl::array<T> >::s_method_array_overloads[] = {
     {
         { 0 },
         { 0, 0 },
-        be_typeid< minitl::array<T> >::type(),
+        be_type< minitl::array<T> >(),
         true,
         &trampoline_method_array_overload_0
     }
 };
 
 template< typename T >
-const RTTI::Method::Parameter array_BugHelper<T>::s_method_size_overload_0_params[] = {
+const RTTI::Method::Parameter ClassID< minitl::array<T> >::s_method_size_overload_0_params[] = {
     {
         { 0 },
         istring("this"),
-        be_typeid< const minitl::array<T>& >::type(),
+        be_type< const minitl::array<T>& >(),
         {&RTTI::Method::Parameter::s_noDefaultValue}
     }
 };
 
 template< typename T >
-const RTTI::Method::Overload array_BugHelper<T>::s_method_size_overloads[] = {
+const RTTI::Method::Overload ClassID< minitl::array<T> >::s_method_size_overloads[] = {
     {
         { 0 },
         { 1, s_method_size_overload_0_params },
-        be_typeid< u32 >::type(),
+        be_type< u32 >(),
         false,
         &trampoline_method_size_overload_0
     }
 };
 
 template< typename T >
-const RTTI::Method::Parameter array_BugHelper<T>::s_method_Index_overload_0_params[] = {
+const RTTI::Method::Parameter ClassID< minitl::array<T> >::s_method_Index_overload_0_params[] = {
     {
         { 0 },
         istring("this"),
-        be_typeid< const minitl::array<T>& >::type(),
+        be_type< const minitl::array<T>& >(),
         {&RTTI::Method::Parameter::s_noDefaultValue}
     },
     {
         { 0 },
         istring("index"),
-        be_typeid< u32  >::type(),
+        be_type< u32  >(),
         {&RTTI::Method::Parameter::s_noDefaultValue}
     }
 };
 
 template< typename T >
-const RTTI::Method::Parameter array_BugHelper<T>::s_method_Index_overload_1_params[] = {
+const RTTI::Method::Parameter ClassID< minitl::array<T> >::s_method_Index_overload_1_params[] = {
     {
         { 0 },
         istring("this"),
-        be_typeid< minitl::array<T>& >::type(),
+        be_type< minitl::array<T>& >(),
         {&RTTI::Method::Parameter::s_noDefaultValue}
     },
     {
         { 0 },
         istring("index"),
-        be_typeid< u32  >::type(),
+        be_type< u32  >(),
         {&RTTI::Method::Parameter::s_noDefaultValue}
     }
 };
 
 template< typename T >
-const RTTI::Method::Overload array_BugHelper<T>::s_method_Index_overloads[] = {
+const RTTI::Method::Overload ClassID< minitl::array<T> >::s_method_Index_overloads[] = {
     {
         { 0 },
         { 2, s_method_Index_overload_0_params },
-        be_typeid< const T & >::type(),
+        be_type< const T & >(),
         false,
         &trampoline_method_Index_overload_0
     },
     {
         { 0 },
         { 2, s_method_Index_overload_1_params },
-        be_typeid< T & >::type(),
+        be_type< T & >(),
         false,
         &trampoline_method_Index_overload_1
     }
 };
 
 template< typename T >
-const RTTI::ScriptingArrayAPI array_BugHelper<T>::scriptingArrayAPI = {
-    be_typeid<T>::type(),
+const RTTI::ScriptingArrayAPI ClassID< minitl::array<T> >::scriptingArrayAPI = {
+    be_type<T>(),
     &array_size,
     &index,
     &indexConst
 };
 
 template< typename T >
-const RTTI::ScriptingAPI array_BugHelper<T>::scriptingAPI = {
+const RTTI::ScriptingAPI ClassID< minitl::array<T> >::scriptingAPI = {
     {&scriptingArrayAPI}
 };
 
@@ -213,7 +208,7 @@ const RTTI::ScriptingAPI array_BugHelper<T>::scriptingAPI = {
 
 template< typename T >
 BE_EXPORT
-raw<const RTTI::Class> be_typeid< minitl::array<T> >::klass()
+raw<const RTTI::Class> ClassID< minitl::array<T> >::klass()
 {
     /* work around Intel compiler issue
      * internal error: assertion failed: adjust_cleanup_state_for_aggregate_init: NULL dip
@@ -222,17 +217,17 @@ raw<const RTTI::Class> be_typeid< minitl::array<T> >::klass()
     static const RTTI::Method s_methods[3] = {
         {
             istring("array"),
-            { 1, array_BugHelper<T>::s_method_array_overloads },
+            { 1, ClassID< minitl::array<T> >::s_method_array_overloads },
             {&s_methods[0]}
         },
         {
             istring("size"),
-            { 1, array_BugHelper<T>::s_method_size_overloads },
+            { 1, ClassID< minitl::array<T> >::s_method_size_overloads },
             {&s_methods[1]}
         },
         {
             istring("Index"),
-            { 2, array_BugHelper<T>::s_method_Index_overloads },
+            { 2, ClassID< minitl::array<T> >::s_method_Index_overloads },
             {&s_methods[2]}
         }
     };
@@ -242,13 +237,13 @@ raw<const RTTI::Class> be_typeid< minitl::array<T> >::klass()
         0,
         RTTI::ClassType_Array,
         {0},
-        {be_typeid< void >::klass().m_ptr},
+        {be_class< void >().m_ptr},
         {0},
         { 0 },
         { 0, 0 },
         { 3, s_methods },
         {s_methods},
-        {&array_BugHelper<T>::scriptingAPI},
+        {&ClassID< minitl::array<T> >::scriptingAPI},
         &RTTI::wrap< minitl::array<T> >::copy,
         &RTTI::wrap< minitl::array<T> >::destroy
     };
@@ -256,14 +251,7 @@ raw<const RTTI::Class> be_typeid< minitl::array<T> >::klass()
     return result;
 }
 
-template< typename T >
-BE_EXPORT
-RTTI::Type be_typeid< minitl::array<T> >::type()
-{
-    return RTTI::Type::makeType(klass(), RTTI::Type::Value, RTTI::Type::Mutable, RTTI::Type::Mutable);
-}
-
-}
+}}
 
 /**************************************************************************************************/
 #endif

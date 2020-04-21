@@ -63,7 +63,7 @@ static bool convertStringToValue(lua_State *state, int index, const RTTI::Type& 
 
 static bool convertBooleanToValue(lua_State *state, int index, const RTTI::Type& type, void* buffer)
 {
-    if (type.metaclass == be_typeid<bool>::type().metaclass)
+    if (type.metaclass == be_type<bool>().metaclass)
     {
         new (buffer) RTTI::Value(lua_toboolean(state, index)
                                   ? true

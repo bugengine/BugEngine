@@ -881,13 +881,13 @@ FileValue::~FileValue()
 
 RTTI::ConversionCost FileValue::calculateConversion(const RTTI::Type& type) const
 {
-    return be_typeid< weak<const File> >::type().calculateConversion(type);
+    return be_type< weak<const File> >().calculateConversion(type);
 }
 
 RTTI::Value FileValue::as(const RTTI::Type& type) const
 {
     be_assert(calculateConversion(type) < RTTI::ConversionCost::s_incompatible,
-              "invalid conversion from %s to %s" | be_typeid< weak<const File> >::type() | type);
+              "invalid conversion from %s to %s" | be_type< weak<const File> >() | type);
     be_forceuse(type);
     return RTTI::Value(m_value);
 }

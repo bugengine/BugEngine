@@ -8,10 +8,10 @@
 #include    <rtti/engine/helper/method.hh>
 
 
-namespace BugEngine
+namespace BugEngine { namespace RTTI
 {
 
-template< > BE_EXPORT raw<const RTTI::Class> be_typeid< void >::klass()
+template< > BE_EXPORT raw<const RTTI::Class> ClassID< void >::klass()
 {
     static RTTI::Class s_void = { "void", 0, 0, 0, { 0 },{ 0 }, { 0 },
                                   {0}, {0, 0}, {0, 0},
@@ -20,24 +20,24 @@ template< > BE_EXPORT raw<const RTTI::Class> be_typeid< void >::klass()
     return ci;
 }
 
-template< > BE_EXPORT raw<const RTTI::Class> be_typeid< minitl::pointer >::klass()
+template< > BE_EXPORT raw<const RTTI::Class> ClassID< minitl::pointer >::klass()
 {
     static RTTI::Class s_pointer = { "pointer", 0, 0, 0, { 0 },
-                                     {be_typeid< void >::klass().m_ptr}, { 0 },
+                                     {be_class< void >().m_ptr}, { 0 },
                                      {0}, {0, 0}, {0, 0},
                                      {0}, {0}, &RTTI::nullconstructor<0>, &RTTI::nulldestructor };
     raw<RTTI::Class> ci = {&s_pointer};
     return ci;
 }
 
-template< > BE_EXPORT raw<const RTTI::Class> be_typeid< minitl::refcountable >::klass()
+template< > BE_EXPORT raw<const RTTI::Class> ClassID< minitl::refcountable >::klass()
 {
     static RTTI::Class s_refcountable = { "refcountable", 0, 0, 0, { 0 },
-                                          {be_typeid< minitl::pointer >::klass().m_ptr}, { 0 },
+                                          {be_class< minitl::pointer >().m_ptr}, { 0 },
                                           {0}, {0, 0}, {0, 0},
                                           {0}, {0}, &RTTI::nullconstructor<0>, &RTTI::nulldestructor };
     raw<RTTI::Class> ci = {&s_refcountable};
     return ci;
 }
 
-}
+}}

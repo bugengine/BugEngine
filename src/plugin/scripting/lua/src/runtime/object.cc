@@ -73,17 +73,17 @@ extern "C" int valueToString(lua_State *state)
     if (userdata->type().indirection == RTTI::Type::Value)
     {
         raw<const RTTI::Class> metaclass = userdata->type().metaclass;
-        if (metaclass == be_typeid< inamespace >::klass())
+        if (metaclass == be_class< inamespace >())
         {
             lua_pushfstring(state, "%s", userdata->as<const inamespace > ().str().name);
             return 1;
         }
-        if (metaclass == be_typeid< istring >::klass())
+        if (metaclass == be_class< istring >())
         {
             lua_pushfstring(state, "%s", userdata->as<const istring > ().c_str());
             return 1;
         }
-        if (metaclass == be_typeid< ifilename >::klass())
+        if (metaclass == be_class< ifilename >())
         {
             lua_pushfstring(state, "%s", userdata->as<const ifilename > ().str().name);
             return 1;

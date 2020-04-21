@@ -17,6 +17,8 @@ class Windows(Configure.ConfigurationContext.Platform):
         except Exception as e:
             return False
         finally:
+            #if result:
+            #    print(compiler.name(), err)
             node.delete()
             tgtnode.delete()
         return result == 0

@@ -13,7 +13,7 @@ namespace BugEngine { namespace RTTI
 template< typename T >
 bool Type::isA() const
 {
-    return isA(be_typeid<T>::type());
+    return isA(be_type<T>());
 }
 
 }}
