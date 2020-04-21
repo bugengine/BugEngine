@@ -25,16 +25,16 @@ TextPlugin::TextPlugin(const Plugin::Context& pluginContext)
     ,   m_outlineFontManager(scoped<OutlineFontManager>::create(Arena::game(), m_resourceManager, m_freetypeLibrary, m_fontList))
     ,   m_bitmapFontManager(scoped<BitmapFontManager>::create(Arena::game(), m_resourceManager, m_freetypeLibrary, m_fontList))
 {
-    m_resourceManager->attach(be_typeid<Text>::klass(), m_textManager);
-    m_resourceManager->attach(be_typeid<OutlineFont>::klass(), m_outlineFontManager);
-    m_resourceManager->attach(be_typeid<BitmapFont>::klass(), m_bitmapFontManager);
+    m_resourceManager->attach(be_class<Text>(), m_textManager);
+    m_resourceManager->attach(be_class<OutlineFont>(), m_outlineFontManager);
+    m_resourceManager->attach(be_class<BitmapFont>(), m_bitmapFontManager);
 }
 
 TextPlugin::~TextPlugin()
 {
-    m_resourceManager->detach(be_typeid<BitmapFont>::klass(), m_bitmapFontManager);
-    m_resourceManager->detach(be_typeid<OutlineFont>::klass(), m_outlineFontManager);
-    m_resourceManager->detach(be_typeid<Text>::klass(), m_textManager);
+    m_resourceManager->detach(be_class<BitmapFont>(), m_bitmapFontManager);
+    m_resourceManager->detach(be_class<OutlineFont>(), m_outlineFontManager);
+    m_resourceManager->detach(be_class<Text>(), m_textManager);
 }
 
 }

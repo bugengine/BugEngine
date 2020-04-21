@@ -32,7 +32,7 @@ public:
     weak<Task::ITask> updateWorldTask() const;
     template< typename T > void addComponent(Entity e, const T& component)
     {
-        addComponent(e, &component, be_typeid<T>::klass());
+        addComponent(e, &component, be_class<T>());
     }
 published:
     Entity spawn();

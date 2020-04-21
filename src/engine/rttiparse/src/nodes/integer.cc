@@ -21,34 +21,34 @@ Integer::~Integer()
 
 bool Integer::isCompatible(const RTTI::Type& expectedType) const
 {
-    return be_typeid<i8>::type().isA(expectedType)
-        || be_typeid<i16>::type().isA(expectedType)
-        || be_typeid<i32>::type().isA(expectedType)
-        || be_typeid<i64>::type().isA(expectedType)
-        || be_typeid<u8>::type().isA(expectedType)
-        || be_typeid<u16>::type().isA(expectedType)
-        || be_typeid<u32>::type().isA(expectedType)
-        || be_typeid<u64>::type().isA(expectedType);
+    return be_type<i8>().isA(expectedType)
+        || be_type<i16>().isA(expectedType)
+        || be_type<i32>().isA(expectedType)
+        || be_type<i64>().isA(expectedType)
+        || be_type<u8>().isA(expectedType)
+        || be_type<u16>().isA(expectedType)
+        || be_type<u32>().isA(expectedType)
+        || be_type<u64>().isA(expectedType);
 }
 
 void Integer::doEval(const RTTI::Type& expectedType, RTTI::Value& result) const
 {
     be_assert(isCompatible(expectedType), "invalid conversion from int to %s" | expectedType);
-    if (be_typeid<i8>::type().isA(expectedType))
+    if (be_type<i8>().isA(expectedType))
         result = RTTI::Value(be_checked_numcast<i8>(m_value));
-    else if (be_typeid<i16>::type().isA(expectedType))
+    else if (be_type<i16>().isA(expectedType))
         result = RTTI::Value(be_checked_numcast<i16>(m_value));
-    else if (be_typeid<i32>::type().isA(expectedType))
+    else if (be_type<i32>().isA(expectedType))
         result = RTTI::Value(be_checked_numcast<i32>(m_value));
-    else if (be_typeid<i64>::type().isA(expectedType))
+    else if (be_type<i64>().isA(expectedType))
         result = RTTI::Value(be_checked_numcast<i64>(m_value));
-    else if (be_typeid<u8>::type().isA(expectedType))
+    else if (be_type<u8>().isA(expectedType))
         result = RTTI::Value(be_checked_numcast<u8>(m_value));
-    else if (be_typeid<u16>::type().isA(expectedType))
+    else if (be_type<u16>().isA(expectedType))
         result = RTTI::Value(be_checked_numcast<u16>(m_value));
-    else if (be_typeid<u32>::type().isA(expectedType))
+    else if (be_type<u32>().isA(expectedType))
         result = RTTI::Value(be_checked_numcast<u32>(m_value));
-    else if (be_typeid<u64>::type().isA(expectedType))
+    else if (be_type<u64>().isA(expectedType))
         result = RTTI::Value(be_checked_numcast<u64>(m_value));
 }
 

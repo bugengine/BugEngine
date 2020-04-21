@@ -55,7 +55,7 @@ RTTI::Type PythonTypeInfo::getTypeFromPyObject(PyObject* object)
     }
     else
     {
-        return be_typeid<void>::type();
+        return be_type<void>();
     }
 }
 

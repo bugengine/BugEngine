@@ -21,7 +21,7 @@ Bool::~Bool()
 
 bool Bool::isCompatible(const Type &expectedType) const
 {
-    return be_typeid<bool>::type().isA(expectedType);
+    return be_type<bool>().isA(expectedType);
 }
 
 void Bool::doEval(const RTTI::Type& expectedType, Value& result) const

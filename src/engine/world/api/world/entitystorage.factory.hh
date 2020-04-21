@@ -100,33 +100,23 @@ RTTI::Property* EntityStorage_BugHelper<STORAGE>::s_properties = reinterpret_cas
 
 }}
 
-namespace BugEngine
+namespace BugEngine { namespace RTTI
 {
 
 template< typename COMPONENT_LIST, typename PARTITION_LIST >
-struct be_typeid< World::EntityStorageFactory<COMPONENT_LIST, PARTITION_LIST> >
+struct ClassID< World::EntityStorageFactory<COMPONENT_LIST, PARTITION_LIST> >
 {
-    static inline RTTI::Type  type()
-    {
-        return RTTI::Type::makeType(klass(), RTTI::Type::Value,
-                                    RTTI::Type::Mutable, RTTI::Type::Mutable);
-    }
-    static BE_EXPORT istring name()
-    {
-        static istring s_name("EntityStorageFactory");
-        return s_name;
-    }
     static BE_EXPORT raw<const RTTI::Class> klass()
     {
         typedef World::EntityStorage_BugHelper<World::EntityStorageFactory<COMPONENT_LIST, PARTITION_LIST> > Helper;
         static const RTTI::Class s_class =
         {
-            name(),
+            istring("EntityStorageFactory"),
             0,
             0,
             RTTI::ClassType_Object,
             {0},
-            {be_typeid<BugEngine::World::EntityStorage>::klass().m_ptr},
+            {be_class<BugEngine::World::EntityStorage>().m_ptr},
             {0},
             {0},
             { Helper::PropertyCount, Helper::s_properties },
@@ -146,10 +136,10 @@ struct be_typeid< World::EntityStorageFactory<COMPONENT_LIST, PARTITION_LIST> >
 
 template< typename COMPONENT_LIST, typename PARTITION_LIST >
 BE_EXPORT
-bool be_typeid< World::EntityStorageFactory<COMPONENT_LIST, PARTITION_LIST> >::s_propertiesSet =
-            World::EntityStorage_BugHelper<World::EntityStorageFactory<COMPONENT_LIST, PARTITION_LIST> >::getProperties();
+bool ClassID< World::EntityStorageFactory<COMPONENT_LIST, PARTITION_LIST> >::s_propertiesSet =
+              World::EntityStorage_BugHelper<World::EntityStorageFactory<COMPONENT_LIST, PARTITION_LIST> >::getProperties();
 
-}
+}}
 
 /**************************************************************************************************/
 #endif

@@ -72,7 +72,7 @@ RTTI::Type Reference::getType() const
             if (!p)
             {
                 be_notreached();
-                return be_typeid<void>::type();
+                return be_type<void>();
             }
             t = p->type;
         }
@@ -81,7 +81,7 @@ RTTI::Type Reference::getType() const
     else
     {
         be_notreached();
-        return be_typeid<void>::type();
+        return be_type<void>();
     }
 }
 

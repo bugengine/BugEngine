@@ -71,7 +71,7 @@ static Value createPod(Value* params, u32 paramCount)
     be_forceuse(params);
     be_forceuse(paramCount);
     be_assert(paramCount == 0, "too many parameters to POD construction");
-    return Value(be_typeid<T>::type(), Value::Reserve);
+    return Value(be_type<T>(), Value::Reserve);
 }
 
 

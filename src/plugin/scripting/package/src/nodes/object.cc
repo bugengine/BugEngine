@@ -41,7 +41,7 @@ void Object::setMethod(ref<Reference> reference)
         RTTI::Value call = v[callName];
         if (call)
         {
-            if (call.isA(be_typeid<raw<const RTTI::Method> const>::type()))
+            if (call.isA(be_type<raw<const RTTI::Method> const>()))
             {
                 m_method = call.as<raw<const RTTI::Method> const>();
                 if (m_method)
@@ -94,7 +94,7 @@ RTTI::Type Object::getType() const
 {
     if (m_overloads.empty())
     {
-        return be_typeid<void>::type();
+        return be_type<void>();
     }
     else
     {

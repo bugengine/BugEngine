@@ -13,14 +13,14 @@ namespace BugEngine { namespace RTTI
 {
 
 Value::Value()
-:   m_type(be_typeid<void>::type())
+:   m_type(be_type<void>())
 ,   m_reference(false)
 {
 }
 
 template< typename T >
 Value::Value(T t)
-:   m_type(be_typeid<T>::type())
+:   m_type(be_type<T>())
 ,   m_reference(false)
 {
     store(&t);
@@ -28,7 +28,7 @@ Value::Value(T t)
 
 template< typename T >
 Value::Value(T t, MakeConstType /*constify*/)
-:   m_type(Type::makeType(be_typeid<T>::type(), Type::MakeConst))
+:   m_type(Type::makeType(be_type<T>(), Type::MakeConst))
 ,   m_reference(false)
 {
     store(&t);
@@ -36,7 +36,7 @@ Value::Value(T t, MakeConstType /*constify*/)
 
 template< typename T >
 Value::Value(ByRefType<T> t)
-:   m_type(be_typeid<T>::type())
+:   m_type(be_type<T>())
 ,   m_reference(true)
 {
     m_ref.m_pointer = const_cast<void*>((const void*)&t.value);
@@ -66,7 +66,7 @@ Value& Value::operator=(const T& t)
 {
     if (m_reference)
     {
-        be_assert_recover(m_type.isA(be_typeid<T>::type()), "Value has type %s; unable to copy from type %s" | m_type | be_typeid<T>::type(), return *this);
+        be_assert_recover(m_type.isA(be_type<T>()), "Value has type %s; unable to copy from type %s" | m_type | be_type<T>(), return *this);
         be_assert_recover(m_type.constness != Type::Const, "Value is const", return *this);
         void* mem = memory();
         m_type.destroy(mem);
@@ -101,7 +101,7 @@ template< typename T >
 T Value::as()
 {
     typedef typename minitl::remove_reference<T>::type REALTYPE;
-    Type ti = be_typeid<T>::type();
+    Type ti = be_type<T>();
     ref<minitl::refcountable>   rptr;
     weak<minitl::refcountable>  wptr;
     minitl::refcountable*       obj;
@@ -151,12 +151,12 @@ bool Value::isConst() const
 
 Value::operator const void*() const
 {
-    return (const void*)(m_type.metaclass != be_typeid<void>::klass());
+    return (const void*)(m_type.metaclass != be_class<void>());
 }
 
 bool Value::operator!() const
 {
-    return m_type.metaclass == be_typeid<void>::klass();
+    return m_type.metaclass == be_class<void>();
 }
 
 void* Value::rawget() const

@@ -52,7 +52,7 @@ void Object::doEval(const Type &expectedType, Value &result) const
 
 Type Object::getType() const
 {
-    return be_typeid<void>::type();
+    return be_type<void>();
 }
 
 }}}

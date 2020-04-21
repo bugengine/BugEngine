@@ -8,41 +8,46 @@
 #include    <rtti/typeinfo.script.hh>
 #include    <minitl/typemanipulation.hh>
 
-namespace BugEngine
+
+namespace BugEngine { namespace RTTI
 {
 
-namespace RTTI
+struct Class;
+struct Property;
+struct Method;
+
+}}
+
+template< typename T > static inline BugEngine::RTTI::Type be_type();
+template< typename T > static inline raw<const BugEngine::RTTI::Class> be_class();
+
+namespace BugEngine { namespace RTTI
 {
-    struct Class;
-    struct Property;
-    struct Method;
-}
 
 template< typename T >
-struct be_typeid
+struct ClassID
 {
-    template< typename U > friend struct be_typeid;
-public:
     static BE_EXPORT raw<const RTTI::Class> klass();
-    static BE_EXPORT RTTI::Type  type();
-    static BE_EXPORT istring name();
 };
 
 template< typename T >
-RTTI::Type be_typeid<T>::type()
+struct TypeID
 {
-    return RTTI::Type::makeType(klass(),
-                                RTTI::Type::Value,
-                                RTTI::Type::Mutable,
-                                RTTI::Type::Mutable);
-}
+    static inline RTTI::Type type()
+    {
+        return RTTI::Type::makeType(ClassID<T>::klass(),
+                                    RTTI::Type::Value,
+                                    RTTI::Type::Mutable,
+                                    RTTI::Type::Mutable);
+    }
+};
 
 template< typename T >
-struct be_typeid<const T> : public be_typeid<T>
+struct TypeID<const T> : public TypeID<T>
 {
     static inline RTTI::Type  type()
     {
-        return RTTI::Type::makeType(be_typeid<T>::klass(),
+        return RTTI::Type::makeType(TypeID<T>::type().metaclass,
                                     RTTI::Type::Value,
                                     RTTI::Type::Const,
                                     RTTI::Type::Const);
@@ -50,11 +55,11 @@ struct be_typeid<const T> : public be_typeid<T>
 };
 
 template< typename T >
-struct be_typeid< T& >
+struct TypeID< T& >
 {
     static inline RTTI::Type  type()
     {
-        RTTI::Type t = be_typeid<T>::type();
+        RTTI::Type t = TypeID<T>::type();
         t.access = RTTI::Type::Mutable;
         t.constness = RTTI::Type::Const;
         return t;
@@ -62,22 +67,22 @@ struct be_typeid< T& >
 };
 
 template< typename T >
-struct be_typeid< const T& >
+struct TypeID< const T& >
 {
     static inline RTTI::Type  type()
     {
-        RTTI::Type t = be_typeid<T>::type();
+        RTTI::Type t = TypeID<T>::type();
         t.access = RTTI::Type::Const;
         return t;
     }
 };
 
 template< typename T >
-struct be_typeid< ref<T> >
+struct TypeID< ref<T> >
 {
     static inline RTTI::Type  type()
     {
-        return RTTI::Type::makeType(be_typeid<T>::klass(),
+        return RTTI::Type::makeType(TypeID<T>::type().metaclass,
                                     RTTI::Type::RefPtr,
                                     minitl::is_const<T>::Value
                                         ?   RTTI::Type::Const
@@ -86,11 +91,11 @@ struct be_typeid< ref<T> >
 };
 
 template< typename T >
-struct be_typeid< weak<T> >
+struct TypeID< weak<T> >
 {
     static inline RTTI::Type  type()
     {
-        return RTTI::Type::makeType(be_typeid<T>::klass(),
+        return RTTI::Type::makeType(TypeID<T>::type().metaclass,
                                     RTTI::Type::WeakPtr,
                                     minitl::is_const<T>::Value
                                         ?   RTTI::Type::Const
@@ -100,11 +105,11 @@ struct be_typeid< weak<T> >
 };
 
 template< typename T >
-struct be_typeid< raw<T> >
+struct TypeID< raw<T> >
 {
     static inline RTTI::Type  type()
     {
-        return RTTI::Type::makeType(be_typeid<T>::klass(),
+        return RTTI::Type::makeType(TypeID<T>::type().metaclass,
                                     RTTI::Type::RawPtr,
                                     minitl::is_const<T>::Value
                                         ?   RTTI::Type::Const
@@ -114,11 +119,11 @@ struct be_typeid< raw<T> >
 };
 
 template< typename T >
-struct be_typeid< T* >
+struct TypeID< T* >
 {
     static inline RTTI::Type  type()
     {
-        return RTTI::Type::makeType(be_typeid<T>::klass(),
+        return RTTI::Type::makeType(TypeID<T>::type().metaclass,
                                     RTTI::Type::RawPtr,
                                     minitl::is_const<T>::Value
                                         ?   RTTI::Type::Const
@@ -129,11 +134,11 @@ struct be_typeid< T* >
 
 
 template< typename T >
-struct be_typeid< ref<T> const >
+struct TypeID< ref<T> const >
 {
     static inline RTTI::Type  type()
     {
-        return RTTI::Type::makeType(be_typeid<T>::klass(),
+        return RTTI::Type::makeType(TypeID<T>::type().metaclass,
                                     RTTI::Type::RefPtr,
                                     minitl::is_const<T>::Value
                                         ?   RTTI::Type::Const
@@ -143,11 +148,11 @@ struct be_typeid< ref<T> const >
 };
 
 template< typename T >
-struct be_typeid< weak<T> const >
+struct TypeID< weak<T> const >
 {
     static inline RTTI::Type  type()
     {
-        return RTTI::Type::makeType(be_typeid<T>::klass(),
+        return RTTI::Type::makeType(TypeID<T>::type().metaclass,
                                     RTTI::Type::WeakPtr,
                                     minitl::is_const<T>::Value
                                         ?   RTTI::Type::Const
@@ -157,11 +162,11 @@ struct be_typeid< weak<T> const >
 };
 
 template< typename T >
-struct be_typeid< raw<T> const >
+struct TypeID< raw<T> const >
 {
     static inline RTTI::Type  type()
     {
-        return RTTI::Type::makeType(be_typeid<T>::klass(),
+        return RTTI::Type::makeType(TypeID<T>::type().metaclass,
                                     RTTI::Type::RawPtr,
                                     minitl::is_const<T>::Value
                                         ?   RTTI::Type::Const
@@ -171,11 +176,11 @@ struct be_typeid< raw<T> const >
 };
 
 template< typename T >
-struct be_typeid< T* const >
+struct TypeID< T* const >
 {
     static inline RTTI::Type  type()
     {
-        return RTTI::Type::makeType(be_typeid<T>::klass(),
+        return RTTI::Type::makeType(TypeID<T>::type().metaclass,
                                     RTTI::Type::RawPtr,
                                     minitl::is_const<T>::Value
                                         ?   RTTI::Type::Const
@@ -185,12 +190,20 @@ struct be_typeid< T* const >
 };
 
 template< typename T >
-struct be_typeid< scoped<T> >
+struct TypeID< scoped<T> >
 {
 };
 
-template< > BE_EXPORT raw<const RTTI::Class> be_typeid< void >::klass();
+}}
 
+template< typename T > static inline BugEngine::RTTI::Type be_type()
+{
+    return BugEngine::RTTI::TypeID<T>::type();
+}
+
+template< typename T > static inline raw<const BugEngine::RTTI::Class> be_class()
+{
+    return BugEngine::RTTI::ClassID<T>::klass();
 }
 
 /**************************************************************************************************/

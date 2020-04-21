@@ -21,7 +21,7 @@ Float2::~Float2()
 
 bool Float2::isCompatible(const RTTI::Type& expectedType) const
 {
-    return be_typeid<float2>::type().isA(expectedType);
+    return be_type<float2>().isA(expectedType);
 }
 
 void Float2::doEval(const RTTI::Type& expectedType, RTTI::Value& result) const

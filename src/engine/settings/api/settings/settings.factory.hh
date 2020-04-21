@@ -44,7 +44,7 @@ private:
     static BE_EXPORT T& getStaticSettings() { static T s_settings; return s_settings; }
 protected:
     Settings()
-        :   SettingsBase(be_typeid<T>::klass())
+        :   SettingsBase(be_class<T>())
     {
         (void)s_registration;
     }
@@ -63,12 +63,14 @@ namespace BugEngine
 
 BE_EXPORT raw<RTTI::Class> be_bugengine_Namespace_BugEngine_Settings();
 
+namespace RTTI
+{
 template< typename T >
-struct be_typeid< Settings::Settings<T> >
+struct ClassID< Settings::Settings<T> >
 {
     static BE_EXPORT raw<const RTTI::Class> klass();
-    static BE_EXPORT RTTI::Type  type();
 };
+}
 
 
 namespace Settings
@@ -95,7 +97,7 @@ const RTTI::Method::Overload Settings_BugHelper<T>::s_method_get_overloads[] = {
     {
         { 0 },
         { 0, 0 },
-        be_typeid< T& >::type(),
+        be_type< T& >(),
         false,
         &trampoline_method_get_overload_0
     }
@@ -112,19 +114,18 @@ const RTTI::Method Settings_BugHelper<T>::s_methods[1] = {
 
 }
 
-
 template< typename T >
 BE_EXPORT
-raw<const RTTI::Class> be_typeid< Settings::Settings<T> >::klass()
+raw<const RTTI::Class> RTTI::ClassID< Settings::Settings<T> >::klass()
 {
     static const RTTI::Class s_class =
     {
-        istring(minitl::format<1024u>("Settings<%s>") | be_typeid<T>::name()),
+        istring(minitl::format<1024u>("Settings<%s>") | be_class<T>()->name),
         0,
         0,
         RTTI::ClassType_Struct,
         {be_bugengine_Namespace_BugEngine_Settings().m_ptr},
-        be_typeid<void>::klass(),
+        be_class<void>(),
         {0},
         {0},
         {0, 0},
@@ -138,14 +139,6 @@ raw<const RTTI::Class> be_typeid< Settings::Settings<T> >::klass()
     raw< const RTTI::Class > result = { &s_class };
     return result;
 }
-
-template< typename T >
-BE_EXPORT
-RTTI::Type be_typeid< Settings::Settings<T> >::type()
-{
-    return RTTI::Type::makeType(klass(), RTTI::Type::Value, RTTI::Type::Mutable, RTTI::Type::Mutable);
-}
-
 
 }
 

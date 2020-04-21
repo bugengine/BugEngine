@@ -93,7 +93,7 @@ template< typename T >
 PyTypeObject PyBugNumber<T>::s_pyType =
 {
     { { 0, 0 }, 0 },
-    istring(minitl::format<128u>("py_bugengine.%s") | be_typeid<T>::type().metaclass->name).c_str(),
+    istring(minitl::format<128u>("py_bugengine.%s") | be_type<T>().metaclass->name).c_str(),
     sizeof(PyBugNumber<T>),
     0,
     &PyBugNumber<T>::dealloc,
@@ -147,8 +147,8 @@ PyObject* PyBugNumber<T>::stealValue(PyObject* owner, RTTI::Value& value)
 {
     be_assert(value.type().metaclass->type() == RTTI::ClassType_Number,
               "PyBugNumber only accepts Number types");
-    be_assert(value.type().metaclass->index() == be_typeid<T>::type().metaclass->index(),
-              "expected %s; got %s" | be_typeid<T>::type().metaclass->name
+    be_assert(value.type().metaclass->index() == be_type<T>().metaclass->index(),
+              "expected %s; got %s" | be_type<T>().metaclass->name
                                     | value.type().metaclass->name);
     PyObject* result = s_pyType.tp_alloc(&s_pyType, 0);
     static_cast<PyBugNumber*>(result)->owner = owner;
@@ -193,7 +193,7 @@ int PyBugNumber<T>::init(PyObject* self, PyObject* args, PyObject* kwds)
         {
             s_library->m_PyErr_Format(*s_library->m_PyExc_TypeError, "Cannot convert from %s to %s",
                                       arg->py_type->tp_name,
-                                      be_typeid<T>::type().metaclass->name.c_str());
+                                      be_type<T>().metaclass->name.c_str());
             return -1;
         }
     }
@@ -282,7 +282,7 @@ void PyBugNumber<T>::registerType(PyObject* module)
     be_assert(result >= 0, "unable to register type");
     Py_INCREF(&s_pyType);
     result = (*s_library->m_PyModule_AddObject)(module,
-                                                be_typeid<T>::type().metaclass->name.c_str(),
+                                                be_type<T>().metaclass->name.c_str(),
                                                 (PyObject*)&s_pyType);
     be_assert(result >= 0, "unable to register type");
     be_forceuse(result);

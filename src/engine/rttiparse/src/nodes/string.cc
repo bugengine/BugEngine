@@ -20,16 +20,16 @@ String::~String()
 
 bool String::isCompatible(const RTTI::Type& expectedType) const
 {
-    return be_typeid<istring>::type().isA(expectedType)
-        || be_typeid<inamespace>::type().isA(expectedType);
+    return be_type<istring>().isA(expectedType)
+        || be_type<inamespace>().isA(expectedType);
 }
 
 void String::doEval(const RTTI::Type& expectedType, Value& result) const
 {
     be_assert(isCompatible(expectedType), "invalid conversion from string to %s" | expectedType);
-    if (be_typeid< istring >::type().isA(expectedType))
+    if (be_type< istring >().isA(expectedType))
         result = RTTI::Value(istring(m_value));
-    else if (be_typeid< inamespace >::type().isA(expectedType))
+    else if (be_type< inamespace >().isA(expectedType))
         result = RTTI::Value(inamespace(m_value));
 }
 }}}

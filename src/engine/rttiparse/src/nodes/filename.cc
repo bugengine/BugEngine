@@ -34,13 +34,13 @@ bool FileName::resolve(DbContext &context)
 
 bool FileName::isCompatible(const Type &expectedType) const
 {
-    return be_typeid< weak<const File> >::type().isA(expectedType);
+    return be_type< weak<const File> >().isA(expectedType);
 }
 
 void FileName::doEval(const Type& expectedType, Value& result) const
 {
     be_assert(isCompatible(expectedType), "invalid conversion from %s to %s"
-            | be_typeid< weak<const File> >::type()
+            | be_type< weak<const File> >()
             | expectedType);
     be_forceuse(expectedType);
     result = RTTI::Value(m_file);

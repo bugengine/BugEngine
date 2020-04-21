@@ -13,27 +13,19 @@
 #include    <rtti/engine/scriptingapi.hh>
 
 
-namespace BugEngine
+namespace BugEngine { namespace RTTI
 {
 
 template< typename T, u32 Count >
-struct be_typeid< T[Count] >
+struct ClassID< T[Count] >
 {
     static BE_EXPORT raw<const RTTI::Class> klass();
-    static RTTI::Type  type()
-    {
-        return RTTI::Type::makeType(klass(), RTTI::Type::Value, RTTI::Type::Mutable, RTTI::Type::Mutable);
-    }
 };
 
 template< typename T, u32 Count >
-struct be_typeid< const T[Count] >
+struct ClassID< const T[Count] >
 {
     static BE_EXPORT raw<const RTTI::Class> klass();
-    static RTTI::Type  type()
-    {
-        return RTTI::Type::makeType(klass(), RTTI::Type::Value, RTTI::Type::Mutable, RTTI::Type::Mutable);
-    }
 };
 
 
@@ -61,7 +53,7 @@ struct carray_BugHelper
 };
 
 template< typename T, u32 Count >
-const RTTI::Type carray_BugHelper<T, Count>::value_type = be_typeid<T>::type();
+const RTTI::Type carray_BugHelper<T, Count>::value_type = be_type<T>();
 
 template< typename T, u32 Count >
 u32 carray_BugHelper<T, Count>::array_size(const RTTI::Value& v)
@@ -124,7 +116,7 @@ const RTTI::Method::Parameter carray_BugHelper<T, Count>::s_method_size_overload
     {
         { 0 },
         istring("this"),
-        be_typeid< const ArrayType& >::type(),
+        be_type< const ArrayType& >(),
         {&RTTI::Method::Parameter::s_noDefaultValue}
     }
 };
@@ -134,7 +126,7 @@ const RTTI::Method::Overload carray_BugHelper<T, Count>::s_method_size_overloads
     {
         { 0 },
         { 1, s_method_size_overload_0_params },
-        be_typeid< u32 >::type(),
+        be_type< u32 >(),
         false,
         &trampoline_method_size_overload_0
     }
@@ -145,13 +137,13 @@ const RTTI::Method::Parameter carray_BugHelper<T, Count>::s_method_Index_overloa
     {
         { 0 },
         istring("this"),
-        be_typeid< const ArrayType& >::type(),
+        be_type< const ArrayType& >(),
         {&RTTI::Method::Parameter::s_noDefaultValue}
     },
     {
         { 0 },
         istring("index"),
-        be_typeid< u32  >::type(),
+        be_type< u32  >(),
         {&RTTI::Method::Parameter::s_noDefaultValue}
     }
 };
@@ -161,13 +153,13 @@ const RTTI::Method::Parameter carray_BugHelper<T, Count>::s_method_Index_overloa
     {
         { 0 },
         istring("this"),
-        be_typeid< ArrayType& >::type(),
+        be_type< ArrayType& >(),
         {&RTTI::Method::Parameter::s_noDefaultValue}
     },
     {
         { 0 },
         istring("index"),
-        be_typeid< u32  >::type(),
+        be_type< u32  >(),
         {&RTTI::Method::Parameter::s_noDefaultValue}
     }
 };
@@ -177,14 +169,14 @@ const RTTI::Method::Overload carray_BugHelper<T, Count>::s_method_Index_overload
     {
         { 0 },
         { 2, s_method_Index_overload_0_params },
-        be_typeid< const T & >::type(),
+        be_type< const T & >(),
         false,
         &trampoline_method_Index_overload_0
     },
     {
         { 0 },
         { 2, s_method_Index_overload_1_params },
-        be_typeid< T & >::type(),
+        be_type< T & >(),
         false,
         &trampoline_method_Index_overload_1
     }
@@ -192,7 +184,7 @@ const RTTI::Method::Overload carray_BugHelper<T, Count>::s_method_Index_overload
 
 template< typename T, u32 Count >
 const RTTI::ScriptingArrayAPI carray_BugHelper<T, Count>::scriptingArrayAPI = {
-    be_typeid<T>::type(),
+    be_type<T>(),
     &array_size,
     &index,
     &indexConst
@@ -207,7 +199,7 @@ const RTTI::ScriptingAPI carray_BugHelper<T, Count>::scriptingAPI = {
 
 template< typename T, u32 Count >
 BE_EXPORT
-raw<const RTTI::Class> be_typeid< T[Count] >::klass()
+raw<const RTTI::Class> ClassID< T[Count] >::klass()
 {
     /* work around Intel compiler issue
      * internal error: assertion failed: adjust_cleanup_state_for_aggregate_init: NULL dip
@@ -231,7 +223,7 @@ raw<const RTTI::Class> be_typeid< T[Count] >::klass()
         0,
         RTTI::ClassType_Array,
         {0},
-        {be_typeid< void >::klass().m_ptr},
+        {be_class< void >().m_ptr},
         {0},
         { 0 },
         { 0, 0 },
@@ -247,7 +239,7 @@ raw<const RTTI::Class> be_typeid< T[Count] >::klass()
 
 template< typename T, u32 Count >
 BE_EXPORT
-raw<const RTTI::Class> be_typeid< const T[Count] >::klass()
+raw<const RTTI::Class> ClassID< const T[Count] >::klass()
 {
     /* work around Intel compiler issue
      * internal error: assertion failed: adjust_cleanup_state_for_aggregate_init: NULL dip
@@ -271,7 +263,7 @@ raw<const RTTI::Class> be_typeid< const T[Count] >::klass()
         0,
         RTTI::ClassType_Array,
         {0},
-        {be_typeid< void >::klass().m_ptr},
+        {be_class< void >().m_ptr},
         {0},
         { 0 },
         { 0, 0 },
@@ -285,7 +277,7 @@ raw<const RTTI::Class> be_typeid< const T[Count] >::klass()
     return result;
 }
 
-}
+}}
 
 /**************************************************************************************************/
 #endif

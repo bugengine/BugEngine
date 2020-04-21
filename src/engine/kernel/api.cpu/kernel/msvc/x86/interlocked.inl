@@ -134,9 +134,9 @@ struct InterlockedType<4>
             mov         eax, [ecx]
             mov         edx, [ecx+4]
             mov         esi, p
+            mov         ecx, v
             mov         ebx, eax
             inc         ebx
-            mov         ecx, v
             // lock        cmpxch8b esi;
             _emit 0xF0
             _emit 0x0F

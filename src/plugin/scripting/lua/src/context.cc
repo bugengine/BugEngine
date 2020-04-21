@@ -24,7 +24,7 @@ namespace Lua
 {
 
 static ref<Logger> s_logger(Logger::instance("scripting.lua"));
-static const raw<const RTTI::Class> s_voidClass = be_typeid<void>::klass();
+static const raw<const RTTI::Class> s_voidClass = be_class<void>();
 
 static const char* s_metaTables[] = {
     "BugEngine.Object",

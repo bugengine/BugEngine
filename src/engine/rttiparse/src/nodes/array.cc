@@ -43,12 +43,12 @@ bool Array::isCompatible(const Type &expectedType) const
         {
             be_error("type %s does not have a %s property" | expectedType.name() | value_type);
         }
-        else if (!o->value.type().isA(be_typeid<const RTTI::Type>::type()))
+        else if (!o->value.type().isA(be_type<const RTTI::Type>()))
         {
             be_error("type %s, property %s does not have the right type; expected %s, got %s"
                    | expectedType.name()
                    | value_type
-                   | be_typeid<const RTTI::Type>::type().name()
+                   | be_type<const RTTI::Type>().name()
                    | o->value.type().name());
         }
         else

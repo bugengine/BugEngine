@@ -56,12 +56,12 @@ public:
     void load(raw<const RTTI::Class> classinfo, weak<const Description> resource);
     void unload(raw<const RTTI::Class> classinfo, weak<const Description> resource);
 
-    template< typename T > void attach(weak<ILoader> loader)        { attach(be_typeid<T>::klass(), loader); }
-    template< typename T > void detach(weak<const ILoader> loader)  { detach(be_typeid<T>::klass(), loader); }
-    template< typename T > void load(weak<const T> resource)        { load(be_typeid<T>::klass(), resource); }
-    template< typename T > void load(ref<const T> resource)         { load(be_typeid<T>::klass(), resource); }
-    template< typename T > void unload(weak<const T> resource)      { unload(be_typeid<T>::klass(), resource); }
-    template< typename T > void unload(ref<const T> resource)       { unload(be_typeid<T>::klass(), resource); }
+    template< typename T > void attach(weak<ILoader> loader)        { attach(be_class<T>(), loader); }
+    template< typename T > void detach(weak<const ILoader> loader)  { detach(be_class<T>(), loader); }
+    template< typename T > void load(weak<const T> resource)        { load(be_class<T>(), resource); }
+    template< typename T > void load(ref<const T> resource)         { load(be_class<T>(), resource); }
+    template< typename T > void unload(weak<const T> resource)      { unload(be_class<T>(), resource); }
+    template< typename T > void unload(ref<const T> resource)       { unload(be_class<T>(), resource); }
 
     void addTicket(weak<ILoader> loader, weak<const Description> description, weak<const File> file,
                    ILoader::FileType fileType, ILoader::LoadType loadType);

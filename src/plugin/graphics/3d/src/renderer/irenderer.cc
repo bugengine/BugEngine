@@ -24,9 +24,9 @@ IRenderer::IRenderer(minitl::Allocator& allocator, weak<Resource::ResourceManage
     //,   m_kernelSort(scoped<Kernel::KernelDescription>::create(Arena::task(), "graphics.3d.batchsort"))
     //,   m_kernelRender(scoped<Kernel::KernelDescription>::create(Arena::task(), "graphics.3d.batchrender"))
 {
-    m_resourceManager->attach(be_typeid<RenderSurfaceDescription>::klass(), m_renderSurfaceLoader);
-    m_resourceManager->attach(be_typeid<RenderWindowDescription>::klass(), m_renderWindowLoader);
-    m_resourceManager->attach(be_typeid<ShaderProgramDescription>::klass(), m_shaderProgramLoader);
+    m_resourceManager->attach(be_class<RenderSurfaceDescription>(), m_renderSurfaceLoader);
+    m_resourceManager->attach(be_class<RenderWindowDescription>(), m_renderWindowLoader);
+    m_resourceManager->attach(be_class<ShaderProgramDescription>(), m_shaderProgramLoader);
     //m_resourceManager->load(weak<Kernel::KernelDescription>(m_kernelSort));
     //m_resourceManager->load(weak<Kernel::KernelDescription>(m_kernelRender));
 }
@@ -35,9 +35,9 @@ IRenderer::~IRenderer()
 {
     //m_resourceManager->unload(weak<Kernel::KernelDescription>(m_kernelRender));
     //m_resourceManager->unload(weak<Kernel::KernelDescription>(m_kernelSort));
-    m_resourceManager->detach(be_typeid<ShaderProgramDescription>::klass(), m_shaderProgramLoader);
-    m_resourceManager->detach(be_typeid<RenderWindowDescription>::klass(), m_renderWindowLoader);
-    m_resourceManager->detach(be_typeid<RenderSurfaceDescription>::klass(), m_renderSurfaceLoader);
+    m_resourceManager->detach(be_class<ShaderProgramDescription>(), m_shaderProgramLoader);
+    m_resourceManager->detach(be_class<RenderWindowDescription>(), m_renderWindowLoader);
+    m_resourceManager->detach(be_class<RenderSurfaceDescription>(), m_renderSurfaceLoader);
 }
 
 weak<Task::ITask> IRenderer::syncTask() const
