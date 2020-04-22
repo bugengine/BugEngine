@@ -143,6 +143,11 @@ class Windows_GCC(Windows):
         env.cshlib_PATTERN      = '%s.dll'
         env.cxxshlib_PATTERN      = '%s.dll'
         env.implib_PATTERN = '%s.dll.a'
+        for option in ('-fpic', '-fPIC'):
+            try: env.CFLAGS_cshlib.remove(option)
+            except ValueError: pass
+            try: env.CXXFLAGS_cxxshlib.remove(option)
+            except ValueError: pass
 
 
 class Windows_MSVC(Windows):
