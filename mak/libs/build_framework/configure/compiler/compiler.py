@@ -67,6 +67,7 @@ class Compiler:
         self.arch = self.to_target_arch(arch)
         self.arch_name = self.arch
         self.siblings = [self]
+        self.extra_env = extra_env
         self.env = os.environ.copy()
         for env_name, env_value in extra_env.items():
             self.env[env_name] = env_value
@@ -116,7 +117,7 @@ class Compiler:
 
     def sort_name(self):
         compiler_name = self.NAMES[0].lower()
-        return self.arch, compiler_name, self.version_number, self.arch_name, self.platform
+        return self.arch, compiler_name, self.version_number, self.arch_name, self.platform_name
 
     def name(self):
         compiler_name = self.NAMES[0]
@@ -126,6 +127,13 @@ class Compiler:
         return []
 
     def load_in_env(self, conf, platform):
+        extra_env = list(self.extra_env.items())
+        conf.env.c_env = extra_env
+        conf.env.cxx_env = extra_env
+        conf.env.cshlib_env = extra_env
+        conf.env.cxxshlib_env = extra_env
+        conf.env.cprogram_env = extra_env
+        conf.env.cxxprogram_env = extra_env
         conf.env.append_unique('TARGETS', list(self.targets) + [self.target])
         conf.env.append_unique('CPPFLAGS', self.extra_args.get('c', []))
         conf.env.append_unique('CFLAGS', self.extra_args.get('c', []))

@@ -20,7 +20,7 @@ public:
     void refresh(u64 size, time_t modifiedTime);
 private:
     virtual void doFillBuffer(weak<File::Ticket> ticket) const override;
-    virtual void doWriteBuffer(weak<Ticket> ticket) const;
+    virtual void doWriteBuffer(weak<Ticket> ticket) const override;
 };
 
 }
