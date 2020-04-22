@@ -306,6 +306,14 @@
    /* If building or using zlib as a DLL, define ZLIB_DLL.
     * This is not mandatory, but it offers a little performance increase.
     */
+#  if defined(_MSC_VER)
+#    ifdef ZLIB_INTERNAL
+#      define open _open
+#      define close _close
+#      define read _read
+#      define write _write
+#    endif
+#  endif
 #  ifdef ZLIB_DLL
 #    if defined(WIN32) && (!defined(__BORLANDC__) || (__BORLANDC__ >= 0x500))
 #      ifdef ZLIB_INTERNAL
