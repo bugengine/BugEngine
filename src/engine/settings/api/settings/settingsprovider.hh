@@ -31,7 +31,9 @@ private:
     };
     friend struct SettingsRegistration;
 protected:
-    typedef minitl::vector< minitl::tuple< istring, ref<RTTI::Parser::Node > > > SettingsList;
+    typedef minitl::vector< minitl::tuple< istring,
+                                           ref<RTTI::Parser::Namespace>,
+                                           ref<RTTI::Parser::Node > > > SettingsList;
     typedef minitl::hashmap< istring, SettingsList > SettingsCategoryMap;
 private:
     ifilename           m_filename;

@@ -21,11 +21,14 @@ void SettingsProvider::addSetting(minitl::hashmap<istring, SettingsList> &contai
         if (it->first == name)
         {
             be_warning("setting %s.%s overriden; first value ignored" | category | name);
-            it->second = value;
+            it->third = value;
             return;
         }
     }
-    where->second.push_back(minitl::make_tuple(name, value));
+    where->second.push_back(minitl::make_tuple(name,
+                                               ref<RTTI::Parser::Namespace>::create(Arena::general(),
+                                                                                    byref(Arena::general())),
+                                               value));
 }
 
 SettingsProvider::SettingsProvider(const ifilename& settingsOrigin,
@@ -85,9 +88,9 @@ void SettingsProvider::apply(SettingsBase& settings) const
                 }
                 else
                 {
-                    RTTI::Parser::DbContext context(Arena::stack(), m_filename, m_folder);
-                    setting->second->resolve(context);
-                    RTTI::Value v = setting->second->eval(context, property->type);
+                    RTTI::Parser::DbContext context(Arena::stack(), m_filename, setting->second, m_folder);
+                    setting->third->resolve(context);
+                    RTTI::Value v = setting->third->eval(context, property->type);
                     if (!context.errorCount)
                     {
                         property->set(settingsValue, v);
