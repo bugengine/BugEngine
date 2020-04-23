@@ -1,5 +1,4 @@
-
-from waflib import Utils, Configure
+from waflib import Utils, Configure, Logs
 import os
 import sys
 import shlex
@@ -89,12 +88,11 @@ def setup(configuration_context):
         return
     if configuration_context.env.NVCC_COMPILERS:
         cuda_available = False
-        configuration_context.start_msg('      `- [cuda]')
         toolchain = configuration_context.env.TOOLCHAIN
         for version, compiler in configuration_context.env.NVCC_COMPILERS[::-1]:
             version = '.'.join(str(x) for x in version)
             cuda_toolchain = toolchain + '-cuda{}'.format(version)
-            configuration_context.setenv(cuda_toolchain, env=configuration_context.env)
+            configuration_context.setenv(cuda_toolchain, env=configuration_context.env.detach())
             v = configuration_context.env
             v.NVCC_CXX = compiler
             cxx_compiler = v.CXX[0]
@@ -117,7 +115,6 @@ def setup(configuration_context):
             try:
                 include_paths, lib_paths, archs = configuration_context.check_nvcc(compiler)
             except Exception as e:
-                #print(e)
                 configuration_context.setenv(toolchain)
             else:
                 for a in archs:
@@ -132,7 +129,6 @@ def setup(configuration_context):
                 break
         if cuda_available:
             configuration_context.env.append_value('KERNEL_TOOLCHAINS', [('cuda', cuda_toolchain)])
-            configuration_context.env.append_value('NVCC_CXXFLAGS', ['--compiler-bindir', configuration_context.env.CXX])
-            configuration_context.end_msg('{} [{}]'.format(version, ', '.join('{}.{}'.format(*a) for a in archs)))
+            Logs.pprint('GREEN', '+cuda{} [{}]'.format(version, ', '.join('{}.{}'.format(*a) for a in archs)), sep=' ')
         else:
-            configuration_context.end_msg(None)
+            Logs.pprint('YELLOW', '-cuda', sep=' ')
