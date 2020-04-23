@@ -53,7 +53,6 @@ typedef minitl::vector< Message > MessageList;
 
 struct be_api(RTTIPARSE) DbContext
 {
-
     const ifilename             filename;
     ref<const Namespace> const  rootNamespace;
     ref<Folder> const           rootFolder;
