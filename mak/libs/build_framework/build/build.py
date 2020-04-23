@@ -432,6 +432,12 @@ def create_compiled_task(self, name, node):
     """
     out = self.make_bld_node('obj', node.parent, node.name[:node.name.rfind('.')] + '.o')
     task = self.create_task(name, node, out)
+    extra_env = self.env['%s_env' % name]
+    if extra_env:
+        if not task.env.env:
+            task.env.env = dict(os.environ)
+        for k, v in extra_env:
+            task.env.env[k] = v
     try:
         self.compiled_tasks.append(task)
     except AttributeError:

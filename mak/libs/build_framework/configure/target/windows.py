@@ -11,14 +11,14 @@ class Windows(Configure.ConfigurationContext.Platform):
     def is_valid(self, compiler):
         node = self.conf.bldnode.make_node('main.cxx')
         tgtnode = node.change_ext('')
-        node.write('#include <cstdio>\n#include <cfloat>\nint main() {}\n')
+        node.write('#include <cstdio>\n#include <cfloat>\n#include <new>\nint main() {}\n')
         try:
             result, out, err = compiler.run_cxx([node.abspath(), '-x', 'c++', '-o', tgtnode.abspath()])
         except Exception as e:
             return False
         finally:
             #if result:
-            #    print(compiler.name(), err)
+            #    print(compiler.name())
             node.delete()
             tgtnode.delete()
         return result == 0
@@ -94,13 +94,33 @@ class Windows_Clang(Windows):
     def load_in_env(self, conf, compiler):
         Windows.load_in_env(self, conf, compiler)
         env = conf.env
-        env.append_unique('LINKFLAGS', ['-static-libgcc'])
+        if not compiler.target.endswith('-msvc'):
+            env.append_unique('LINKFLAGS', ['-static-libgcc'])
+            env.STRIP_BINARY = True
+            env.implib_PATTERN = '%s.dll.a'
+        else:
+            env.SHLIB_MARKER        = []
+            env.STLIB_MARKER        = []
+            env.cstlib_PATTERN      = '%s.lib'
+            env.cxxstlib_PATTERN    = '%s.lib'
+            env.implib_PATTERN = '%s.lib'
+            env.append_unique('DEFINES', ['_DLL'])
+            env.append_unique('CXXFLAGS_warnall', ['-Wno-microsoft-enum-value', '-Wno-deprecated-register'])
+            env.append_unique('LINKFLAGS', ['-Wl,-nodefaultlib:libcmt'])
+            env.append_unique('LIB', ['msvcrt'])
         env.append_unique('CXXFLAGS_warnall', ['-Wno-unknown-pragmas', '-Wno-comment'])
         self.find_winres(conf, compiler)
         conf.env.DEFINES_console = ['_CONSOLE=1']
         env.LINKFLAGS_console = ['-mconsole']
-        env.STRIP_BINARY = True
-
+        env.cprogram_PATTERN    = '%s.exe'
+        env.cxxprogram_PATTERN    = '%s.exe'
+        env.cshlib_PATTERN      = '%s.dll'
+        env.cxxshlib_PATTERN      = '%s.dll'
+        for option in ('-fpic', '-fPIC'):
+            try: env.CFLAGS_cshlib.remove(option)
+            except ValueError: pass
+            try: env.CXXFLAGS_cxxshlib.remove(option)
+            except ValueError: pass
 
 class Windows_GCC(Windows):
     def load_in_env(self, conf, compiler):
@@ -118,6 +138,16 @@ class Windows_GCC(Windows):
         env.DEFINES_console = ['_CONSOLE=1']
         env.LINKFLAGS_console = ['-mconsole']
         env.STRIP_BINARY = True
+        env.cprogram_PATTERN    = '%s.exe'
+        env.cxxprogram_PATTERN    = '%s.exe'
+        env.cshlib_PATTERN      = '%s.dll'
+        env.cxxshlib_PATTERN      = '%s.dll'
+        env.implib_PATTERN = '%s.dll.a'
+        for option in ('-fpic', '-fPIC'):
+            try: env.CFLAGS_cshlib.remove(option)
+            except ValueError: pass
+            try: env.CXXFLAGS_cxxshlib.remove(option)
+            except ValueError: pass
 
 
 class Windows_MSVC(Windows):

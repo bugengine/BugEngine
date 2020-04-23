@@ -217,13 +217,15 @@ class GnuCompiler(Configure.ConfigurationContext.Compiler):
                 try:
                     c = self.__class__(
                         self.compiler_c, self.compiler_cxx, {
-                            'c': multilib[0][:],
-                            'cxx': multilib[0][:],
-                            'link': multilib[0][:],
-                        }
+                            'c': self.extra_args.get('c', []) + multilib[0],
+                            'cxx': self.extra_args.get('cxx', []) + multilib[0],
+                            'link': self.extra_args.get('link', []) + multilib[0],
+                        },
+                        extra_env=deepcopy(self.extra_env)
                     )
                     result.append(c)
                 except Exception as e:
+                    #print(e)
                     pass
             return result
 

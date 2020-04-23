@@ -58,7 +58,6 @@ class Darwin(Configure.ConfigurationContext.Platform):
         return (os.path.join(appname + '.app', 'Contents'), os.path.join(appname + '.app', 'Contents', 'MacOS'))
 
     def load_in_env(self, conf, compiler):
-        self.CFLAGS_cshlib = ['-fPIC']
         platform = self.SDK_NAME.lower()
         compiler.find_target_program(conf, self, 'lipo', mandatory=False) or conf.find_program('lipo')
         compiler.find_target_program(conf, self, 'codesign', mandatory=False) or conf.find_program('codesign')
@@ -70,6 +69,21 @@ class Darwin(Configure.ConfigurationContext.Platform):
         conf.env.XCODE_SDKROOT = platform
         conf.env.XCODE_ABI = 'mach_o'
         conf.env.XCODE_SUPPORTEDPLATFORMS = platform
+        conf.env.CFLAGS_cshlib      = ['-fPIC']
+        conf.env.CXXFLAGS_cxxshlib  = ['-fPIC']
+        conf.env.LINKFLAGS_cshlib   = ['-dynamiclib']
+        conf.env.LINKFLAGS_cxxshlib = ['-dynamiclib']
+        conf.env.cshlib_PATTERN     = 'lib%s.dylib'
+        conf.env.cxxshlib_PATTERN   = 'lib%s.dylib'
+        conf.env.FRAMEWORKPATH_ST   = '-F%s'
+        conf.env.FRAMEWORK_ST       = ['-framework']
+        conf.env.ARCH_ST            = ['-arch']
+
+        conf.env.LINKFLAGS_cxxstlib = []
+
+        conf.env.SHLIB_MARKER       = []
+        conf.env.STLIB_MARKER       = []
+        conf.env.SONAME_ST          = []
         conf.env.pymodule_PATTERN = '%s.so'
 
         appname = getattr(Context.g_module, Context.APPNAME, conf.srcnode.name)
@@ -99,8 +113,6 @@ class Darwin(Configure.ConfigurationContext.Platform):
             '-m%s-version-min=%s' % (self.OS_NAME, self.sdk[3]), '-isysroot', self.sdk[1],
             '-L%s/usr/lib' % self.sdk[1]
         ])
-        conf.env.CFLAGS_cshlib = ['-fPIC']
-        conf.env.CXXFLAGS_cxxshlib = ['-fPIC']
         conf.env.env = dict(os.environ)
 
     platform_sdk_re = re.compile('.*/Platforms/\w*\.platform/Developer/SDKs/[\.\w]*\.sdk')
