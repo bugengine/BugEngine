@@ -46,7 +46,7 @@ def build_bugengine(bld):
     bld.library('engine.rttiparse', ['engine.core', 'engine.rtti', 'engine.filesystem'])
     bld.library('engine.settings', ['engine.rtti', 'engine.rttiparse'])
     bld.library('engine.resource', ['engine.core', 'engine.rtti', 'engine.filesystem'])
-    bld.library('engine.scheduler', ['engine.core', 'engine.rtti', 'engine.resource'])
+    bld.library('engine.scheduler', ['engine.core', 'engine.rtti', 'engine.resource', 'engine.settings'])
     bld.library('engine.world', ['engine.core', 'engine.rtti', 'engine.resource', 'engine.scheduler'])
     bld.library(
         'engine.plugin', ['engine.core', 'engine.rtti', 'engine.filesystem', 'engine.resource', 'engine.scheduler']
