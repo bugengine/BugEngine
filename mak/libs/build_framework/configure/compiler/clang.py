@@ -29,7 +29,7 @@ def get_msvc_build_tools(configuration_context):
                 stderr=Utils.subprocess.PIPE
             )
         except Exception as e:
-            print(e)
+            #print(e)
             pass
         else:
             out, err = p.communicate()
@@ -46,7 +46,7 @@ def get_msvc_build_tools(configuration_context):
         else:
             product = product['productId'].split('.')[-1].lower() + product['catalog']['productLineVersion']
             VCToolsInstallDir = os.path.join(vs_path, 'VC', 'Tools', 'MSVC', version)
-            result.append((product, VCToolsInstallDir))
+            result.append((str(product), str(VCToolsInstallDir)))
     return result
 
 
@@ -122,7 +122,7 @@ class Clang(Configure.ConfigurationContext.GnuCompiler):
                                 'cxx': self.extra_args.get('cxx', []) + ['-fms-compatibility-version=19'],
                                 'link': self.extra_args.get('link', []),
                             },
-                            extra_env={'VCToolsInstallDir': path}
+                            extra_env={'VCToolsInstallDir': str(path)}
                         )
                     except Exception as e:
                         pass
@@ -246,7 +246,7 @@ def detect_clang(conf):
             try:
                 c = Clang(clang, clangxx)
             except Exception as e:
-                print(e)
+                #print(e)
                 pass
             else:
                 if not c.is_valid(conf):
