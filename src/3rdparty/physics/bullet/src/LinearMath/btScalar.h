@@ -101,7 +101,11 @@ inline int btGetVersion()
 			#ifdef BT_USE_SSE
 
 #if (_MSC_FULL_VER >= 170050727)//Visual Studio 2012 can compile SSE4/FMA3 (but SSE4/FMA3 is not enabled by default)
-			#define BT_ALLOW_SSE4
+			#if !defined(__clang__)
+				#define BT_ALLOW_SSE4
+			#else
+				#define BT_NO_SIMD_OPERATOR_OVERLOADS 1
+			#endif
 #endif //(_MSC_FULL_VER >= 160040219)
 
 			//BT_USE_SSE_IN_API is disabled under Windows by default, because 
@@ -120,7 +124,7 @@ inline int btGetVersion()
 	#endif //__MINGW32__
 
 	#ifdef BT_DEBUG
-		#ifdef _MSC_VER
+		#if defined(_MSC_VER) && !defined(__clang__)
 			#include <stdio.h>
 			#define btAssert(x) { if(!(x)){printf("Assert "__FILE__ ":%u (%s)\n", __LINE__, #x);__debugbreak();	}}
 		#else//_MSC_VER

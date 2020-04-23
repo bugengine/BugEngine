@@ -1,5 +1,53 @@
 from waflib import Utils, Logs, Configure
+from waflib.Tools import gcc, gxx
 import os
+import sys
+import json
+
+
+@Configure.conf
+def gcc_modifier_platform(conf):
+    pass
+
+
+@Configure.conf
+def gxx_modifier_platform(conf):
+    pass
+
+
+def get_msvc_build_tools(configuration_context):
+    # finds all possible VCToolsInstallDir
+    result = [] 
+    products = []
+    for extra in ([], ['-products', 'Microsoft.VisualStudio.Product.BuildTools']):
+        try:
+            vswhere = configuration_context.bugenginenode.find_node('mak/host/win32/bin/vswhere.exe')
+            p = Utils.subprocess.Popen(
+                [vswhere.abspath(), '-format', 'json'] + extra,
+                stdin=Utils.subprocess.PIPE,
+                stdout=Utils.subprocess.PIPE,
+                stderr=Utils.subprocess.PIPE
+            )
+        except Exception as e:
+            #print(e)
+            pass
+        else:
+            out, err = p.communicate()
+            if not isinstance(out, str):
+                out = out.decode(sys.stdout.encoding)
+            products += json.loads(out)
+    for product in products:
+        vs_path = product['installationPath']
+        try:
+            with open(os.path.join(vs_path, 'VC', 'Auxiliary', 'Build', 'Microsoft.VCToolsVersion.default.txt'), 'r') as prop_file:
+                version = prop_file.read().strip()
+        except OSError:
+            pass
+        else:
+            product = product['productId'].split('.')[-1].lower() + product['catalog']['productLineVersion']
+            VCToolsInstallDir = os.path.join(vs_path, 'VC', 'Tools', 'MSVC', version)
+            result.append((str(product), str(VCToolsInstallDir)))
+    return result
 
 
 class Clang(Configure.ConfigurationContext.GnuCompiler):
@@ -7,8 +55,8 @@ class Clang(Configure.ConfigurationContext.GnuCompiler):
     NAMES = ('Clang', )
     TOOLS = 'clang clangxx'
 
-    def __init__(self, clang, clangxx, extra_args={}):
-        Configure.ConfigurationContext.GnuCompiler.__init__(self, clang, clangxx, extra_args)
+    def __init__(self, clang, clangxx, extra_args={}, extra_env={}):
+        Configure.ConfigurationContext.GnuCompiler.__init__(self, clang, clangxx, extra_args, extra_env)
 
     def has_arch_flag(self):
         # if clang manages to compile, then the -arch keyword was ignored
@@ -26,7 +74,7 @@ class Clang(Configure.ConfigurationContext.GnuCompiler):
             if self.version_number >= (3, 6):
                 conf.env.CXXFLAGS_warnall.append('-Wno-unused-local-typedefs')
 
-    def get_multilib_compilers(self):
+    def get_multilib_compilers(self, vs_install_paths):
         result = []
         seen = set([self.arch])
         if self.has_arch_flag():
@@ -65,44 +113,69 @@ class Clang(Configure.ConfigurationContext.GnuCompiler):
             else:
                 result.append(c)
                 result += Configure.ConfigurationContext.GnuCompiler.get_multilib_compilers(c)
+            if c.version_number >= (5,):
+                for product, path in vs_install_paths:
+                    try:
+                        c = self.__class__(
+                            self.compiler_c, self.compiler_cxx, {
+                                'c': self.extra_args.get('c', []),
+                                'cxx': self.extra_args.get('cxx', []) + ['-fms-compatibility-version=19'],
+                                'link': self.extra_args.get('link', []),
+                            },
+                            extra_env={'VCToolsInstallDir': str(path)}
+                        )
+                    except Exception as e:
+                        pass
+                    else:
+                        c.NAMES = ('clang_%s' % product,) + c.NAMES
+                        result.append(c)
+                        for c in Configure.ConfigurationContext.GnuCompiler.get_multilib_compilers(c):
+                            c.NAMES = ('clang_%s' % product,) + c.NAMES
+                            result.append(c)
+            else:
+                result.append(self)
+                for c in Configure.ConfigurationContext.GnuCompiler.get_multilib_compilers(c):
+                    result.append(c)
+        else:
+            result.append(self)
 
-        r, out, err = self.run_cxx(['-x', 'c++', '-v', '-E', '-'], '\n')
-        out = out.split('\n') + err.split('\n')
-        while out:
-            line = out.pop(0)
-            if line.startswith('#include <...>'):
-                while out:
-                    path = out.pop(0)
-                    if path[0] != ' ':
-                        break
-                    path = path.strip()
-                    if os.path.isdir(path):
-                        if os.path.split(path)[1].startswith(arch):
-                            path = os.path.dirname(path)
-                            for x in os.listdir(path):
-                                c = x.split('-')
-                                if len(c) < 2:
-                                    continue
-                                if c[0] not in self.ARCHS:
-                                    continue
-                                if os.path.isdir(os.path.join(path, x)) and not x.startswith(arch):
-                                    a = self.to_target_arch(c[0])
-                                    if a in seen:
+            r, out, err = self.run_cxx(['-x', 'c++', '-v', '-E', '-'], '\n')
+            out = out.split('\n') + err.split('\n')
+            while out:
+                line = out.pop(0)
+                if line.startswith('#include <...>'):
+                    while out:
+                        path = out.pop(0)
+                        if path[0] != ' ':
+                            break
+                        path = path.strip()
+                        if os.path.isdir(path):
+                            if os.path.split(path)[1].startswith(arch):
+                                path = os.path.dirname(path)
+                                for x in os.listdir(path):
+                                    c = x.split('-')
+                                    if len(c) < 2:
                                         continue
-                                    try:
-                                        c = self.__class__(
-                                            self.compiler_c, self.compiler_cxx, {
-                                                'c': self.extra_args.get('c', []) + ['--target=%s' % x],
-                                                'cxx': self.extra_args.get('cxx', []) + ['--target=%s' % x],
-                                                'link': self.extra_args.get('link', []) + ['--target=%s' % x],
-                                            })
-                                    except Exception:
-                                        pass
-                                    else:
-                                        if c.arch in seen:
+                                    if c[0] not in self.ARCHS:
+                                        continue
+                                    if os.path.isdir(os.path.join(path, x)) and not x.startswith(arch):
+                                        a = self.to_target_arch(c[0])
+                                        if a in seen:
                                             continue
-                                        result.append(c)
-                                        seen.add(c.arch)
+                                        try:
+                                            c = self.__class__(
+                                                self.compiler_c, self.compiler_cxx, {
+                                                    'c': self.extra_args.get('c', []) + ['--target=%s' % x],
+                                                    'cxx': self.extra_args.get('cxx', []) + ['--target=%s' % x],
+                                                    'link': self.extra_args.get('link', []) + ['--target=%s' % x],
+                                                })
+                                        except Exception:
+                                            pass
+                                        else:
+                                            if c.arch in seen:
+                                                continue
+                                            result.append(c)
+                                            seen.add(c.arch)
         if not result:
             result = Configure.ConfigurationContext.GnuCompiler.get_multilib_compilers(self)
         return result
@@ -173,7 +246,7 @@ def detect_clang(conf):
             try:
                 c = Clang(clang, clangxx)
             except Exception as e:
-                print(e)
+                #print(e)
                 pass
             else:
                 if not c.is_valid(conf):
@@ -181,11 +254,10 @@ def detect_clang(conf):
                 try:
                     seen[c.name()].add_sibling(c)
                 except KeyError:
-                    seen[c.name()] = c
-                    conf.compilers.append(c)
                     clangs.append(c)
+    msvc_versions = get_msvc_build_tools(conf)
     for c in clangs:
-        for multilib_compiler in c.get_multilib_compilers():
+        for multilib_compiler in c.get_multilib_compilers(msvc_versions):
             if not multilib_compiler.is_valid(conf):
                 continue
             try:

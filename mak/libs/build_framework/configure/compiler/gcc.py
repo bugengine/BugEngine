@@ -1,5 +1,5 @@
 from waflib import Utils, Logs, Configure
-from waflib.Tools import c_config, gcc
+from waflib.Tools import c_config, gcc, gxx
 import os
 import sys
 
@@ -14,13 +14,18 @@ def gcc_modifier_platform(conf):
     pass
 
 
+@Configure.conf
+def gxx_modifier_platform(conf):
+    pass
+
+
 class GCC(Configure.ConfigurationContext.GnuCompiler):
     DEFINES = ['__GNUC__', '__GNUG__']
     NAMES = ('GCC', )
     TOOLS = 'gcc gxx'
 
-    def __init__(self, gcc, gxx, extra_args={}):
-        Configure.ConfigurationContext.GnuCompiler.__init__(self, gcc, gxx, extra_args)
+    def __init__(self, gcc, gxx, extra_args={}, extra_env={}):
+        Configure.ConfigurationContext.GnuCompiler.__init__(self, gcc, gxx, extra_args, extra_env)
 
     def set_warning_options(self, conf):
         Configure.ConfigurationContext.GnuCompiler.set_warning_options(self, conf)

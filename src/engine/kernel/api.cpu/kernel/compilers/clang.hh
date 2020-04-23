@@ -45,15 +45,20 @@ typedef u8                      byte;
 # define BE_HAS_MOVE_SEMANTICS
 #endif
 
-#define override
+#ifndef _MSC_VER
+# define override
+#endif
 #define BE_NOINLINE             __attribute__((noinline))
 #define BE_ALWAYSINLINE         __attribute__((always_inline))
 #define BE_SUPPORTS_EXCEPTIONS  __EXCEPTIONS
 
 #ifndef BE_STATIC
 # ifndef _WIN32
-#  define BE_EXPORT              __attribute__ ((visibility("default")))
-#  define BE_IMPORT              __attribute__ ((visibility("default")))
+#  define BE_EXPORT             __attribute__ ((visibility("default")))
+#  define BE_IMPORT             __attribute__ ((visibility("default")))
+# elif defined(_MSC_VER)
+#  define BE_EXPORT              __declspec(dllexport)
+#  define BE_IMPORT              __declspec(dllimport)
 # else
 #  define BE_EXPORT
 #  define BE_IMPORT
