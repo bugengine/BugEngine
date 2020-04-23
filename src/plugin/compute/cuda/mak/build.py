@@ -142,6 +142,7 @@ def create_cuda_kernels(task_gen):
     internal_deps = []
 
     for kernel, kernel_source, kernel_ast in task_gen.kernels:
+        print(kernel)
         kernel_target = '.'.join([task_gen.parent, '.'.join(kernel), 'cuda'])
         for env in task_gen.bld.multiarch_envs:
             for kernel_type, toolchain in env.KERNEL_TOOLCHAINS:
