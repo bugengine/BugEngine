@@ -46,7 +46,7 @@ def get_msvc_build_tools(configuration_context):
         else:
             product = product['productId'].split('.')[-1].lower() + product['catalog']['productLineVersion']
             VCToolsInstallDir = os.path.join(vs_path, 'VC', 'Tools', 'MSVC', version)
-            result.append((product, VCToolsInstallDir))
+            result.append((str(product), str(VCToolsInstallDir)))
     return result
 
 
