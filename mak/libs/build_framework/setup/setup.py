@@ -22,6 +22,7 @@ def multiarch_setup(conf):
                 conf.start_msg('Setting up environment')
                 conf.end_msg(t)
                 conf.setenv(t + '.setup', conf.all_envs[t])
+                conf.env.TOOLCHAIN = conf.env.TOOLCHAIN + '.setup'
                 conf.recurse(conf.run_dir, once=False)
             except Exception as e:
                 raise
@@ -38,6 +39,7 @@ def multiarch_setup(conf):
             conf.start_msg('Setting up environment')
             conf.end_msg(t)
             conf.setenv(t + '.setup', conf.all_envs[t])
+            conf.env.TOOLCHAIN = conf.env.TOOLCHAIN + '.setup'
             conf.recurse(conf.run_dir, once=False)
         except Exception as e:
             raise

@@ -101,7 +101,7 @@ def configure(configuration_context):
         v.NVCC_CXXFLAGS_profile = ['-DNDEBUG', '-O2', '--generate-line-info']
         v.NVCC_CXXFLAGS_final = ['-DNDEBUG', '-O2']
         v.NVCC_CXXFLAGS = [
-            '-c', '-x', 'cu', '-I%s' % configuration_context.path.make_node('api.cuda').abspath()
+            '-c', '-x', 'cu', '-I%s' % configuration_context.path.parent.make_node('api.cuda').abspath()
         ]
         v.NVCC_CXX_SRC_F = ''
         v.NVCC_CXX_TGT_F = ['-o']
