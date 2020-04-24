@@ -266,7 +266,9 @@ def run_pkg_config(conf, name):
 
     expand = {}
     configs = {}
-    lib_paths = conf.env.SYSTEM_LIBPATHS + ['=/usr/lib', '=/usr/local/lib', '=/usr/libdata', '=/usr/local/libdata']
+    lib_paths = conf.env.SYSTEM_LIBPATHS
+    if conf.env.HOST in conf.env.VALID_PLATFORMS or sysroot:
+        lib_paths += ['=/usr/lib', '=/usr/local/lib', '=/usr/libdata', '=/usr/local/libdata']
     for t in conf.env.TARGETS:
         lib_paths.append('=/usr/lib/%s' % t)
         lib_paths.append('=/usr/libdata/%s' % t)
