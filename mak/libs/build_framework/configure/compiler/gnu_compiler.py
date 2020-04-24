@@ -341,16 +341,11 @@ class GnuCompiler(Configure.ConfigurationContext.Compiler):
         env.SYSROOT = env.SYSROOT or self.sysroot
         env.PATH = self.directories + platform.directories + os.environ['PATH'].split(os.pathsep)
 
-        #conf.end_msg(' ')
-        #conf.start_msg('      `- [vectorize flags]')
-        #for variant_name, flags in self.VECTORIZED_FLAGS.get(self.arch, []):
-        #    if self.is_valid(conf, flags + self.error_flag()):
-        #        conf.env.append_unique('VECTOR_OPTIM_VARIANTS', [variant_name])
-        #        conf.env['CFLAGS_%s' % variant_name] = flags
-        #        conf.env['CXXFLAGS_%s' % variant_name] = flags
-        #        Logs.pprint('GREEN', '+%s' % variant_name, sep=' ')
-        #    else:
-        #        Logs.pprint('YELLOW', '-%s' % variant_name, sep=' ')
+        for variant_name, flags in self.VECTORIZED_FLAGS.get(self.arch, []):
+            if self.is_valid(conf, flags + self.error_flag()):
+                conf.env.append_unique('VECTOR_OPTIM_VARIANTS', [variant_name])
+                conf.env['CFLAGS_%s' % variant_name] = flags
+                conf.env['CXXFLAGS_%s' % variant_name] = flags
 
         env.COMPILER_NAME = self.__class__.__name__.lower()
         env.COMPILER_TARGET = self.arch + '-' + self.platform

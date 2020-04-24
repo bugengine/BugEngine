@@ -96,7 +96,7 @@ DIGIT           [0-9]
 HEXDIGIT        [0-9A-Fa-f]
 DIGITS          ({DIGIT}+)
 SIGN            ("+"|"-")
-ID              [0-9A-Za-z_\-\+\$]*[A-Za-z_\-\+\$]+[0-9A-Za-z_\-\+\$]*
+ID              [A-Za-z_][0-9A-Za-z_]*
 
 %%
 

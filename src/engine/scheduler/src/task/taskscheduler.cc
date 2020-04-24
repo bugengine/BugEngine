@@ -9,6 +9,7 @@
 #include    <scheduler/task/task.hh>
 #include    <scheduler/private/taskitem.hh>
 #include    <scheduler/range/sequence.hh>
+#include    <settings.script.hh>
 
 
 namespace BugEngine { namespace Task
@@ -84,7 +85,10 @@ TaskScheduler::TaskScheduler(weak<Scheduler> scheduler)
 ,   m_tasks()
 ,   m_mainThreadTasks()
 {
-    const size_t g_numWorkers = Environment::getEnvironment().getProcessorCount();
+    const SchedulerSettings::Scheduler& settings = SchedulerSettings::Scheduler::get();
+    const size_t g_numWorkers = settings.CoreCount > 0 ? settings.CoreCount
+                                                       : Environment::getEnvironment().getProcessorCount() + settings.CoreCount;
+    be_info("initializing scheduler with %d workers" | g_numWorkers);
     for (size_t i = 0; i < g_numWorkers; ++i)
     {
         m_workers.push_back(new Worker(this, i));

@@ -118,9 +118,9 @@ template< typename T >
 BE_EXPORT
 raw<const RTTI::Class> RTTI::ClassID< Settings::Settings<T> >::klass()
 {
-    static const RTTI::Class s_class =
+    static RTTI::Class s_class =
     {
-        istring(minitl::format<1024u>("Settings<%s>") | be_class<T>()->name),
+        "Settings",
         0,
         0,
         RTTI::ClassType_Struct,
@@ -135,7 +135,6 @@ raw<const RTTI::Class> RTTI::ClassID< Settings::Settings<T> >::klass()
         0,
         0
     };
-
     raw< const RTTI::Class > result = { &s_class };
     return result;
 }
