@@ -7,7 +7,7 @@ namespace BugEngine { namespace SchedulerSettings
 {
 
 Scheduler::Scheduler()
-    :   CoreCount(0)
+    :   ThreadCount(0)
     ,   KernelScheduler(Auto)
 {
 }

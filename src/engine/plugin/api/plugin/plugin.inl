@@ -55,18 +55,30 @@ namespace BugEngine { namespace Plugin
 
 #define BE_PLUGIN_REGISTER_NAMED__(name, id, create)                                                \
     BE_PLUGIN_NAMESPACE_CREATE_(id);                                                                \
+    BE_PLUGIN_REGISTER_KERNELS_(id)                                                                 \
     _BE_PLUGIN_EXPORT                                                                               \
     minitl::refcountable* be_createPlugin (const ::BugEngine::Plugin::Context& context)             \
     {                                                                                               \
+        const BugEngine::KernelScheduler::Kernel::KernelList& kernelList=getKernelList_##id();      \
+        for (BugEngine::KernelScheduler::Kernel::KernelList::const_iterator it = kernelList.begin();\
+             it != kernelList.end();                                                                \
+             ++it)                                                                                  \
+            context.resourceManager->load(weak<const BugEngine::KernelScheduler::Kernel>(it.operator->()));  \
         ref<minitl::refcountable> r = (*create)(context);                                           \
         if (r)                                                                                      \
             r->addref();                                                                            \
         return r.operator->();                                                                      \
     }                                                                                               \
-    _BE_PLUGIN_EXPORT void be_destroyPlugin(minitl::refcountable* cls)                              \
+    _BE_PLUGIN_EXPORT void be_destroyPlugin(minitl::refcountable* cls,                              \
+                                            weak<BugEngine::Resource::ResourceManager> manager)     \
     {                                                                                               \
         if (cls)                                                                                    \
             cls->decref();                                                                          \
+        const BugEngine::KernelScheduler::Kernel::KernelList& kernelList=getKernelList_##id();      \
+        for (BugEngine::KernelScheduler::Kernel::KernelList::const_iterator it = kernelList.begin();\
+             it != kernelList.end();                                                                \
+             ++it)                                                                                  \
+            manager->unload(weak<const BugEngine::KernelScheduler::Kernel>(it.operator->()));       \
     }                                                                                               \
     _BE_PLUGIN_EXPORT const BugEngine::RTTI::Class* be_pluginNamespace()                            \
     {                                                                                               \
@@ -83,14 +95,8 @@ namespace BugEngine { namespace Plugin
 #define BE_PLUGIN_REGISTER_CREATE(create)                                                           \
     BE_PLUGIN_REGISTER_NAMED_(BE_PROJECTNAME, BE_PROJECTID, create)
 #define BE_PLUGIN_REGISTER__(klass, project)                                                        \
-    BE_PLUGIN_REGISTER_KERNELS_(project)                                                            \
     static ref<klass> create(const BugEngine::Plugin::Context& context)                             \
     {                                                                                               \
-        const BugEngine::KernelScheduler::Kernel::KernelList& kernelList=getKernelList_##project(); \
-        for (BugEngine::KernelScheduler::Kernel::KernelList::const_iterator it = kernelList.begin();\
-             it != kernelList.end();                                                                \
-             ++it)                                                                                  \
-            context.resourceManager->load(weak<const BugEngine::KernelScheduler::Kernel>(it.operator->()));  \
         return ref<klass>::create(BugEngine::Arena::game(), context);                               \
     }                                                                                               \
     BE_PLUGIN_REGISTER_CREATE(&create)
@@ -120,6 +126,7 @@ Plugin<T>::Plugin(const inamespace& pluginName, PreloadType /*preload*/)
 template< typename T >
 Plugin<T>::Plugin(const inamespace& pluginName, const Context& context)
     :   m_name(pluginName)
+    ,   m_resourceManager(context.resourceManager)
     ,   m_dynamicObject(new (Arena::general()) DynamicObject(pluginName, ipath("plugin")))
     ,   m_interface(0)
     ,   m_refCount(new (Arena::general()) i_u32(i_u32::create(1)))
@@ -141,7 +148,7 @@ Plugin<T>::~Plugin()
         {
             DestroyFunction* destroy = m_dynamicObject->getSymbol<DestroyFunction>("be_destroyPlugin");
             be_assert(destroy, "could not load method be_destroyPlugin");
-            (*destroy)(m_interface);
+            (*destroy)(m_interface, m_resourceManager);
         }
         if (m_dynamicObject)
         {

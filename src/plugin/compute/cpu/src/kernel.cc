@@ -32,7 +32,10 @@ public:
 private:
     virtual void onCompleted(weak<BugEngine::Scheduler> scheduler, weak<Task::ITask> task) override
     {
-        be_checked_cast<Task::Task<CPUKernelTask> >(task)->body.sourceTask->completed(scheduler);
+        weak< Task::Task<CPUKernelTask> > t = be_checked_cast<Task::Task<CPUKernelTask> >(task);
+        weak<Task::ITask> sourceTask = t->body.sourceTask;
+        t->body.sourceTask.clear();
+        sourceTask->completed(scheduler);
     }
     virtual void onConnected(weak<Task::ITask> /*to*/, CallbackStatus /*status*/) override
     {

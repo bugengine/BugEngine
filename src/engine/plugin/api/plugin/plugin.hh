@@ -41,13 +41,14 @@ template< typename Interface >
 class Plugin
 {
 private:
-    inamespace      m_name;
-    DynamicObject*  m_dynamicObject;
-    Interface*      m_interface;
-    i_u32*          m_refCount;
+    inamespace                      m_name;
+    weak<Resource::ResourceManager> m_resourceManager;
+    DynamicObject*                  m_dynamicObject;
+    Interface*                      m_interface;
+    i_u32*                          m_refCount;
 private:
     typedef Interface* (CreateFunction)(const Context& context);
-    typedef void (DestroyFunction)(Interface* instance);
+    typedef void (DestroyFunction)(Interface* instance, weak<Resource::ResourceManager> manager);
     typedef const RTTI::Class* (GetPluginNamespace)();
 public:
     enum PreloadType { Preload };
