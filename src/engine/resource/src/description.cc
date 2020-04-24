@@ -71,6 +71,8 @@ void Description::unload(weak<ILoader> loader) const
                 for (u32 j = 0; j < m_resourceCount; ++j)
                 {
                     new (&newBuffer[j]) Resource(resources[j]);
+                    resources[j].m_handle.id.ptrId = 0;
+                    resources[j].m_handle.owner = 0;
                     resources[j].~Resource();
                 }
                 Arena::resource().free(resources);

@@ -24,7 +24,7 @@ struct Scheduler : public Settings::Settings<Scheduler>
 
     Scheduler();
 
-    i32                 CoreCount;
+    i32                 ThreadCount;
     KernelSchedulerType KernelScheduler;
 };
 

@@ -86,8 +86,8 @@ TaskScheduler::TaskScheduler(weak<Scheduler> scheduler)
 ,   m_mainThreadTasks()
 {
     const SchedulerSettings::Scheduler& settings = SchedulerSettings::Scheduler::get();
-    const size_t g_numWorkers = settings.CoreCount > 0 ? settings.CoreCount
-                                                       : Environment::getEnvironment().getProcessorCount() + settings.CoreCount;
+    const size_t g_numWorkers = settings.ThreadCount > 0 ? settings.ThreadCount
+                                                         : minitl::max(1ul, Environment::getEnvironment().getProcessorCount() + settings.ThreadCount);
     be_info("initializing scheduler with %d workers" | g_numWorkers);
     for (size_t i = 0; i < g_numWorkers; ++i)
     {
