@@ -82,7 +82,7 @@ namespace Arena
 {
 static inline SystemAllocator& string()
 {
-    static SystemAllocator allocator(SystemAllocator::BlockSize_256k, 5);
+    static SystemAllocator allocator(SystemAllocator::BlockSize_64k, 5);
     return allocator;
 }
 }
