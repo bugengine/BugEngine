@@ -8,10 +8,12 @@
 #include    <core/stdafx.h>
 #include    <rtti/stdafx.h>
 
-#if defined(building_settings) || defined(SETTINGS_EXPORTS)
-# define     SETTINGSEXPORT      BE_EXPORT
+#if defined(building_settings)
+# define     BE_API_SETTINGS        BE_EXPORT
+#elif defined(be_dll_settings)
+# define     BE_API_SETTINGS        BE_IMPORT
 #else
-# define     SETTINGSEXPORT      BE_IMPORT
+# define     BE_API_SETTINGS
 #endif
 
 /**************************************************************************************************/

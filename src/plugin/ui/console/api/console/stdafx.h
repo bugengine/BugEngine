@@ -8,9 +8,11 @@
 
 
 #if defined(building_console)
-# define    CONSOLEEXPORT  BE_EXPORT
+# define    BE_API_CONSOLE  BE_EXPORT
+#elif defined(be_dll_console)
+# define    BE_API_CONSOLE  BE_IMPORT
 #else
-# define    CONSOLEEXPORT  BE_IMPORT
+# define    BE_API_CONSOLE
 #endif
 
 /**************************************************************************************************/

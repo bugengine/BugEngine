@@ -9,12 +9,12 @@
 #include    <rtti/stdafx.h>
 #include    <3d/stdafx.h>
 
-#if defined(building_windowing) || defined(WINDOWING_EXPORTS)
-# define     WINDOWINGEXPORT          BE_EXPORT
-#elif defined(rtti_dll)
-# define     WINDOWINGEXPORT          BE_IMPORT
+#if defined(building_windowing)
+# define     BE_API_WINDOWING       BE_EXPORT
+#elif defined(be_dll_windowing)
+# define     BE_API_WINDOWING       BE_IMPORT
 #else
-# define     WINDOWINGEXPORT
+# define     BE_API_WINDOWING
 #endif
 
 /**************************************************************************************************/

@@ -7,10 +7,12 @@
 
 #include <core/stdafx.h>
 
-#if defined(building_network) || defined(NETWORK_EXPORTS)
-# define    NETWORKEXPORT       BE_EXPORT
+#if defined(building_network)
+# define    BE_API_NETWORK      BE_EXPORT
+#elif defined(be_dll_network)
+# define    BE_API_NETWORK   BE_IMPORT
 #else
-# define    NETWORKEXPORT       BE_IMPORT
+# define    BE_API_NETWORK
 #endif
 
 

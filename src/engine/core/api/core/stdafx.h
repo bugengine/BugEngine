@@ -26,10 +26,12 @@
 
 #include    <core/platforms.hh>
 
-#if defined(building_core) || defined(CORE_EXPORTS)
-# define    COREEXPORT          BE_EXPORT
+#if defined(building_core)
+# define    BE_API_CORE         BE_EXPORT
+#elif defined(be_dll_core)
+# define    BE_API_CORE         BE_IMPORT
 #else
-# define    COREEXPORT          BE_IMPORT
+# define    BE_API_CORE
 #endif
 
 

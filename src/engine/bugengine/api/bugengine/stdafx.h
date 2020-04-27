@@ -13,10 +13,12 @@
 #include    <plugin/stdafx.h>
 #include    <world/stdafx.h>
 
-#if defined(building_bugengine) || defined(BUGENGINE_EXPORTS)
-# define     BUGENGINEEXPORT          BE_EXPORT
+#if defined(building_bugengine)
+# define     BE_API_BUGENGINE   BE_EXPORT
+#elif defined(be_dll_bugengine)
+# define     BE_API_BUGENGINE   BE_IMPORT
 #else
-# define     BUGENGINEEXPORT          BE_IMPORT
+# define     BE_API_BUGENGINE
 #endif
 
 /**************************************************************************************************/

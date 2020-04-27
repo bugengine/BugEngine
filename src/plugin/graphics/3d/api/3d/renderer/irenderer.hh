@@ -31,7 +31,7 @@ class IGPUResource;
 template< typename R >
 class GPUResourceLoader;
 
-class be_api(_3D) IRenderer : public minitl::refcountable
+class be_api(3D) IRenderer : public minitl::refcountable
 {
     template< typename R >
     friend class GPUResourceLoader;
@@ -45,7 +45,8 @@ protected:
     scoped<KernelScheduler::Kernel>                         m_kernelSort;
     scoped<KernelScheduler::Kernel>                         m_kernelRender;
 protected:
-    IRenderer(minitl::Allocator& allocator, weak<Resource::ResourceManager> manager, Scheduler::Affinity affinity = Scheduler::DontCare);
+    IRenderer(minitl::Allocator& allocator, weak<Resource::ResourceManager> manager,
+              Scheduler::Affinity affinity = Scheduler::WorkerThread);
     virtual ~IRenderer();
 protected:
     virtual void flush();

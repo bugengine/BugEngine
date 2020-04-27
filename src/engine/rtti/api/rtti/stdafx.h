@@ -10,10 +10,12 @@
 #include    <kernel/colors.hh>
 
 
-#if defined(building_rtti) || defined(RTTI_EXPORTS)
-# define     RTTIEXPORT          BE_EXPORT
+#if defined(building_rtti)
+# define     BE_API_RTTI        BE_EXPORT
+#elif defined(be_dll_rtti)
+# define     BE_API_RTTI        BE_IMPORT
 #else
-# define     RTTIEXPORT          BE_IMPORT
+# define     BE_API_RTTI
 #endif
 
 #define     published           public

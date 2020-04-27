@@ -7,12 +7,12 @@
 
 #include    <bugengine/stdafx.h>
 
-#if defined(building_pythonlib) || defined(PYTHONLIB_EXPORTS)
-# define     PYTHONLIBEXPORT        BE_EXPORT
-#elif defined(pythonlib_dll)
-# define     PYTHONLIBEXPORT        BE_IMPORT
+#if defined(building_pythonlib)
+# define     BE_API_PYTHONLIB       BE_EXPORT
+#elif defined(be_dll_pythonlib)
+# define     BE_API_PYTHONLIB       BE_IMPORT
 #else
-# define     PYTHONLIBEXPORT
+# define     BE_API_PYTHONLIB
 #endif
 
 namespace BugEngine { namespace Arena

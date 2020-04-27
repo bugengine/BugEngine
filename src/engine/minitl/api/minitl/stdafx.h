@@ -11,13 +11,15 @@
 #if defined(BE_COMPUTE)
 #define     be_api(module)
 #else
-#define     be_api(module)  module##EXPORT
+#define     be_api(module)  BE_API_##module
 #endif
 
-#if defined(building_minitl) || defined(MINITL_EXPORTS)
-# define    MINITLEXPORT         BE_EXPORT
+#if defined(building_minitl)
+# define    BE_API_MINITL       BE_EXPORT
+#elif defined(be_dll_minitl)
+# define    BE_API_MINITL       BE_IMPORT
 #else
-# define    MINITLEXPORT         BE_IMPORT
+# define    BE_API_MINITL
 #endif
 
 #include    <kernel/interlocked.hh>

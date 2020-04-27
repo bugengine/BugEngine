@@ -9,9 +9,11 @@
 
 
 #if defined(building_3d)
-# define    _3DEXPORT      BE_EXPORT
+# define    BE_API_3D      BE_EXPORT
+#elif defined(be_dll_3d)
+# define    BE_API_3D      BE_IMPORT
 #else
-# define    _3DEXPORT      BE_IMPORT
+# define    BE_API_3D
 #endif
 
 /**************************************************************************************************/

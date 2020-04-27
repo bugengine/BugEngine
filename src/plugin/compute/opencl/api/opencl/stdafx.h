@@ -7,10 +7,12 @@
 
 #include    <bugengine/stdafx.h>
 
-#if defined(building_opencl) || defined(OPENCL_EXPORTS)
-# define    OPENCLEXPORT        BE_EXPORT
+#if defined(building_opencl)
+# define    BE_API_OPENCL       BE_EXPORT
+#elif defined(be_dll_opencl)
+# define    BE_API_OPENCL       BE_IMPORT
 #else
-# define    OPENCLEXPORT        BE_IMPORT
+# define    BE_API_OPENCL
 #endif
 
 #ifdef BE_PLATFORM_MACOS

@@ -8,10 +8,12 @@
 #include    <bugengine/stdafx.h>
 
 
-#if defined(building_runtime) || defined(RUNTIME_EXPORTS)
-# define     RUNTIMEEXPORT          BE_EXPORT
+#if defined(building_runtime)
+# define     BE_API_RUNTIME         BE_EXPORT
+#elif defined(be_dll_runtime)
+# define     BE_API_RUNTIME         BE_IMPORT
 #else
-# define     RUNTIMEEXPORT          BE_IMPORT
+# define     BE_API_RUNTIME
 #endif
 
 /**************************************************************************************************/

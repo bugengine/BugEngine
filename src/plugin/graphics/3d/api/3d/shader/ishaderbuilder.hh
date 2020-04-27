@@ -53,7 +53,7 @@ enum Builtin
     Builtin_mul
 };
 
-class be_api(_3D) IShaderBuilder
+class be_api(3D) IShaderBuilder
 {
     BE_NOCOPY(IShaderBuilder);
 private:

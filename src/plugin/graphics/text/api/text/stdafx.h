@@ -9,11 +9,11 @@
 #include    <3d/stdafx.h>
 
 #if defined(building_text)
-# define    TEXTEXPORT          BE_EXPORT
-#elif defined(text_dll)
-# define    TEXTEXPORT          BE_IMPORT
+# define    BE_API_TEXT         BE_EXPORT
+#elif defined(be_dll_text)
+# define    BE_API_TEXT         BE_IMPORT
 #else
-# define    TEXTEXPORT
+# define    BE_API_TEXT
 #endif
 
 /**************************************************************************************************/

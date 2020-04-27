@@ -8,11 +8,11 @@
 #include    <bugengine/stdafx.h>
 
 #if defined(building_package)
-# define    PACKAGEEXPORT      BE_EXPORT
-#elif defined(package_dll)
-# define    PACKAGEEXPORT      BE_IMPORT
+# define    BE_API_PACKAGE  BE_EXPORT
+#elif defined(be_dll_package)
+# define    BE_API_PACKAGE  BE_IMPORT
 #else
-# define    PACKAGEEXPORT
+# define    BE_API_PACKAGE
 #endif
 
 #ifndef BE_BUILD_KERNEL
