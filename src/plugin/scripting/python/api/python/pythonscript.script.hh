@@ -11,7 +11,7 @@
 namespace BugEngine
 {
 
-class be_api(PYTHONLIB) PythonScript : public Script
+class be_api(PYTHON) PythonScript : public Script
 {
     friend class PackageLoader;
 published:
