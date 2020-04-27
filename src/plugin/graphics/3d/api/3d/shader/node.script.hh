@@ -13,7 +13,7 @@ namespace BugEngine { namespace Shaders
 
 class IShaderBuilder;
 
-class be_api(_3D) Node : public minitl::refcountable
+class be_api(3D) Node : public minitl::refcountable
 {
     BE_NOCOPY(Node);
 public:

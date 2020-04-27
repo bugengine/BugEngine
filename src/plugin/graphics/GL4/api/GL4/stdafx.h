@@ -13,9 +13,11 @@
 #include    <windowing/renderer.hh>
 
 #if defined(building_GL4)
-# define    GL4EXPORT      BE_EXPORT
+# define    BE_API_GL4     BE_EXPORT
+#elif defined(be_dll_gl4)
+# define    BE_API_GL4     BE_IMPORT
 #else
-# define    GL4EXPORT      BE_IMPORT
+# define    BE_API_GL4
 #endif
 
 #ifdef BE_PLATFORM_MACOS

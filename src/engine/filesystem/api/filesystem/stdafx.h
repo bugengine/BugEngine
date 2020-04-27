@@ -8,10 +8,12 @@
 #include    <core/stdafx.h>
 #include    <rtti/stdafx.h>
 
-#if defined(building_filesystem) || defined(FILESYSTEM_EXPORTS)
-# define    FILESYSTEMEXPORT    BE_EXPORT
+#if defined(building_filesystem)
+# define    BE_API_FILESYSTEM       BE_EXPORT
+#elif defined(be_dll_filesystem)
+# define    BE_API_FILESYSTEM       BE_IMPORT
 #else
-# define    FILESYSTEMEXPORT    BE_IMPORT
+# define    BE_API_FILESYSTEM
 #endif
 
 #ifndef BE_BUILD_KERNEL

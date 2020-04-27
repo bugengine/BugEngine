@@ -171,36 +171,7 @@ def objects_feature(task):
 
 @feature('Makefile')
 def makefile_feature(task):
-    task_roots = [source_node.abspath() for source_node in task.source_nodes]
-    project_root = task.bld.srcnode.abspath()
-    env = ConfigSet.ConfigSet()
-    env.load(os.path.join(Context.top_dir, Options.lockfile))
-    seen = set([])
-    for module in sys.modules.values():
-        try:
-            if module.__file__.startswith(project_root):
-                env.files.append(module.__file__)
-        except AttributeError as e:
-            pass
-    for f in env.files:
-        for task_root in task_roots:
-            if f.startswith(task_root):
-                break
-        else:
-            f = f[len(project_root) + 1:]
-            if sys.version_info.major < 3:
-                base_name, ext = os.path.splitext(f)
-                if ext == '.pyc':
-                    f = base_name + '.py'
-            else:
-                try:
-                    f = importlib.util.source_from_cache(f)
-                except ValueError:
-                    pass
-            if os.path.isfile(f):
-                if f not in seen:
-                    task.source_nodes.append(task.bld.srcnode.make_node(f))
-                    seen.add(f)
+    pass
 
 
 @feature('cxx')
@@ -258,6 +229,13 @@ def process_use_flags(self):
                 self.env.append_value(var, Utils.to_list(value))
 
 
+@feature('cxxshlib', 'cshlib')
+def be_build_dll(self):
+    try:
+        self.export_defines.append('be_dll_%s' % self.target_name.split('.')[-1])
+    except AttributeError:
+        self.export_defines = ['be_dll_%s' % self.target_name.split('.')[-1]]
+
 @taskgen_method
 def process_use_link(self):
     link_task = getattr(self, 'link_task', None)
@@ -295,6 +273,8 @@ def process_use_link(self):
                 self.env.append_value('LIBPATH', [tmp_path])
             elif link_objects and ('cxxobjects' in d.features or 'cobjects' in d.features):
                 self.add_objects_from_tgen(d)
+                if 'cxxshlib' in self.features or 'cshlib' in self.features:
+                    self.export_defines.append('be_dll_%s' % d.target_name.split('.')[-1])
 
 
 @taskgen_method

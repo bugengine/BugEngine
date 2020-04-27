@@ -25,7 +25,7 @@ enum Stage
 
 }
 
-class be_api(_3D) ShaderProgramDescription : public Resource::Description
+class be_api(3D) ShaderProgramDescription : public Resource::Description
 {
     BE_NOCOPY(ShaderProgramDescription);
 private:

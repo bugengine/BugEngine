@@ -11,10 +11,12 @@
 #include    <scheduler/stdafx.h>
 #include    <rtti/stdafx.h>
 
-#if defined(building_world) || defined(WORLD_EXPORTS)
-# define    WORLDEXPORT         BE_EXPORT
+#if defined(building_world)
+# define    BE_API_WORLD        BE_EXPORT
+#elif defined(be_dll_world)
+# define    BE_API_WORLD        BE_IMPORT
 #else
-# define    WORLDEXPORT         BE_IMPORT
+# define    BE_API_WORLD
 #endif
 
 #ifndef BE_BUILD_KERNEL

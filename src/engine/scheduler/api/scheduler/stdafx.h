@@ -10,10 +10,12 @@
 #include    <filesystem/stdafx.h>
 #include    <resource/stdafx.h>
 
-#if defined(building_scheduler) || defined(SCHEDULER_EXPORTS)
-# define    SCHEDULEREXPORT     BE_EXPORT
+#if defined(building_scheduler)
+# define    BE_API_SCHEDULER        BE_EXPORT
+#elif defined(be_dll_scheduler)
+# define    BE_API_SCHEDULER        BE_IMPORT
 #else
-# define    SCHEDULEREXPORT     BE_IMPORT
+# define    BE_API_SCHEDULER
 #endif
 
 #ifndef BE_BUILD_KERNEL

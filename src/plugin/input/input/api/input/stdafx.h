@@ -8,10 +8,12 @@
 #include    <bugengine/stdafx.h>
 
 
-#if defined(building_input) || defined(INPUT_EXPORTS)
-# define    INPUTEXPORT         BE_EXPORT
+#if defined(building_input)
+# define    BE_API_INPUT        BE_EXPORT
+#elif defined(be_dll_input)
+# define    BE_API_INPUT        BE_IMPORT
 #else
-# define    INPUTEXPORT         BE_IMPORT
+# define    BE_API_INPUT
 #endif
 
 /**************************************************************************************************/

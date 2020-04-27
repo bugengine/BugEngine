@@ -10,7 +10,7 @@
 namespace BugEngine
 {
 
-class be_api(_3D) MeshDescription : public Resource::Description
+class be_api(3D) MeshDescription : public Resource::Description
 {
 public:
     MeshDescription();

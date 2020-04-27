@@ -10,10 +10,12 @@
 #include    <filesystem/stdafx.h>
 
 
-#if defined(building_rttiparse) || defined(RTTIPARSE_EXPORTS)
-# define     RTTIPARSEEXPORT     BE_EXPORT
+#if defined(building_rttiparse)
+# define     BE_API_RTTIPARSE       BE_EXPORT
+#elif defined(be_dll_rttiparse)
+# define     BE_API_RTTIPARSE       BE_IMPORT
 #else
-# define     RTTIPARSEEXPORT     BE_IMPORT
+# define     BE_API_RTTIPARSE
 #endif
 
 /**************************************************************************************************/

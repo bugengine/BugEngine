@@ -9,10 +9,12 @@
 #include    <rtti/stdafx.h>
 #include    <filesystem/stdafx.h>
 
-#if defined(building_resource) || defined(RESOURCE_EXPORTS)
-# define    RESOURCEEXPORT      BE_EXPORT
+#if defined(building_resource)
+# define    BE_API_RESOURCE     BE_EXPORT
+#elif defined(be_dll_resource)
+# define    BE_API_RESOURCE     BE_IMPORT
 #else
-# define    RESOURCEEXPORT      BE_IMPORT
+# define    BE_API_RESOURCE
 #endif
 
 #ifndef BE_BUILD_KERNEL

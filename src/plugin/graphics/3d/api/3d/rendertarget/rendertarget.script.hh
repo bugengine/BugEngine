@@ -10,7 +10,7 @@
 namespace BugEngine
 {
 
-class be_api(_3D) RenderTargetDescription : public Resource::Description
+class be_api(3D) RenderTargetDescription : public Resource::Description
 {
     BE_NOCOPY(RenderTargetDescription);
 protected:
@@ -19,7 +19,7 @@ public:
     ~RenderTargetDescription();
 };
 
-class be_api(_3D) RenderSurfaceDescription : public RenderTargetDescription
+class be_api(3D) RenderSurfaceDescription : public RenderTargetDescription
 {
     BE_NOCOPY(RenderSurfaceDescription);
 published:
@@ -29,7 +29,7 @@ published:
     ~RenderSurfaceDescription();
 };
 
-class be_api(_3D) RenderWindowDescription : public RenderTargetDescription
+class be_api(3D) RenderWindowDescription : public RenderTargetDescription
 {
     BE_NOCOPY(RenderWindowDescription);
 published:

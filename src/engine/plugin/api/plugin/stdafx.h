@@ -11,10 +11,12 @@
 #include    <resource/stdafx.h>
 #include    <scheduler/stdafx.h>
 
-#if defined(building_plugin) || defined(PLUGIN_EXPORTS)
-# define    PLUGINEXPORT        BE_EXPORT
+#if defined(building_plugin)
+# define    BE_API_PLUGIN       BE_EXPORT
+#elif defined(be_dll_plugin)
+# define    BE_API_PLUGIN       BE_IMPORT
 #else
-# define    PLUGINEXPORT        BE_IMPORT
+# define    BE_API_PLUGIN
 #endif
 
 /**************************************************************************************************/

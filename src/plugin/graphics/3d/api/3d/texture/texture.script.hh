@@ -10,7 +10,7 @@
 namespace BugEngine
 {
 
-class be_api(_3D) TextureDescription : public Resource::Description
+class be_api(3D) TextureDescription : public Resource::Description
 {
 public:
     TextureDescription();

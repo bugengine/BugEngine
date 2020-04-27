@@ -14,7 +14,7 @@ namespace BugEngine
 class IRenderer;
 class RenderTargetDescription;
 
-class be_api(_3D) IRenderTarget : public IGPUResource
+class be_api(3D) IRenderTarget : public IGPUResource
 {
     BE_NOCOPY(IRenderTarget);
 public:

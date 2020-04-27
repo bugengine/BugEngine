@@ -19,8 +19,8 @@ class Description;
 template< typename R > class GPUResourceLoader;
 class IRenderer;
 
-class be_api(_3D) IGPUResource :   public minitl::refcountable
-                               ,   public minitl::intrusive_list<IGPUResource>::item
+class be_api(3D) IGPUResource :   public minitl::refcountable
+                              ,   public minitl::intrusive_list<IGPUResource>::item
 {
     template< typename T >
     friend class GPUResourceLoader;
