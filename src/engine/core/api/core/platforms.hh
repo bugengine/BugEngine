@@ -39,7 +39,7 @@
 #elif defined(_AMD64)
 
 /* amd64 **********************/
-# define    BE_32
+# define    BE_64
 # define    BE_LITTLEENDIAN
 
 #elif defined(_MIPS)

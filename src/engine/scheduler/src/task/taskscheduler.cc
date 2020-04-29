@@ -50,7 +50,7 @@ TaskScheduler::Worker::~Worker()
 
 bool TaskScheduler::Worker::doWork(weak<TaskScheduler> sc)
 {
-    ITaskItem* item = sc->pop(Scheduler::DontCare);
+    ITaskItem* item = sc->pop(Scheduler::WorkerThread);
 
     if (!item)
         return false;
@@ -119,7 +119,7 @@ void TaskScheduler::queue(ITaskItem* head, ITaskItem* tail, u32 count, int prior
                                  | debugCount | count);
 #   endif
     m_scheduler->m_runningTasks += count;
-    if (head->m_owner->affinity == Scheduler::DontCare)
+    if (head->m_owner->affinity == Scheduler::WorkerThread)
     {
         m_tasks[priority].pushList(head, tail);
         m_synchro.release(count);
@@ -138,7 +138,7 @@ void TaskScheduler::queue(ITaskItem* head, ITaskItem* tail, u32 count)
 
 ITaskItem* TaskScheduler::pop(Scheduler::Affinity affinity)
 {
-    minitl::istack<ITaskItem>* tasks = affinity == Scheduler::DontCare ? m_tasks : m_mainThreadTasks;
+    minitl::istack<ITaskItem>* tasks = affinity == Scheduler::WorkerThread ? m_tasks : m_mainThreadTasks;
     for (unsigned int i = Scheduler::Immediate; i != Scheduler::Low; --i)
     {
         ITaskItem* t = tasks[i].pop();

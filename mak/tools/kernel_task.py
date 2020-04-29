@@ -75,6 +75,7 @@ BugEngine::KernelScheduler::Kernel::KernelList&  getKernelList_%(module)s();
 %(Name)sTask::%(Name)sTask(%(argument_params)s)
     :   %(argument_assign)sm_task(ref<BugEngine::Task::KernelTask>::create(BugEngine::Arena::task(),
                                                         "%(kernel_full_name)s",
+                                                        BugEngine::KernelScheduler::GPUType,
                                                         BugEngine::Colors::Red::Red,
                                                         BugEngine::Scheduler::High,
                                                         s_kernel,
@@ -108,6 +109,7 @@ class kernel_task(Task.Task):
     def run(self):
         with open(self.inputs[0].abspath(), 'rb') as input_file:
             kernel_name, method, args, includes, source = pickle.load(input_file)
+
         kernel_namespace = ['Kernels'] + kernel_name.split('.')
         kernel_name = kernel_namespace[-1]
         kernel_full_name = kernel_namespace[1:]

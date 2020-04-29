@@ -15,12 +15,15 @@ namespace BugEngine { namespace KernelScheduler
 class be_api(SCHEDULER) IProduct : public minitl::refcountable
 {
 protected:
-    ref<IParameter>     m_parameter;
-    weak<Task::ITask>   m_producer;
+    typedef minitl::tuple<weak<IMemoryHost>, u32>    HostInformation;
+    ref<IParameter>                     m_parameter;
+    weak<Task::ITask>                   m_producer;
+    minitl::vector< HostInformation >   m_productOutput;
 protected:
     IProduct(ref<IParameter> parameter, weak<Task::ITask> producer)
         :   m_parameter(parameter)
         ,   m_producer(producer)
+        ,   m_productOutput(Arena::task())
     {
     }
 
@@ -33,6 +36,9 @@ public:
     {
         return m_producer;
     }
+
+    void addOutputHost(weak<IMemoryHost> host);
+    void removeOutputHost(weak<IMemoryHost> host);
 };
 
 }}

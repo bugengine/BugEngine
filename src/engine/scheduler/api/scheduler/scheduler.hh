@@ -48,7 +48,7 @@ public:
     };
     enum Affinity
     {
-        DontCare = 0,
+        WorkerThread = 0,
         MainThread = 1
     };
 private:
@@ -82,8 +82,6 @@ public:
     ~Scheduler();
 
     void mainThreadJoin();
-    void addKernelScheduler(weak<KernelScheduler::IScheduler> scheduler);
-    void removeKernelScheduler(weak<KernelScheduler::IScheduler> scheduler);
     u32 workerCount() const;
 };
 

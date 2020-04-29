@@ -9,16 +9,48 @@
 namespace BugEngine { namespace KernelScheduler
 {
 
-IScheduler::IScheduler(istring name, weak<Scheduler> scheduler)
-    :   m_name(name)
-    ,   m_scheduler(scheduler)
+static minitl::vector< weak<IScheduler> >  s_schedulers(Arena::task());
+
+IScheduler::IScheduler(istring name, weak<Scheduler> scheduler, SchedulerType type)
+    :   m_scheduler(scheduler)
+    ,   m_name(name)
+    ,   m_type(type)
 {
-    m_scheduler->addKernelScheduler(this);
+    s_schedulers.push_back(this);
 }
 
 IScheduler::~IScheduler()
 {
-    m_scheduler->removeKernelScheduler(this);
+    for (minitl::vector< weak<IScheduler> >::iterator it = s_schedulers.begin();
+         it != s_schedulers.end();
+         ++it)
+    {
+        if (*it == this)
+        {
+            s_schedulers.erase(it);
+            return;
+        }
+    }
+    be_notreached();
+}
+
+weak<IScheduler> IScheduler::findScheduler(SchedulerType preferredType)
+{
+    weak<IScheduler> result;
+    for (minitl::vector< weak<IScheduler> >::iterator it = s_schedulers.begin();
+         it != s_schedulers.end();
+         ++it)
+    {
+        if ((*it)->m_type == preferredType)
+        {
+            return *it;
+        }
+        else
+        {
+            result = *it;
+        }
+    }
+    return result;
 }
 
 }}

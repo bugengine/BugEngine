@@ -16,7 +16,8 @@ class CopyApplication : public Application
 {
 private:
     Plugin::Plugin<Resource::ILoader>   const   m_packageManager;
-    Plugin::Plugin<Resource::ILoader>   const   m_computeModule;
+    Plugin::Plugin<Resource::ILoader>   const   m_computeCudaModule;
+    Plugin::Plugin<Resource::ILoader>   const   m_computeCLModule;
     ref<const Package>                  const   m_mainPackage;
 public:
     CopyApplication(const Plugin::Context& context);

@@ -121,6 +121,7 @@ protected:
     ~EntityStorage();
 
     weak<Task::ITask>   initialTask() const;
+    weak<MemoryHost>    memoryHost() const;
 };
 
 }}

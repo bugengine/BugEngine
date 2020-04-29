@@ -21,13 +21,12 @@ class IMemoryHost;
 
 class be_api(SCHEDULER) IScheduler : public minitl::refcountable
 {
-public:
 protected:
-    const istring           m_name;
     const weak<Scheduler>   m_scheduler;
-
+    const istring           m_name;
+    const SchedulerType     m_type;
 protected:
-    IScheduler(istring name, weak<Scheduler> scheduler);
+    IScheduler(istring name, weak<Scheduler> scheduler, SchedulerType type);
     virtual ~IScheduler();
 
 public:
@@ -35,6 +34,8 @@ public:
                      weak<const Kernel> kernel,
                      const minitl::array< weak<const IMemoryBuffer> >& parameters) = 0;
     virtual weak<IMemoryHost> memoryHost() const = 0;
+
+    static weak<IScheduler> findScheduler(SchedulerType preferredType);
 };
 
 }}

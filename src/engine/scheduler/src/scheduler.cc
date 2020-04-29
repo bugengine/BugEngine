@@ -59,16 +59,16 @@ void Scheduler::queueTasks(Task::ITaskItem* head, Task::ITaskItem* tail, u32 cou
 void Scheduler::queueKernel(weak<Task::KernelTask> task,
                             const minitl::array< weak<KernelScheduler::IParameter> >& parameters)
 {
-    be_assert(m_kernelSchedulers.size() > 0, "no kernel scheduler installed");
     u32 paramCount = parameters.size();
     minitl::array< weak<const KernelScheduler::IMemoryBuffer> > kernelParams(Arena::temporary(), paramCount);
+    weak<KernelScheduler::IScheduler> scheduler = task->m_targetScheduler;
+    weak<KernelScheduler::IMemoryHost> memHost = scheduler->memoryHost();
     for (u32 i = 0; i < paramCount; ++i)
     {
-        weak<const KernelScheduler::IMemoryBuffer> bank = parameters[i]->getCurrentBank();
-        // todo: transfer
+        weak<const KernelScheduler::IMemoryBuffer> bank = parameters[i]->getBank(memHost);
         kernelParams[i] = bank;
     }
-    m_kernelSchedulers[0]->run(task, task->m_kernel, kernelParams);
+    scheduler->run(task, task->m_kernel, kernelParams);
 }
 
 void Scheduler::mainThreadJoin()
@@ -81,26 +81,6 @@ void Scheduler::notifyEnd()
     be_assert(m_runningTasks == 0, "should not notify end when tasks remain to be done");
     be_info("no more tasks to run; exiting");
     m_taskScheduler->notifyEnd();
-}
-
-void Scheduler::addKernelScheduler(weak<KernelScheduler::IScheduler> scheduler)
-{
-    m_kernelSchedulers.push_back(scheduler);
-}
-
-void Scheduler::removeKernelScheduler(weak<KernelScheduler::IScheduler> scheduler)
-{
-    for (minitl::vector< weak<KernelScheduler::IScheduler> >::iterator it = m_kernelSchedulers.begin();
-         it != m_kernelSchedulers.end();
-         ++it)
-    {
-        if (*it == scheduler)
-        {
-            m_kernelSchedulers.erase(it);
-            return;
-        }
-    }
-    be_notreached();
 }
 
 u32 Scheduler::workerCount() const

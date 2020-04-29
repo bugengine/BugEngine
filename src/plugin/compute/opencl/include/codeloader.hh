@@ -11,10 +11,14 @@
 namespace BugEngine { namespace KernelScheduler { namespace OpenCL
 {
 
+class Scheduler;
+
 class CodeLoader : public ICodeLoader
 {
+private:
+    weak<const Scheduler>   m_scheduler;
 public:
-    CodeLoader();
+    CodeLoader(weak<const Scheduler> scheduler);
     ~CodeLoader();
 
     virtual void load(weak<const Resource::Description> kernelDescription,
