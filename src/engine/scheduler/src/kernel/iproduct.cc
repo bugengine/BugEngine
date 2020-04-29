@@ -3,7 +3,7 @@
 
 #include    <scheduler/stdafx.h>
 #include    <scheduler/kernel/iproduct.script.hh>
-
+#include    <scheduler/kernel/imemoryhost.hh>
 
 namespace BugEngine { namespace KernelScheduler
 {
