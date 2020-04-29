@@ -1,8 +1,5 @@
-#!/usr/bin/env python
-# encoding: utf-8
-
 from waflib import Task
-from waflib.TaskGen import feature, before_method
+from waflib.TaskGen import feature, before_method, extension
 from waflib.Tools import c_preproc
 import os
 import sys
@@ -12,25 +9,7 @@ try:
 except ImportError:
     import pickle
 
-
-template_cl = """
-#include "%(kernel_source)s"
-
-struct Parameter
-{
-    void* begin;
-    void* end;
-};
-
-__kernel void _kmain()
-{
-    kmain(0, 0,
-          %(args)s
-    );
-}
-"""
-
-template_cpp = """
+template_cc = """
 %(pch)s
 #include    <kernel/compilers.hh>
 #include    <kernel/simd.hh>
@@ -55,9 +34,11 @@ _BE_REGISTER_METHOD_NAMED(BE_KERNEL_ID, , s_clKernel64);
 _BE_REGISTER_METHOD_NAMED(BE_KERNEL_ID, , s_clKernel64Size);
 """
 
-class cl_trampoline(Task.Task):
-    "cl_trampoline"
+
+class cc_cl_trampoline(Task.Task):
+    "cc_cl_trampoline"
     color = 'PINK'
+
     def run(self):
         with open(self.inputs[0].abspath(), 'rb') as input_file:
             kernel_name, method, _, includes, source = pickle.load(input_file)
@@ -72,25 +53,8 @@ class cl_trampoline(Task.Task):
         }
 
         with open(self.outputs[0].abspath(), 'w') as out:
-            out.write(template_cl % params)
-        with open(self.outputs[1].abspath(), 'w') as out:
-            out.write(template_cpp % params)
+            out.write(template_cc % params)
 
-
-class clc32(Task.Task):
-    "clc32"
-    run_str = '${CLC_CXX} -cc1 -emit-llvm-bc -x cl -triple spir-unknown-unknown ${CLC_CXXFLAGS} ${CLC_CPPPATH_ST:INCPATHS} ${CLC_DEFINES_ST:DEFINES} -D_CLC=1 -DBE_COMPUTE ${CLC_CXX_SRC_F}${SRC[0].abspath()} ${CLC_CXX_TGT_F} ${TGT}'
-    ext_out = ['.bc']
-    scan = c_preproc.scan
-    color = 'PINK'
-
-
-class clc64(Task.Task):
-    "clc64"
-    run_str = '${CLC_CXX} -cc1 -emit-llvm-bc -x cl -triple spir64-unknown-unknown ${CLC_CXXFLAGS} ${CLC_CPPPATH_ST:INCPATHS} ${CLC_DEFINES_ST:DEFINES} -D_CLC=1 -DBE_COMPUTE ${CLC_CXX_SRC_F}${SRC[0].abspath()} ${CLC_CXX_TGT_F} ${TGT}'
-    ext_out = ['.bc']
-    scan = c_preproc.scan
-    color = 'PINK'
 
 @feature('preprocess')
 def create_cl_kernels(task_gen):
@@ -115,7 +79,8 @@ def create_cl_kernels(task_gen):
                     target_name=target_prefix + task_gen.parent,
                     kernel=kernel,
                     features=[
-                        'cxx', task_gen.bld.env.STATIC and 'cxxobjects' or 'cxxshlib', 'kernel', 'clkernel_create'
+                        'cxx', task_gen.bld.env.STATIC and 'cxxobjects' or 'cxxshlib', 'kernel', 'kernel_create',
+                        'clkernel_create'
                     ],
                     extra_use=tgen.extra_use,
                     pchstop=tgen.pchstop,
@@ -126,6 +91,7 @@ def create_cl_kernels(task_gen):
                         'BE_KERNEL_TARGET=%s' % kernel_type,
                     ],
                     includes=tgen.includes,
+                    kernel_source=kernel_source,
                     kernel_ast=kernel_ast,
                     use=tgen.use + [target_prefix + 'plugin.compute.opencl'],
                 )
@@ -136,18 +102,28 @@ def create_cl_kernels(task_gen):
 
 @feature('clkernel_create')
 @before_method('process_source')
-def cl_kernel_compile(task_gen):
+def create_cc_source(task_gen):
     source = task_gen.kernel_ast
-    cl_source = task_gen.make_bld_node('src', source.parent, source.name[:source.name.rfind('.')] + '.trampoline.cl')
     cc_source = task_gen.make_bld_node('src', source.parent, source.name[:source.name.rfind('.')] + '.trampoline.cc')
-    out_bc_32 = task_gen.make_bld_node('obj', source.parent, source.name[:source.name.rfind('.')] + '.32.bc')
-    out_bc_64 = task_gen.make_bld_node('obj', source.parent, source.name[:source.name.rfind('.')] + '.64.bc')
-    cl_cc_32 = task_gen.make_bld_node('src', source.parent, source.name[:source.name.rfind('.')] + '.32.cc')
-    cl_cc_64 = task_gen.make_bld_node('src', source.parent, source.name[:source.name.rfind('.')] + '.64.cc')
+    task_gen.create_task('cc_cl_trampoline', [source], [cc_source])
+    task_gen.source += [cc_source]
 
-    task_gen.create_task('cl_trampoline', [source], [cl_source, cc_source])
-    task_gen.create_task('clc32', [cl_source], [out_bc_32])
-    task_gen.create_task('clc64', [cl_source], [out_bc_64])
-    task_gen.create_task('bin2c', [out_bc_32], [cl_cc_32], var='cldata32')
-    task_gen.create_task('bin2c', [out_bc_64], [cl_cc_64], var='cldata64')
-    task_gen.source += [cl_cc_32, cl_cc_64, cc_source]
+
+@extension('.ll32', '.ll64')
+def cl_kernel_compile(task_gen, source):
+    if 'clkernel_create' in task_gen.features:
+        ptr_size = source.name[-2:]
+        cl_source = task_gen.make_bld_node(
+            'src', source.parent, source.name[:source.name.rfind('.')] + '.generated.%s.cl' % ptr_size
+        )
+        cl_cc = task_gen.make_bld_node(
+            'src', source.parent, source.name[:source.name.rfind('.')] + '.embedded.%s.cc' % ptr_size
+        )
+
+        task_gen.create_task('ircc', [source], [cl_source], ircc_target=task_gen.env.IRCC_CL_TARGET)
+        task_gen.create_task('bin2c', [cl_source], [cl_cc], var='cldata%s' % ptr_size, zero_terminate=True)
+        task_gen.source += [cl_cc]
+
+
+def build(build_context):
+    build_context.env.IRCC_CL_TARGET = build_context.path.find_node('ir2cl').abspath()

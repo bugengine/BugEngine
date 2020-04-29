@@ -50,7 +50,7 @@ def module(
     else:
         source_node = module_path
     try:
-        bld.recurse(os.path.join(source_node.path_from(bld.path), 'build.py'))
+        bld.recurse(os.path.join(source_node.path_from(bld.path), 'mak/build.py'))
     except Errors.WafError:
         pass
     project_path = source_node.path_from(bld.srcnode).replace('/', '.').replace('\\', '.')

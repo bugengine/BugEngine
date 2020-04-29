@@ -1,14 +1,14 @@
-from clt.cl_position import ClPosition
+from ircc.ir_position import IrPosition
 from typing import Any, List, Optional, Tuple, Union, TYPE_CHECKING
 from .lex import LexToken
 
 
 class YaccSymbol:
-    position: ClPosition
+    position: IrPosition
 
 
 class YaccProduction:
-    lexer: 'cl_lexer.ClLexer'
+    lexer: 'ir_lexer.IrLexer'
     parser: 'Parser'
     slice: List[Union[YaccSymbol, LexToken]]
     stack: List[Union[YaccSymbol, LexToken]]
@@ -25,10 +25,10 @@ class YaccProduction:
     def set_position(self, s1: int, s2: int) -> None:
         ...
 
-    def set_position_absolute(self, s1: int, position: ClPosition) -> None:
+    def set_position_absolute(self, s1: int, position: IrPosition) -> None:
         ...
 
-    def position(self, s: int) -> ClPosition:
+    def position(self, s: int) -> IrPosition:
         ...
 
     def lexspan(self, s: int) -> Tuple[int, int]:
@@ -62,4 +62,4 @@ def yacc(
 
 
 if TYPE_CHECKING:
-    from clt import cl_lexer
+    from ircc import ir_lexer

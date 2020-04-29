@@ -83,13 +83,7 @@ Scheduler::ClContext Scheduler::createCLContextOnPlatform(const cl_context_prope
             deviceExtensions[size] = 0;
             checkResult(clGetDeviceInfo(device, CL_DEVICE_EXTENSIONS, size, deviceExtensions, 0));
             be_info("Extensions: %s" | deviceExtensions);
-            const char* spir = strstr(deviceExtensions, "cl_khr_spir");
             freea(deviceExtensions);
-            if (!spir)
-            {
-                be_warning("device can't load SPIR bytecode; ignoring");
-                continue;
-            }
 
             cl_int err;
             context = clCreateContext(properties, 1, &device, 0, 0, &err);
@@ -137,20 +131,17 @@ Scheduler::ClContext Scheduler::createCLContext(const cl_context_properties* pro
     return context;
 }
 
-Scheduler::ClKernel Scheduler::buildKernel(const size_t size, const unsigned char* bytecode) const
+Scheduler::ClKernel Scheduler::buildKernel(const size_t size, const unsigned char* code) const
 {
-    cl_int status = 0;
     cl_int error_code = 0;
     cl_kernel kernel = 0;
-    cl_program program = clCreateProgramWithBinary(m_context.first, 1, &m_context.second, &size,
-                                                   &bytecode, &status, &error_code);
+    cl_program program = clCreateProgramWithSource(m_context.first, 1, reinterpret_cast<const char**>(&code), &size, &error_code);
     if (error_code != CL_SUCCESS)
     {
         be_error("failed to load OpenCL kernel: clCreateProgramWithBinary failed with code %d" | error_code);
         return minitl::make_tuple(kernel, program);
     }
 
-    error_code = clCompileProgram(program, 1, &m_context.second, "", 0, 0, 0, 0, 0);
     error_code = clBuildProgram(program, 1, &m_context.second, "", 0, 0);
     cl_program_build_info info;
     cl_program_binary_type type;
