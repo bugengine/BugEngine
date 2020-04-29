@@ -4,15 +4,18 @@
 #include    <scheduler/stdafx.h>
 #include    <scheduler/task/kerneltask.hh>
 #include    <scheduler/kernel/kernel.script.hh>
+#include    <scheduler/kernel/ischeduler.hh>
 
 namespace BugEngine { namespace Task
 {
 
-KernelTask::KernelTask(istring name, color32 color, Scheduler::Priority priority,
+KernelTask::KernelTask(istring name, KernelScheduler::SchedulerType type, color32 color,
+                       Scheduler::Priority priority,
                        weak<const BugEngine::KernelScheduler::Kernel> kernel,
                        minitl::array< weak<KernelScheduler::IParameter> > parameters)
-    :   ITask(name, color, priority, Scheduler::DontCare)
+    :   ITask(name, color, priority, Scheduler::WorkerThread)
     ,   m_kernel(kernel)
+    ,   m_targetScheduler(KernelScheduler::IScheduler::findScheduler(type))
     ,   m_parameters(parameters)
 {
 }

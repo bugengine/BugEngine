@@ -50,6 +50,7 @@ def build(bld):
     bld.load('data', tooldir=[tool_dir])
     bld.load('kernel_ast', tooldir=[tool_dir])
     bld.load('kernel_task', tooldir=[tool_dir])
+    bld.load('bin2c', tooldir=[tool_dir])
     bld.env.STATIC = bld.env.STATIC or Options.options.static
     bld.env.DYNAMIC = Options.options.dynamic
     if bld.env.STATIC and bld.env.DYNAMIC:

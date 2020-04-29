@@ -25,7 +25,7 @@ private:
 public:
     Task(istring name, color32 color, const Body& body,
          Scheduler::Priority priority = Scheduler::Default,
-         Scheduler::Affinity affinity = Scheduler::DontCare);
+         Scheduler::Affinity affinity = Scheduler::WorkerThread);
     virtual void schedule(weak<Scheduler> sc) override;
 };
 

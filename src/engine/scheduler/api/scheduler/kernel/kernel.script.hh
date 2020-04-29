@@ -10,6 +10,12 @@
 namespace BugEngine { namespace KernelScheduler
 {
 
+enum SchedulerType
+{
+    CPUType,
+    GPUType
+};
+
 class be_api(SCHEDULER) Kernel : public Resource::Description
                                , public minitl::intrusive_list<const Kernel, 1>::item
 {

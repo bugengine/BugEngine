@@ -99,23 +99,12 @@ class cudac(Task.Task):
             out.write(template_cpp % params)
 
 
-class bin2c(Task.Task):
-    color = 'PINK'
-
-    def scan(self):
-        return ([], [])
-
-    def run(self):
-        with open(self.outputs[0].abspath(), 'w') as out:
-            out.write("const char* s_cudaKernel[] = { %s };\n" % ('0'))
-
-
 @extension('.cu')
 def process_cuda_source(task_gen, cuda_source):
     cuda_bin = task_gen.make_bld_node('obj', cuda_source.parent, cuda_source.name[:-2] + 'fatbin')
     cuda_cc = task_gen.make_bld_node('src', cuda_source.parent, cuda_source.name[:-2] + 'cc')
     task_gen.create_task('nvcc', [cuda_source], [cuda_bin])
-    task_gen.create_task('bin2c', [cuda_bin], [cuda_cc])
+    task_gen.create_task('bin2c', [cuda_bin], [cuda_cc], var='cudaKernel')
     task_gen.source.append(cuda_cc)
 
 

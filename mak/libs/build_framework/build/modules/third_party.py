@@ -26,7 +26,7 @@ def thirdparty(bld, name, feature='', path='', var='', use=[], private_use=[]):
                 features=['cxx'],
                 module_path=project_path,
                 export_includes=env['check_%s_includes' % var],
-                export_defines=env['check_%s_defines' % var],
+                export_defines=env['check_%s_defines' % var] + ['BE_HAVE_%s' % var.upper()],
                 export_libpath=env['check_%s_libpath' % var],
                 export_lib=env['check_%s_libs' % var],
                 export_framework=env['check_%s_frameworks' % var],

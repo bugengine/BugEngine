@@ -39,6 +39,7 @@ def setup(conf):
             else:
                 conf.env.SYSTEM_OPENCL = True
                 conf.env.append_value('KERNEL_TOOLCHAINS', [('opencl', conf.env.TOOLCHAIN)])
+                conf.env.append_value('CLC_CXXFLAGS', ['-I%s' % conf.path.parent.make_node('api.cl').abspath()])
                 pprint('GREEN', '+OpenCL', sep=' ')
     else:
         pprint('YELLOW', '-OpenCL', sep=' ')

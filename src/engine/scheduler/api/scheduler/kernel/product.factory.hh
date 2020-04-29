@@ -5,11 +5,20 @@
 #define BE_SCHEDULER_KERNEL_PRODUCT_FACTORY_HH_
 /**************************************************************************************************/
 #include    <scheduler/stdafx.h>
-#include    <scheduler/kernel/product.hh>
 #include    <rtti/typeinfo.hh>
 #include    <rtti/classinfo.script.hh>
 
-namespace BugEngine { namespace RTTI
+namespace BugEngine
+{
+
+namespace KernelScheduler
+{
+class IProduct;
+template< typename T >
+class Product;
+}
+
+namespace RTTI
 {
 
 template< typename T >

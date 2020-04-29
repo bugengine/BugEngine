@@ -16,7 +16,7 @@ namespace BugEngine { namespace KernelScheduler { namespace Cuda
 {
 
 Scheduler::Scheduler(const Plugin::Context& context)
-    :   IScheduler("Cuda", context.scheduler)
+    :   IScheduler("Cuda", context.scheduler, GPUType)
     ,   m_resourceManager(context.resourceManager)
     ,   m_cudaLoader(ref<CodeLoader>::create(Arena::task()))
     ,   m_memoryHost(scoped<MemoryHost>::create(Arena::task()))
@@ -33,15 +33,7 @@ void Scheduler::run(weak<Task::KernelTask> task,
                     weak<const Kernel> kernel,
                     const minitl::array< weak<const IMemoryBuffer> >& parameters)
 {
-    weak<KernelObject> object = kernel->getResource(m_cudaLoader).getRefHandle<KernelObject>();
-    be_assert(object, "kernel is not loaded");
-    CudaKernelTask& taskBody = object->m_task->body;
-    taskBody.sourceTask = task;
-    {
-        minitl::array< weak<const IMemoryBuffer> > params = parameters;
-        taskBody.params.swap(params);
-    }
-    object->m_task->schedule(m_scheduler);
+    /* todo */
 }
 
 weak<IMemoryHost> Scheduler::memoryHost() const

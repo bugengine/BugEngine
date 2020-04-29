@@ -17,14 +17,17 @@ namespace BugEngine { namespace KernelScheduler { namespace CPU
 {
 
 Scheduler::Scheduler(const Plugin::Context& context)
-    :   IScheduler("CPU", context.scheduler)
+    :   IScheduler("CPU", context.scheduler, CPUType)
     ,   m_resourceManager(context.resourceManager)
     ,   m_cpuLoaders(Arena::task(), s_cpuVariantCount+1)
     ,   m_memoryHost(scoped<MemoryHost>::create(Arena::task()))
 {
     for (i32 i = 0; i < s_cpuVariantCount; ++i)
     {
-        be_info("registering optimised CPU kernel loader for %s" | s_cpuVariants[i]);
+        if (*s_cpuVariants[i])
+            be_info("registering optimised CPU kernel loader for %s" | s_cpuVariants[i]);
+        else
+            be_info("registering unoptimised CPU kernel loader");
         m_cpuLoaders.push_back(ref<CodeLoader>::create(Arena::task(), inamespace(s_cpuVariants[i])));
         m_resourceManager->attach<Kernel>(m_cpuLoaders[i]);
     }

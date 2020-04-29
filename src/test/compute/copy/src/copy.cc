@@ -16,7 +16,8 @@ CopyApplication::CopyApplication(const Plugin::Context& context)
                     context.resourceManager,
                     context.scheduler)
     ,   m_packageManager("plugin.scripting.package", pluginContext())
-    ,   m_computeModule("plugin.compute.cuda", pluginContext())
+    ,   m_computeCudaModule("plugin.compute.cuda", pluginContext())
+    ,   m_computeCLModule("plugin.compute.opencl", pluginContext())
     ,   m_mainPackage(ref<Package>::create(Arena::game(), pluginContext().dataFolder->openFile(ifilename("copy.pkg"))))
 {
     pluginContext().resourceManager->load(m_mainPackage);

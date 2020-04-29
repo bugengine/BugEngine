@@ -8,6 +8,7 @@
 #include    <kernel/stdafx.h>
 #include    <kernel/simd.hh>
 
+#ifndef BE_COMPUTE
 #include    <minitl/stdafx.h>
 
 #include    <core/preproc.hh>
@@ -67,6 +68,7 @@ using minitl::be_checked_cast;
 using minitl::be_const_cast;
 using minitl::be_checked_numcast;
 using minitl::be_function_cast;
+#endif
 
 /**************************************************************************************************/
 #endif
