@@ -177,6 +177,10 @@ Scheduler::ClKernel Scheduler::buildKernel(const size_t size, const unsigned cha
         be_error("failed to load OpenCL kernel: clCreateKernel failed with code %d" | error_code);
         return minitl::make_tuple(kernel, program);
     }
+    else
+    {
+        be_info("success");
+    }
     return minitl::make_tuple(kernel, program);
 }
 

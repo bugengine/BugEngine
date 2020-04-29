@@ -9,7 +9,7 @@ def configure(configuration_context):
         v.CLC_CXXFLAGS_debug = ['-D_DEBUG']
         v.CLC_CXXFLAGS_profile = ['-DNDEBUG', '-fno-rtti', '-fno-exceptions']
         v.CLC_CXXFLAGS_final = ['-DNDEBUG', '-fno-rtti', '-fno-exceptions']
-        v.CLC_CXXFLAGS = ['-std=cl1.2']
+        v.CLC_CXXFLAGS = ['-std=clc++']
         v.CLC_CXX_SRC_F = ''
         v.CLC_CXX_TGT_F = ['-o']
         v.CLC_ARCH_ST = ['-arch']
