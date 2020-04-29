@@ -34,6 +34,9 @@ void Scheduler::run(weak<Task::KernelTask> task,
                     const minitl::array< weak<const IMemoryBuffer> >& parameters)
 {
     /* todo */
+    be_forceuse(task);
+    be_forceuse(kernel);
+    be_forceuse(parameters);
 }
 
 weak<IMemoryHost> Scheduler::memoryHost() const
