@@ -37,9 +37,8 @@ def build(bld):
             raise Errors.WafError(
                 'Call %s %s %s:toolchain:variant\n'
                 '  (with toolchain in:\n    %s)\n  (with variant in:\n    %s)' % (
-                    sys.executable, sys.argv[0], bld.cmd,
-                    '\n    '.join(bld.env.ALL_TOOLCHAINS),
-                    '\n    '.join(bld.env.ALL_VARIANTS)
+                    sys.executable, sys.argv[0], bld.cmd, '\n    '.join(bld.env.ALL_TOOLCHAINS
+                                                                        ), '\n    '.join(bld.env.ALL_VARIANTS)
                 )
             )
         bld.env = bld.all_envs[bld.bugengine_variant]
@@ -51,6 +50,8 @@ def build(bld):
     bld.load('kernel_ast', tooldir=[tool_dir])
     bld.load('kernel_task', tooldir=[tool_dir])
     bld.load('bin2c', tooldir=[tool_dir])
+    bld.load('clir', tooldir=[tool_dir])
+    bld.load('ir_compiler', tooldir=[tool_dir])
     bld.env.STATIC = bld.env.STATIC or Options.options.static
     bld.env.DYNAMIC = Options.options.dynamic
     if bld.env.STATIC and bld.env.DYNAMIC:
@@ -69,6 +70,7 @@ def build(bld):
     bld.recurse('compiler/compiler.py')
 
     if bld.env.PROJECTS:
+
         def rc_hook(self, node):
             # type: (TaskGen.task_gen, Node.Node) -> None
             "creates RC hook to silence waf error"
@@ -236,6 +238,7 @@ def be_build_dll(self):
         self.export_defines.append('be_dll_%s' % self.target_name.split('.')[-1])
     except AttributeError:
         self.export_defines = ['be_dll_%s' % self.target_name.split('.')[-1]]
+
 
 @taskgen_method
 def process_use_link(self):

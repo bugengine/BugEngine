@@ -126,20 +126,24 @@ def detect_icc(conf):
         icc = conf.detect_executable('icc', path_list=[bindir])
         icpc = conf.detect_executable('icpc', path_list=[bindir])
         if icc and icpc:
-            c = ICC(icc, icpc)
-            if c.name() in seen:
-                continue
-            if not c.is_valid(conf):
-                continue
-            seen.add(c.name())
-            conf.compilers.append(c)
-            for multilib_compiler in c.get_multilib_compilers():
-                if multilib_compiler.name() in seen:
+            try:
+                c = ICC(icc, icpc)
+            except Exception as e:
+                pass
+            else:
+                if c.name() in seen:
                     continue
-                if not multilib_compiler.is_valid(conf):
+                if not c.is_valid(conf):
                     continue
-                seen.add(multilib_compiler.name())
-                conf.compilers.append(multilib_compiler)
+                seen.add(c.name())
+                conf.compilers.append(c)
+                for multilib_compiler in c.get_multilib_compilers():
+                    if multilib_compiler.name() in seen:
+                        continue
+                    if not multilib_compiler.is_valid(conf):
+                        continue
+                    seen.add(multilib_compiler.name())
+                    conf.compilers.append(multilib_compiler)
 
 
 def configure(conf):

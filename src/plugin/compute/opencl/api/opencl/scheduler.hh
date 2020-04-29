@@ -37,7 +37,7 @@ private:
                                                cl_device_type deviceType);
     static ClContext createCLContext(const cl_context_properties* properties);
 private: // friend KernelObject
-    ClKernel buildKernel(const size_t size, const unsigned char* byteCode) const;
+    ClKernel buildKernel(const size_t size, const unsigned char* code) const;
 public:
     Scheduler(const Plugin::Context& context, const cl_context_properties* properties = 0);
     ~Scheduler();
