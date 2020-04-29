@@ -14,8 +14,19 @@ except ImportError:
 
 
 template_cl = """
+#include "%(kernel_source)s"
+
+struct Parameter
+{
+    void* begin;
+    void* end;
+};
+
 __kernel void _kmain()
 {
+    kmain(0, 0,
+          %(args)s
+    );
 }
 """
 
@@ -59,6 +70,7 @@ class cl_trampoline(Task.Task):
             'kernel_source': source,
             'args': ',\n          '.join('%s(0, 0, 0)' % arg[1] for i, arg in enumerate(args)),
         }
+
         with open(self.outputs[0].abspath(), 'w') as out:
             out.write(template_cl % params)
         with open(self.outputs[1].abspath(), 'w') as out:
@@ -79,7 +91,6 @@ class clc64(Task.Task):
     ext_out = ['.bc']
     scan = c_preproc.scan
     color = 'PINK'
-
 
 @feature('preprocess')
 def create_cl_kernels(task_gen):
