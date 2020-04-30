@@ -5,8 +5,8 @@
 #define BE_KERNEL_CUDA_INPUT_INPUT_HH_
 /**************************************************************************************************/
 
-#include    <kernel/input/segment.hh>
-#include    <kernel/input/segments.hh>
+#include    <bugengine/kernel/input/segment.hh>
+#include    <bugengine/kernel/input/segments.hh>
 
 /**************************************************************************************************/
 #endif

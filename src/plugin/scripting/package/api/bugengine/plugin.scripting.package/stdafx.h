@@ -15,7 +15,7 @@
 #    define BE_API_PACKAGE
 #endif
 
-#ifndef BE_BUILD_KERNEL
+#ifndef BE_COMPUTE
 namespace BugEngine { namespace Arena {
 
 minitl::Allocator& package();

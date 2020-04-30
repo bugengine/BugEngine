@@ -9,10 +9,7 @@ except ImportError:
 
 template = """
 %(pch)s
-#include    <kernel/compilers.hh>
-#include    <scheduler/kernel/parameters/parameters.hh>
-
-using namespace Kernel;
+#include    <bugengine/kernel/compilers.hh>
 
 #include    "%(source)s"
 
@@ -32,13 +29,13 @@ __device__ void _kmain(const u32 index, const u32 total, Parameter* parameters)
 
 template_cpp = """
 %(pch)s
-#include    <kernel/compilers.hh>
-#include    <kernel/simd.hh>
-#include    <kernel/input/input.hh>
-#include    <plugin/dynobjectlist.hh>
-#include    <minitl/array.hh>
-#include    <cuda/memorybuffer.hh>
-#include    <scheduler/kernel/parameters/parameters.hh>
+#include    <bugengine/kernel/compilers.hh>
+#include    <bugengine/kernel/simd.hh>
+#include    <bugengine/kernel/input/input.hh>
+#include    <bugengine/plugin/dynobjectlist.hh>
+#include    <bugengine/minitl/array.hh>
+#include    <bugengine/plugin.compute.cuda/memorybuffer.hh>
+#include    <bugengine/scheduler/kernel/parameters/parameters.hh>
 
 using namespace Kernel;
 
@@ -48,6 +45,7 @@ _BE_PLUGIN_EXPORT void _kmain(const u32 index, const u32 total,
     be_forceuse(index);
     be_forceuse(total);
 }
+
 _BE_REGISTER_PLUGIN(BE_KERNEL_ID, BE_KERNEL_NAME);
 _BE_REGISTER_METHOD_NAMED(BE_KERNEL_ID, _kmain, _kmain);
 """
@@ -77,6 +75,12 @@ class nvcc(Task.Task):
 class cudac(Task.Task):
     "Generates a CUDA trampoline to call the C++ kernel, and a C++ wrapper"
     color = 'PINK'
+
+    def sig_vars(self):
+        Task.Task.sig_vars(self)
+        self.m.update(template.encode('utf-8'))
+        self.m.update(template_cpp.encode('utf-8'))
+        self.m.update((self.generator.pchstop if self.generator.pchstop else '').encode('utf-8'))
 
     def scan(self):
         return ([], [])
@@ -154,7 +158,6 @@ def create_cuda_kernels(task_gen):
                     extra_use=tgen.extra_use,
                     pchstop=tgen.pchstop,
                     defines=tgen.defines + [
-                        'BE_BUILD_KERNEL=1',
                         'BE_KERNEL_ID=%s_%s' % (task_gen.parent.replace('.', '_'), kernel_target.replace('.', '_')),
                         'BE_KERNEL_NAME=%s' % (kernel_target),
                         'BE_KERNEL_TARGET=%s' % kernel_type,

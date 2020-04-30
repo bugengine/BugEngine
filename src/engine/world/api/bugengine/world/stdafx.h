@@ -19,7 +19,7 @@
 #    define BE_API_WORLD
 #endif
 
-#ifndef BE_BUILD_KERNEL
+#ifndef BE_COMPUTE
 namespace BugEngine { namespace Arena {
 be_api(WORLD) minitl::Allocator& game();
 }}  // namespace BugEngine::Arena

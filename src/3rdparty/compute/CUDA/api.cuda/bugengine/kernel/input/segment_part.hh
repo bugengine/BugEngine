@@ -4,7 +4,7 @@
 #ifndef BE_KERNEL_CUDA_INPUT_SEGMENT_PART_HH_
 #define BE_KERNEL_CUDA_INPUT_SEGMENT_PART_HH_
 /**************************************************************************************************/
-#include    <kernel/stdafx.h>
+#include    <bugengine/kernel/stdafx.h>
 
 
 namespace Kernel
