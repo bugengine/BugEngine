@@ -1,11 +1,10 @@
 /* BugEngine <bugengine.devel@gmail.com> / 2008-2014
    see LICENSE for detail */
 
-#include    <text/stdafx.h>
-#include    <fontlist.hh>
+#include <bugengine/plugin.graphics.text/stdafx.h>
+#include <fontlist.hh>
 
-namespace BugEngine
-{
+namespace BugEngine {
 
 FontList::FontList()
 {
@@ -15,5 +14,4 @@ FontList::~FontList()
 {
 }
 
-}
-
+}  // namespace BugEngine

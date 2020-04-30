@@ -1,13 +1,14 @@
 /* BugEngine <bugengine.devel@gmail.com> / 2008-2014
    see LICENSE for detail */
 
-#include    <core/stdafx.h>
-#include    <core/environment.hh>
-#include    <core/string/istring.hh>
-#include    <cstring>
+#include <bugengine/core/stdafx.h>
+#include <bugengine/core/environment.hh>
 
-namespace BugEngine
-{
+#include <bugengine/core/string/istring.hh>
+
+#include <cstring>
+
+namespace BugEngine {
 
 Environment& Environment::getEnvironment()
 {
@@ -15,46 +16,38 @@ Environment& Environment::getEnvironment()
     return s_environment;
 }
 
-ipath Environment::canonicalPath(const char *path, const char *pathSeparators)
+ipath Environment::canonicalPath(const char* path, const char* pathSeparators)
 {
     ipath result;
 
-    if (*path)
+    if(*path)
     {
-        be_assert_recover(1+strlen(pathSeparators) <= 4,
-                          "too many different path separators",
-                          return result);
-        char separators[4] = { 0, 0, 0, 0};
+        be_assert_recover(1 + strlen(pathSeparators) <= 4, "too many different path separators", return result);
+        char separators[4] = {0, 0, 0, 0};
         strcpy(separators, pathSeparators);
 
         const char* sep = path;
-        while (*sep != separators[0]
-            && *sep != separators[1]
-            && *sep != separators[2]
-            && *sep != separators[3])
+        while(*sep != separators[0] && *sep != separators[1] && *sep != separators[2] && *sep != separators[3])
             sep++;
         result.push_back(istring(path, sep));
         path = sep;
-        if (*path) path++;
-        while (*path)
+        if(*path) path++;
+        while(*path)
         {
             sep = path;
-            while (*sep != separators[0]
-                && *sep != separators[1]
-                && *sep != separators[2]
-                && *sep != separators[3])
+            while(*sep != separators[0] && *sep != separators[1] && *sep != separators[2] && *sep != separators[3])
                 sep++;
-            if (sep != path)
+            if(sep != path)
             {
-                if (sep - path == 1 && path[0] == '.')
+                if(sep - path == 1 && path[0] == '.')
                 {
                     // skip
                 }
-                else if (sep == path)
+                else if(sep == path)
                 {
                     // skip
                 }
-                else if (sep - path == 2 && path[0] == '.' && path[1] == '.' && result.size())
+                else if(sep - path == 2 && path[0] == '.' && path[1] == '.' && result.size())
                 {
                     result.pop_back();
                 }
@@ -64,10 +57,10 @@ ipath Environment::canonicalPath(const char *path, const char *pathSeparators)
                 }
             }
             path = sep;
-            if (*path) path++;
+            if(*path) path++;
         }
     }
     return result;
 }
 
-}
+}  // namespace BugEngine

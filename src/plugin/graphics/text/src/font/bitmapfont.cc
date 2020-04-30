@@ -1,22 +1,19 @@
 /* BugEngine <bugengine.devel@gmail.com> / 2008-2014
    see LICENSE for detail */
 
-#include    <text/stdafx.h>
-#include    <text/bitmapfont.script.hh>
-#include    <3d/shader/types.script.hh>
+#include <bugengine/plugin.graphics.text/stdafx.h>
+#include <bugengine/plugin.graphics.3d/shader/types.script.hh>
+#include <bugengine/plugin.graphics.text/bitmapfont.script.hh>
 
-namespace BugEngine
-{
+namespace BugEngine {
 
 BitmapFont::BitmapFont(const istring& fontSystemName)
-    :   m_fontSystemName(fontSystemName)
-    ,   m_fontFile()
+    : m_fontSystemName(fontSystemName)
+    , m_fontFile()
 {
 }
 
-BitmapFont::BitmapFont(weak<const File> fontFile)
-    :   m_fontSystemName("")
-    ,   m_fontFile(fontFile)
+BitmapFont::BitmapFont(weak< const File > fontFile) : m_fontSystemName(""), m_fontFile(fontFile)
 {
 }
 
@@ -24,5 +21,4 @@ BitmapFont::~BitmapFont()
 {
 }
 
-}
-
+}  // namespace BugEngine

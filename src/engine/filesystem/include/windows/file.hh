@@ -4,11 +4,10 @@
 #ifndef BE_FILESYSTEM_WIN32_FILE_HH_
 #define BE_FILESYSTEM_WIN32_FILE_HH_
 /**************************************************************************************************/
-#include    <filesystem/stdafx.h>
-#include    <filesystem/file.script.hh>
+#include <bugengine/filesystem/stdafx.h>
+#include <bugengine/filesystem/file.script.hh>
 
-namespace BugEngine
-{
+namespace BugEngine {
 
 class Win32File : public File
 {
@@ -17,12 +16,13 @@ public:
     ~Win32File();
 
     void refresh(u64 size, u64 timestamp);
+
 private:
-    void doFillBuffer(weak<File::Ticket> ticket) const override;
-    virtual void doWriteBuffer(weak<Ticket> ticket) const override;
+    void         doFillBuffer(weak< File::Ticket > ticket) const override;
+    virtual void doWriteBuffer(weak< Ticket > ticket) const override;
 };
 
-}
+}  // namespace BugEngine
 
 /**************************************************************************************************/
 #endif

@@ -1,20 +1,20 @@
 /* BugEngine <bugengine.devel@gmail.com> / 2008-2014
    see LICENSE for detail */
 
-#include    <plugin/stdafx.h>
-#include    <plugin/plugin.hh>
-#include    <filesystem/folder.script.hh>
-#include    <scheduler/scheduler.hh>
-#include    <resource/resourcemanager.hh>
+#include <bugengine/plugin/stdafx.h>
+#include <bugengine/filesystem/folder.script.hh>
+#include <bugengine/plugin/plugin.hh>
+#include <bugengine/resource/resourcemanager.hh>
+#include <bugengine/scheduler/scheduler.hh>
 
-namespace BugEngine { namespace Plugin
-{
+namespace BugEngine { namespace Plugin {
 
-Context::Context(weak<Resource::ResourceManager> manager, ref<Folder> folder, weak<Scheduler> scheduler)
-    :   resourceManager(manager)
-    ,   dataFolder(folder)
-    ,   scheduler(scheduler)
+Context::Context(weak< Resource::ResourceManager > manager, ref< Folder > folder,
+                 weak< Scheduler > scheduler)
+    : resourceManager(manager)
+    , dataFolder(folder)
+    , scheduler(scheduler)
 {
 }
 
-}}
+}}  // namespace BugEngine::Plugin

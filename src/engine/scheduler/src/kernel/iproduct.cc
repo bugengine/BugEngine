@@ -1,20 +1,18 @@
 /* BugEngine <bugengine.devel@gmail.com> / 2008-2014
    see LICENSE for detail */
 
-#include    <scheduler/stdafx.h>
-#include    <scheduler/kernel/iproduct.script.hh>
-#include    <scheduler/kernel/imemoryhost.hh>
+#include <bugengine/scheduler/stdafx.h>
+#include <bugengine/scheduler/kernel/imemoryhost.hh>
+#include <bugengine/scheduler/kernel/iproduct.script.hh>
 
-namespace BugEngine { namespace KernelScheduler
-{
+namespace BugEngine { namespace KernelScheduler {
 
-void IProduct::addOutputHost(weak<IMemoryHost> host)
+void IProduct::addOutputHost(weak< IMemoryHost > host)
 {
-    for (minitl::vector<HostInformation>::iterator it = m_productOutput.begin();
-         it != m_productOutput.end();
-         ++it)
+    for(minitl::vector< HostInformation >::iterator it = m_productOutput.begin();
+        it != m_productOutput.end(); ++it)
     {
-        if (it->first == host)
+        if(it->first == host)
         {
             ++it->second;
             return;
@@ -23,20 +21,18 @@ void IProduct::addOutputHost(weak<IMemoryHost> host)
     m_productOutput.push_back(HostInformation(host, 1));
 }
 
-void IProduct::removeOutputHost(weak<IMemoryHost> host)
+void IProduct::removeOutputHost(weak< IMemoryHost > host)
 {
-    for (minitl::vector<HostInformation>::iterator it = m_productOutput.begin();
-         it != m_productOutput.end();
-         ++it)
+    for(minitl::vector< HostInformation >::iterator it = m_productOutput.begin();
+        it != m_productOutput.end(); ++it)
     {
-        if (it->first == host)
+        if(it->first == host)
         {
-            if (--it->second == 0)
-                m_productOutput.erase(it);
+            if(--it->second == 0) m_productOutput.erase(it);
             return;
         }
     }
     be_notreached();
 }
 
-}}
+}}  // namespace BugEngine::KernelScheduler

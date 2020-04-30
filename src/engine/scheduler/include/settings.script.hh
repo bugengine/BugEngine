@@ -4,14 +4,12 @@
 #ifndef BE_SCHEDULER_SETTINGS_SCRIPT_HH_
 #define BE_SCHEDULER_SETTINGS_SCRIPT_HH_
 /**************************************************************************************************/
-#include    <scheduler/stdafx.h>
-#include    <settings/settings.factory.hh>
+#include <bugengine/scheduler/stdafx.h>
+#include <bugengine/settings/settings.factory.hh>
 
+namespace BugEngine { namespace SchedulerSettings {
 
-namespace BugEngine { namespace SchedulerSettings
-{
-
-struct Scheduler : public Settings::Settings<Scheduler>
+struct Scheduler : public Settings::Settings< Scheduler >
 {
     enum KernelSchedulerType
     {
@@ -28,7 +26,7 @@ struct Scheduler : public Settings::Settings<Scheduler>
     KernelSchedulerType KernelScheduler;
 };
 
-}}
+}}  // namespace BugEngine::SchedulerSettings
 
 /**************************************************************************************************/
 #endif

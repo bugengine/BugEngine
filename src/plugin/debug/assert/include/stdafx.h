@@ -5,10 +5,9 @@
 #define BE_DEBUG_ASSERT_STDAFX_H_
 /**************************************************************************************************/
 
-#include    <bugengine/stdafx.h>
+#include <bugengine/stdafx.h>
 
-#include    <runtime/stdafx.h>
+#include <bugengine/plugin.debug.runtime/stdafx.h>
 
 /**************************************************************************************************/
 #endif
-

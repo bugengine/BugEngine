@@ -4,10 +4,9 @@
 #ifndef BE_RTTI_BUILTIN_SCRIPT_HH_
 #define BE_RTTI_BUILTIN_SCRIPT_HH_
 /**************************************************************************************************/
-#include    <rtti/stdafx.h>
-#include    <rtti/classinfo.script.hh>
-#include    <rtti/builtin.hh>
-
+#include <bugengine/rtti/stdafx.h>
+#include <bugengine/rtti/builtin.hh>
+#include <bugengine/rtti/classinfo.script.hh>
 
 #if 0
 

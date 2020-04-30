@@ -1,15 +1,13 @@
 /* BugEngine <bugengine.devel@gmail.com> / 2008-2014
    see LICENSE for detail */
 
-#include    <stdafx.h>
+#include <stdafx.h>
 
-#include    <lua.script.hh>
+#include <lua.script.hh>
 
-namespace BugEngine
-{
+namespace BugEngine {
 
-LuaScript::LuaScript(weak<const File> file)
-    :   Script(file)
+LuaScript::LuaScript(weak< const File > file) : Script(file)
 {
 }
 
@@ -17,4 +15,4 @@ LuaScript::~LuaScript()
 {
 }
 
-}
+}  // namespace BugEngine

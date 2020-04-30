@@ -1,15 +1,12 @@
 /* BugEngine <bugengine.devel@gmail.com> / 2008-2014
    see LICENSE for detail */
 
-#include    <core/stdafx.h>
-#include    <core/threads/mutex.hh>
+#include <bugengine/core/stdafx.h>
+#include <bugengine/core/threads/mutex.hh>
 
+namespace BugEngine {
 
-namespace BugEngine
-{
-
-Mutex::Mutex()
-:   m_data(CreateMutex(0, FALSE, 0))
+Mutex::Mutex() : m_data(CreateMutex(0, FALSE, 0))
 {
 }
 
@@ -28,15 +25,11 @@ Threads::Waitable::WaitResult Mutex::wait()
     DWORD rcode = WaitForSingleObject((HANDLE)m_data, INFINITE);
     switch(rcode)
     {
-    case WAIT_OBJECT_0:
-        return Finished;
-    case WAIT_FAILED:
-        be_notreached();
-        return Abandoned;
+    case WAIT_OBJECT_0: return Finished;
+    case WAIT_FAILED: be_notreached(); return Abandoned;
     case WAIT_ABANDONED:
-    default:
-        return Abandoned;
+    default: return Abandoned;
     }
 }
 
-}
+}  // namespace BugEngine

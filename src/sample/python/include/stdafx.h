@@ -5,9 +5,9 @@
 #define BE_SAMPLES_PYTHON_STDAFX_H_
 /**************************************************************************************************/
 
-#include    <bugengine/stdafx.h>
+#include <bugengine/stdafx.h>
 
-#include    <package/stdafx.h>
+#include <bugengine/plugin.scripting.package/stdafx.h>
 
 /**************************************************************************************************/
 #endif

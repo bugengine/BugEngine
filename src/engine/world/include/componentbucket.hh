@@ -4,10 +4,9 @@
 #ifndef BE_WORLD_COMPONENTBUCKET_HH_
 #define BE_WORLD_COMPONENTBUCKET_HH_
 /**************************************************************************************************/
-#include    <world/stdafx.h>
+#include <bugengine/world/stdafx.h>
 
-namespace BugEngine { namespace World
-{
+namespace BugEngine { namespace World {
 
 struct Bucket
 {
@@ -21,8 +20,7 @@ struct Bucket
     Bucket(u32 acceptMask, u32 componentSize);
 };
 
-}}
-
+}}  // namespace BugEngine::World
 
 /**************************************************************************************************/
 #endif

@@ -1,13 +1,13 @@
 /* BugEngine <bugengine.devel@gmail.com> / 2008-2014
    see LICENSE for detail */
 
-#include    <filesystem/stdafx.h>
+#include    <bugengine/filesystem/stdafx.h>
 #include    <macosx/watchqueue.hh>
 
 #include    <diskwatch.hh>
 #include    <watchpoint.hh>
 
-#include    <core/environment.hh>
+#include    <bugengine/core/environment.hh>
 #include    <Foundation/Foundation.h>
 
 namespace BugEngine { namespace FileSystem

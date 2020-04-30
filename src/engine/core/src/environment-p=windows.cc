@@ -1,34 +1,29 @@
 /* BugEngine <bugengine.devel@gmail.com> / 2008-2014
    see LICENSE for detail */
 
-#include    <core/stdafx.h>
-#include    <core/environment.hh>
-#include    <stdlib.h>
+#include <bugengine/core/stdafx.h>
+#include <bugengine/core/environment.hh>
 
-typedef BOOL (WINAPI *GetUserProfileDirectoryFunction)(HANDLE hToken, LPSTR lpProfileDir, LPDWORD lpcchSize);
+#include <stdlib.h>
 
-namespace BugEngine
-{
+typedef BOOL(WINAPI* GetUserProfileDirectoryFunction)(HANDLE hToken, LPSTR lpProfileDir, LPDWORD lpcchSize);
 
-Environment::Environment()
-:   m_homeDirectory("")
-,   m_dataDirectory("data")
-,   m_game("")
-,   m_user("")
-,   m_programPath(0)
+namespace BugEngine {
+
+Environment::Environment() : m_homeDirectory(""), m_dataDirectory("data"), m_game(""), m_user(""), m_programPath(0)
 {
     HANDLE token;
     OpenProcessToken(GetCurrentProcess(), TOKEN_QUERY, &token);
-    char profile[MAX_PATH];
+    char  profile[MAX_PATH];
     DWORD size = sizeof(profile);
     GetUserName(profile, &size);
-    m_user = profile;
-    size = sizeof(profile);
+    m_user    = profile;
+    size      = sizeof(profile);
     HMODULE h = LoadLibraryA("userenv.dll");
-    if (h != 0)
+    if(h != 0)
     {
-        FARPROC symbol = GetProcAddress(h, "GetUserProfileDirectoryA");
-        GetUserProfileDirectoryFunction function = be_function_cast<GetUserProfileDirectoryFunction>(symbol);
+        FARPROC                         symbol   = GetProcAddress(h, "GetUserProfileDirectoryA");
+        GetUserProfileDirectoryFunction function = be_function_cast< GetUserProfileDirectoryFunction >(symbol);
         (*function)(token, profile, &size);
         FreeLibrary(h);
     }
@@ -42,13 +37,13 @@ Environment::~Environment()
 }
 
 extern "C" IMAGE_DOS_HEADER __ImageBase;
-void Environment::init()
+void                        Environment::init()
 {
     char dllPath[MAX_PATH] = {0};
     union
     {
-        IMAGE_DOS_HEADER*   imageBase;
-        HINSTANCE           value;
+        IMAGE_DOS_HEADER* imageBase;
+        HINSTANCE         value;
     } convertToHinstance;
     convertToHinstance.imageBase = &__ImageBase;
     GetModuleFileNameA(convertToHinstance.value, dllPath, sizeof(dllPath));
@@ -56,24 +51,24 @@ void Environment::init()
     init(1, &progName);
 }
 
-void Environment::init(int argc, const char *argv[])
+void Environment::init(int argc, const char* argv[])
 {
-    m_game = istring("sample.text");
+    m_game         = istring("sample.text");
     ipath rootPath = canonicalPath(argv[0], "\\/");
-    m_programPath = ifilename(rootPath);
+    m_programPath  = ifilename(rootPath);
     rootPath.pop_back();
     m_dataDirectory = rootPath + m_dataDirectory;
 
-    for (int arg = 1; arg < argc; arg++)
+    for(int arg = 1; arg < argc; arg++)
     {
-        if (argv[arg][0] == '-')
+        if(argv[arg][0] == '-')
         {
             continue;
         }
         m_game = argv[arg];
     }
 
-    SetDllDirectoryA((getDataDirectory()+ipath("plugin")).str().name);
+    SetDllDirectoryA((getDataDirectory() + ipath("plugin")).str().name);
 }
 
 size_t Environment::getProcessorCount() const
@@ -83,9 +78,9 @@ size_t Environment::getProcessorCount() const
     return i.dwNumberOfProcessors;
 }
 
-const char* Environment::getEnvironmentVariable(const char *variable) const
+const char* Environment::getEnvironmentVariable(const char* variable) const
 {
     return getenv(variable);
 }
 
-}
+}  // namespace BugEngine

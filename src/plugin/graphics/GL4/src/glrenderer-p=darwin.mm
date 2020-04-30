@@ -1,20 +1,20 @@
 /* BugEngine <bugengine.devel@gmail.com> / 2008-2014
    see LICENSE for detail */
 
-#include    <GL4/stdafx.h>
-#include    <GL4/glrenderer.hh>
-#include    <GL4/glmemoryhost.hh>
+#include    <bugengine/plugin.graphics.GL4/stdafx.h>
+#include    <bugengine/plugin.graphics.GL4/glrenderer.hh>
+#include    <bugengine/plugin.graphics.GL4/glmemoryhost.hh>
 #include    <extensions.hh>
 
-#include    <3d/mesh/mesh.script.hh>
-#include    <3d/texture/texture.script.hh>
-#include    <3d/shader/shader.script.hh>
-#include    <3d/rendertarget/rendertarget.script.hh>
+#include    <bugengine/plugin.graphics.3d/mesh/mesh.script.hh>
+#include    <bugengine/plugin.graphics.3d/texture/texture.script.hh>
+#include    <bugengine/plugin.graphics.3d/shader/shader.script.hh>
+#include    <bugengine/plugin.graphics.3d/rendertarget/rendertarget.script.hh>
 #include    <loaders/mesh/glmesh.hh>
 #include    <loaders/texture/gltexture.hh>
 #include    <loaders/shader/glshader.hh>
 #include    <loaders/rendertarget/glwindow.hh>
-#include    <core/threads/thread.hh>
+#include    <bugengine/core/threads/thread.hh>
 
 
 #include    <Cocoa/Cocoa.h>

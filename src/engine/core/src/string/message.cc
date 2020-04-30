@@ -1,16 +1,14 @@
 /* BugEngine <bugengine.devel@gmail.com> / 2008-2014
    see LICENSE for detail */
 
-#include    <core/stdafx.h>
-#include    <core/string/message.hh>
-#include    <cstring>
+#include <bugengine/core/stdafx.h>
+#include <bugengine/core/string/message.hh>
 
+#include <cstring>
 
-namespace BugEngine
-{
+namespace BugEngine {
 
-message::message(const char *msg)
-:   m_msg(msg)
+message::message(const char* msg) : m_msg(msg)
 {
 }
 
@@ -18,4 +16,4 @@ message::~message()
 {
 }
 
-}
+}  // namespace BugEngine

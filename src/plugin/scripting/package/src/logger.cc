@@ -1,15 +1,13 @@
 /* BugEngine <bugengine.devel@gmail.com> / 2008-2014
    see LICENSE for detail */
 
-#include    <package/stdafx.h>
-#include    <package/logger.hh>
-#include    <core/logger.hh>
+#include <bugengine/plugin.scripting.package/stdafx.h>
+#include <bugengine/core/logger.hh>
+#include <bugengine/plugin.scripting.package/logger.hh>
 
-namespace BugEngine { namespace PackageBuilder
-{
+namespace BugEngine { namespace PackageBuilder {
 
-Logger::Logger()
-    :   m_errorCount(0)
+Logger::Logger() : m_errorCount(0)
 {
 }
 
@@ -35,7 +33,7 @@ void Logger::warning(const ifilename& file, const u32 line, const char* message)
 void Logger::error(const ifilename& file, const u32 line, const char* message)
 {
     ::BugEngine::Logger::root()->log(::BugEngine::logError, file.str().name, line, message);
-    m_errorCount ++;
+    m_errorCount++;
 }
 
-}}
+}}  // namespace BugEngine::PackageBuilder

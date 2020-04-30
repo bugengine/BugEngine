@@ -1,21 +1,19 @@
 /* BugEngine <bugengine.devel@gmail.com> / 2008-2014
    see LICENSE for detail */
 
-#include    <bugengine/stdafx.h>
-#include    <bugengine/application.hh>
+#include <bugengine/stdafx.h>
+#include <bugengine/application.hh>
 
-#include    <signal.h>
+#include <signal.h>
 
-
-namespace BugEngine
-{
+namespace BugEngine {
 
 static Application* s_application = 0;
 
 extern "C" void signalHandler(int /*signal*/)
 {
     be_info("interrupted");
-    if (s_application)
+    if(s_application)
     {
         s_application->finish();
         s_application = 0;
@@ -41,4 +39,4 @@ void Application::unregisterInterruptions()
     s_application = 0;
 }
 
-}
+}  // namespace BugEngine

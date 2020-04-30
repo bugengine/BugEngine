@@ -1,25 +1,23 @@
 /* BugEngine <bugengine.devel@gmail.com> / 2008-2014
    see LICENSE for detail */
 
-#include    <pythonlib/stdafx.h>
-#include    <pythonlib/pythonlib.hh>
+#include <bugengine/plugin.scripting.pythonlib/stdafx.h>
+#include <bugengine/plugin.scripting.pythonlib/pythonlib.hh>
 
-namespace BugEngine { namespace Arena
-{
+namespace BugEngine { namespace Arena {
 
 minitl::Allocator& python()
 {
     return script();
 }
 
-}}
+}}  // namespace BugEngine::Arena
 
-namespace BugEngine { namespace Python
-{
+namespace BugEngine { namespace Python {
 
-PythonLibrary::ThreadLock::ThreadLock(weak<PythonLibrary> library, PyThreadState *thread)
-    :   m_library(library)
-    ,   m_thread(thread)
+PythonLibrary::ThreadLock::ThreadLock(weak< PythonLibrary > library, PyThreadState* thread)
+    : m_library(library)
+    , m_thread(thread)
 {
     (*m_library->m_PyEval_AcquireThread)(m_thread);
     setCurrentContext(m_library);
@@ -71,4 +69,4 @@ int PythonLibrary::getApi() const
     return m_api;
 }
 
-}}
+}}  // namespace BugEngine::Python

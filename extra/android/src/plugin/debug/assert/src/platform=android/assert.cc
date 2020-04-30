@@ -1,18 +1,14 @@
 /* BugEngine <bugengine.devel@gmail.com> / 2008-2014
    see LICENSE for detail */
 
-#include    <stdafx.h>
-#include    <minitl/assert.hh>
-#include    <stdio.h>
-#include    <stdarg.h>
+#include <stdafx.h>
+#include <bugengine/minitl/assert.hh>
+#include <stdarg.h>
+#include <stdio.h>
 
-namespace BugEngine { namespace Debug
-{
+namespace BugEngine { namespace Debug {
 
-minitl::AssertionResult AssertionCallback(const char *file,
-                                          int        line,
-                                          const char *expr,
-                                          const char *message)
+minitl::AssertionResult AssertionCallback(const char* file, int line, const char* expr, const char* message)
 {
     fprintf(stderr, "%s:%d Assertion failed: %s\n\t", file, line, expr);
     fprintf(stderr, "%s\n", message);
@@ -20,5 +16,4 @@ minitl::AssertionResult AssertionCallback(const char *file,
     return minitl::Break;
 }
 
-}}
-
+}}  // namespace BugEngine::Debug

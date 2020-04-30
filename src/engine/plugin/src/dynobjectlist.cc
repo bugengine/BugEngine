@@ -1,27 +1,22 @@
 /* BugEngine <bugengine.devel@gmail.com> / 2008-2014
    see LICENSE for detail */
 
-#include    <plugin/stdafx.h>
-#include    <plugin/dynobject.hh>
-#include    <plugin/dynobjectlist.hh>
-#include    <cstring>
+#include <bugengine/plugin/stdafx.h>
+#include <bugengine/plugin/dynobject.hh>
+#include <bugengine/plugin/dynobjectlist.hh>
+#include <cstring>
 
-namespace BugEngine { namespace Plugin
-{
+namespace BugEngine { namespace Plugin {
 
 #ifdef BE_STATIC
 
-DynamicObjectList*  DynamicObjectList::s_dynamicObjectRoot = 0;
+DynamicObjectList* DynamicObjectList::s_dynamicObjectRoot = 0;
 
-DynamicObjectList::Symbol::Symbol()
-    :   name(0)
-    ,   symbol()
+DynamicObjectList::Symbol::Symbol() : name(0), symbol()
 {
 }
 
-DynamicObjectList::DynamicObjectList(const char* name)
-    :   m_next(s_dynamicObjectRoot)
-    ,   m_name(name)
+DynamicObjectList::DynamicObjectList(const char* name) : m_next(s_dynamicObjectRoot), m_name(name)
 {
     be_info("Registering built-in dynamic object %s" | name);
     s_dynamicObjectRoot = this;
@@ -29,17 +24,17 @@ DynamicObjectList::DynamicObjectList(const char* name)
 
 DynamicObjectList::~DynamicObjectList()
 {
-    be_assert(s_dynamicObjectRoot == this,"Invalid order in create/destroy dynamic object");
+    be_assert(s_dynamicObjectRoot == this, "Invalid order in create/destroy dynamic object");
     s_dynamicObjectRoot = m_next;
 }
 
-DynamicObjectList* DynamicObjectList::findDynamicObject(const char *name)
+DynamicObjectList* DynamicObjectList::findDynamicObject(const char* name)
 {
     be_info("loading dynamic object %s (built-in)" | name);
     DynamicObjectList* current = s_dynamicObjectRoot;
     while(current)
     {
-        if (strcmp(name, current->m_name) == 0)
+        if(strcmp(name, current->m_name) == 0)
         {
             return current;
         }
@@ -51,11 +46,11 @@ DynamicObjectList* DynamicObjectList::findDynamicObject(const char *name)
 
 bool DynamicObjectList::registerSymbolInternal(const char* name, SymbolPointer value)
 {
-    for (u32 i = 0; i < sizeof(m_symbols)/sizeof(m_symbols[0]); ++i)
+    for(u32 i = 0; i < sizeof(m_symbols) / sizeof(m_symbols[0]); ++i)
     {
-        if (m_symbols[i].name == 0)
+        if(m_symbols[i].name == 0)
         {
-            m_symbols[i].name = name;
+            m_symbols[i].name   = name;
             m_symbols[i].symbol = value;
             return true;
         }
@@ -64,11 +59,12 @@ bool DynamicObjectList::registerSymbolInternal(const char* name, SymbolPointer v
     return false;
 }
 
-const DynamicObjectList::SymbolPointer* DynamicObjectList::findSymbolInternal(const char* name) const
+const DynamicObjectList::SymbolPointer*
+DynamicObjectList::findSymbolInternal(const char* name) const
 {
-    for (u32 i = 0; i < sizeof(m_symbols)/sizeof(m_symbols[0]); ++i)
+    for(u32 i = 0; i < sizeof(m_symbols) / sizeof(m_symbols[0]); ++i)
     {
-        if (strcmp(m_symbols[i].name, name) == 0)
+        if(strcmp(m_symbols[i].name, name) == 0)
         {
             return &m_symbols[i].symbol;
         }
@@ -79,13 +75,12 @@ const DynamicObjectList::SymbolPointer* DynamicObjectList::findSymbolInternal(co
 void DynamicObjectList::showList()
 {
     DynamicObjectList* object = s_dynamicObjectRoot;
-    while (object)
+    while(object)
     {
         be_info("registered built-in plugin %s" | object->m_name);
         object = object->m_next;
     }
 }
-
 
 DynamicObject::Handle DynamicObject::load(const inamespace& objectName, const ipath& objectPath)
 {
@@ -100,9 +95,9 @@ void DynamicObject::unload(Handle handle)
 
 void* DynamicObject::getSymbolInternal(Handle handle, const istring& name)
 {
-    return reinterpret_cast<DynamicObjectList*>(handle)->findSymbol<void*>(name.c_str());
+    return reinterpret_cast< DynamicObjectList* >(handle)->findSymbol< void* >(name.c_str());
 }
 
 #endif
 
-}}
+}}  // namespace BugEngine::Plugin

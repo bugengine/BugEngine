@@ -1,16 +1,13 @@
 /* BugEngine <bugengine.devel@gmail.com> / 2008-2014
    see LICENSE for detail */
 
-#include    <scheduler/stdafx.h>
-#include    <scheduler/private/taskitem.hh>
-#include    <scheduler/task/task.hh>
+#include <bugengine/scheduler/stdafx.h>
+#include <bugengine/scheduler/private/taskitem.hh>
+#include <bugengine/scheduler/task/task.hh>
 
+namespace BugEngine { namespace Task {
 
-namespace BugEngine { namespace Task
-{
-
-ITaskItem::ITaskItem(weak<ITask> owner)
-    :   m_owner(owner)
+ITaskItem::ITaskItem(weak< ITask > owner) : m_owner(owner)
 {
 }
 
@@ -18,4 +15,4 @@ ITaskItem::~ITaskItem()
 {
 }
 
-}}
+}}  // namespace BugEngine::Task

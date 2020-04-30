@@ -1,19 +1,17 @@
 /* BugEngine <bugengine.devel@gmail.com> / 2008-2014
    see LICENSE for detail */
 
-#include    <GL4/stdafx.h>
-#include    <loaders/rendertarget/glwindow.hh>
+#include <bugengine/plugin.graphics.GL4/stdafx.h>
+#include <loaders/rendertarget/glwindow.hh>
 
-
-namespace BugEngine { namespace OpenGL
-{
+namespace BugEngine { namespace OpenGL {
 
 void GLWindow::begin(ClearMode clear) const
 {
-    if (m_context)
+    if(m_context)
     {
         setCurrent();
-        if (clear == IRenderTarget::Clear)
+        if(clear == IRenderTarget::Clear)
         {
             glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
             glClear(GL_COLOR_BUFFER_BIT);
@@ -24,10 +22,10 @@ void GLWindow::begin(ClearMode clear) const
 
 void GLWindow::end(PresentMode presentMode) const
 {
-    if (m_context)
+    if(m_context)
     {
         glFlush();
-        if (presentMode == Present)
+        if(presentMode == Present)
         {
             present();
         }
@@ -36,4 +34,4 @@ void GLWindow::end(PresentMode presentMode) const
     be_info("blabla");
 }
 
-}}
+}}  // namespace BugEngine::OpenGL

@@ -4,11 +4,10 @@
 #ifndef BE_COMPUTE_CPU_MEMORYHOST_HH_
 #define BE_COMPUTE_CPU_MEMORYHOST_HH_
 /**************************************************************************************************/
-#include    <cpu/stdafx.h>
-#include    <scheduler/kernel/imemoryhost.hh>
+#include <bugengine/plugin.compute.cpu/stdafx.h>
+#include <bugengine/scheduler/kernel/imemoryhost.hh>
 
-namespace BugEngine { namespace KernelScheduler { namespace CPU
-{
+namespace BugEngine { namespace KernelScheduler { namespace CPU {
 
 class MemoryHost : public IMemoryHost
 {
@@ -16,10 +15,10 @@ public:
     MemoryHost();
     ~MemoryHost();
 
-    void release(weak<KernelScheduler::IMemoryBuffer> buffer);
+    void release(weak< KernelScheduler::IMemoryBuffer > buffer);
 };
 
-}}}
+}}}  // namespace BugEngine::KernelScheduler::CPU
 
 /**************************************************************************************************/
 #endif

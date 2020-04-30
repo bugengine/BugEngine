@@ -1,16 +1,15 @@
 /* BugEngine <bugengine.devel@gmail.com> / 2008-2014
    see LICENSE for detail */
 
-#include    <rtti/stdafx.h>
-#include    <rtti/tags/documentation.script.hh>
-#include    <rtti/classinfo.script.hh>
-#include    <rtti/engine/methodinfo.script.hh>
-#include    <rtti/engine/propertyinfo.script.hh>
-#include    <rtti/value.hh>
-#include    <zlib.h>
+#include <bugengine/rtti/stdafx.h>
+#include <bugengine/rtti/classinfo.script.hh>
+#include <bugengine/rtti/engine/methodinfo.script.hh>
+#include <bugengine/rtti/engine/propertyinfo.script.hh>
+#include <bugengine/rtti/tags/documentation.script.hh>
+#include <bugengine/rtti/value.hh>
+#include <zlib.h>
 
-namespace BugEngine
-{
+namespace BugEngine {
 
 void help(const RTTI::Type& type)
 {
@@ -46,11 +45,9 @@ void help(const RTTI::Method::Parameter& parameter)
     be_forceuse(parameter);
 }
 
-
 void help(const RTTI::Value& v)
 {
     be_forceuse(v);
 }
 
-}
-
+}  // namespace BugEngine

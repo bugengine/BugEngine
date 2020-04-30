@@ -1,16 +1,15 @@
 /* BugEngine <bugengine.devel@gmail.com> / 2008-2014
    see LICENSE for detail */
 
-#include    <core/stdafx.h>
-#include    <core/memory/allocators/system.hh>
+#include <bugengine/core/stdafx.h>
+#include <bugengine/core/memory/allocators/system.hh>
 
-namespace BugEngine
-{
+namespace BugEngine {
 
 u32 SystemAllocator::platformPageSize()
 {
     static SYSTEM_INFO s_systemInfo;
-    static bool s_systemInfo_acquired = (GetSystemInfo(&s_systemInfo), true);
+    static bool        s_systemInfo_acquired = (GetSystemInfo(&s_systemInfo), true);
     be_forceuse(s_systemInfo_acquired);
     return s_systemInfo.dwPageSize;
 }
@@ -32,10 +31,10 @@ void SystemAllocator::platformCommit(byte* ptr, u32 start, u32 stop)
               "offset %d is not aligned on a page boundary (page size = %d)" | start | platformPageSize());
     be_assert(stop % platformPageSize() == 0,
               "offset %d is not aligned on a page boundary (page size = %d)" | stop | platformPageSize());
-    VirtualAlloc(ptr+start, stop-start, MEM_COMMIT, PAGE_READWRITE);
+    VirtualAlloc(ptr + start, stop - start, MEM_COMMIT, PAGE_READWRITE);
 }
 
-void  SystemAllocator::platformRelease(byte* ptr, u32 start, u32 stop)
+void SystemAllocator::platformRelease(byte* ptr, u32 start, u32 stop)
 {
     be_assert((uintptr_t)ptr % platformPageSize() == 0,
               "pointer %p is not aligned on a page boundary (page size = %d)" | ptr | platformPageSize());
@@ -43,10 +42,10 @@ void  SystemAllocator::platformRelease(byte* ptr, u32 start, u32 stop)
               "offset %d is not aligned on a page boundary (page size = %d)" | start | platformPageSize());
     be_assert(stop % platformPageSize() == 0,
               "offset %d is not aligned on a page boundary (page size = %d)" | stop | platformPageSize());
-    VirtualFree(ptr+start, stop-start, MEM_DECOMMIT);
+    VirtualFree(ptr + start, stop - start, MEM_DECOMMIT);
 }
 
-void  SystemAllocator::platformFree(byte* ptr, u32 size)
+void SystemAllocator::platformFree(byte* ptr, u32 size)
 {
     be_assert((uintptr_t)ptr % platformPageSize() == 0,
               "pointer %p is not aligned on a page boundary (page size = %d)" | ptr | platformPageSize());
@@ -55,4 +54,4 @@ void  SystemAllocator::platformFree(byte* ptr, u32 size)
     VirtualFree(ptr, size, MEM_RELEASE);
 }
 
-}
+}  // namespace BugEngine

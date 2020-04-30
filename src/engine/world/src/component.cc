@@ -2,11 +2,9 @@
 /* BugEngine <bugengine.devel@gmail.com> / 2008-2014
    see LICENSE for detail */
 
-#include    <world/stdafx.h>
-#include    <world/component.script.hh>
+#include <bugengine/world/stdafx.h>
+#include <bugengine/world/component.script.hh>
 
-namespace BugEngine { namespace World
-{
+namespace BugEngine { namespace World {
 
 }}
-

@@ -1,11 +1,13 @@
 /* BugEngine <bugengine.devel@gmail.com> / 2008-2014
    see LICENSE for detail */
 
-#include    <scheduler/stdafx.h>
+#include <bugengine/scheduler/stdafx.h>
 
-namespace BugEngine { namespace Arena
+namespace BugEngine { namespace Arena {
+
+minitl::Allocator& task()
 {
+    return general();
+}
 
-minitl::Allocator& task() { return general(); }
-
-}}
+}}  // namespace BugEngine::Arena

@@ -1,14 +1,12 @@
 /* BugEngine <bugengine.devel@gmail.com> / 2008-2014
    see LICENSE for detail */
 
-#include    <stdafx.h>
-#include    <loaders/nullsurface.hh>
-#include    <nullrenderer.hh>
-#include    <3d/rendertarget/rendertarget.script.hh>
+#include <stdafx.h>
+#include <bugengine/plugin.graphics.3d/rendertarget/rendertarget.script.hh>
+#include <loaders/nullsurface.hh>
+#include <nullrenderer.hh>
 
-
-namespace BugEngine { namespace Null
-{
+namespace BugEngine { namespace Null {
 
 void NullSurface::begin(ClearMode /*clear*/) const
 {
@@ -18,8 +16,9 @@ void NullSurface::end(PresentMode /*presentMode*/) const
 {
 }
 
-NullSurface::NullSurface(weak<const RenderSurfaceDescription> surfaceDescription, weak<const NullRenderer> renderer)
-:   IRenderTarget(surfaceDescription, renderer)
+NullSurface::NullSurface(weak< const RenderSurfaceDescription > surfaceDescription,
+                         weak< const NullRenderer >             renderer)
+    : IRenderTarget(surfaceDescription, renderer)
 {
 }
 
@@ -31,7 +30,7 @@ void NullSurface::present() const
 {
 }
 
-void NullSurface::load(weak<const Resource::Description> /*surfaceDescription*/)
+void NullSurface::load(weak< const Resource::Description > /*surfaceDescription*/)
 {
 }
 
@@ -39,4 +38,4 @@ void NullSurface::unload()
 {
 }
 
-}}
+}}  // namespace BugEngine::Null

@@ -1,25 +1,24 @@
 /* BugEngine <bugengine.devel@gmail.com> / 2008-2014
    see LICENSE for detail */
 
-#include    <console/stdafx.h>
-#include    <window.script.hh>
-#include    <io.h>
-#include    <fcntl.h>
-#include    <stdio.h>
+#include <bugengine/plugin.ui.console/stdafx.h>
+#include <fcntl.h>
+#include <io.h>
+#include <stdio.h>
+#include <window.script.hh>
 
-namespace BugEngine
-{
+namespace BugEngine {
 
 Window::CursesWindow::ScreenPipe::ScreenPipe()
 {
     HANDLE pipeRead, pipeWrite;
-    BOOL result = CreatePipe(&pipeRead, &pipeWrite, NULL, 0);
+    BOOL   result = CreatePipe(&pipeRead, &pipeWrite, NULL, 0);
     be_assert(result != FALSE, "CreatePipe failed with error %d" | GetLastError());
     be_forceuse(result);
-    int descRead = _open_osfhandle((intptr_t)pipeRead, _O_RDONLY);
+    int descRead   = _open_osfhandle((intptr_t)pipeRead, _O_RDONLY);
     m_screenStdOut = _fdopen(descRead, "r");
-    int descWrite = _open_osfhandle((intptr_t)pipeWrite, _O_WRONLY);
-    m_fileOutput = _fdopen(descWrite, "w");
+    int descWrite  = _open_osfhandle((intptr_t)pipeWrite, _O_WRONLY);
+    m_fileOutput   = _fdopen(descWrite, "w");
 
     SetStdHandle(STD_OUTPUT_HANDLE, m_screenStdOut);
 }
@@ -30,4 +29,4 @@ Window::CursesWindow::ScreenPipe::~ScreenPipe()
     fclose(m_screenStdOut);
 }
 
-}
+}  // namespace BugEngine

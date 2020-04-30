@@ -1,14 +1,12 @@
 /* BugEngine <bugengine.devel@gmail.com> / 2008-2014
    see LICENSE for detail */
 
-#include    <bugengine/stdafx.h>
-#include    <bugengine/script.script.hh>
+#include <bugengine/stdafx.h>
+#include <bugengine/script.script.hh>
 
-namespace BugEngine
-{
+namespace BugEngine {
 
-Script::Script(weak<const File> file)
-    :   m_file(file)
+Script::Script(weak< const File > file) : m_file(file)
 {
 }
 
@@ -21,5 +19,4 @@ ifilename Script::getScriptName() const
     return m_file->getFileName();
 }
 
-}
-
+}  // namespace BugEngine

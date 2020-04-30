@@ -4,11 +4,10 @@
 #ifndef BE_GL4_LOADERS_RENDERTARGET_GLSURFACE_HH_
 #define BE_GL4_LOADERS_RENDERTARGET_GLSURFACE_HH_
 /**************************************************************************************************/
-#include    <GL4/stdafx.h>
-#include    <3d/renderer/igpuresource.hh>
+#include <bugengine/plugin.graphics.GL4/stdafx.h>
+#include <bugengine/plugin.graphics.3d/renderer/igpuresource.hh>
 
-namespace BugEngine { namespace OpenGL
-{
+namespace BugEngine { namespace OpenGL {
 
 class GLRenderer;
 
@@ -17,11 +16,13 @@ class GLSurface : public IRenderTarget
 private:
     void setCurrent() const;
     void clearCurrent() const;
+
 public:
-    GLSurface(weak<const RenderSurfaceDescription> surfaceDescription, weak<GLRenderer> renderer);
+    GLSurface(weak< const RenderSurfaceDescription > surfaceDescription,
+              weak< GLRenderer >                     renderer);
     ~GLSurface();
 
-    virtual void load(weak<const Resource::Description> surfaceDescription) override;
+    virtual void load(weak< const Resource::Description > surfaceDescription) override;
     virtual void unload() override;
 
     void begin(ClearMode clear) const override;
@@ -30,7 +31,7 @@ public:
     void present() const;
 };
 
-}}
+}}  // namespace BugEngine::OpenGL
 
 /**************************************************************************************************/
 #endif

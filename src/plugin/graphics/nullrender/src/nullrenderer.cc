@@ -1,17 +1,16 @@
 /* BugEngine <bugengine.devel@gmail.com> / 2008-2014
    see LICENSE for detail */
 
-#include    <stdafx.h>
-#include    <nullrenderer.hh>
+#include <stdafx.h>
+#include <nullrenderer.hh>
 
-#include    <3d/rendertarget/rendertarget.script.hh>
-#include    <3d/shader/shader.script.hh>
-#include    <loaders/nullsurface.hh>
-#include    <loaders/nullwindow.hh>
-#include    <loaders/nullshader.hh>
+#include <bugengine/plugin.graphics.3d/rendertarget/rendertarget.script.hh>
+#include <bugengine/plugin.graphics.3d/shader/shader.script.hh>
+#include <loaders/nullshader.hh>
+#include <loaders/nullsurface.hh>
+#include <loaders/nullwindow.hh>
 
-namespace BugEngine { namespace Null
-{
+namespace BugEngine { namespace Null {
 
 void NullRenderer::flush()
 {
@@ -19,7 +18,7 @@ void NullRenderer::flush()
 }
 
 NullRenderer::NullRenderer(const Plugin::Context& context)
-:   IRenderer(Arena::general(), context.resourceManager)
+    : IRenderer(Arena::general(), context.resourceManager)
 {
 }
 
@@ -28,19 +27,22 @@ NullRenderer::~NullRenderer()
     flush();
 }
 
-ref<IGPUResource> NullRenderer::create(weak<const RenderSurfaceDescription> renderSurfaceDescription) const
+ref< IGPUResource >
+NullRenderer::create(weak< const RenderSurfaceDescription > renderSurfaceDescription) const
 {
-    return ref<NullSurface>::create(m_allocator, renderSurfaceDescription, this);
+    return ref< NullSurface >::create(m_allocator, renderSurfaceDescription, this);
 }
 
-ref<IGPUResource> NullRenderer::create(weak<const RenderWindowDescription> renderWindowDescription) const
+ref< IGPUResource >
+NullRenderer::create(weak< const RenderWindowDescription > renderWindowDescription) const
 {
-    return ref<NullWindow>::create(m_allocator, renderWindowDescription, this);
+    return ref< NullWindow >::create(m_allocator, renderWindowDescription, this);
 }
 
-ref<IGPUResource> NullRenderer::create(weak<const ShaderProgramDescription> shaderDescription) const
+ref< IGPUResource >
+NullRenderer::create(weak< const ShaderProgramDescription > shaderDescription) const
 {
-    return ref<NullShaderProgram>::create(m_allocator, shaderDescription, this);
+    return ref< NullShaderProgram >::create(m_allocator, shaderDescription, this);
 }
 
-}}
+}}  // namespace BugEngine::Null

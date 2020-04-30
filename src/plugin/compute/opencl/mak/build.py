@@ -11,21 +11,25 @@ except ImportError:
 
 template_cc = """
 %(pch)s
-#include    <kernel/compilers.hh>
-#include    <kernel/simd.hh>
-#include    <kernel/input/input.hh>
-#include    <plugin/dynobjectlist.hh>
+#include    <bugengine/kernel/compilers.hh>
+#include    <bugengine/kernel/simd.hh>
+#include    <bugengine/kernel/input/input.hh>
+#include    <bugengine/plugin/dynobjectlist.hh>
 
 extern const unsigned char s_cldata32[];
 extern const size_t s_cldata32_size;
 extern const unsigned char s_cldata64[];
 extern const size_t s_cldata64_size;
 
-_BE_PLUGIN_EXPORT const unsigned char* s_clKernel32 = s_cldata32;
-_BE_PLUGIN_EXPORT const unsigned long s_clKernel32Size = s_cldata32_size;
+_BE_PLUGIN_EXPORT const unsigned char* s_clKernel32;
+_BE_PLUGIN_EXPORT const unsigned long s_clKernel32Size;
+_BE_PLUGIN_EXPORT const unsigned char* s_clKernel64;
+_BE_PLUGIN_EXPORT const unsigned long s_clKernel64Size;
 
-_BE_PLUGIN_EXPORT const unsigned char* s_clKernel64 = s_cldata64;
-_BE_PLUGIN_EXPORT const unsigned long s_clKernel64Size = s_cldata64_size;
+const unsigned char* s_clKernel32 = s_cldata32;
+const unsigned long s_clKernel32Size = s_cldata32_size;
+const unsigned char* s_clKernel64 = s_cldata64;
+const unsigned long s_clKernel64Size = s_cldata64_size;
 
 _BE_REGISTER_PLUGIN(BE_KERNEL_ID, BE_KERNEL_NAME);
 _BE_REGISTER_METHOD_NAMED(BE_KERNEL_ID, , s_clKernel32);
@@ -39,10 +43,13 @@ class cc_cl_trampoline(Task.Task):
     "cc_cl_trampoline"
     color = 'PINK'
 
+    def sig_vars(self):
+        self.m.update(template_cc.encode('utf-8'))
+        self.m.update((self.generator.pchstop if self.generator.pchstop else '').encode('utf-8'))
+
     def run(self):
         with open(self.inputs[0].abspath(), 'rb') as input_file:
             kernel_name, method, _, includes, source = pickle.load(input_file)
-
         args = []
         for arg in method.parameters[2:]:
             args.append((arg.name, arg.type))
@@ -51,7 +58,6 @@ class cc_cl_trampoline(Task.Task):
             'kernel_source': source,
             'args': ',\n          '.join('%s(0, 0, 0)' % arg[1] for i, arg in enumerate(args)),
         }
-
         with open(self.outputs[0].abspath(), 'w') as out:
             out.write(template_cc % params)
 

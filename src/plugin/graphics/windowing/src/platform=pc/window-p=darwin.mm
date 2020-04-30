@@ -1,11 +1,11 @@
 /* BugEngine <bugengine.devel@gmail.com> / 2008-2014
    see LICENSE for detail */
 
-#include    <windowing/stdafx.h>
-#include    <windowing/window.hh>
-#include    <windowing/renderer.hh>
+#include    <bugengine/plugin.graphics.windowing/stdafx.h>
+#include    <bugengine/plugin.graphics.windowing/window.hh>
+#include    <bugengine/plugin.graphics.windowing/renderer.hh>
 #include    <darwin/platformrenderer.hh>
-#include    <3d/rendertarget/rendertarget.script.hh>
+#include    <bugengine/plugin.graphics.3d/rendertarget/rendertarget.script.hh>
 
 #ifndef MAC_OS_X_VERSION_10_12
 # define MAC_OS_X_VERSION_10_12 101200

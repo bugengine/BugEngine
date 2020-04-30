@@ -1,137 +1,134 @@
 /* BugEngine <bugengine.devel@gmail.com> / 2008-2014
    see LICENSE for detail */
 
-#include    <runtime/stdafx.h>
+#include <bugengine/plugin.debug.runtime/stdafx.h>
 
-#include    <elf.hh>
-#include    <dwarf.hh>
+#include <dwarf.hh>
+#include <elf.hh>
 
-namespace BugEngine { namespace Runtime
-{
+namespace BugEngine { namespace Runtime {
 
 struct ElfIdentification
 {
-    u8  header[4];
-    u8  klass;
-    u8  msb;
-    u8  version;
-    u8  padding[9];
+    u8 header[4];
+    u8 klass;
+    u8 msb;
+    u8 version;
+    u8 padding[9];
 };
 
-template< ElfClass, ElfEndianness >
+template < ElfClass, ElfEndianness >
 struct ElfTypes;
 
-template< >
-struct ElfTypes<klass_32, msb_littleendian>
+template <>
+struct ElfTypes< klass_32, msb_littleendian >
 {
-    typedef u16_l   half_t;
-    typedef u32_l   word_t;
-    typedef i32_l   sword_t;
-    typedef u64_l   xword_t;
-    typedef i64_l   sxword_t;
-    typedef u32_l   addr_t;
-    typedef u32_l   offset_t;
-    typedef u16_l   section_t;
-    typedef half_t  versym_t;
+    typedef u16_l  half_t;
+    typedef u32_l  word_t;
+    typedef i32_l  sword_t;
+    typedef u64_l  xword_t;
+    typedef i64_l  sxword_t;
+    typedef u32_l  addr_t;
+    typedef u32_l  offset_t;
+    typedef u16_l  section_t;
+    typedef half_t versym_t;
 };
 
-template< >
-struct ElfTypes<klass_64, msb_littleendian>
+template <>
+struct ElfTypes< klass_64, msb_littleendian >
 {
-    typedef u16_l   half_t;
-    typedef u32_l   word_t;
-    typedef i32_l   sword_t;
-    typedef u64_l   xword_t;
-    typedef i64_l   sxword_t;
-    typedef u64_l   addr_t;
-    typedef u64_l   offset_t;
-    typedef u16_l   section_t;
-    typedef half_t  versym_t;
-
+    typedef u16_l  half_t;
+    typedef u32_l  word_t;
+    typedef i32_l  sword_t;
+    typedef u64_l  xword_t;
+    typedef i64_l  sxword_t;
+    typedef u64_l  addr_t;
+    typedef u64_l  offset_t;
+    typedef u16_l  section_t;
+    typedef half_t versym_t;
 };
 
-template< >
-struct ElfTypes<klass_32, msb_bigendian>
+template <>
+struct ElfTypes< klass_32, msb_bigendian >
 {
-    typedef u16_b   half_t;
-    typedef u32_b   word_t;
-    typedef i32_b   sword_t;
-    typedef u64_b   xword_t;
-    typedef i64_b   sxword_t;
-    typedef u32_b   addr_t;
-    typedef u32_b   offset_t;
-    typedef u16_b   section_t;
-    typedef half_t  versym_t;
+    typedef u16_b  half_t;
+    typedef u32_b  word_t;
+    typedef i32_b  sword_t;
+    typedef u64_b  xword_t;
+    typedef i64_b  sxword_t;
+    typedef u32_b  addr_t;
+    typedef u32_b  offset_t;
+    typedef u16_b  section_t;
+    typedef half_t versym_t;
 };
 
-template< >
-struct ElfTypes<klass_64, msb_bigendian>
+template <>
+struct ElfTypes< klass_64, msb_bigendian >
 {
-    typedef u16_b   half_t;
-    typedef u32_b   word_t;
-    typedef i32_b   sword_t;
-    typedef u64_b   xword_t;
-    typedef i64_b   sxword_t;
-    typedef u64_b   addr_t;
-    typedef u64_b   offset_t;
-    typedef u16_b   section_t;
-    typedef half_t  versym_t;
+    typedef u16_b  half_t;
+    typedef u32_b  word_t;
+    typedef i32_b  sword_t;
+    typedef u64_b  xword_t;
+    typedef i64_b  sxword_t;
+    typedef u64_b  addr_t;
+    typedef u64_b  offset_t;
+    typedef u16_b  section_t;
+    typedef half_t versym_t;
 };
 
-template< ElfClass klass, ElfEndianness endianness >
+template < ElfClass klass, ElfEndianness endianness >
 struct ElfHeader
 {
-    typename ElfTypes<klass, endianness>::half_t     type;
-    typename ElfTypes<klass, endianness>::half_t     machine;
-    typename ElfTypes<klass, endianness>::word_t     version;
-    typename ElfTypes<klass, endianness>::addr_t     entry;
-    typename ElfTypes<klass, endianness>::offset_t   phoffset;
-    typename ElfTypes<klass, endianness>::offset_t   shoffset;
-    typename ElfTypes<klass, endianness>::word_t     flags;
-    typename ElfTypes<klass, endianness>::half_t     ehsize;
-    typename ElfTypes<klass, endianness>::half_t     phentsize;
-    typename ElfTypes<klass, endianness>::half_t     phnum;
-    typename ElfTypes<klass, endianness>::half_t     shentsize;
-    typename ElfTypes<klass, endianness>::half_t     shnum;
-    typename ElfTypes<klass, endianness>::half_t     shstrndx;
+    typename ElfTypes< klass, endianness >::half_t   type;
+    typename ElfTypes< klass, endianness >::half_t   machine;
+    typename ElfTypes< klass, endianness >::word_t   version;
+    typename ElfTypes< klass, endianness >::addr_t   entry;
+    typename ElfTypes< klass, endianness >::offset_t phoffset;
+    typename ElfTypes< klass, endianness >::offset_t shoffset;
+    typename ElfTypes< klass, endianness >::word_t   flags;
+    typename ElfTypes< klass, endianness >::half_t   ehsize;
+    typename ElfTypes< klass, endianness >::half_t   phentsize;
+    typename ElfTypes< klass, endianness >::half_t   phnum;
+    typename ElfTypes< klass, endianness >::half_t   shentsize;
+    typename ElfTypes< klass, endianness >::half_t   shnum;
+    typename ElfTypes< klass, endianness >::half_t   shstrndx;
 };
 
-template< ElfClass klass, ElfEndianness endianness >
+template < ElfClass klass, ElfEndianness endianness >
 struct ElfSectionHeader
 {
     enum Types
     {
-        Null = 0,
-        ProgBits = 1,
-        SymbolTable = 2,
-        StringTable = 3,
-        Rela = 4,
-        Hash = 5,
-        Dynamic = 6,
-        Note = 7,
-        Nobits = 8,
-        Rel = 9,
+        Null          = 0,
+        ProgBits      = 1,
+        SymbolTable   = 2,
+        StringTable   = 3,
+        Rela          = 4,
+        Hash          = 5,
+        Dynamic       = 6,
+        Note          = 7,
+        Nobits        = 8,
+        Rel           = 9,
         SharedLibrary = 10,
-        DynSym = 11
+        DynSym        = 11
     };
     enum Flags
     {
         Write = 0x1,
         Alloc = 0x2,
-        Exec = 0x4
+        Exec  = 0x4
     };
-    typename ElfTypes<klass, endianness>::word_t     name;
-    typename ElfTypes<klass, endianness>::word_t     type;
-    typename ElfTypes<klass, endianness>::addr_t     flags;
-    typename ElfTypes<klass, endianness>::addr_t     addr;
-    typename ElfTypes<klass, endianness>::offset_t   offset;
-    typename ElfTypes<klass, endianness>::addr_t     size;
-    typename ElfTypes<klass, endianness>::word_t     link;
-    typename ElfTypes<klass, endianness>::word_t     info;
-    typename ElfTypes<klass, endianness>::addr_t     addralign;
-    typename ElfTypes<klass, endianness>::addr_t     entsize;
+    typename ElfTypes< klass, endianness >::word_t   name;
+    typename ElfTypes< klass, endianness >::word_t   type;
+    typename ElfTypes< klass, endianness >::addr_t   flags;
+    typename ElfTypes< klass, endianness >::addr_t   addr;
+    typename ElfTypes< klass, endianness >::offset_t offset;
+    typename ElfTypes< klass, endianness >::addr_t   size;
+    typename ElfTypes< klass, endianness >::word_t   link;
+    typename ElfTypes< klass, endianness >::word_t   info;
+    typename ElfTypes< klass, endianness >::addr_t   addralign;
+    typename ElfTypes< klass, endianness >::addr_t   entsize;
 };
-
 
 /*
 static const char *s_elfFileType [] =
@@ -243,10 +240,10 @@ static const char* s_elfMachineType [] =
 "Tensilica Xtensa Architecture",                        // 94
 };*/
 
-Elf::Elf(const char *filename, u64 baseAddress)
-:   Module(filename, baseAddress)
-,   m_class(klass_invalid)
-,   m_endianness(msb_invalid)
+Elf::Elf(const char* filename, u64 baseAddress)
+    : Module(filename, baseAddress)
+    , m_class(klass_invalid)
+    , m_endianness(msb_invalid)
 {
     /*FILE* file = fopen(filename, "rb");
     if (file)
@@ -254,8 +251,8 @@ Elf::Elf(const char *filename, u64 baseAddress)
         be_debug("loading file %s" | filename);
         ElfIdentification id;
         fread(&id, 1, sizeof(id), file);
-        be_assert(id.header[0] == 0x7f && id.header[1] == 'E' && id.header[2] == 'L' && id.header[3] == 'F', "not a valid elf signature in file %s" | filename);
-        m_class = (ElfClass)id.klass;
+        be_assert(id.header[0] == 0x7f && id.header[1] == 'E' && id.header[2] == 'L' && id.header[3]
+    == 'F', "not a valid elf signature in file %s" | filename); m_class = (ElfClass)id.klass;
         m_endianness = (ElfEndianness)id.msb;
         if (id.klass == klass_32 && id.msb == msb_littleendian)
         {
@@ -289,29 +286,30 @@ Elf::~Elf()
 {
 }
 
-template< ElfClass klass, ElfEndianness e >
+template < ElfClass klass, ElfEndianness e >
 void Elf::parse()
 {
     /*
     ElfHeader<klass, e> header;
     fread(&header, sizeof(header), 1, f);
-    be_debug("elf file type: %s, for machine : %s" | s_elfFileType[header.type] | s_elfMachineType[header.machine]);
-    be_forceuse(s_elfFileType);
-    be_forceuse(s_elfMachineType);
+    be_debug("elf file type: %s, for machine : %s" | s_elfFileType[header.type] |
+    s_elfMachineType[header.machine]); be_forceuse(s_elfFileType); be_forceuse(s_elfMachineType);
 
-    be_assert(header.shentsize == sizeof(ElfSectionHeader<klass, e>), "invalid or unsupported entry size; expected %d, got %d" | sizeof(ElfSectionHeader<klass, e>) | header.shentsize);
-    ElfSectionHeader<klass, e> *sections = (ElfSectionHeader<klass, e>*)malloca(header.shentsize*header.shnum);
-    fseek(f, be_checked_numcast<long>(header.shoffset), SEEK_SET);
-    fread(sections, header.shentsize, header.shnum, f);
+    be_assert(header.shentsize == sizeof(ElfSectionHeader<klass, e>), "invalid or unsupported entry
+    size; expected %d, got %d" | sizeof(ElfSectionHeader<klass, e>) | header.shentsize);
+    ElfSectionHeader<klass, e> *sections = (ElfSectionHeader<klass,
+    e>*)malloca(header.shentsize*header.shnum); fseek(f, be_checked_numcast<long>(header.shoffset),
+    SEEK_SET); fread(sections, header.shentsize, header.shnum, f);
 
-    minitl::Allocator::Block<char> stringPool(Arena::temporary(), be_checked_numcast<size_t>(sections[header.shstrndx].size));
-    fseek(f, be_checked_numcast<long>(sections[header.shstrndx].offset), SEEK_SET);
-    fread(stringPool, 1, be_checked_numcast<size_t>(sections[header.shstrndx].size), f);
-    
+    minitl::Allocator::Block<char> stringPool(Arena::temporary(),
+    be_checked_numcast<size_t>(sections[header.shstrndx].size)); fseek(f,
+    be_checked_numcast<long>(sections[header.shstrndx].offset), SEEK_SET); fread(stringPool, 1,
+    be_checked_numcast<size_t>(sections[header.shstrndx].size), f);
+
     for (int i = 0; i < header.shnum; ++i)
     {
-        Section sec = { stringPool + sections[i].name, sections[i].addr, sections[i].size, sections[i].offset,  sections[i].size };
-        m_sections.push_back(sec);
+        Section sec = { stringPool + sections[i].name, sections[i].addr, sections[i].size,
+    sections[i].offset,  sections[i].size }; m_sections.push_back(sec);
     }
     freea(sections);*/
 }
@@ -319,14 +317,15 @@ void Elf::parse()
 SymbolResolver::SymbolInformations Elf::getSymbolInformation() const
 {
     SymbolResolver::SymbolInformations result;
-    result.type = SymbolResolver::SymbolInformations::ELFDwarf;
-    const Section& code = (*this)[".text"];
-    result.offset = m_baseAddress + code.offset;
-    result.size = code.size;
+    result.type               = SymbolResolver::SymbolInformations::ELFDwarf;
+    const Section& code       = (*this)[".text"];
+    result.offset             = m_baseAddress + code.offset;
+    result.size               = code.size;
     const Section& debug_link = (*this)[".gnu_debuglink"];
-    if (debug_link)
+    if(debug_link)
     {
-        minitl::Allocator::Block<char> filename(Arena::temporary(), be_checked_numcast<size_t>(debug_link.fileSize));
+        minitl::Allocator::Block< char > filename(
+           Arena::temporary(), be_checked_numcast< size_t >(debug_link.fileSize));
         readSection(debug_link, filename);
         result.filename = ifilename(filename);
     }
@@ -337,5 +336,4 @@ SymbolResolver::SymbolInformations Elf::getSymbolInformation() const
     return result;
 }
 
-}}
-
+}}  // namespace BugEngine::Runtime

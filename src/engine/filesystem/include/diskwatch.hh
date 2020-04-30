@@ -4,27 +4,26 @@
 #ifndef BE_FILESYSTEM_DISKWATCH_HH_
 #define BE_FILESYSTEM_DISKWATCH_HH_
 /**************************************************************************************************/
-#include    <filesystem/stdafx.h>
-#include    <filesystem/diskfolder.script.hh>
+#include <bugengine/filesystem/stdafx.h>
+#include <bugengine/filesystem/diskfolder.script.hh>
 
-namespace BugEngine
-{
+namespace BugEngine {
 
-namespace FileSystem
-{
+namespace FileSystem {
 class WatchPoint;
 }
 
 class DiskFolder::Watch : public Folder::Watch
 {
 private:
-    weak<FileSystem::WatchPoint> m_watchPoint;
+    weak< FileSystem::WatchPoint > m_watchPoint;
+
 public:
-    Watch(weak<DiskFolder> folder, weak<FileSystem::WatchPoint> watchPoint);
+    Watch(weak< DiskFolder > folder, weak< FileSystem::WatchPoint > watchPoint);
     ~Watch();
 };
 
-}
+}  // namespace BugEngine
 
 /**************************************************************************************************/
 #endif

@@ -1,17 +1,15 @@
 /* BugEngine <bugengine.devel@gmail.com> / 2008-2014
    see LICENSE for detail */
 
-#include    <text/stdafx.h>
-#include    <freetypeface.hh>
-#include    <freetypelib.hh>
-#include    FT_OUTLINE_H
+#include <bugengine/plugin.graphics.text/stdafx.h>
+#include <freetypeface.hh>
+#include <freetypelib.hh>
+#include FT_OUTLINE_H
 
-namespace BugEngine
-{
+namespace BugEngine {
 
 struct OutlineDecompose
 {
-
     static int moveTo(const FT_Vector* target, void* decompose)
     {
         be_forceuse(target);
@@ -42,32 +40,31 @@ struct OutlineDecompose
     }
 };
 
-FreetypeFace::FreetypeFace(weak<FreetypeLibrary> freetype, const minitl::Allocator::Block<u8>& buffer)
+FreetypeFace::FreetypeFace(weak< FreetypeLibrary >               freetype,
+                           const minitl::Allocator::Block< u8 >& buffer)
 {
-    FT_Face face = 0;
+    FT_Face  face = 0;
     FT_Error error;
     error = FT_New_Memory_Face(freetype->library, buffer.begin(),
-                               be_checked_numcast<u32>(buffer.byteCount()),
-                               0,
-                               &face);
+                               be_checked_numcast< u32 >(buffer.byteCount()), 0, &face);
     be_forceuse(error);
     be_assert(!error, "Freetype error %d" | error);
     error = FT_Select_Charmap(face, FT_ENCODING_UNICODE);
     be_assert(!error, "Freetype error %d" | error);
-    FT_UInt glyphIndex = 0;
-    FT_ULong charcode = FT_Get_First_Char(face, &glyphIndex);
-    while (glyphIndex)
+    FT_UInt  glyphIndex = 0;
+    FT_ULong charcode   = FT_Get_First_Char(face, &glyphIndex);
+    while(glyphIndex)
     {
         error = FT_Load_Glyph(face, glyphIndex, FT_LOAD_NO_BITMAP);
-        if (!error && face->glyph->format == FT_GLYPH_FORMAT_OUTLINE)
+        if(!error && face->glyph->format == FT_GLYPH_FORMAT_OUTLINE)
         {
             FT_Outline_Funcs funcs;
-            funcs.move_to = &OutlineDecompose::moveTo;
-            funcs.line_to = &OutlineDecompose::lineTo;
+            funcs.move_to  = &OutlineDecompose::moveTo;
+            funcs.line_to  = &OutlineDecompose::lineTo;
             funcs.conic_to = &OutlineDecompose::conicTo;
             funcs.cubic_to = &OutlineDecompose::cubicTo;
-            funcs.delta = 0;
-            funcs.shift = 0;
+            funcs.delta    = 0;
+            funcs.shift    = 0;
             OutlineDecompose decompose;
             FT_Outline_Decompose(&face->glyph->outline, &funcs, (void*)&decompose);
         }
@@ -80,4 +77,4 @@ FreetypeFace::~FreetypeFace()
 {
 }
 
-}
+}  // namespace BugEngine

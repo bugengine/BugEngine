@@ -4,11 +4,10 @@
 #ifndef BE_WORLD_ENTITYINFO_HH_
 #define BE_WORLD_ENTITYINFO_HH_
 /**************************************************************************************************/
-#include    <world/stdafx.h>
-#include    <minitl/bitset.hh>
+#include <bugengine/world/stdafx.h>
+#include <bugengine/minitl/bitset.hh>
 
-namespace BugEngine { namespace World
-{
+namespace BugEngine { namespace World {
 
 struct EntityInfo
 {
@@ -23,13 +22,13 @@ struct EntityInfo
         u16 bucket;
         u32 offset;
     };
-    BucketInfo  buckets[1];
+    BucketInfo buckets[1];
 };
 
-static const u32 s_usedBit = 0x80000000;
+static const u32 s_usedBit   = 0x80000000;
 static const u32 s_indexMask = 0x7FFFFFFF;
 
-}}
+}}  // namespace BugEngine::World
 
 /**************************************************************************************************/
 #endif

@@ -1,12 +1,10 @@
 /* BugEngine <bugengine.devel@gmail.com> / 2008-2014
    see LICENSE for detail */
 
-#include    <runtime/stdafx.h>
+#include <bugengine/plugin.debug.runtime/stdafx.h>
+#include <bugengine/plugin.debug.runtime/callstack.hh>
 
-#include    <runtime/callstack.hh>
-
-namespace BugEngine { namespace Runtime
-{
+namespace BugEngine { namespace Runtime {
 
 BE_NOINLINE size_t Callstack::backtrace(Address* /*buffer*/, size_t /*count*/, size_t /*skip*/)
 {
@@ -14,4 +12,4 @@ BE_NOINLINE size_t Callstack::backtrace(Address* /*buffer*/, size_t /*count*/, s
     return 0;
 }
 
-}}
+}}  // namespace BugEngine::Runtime

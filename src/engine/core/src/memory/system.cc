@@ -1,17 +1,16 @@
 /* BugEngine <bugengine.devel@gmail.com> / 2008-2014
    see LICENSE for detail */
 
-#include    <core/stdafx.h>
-#include    <core/memory/allocators/system.hh>
+#include <bugengine/core/stdafx.h>
+#include <bugengine/core/memory/allocators/system.hh>
 
-namespace BugEngine
-{
+namespace BugEngine {
 
 SystemAllocator::SystemAllocator(BlockSize size, u32 initialCount)
-    :   m_head(0)
-    ,   m_capacity(i_u32::create(0))
-    ,   m_used(i_u32::create(0))
-    ,   m_blockSize(size)
+    : m_head(0)
+    , m_capacity(i_u32::create(0))
+    , m_used(i_u32::create(0))
+    , m_blockSize(size)
 {
     grow(initialCount);
 }
@@ -20,13 +19,13 @@ SystemAllocator::~SystemAllocator()
 {
     be_assert(m_used == 0, "Not all blocks reclaimed when system allocator was freed");
     Block* head = m_head;
-    while (head)
+    while(head)
     {
-        byte* buffer = reinterpret_cast<byte*>(head);
-        head = head->next;
-        if (blockSize() < platformPageSize())
+        byte* buffer = reinterpret_cast< byte* >(head);
+        head         = head->next;
+        if(blockSize() < platformPageSize())
         {
-            if ((uintptr_t)buffer % platformPageSize() == 0)
+            if((uintptr_t)buffer % platformPageSize() == 0)
             {
                 platformFree(buffer, platformPageSize());
             }
@@ -40,38 +39,38 @@ SystemAllocator::~SystemAllocator()
 
 void* SystemAllocator::allocate()
 {
-    ++ m_used;
-    minitl::itaggedptr<Block>::ticket_t ticket;
-    Block* result;
+    ++m_used;
+    minitl::itaggedptr< Block >::ticket_t ticket;
+    Block*                                result;
     do
     {
         ticket = m_head.getTicket();
         result = m_head;
-        if (!result)
+        if(!result)
         {
             ScopedMutexLock lock(m_allocLock);
-            if (!m_head)
+            if(!m_head)
             {
                 grow(m_capacity);
             }
             ticket = m_head.getTicket();
             result = m_head;
         }
-    } while (!m_head.setConditional(result->next, ticket));
+    } while(!m_head.setConditional(result->next, ticket));
     return result;
 }
 
-void  SystemAllocator::free(void* memory)
+void SystemAllocator::free(void* memory)
 {
-    -- m_used;
-    minitl::itaggedptr<Block>::ticket_t ticket;
-    Block* block;
+    --m_used;
+    minitl::itaggedptr< Block >::ticket_t ticket;
+    Block*                                block;
     do
     {
-        ticket = m_head.getTicket();
-        block = reinterpret_cast<Block*>(memory);
+        ticket      = m_head.getTicket();
+        block       = reinterpret_cast< Block* >(memory);
         block->next = m_head;
-    } while (!m_head.setConditional(block, ticket));
+    } while(!m_head.setConditional(block, ticket));
 }
 
 u32 SystemAllocator::blockSize() const
@@ -81,32 +80,32 @@ u32 SystemAllocator::blockSize() const
 
 void SystemAllocator::grow(u32 extraCapacity)
 {
-    Block* head = 0;
+    Block*    head     = 0;
     const u32 pageSize = platformPageSize();
-    if (blockSize() > pageSize)
+    if(blockSize() > pageSize)
     {
-        for (u32 i = 0; i < extraCapacity; ++i)
+        for(u32 i = 0; i < extraCapacity; ++i)
         {
             Block* block = (Block*)platformReserve(blockSize());
             platformCommit((byte*)block, 0, blockSize());
             block->next = head;
-            head = block;
+            head        = block;
         }
     }
     else
     {
         be_assert(pageSize % blockSize() == 0, "Page size should be a multiple of block size");
         u32 blocksPerPage = pageSize / blockSize();
-        u32 pageCount = extraCapacity / blocksPerPage;
-        for (u32 i = 0; i < pageCount; ++i)
+        u32 pageCount     = extraCapacity / blocksPerPage;
+        for(u32 i = 0; i < pageCount; ++i)
         {
             Block* block = (Block*)platformReserve(pageSize);
             platformCommit((byte*)block, 0, pageSize);
-            for (u32 j = 0; j < blocksPerPage; ++j)
+            for(u32 j = 0; j < blocksPerPage; ++j)
             {
                 block->next = head;
-                head = block;
-                block = (Block*)((u8*)block + blockSize());
+                head        = block;
+                block       = (Block*)((u8*)block + blockSize());
             }
         }
     }
@@ -114,4 +113,4 @@ void SystemAllocator::grow(u32 extraCapacity)
     m_capacity += extraCapacity;
 }
 
-}
+}  // namespace BugEngine

@@ -4,62 +4,64 @@
 #ifndef BE_3D_RENDERER_GPURESOURCELOADER_INL_
 #define BE_3D_RENDERER_GPURESOURCELOADER_INL_
 /**************************************************************************************************/
-#include    <3d/stdafx.h>
-#include    <gpuresourceloader.hh>
-#include    <3d/renderer/igpuresource.hh>
+#include <bugengine/plugin.graphics.3d/stdafx.h>
+#include <bugengine/plugin.graphics.3d/renderer/igpuresource.hh>
+#include <gpuresourceloader.hh>
 
-namespace BugEngine
-{
+namespace BugEngine {
 
-template< typename R >
-GPUResourceLoader<R>::GPUResourceLoader(weak<const IRenderer> renderer)
-    :   m_renderer(renderer)
-    ,   m_deleted(Arena::resource())
-{
-}
-
-
-template< typename R >
-GPUResourceLoader<R>::~GPUResourceLoader()
+template < typename R >
+GPUResourceLoader< R >::GPUResourceLoader(weak< const IRenderer > renderer)
+    : m_renderer(renderer)
+    , m_deleted(Arena::resource())
 {
 }
 
-template< typename R >
-void GPUResourceLoader<R>::load(weak<const Resource::Description> description, Resource::Resource& resource)
+template < typename R >
+GPUResourceLoader< R >::~GPUResourceLoader()
 {
-    ref<IGPUResource> handle = m_renderer->create(be_checked_cast<const R>(description));
+}
+
+template < typename R >
+void GPUResourceLoader< R >::load(weak< const Resource::Description > description,
+                                  Resource::Resource&                 resource)
+{
+    ref< IGPUResource > handle = m_renderer->create(be_checked_cast< const R >(description));
     resource.setRefHandle(handle);
     m_pending.push_back(*handle.operator->());
 }
 
-template< typename R >
-void GPUResourceLoader<R>::reload(weak<const Resource::Description> /*oldDescription*/, weak<const Resource::Description> newDescription, Resource::Resource& resource)
+template < typename R >
+void GPUResourceLoader< R >::reload(weak< const Resource::Description > /*oldDescription*/,
+                                    weak< const Resource::Description > newDescription,
+                                    Resource::Resource&                 resource)
 {
     unload(resource);
     load(newDescription, resource);
 }
 
-template< typename R >
-void GPUResourceLoader<R>::unload(Resource::Resource& resource)
+template < typename R >
+void GPUResourceLoader< R >::unload(Resource::Resource& resource)
 {
-    weak<IGPUResource> gpuResource = resource.getRefHandle<IGPUResource>();
+    weak< IGPUResource > gpuResource = resource.getRefHandle< IGPUResource >();
     gpuResource->m_resource.clear();
     gpuResource->addref();
     m_deleted.push_back(gpuResource);
     resource.clearRefHandle();
 }
 
-template< typename R >
-void GPUResourceLoader<R>::flush()
+template < typename R >
+void GPUResourceLoader< R >::flush()
 {
-    while (!m_deleted.empty())
+    while(!m_deleted.empty())
     {
         IGPUResource* resource = m_deleted.back().operator->();
         m_deleted.pop_back();
         resource->unload();
         resource->decref();
     }
-    for (minitl::intrusive_list<IGPUResource>::iterator it = m_pending.begin(); it != m_pending.end(); )
+    for(minitl::intrusive_list< IGPUResource >::iterator it = m_pending.begin();
+        it != m_pending.end();)
     {
         IGPUResource& resource = *it;
         resource.load(resource.m_resource);
@@ -68,8 +70,7 @@ void GPUResourceLoader<R>::flush()
     }
 }
 
-}
+}  // namespace BugEngine
 
 /**************************************************************************************************/
 #endif
-

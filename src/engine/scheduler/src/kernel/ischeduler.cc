@@ -1,31 +1,28 @@
 /* BugEngine <bugengine.devel@gmail.com> / 2008-2014
    see LICENSE for detail */
 
-#include    <scheduler/stdafx.h>
-#include    <scheduler/kernel/ischeduler.hh>
-#include    <scheduler/scheduler.hh>
+#include <bugengine/scheduler/stdafx.h>
+#include <bugengine/scheduler/kernel/ischeduler.hh>
+#include <bugengine/scheduler/scheduler.hh>
 
+namespace BugEngine { namespace KernelScheduler {
 
-namespace BugEngine { namespace KernelScheduler
-{
+static minitl::vector< weak< IScheduler > > s_schedulers(Arena::task());
 
-static minitl::vector< weak<IScheduler> >  s_schedulers(Arena::task());
-
-IScheduler::IScheduler(istring name, weak<Scheduler> scheduler, SchedulerType type)
-    :   m_scheduler(scheduler)
-    ,   m_name(name)
-    ,   m_type(type)
+IScheduler::IScheduler(istring name, weak< Scheduler > scheduler, SchedulerType type)
+    : m_scheduler(scheduler)
+    , m_name(name)
+    , m_type(type)
 {
     s_schedulers.push_back(this);
 }
 
 IScheduler::~IScheduler()
 {
-    for (minitl::vector< weak<IScheduler> >::iterator it = s_schedulers.begin();
-         it != s_schedulers.end();
-         ++it)
+    for(minitl::vector< weak< IScheduler > >::iterator it = s_schedulers.begin();
+        it != s_schedulers.end(); ++it)
     {
-        if (*it == this)
+        if(*it == this)
         {
             s_schedulers.erase(it);
             return;
@@ -34,14 +31,13 @@ IScheduler::~IScheduler()
     be_notreached();
 }
 
-weak<IScheduler> IScheduler::findScheduler(SchedulerType preferredType)
+weak< IScheduler > IScheduler::findScheduler(SchedulerType preferredType)
 {
-    weak<IScheduler> result;
-    for (minitl::vector< weak<IScheduler> >::iterator it = s_schedulers.begin();
-         it != s_schedulers.end();
-         ++it)
+    weak< IScheduler > result;
+    for(minitl::vector< weak< IScheduler > >::iterator it = s_schedulers.begin();
+        it != s_schedulers.end(); ++it)
     {
-        if ((*it)->m_type == preferredType)
+        if((*it)->m_type == preferredType)
         {
             return *it;
         }
@@ -53,4 +49,4 @@ weak<IScheduler> IScheduler::findScheduler(SchedulerType preferredType)
     return result;
 }
 
-}}
+}}  // namespace BugEngine::KernelScheduler

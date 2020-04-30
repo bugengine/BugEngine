@@ -98,6 +98,10 @@ def module(
 
     if api and os.path.isfile(os.path.join(api[0].abspath(), name.split('.')[-1], 'stdafx.h')):
         pchstop = '%s/%s' % (name.split('.')[-1], 'stdafx.h')
+    elif api and os.path.isfile(os.path.join(api[0].abspath(), 'bugengine', name.split('.')[-1], 'stdafx.h')):
+        pchstop = 'bugengine/%s/%s' % (name.split('.')[-1], 'stdafx.h')
+    elif api and os.path.isfile(os.path.join(api[0].abspath(), 'bugengine', name, 'stdafx.h')):
+        pchstop = 'bugengine/%s/%s' % (name, 'stdafx.h')
     elif include and os.path.isfile(os.path.join(include[0].abspath(), 'stdafx.h')):
         pchstop = 'stdafx.h'
     else:

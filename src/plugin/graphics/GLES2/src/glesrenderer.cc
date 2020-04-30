@@ -1,16 +1,15 @@
 /* BugEngine <bugengine.devel@gmail.com> / 2008-2014
    see LICENSE for detail */
 
-#include    <stdafx.h>
-#include    <glesrenderer.hh>
-#include    <3d/rendertarget/rendertarget.script.hh>
-#include    <scheduler/scheduler.hh>
+#include <stdafx.h>
+#include <bugengine/plugin.graphics.3d/rendertarget/rendertarget.script.hh>
+#include <bugengine/scheduler/scheduler.hh>
+#include <glesrenderer.hh>
 
-namespace BugEngine { namespace OpenGLES
-{
+namespace BugEngine { namespace OpenGLES {
 
 GLESRenderer::GLESRenderer(const Plugin::Context& context)
-    :   IRenderer(Arena::general(), context.resourceManager, Scheduler::MainThread)
+    : IRenderer(Arena::general(), context.resourceManager, Scheduler::MainThread)
 {
 }
 
@@ -24,19 +23,22 @@ void GLESRenderer::flush()
     IRenderer::flush();
 }
 
-ref<IGPUResource> GLESRenderer::create(weak<const RenderSurfaceDescription> /*renderSurfaceDescription*/) const
+ref< IGPUResource >
+   GLESRenderer::create(weak< const RenderSurfaceDescription > /*renderSurfaceDescription*/) const
 {
-    return ref<IGPUResource>();
+    return ref< IGPUResource >();
 }
 
-ref<IGPUResource> GLESRenderer::create(weak<const RenderWindowDescription> /*renderWindowDescription*/) const
+ref< IGPUResource >
+   GLESRenderer::create(weak< const RenderWindowDescription > /*renderWindowDescription*/) const
 {
-    return ref<IGPUResource>();
+    return ref< IGPUResource >();
 }
 
-ref<IGPUResource> GLESRenderer::create(weak<const ShaderProgramDescription> /*shaderDescription*/) const
+ref< IGPUResource >
+   GLESRenderer::create(weak< const ShaderProgramDescription > /*shaderDescription*/) const
 {
-    return ref<IGPUResource>();
+    return ref< IGPUResource >();
 }
 
 uint2 GLESRenderer::getScreenSize() const
@@ -44,4 +46,4 @@ uint2 GLESRenderer::getScreenSize() const
     return make_uint2(320, 200);
 }
 
-}}
+}}  // namespace BugEngine::OpenGLES
