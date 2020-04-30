@@ -1,5 +1,7 @@
 .waf_toolchains.py
 extra/*
+!extra/android
+!extra/iphone
 bld/*
 nbproject/*
 *.pyc
