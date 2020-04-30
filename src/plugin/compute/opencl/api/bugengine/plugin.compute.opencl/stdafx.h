@@ -21,7 +21,7 @@
 #ifdef BE_PLATFORM_MACOS
 #    include <OpenCL/opencl.h>
 #else
-#    include <CL/cl.h>
+#    include <CL/opencl.h>
 #endif
 
 /**************************************************************************************************/
