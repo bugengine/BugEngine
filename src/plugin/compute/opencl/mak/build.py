@@ -131,4 +131,4 @@ def cl_kernel_compile(task_gen, source):
 
 
 def build(build_context):
-    build_context.env.IRCC_CL_TARGET = build_context.path.find_node('ir2cl').abspath()
+    build_context.env.IRCC_CL_TARGET = build_context.path.find_node('ir2cl')

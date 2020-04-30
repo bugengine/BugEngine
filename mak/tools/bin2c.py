@@ -9,7 +9,8 @@ class bin2c(Task.Task):
                 input_data = input_file.read(12)
                 if input_data == b'':
                     break
-                input_lines.append(', '.join('0x%.2X' % x for x in input_data))
+                input_lines.append(', '.join('0x%.2X' % x for x in bytearray(input_data)))
+
         export = getattr(self, 'export', False)
         if getattr(self, 'zero_terminate', False):
             input_lines.append('0x00')
