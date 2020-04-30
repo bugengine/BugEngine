@@ -3,7 +3,6 @@ import os
 import sys
 import shlex
 
-
 ARCHS = [
     (3, 0),
     (3, 5),
@@ -16,13 +15,11 @@ ARCHS = [
     (7, 5),
 ]
 
+
 def run_nvcc(nvcc, flags):
     try:
         p = Utils.subprocess.Popen(
-            nvcc + flags,
-            stdin=Utils.subprocess.PIPE,
-            stdout=Utils.subprocess.PIPE,
-            stderr=Utils.subprocess.PIPE
+            nvcc + flags, stdin=Utils.subprocess.PIPE, stdout=Utils.subprocess.PIPE, stderr=Utils.subprocess.PIPE
         )
         out, err = p.communicate()
     except Exception as e:
@@ -50,13 +47,18 @@ int main(int argc, const char *argv[])
 }
 """
 
+
 @Configure.conf
 def check_nvcc(configuration_context, nvcc):
     source_node = configuration_context.bldnode.make_node('test.cu')
     dest_node = configuration_context.bldnode.make_node('test.obj')
     try:
         source_node.write(_CUDA_SNIPPET)
-        out, err = run_nvcc(nvcc, configuration_context.env.NVCC_CXXFLAGS + ['-v', source_node.abspath(), '-o', dest_node.abspath(), '-arch', 'compute_30'])
+        out, err = run_nvcc(
+            nvcc, configuration_context.env.NVCC_CXXFLAGS +
+            ['-v', source_node.abspath(), '-o',
+             dest_node.abspath(), '-arch', 'compute_30']
+        )
         target_includes = None
         target_libs = None
         for line in out.split('\n') + err.split('\n'):
@@ -64,21 +66,21 @@ def check_nvcc(configuration_context, nvcc):
                 target_libs = shlex.split(line.split('=')[1].strip())
             elif line.startswith('#$ INCLUDES='):
                 target_includes = shlex.split(line.split('=')[1].strip())
-        if target_includes is None or target_libs is None:
+        if target_libs is None:
             raise Exception('could not deduce target path')
         archs = []
         for a in ARCHS:
             try:
-                run_nvcc(nvcc, configuration_context.env.NVCC_CXXFLAGS + [
-                    '-arch', 'compute_{0}{1}'.format(*a), '--version'
-                ])
+                run_nvcc(
+                    nvcc, configuration_context.env.NVCC_CXXFLAGS + ['-arch', 'compute_{0}{1}'.format(*a), '--version']
+                )
             except Exception as e:
                 pass
             else:
                 archs.append(a)
         if not archs:
             raise Exception('no viable arch found')
-        return (target_includes, target_libs, archs)
+        return (target_includes or [], target_libs, archs)
     finally:
         source_node.delete()
 
@@ -97,7 +99,8 @@ def setup(configuration_context):
             v.NVCC_CXX = compiler
             cxx_compiler = v.CXX[0]
             if v.MSVC_COMPILER:
-                cxx_compiler = configuration_context.find_program('cl', path_list=configuration_context.env.MSVC_PATH)[0]
+                cxx_compiler = configuration_context.find_program('cl',
+                                                                  path_list=configuration_context.env.MSVC_PATH)[0]
             v.append_value('NVCC_CXXFLAGS', ['--compiler-bindir', cxx_compiler])
             if v.ARCH_LP64:
                 v.append_value('NVCC_CXXFLAGS', ['-m64'])
@@ -119,7 +122,9 @@ def setup(configuration_context):
             else:
                 for a in archs:
                     v.append_value('NVCC_CXXFLAGS', ['-gencode', 'arch=compute_{0}{1},code=sm_{0}{1}'.format(*a)])
-                v.append_value('NVCC_CXXFLAGS', ['-gencode', 'arch=compute_{0}{1},code=compute_{0}{1}'.format(*archs[-1])])
+                v.append_value(
+                    'NVCC_CXXFLAGS', ['-gencode', 'arch=compute_{0}{1},code=compute_{0}{1}'.format(*archs[-1])]
+                )
                 cuda_available = True
 
                 configuration_context.setenv(toolchain)

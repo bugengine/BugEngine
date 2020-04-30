@@ -4,7 +4,7 @@
 #ifndef BE_KERNEL_CUDA_COMPUTE_INTERLOCKED_INL_
 #define BE_KERNEL_CUDA_COMPUTE_INTERLOCKED_INL_
 /**************************************************************************************************/
-#include    <kernel/stdafx.h>
+#include    <bugengine/kernel/stdafx.h>
 
 namespace _Kernel
 {

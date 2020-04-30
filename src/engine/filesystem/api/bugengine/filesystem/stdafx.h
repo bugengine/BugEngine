@@ -16,7 +16,7 @@
 #    define BE_API_FILESYSTEM
 #endif
 
-#ifndef BE_BUILD_KERNEL
+#ifndef BE_COMPUTE
 namespace BugEngine { namespace Arena {
 be_api(FILESYSTEM) minitl::Allocator& filesystem();
 }}  // namespace BugEngine::Arena

@@ -4,8 +4,8 @@
 #ifndef BE_KERNEL_CUDA_INPUT_SEGMENT_HH_
 #define BE_KERNEL_CUDA_INPUT_SEGMENT_HH_
 /**************************************************************************************************/
-#include    <kernel/stdafx.h>
-#include    <kernel/input/segment_part.hh>
+#include    <bugengine/kernel/stdafx.h>
+#include    <bugengine/kernel/input/segment_part.hh>
 
 
 namespace Kernel

@@ -20,7 +20,7 @@
 #define published public
 #define be_tag(v)
 
-#ifndef BE_BUILD_KERNEL
+#ifndef BE_COMPUTE
 namespace BugEngine { namespace Arena {
 be_api(RTTI) minitl::Allocator& rtti();
 be_api(RTTI) minitl::Allocator& script();

@@ -17,7 +17,7 @@
 #    define BE_API_RESOURCE
 #endif
 
-#ifndef BE_BUILD_KERNEL
+#ifndef BE_COMPUTE
 namespace BugEngine { namespace Arena {
 be_api(RESOURCE) minitl::Allocator& resource();
 }}  // namespace BugEngine::Arena

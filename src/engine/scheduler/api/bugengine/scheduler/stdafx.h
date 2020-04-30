@@ -18,7 +18,7 @@
 #    define BE_API_SCHEDULER
 #endif
 
-#ifndef BE_BUILD_KERNEL
+#ifndef BE_COMPUTE
 namespace BugEngine { namespace Arena {
 be_api(SCHEDULER) minitl::Allocator& task();
 }}  // namespace BugEngine::Arena

@@ -133,7 +133,6 @@ def create_cpu_kernels(task_gen):
                         extra_use=tgen.extra_use,
                         pchstop=tgen.pchstop,
                         defines=tgen.defines + [
-                            'BE_BUILD_KERNEL=1',
                             'BE_KERNEL_ID=%s_%s' % (task_gen.parent.replace('.', '_'), kernel_target.replace('.', '_')),
                             'BE_KERNEL_NAME=%s' % (kernel_target),
                             'BE_KERNEL_TARGET=%s' % kernel_type,
