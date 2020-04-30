@@ -34,6 +34,9 @@ class cl_trampoline(Task.Task):
     "cl_trampoline"
     color = 'PINK'
 
+    def sig_vars(self):
+        self.m.update(template_cl.encode('utf-8'))
+
     def run(self):
         with open(self.inputs[0].abspath(), 'rb') as input_file:
             kernel_name, method, _, includes, source = pickle.load(input_file)
@@ -42,7 +45,6 @@ class cl_trampoline(Task.Task):
         for arg in method.parameters[2:]:
             args.append((arg.name, arg.type))
         params = {
-            'pch': '#include <%s>\n' % self.generator.pchstop if self.generator.pchstop else '',
             'kernel_source': source,
             'args': ',\n          '.join('%s(0, 0, 0)' % arg[1] for i, arg in enumerate(args)),
         }

@@ -1,16 +1,12 @@
 /* BugEngine <bugengine.devel@gmail.com> / 2008-2014
    see LICENSE for detail */
 
-#include    <rttiparse/stdafx.h>
-#include    <nodes/float3.hh>
+#include <bugengine/rttiparse/stdafx.h>
+#include <nodes/float3.hh>
 
+namespace BugEngine { namespace RTTI { namespace Parser {
 
-namespace BugEngine { namespace RTTI { namespace Parser
-{
-
-Float3::Float3(const ParseLocation& location, float3 value)
-    :   Node(location)
-    ,   m_value(value)
+Float3::Float3(const ParseLocation& location, float3 value) : Node(location), m_value(value)
 {
     be_forceuse(m_value);
 }
@@ -21,7 +17,7 @@ Float3::~Float3()
 
 bool Float3::isCompatible(const RTTI::Type& expectedType) const
 {
-    return be_type<float3>().isA(expectedType);
+    return be_type< float3 >().isA(expectedType);
 }
 
 void Float3::doEval(const RTTI::Type& expectedType, RTTI::Value& result) const
@@ -30,4 +26,4 @@ void Float3::doEval(const RTTI::Type& expectedType, RTTI::Value& result) const
     result = RTTI::Value(m_value);
 }
 
-}}}
+}}}  // namespace BugEngine::RTTI::Parser

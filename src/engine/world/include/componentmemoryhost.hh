@@ -4,11 +4,10 @@
 #ifndef BE_WORLD_COMPONENTMEMORYHOST_HH_
 #define BE_WORLD_COMPONENTMEMORYHOST_HH_
 /**************************************************************************************************/
-#include    <world/stdafx.h>
-#include    <scheduler/kernel/imemoryhost.hh>
+#include <bugengine/world/stdafx.h>
+#include <bugengine/scheduler/kernel/imemoryhost.hh>
 
-namespace BugEngine { namespace World
-{
+namespace BugEngine { namespace World {
 
 class be_api(WORLD) ComponentMemoryHost : public KernelScheduler::IMemoryHost
 {
@@ -20,7 +19,7 @@ public:
     ~ComponentMemoryHost();
 };
 
-}}
+}}  // namespace BugEngine::World
 
 /**************************************************************************************************/
 #endif

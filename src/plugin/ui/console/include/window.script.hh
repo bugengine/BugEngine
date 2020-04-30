@@ -4,21 +4,20 @@
 #ifndef BE_UI_CONSOLE_WINDOW_HH_
 #define BE_UI_CONSOLE_WINDOW_HH_
 /**************************************************************************************************/
-#include    <resource/description.script.hh>
-#include    <cstdio>
+#include <bugengine/resource/description.script.hh>
+#include <cstdio>
 
 #define raw raw2
-#include    <curses.h>
+#include <curses.h>
 #undef raw
 
-
-namespace BugEngine
-{
+namespace BugEngine {
 
 class be_api(CONSOLE) Window : public Resource::Description
 {
 published:
     const istring name;
+
 public:
     class CursesWindow : public minitl::refcountable
     {
@@ -26,18 +25,22 @@ public:
         struct ScreenPipe
         {
             friend class CursesWindow;
+
         private:
-            FILE*   m_fileOutput;
-            FILE*   m_screenStdOut;
+            FILE* m_fileOutput;
+            FILE* m_screenStdOut;
+
         public:
             ScreenPipe();
             ~ScreenPipe();
+
         private:
             ScreenPipe(const ScreenPipe& other);
             ScreenPipe& operator=(const ScreenPipe& oher);
         };
-        ScreenPipe  m_pipe;
-        SCREEN*     m_screen;
+        ScreenPipe m_pipe;
+        SCREEN*    m_screen;
+
     public:
         CursesWindow();
         ~CursesWindow();
@@ -47,10 +50,10 @@ published:
     ~Window();
 
 public:
-    ref<CursesWindow> create() const;
+    ref< CursesWindow > create() const;
 };
 
-}
+}  // namespace BugEngine
 
 /**************************************************************************************************/
 #endif

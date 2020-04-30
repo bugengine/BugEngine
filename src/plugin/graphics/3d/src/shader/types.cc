@@ -1,11 +1,10 @@
 /* BugEngine <bugengine.devel@gmail.com> / 2008-2014
    see LICENSE for detail */
 
-#include    <3d/stdafx.h>
-#include    <3d/shader/types.script.hh>
+#include <bugengine/plugin.graphics.3d/stdafx.h>
+#include <bugengine/plugin.graphics.3d/shader/types.script.hh>
 
-namespace BugEngine { namespace Shaders
-{
+namespace BugEngine { namespace Shaders {
 
 Output::Output()
 {
@@ -119,4 +118,4 @@ Bool::~Bool()
 {
 }
 
-}}
+}}  // namespace BugEngine::Shaders

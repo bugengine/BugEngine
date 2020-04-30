@@ -4,19 +4,21 @@
 #ifndef BE_SAMPLES_PYTHON_FUNCTIONS_SCRIPT_HH_
 #define BE_SAMPLES_PYTHON_FUNCTIONS_SCRIPT_HH_
 /**************************************************************************************************/
-#include    <stdafx.h>
+#include <stdafx.h>
 
-namespace BugEngine { namespace TestCases
-{
+namespace BugEngine { namespace TestCases {
 
 class Class : public minitl::refcountable
 {
-published:
-    i32 x1;
-    i32 y1;
+    published : i32 x1;
+    i32             y1;
 
-    Class(u32 x1=0, u32 y1=0) : x1(x1), y1(y1) {}
-    ~Class() {}
+    Class(u32 x1 = 0, u32 y1 = 0) : x1(x1), y1(y1)
+    {
+    }
+    ~Class()
+    {
+    }
 
     void doStuff(float v1, float v2 = 5.0f);
     void doStuff(u32 v1, u32 v2, bool done);
@@ -25,7 +27,6 @@ published:
 
 struct Struct
 {
-
 };
 
 enum Enum
@@ -35,8 +36,7 @@ enum Enum
     Value3 = 5
 };
 
-
-}}
+}}  // namespace BugEngine::TestCases
 
 /**************************************************************************************************/
 #endif

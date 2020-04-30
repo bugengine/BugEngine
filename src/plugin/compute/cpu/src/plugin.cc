@@ -1,9 +1,9 @@
 /* BugEngine <bugengine.devel@gmail.com> / 2008-2014
    see LICENSE for detail */
 
-#include    <cpu/stdafx.h>
-#include    <plugin/plugin.hh>
-#include    <scheduler.hh>
-#include    <rtti/classinfo.script.hh>
+#include <bugengine/plugin.compute.cpu/stdafx.h>
+#include <bugengine/plugin/plugin.hh>
+#include <bugengine/rtti/classinfo.script.hh>
+#include <scheduler.hh>
 
 BE_PLUGIN_REGISTER(BugEngine::KernelScheduler::CPU::Scheduler);

@@ -1,12 +1,10 @@
 /* BugEngine <bugengine.devel@gmail.com> / 2008-2014
    see LICENSE for detail */
 
-#include    <rttiparse/stdafx.h>
-#include    <rttiparse/node.hh>
+#include <bugengine/rttiparse/stdafx.h>
+#include <bugengine/rttiparse/node.hh>
 
-
-namespace BugEngine { namespace RTTI { namespace Parser
-{
+namespace BugEngine { namespace RTTI { namespace Parser {
 
 bool Node::resolve(DbContext& context)
 {
@@ -14,11 +12,11 @@ bool Node::resolve(DbContext& context)
     return true;
 }
 
-void Node::eval(DbContext &context, const Type &expectedType, Value& result) const
+void Node::eval(DbContext& context, const Type& expectedType, Value& result) const
 {
-    if (!m_cacheSet)
+    if(!m_cacheSet)
     {
-        if (!isCompatible(expectedType))
+        if(!isCompatible(expectedType))
         {
             context.error(m_location,
                           Message::MessageType("type mismatch; expected %s") | expectedType.name());
@@ -34,9 +32,9 @@ void Node::eval(DbContext &context, const Type &expectedType, Value& result) con
 
 Value Node::eval(DbContext& context, const Type& expectedType) const
 {
-    if (!m_cacheSet)
+    if(!m_cacheSet)
     {
-        if (!isCompatible(expectedType))
+        if(!isCompatible(expectedType))
         {
             context.error(m_location,
                           Message::MessageType("type mismatch; expected %s") | expectedType.name());
@@ -50,4 +48,4 @@ Value Node::eval(DbContext& context, const Type& expectedType) const
     return Value(Value::ByRef(m_cache));
 }
 
-}}}
+}}}  // namespace BugEngine::RTTI::Parser

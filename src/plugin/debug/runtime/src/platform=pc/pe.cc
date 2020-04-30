@@ -1,16 +1,15 @@
 /* BugEngine <bugengine.devel@gmail.com> / 2008-2014
    see LICENSE for detail */
 
-#include    <runtime/stdafx.h>
+#include <bugengine/plugin.debug.runtime/stdafx.h>
 
-#include    <pe.hh>
+#include <pe.hh>
 
-namespace BugEngine { namespace Runtime
-{
+namespace BugEngine { namespace Runtime {
 
 static inline char be_hex2char(u8 value)
 {
-    return (value&(char)0xf) > 9 ? (char)(value-10+'A') : (char)(value+'0');
+    return (value & (char)0xf) > 9 ? (char)(value - 10 + 'A') : (char)(value + '0');
 }
 
 struct Guid
@@ -23,8 +22,14 @@ struct Guid
     struct GuidString
     {
         char str[33];
-        operator char*()                { return str; }
-        operator const char*() const    { return str; }
+             operator char*()
+        {
+            return str;
+        }
+        operator const char*() const
+        {
+            return str;
+        }
     };
     GuidString compactstr() const
     {
@@ -38,8 +43,8 @@ struct Guid
         result[6] = be_hex2char(u8((data1 >> 4) & 0xf));
         result[7] = be_hex2char(u8((data1 >> 0) & 0xf));
 
-        result[8] = be_hex2char(u8((data2 >> 12) & 0xf));
-        result[9] = be_hex2char(u8((data2 >> 8) & 0xf));
+        result[8]  = be_hex2char(u8((data2 >> 12) & 0xf));
+        result[9]  = be_hex2char(u8((data2 >> 8) & 0xf));
         result[10] = be_hex2char(u8((data2 >> 4) & 0xf));
         result[11] = be_hex2char(u8((data2 >> 0) & 0xf));
 
@@ -70,16 +75,16 @@ struct Guid
     GuidString str() const
     {
         GuidString result;
-        result[0] = '{';
-        result[1] = be_hex2char(u8((data1 >> 28) & 0xf));
-        result[2] = be_hex2char(u8((data1 >> 24) & 0xf));
-        result[3] = be_hex2char(u8((data1 >> 20) & 0xf));
-        result[4] = be_hex2char(u8((data1 >> 16) & 0xf));
-        result[5] = be_hex2char(u8((data1 >> 12) & 0xf));
-        result[6] = be_hex2char(u8((data1 >> 8) & 0xf));
-        result[7] = be_hex2char(u8((data1 >> 4) & 0xf));
-        result[8] = be_hex2char(u8((data1 >> 0) & 0xf));
-        result[9] = '-';
+        result[0]  = '{';
+        result[1]  = be_hex2char(u8((data1 >> 28) & 0xf));
+        result[2]  = be_hex2char(u8((data1 >> 24) & 0xf));
+        result[3]  = be_hex2char(u8((data1 >> 20) & 0xf));
+        result[4]  = be_hex2char(u8((data1 >> 16) & 0xf));
+        result[5]  = be_hex2char(u8((data1 >> 12) & 0xf));
+        result[6]  = be_hex2char(u8((data1 >> 8) & 0xf));
+        result[7]  = be_hex2char(u8((data1 >> 4) & 0xf));
+        result[8]  = be_hex2char(u8((data1 >> 0) & 0xf));
+        result[9]  = '-';
         result[10] = be_hex2char(u8((data2 >> 12) & 0xf));
         result[11] = be_hex2char(u8((data2 >> 8) & 0xf));
         result[12] = be_hex2char(u8((data2 >> 4) & 0xf));
@@ -115,7 +120,7 @@ struct Guid
 struct MSDosHeader
 {
     u8  signature[2];
-    u8  pad[0x3c-2];
+    u8  pad[0x3c - 2];
     u32 offset;
 };
 
@@ -123,49 +128,49 @@ struct ImageHeader
 {
     enum Machines
     {
-        Machine_Unknown = 0x0,
-        Machine_AM33 = 0x1d3,
-        Machine_AMD64 = 0x8664,
-        Machine_ARM = 0x1c0,
-        Machine_EBC = 0xebc,
-        Machine_i386 = 0x14c,
-        Machine_IA64 = 0x200,
-        Machine_M32R = 0x9041,
-        Machine_MIPS16 = 0x266,
-        Machine_MIPSFPU = 0x366,
+        Machine_Unknown   = 0x0,
+        Machine_AM33      = 0x1d3,
+        Machine_AMD64     = 0x8664,
+        Machine_ARM       = 0x1c0,
+        Machine_EBC       = 0xebc,
+        Machine_i386      = 0x14c,
+        Machine_IA64      = 0x200,
+        Machine_M32R      = 0x9041,
+        Machine_MIPS16    = 0x266,
+        Machine_MIPSFPU   = 0x366,
         Machine_MIPSFPU16 = 0x466,
-        Machine_POWERPC = 0x1f0,
+        Machine_POWERPC   = 0x1f0,
         Machine_POWERPCFP = 0x1f1,
-        Machine_R4000 = 0x166,
-        Machine_SH3 = 0x1a2,
-        Machine_SH3DSP = 0x1a3,
-        Machine_SH4 = 0x1a6,
-        Machine_SH5 = 0x1a8,
-        Machine_THUMB = 0x1c2,
+        Machine_R4000     = 0x166,
+        Machine_SH3       = 0x1a2,
+        Machine_SH3DSP    = 0x1a3,
+        Machine_SH4       = 0x1a6,
+        Machine_SH5       = 0x1a8,
+        Machine_THUMB     = 0x1c2,
         Machine_WCEMIPSV2 = 0x169
     };
     enum Flags
     {
-        Flag_RelocsStripped = 0x1,
-        Flag_ExecutableImage = 0x2,
-        Flag_LinesStripped = 0x4,
-        Flag_SymbolsStripped = 0x8,
+        Flag_RelocsStripped           = 0x1,
+        Flag_ExecutableImage          = 0x2,
+        Flag_LinesStripped            = 0x4,
+        Flag_SymbolsStripped          = 0x8,
         Flag_AggressiveWorkingSetTrim = 0x10,
-        Flag_LargeAddressAware = 0x20,
-        Flag_Reserved = 0x40,
-        Flag_LittleEndian = 0x80,
-        Flag_Machine32 = 0x100,
-        Flag_DebugStripped = 0x200,
-        Flag_RemovableRunFromSwap = 0x400,
-        Flag_NetRunFromSwap = 0x800,
-        Flag_SystemFile = 0x1000,
-        Flag_Dll = 0x2000,
-        Flag_UniProcessor = 0x4000,
-        Flag_BigEndian = 0x8000
+        Flag_LargeAddressAware        = 0x20,
+        Flag_Reserved                 = 0x40,
+        Flag_LittleEndian             = 0x80,
+        Flag_Machine32                = 0x100,
+        Flag_DebugStripped            = 0x200,
+        Flag_RemovableRunFromSwap     = 0x400,
+        Flag_NetRunFromSwap           = 0x800,
+        Flag_SystemFile               = 0x1000,
+        Flag_Dll                      = 0x2000,
+        Flag_UniProcessor             = 0x4000,
+        Flag_BigEndian                = 0x8000
     };
     enum Headers
     {
-        Header_Pe32Header = 0x10b,
+        Header_Pe32Header     = 0x10b,
         Header_Pe32PlusHeader = 0x20b
     };
     u8  signature[4];
@@ -182,37 +187,37 @@ struct PEHeader
 {
     enum Subsystems
     {
-        Subsystem_Unknown = 0,
-        Subsystem_Native = 1,
-        Subsystem_Windows = 2,
-        Subsystem_Console = 3,
-        Subsystem_Posix = 7,
-        Subsystem_CE = 9,
-        Subsystem_EFI = 10,
-        Subsystem_EFIBoot = 11,
+        Subsystem_Unknown    = 0,
+        Subsystem_Native     = 1,
+        Subsystem_Windows    = 2,
+        Subsystem_Console    = 3,
+        Subsystem_Posix      = 7,
+        Subsystem_CE         = 9,
+        Subsystem_EFI        = 10,
+        Subsystem_EFIBoot    = 11,
         Subsystem_EFIRuntime = 12,
-        Subsystem_EFIRom = 13,
-        Subsystem_XBox = 14
+        Subsystem_EFIRom     = 13,
+        Subsystem_XBox       = 14
     };
     enum DataDirectories
     {
-        DataDirectory_ExportTable = 0,
-        DataDirectory_ImportTable = 1,
-        DataDirectory_ResourceTable = 2,
-        DataDirectory_ExceptionTable = 3,
-        DataDirectory_CertificateTable = 4,
-        DataDirectory_BaseRelocationTable = 5,
-        DataDirectory_Debug = 6,
-        DataDirectory_Architecture = 7,
-        DataDirectory_GlobalPtr = 8,
-        DataDirectory_TLSTable = 9,
-        DataDirectory_LoadConfigTable = 10,
-        DataDirectory_BoundImport = 11,
-        DataDirectory_ImportAddressTable = 12,
+        DataDirectory_ExportTable           = 0,
+        DataDirectory_ImportTable           = 1,
+        DataDirectory_ResourceTable         = 2,
+        DataDirectory_ExceptionTable        = 3,
+        DataDirectory_CertificateTable      = 4,
+        DataDirectory_BaseRelocationTable   = 5,
+        DataDirectory_Debug                 = 6,
+        DataDirectory_Architecture          = 7,
+        DataDirectory_GlobalPtr             = 8,
+        DataDirectory_TLSTable              = 9,
+        DataDirectory_LoadConfigTable       = 10,
+        DataDirectory_BoundImport           = 11,
+        DataDirectory_ImportAddressTable    = 12,
         DataDirectory_DelayImportDescriptor = 13,
-        DataDirectory_CLRRuntimeHeeader = 14,
-        DataDirectory_Reserved = 15,
-        DataDirectory_Count = 16
+        DataDirectory_CLRRuntimeHeeader     = 14,
+        DataDirectory_Reserved              = 15,
+        DataDirectory_Count                 = 16
     };
     struct
     {
@@ -301,38 +306,36 @@ struct PEPlusHeader
     } windows;
 };
 
-
 struct SectionHeader
 {
     char name[8];
-    u32 size;
-    u32 offset;
-    u32 rawDataSize;
-    u32 rawDataOffset;
-    u32 relocationOffset;
-    u32 lineNumbersOffset;
-    u16 relocationCount;
-    u16 lineNumbersCount;
-    u32 characteristics;
+    u32  size;
+    u32  offset;
+    u32  rawDataSize;
+    u32  rawDataOffset;
+    u32  relocationOffset;
+    u32  lineNumbersOffset;
+    u16  relocationCount;
+    u16  lineNumbersCount;
+    u32  characteristics;
 };
-
 
 struct DebugEntry
 {
     enum Types
     {
-        Type_Unknown = 0,
-        Type_COFF = 1,
-        Type_CodeView = 2,
+        Type_Unknown              = 0,
+        Type_COFF                 = 1,
+        Type_CodeView             = 2,
         Type_FramePointerOmission = 3,
-        Type_Misc = 4,
-        Type_Exception = 5,
-        Type_Fixup = 6,
-        Type_Mappings = 7,
-        Type_ReverseMappings = 8,
-        Type_Borland = 9,
-        Type_Reserved = 10,
-        Type_ClsId = 11
+        Type_Misc                 = 4,
+        Type_Exception            = 5,
+        Type_Fixup                = 6,
+        Type_Mappings             = 7,
+        Type_ReverseMappings      = 8,
+        Type_Borland              = 9,
+        Type_Reserved             = 10,
+        Type_ClsId                = 11
     };
     u32 characteristics;
     u32 timeStamp;
@@ -344,10 +347,9 @@ struct DebugEntry
     u32 fileOffset;
 };
 
-
 struct PdbInfo
 {
-    char    signature[4];
+    char signature[4];
 };
 
 struct PdbInfo20
@@ -369,16 +371,15 @@ struct PdbInfo70
 
 struct COFFSymbol
 {
-    char    name[8];
-    u32     value;
-    u16     section;
-    u16     type;
-    u8      storage;
-    u8      auxilliary;
+    char name[8];
+    u32  value;
+    u16  section;
+    u16  type;
+    u8   storage;
+    u8   auxilliary;
 };
 
-PE::PE(const char *filename, u64 baseAddress)
-:   Module(filename, baseAddress)
+PE::PE(const char* filename, u64 baseAddress) : Module(filename, baseAddress)
 {
     be_info("loading file %s" | filename);
     /*MSDosHeader dosh;
@@ -399,8 +400,9 @@ PE::PE(const char *filename, u64 baseAddress)
                 PEHeader* header = reinterpret_cast<PEHeader*>((u8*)block);
                 if (header->windows.dataDirectoryCount > PEHeader::DataDirectory_Debug)
                 {
-                    debugEntryVirtualAdress = header->windows.dataDirectoryEntries[PEHeader::DataDirectory_Debug].offset;
-                    debugEntrySize = header->windows.dataDirectoryEntries[PEHeader::DataDirectory_Debug].size;
+                    debugEntryVirtualAdress =
+    header->windows.dataDirectoryEntries[PEHeader::DataDirectory_Debug].offset; debugEntrySize =
+    header->windows.dataDirectoryEntries[PEHeader::DataDirectory_Debug].size;
                 }
             }
             else if (*(i16*)(u8*)block == ImageHeader::Header_Pe32PlusHeader)
@@ -408,8 +410,9 @@ PE::PE(const char *filename, u64 baseAddress)
                 PEPlusHeader* header = reinterpret_cast<PEPlusHeader*>((u8*)block);
                 if (header->windows.dataDirectoryCount > PEHeader::DataDirectory_Debug)
                 {
-                    debugEntryVirtualAdress = header->windows.dataDirectoryEntries[PEHeader::DataDirectory_Debug].offset;
-                    debugEntrySize = header->windows.dataDirectoryEntries[PEHeader::DataDirectory_Debug].size;
+                    debugEntryVirtualAdress =
+    header->windows.dataDirectoryEntries[PEHeader::DataDirectory_Debug].offset; debugEntrySize =
+    header->windows.dataDirectoryEntries[PEHeader::DataDirectory_Debug].size;
                 }
             }
             else
@@ -423,17 +426,19 @@ PE::PE(const char *filename, u64 baseAddress)
 
         if (debugEntryVirtualAdress && debugEntrySize)
         {
-            be_assert(debugEntrySize % sizeof(DebugEntry) == 0, "got an unexpected size for the debug section; expected a multiple of %d, got %d" | sizeof(DebugEntry) | debugEntrySize);
-            size_t debugEntryCount = debugEntrySize / sizeof(DebugEntry);
-            for (u16 section = 0; section <  imageHeader.sectionCount; ++section)
+            be_assert(debugEntrySize % sizeof(DebugEntry) == 0, "got an unexpected size for the
+    debug section; expected a multiple of %d, got %d" | sizeof(DebugEntry) | debugEntrySize); size_t
+    debugEntryCount = debugEntrySize / sizeof(DebugEntry); for (u16 section = 0; section <
+    imageHeader.sectionCount; ++section)
             {
-                if (sections[section].offset <= debugEntryVirtualAdress && (sections[section].offset + sections[section].size) > debugEntryVirtualAdress)
+                if (sections[section].offset <= debugEntryVirtualAdress && (sections[section].offset
+    + sections[section].size) > debugEntryVirtualAdress)
                 {
                     be_info("loading debug info from section %s" | sections[section].name);
                     minitl::Allocator::Block<DebugEntry> entries(Arena::stack(), debugEntryCount);
-                    fseek(m_file, static_cast<long>(sections[section].rawDataOffset + (debugEntryVirtualAdress - sections[section].offset)), SEEK_SET);
-                    fread(entries, sizeof(DebugEntry), debugEntryCount, m_file);
-                    for (size_t i = 0; i < debugEntryCount; ++i)
+                    fseek(m_file, static_cast<long>(sections[section].rawDataOffset +
+    (debugEntryVirtualAdress - sections[section].offset)), SEEK_SET); fread(entries,
+    sizeof(DebugEntry), debugEntryCount, m_file); for (size_t i = 0; i < debugEntryCount; ++i)
                     {
                         switch(entries[i].type)
                         {
@@ -446,18 +451,20 @@ PE::PE(const char *filename, u64 baseAddress)
                                 if (strncmp(pdbInfo->signature, "NB10", 4) == 0)
                                 {
                                     PdbInfo20* pdb20 = reinterpret_cast<PdbInfo20*>((u8*)info);
-                                    m_symbolInformations.type = SymbolResolver::SymbolInformations::PDB20;
-                                    m_symbolInformations.filename = pdb20->filename;
-                                    m_symbolInformations.identifier = istring(minitl::format<128u>("%d%d") | pdb20->timestamp | pdb20->age);
+                                    m_symbolInformations.type =
+    SymbolResolver::SymbolInformations::PDB20; m_symbolInformations.filename = pdb20->filename;
+                                    m_symbolInformations.identifier =
+    istring(minitl::format<128u>("%d%d") | pdb20->timestamp | pdb20->age);
                                     m_symbolInformations.offset = m_baseAddress;
                                 }
                                 else if (strncmp(pdbInfo->signature, "RSDS", 4) == 0)
                                 {
                                     PdbInfo70* pdb70 = reinterpret_cast<PdbInfo70*>((u8*)info);
-                                    m_symbolInformations.type = SymbolResolver::SymbolInformations::PDB70;
-                                    m_symbolInformations.filename = pdb70->filename;
-                                    m_symbolInformations.identifier = istring(minitl::format<128u>("%s%d") | (const char *)pdb70->signature.compactstr() | pdb70->age);
-                                    m_symbolInformations.offset = m_baseAddress;
+                                    m_symbolInformations.type =
+    SymbolResolver::SymbolInformations::PDB70; m_symbolInformations.filename = pdb70->filename;
+                                    m_symbolInformations.identifier =
+    istring(minitl::format<128u>("%s%d") | (const char *)pdb70->signature.compactstr() |
+    pdb70->age); m_symbolInformations.offset = m_baseAddress;
                                 }
                             }
                             break;
@@ -490,21 +497,21 @@ PE::PE(const char *filename, u64 baseAddress)
                 int offset = 0;
                 for (int i = 1; i < 8 && name[i]; ++i)
                 {
-                    be_assert(name[i] >= '0' && name[i] <= '9', "unexpected character in section name %s : %c" | name | name[i]);
-                    offset = offset*10 + name[i]-'0';
+                    be_assert(name[i] >= '0' && name[i] <= '9', "unexpected character in section
+    name %s : %c" | name | name[i]); offset = offset*10 + name[i]-'0';
                 }
                 name = strings->strings+offset-4;
             }
-            Section sec = { name, sections[section].offset,  sections[section].size, sections[section].rawDataOffset, sections[section].rawDataSize };
-            m_sections.push_back(sec);
+            Section sec = { name, sections[section].offset,  sections[section].size,
+    sections[section].rawDataOffset, sections[section].rawDataSize }; m_sections.push_back(sec);
         }
         const Section& code = (*this)[".text"];
         be_assert(code, "No .text section in executable %s" | m_filename);
         const Section& debug_link = (*this)[".gnu_debuglink"];
         if (debug_link)
         {
-            minitl::Allocator::Block<char> f(Arena::stack(), be_checked_numcast<size_t>(debug_link.fileSize));
-            readSection(debug_link, f);
+            minitl::Allocator::Block<char> f(Arena::stack(),
+    be_checked_numcast<size_t>(debug_link.fileSize)); readSection(debug_link, f);
             m_symbolInformations.type = SymbolResolver::SymbolInformations::PEDwarf;
             m_symbolInformations.filename = ifilename(f);
             m_symbolInformations.offset = m_baseAddress + code.offset;
@@ -529,5 +536,4 @@ SymbolResolver::SymbolInformations PE::getSymbolInformation() const
     return m_symbolInformations;
 }
 
-}}
-
+}}  // namespace BugEngine::Runtime

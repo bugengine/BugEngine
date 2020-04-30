@@ -15,12 +15,12 @@ TEMPLATE_H = """
 #define BE_%(PLUGIN)s_%(NAME)s_SCRIPT_HH_
 /**************************************************************************************************/
 %(pch)s
-#include    <scheduler/kernel/kernel.script.hh>
-#include    <scheduler/task/itask.hh>
-#include    <scheduler/kernel/product.hh>
-#include    <scheduler/kernel/parameters/parameters.hh>
-#include    <scheduler/task/kerneltask.hh>
-#include    <kernel/colors.hh>
+#include    <bugengine/scheduler/kernel/kernel.script.hh>
+#include    <bugengine/scheduler/task/itask.hh>
+#include    <bugengine/scheduler/kernel/product.hh>
+#include    <bugengine/scheduler/kernel/parameters/parameters.hh>
+#include    <bugengine/scheduler/task/kerneltask.hh>
+#include    <bugengine/kernel/colors.hh>
 %(includes)s
 
 %(Namespace)s
@@ -118,6 +118,7 @@ class kernel_task(Task.Task):
         callback_assign = '\n    ,   '.join(
             ('m_%sChain(%s->producer(), m_task->startCallback())' % (arg[0], arg[0]) for arg in args)
         )
+
         argument_out_assign = '\n    ,   '.join(
             (
                 '%s(ref< const BugEngine::KernelScheduler::Product< BugEngine::KernelScheduler::ParamTypeToKernelType< %s >::Type > >::create(BugEngine::Arena::task(), %s, m_task))'

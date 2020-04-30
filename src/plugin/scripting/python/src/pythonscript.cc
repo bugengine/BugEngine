@@ -1,14 +1,12 @@
 /* BugEngine <bugengine.devel@gmail.com> / 2008-2014
    see LICENSE for detail */
 
-#include    <python/stdafx.h>
-#include    <python/pythonscript.script.hh>
+#include <bugengine/plugin.scripting.python/stdafx.h>
+#include <bugengine/plugin.scripting.python/pythonscript.script.hh>
 
-namespace BugEngine
-{
+namespace BugEngine {
 
-PythonScript::PythonScript(weak<const File> file)
-    :   Script(file)
+PythonScript::PythonScript(weak< const File > file) : Script(file)
 {
 }
 
@@ -16,4 +14,4 @@ PythonScript::~PythonScript()
 {
 }
 
-}
+}  // namespace BugEngine

@@ -5,20 +5,20 @@
 #define BE_BUGENGINE_STDAFX_H_
 /**************************************************************************************************/
 
-#include    <core/stdafx.h>
-#include    <rtti/stdafx.h>
-#include    <filesystem/stdafx.h>
-#include    <resource/stdafx.h>
-#include    <scheduler/stdafx.h>
-#include    <plugin/stdafx.h>
-#include    <world/stdafx.h>
+#include <bugengine/core/stdafx.h>
+#include <bugengine/filesystem/stdafx.h>
+#include <bugengine/plugin/stdafx.h>
+#include <bugengine/resource/stdafx.h>
+#include <bugengine/rtti/stdafx.h>
+#include <bugengine/scheduler/stdafx.h>
+#include <bugengine/world/stdafx.h>
 
 #if defined(building_bugengine)
-# define     BE_API_BUGENGINE   BE_EXPORT
+#    define BE_API_BUGENGINE BE_EXPORT
 #elif defined(be_dll_bugengine)
-# define     BE_API_BUGENGINE   BE_IMPORT
+#    define BE_API_BUGENGINE BE_IMPORT
 #else
-# define     BE_API_BUGENGINE
+#    define BE_API_BUGENGINE
 #endif
 
 /**************************************************************************************************/

@@ -1,16 +1,16 @@
 /* BugEngine <bugengine.devel@gmail.com> / 2008-2014
    see LICENSE for detail */
 %{
-#include    <package/stdafx.h>
+#include    <bugengine/plugin.scripting.package/stdafx.h>
 #include    <buildcontext.hh>
-#include    <package/nodes/package.hh>
-#include    <package/nodes/object.hh>
-#include    <package/nodes/entity.hh>
-#include    <package/nodes/component.hh>
-#include    <package/nodes/reference.hh>
-#include    <package/nodes/parameter.hh>
-#include    <package/nodes/value.hh>
-#include    <package/nodes/zip.hh>
+#include    <bugengine/plugin.scripting.package/nodes/package.hh>
+#include    <bugengine/plugin.scripting.package/nodes/object.hh>
+#include    <bugengine/plugin.scripting.package/nodes/entity.hh>
+#include    <bugengine/plugin.scripting.package/nodes/component.hh>
+#include    <bugengine/plugin.scripting.package/nodes/reference.hh>
+#include    <bugengine/plugin.scripting.package/nodes/parameter.hh>
+#include    <bugengine/plugin.scripting.package/nodes/value.hh>
+#include    <bugengine/plugin.scripting.package/nodes/zip.hh>
 
 #define yyparse be_package_parse
 #define yylex   be_package_lex

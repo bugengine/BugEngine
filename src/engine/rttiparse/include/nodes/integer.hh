@@ -4,26 +4,26 @@
 #ifndef BE_RTTIPARSE_NODES_INTEGER_HH_
 #define BE_RTTIPARSE_NODES_INTEGER_HH_
 /**************************************************************************************************/
-#include    <rttiparse/stdafx.h>
-#include    <rttiparse/valueparse.hh>
+#include <bugengine/rttiparse/stdafx.h>
+#include <bugengine/rttiparse/valueparse.hh>
 
-
-namespace BugEngine { namespace RTTI { namespace Parser
-{
+namespace BugEngine { namespace RTTI { namespace Parser {
 
 class Integer : public Node
 {
 private:
-    const i64   m_value;
+    const i64 m_value;
+
 protected:
     virtual bool isCompatible(const Type& expectedType) const override;
     virtual void doEval(const Type& expectedType, Value& result) const override;
+
 public:
     Integer(const ParseLocation& location, i64 value);
     ~Integer();
 };
 
-}}}
+}}}  // namespace BugEngine::RTTI::Parser
 
 /**************************************************************************************************/
 #endif

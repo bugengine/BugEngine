@@ -1,15 +1,12 @@
 /* BugEngine <bugengine.devel@gmail.com> / 2008-2014
    see LICENSE for detail */
 
-#include    <core/stdafx.h>
-#include    <core/timer.hh>
+#include <bugengine/core/stdafx.h>
+#include <bugengine/core/timer.hh>
 
-namespace BugEngine
-{
+namespace BugEngine {
 
-Timer::Timer() 
-:   m_total(0)
-,   m_start(0)
+Timer::Timer() : m_total(0), m_start(0)
 {
     start();
 }
@@ -45,4 +42,4 @@ u64 Timer::total() const
     return m_total;
 }
 
-}
+}  // namespace BugEngine

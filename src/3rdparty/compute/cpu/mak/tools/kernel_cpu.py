@@ -9,17 +9,18 @@ except ImportError:
 
 template = """
 %(pch)s
-#include    <kernel/compilers.hh>
-#include    <kernel/simd.hh>
-#include    <kernel/input/input.hh>
-#include    <plugin/dynobjectlist.hh>
-#include    <minitl/array.hh>
-#include    <cpu/memorybuffer.hh>
-#include    <scheduler/kernel/parameters/parameters.hh>
+
+#include <bugengine/kernel/compilers.hh>
+#include <bugengine/kernel/input/input.hh>
+#include <bugengine/kernel/simd.hh>
+#include <bugengine/minitl/array.hh>
+#include <bugengine/plugin.compute.cpu/memorybuffer.hh>
+#include <bugengine/plugin/dynobjectlist.hh>
+#include <bugengine/scheduler/kernel/parameters/parameters.hh>
 
 using namespace Kernel;
 
-#include    "%(source)s"
+#include "%(source)s"
 
 struct Parameter
 {
@@ -28,11 +29,10 @@ struct Parameter
 };
 
 _BE_PLUGIN_EXPORT void _kmain%(static_variant)s(const u32 index, const u32 total,
-                                                const minitl::array< minitl::weak<const BugEngine::KernelScheduler::IMemoryBuffer> >& /*argv*/)
+        const minitl::array<
+           minitl::weak< const BugEngine::KernelScheduler::IMemoryBuffer > >& /*argv*/)
 {
-    kmain(index, total,
-          %(args)s
-    );
+    kmain(index, total, %(args)s);
 }
 _BE_REGISTER_PLUGIN(BE_KERNEL_ID, BE_KERNEL_NAME);
 _BE_REGISTER_METHOD_NAMED(BE_KERNEL_ID, _kmain%(static_variant)s, _kmain);
@@ -58,7 +58,7 @@ class cpuc(Task.Task):
             'pch': '#include <%s>\n' % self.generator.pchstop if self.generator.pchstop else '',
             'source': source,
             'args': ',\n          '.join('%s(0, 0, 0)' % arg[1] for i, arg in enumerate(args)),
-            'static_variant': ('_'+self.generator.variant_name[1:]) if self.env.STATIC else ''
+            'static_variant': ('_' + self.generator.variant_name[1:]) if self.env.STATIC else ''
         }
 
         with open(self.outputs[0].abspath(), 'w') as out:

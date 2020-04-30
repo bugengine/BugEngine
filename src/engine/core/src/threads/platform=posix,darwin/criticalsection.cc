@@ -1,33 +1,32 @@
 /* BugEngine <bugengine.devel@gmail.com> / 2008-2014
    see LICENSE for detail */
 
-#include    <core/stdafx.h>
-#include    <core/threads/criticalsection.hh>
-#include    <pthread.h>
+#include <bugengine/core/stdafx.h>
+#include <bugengine/core/threads/criticalsection.hh>
 
-namespace BugEngine
-{
+#include <pthread.h>
 
-CriticalSection::CriticalSection()
-:   m_data(new pthread_mutex_t)
+namespace BugEngine {
+
+CriticalSection::CriticalSection() : m_data(new pthread_mutex_t)
 {
-    pthread_mutex_init(reinterpret_cast<pthread_mutex_t*>(m_data), 0);
+    pthread_mutex_init(reinterpret_cast< pthread_mutex_t* >(m_data), 0);
 }
 
 CriticalSection::~CriticalSection()
 {
-    pthread_mutex_destroy(reinterpret_cast<pthread_mutex_t*>(m_data));
-    delete reinterpret_cast<pthread_mutex_t*>(m_data);
+    pthread_mutex_destroy(reinterpret_cast< pthread_mutex_t* >(m_data));
+    delete reinterpret_cast< pthread_mutex_t* >(m_data);
 }
 
 void CriticalSection::enter() const
 {
-    pthread_mutex_lock(reinterpret_cast<pthread_mutex_t*>(m_data));
+    pthread_mutex_lock(reinterpret_cast< pthread_mutex_t* >(m_data));
 }
 
 void CriticalSection::leave() const
 {
-    pthread_mutex_unlock(reinterpret_cast<pthread_mutex_t*>(m_data));
+    pthread_mutex_unlock(reinterpret_cast< pthread_mutex_t* >(m_data));
 }
 
-}
+}  // namespace BugEngine

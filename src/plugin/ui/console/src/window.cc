@@ -1,16 +1,14 @@
 /* BugEngine <bugengine.devel@gmail.com> / 2008-2014
    see LICENSE for detail */
 
-#include    <console/stdafx.h>
-#include    <window.script.hh>
+#include <bugengine/plugin.ui.console/stdafx.h>
+#include <window.script.hh>
 
-
-namespace BugEngine
-{
+namespace BugEngine {
 
 Window::CursesWindow::CursesWindow()
-    :   m_pipe()
-    ,   m_screen(newterm(NULL, m_pipe.m_screenStdOut, stdin))
+    : m_pipe()
+    , m_screen(newterm(NULL, m_pipe.m_screenStdOut, stdin))
 {
     set_term(m_screen);
     cbreak();
@@ -27,8 +25,7 @@ Window::CursesWindow::~CursesWindow()
     delscreen(m_screen);
 }
 
-Window::Window(const istring name)
-    :   name(name)
+Window::Window(const istring name) : name(name)
 {
 }
 
@@ -36,9 +33,9 @@ Window::~Window()
 {
 }
 
-ref<Window::CursesWindow> Window::create() const
+ref< Window::CursesWindow > Window::create() const
 {
-    return ref<CursesWindow>::create(Arena::resource());
+    return ref< CursesWindow >::create(Arena::resource());
 }
 
-}
+}  // namespace BugEngine

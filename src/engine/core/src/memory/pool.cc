@@ -1,13 +1,12 @@
 /* BugEngine <bugengine.devel@gmail.com> / 2008-2014
    see LICENSE for detail */
 
-#include    <core/stdafx.h>
-#include    <core/memory/allocators/pool.hh>
+#include <bugengine/core/stdafx.h>
+#include <bugengine/core/memory/allocators/pool.hh>
 
-namespace BugEngine
-{
+namespace BugEngine {
 
-//TODO
+// TODO
 PoolAllocator::PoolAllocator()
 {
 }
@@ -19,7 +18,7 @@ PoolAllocator::~PoolAllocator()
 void* PoolAllocator::internalAlloc(u64 size, u64 alignment)
 {
 #ifdef _MSC_VER
-    return ::_aligned_malloc(be_checked_numcast<size_t>(size), be_checked_numcast<size_t>(alignment));
+    return ::_aligned_malloc(be_checked_numcast< size_t >(size), be_checked_numcast< size_t >(alignment));
 #else
     be_forceuse(alignment);
     return ::malloc(size);
@@ -34,7 +33,7 @@ bool PoolAllocator::internalResize(void* /*ptr*/, u64 /*size*/)
 void* PoolAllocator::internalRealloc(void* ptr, u64 size, u64 alignment)
 {
 #ifdef _MSC_VER
-    return ::_aligned_realloc(ptr, be_checked_numcast<size_t>(size), be_checked_numcast<size_t>(alignment));
+    return ::_aligned_realloc(ptr, be_checked_numcast< size_t >(size), be_checked_numcast< size_t >(alignment));
 #else
     be_forceuse(alignment);
     return ::realloc(ptr, size);
@@ -44,10 +43,10 @@ void* PoolAllocator::internalRealloc(void* ptr, u64 size, u64 alignment)
 void PoolAllocator::internalFree(const void* pointer)
 {
 #ifdef _MSC_VER
-    ::_aligned_free(const_cast<void*>(pointer));
+    ::_aligned_free(const_cast< void* >(pointer));
 #else
-    ::free(const_cast<void*>(pointer));
+    ::free(const_cast< void* >(pointer));
 #endif
 }
 
-}
+}  // namespace BugEngine

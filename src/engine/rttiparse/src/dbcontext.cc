@@ -1,31 +1,28 @@
 /* BugEngine <bugengine.devel@gmail.com> / 2008-2014
    see LICENSE for detail */
 
-#include    <rttiparse/stdafx.h>
-#include    <rttiparse/dbcontext.hh>
-#include    <rttiparse/valueparse.hh>
+#include <bugengine/rttiparse/stdafx.h>
+#include <bugengine/rttiparse/dbcontext.hh>
+#include <bugengine/rttiparse/valueparse.hh>
 
+namespace BugEngine { namespace RTTI { namespace Parser {
 
-namespace BugEngine { namespace RTTI { namespace Parser
-{
-
-
-DbContext::DbContext(minitl::Allocator& arena, const ifilename& filename, ref<Folder> rootFolder)
-    :   filename(filename)
-    ,   rootNamespace(ref<Namespace>::create(arena, byref(arena)))
-    ,   rootFolder(rootFolder)
-    ,   messages(arena)
-    ,   errorCount()
+DbContext::DbContext(minitl::Allocator& arena, const ifilename& filename, ref< Folder > rootFolder)
+    : filename(filename)
+    , rootNamespace(ref< Namespace >::create(arena, byref(arena)))
+    , rootFolder(rootFolder)
+    , messages(arena)
+    , errorCount()
 {
 }
 
-DbContext::DbContext(minitl::Allocator& arena, const ifilename& filename,
-                     ref<const Namespace> ns, ref<Folder> rootFolder)
-    :   filename(filename)
-    ,   rootNamespace(ns)
-    ,   rootFolder(rootFolder)
-    ,   messages(arena)
-    ,   errorCount()
+DbContext::DbContext(minitl::Allocator& arena, const ifilename& filename, ref< const Namespace > ns,
+                     ref< Folder > rootFolder)
+    : filename(filename)
+    , rootNamespace(ns)
+    , rootFolder(rootFolder)
+    , messages(arena)
+    , errorCount()
 {
 }
 
@@ -40,5 +37,4 @@ void DbContext::warning(const ParseLocation& location, const Message::MessageTyp
     messages.push_back(Message(location, warning, logWarning));
 }
 
-}}}
-
+}}}  // namespace BugEngine::RTTI::Parser

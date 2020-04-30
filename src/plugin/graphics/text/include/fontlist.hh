@@ -4,11 +4,10 @@
 #ifndef BE_TEXT_FONTLIST_HH_
 #define BE_TEXT_FONTLIST_HH_
 /**************************************************************************************************/
-#include    <text/stdafx.h>
-#include    <minitl/pointer.hh>
+#include <bugengine/plugin.graphics.text/stdafx.h>
+#include <bugengine/minitl/pointer.hh>
 
-namespace BugEngine
-{
+namespace BugEngine {
 
 class FontList : public minitl::pointer
 {
@@ -17,7 +16,7 @@ public:
     ~FontList();
 };
 
-}
+}  // namespace BugEngine
 
 /**************************************************************************************************/
 #endif

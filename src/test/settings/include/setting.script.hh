@@ -3,12 +3,10 @@
 #ifndef BE_TEST_SETTINGS_SETTINGS_HH_
 #define BE_TEST_SETTINGS_SETTINGS_HH_
 /**************************************************************************************************/
-#include    <stdafx.h>
-#include    <settings/settings.factory.hh>
+#include <stdafx.h>
+#include <bugengine/settings/settings.factory.hh>
 
-
-namespace BugEngine { namespace TestSettings
-{
+namespace BugEngine { namespace TestSettings {
 
 enum EnumSetting
 {
@@ -16,17 +14,16 @@ enum EnumSetting
     EnumSettingValue2
 };
 
-struct TestSettings : public Settings::Settings<TestSettings>
+struct TestSettings : public Settings::Settings< TestSettings >
 {
     EnumSetting enumSetting;
 
-    TestSettings()
-        : enumSetting(EnumSettingValue1)
+    TestSettings() : enumSetting(EnumSettingValue1)
     {
     }
 };
 
-}}
+}}  // namespace BugEngine::TestSettings
 
 /**************************************************************************************************/
 #endif

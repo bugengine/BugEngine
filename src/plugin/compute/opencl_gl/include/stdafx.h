@@ -5,11 +5,10 @@
 #define BE_COMPUTE_OPENCL_OPENGL_STDAFX_H_
 /**************************************************************************************************/
 
-#include    <bugengine/stdafx.h>
+#include <bugengine/stdafx.h>
 
-#include    <GL4/stdafx.h>
-#include    <opencl/stdafx.h>
+#include <bugengine/plugin.compute.opencl/stdafx.h>
+#include <bugengine/plugin.graphics.GL4/stdafx.h>
 
 /**************************************************************************************************/
 #endif
-

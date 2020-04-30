@@ -33,7 +33,7 @@ cls = Task.task_factory('datagen', ddf, [], 'PINK', ext_in='.h .hh .hxx', ext_ou
 cls.scan = scan
 
 namespace_register = 'BE_REGISTER_NAMESPACE_%d_NAMED(%s, %s)\n'
-namespace_alias =    'BE_REGISTER_ROOT_NAMESPACE(%s, %s, %s)\n'
+namespace_alias = 'BE_REGISTER_ROOT_NAMESPACE(%s, %s, %s)\n'
 
 
 class docgen(Task.Task):
@@ -53,7 +53,7 @@ class nsdef(Task.Task):
             pch = getattr(self, 'pch', '')
             if pch:
                 namespace_file.write('#include <%s>\n' % pch)
-            namespace_file.write('#include <rtti/engine/namespace.hh>\n')
+            namespace_file.write('#include <bugengine/rtti/engine/namespace.hh>\n')
             for input in self.inputs:
                 with open(input.abspath(), 'rb') as in_file:
                     while True:
@@ -63,12 +63,12 @@ class nsdef(Task.Task):
                                 root_namespace = root_namespace.split('::')
                                 seen.add((plugin, '.'.join(namespace)))
                                 if namespace == root_namespace:
-                                    line = namespace_alias % (plugin,
-                                                              '_'+'_'.join(root_namespace[:-1]) if len(root_namespace) > 1 else '',
-                                                              root_namespace[-1])
+                                    line = namespace_alias % (
+                                        plugin, '_' + '_'.join(root_namespace[:-1]) if len(root_namespace) > 1 else '',
+                                        root_namespace[-1]
+                                    )
                                 else:
-                                    line = namespace_register % (len(namespace), plugin,
-                                                                 ', '.join(namespace))
+                                    line = namespace_register % (len(namespace), plugin, ', '.join(namespace))
                                 namespace_file.write(line)
                         except EOFError:
                             break
@@ -125,7 +125,6 @@ def nsgen(self):
                 for s in y.source:
                     if s.name.endswith('.namespaces'):
                         self.add_namespace_file(s)
-
 
 
 @extension('.namespaces')

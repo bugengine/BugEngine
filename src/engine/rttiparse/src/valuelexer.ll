@@ -1,7 +1,7 @@
 /* BugEngine <bugengine.devel@gmail.com> / 2008-2014
    see LICENSE for detail */
 %{
-#include    <rttiparse/stdafx.h>
+#include    <bugengine/rttiparse/stdafx.h>
 #include    <ctype.h>
 #include    <parsecontext.hh>
 

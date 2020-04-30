@@ -4,12 +4,12 @@
 #ifndef BE_FILESYSTEM_POSIX_FILE_HH_
 #define BE_FILESYSTEM_POSIX_FILE_HH_
 /**************************************************************************************************/
-#include    <filesystem/stdafx.h>
-#include    <filesystem/file.script.hh>
-#include    <sys/types.h>
+#include <bugengine/filesystem/stdafx.h>
+#include <bugengine/filesystem/file.script.hh>
 
-namespace BugEngine
-{
+#include <sys/types.h>
+
+namespace BugEngine {
 
 class PosixFile : public File
 {
@@ -18,12 +18,13 @@ public:
     ~PosixFile();
 
     void refresh(u64 size, time_t modifiedTime);
+
 private:
-    virtual void doFillBuffer(weak<File::Ticket> ticket) const override;
-    virtual void doWriteBuffer(weak<Ticket> ticket) const override;
+    virtual void doFillBuffer(weak< File::Ticket > ticket) const override;
+    virtual void doWriteBuffer(weak< Ticket > ticket) const override;
 };
 
-}
+}  // namespace BugEngine
 
 /**************************************************************************************************/
 #endif

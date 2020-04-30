@@ -1,10 +1,10 @@
 /* BugEngine <bugengine.devel@gmail.com> / 2008-2014
    see LICENSE for detail */
 
-#include    <windowing/stdafx.h>
-#include    <windowing/renderer.hh>
-#include    <windowing/window.hh>
-#include    <core/threads/event.hh>
+#include    <bugengine/plugin.graphics.windowing/stdafx.h>
+#include    <bugengine/plugin.graphics.windowing/renderer.hh>
+#include    <bugengine/plugin.graphics.windowing/window.hh>
+#include    <bugengine/core/threads/event.hh>
 
 #include    <darwin/platformrenderer.hh>
 

@@ -1,52 +1,51 @@
 /* BugEngine <bugengine.devel@gmail.com> / 2008-2014
    see LICENSE for detail */
 
-#include    <runtime/stdafx.h>
+#include <bugengine/plugin.debug.runtime/stdafx.h>
+#include <bugengine/plugin.debug.runtime/module.hh>
+#include <bugengine/plugin.debug.runtime/symbols.hh>
 
-#include    <runtime/module.hh>
-#include    <runtime/symbols.hh>
+#include <psapi.h>
 
-#include    <psapi.h>
+#include <elf.hh>
+#include <pe.hh>
 
-#include    <elf.hh>
-#include    <pe.hh>
+namespace BugEngine { namespace Runtime {
 
-
-namespace BugEngine { namespace Runtime
+ref< const Module > Module::self()
 {
-
-ref<const Module> Module::self()
-{
-    static ref<Module> s_module;
-    static ref<Module> module;
-    static size_t seen = 0;
+    static ref< Module > s_module;
+    static ref< Module > module;
+    static size_t        seen = 0;
 
     HANDLE process = ::GetCurrentProcess();
-    DWORD requiredSize;
+    DWORD  requiredSize;
     ::EnumProcessModules(process, 0, 0, &requiredSize);
-    size_t moduleCount = requiredSize/sizeof(HMODULE);
-    minitl::Allocator::Block<HMODULE> hmodules(Arena::stack(), moduleCount);
+    size_t                              moduleCount = requiredSize / sizeof(HMODULE);
+    minitl::Allocator::Block< HMODULE > hmodules(Arena::stack(), moduleCount);
     ::EnumProcessModules(process, hmodules, requiredSize, &requiredSize);
 
-    for (; seen < moduleCount; seen++)
+    for(; seen < moduleCount; seen++)
     {
-        char moduleName[32768];
+        char       moduleName[32768];
         MODULEINFO info;
         ::GetModuleFileNameEx(process, hmodules[seen], moduleName, sizeof(moduleName));
         ::GetModuleInformation(process, hmodules[seen], &info, sizeof(info));
-        if (seen == 0)
+        if(seen == 0)
         {
-            s_module = ref<PE>::create(Arena::debug(), moduleName, (u64)(uintptr_t)info.lpBaseOfDll);
+            s_module
+               = ref< PE >::create(Arena::debug(), moduleName, (u64)(uintptr_t)info.lpBaseOfDll);
             module = s_module;
         }
         else
         {
-            ref<Module> newModule = ref<PE>::create(Arena::debug(), moduleName, (u64)(uintptr_t)info.lpBaseOfDll);
+            ref< Module > newModule
+               = ref< PE >::create(Arena::debug(), moduleName, (u64)(uintptr_t)info.lpBaseOfDll);
             module->m_next = newModule;
-            module = newModule;
+            module         = newModule;
         }
     }
     return s_module;
 }
 
-}}
+}}  // namespace BugEngine::Runtime

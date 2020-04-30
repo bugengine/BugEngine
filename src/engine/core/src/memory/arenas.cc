@@ -1,11 +1,10 @@
 /* BugEngine <bugengine.devel@gmail.com> / 2008-2014
    see LICENSE for detail */
 
-#include    <core/stdafx.h>
-#include    <core/memory/allocators/general.hh>
+#include <bugengine/core/stdafx.h>
+#include <bugengine/core/memory/allocators/general.hh>
 
-namespace BugEngine { namespace Arena
-{
+namespace BugEngine { namespace Arena {
 
 minitl::Allocator& general()
 {
@@ -28,4 +27,4 @@ minitl::Allocator& debug()
     return general();
 }
 
-}}
+}}  // namespace BugEngine::Arena

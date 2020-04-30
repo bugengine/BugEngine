@@ -1,19 +1,18 @@
 /* BugEngine <bugengine.devel@gmail.com> / 2008-2014
    see LICENSE for detail */
 
-#include    <rtti/stdafx.h>
-#include    <rtti/classinfo.script.hh>
-#include    <rtti/engine/propertyinfo.script.hh>
-#include    <rtti/engine/methodinfo.script.hh>
-#include    <rtti/engine/objectinfo.script.hh>
-#include    <rtti/engine/taginfo.script.hh>
-#include    <rtti/value.hh>
+#include <bugengine/rtti/stdafx.h>
+#include <bugengine/rtti/classinfo.script.hh>
+#include <bugengine/rtti/engine/methodinfo.script.hh>
+#include <bugengine/rtti/engine/objectinfo.script.hh>
+#include <bugengine/rtti/engine/propertyinfo.script.hh>
+#include <bugengine/rtti/engine/taginfo.script.hh>
+#include <bugengine/rtti/value.hh>
 
-namespace BugEngine { namespace RTTI
-{
+namespace BugEngine {
+namespace RTTI {
 
-be_api(RTTI)
-char s_zero[] = { 0, 0, 0, 0 };
+be_api(RTTI) char s_zero[] = {0, 0, 0, 0};
 
 const istring Class::nameConstructor()
 {
@@ -245,75 +244,71 @@ const istring Class::nameOperatorGet()
 
 void Class::copy(const void* src, void* dst) const
 {
-    be_assert_recover(copyconstructor, "no copy for type %s" | name, return);
+    be_assert_recover(copyconstructor, "no copy for type %s" | name, return );
     (*copyconstructor)(src, dst);
 }
 
 void Class::destroy(void* src) const
 {
-    be_assert_recover(destructor, "no destructor for type %s" | name, return);
+    be_assert_recover(destructor, "no destructor for type %s" | name, return );
     (*destructor)(src);
 }
 
 void Class::enumerateObjects(EnumerateRecursion recursion, EnumerateCallback callback) const
 {
-    static raw<const Class> const s_metaClass = be_class<Class>();
-    raw<const ObjectInfo> o = objects;
+    static raw< const Class > const s_metaClass = be_class< Class >();
+    raw< const ObjectInfo >         o           = objects;
     while(o)
     {
         (*callback)(o->value);
-        if (recursion == EnumerateRecursive && (o->value.type().metaclass == s_metaClass))
+        if(recursion == EnumerateRecursive && (o->value.type().metaclass == s_metaClass))
         {
-            o->value.as< raw<const Class> >()->enumerateObjects(recursion, callback);
+            o->value.as< raw< const Class > >()->enumerateObjects(recursion, callback);
         }
         o = o->next;
     }
 }
 
-raw<const Property> Class::getProperty(istring propertyName) const
+raw< const Property > Class::getProperty(istring propertyName) const
 {
-    raw<const Class> thisCls = { this };
-    for (raw< const Class > cls = thisCls; cls; cls = cls->parent)
+    raw< const Class > thisCls = {this};
+    for(raw< const Class > cls = thisCls; cls; cls = cls->parent)
     {
-        for (const Property* p = cls->properties.begin();
-             p != cls->properties.end();
-             ++p)
+        for(const Property* p = cls->properties.begin(); p != cls->properties.end(); ++p)
         {
-            if (p->name == propertyName)
+            if(p->name == propertyName)
             {
-                raw<const Property> pptr = {p};
+                raw< const Property > pptr = {p};
                 return pptr;
             }
         }
     }
-    return raw<const Property>();
+    return raw< const Property >();
 }
 
-raw<const Method> Class::getMethod(istring methodName) const
+raw< const Method > Class::getMethod(istring methodName) const
 {
-    raw<const Class> thisCls = { this };
-    for (raw< const Class > cls = thisCls; cls; cls = cls->parent)
+    raw< const Class > thisCls = {this};
+    for(raw< const Class > cls = thisCls; cls; cls = cls->parent)
     {
-        for (const Method* m = cls->methods.begin();
-             m != cls->methods.end();
-             ++m)
+        for(const Method* m = cls->methods.begin(); m != cls->methods.end(); ++m)
         {
-            if (m->name == methodName)
+            if(m->name == methodName)
             {
-                raw< const Method > mptr = { m };
+                raw< const Method > mptr = {m};
                 return mptr;
             }
         }
     }
-    return raw<const Method>();
+    return raw< const Method >();
 }
 
-raw<const ObjectInfo> Class::getStaticProperty(istring propertyName) const
+raw< const ObjectInfo > Class::getStaticProperty(istring propertyName) const
 {
-    raw<const ObjectInfo> o = objects;
+    raw< const ObjectInfo > o = objects;
     while(o)
     {
-        if (o->name == propertyName)
+        if(o->name == propertyName)
         {
             break;
         }
@@ -324,32 +319,32 @@ raw<const ObjectInfo> Class::getStaticProperty(istring propertyName) const
 
 Value Class::get(Value& from, istring propname, bool& found) const
 {
-    static raw<const Class> const s_metaClass = be_class<Class>();
-    if (from.type().metaclass == s_metaClass)
+    static raw< const Class > const s_metaClass = be_class< Class >();
+    if(from.type().metaclass == s_metaClass)
     {
-        raw<const Class> cls = from.as< raw<const Class> >();
-        raw<const ObjectInfo> o = cls->getStaticProperty(propname);
-        if (o)
+        raw< const Class >      cls = from.as< raw< const Class > >();
+        raw< const ObjectInfo > o   = cls->getStaticProperty(propname);
+        if(o)
         {
             found = true;
             return o->value;
         }
-        raw<const Method> m = cls->getMethod(propname);
-        if (m)
+        raw< const Method > m = cls->getMethod(propname);
+        if(m)
         {
             found = true;
             return Value(m);
         }
     }
 
-    raw<const Property> p = getProperty(propname);
-    if (p)
+    raw< const Property > p = getProperty(propname);
+    if(p)
     {
         found = true;
         return p->get(from);
     }
-    raw<const Method> m = getMethod(propname);
-    if (m)
+    raw< const Method > m = getMethod(propname);
+    if(m)
     {
         found = true;
         return Value(m);
@@ -361,32 +356,32 @@ Value Class::get(Value& from, istring propname, bool& found) const
 
 Value Class::get(const Value& from, istring propname, bool& found) const
 {
-    static raw<const Class> const s_metaClass = be_class<Class>();
-    if (from.type().metaclass == s_metaClass)
+    static raw< const Class > const s_metaClass = be_class< Class >();
+    if(from.type().metaclass == s_metaClass)
     {
-        raw<const Class> cls = from.as< raw<const Class> >();
-        raw<const ObjectInfo> o = cls->getStaticProperty(propname);
-        if (o)
+        raw< const Class >      cls = from.as< raw< const Class > >();
+        raw< const ObjectInfo > o   = cls->getStaticProperty(propname);
+        if(o)
         {
             found = true;
             return o->value;
         }
-        raw<const Method> m = cls->getMethod(propname);
-        if (m)
+        raw< const Method > m = cls->getMethod(propname);
+        if(m)
         {
             found = true;
             return Value(m);
         }
     }
 
-    raw<const Property> p = getProperty(propname);
-    if (p)
+    raw< const Property > p = getProperty(propname);
+    if(p)
     {
         found = true;
         return p->get(from);
     }
-    raw<const Method> m = getMethod(propname);
-    if (m)
+    raw< const Method > m = getMethod(propname);
+    if(m)
     {
         found = true;
         return Value(m);
@@ -396,13 +391,12 @@ Value Class::get(const Value& from, istring propname, bool& found) const
     return Value();
 }
 
-bool Class::isA(raw<const Class> klass) const
+bool Class::isA(raw< const Class > klass) const
 {
-    raw<const Class> ci = {this};
-    while (ci)
+    raw< const Class > ci = {this};
+    while(ci)
     {
-        if (ci == klass)
-            return true;
+        if(ci == klass) return true;
         ci = ci->parent;
     }
     return false;
@@ -410,36 +404,32 @@ bool Class::isA(raw<const Class> klass) const
 
 Value Class::getTag(const Type& type) const
 {
-    raw<const Class> thisCls = { this };
-    for (raw< const Class > cls = thisCls; cls; cls = cls->parent)
+    raw< const Class > thisCls = {this};
+    for(raw< const Class > cls = thisCls; cls; cls = cls->parent)
     {
-        if (cls->tags)
+        if(cls->tags)
         {
-            for (const Tag* tag = cls->tags->begin();
-                 tag != cls->tags->end();
-                 ++tag)
+            for(const Tag* tag = cls->tags->begin(); tag != cls->tags->end(); ++tag)
             {
-                if (type <= tag->tag.type())
-                    return Value(Value::ByRef(tag->tag));
+                if(type <= tag->tag.type()) return Value(Value::ByRef(tag->tag));
             }
         }
     }
     return Value();
 }
 
-Value Class::getTag(raw<const Class> type) const
+Value Class::getTag(raw< const Class > type) const
 {
     return getTag(Type::makeType(type, Type::Value, Type::Const, Type::Const));
 }
 
-bool Class::distance(raw<const Class> other, u16& result) const
+bool Class::distance(raw< const Class > other, u16& result) const
 {
-    raw<const Class> ci = {this};
-    result = 0;
-    while (ci)
+    raw< const Class > ci = {this};
+    result                = 0;
+    while(ci)
     {
-        if (ci == other)
-            return true;
+        if(ci == other) return true;
         ci = ci->parent;
         ++result;
     }
@@ -448,7 +438,7 @@ bool Class::distance(raw<const Class> other, u16& result) const
 
 inamespace Class::fullname() const
 {
-    if (!owner)
+    if(!owner)
     {
         return inamespace(name);
     }
@@ -460,25 +450,23 @@ inamespace Class::fullname() const
 
 Value Class::findClass(inamespace name)
 {
-    Value v = Value(raw<const RTTI::Class>(be_bugengine_Namespace()));
-    while (v && name.size())
+    Value v = Value(raw< const RTTI::Class >(be_bugengine_Namespace()));
+    while(v && name.size())
     {
         v = v[name.pop_front()];
     }
     return v;
 }
 
-}
+}  // namespace RTTI
 
-raw<RTTI::Class> be_bugengine_Namespace()
+raw< RTTI::Class > be_bugengine_Namespace()
 {
-    static RTTI::Class ci = { "BugEngine", 0, 0, RTTI::ClassType_Namespace, {0}, {0}, {0},
-                              {0},
-                              {0, 0},
-                              {0, 0},
-                              {0}, {0}, 0, 0 };
-    raw<RTTI::Class> result = {&ci};
+    static RTTI::Class ci
+       = {"BugEngine", 0, 0, RTTI::ClassType_Namespace, {0}, {0}, {0}, {0}, {0, 0}, {0, 0}, {0},
+          {0},         0, 0};
+    raw< RTTI::Class > result = {&ci};
     return result;
 }
 
-}
+}  // namespace BugEngine

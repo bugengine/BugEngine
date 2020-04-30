@@ -3,13 +3,10 @@
 
 #include <settings.script.hh>
 
-namespace BugEngine { namespace SchedulerSettings
-{
+namespace BugEngine { namespace SchedulerSettings {
 
-Scheduler::Scheduler()
-    :   ThreadCount(0)
-    ,   KernelScheduler(Auto)
+Scheduler::Scheduler() : ThreadCount(0), KernelScheduler(Auto)
 {
 }
 
-}}
+}}  // namespace BugEngine::SchedulerSettings

@@ -1,35 +1,33 @@
 /* BugEngine <bugengine.devel@gmail.com> / 2008-2014
    see LICENSE for detail */
 
-#include    <core/stdafx.h>
-#include    <core/threads/mutex.hh>
-#include    <pthread.h>
+#include <bugengine/core/stdafx.h>
+#include <bugengine/core/threads/mutex.hh>
 
+#include <pthread.h>
 
-namespace BugEngine
+namespace BugEngine {
+
+Mutex::Mutex() : m_data(new pthread_mutex_t)
 {
-
-Mutex::Mutex()
-:   m_data(new pthread_mutex_t)
-{
-    pthread_mutex_init(reinterpret_cast<pthread_mutex_t*>(m_data), 0);
+    pthread_mutex_init(reinterpret_cast< pthread_mutex_t* >(m_data), 0);
 }
 
 Mutex::~Mutex()
 {
-    pthread_mutex_destroy(reinterpret_cast<pthread_mutex_t*>(m_data));
-    delete reinterpret_cast<pthread_mutex_t*>(m_data);
+    pthread_mutex_destroy(reinterpret_cast< pthread_mutex_t* >(m_data));
+    delete reinterpret_cast< pthread_mutex_t* >(m_data);
 }
 
 void Mutex::release()
 {
-    pthread_mutex_unlock(reinterpret_cast<pthread_mutex_t*>(m_data));
+    pthread_mutex_unlock(reinterpret_cast< pthread_mutex_t* >(m_data));
 }
 
 Threads::Waitable::WaitResult Mutex::wait()
 {
-    pthread_mutex_lock(reinterpret_cast<pthread_mutex_t*>(m_data));
+    pthread_mutex_lock(reinterpret_cast< pthread_mutex_t* >(m_data));
     return Finished;
 }
 
-}
+}  // namespace BugEngine

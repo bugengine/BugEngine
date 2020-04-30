@@ -1,11 +1,10 @@
 /* BugEngine <bugengine.devel@gmail.com> / 2008-2014
    see LICENSE for detail */
 
-#include    <text/stdafx.h>
-#include    <text/text.script.hh>
+#include <bugengine/plugin.graphics.text/stdafx.h>
+#include <bugengine/plugin.graphics.text/text.script.hh>
 
-namespace BugEngine
-{
+namespace BugEngine {
 
 Text::Text()
 {
@@ -15,5 +14,4 @@ Text::~Text()
 {
 }
 
-}
-
+}  // namespace BugEngine

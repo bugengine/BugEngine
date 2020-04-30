@@ -1,9 +1,9 @@
 /* BugEngine <bugengine.devel@gmail.com> / 2008-2014
    see LICENSE for detail */
 %{
-#include    <rttiparse/stdafx.h>
+#include    <bugengine/rttiparse/stdafx.h>
 #include    <parsecontext.hh>
-#include    <rttiparse/object.hh>
+#include    <bugengine/rttiparse/object.hh>
 #include    <nodes/reference.hh>
 #include    <nodes/bool.hh>
 #include    <nodes/integer.hh>

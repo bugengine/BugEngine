@@ -1,11 +1,10 @@
 /* BugEngine <bugengine.devel@gmail.com> / 2008-2014
    see LICENSE for detail */
 
-#include    <text/stdafx.h>
-#include    <freetypelib.hh>
+#include <bugengine/plugin.graphics.text/stdafx.h>
+#include <freetypelib.hh>
 
-namespace BugEngine
-{
+namespace BugEngine {
 
 FreetypeLibrary::FreetypeLibrary()
 {
@@ -19,4 +18,4 @@ FreetypeLibrary::~FreetypeLibrary()
     FT_Done_FreeType(library);
 }
 
-}
+}  // namespace BugEngine

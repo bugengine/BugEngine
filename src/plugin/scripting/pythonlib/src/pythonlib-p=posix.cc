@@ -1,51 +1,48 @@
 /* BugEngine <bugengine.devel@gmail.com> / 2008-2014
    see LICENSE for detail */
 
-#include    <pythonlib/stdafx.h>
-#include    <pythonlib/pythonlib.hh>
+#include <bugengine/plugin.scripting.pythonlib/stdafx.h>
+#include <bugengine/plugin.scripting.pythonlib/pythonlib.hh>
 
-#include    <dlfcn.h>
+#include <dlfcn.h>
 
-namespace BugEngine { namespace Python
-{
+namespace BugEngine { namespace Python {
 
 PythonLibrary::PythonLibrary(const char* pythonLibraryName)
-    :   m_pythonLibraryName(pythonLibraryName)
-    ,   m_handle((m_pythonLibraryName && *m_pythonLibraryName)
-                    ?   dlopen(minitl::format<1024u>("lib%s.so") | m_pythonLibraryName,
-                        RTLD_LAZY | RTLD_GLOBAL)
-                    :   RTLD_DEFAULT)
-    ,   m_status(dlerror() == 0)
-    ,   m_api(1013)
-    ,   m_version(0)
+    : m_pythonLibraryName(pythonLibraryName)
+    , m_handle((m_pythonLibraryName && *m_pythonLibraryName)
+                  ? dlopen(minitl::format< 1024u >("lib%s.so") | m_pythonLibraryName,
+                           RTLD_LAZY | RTLD_GLOBAL)
+                  : RTLD_DEFAULT)
+    , m_status(dlerror() == 0)
+    , m_api(1013)
+    , m_version(0)
 {
-    if (!m_status)
+    if(!m_status)
     {
         be_error("unable to load library %s: %s" | pythonLibraryName | dlerror());
     }
     else
     {
-#       define be_get_func_name_opt(f, dest)                                        \
-            do {                                                                    \
-                void* tmp = dlsym(m_handle, #f);                                    \
-                if (tmp)                                                            \
-                    memcpy(&m_##dest, &tmp, sizeof(dest##Type));                    \
-            } while(0)
-#       define be_get_func_opt(f)                                                   \
-            be_get_func_name_opt(f, f)
-#       define be_get_func_name(f, dest)                                            \
-            do {                                                                    \
-                be_get_func_name_opt(f, dest);                                      \
-                if (!m_##dest)                                                      \
-                {                                                                   \
-                    be_error("could not locate function %s in module %s"            \
-                                | #f                                                \
-                                | (pythonLibraryName ? pythonLibraryName : "root"));\
-                    m_status = false;                                               \
-                }                                                                   \
-            } while(0)
-#       define be_get_func(f)                                                       \
-            be_get_func_name(f, f)
+#define be_get_func_name_opt(f, dest)                                                              \
+    do                                                                                             \
+    {                                                                                              \
+        void* tmp = dlsym(m_handle, #f);                                                           \
+        if(tmp) memcpy(&m_##dest, &tmp, sizeof(dest##Type));                                       \
+    } while(0)
+#define be_get_func_opt(f) be_get_func_name_opt(f, f)
+#define be_get_func_name(f, dest)                                                                  \
+    do                                                                                             \
+    {                                                                                              \
+        be_get_func_name_opt(f, dest);                                                             \
+        if(!m_##dest)                                                                              \
+        {                                                                                          \
+            be_error("could not locate function %s in module %s" | #f                              \
+                     | (pythonLibraryName ? pythonLibraryName : "root"));                          \
+            m_status = false;                                                                      \
+        }                                                                                          \
+    } while(0)
+#define be_get_func(f) be_get_func_name(f, f)
 
         be_get_func(Py_InitializeEx);
         be_get_func(Py_Finalize);
@@ -54,8 +51,8 @@ PythonLibrary::PythonLibrary(const char* pythonLibraryName)
         be_get_func(Py_GetPath);
         be_get_func(Py_GetVersion);
         const char* version = m_Py_GetVersion();
-        m_version = (version[0]-'0')*10 + (version[2]-'0');
-        if (m_version >= 30)
+        m_version           = (version[0] - '0') * 10 + (version[2] - '0');
+        if(m_version >= 30)
         {
             be_get_func(PyModule_Create2);
             be_get_func_name(PyImport_AppendInittab, PyImport_AppendInittab3);
@@ -63,14 +60,14 @@ PythonLibrary::PythonLibrary(const char* pythonLibraryName)
         }
         else
         {
-            m_Py_InitModule4 = 0;
+            m_Py_InitModule4    = 0;
             m_Py_InitModule4_64 = 0;
             be_get_func_opt(Py_InitModule4);
             be_get_func_opt(Py_InitModule4_64);
             be_get_func_name(PyImport_AppendInittab, PyImport_AppendInittab2);
             be_get_func_name(Py_SetPythonHome, Py_SetPythonHome2);
         }
-        if (m_version >= 32)
+        if(m_version >= 32)
         {
             m_Py_CompileStringFlags = 0;
             be_get_func(Py_CompileStringExFlags);
@@ -123,7 +120,7 @@ PythonLibrary::PythonLibrary(const char* pythonLibraryName)
         be_get_func(PyDict_Next);
         be_get_func(PyDict_GetItemString);
         be_get_func(PyDict_SetItemString);
-        if (m_version < 30)
+        if(m_version < 30)
         {
             be_get_func(PyString_FromString);
             be_get_func(PyString_FromStringAndSize);
@@ -149,12 +146,11 @@ PythonLibrary::PythonLibrary(const char* pythonLibraryName)
             be_get_func_name_opt(PyUnicode_AsUTF8String, PyUnicode_AsUTF8String);
             be_get_func_name_opt(PyUnicodeUCS2_AsUTF8String, PyUnicode_AsUTF8String);
             be_get_func_name_opt(PyUnicodeUCS4_AsUTF8String, PyUnicode_AsUTF8String);
-            if (m_version >= 33)
-                be_get_func(PyUnicode_AsUTF8);
+            if(m_version >= 33) be_get_func(PyUnicode_AsUTF8);
             be_get_func(PyBytes_AsString);
         }
         be_get_func(PyBool_FromLong);
-        if (m_version < 30)
+        if(m_version < 30)
         {
             be_get_func(PyInt_AsUnsignedLongMask);
             be_get_func(PyInt_FromLong);
@@ -176,18 +172,18 @@ PythonLibrary::PythonLibrary(const char* pythonLibraryName)
         be_get_func(PyExc_TypeError);
         be_get_func(PySys_GetObject);
         be_get_func(PySys_SetObject);
-#       undef be_get_fun
-#       undef be_get_fun_opt
+#undef be_get_fun
+#undef be_get_fun_opt
     }
 }
 
 PythonLibrary::~PythonLibrary()
 {
-    if (m_status && m_pythonLibraryName)
+    if(m_status && m_pythonLibraryName)
     {
         finalize();
     }
-    if (m_handle)
+    if(m_handle)
     {
         dlclose(m_handle);
     }
@@ -202,8 +198,8 @@ void PythonLibrary::setupPath()
     ifilename programPath = Environment::getEnvironment().getProgramPath();
     programPath.pop_back();
     programPath.pop_back();
-    (*m_PyRun_SimpleString)(minitl::format<4096>("import sys; sys.path.append(\"%s/lib/\")")
-                             | programPath.str().name);
+    (*m_PyRun_SimpleString)(minitl::format< 4096 >("import sys; sys.path.append(\"%s/lib/\")")
+                            | programPath.str().name);
 }
 
-}}
+}}  // namespace BugEngine::Python

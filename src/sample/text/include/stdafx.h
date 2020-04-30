@@ -5,9 +5,8 @@
 #define BE_SAMPLES_TEXT_STDAFX_H_
 /**************************************************************************************************/
 
-#include    <bugengine/stdafx.h>
-
-#include    <package/stdafx.h>
+#include <bugengine/plugin.scripting.package/stdafx.h>
+#include <bugengine/stdafx.h>
 
 /**************************************************************************************************/
 #endif

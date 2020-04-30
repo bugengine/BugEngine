@@ -1,14 +1,13 @@
 /* BugEngine <bugengine.devel@gmail.com> / 2008-2014
    see LICENSE for detail */
 
-#include    <plugin/stdafx.h>
-#include    <plugin/dynobject.hh>
+#include <bugengine/plugin/stdafx.h>
+#include <bugengine/plugin/dynobject.hh>
 
-namespace BugEngine { namespace Plugin
-{
+namespace BugEngine { namespace Plugin {
 
 DynamicObject::DynamicObject(const inamespace& objectName, const ipath& objectPath)
-    :   m_handle(load(objectName, objectPath))
+    : m_handle(load(objectName, objectPath))
 {
 }
 
@@ -20,6 +19,4 @@ DynamicObject::~DynamicObject()
     }
 }
 
-}}
-
-
+}}  // namespace BugEngine::Plugin

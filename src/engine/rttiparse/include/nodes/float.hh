@@ -4,26 +4,26 @@
 #ifndef BE_RTTIPARSE_NODES_FLOAT_HH_
 #define BE_RTTIPARSE_NODES_FLOAT_HH_
 /**************************************************************************************************/
-#include    <rttiparse/stdafx.h>
-#include    <rttiparse/valueparse.hh>
+#include <bugengine/rttiparse/stdafx.h>
+#include <bugengine/rttiparse/valueparse.hh>
 
-
-namespace BugEngine { namespace RTTI { namespace Parser
-{
+namespace BugEngine { namespace RTTI { namespace Parser {
 
 class Float : public Node
 {
 private:
-    const double    m_value;
+    const double m_value;
+
 protected:
     virtual bool isCompatible(const Type& expectedType) const override;
     virtual void doEval(const Type& expectedType, Value& result) const override;
+
 public:
     Float(const ParseLocation& location, double value);
     ~Float();
 };
 
-}}}
+}}}  // namespace BugEngine::RTTI::Parser
 
 /**************************************************************************************************/
 #endif

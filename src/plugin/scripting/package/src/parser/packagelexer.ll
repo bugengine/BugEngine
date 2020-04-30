@@ -1,10 +1,10 @@
 /* BugEngine <bugengine.devel@gmail.com> / 2008-2014
    see LICENSE for detail */
 %{
-#include    <package/stdafx.h>
+#include    <bugengine/plugin.scripting.package/stdafx.h>
 #include    <ctype.h>
 #include    <buildcontext.hh>
-#include    <package/nodes/value.hh>
+#include    <bugengine/plugin.scripting.package/nodes/value.hh>
 
 using namespace BugEngine::PackageBuilder::Nodes;
 

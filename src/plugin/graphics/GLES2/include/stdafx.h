@@ -5,17 +5,16 @@
 #define BE_GLES2_STDAFX_H_
 /**************************************************************************************************/
 
-#include    <bugengine/stdafx.h>
+#include <bugengine/stdafx.h>
 
-#include    <3d/stdafx.h>
-
+#include <bugengine/plugin.graphics.3d/stdafx.h>
 
 #ifdef BE_PLATFORM_DARWIN
-# include   <OpenGLES/ES2/gl.h>
-# include   <OpenGLES/EAGL.h>
+#    include <OpenGLES/EAGL.h>
+#    include <OpenGLES/ES2/gl.h>
 #else
-# include   <GLES2/gl2.h>
-# include   <EGL/egl.h>
+#    include <EGL/egl.h>
+#    include <GLES2/gl2.h>
 #endif
 
 /**************************************************************************************************/

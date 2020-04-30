@@ -4,27 +4,27 @@
 #ifndef BE_RTTIPARSE_NODES_ARRAY_HH_
 #define BE_RTTIPARSE_NODES_ARRAY_HH_
 /**************************************************************************************************/
-#include    <rttiparse/stdafx.h>
-#include    <rttiparse/valueparse.hh>
+#include <bugengine/rttiparse/stdafx.h>
+#include <bugengine/rttiparse/valueparse.hh>
 
-
-namespace BugEngine { namespace RTTI { namespace Parser
-{
+namespace BugEngine { namespace RTTI { namespace Parser {
 
 class Array : public Node
 {
 private:
-    const minitl::vector< ref<Node> >   m_value;
+    const minitl::vector< ref< Node > > m_value;
+
 protected:
-    virtual bool resolve(DbContext &context) override;
+    virtual bool resolve(DbContext& context) override;
     virtual bool isCompatible(const Type& expectedType) const override;
     virtual void doEval(const Type& expectedType, Value& result) const override;
+
 public:
-    Array(const ParseLocation& location, const minitl::vector< ref<Node> >& value);
+    Array(const ParseLocation& location, const minitl::vector< ref< Node > >& value);
     ~Array();
 };
 
-}}}
+}}}  // namespace BugEngine::RTTI::Parser
 
 /**************************************************************************************************/
 #endif

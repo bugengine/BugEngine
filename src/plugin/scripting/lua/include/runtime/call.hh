@@ -4,15 +4,14 @@
 #ifndef BE_LUA_RUNTIME_CALL_HH_
 #define BE_LUA_RUNTIME_CALL_HH_
 /**************************************************************************************************/
-#include    <stdafx.h>
-#include    <rtti/engine/methodinfo.script.hh>
+#include <stdafx.h>
+#include <bugengine/rtti/engine/methodinfo.script.hh>
 
-namespace BugEngine { namespace Lua
-{
+namespace BugEngine { namespace Lua {
 
-int call(lua_State* state, raw<const RTTI::Method> method);
+int call(lua_State* state, raw< const RTTI::Method > method);
 
-}}
+}}  // namespace BugEngine::Lua
 
 /**************************************************************************************************/
 #endif
