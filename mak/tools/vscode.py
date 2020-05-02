@@ -51,16 +51,28 @@ class vscode(Build.BuildContext):
     SETTINGS = '  {\n' \
                '    "editor.formatOnSave": true,\n' \
                '    "editor.formatOnType": true,\n' \
-               '    "python.formatting.provider": "autopep8",\n' \
+               '    "python.formatting.provider": "yapf",\n' \
                '    "python.linting.mypyArgs": [\n' \
                '      "--follow-imports=silent"\n' \
                '    ],\n' \
                '    "python.linting.mypyEnabled": true,\n' \
                '    "python.linting.pylintEnabled": false,\n' \
-               '    "python.formatting.autopep8Path": "yapf",\n' \
-               '    "python.formatting.autopep8Args": [\n' \
+               '    "python.formatting.yapfArgs": [\n' \
                '      "--style=%(bugenginepath)s/setup.cfg"\n' \
-               '    ]\n' \
+               '    ],\n' \
+               '    "files.exclude": {\n' \
+               '      "**/.git": true,\n' \
+               '      "**/.svn": true,\n' \
+               '      "**/.hg": true,\n' \
+               '      "**/CVS": true,\n' \
+               '      "**/.DS_Store": true,\n' \
+               '      "**/__pycache__": true,\n' \
+               '      "**/*.pyc": true,\n' \
+               '      "bld/.waf": true,\n' \
+               '      "**/.clangd": true,\n' \
+               '      "**/.mypy_cache": true,\n' \
+               '      "%(bugenginepath)s/mak/host": true\n' \
+               '    }\n' \
                '  }\n'
 
     def execute(self):
@@ -140,20 +152,12 @@ class vscode(Build.BuildContext):
                     '        "isDefault": true\n'
                     '      }\n'
                     '    }\n' % {
-                        'python':
-                            sys.executable,
-                        'waf':
-                            sys.argv[0],
-                        'toolchain':
-                            env_name,
-                        'variant':
-                            variant,
-                        'cl':
-                            ', '.join(
-                                '"%s"' % o for o in options + ['build:%s:%s' % (env_name, variant)]
-                            ),
-                        'pwd':
-                            self.srcnode.abspath()
+                        'python': sys.executable,
+                        'waf': sys.argv[0],
+                        'toolchain': env_name,
+                        'variant': variant,
+                        'cl': ', '.join('"%s"' % o for o in options + ['build:%s:%s' % (env_name, variant)]),
+                        'pwd': self.srcnode.abspath()
                     }
                 )
         with open(vscode_node.make_node('tasks.json').abspath(), 'w') as task_file:
