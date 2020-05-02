@@ -9,7 +9,7 @@ class ircc(Task.Task):
         return self.exec_command(
             [
                 sys.executable, self.generator.env.KERNEL_CLT, '--tmp',
-                self.generator.bld.bldnode.abspath(), self.inputs[0].abspath(), self.outputs[0].abspath(),
+                self.generator.bld.bldnode.parent.parent.abspath(), self.inputs[0].abspath(), self.outputs[0].abspath(),
                 self.ircc_target.abspath()
             ]
         )
@@ -26,6 +26,6 @@ class ircc(Task.Task):
 def build(build_context):
     if not build_context.env.PROJECTS:
         import ircc
-        ircc.ir_parser.IrParser(build_context.bldnode.abspath())
-        build_context.env.TMPDIR = build_context.bldnode.abspath()
+        tmp_node = build_context.bldnode.parent.parent
+        ircc.ir_parser.IrParser(tmp_node.abspath())
         build_context.env.KERNEL_CLT = build_context.bugenginenode.make_node('mak/bin/ir_compile.py').abspath()

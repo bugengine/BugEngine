@@ -55,7 +55,7 @@ class cl_trampoline(Task.Task):
 
 class clc32(Task.Task):
     "clc32"
-    run_str = '${CLC_CXX} -cc1 -emit-llvm -x cl -triple spir-unknown-unknown ${CLC_CXXFLAGS} ${CLC_CPPPATH_ST:INCPATHS} ${CLC_DEFINES_ST:DEFINES} -D_CLC=1 -DBE_COMPUTE ${CLC_CXX_SRC_F}${SRC[0].abspath()} ${CLC_CXX_TGT_F} ${TGT}'
+    run_str = '${CLC_CXX} -S -emit-llvm -x cl -target spir-unknown-unknown -Xclang -finclude-default-header ${CLC_CXXFLAGS} ${CLC_CPPPATH_ST:INCPATHS} ${CLC_DEFINES_ST:DEFINES} -D_CLC=1 -DBE_COMPUTE ${CLC_CXX_SRC_F}${SRC[0].abspath()} ${CLC_CXX_TGT_F} ${TGT}'
     ext_out = ['.ll32']
     scan = c_preproc.scan
     color = 'PINK'
@@ -63,7 +63,7 @@ class clc32(Task.Task):
 
 class clc64(Task.Task):
     "clc64"
-    run_str = '${CLC_CXX} -cc1 -emit-llvm -x cl -triple spir64-unknown-unknown ${CLC_CXXFLAGS} ${CLC_CPPPATH_ST:INCPATHS} ${CLC_DEFINES_ST:DEFINES} -D_CLC=1 -DBE_COMPUTE ${CLC_CXX_SRC_F}${SRC[0].abspath()} ${CLC_CXX_TGT_F} ${TGT}'
+    run_str = '${CLC_CXX} -S -emit-llvm -x cl -target spir64-unknown-unknown -Xclang -finclude-default-header ${CLC_CXXFLAGS} ${CLC_CPPPATH_ST:INCPATHS} ${CLC_DEFINES_ST:DEFINES} -D_CLC=1 -DBE_COMPUTE ${CLC_CXX_SRC_F}${SRC[0].abspath()} ${CLC_CXX_TGT_F} ${TGT}'
     ext_out = ['.ll64']
     scan = c_preproc.scan
     color = 'PINK'
@@ -91,9 +91,10 @@ def configure(configuration_context):
             if c.version_number >= (10, ):
                 v.CLC_CXX = c.compiler_cxx
     if v.CLC_CXX:
+        v.CLC_CXXFLAGS = ['-g', '-fno-rtti', '-fno-exceptions']
         v.CLC_CXXFLAGS_debug = ['-D_DEBUG']
-        v.CLC_CXXFLAGS_profile = ['-DNDEBUG', '-fno-rtti', '-fno-exceptions']
-        v.CLC_CXXFLAGS_final = ['-DNDEBUG', '-fno-rtti', '-fno-exceptions']
+        v.CLC_CXXFLAGS_profile = ['-O2', '-DNDEBUG']
+        v.CLC_CXXFLAGS_final = ['-O2', '-DNDEBUG']
         v.CLC_CXXFLAGS = ['-std=clc++']
         v.CLC_CXX_SRC_F = ''
         v.CLC_CXX_TGT_F = ['-o']

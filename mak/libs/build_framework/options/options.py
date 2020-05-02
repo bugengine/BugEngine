@@ -37,6 +37,7 @@ def options(option_context):
     option_context.load('qtcreator', tooldir=[tool_dir])
     option_context.load('vscode', tooldir=[tool_dir])
     option_context.load('sublime', tooldir=[tool_dir])
+    option_context.load('clangd', tooldir=[tool_dir])
 
     option_context.recurse('compilers.py')
     option_context.recurse('host/host.py')

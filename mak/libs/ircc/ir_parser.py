@@ -21,6 +21,16 @@ def position(p, s):
     else:
         return p.stack[s].position
 
+def p_error(self, p):
+    # type: (IrParser, lex.LexToken) -> None
+    """
+        error :
+    """
+    if p:
+        self.lexer.logger.C0003(p.position, p.value, p.type)
+    else:
+        self.lexer.logger.C0004(self.lexer.eof_position())
+
 
 setattr(yacc.YaccProduction, 'set_position', set_position)
 setattr(yacc.YaccProduction, 'set_position_absolute', set_position_absolute)
@@ -37,8 +47,10 @@ class IrParser:
             start='translation-unit',
             picklefile=os.path.join(tmp_dir, 'ir_grammar.pickle'),
             debugfile=os.path.join(tmp_dir, 'ir_grammar.debug'),
-            debug=True
+            debug=True,
         )
+        setattr(self.parser, 'errorfunc', lambda p: p_error(self, p))
+
 
     def parse(self, logger, filename):
         # type: (Logger, str) -> IrObject
@@ -52,7 +64,9 @@ class IrParser:
         return result
 
 
+
 from be_typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from .ir_messages import Logger
     from .ir_ast.ir_object import IrObject
+    from ply import lex, yacc

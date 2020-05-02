@@ -39,9 +39,16 @@ class YaccProduction:
 
 
 class Parser:
+    ir_parser: 'ir_parser.IrParser'
     def errok(self) -> None:
         ...
-
+    def parse(self,
+              input: Optional[str] = ...,
+              lexer: Optional[ir_lexer.IrLexer] = ...,
+              debug: bool = ...,
+              tracking: bool = ...,
+              tokenfunc: Optional[Any] = ...):
+        ...
 
 def yacc(
     method: str = ...,
@@ -57,9 +64,9 @@ def yacc(
     debuglog: Optional[str] = ...,
     errorlog: Optional[str] = ...,
     picklefile: Optional[str] = ...
-):
+) -> Parser:
     ...
 
 
 if TYPE_CHECKING:
-    from ircc import ir_lexer
+    from ircc import ir_lexer, ir_parser

@@ -16,7 +16,7 @@ class KernelObject : public minitl::refcountable
     friend class Scheduler;
 
 private:
-    typedef const unsigned char* KernelBlob;
+    typedef const char* KernelBlob;
 
 private:
     Plugin::DynamicObject m_kernel;
