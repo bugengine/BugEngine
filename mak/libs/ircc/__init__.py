@@ -6,6 +6,7 @@ sample_kernel = b"""__kernel  void _kmain()
 }
 """
 
+
 def run():
     # type: () -> None
     def init_arguments(argument_context):

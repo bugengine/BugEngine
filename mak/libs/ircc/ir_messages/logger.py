@@ -234,6 +234,7 @@ class Logger:
         """unexpected end of file"""
         return locals()
 
+
 logger = None
 
 from be_typing import TYPE_CHECKING

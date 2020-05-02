@@ -41,6 +41,7 @@ def p_ir_method_prototype(p):
         ir-method-prototype : ir-method-header ir-return-type ID LPAREN LPAREN_MARK ir-parameter-list RPAREN ir-method-footer 
     """
 
+
 def p_ir_method_header(p):
     # type: (YaccProduction) -> None
     """
@@ -201,6 +202,7 @@ def p_ir_method_gc(p):
         ir-method-gc : empty
                      | GC
     """
+
 
 def p_ir_method_comdat(p):
     # type: (YaccProduction) -> None

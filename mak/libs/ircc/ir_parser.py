@@ -21,6 +21,7 @@ def position(p, s):
     else:
         return p.stack[s].position
 
+
 def p_error(self, p):
     # type: (IrParser, lex.LexToken) -> None
     """
@@ -51,7 +52,6 @@ class IrParser:
         )
         setattr(self.parser, 'errorfunc', lambda p: p_error(self, p))
 
-
     def parse(self, logger, filename):
         # type: (Logger, str) -> IrObject
         with open(filename, 'r') as input:
@@ -62,7 +62,6 @@ class IrParser:
             result.error_count = logger._error_count
             pass
         return result
-
 
 
 from be_typing import TYPE_CHECKING
