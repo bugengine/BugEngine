@@ -14,7 +14,7 @@ class IrLexer:
         self._lexdata = ''
         self._lineno = 1
         self._keywords_enabled = True
-        self._last_token = None # type: Optional[lex.LexToken]
+        self._last_token = None    # type: Optional[lex.LexToken]
         self.logger = logger
 
     def input(self, text):
@@ -37,15 +37,11 @@ class IrLexer:
 
     def position(self, token):
         # type: (lex.LexToken) -> IrPosition
-        return IrPosition(
-            self._filename, self._lineno, token.lexpos, token.lexpos + len(token.value), self._lexdata
-        )
-    
+        return IrPosition(self._filename, self._lineno, token.lexpos, token.lexpos + len(token.value), self._lexdata)
+
     def eof_position(self):
         # type: () -> IrPosition
-        return IrPosition(
-            self._filename, self._lineno, len(self._lexdata), len(self._lexdata), self._lexdata
-        )
+        return IrPosition(self._filename, self._lineno, len(self._lexdata), len(self._lexdata), self._lexdata)
 
     def enable_keywords(self):
         # type: () -> None

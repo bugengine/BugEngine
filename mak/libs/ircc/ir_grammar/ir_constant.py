@@ -39,5 +39,6 @@ def p_ir_value_list(p):
                       | empty
     """
 
+
 if TYPE_CHECKING:
     from ply.yacc import YaccProduction

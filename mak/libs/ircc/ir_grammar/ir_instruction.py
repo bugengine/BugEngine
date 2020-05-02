@@ -28,7 +28,7 @@ def p_ir_instruction_label(p):
 def p_ir_instruction(p):
     # type: (YaccProduction) -> None
     """
-        ir-instruction : ir-instruction-assignment ir-opcode ir-instruction-metadata
+        ir-instruction : ir-instruction-assignment ir-opcode ir-instruction-attachment-list
     """
     p[0] = []
 
@@ -45,9 +45,13 @@ def p_ir_instruction_assignment(p):
 def p_ir_instruction_metadata(p):
     # type: (YaccProduction) -> None
     """
-        ir-instruction-metadata : COMMA ir-metadata-list
-                                | empty
+        ir-instruction-attachment-list : COMMA ir-metadata ir-instruction-attachment-list
+                                       | COMMA ALIGN LITERAL_DECIMAL
+                                       | COMMA ADDRSPACE LPAREN LPAREN_MARK LITERAL_DECIMAL RPAREN
+                                       | COMMA ir-constant
+                                       | empty
     """
+
 
 if TYPE_CHECKING:
     from ply.yacc import YaccProduction

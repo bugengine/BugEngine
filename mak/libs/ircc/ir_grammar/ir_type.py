@@ -120,5 +120,6 @@ def p_ir_type_array(p):
         ir-type-array : LBRACKET LITERAL_DECIMAL X ir-type RBRACKET
     """
 
+
 if TYPE_CHECKING:
     from ply.yacc import YaccProduction
