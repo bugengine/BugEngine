@@ -8,7 +8,7 @@
 #if defined(__INTEL_COMPILER)
 #    define BE_COMPILER_INTEL 1
 #    define BE_COMPILER_NAME  "intel"
-#    include <kbugengine/ernel/compilers/intel.hh>
+#    include <bugengine/kernel/compilers/intel.hh>
 #elif defined(__clang__)
 #    define BE_COMPILER_CLANG 1
 #    define BE_COMPILER_NAME  "clang"
