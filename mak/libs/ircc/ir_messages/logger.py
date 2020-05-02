@@ -107,11 +107,11 @@ class Logger:
 
     IDE_FORMAT = {
         'msvc':
-            '{color_filename}{filename}{color_off}({line:d},{column:d}) : {color_error_type}{error_type}{color_off}: {color_message}{message}{color_off}',
+            '{color_filename}{filename}{color_off}({line:d},{column:d}) : {color_error_type}{error_type}{color_off}: {color_message}{message}{color_off}\n',
         'unix':
-            '{color_filename}{filename}{color_off}:{line:d}:{column:d}: {color_error_type}{error_type}{color_off}: {color_message}{message}{color_off}',
+            '{color_filename}{filename}{color_off}:{line:d}:{column:d}: {color_error_type}{error_type}{color_off}: {color_message}{message}{color_off}\n',
         'vi':
-            '{color_filename}{filename}{color_off} +{line:d}:{column:d}: {color_error_type}{error_type}{color_off}: {color_message}{message}{color_off}',
+            '{color_filename}{filename}{color_off} +{line:d}:{column:d}: {color_error_type}{error_type}{color_off}: {color_message}{message}{color_off}\n',
     }
 
     @classmethod
@@ -206,7 +206,7 @@ class Logger:
     @error
     def C0000(self, position, char):
         # type: (IrPosition, str) -> Dict[str, Any]
-        """invalid character 'char' in input stream"""
+        """invalid character '{char}' in input stream"""
         return locals()
 
     @error
@@ -222,6 +222,17 @@ class Logger:
         """warning treated as error"""
         return locals()
 
+    @error
+    def C0003(self, position, token, type):
+        # type: (IrPosition, str, str) -> Dict[str, Any]
+        """unexpected token {token} ({type})"""
+        return locals()
+
+    @error
+    def C0004(self, position):
+        # type: (IrPosition) -> Dict[str, Any]
+        """unexpected end of file"""
+        return locals()
 
 logger = None
 

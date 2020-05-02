@@ -1,6 +1,10 @@
 # LLVM IR/Spir parser
 from . import ir_parser, ir_messages
 
+sample_kernel = b"""__kernel  void _kmain()
+{
+}
+"""
 
 def run():
     # type: () -> None
@@ -25,7 +29,6 @@ def run():
     argument_context = ArgumentParser()
     init_arguments(argument_context)
 
-    sys.setrecursionlimit(10000)
     arguments = argument_context.parse_args()
     logger = ir_messages.load_arguments(arguments)
 
@@ -35,18 +38,17 @@ def run():
     try:
         parser = ir_parser.IrParser(arguments.tmp_dir)
         result = parser.parse(logger, arguments.input)
-        #if not result:
-        #    sys.exit(0)
-        #elif logger._error_count > 0:
-        #    sys.exit(logger._error_count)
-        #else:
-        path, module = os.path.split(arguments.processor)
-        sys.path.append(path)
-        s = __import__(module)
-        with open(arguments.output, 'wb') as out_file:
-            out_file.write(b'__kernel void kmain() { }\n')
-            pass
-        #    result.write_document(s.writer(out_file).create_document())
+        if not result:
+            sys.exit(1)
+        elif logger._error_count > 0:
+            sys.exit(logger._error_count)
+        else:
+            path, module = os.path.split(arguments.processor)
+            sys.path.append(path)
+            s = __import__(module)
+            with open(arguments.output, 'wb') as out_file:
+                out_file.write(sample_kernel)
+                pass
     except (SyntaxError, ExceptionType) as exception:
         logging.exception(exception)
         sys.exit(255)

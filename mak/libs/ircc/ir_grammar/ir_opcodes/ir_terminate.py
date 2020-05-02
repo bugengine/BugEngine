@@ -1,10 +1,10 @@
 from be_typing import TYPE_CHECKING
 
 
-def p_translation_unit(p):
+def p_ir_opcode_ret(p):
     # type: (YaccProduction) -> None
     """
-        translation-unit : empty
+        ir-opcode : RET ir-constant
     """
 
 

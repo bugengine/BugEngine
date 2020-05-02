@@ -9,7 +9,7 @@ namespace BugEngine { namespace KernelScheduler { namespace OpenCL {
 
 KernelObject::KernelObject(weak< const Scheduler > scheduler, const inamespace& name)
     : m_kernel(name, ipath("kernel"))
-    , m_kernelBlob(*m_kernel.getSymbol< const unsigned char* >(
+    , m_kernelBlob(*m_kernel.getSymbol< const char* >(
          istring(minitl::format< 128u >("s_clKernel%d") | scheduler->m_ptrSize)))
     , m_program(scheduler->buildKernel(
          *m_kernel.getSymbol< const unsigned long >(

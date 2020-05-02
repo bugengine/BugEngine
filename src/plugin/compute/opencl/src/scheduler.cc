@@ -133,7 +133,7 @@ Scheduler::ClContext Scheduler::createCLContext(const cl_context_properties* pro
     return context;
 }
 
-Scheduler::ClKernel Scheduler::buildKernel(const size_t size, const unsigned char* code) const
+Scheduler::ClKernel Scheduler::buildKernel(const size_t size, const char* code) const
 {
     cl_int     error_code = 0;
     cl_kernel  kernel     = 0;

@@ -36,7 +36,7 @@ private:
     static ClContext createCLContext(const cl_context_properties* properties);
 
 private:  // friend KernelObject
-    ClKernel buildKernel(const size_t size, const unsigned char* code) const;
+    ClKernel buildKernel(const size_t size, const char* code) const;
 
 public:
     Scheduler(const Plugin::Context& context, const cl_context_properties* properties = 0);
