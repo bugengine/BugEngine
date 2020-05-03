@@ -327,7 +327,12 @@ def make_bld_node(self, category, path, name):
             node = node.make_node(out_dir)
             node = node.make_node(name)
         else:
-            out_dir = path.path_from(self.path)
+            for source_node in self.source_nodes:
+                if path.is_child_of(source_node):
+                    out_dir = path.path_from(source_node)
+                    break
+            else:
+                out_dir = path.path_from(self.path)
             while out_dir[0] == '.':
                 out_dir = out_dir[out_dir.find(os.path.sep) + 1:]
             node = node.make_node(out_dir)
