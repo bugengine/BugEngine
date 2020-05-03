@@ -17,19 +17,19 @@ template_cc = """
 #include    <bugengine/plugin/dynobjectlist.hh>
 
 extern const unsigned char s_cldata32[];
-extern const size_t s_cldata32_size;
+extern const unsigned long s_cldata32_size;
 extern const unsigned char s_cldata64[];
-extern const size_t s_cldata64_size;
+extern const unsigned long s_cldata64_size;
 
 _BE_PLUGIN_EXPORT const unsigned char* s_clKernel32;
-_BE_PLUGIN_EXPORT const unsigned long s_clKernel32Size;
+_BE_PLUGIN_EXPORT const u64 s_clKernel32Size;
 _BE_PLUGIN_EXPORT const unsigned char* s_clKernel64;
-_BE_PLUGIN_EXPORT const unsigned long s_clKernel64Size;
+_BE_PLUGIN_EXPORT const u64 s_clKernel64Size;
 
 const unsigned char* s_clKernel32 = s_cldata32;
-const unsigned long s_clKernel32Size = s_cldata32_size;
+const u64 s_clKernel32Size = s_cldata32_size;
 const unsigned char* s_clKernel64 = s_cldata64;
-const unsigned long s_clKernel64Size = s_cldata64_size;
+const u64 s_clKernel64Size = s_cldata64_size;
 
 _BE_REGISTER_PLUGIN(BE_KERNEL_ID, BE_KERNEL_NAME);
 _BE_REGISTER_METHOD_NAMED(BE_KERNEL_ID, , s_clKernel32);
