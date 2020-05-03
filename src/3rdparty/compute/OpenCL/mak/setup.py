@@ -43,6 +43,7 @@ def setup(conf):
             except Exception as e:
                 setup_shipped(conf)
             else:
+                conf.env.append_value('check_OpenCL_includes', [os.path.join(conf.path.parent.abspath(), 'api')]),
                 conf.env.SYSTEM_OPENCL = True
                 pprint('GREEN', '+OpenCL', sep=' ')
     else:
