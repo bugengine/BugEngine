@@ -135,18 +135,19 @@ Scheduler::ClContext Scheduler::createCLContext(const cl_context_properties* pro
 
 Scheduler::ClKernel Scheduler::buildKernel(const u64 size, const char* code) const
 {
-    cl_int     error_code = 0;
-    cl_kernel  kernel     = 0;
-    cl_program program    = clCreateProgramWithSource(
-       m_context.first, 1, reinterpret_cast< const char** >(&code), &size, &error_code);
-    if(error_code != CL_SUCCESS)
+    size_t     codeSize  = be_checked_numcast< size_t >(size);
+    cl_int     errorCode = 0;
+    cl_kernel  kernel    = 0;
+    cl_program program
+       = clCreateProgramWithSource(m_context.first, 1, &code, &codeSize, &errorCode);
+    if(errorCode != CL_SUCCESS)
     {
         be_error("failed to load OpenCL kernel: clCreateProgramWithBinary failed with code %d"
-                 | error_code);
+                 | errorCode);
         return minitl::make_tuple(kernel, program);
     }
 
-    error_code = clBuildProgram(program, 1, &m_context.second, "", 0, 0);
+    errorCode = clBuildProgram(program, 1, &m_context.second, "", 0, 0);
     cl_program_build_info  info;
     cl_program_binary_type type;
     size_t                 len = 0;
@@ -162,16 +163,16 @@ Scheduler::ClKernel Scheduler::buildKernel(const u64 size, const char* code) con
         be_info("compilation result:\n%s" | buffer);
         freea(buffer);
     }
-    if(error_code != CL_SUCCESS)
+    if(errorCode != CL_SUCCESS)
     {
-        be_error("failed to load OpenCL kernel: clBuildProgram failed with code %d" | error_code);
+        be_error("failed to load OpenCL kernel: clBuildProgram failed with code %d" | errorCode);
         return minitl::make_tuple(kernel, program);
     }
     checkResult(clGetProgramInfo(program, CL_PROGRAM_BINARIES, 0, 0, &len));
-    kernel = clCreateKernel(program, "_kmain", &error_code);
-    if(error_code != CL_SUCCESS)
+    kernel = clCreateKernel(program, "_kmain", &errorCode);
+    if(errorCode != CL_SUCCESS)
     {
-        be_error("failed to load OpenCL kernel: clCreateKernel failed with code %d" | error_code);
+        be_error("failed to load OpenCL kernel: clCreateKernel failed with code %d" | errorCode);
         return minitl::make_tuple(kernel, program);
     }
     else
