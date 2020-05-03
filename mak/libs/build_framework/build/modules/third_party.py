@@ -21,12 +21,13 @@ def thirdparty(bld, name, feature='', path='', var='', use=[], private_use=[]):
             if feature:
                 bld.add_feature(feature, env)
             supported = True
+            var_id = var.upper().replace('+', 'P').replace('-', '_')
             tg = bld(
                 target=target_name,
                 features=['cxx'],
                 module_path=project_path,
                 export_includes=env['check_%s_includes' % var],
-                export_defines=env['check_%s_defines' % var] + ['BE_HAVE_%s' % var.upper()],
+                export_defines=env['check_%s_defines' % var] + ['BE_HAVE_%s' % var_id],
                 export_libpath=env['check_%s_libpath' % var],
                 export_lib=env['check_%s_libs' % var],
                 export_framework=env['check_%s_frameworks' % var],
