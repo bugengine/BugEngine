@@ -1,8 +1,8 @@
 /* BugEngine <bugengine.devel@gmail.com> / 2008-2014
    see LICENSE for detail */
 
-#include <bugengine/runtime/stdafx.h>
-#include <bugengine/runtime/module.hh>
+#include <bugengine/plugin.debug.runtime/stdafx.h>
+#include <bugengine/plugin.debug.runtime/module.hh>
 
 namespace BugEngine { namespace Runtime {
 
