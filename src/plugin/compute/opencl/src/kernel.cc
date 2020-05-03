@@ -12,7 +12,7 @@ KernelObject::KernelObject(weak< const Scheduler > scheduler, const inamespace& 
     , m_kernelBlob(*m_kernel.getSymbol< const char* >(
          istring(minitl::format< 128u >("s_clKernel%d") | scheduler->m_ptrSize)))
     , m_program(scheduler->buildKernel(
-         *m_kernel.getSymbol< const unsigned long >(
+         *m_kernel.getSymbol< const u64 >(
             istring(minitl::format< 128u >("s_clKernel%dSize") | scheduler->m_ptrSize)),
          m_kernelBlob))
 {

@@ -7,6 +7,7 @@
 #include <bugengine/plugin.compute.opencl/stdafx.h>
 #include <bugengine/plugin/plugin.hh>
 #include <bugengine/scheduler/kernel/ischeduler.hh>
+#include "bugengine/kernel/compilers/clang.hh"
 
 namespace BugEngine { namespace KernelScheduler { namespace OpenCL {
 
@@ -36,7 +37,7 @@ private:
     static ClContext createCLContext(const cl_context_properties* properties);
 
 private:  // friend KernelObject
-    ClKernel buildKernel(const size_t size, const char* code) const;
+    ClKernel buildKernel(const u64 size, const char* code) const;
 
 public:
     Scheduler(const Plugin::Context& context, const cl_context_properties* properties = 0);
