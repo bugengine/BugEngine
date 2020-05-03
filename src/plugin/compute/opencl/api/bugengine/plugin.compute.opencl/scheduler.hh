@@ -7,7 +7,6 @@
 #include <bugengine/plugin.compute.opencl/stdafx.h>
 #include <bugengine/plugin/plugin.hh>
 #include <bugengine/scheduler/kernel/ischeduler.hh>
-#include "bugengine/kernel/compilers/clang.hh"
 
 namespace BugEngine { namespace KernelScheduler { namespace OpenCL {
 
