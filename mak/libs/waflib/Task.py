@@ -418,7 +418,7 @@ class Task(evil):
 
 		:rtype: string
 		"""
-		if Logs.verbose:
+		if Logs.verbose or True:
 			msg = ': %r\n%r' % (self, getattr(self, 'last_cmd', ''))
 		else:
 			msg = ' (run with -v to display more information)'
