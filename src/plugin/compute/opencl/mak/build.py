@@ -99,6 +99,7 @@ def create_cl_kernels(task_gen):
                     kernel_source=kernel_source,
                     kernel_ast=kernel_ast,
                     use=tgen.use + [target_prefix + 'plugin.compute.opencl'],
+                    source_nodes=tgen.source_nodes
                 )
                 kernel_task_gen.env.PLUGIN = kernel_task_gen.env.plugin_name
         if internal_deps:
