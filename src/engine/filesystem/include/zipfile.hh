@@ -7,8 +7,9 @@
 #include <bugengine/filesystem/stdafx.h>
 #include <bugengine/filesystem/file.script.hh>
 
-#include <cstdio>
 #include <cstdlib>
+
+#include <cstdio>
 #include <unzip.h>
 
 namespace BugEngine {
@@ -20,7 +21,8 @@ private:
     unz_file_pos m_filePos;
 
 public:
-    ZipFile(void* handle, const ifilename& filename, const unz_file_info& fileInfo, const unz_file_pos& filePos);
+    ZipFile(void* handle, const ifilename& filename, const unz_file_info& fileInfo,
+            const unz_file_pos& filePos);
     ~ZipFile();
 
 private:
