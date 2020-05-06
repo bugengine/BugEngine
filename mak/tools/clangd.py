@@ -109,7 +109,7 @@ class clangd(Build.BuildContext):
                                                     '\t\t"arguments": [%s],\n'
                                                     '\t\t"file": "%s",\n'
                                                     '\t\t"output": "%s"\n'
-                                                    '\t}' % (task.get_cwd().path_from(self.srcnode) % vars,
+                                                    '\t}' % (task.get_cwd().abspath() % vars,
                                                              ", ".join('"%s"' % (c % vars) for c in cmd),
                                                              task.inputs[0].abspath() % vars,
                                                              task.outputs[0].path_from(task.get_cwd()) % vars))
