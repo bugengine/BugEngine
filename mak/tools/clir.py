@@ -56,7 +56,7 @@ class cl_trampoline(Task.Task):
 class clc32(Task.Task):
     "clc32"
     run_str = '${CLC_CXX} -S -emit-llvm -x cl -target spir-unknown-unknown -Xclang -finclude-default-header ${CLC_CXXFLAGS} ${CLC_CPPPATH_ST:INCPATHS} ${CLC_DEFINES_ST:DEFINES} -D_CLC=1 -DBE_COMPUTE ${CLC_CXX_SRC_F}${SRC[0].abspath()} ${CLC_CXX_TGT_F} ${TGT}'
-    ext_out = ['.ll32']
+    ext_out = ['.32.ll']
     scan = c_preproc.scan
     color = 'PINK'
 
@@ -64,7 +64,7 @@ class clc32(Task.Task):
 class clc64(Task.Task):
     "clc64"
     run_str = '${CLC_CXX} -S -emit-llvm -x cl -target spir64-unknown-unknown -Xclang -finclude-default-header ${CLC_CXXFLAGS} ${CLC_CPPPATH_ST:INCPATHS} ${CLC_DEFINES_ST:DEFINES} -D_CLC=1 -DBE_COMPUTE ${CLC_CXX_SRC_F}${SRC[0].abspath()} ${CLC_CXX_TGT_F} ${TGT}'
-    ext_out = ['.ll64']
+    ext_out = ['.64.ll']
     scan = c_preproc.scan
     color = 'PINK'
 
@@ -74,8 +74,8 @@ class clc64(Task.Task):
 def cl_ir_kernel_compile(task_gen):
     source = task_gen.kernel_source
     out_cl = task_gen.make_bld_node('src', source.parent, source.name[:source.name.rfind('.')] + '.trampoline.cl')
-    out_ll_32 = task_gen.make_bld_node('src', source.parent, source.name[:source.name.rfind('.')] + '.ll32')
-    out_ll_64 = task_gen.make_bld_node('src', source.parent, source.name[:source.name.rfind('.')] + '.ll64')
+    out_ll_32 = task_gen.make_bld_node('src', source.parent, source.name[:source.name.rfind('.')] + '.32.ll')
+    out_ll_64 = task_gen.make_bld_node('src', source.parent, source.name[:source.name.rfind('.')] + '.64.ll')
 
     task_gen.create_task('cl_trampoline', [task_gen.kernel_ast], [out_cl])
     task_gen.create_task('clc32', [out_cl], [out_ll_32])
@@ -91,11 +91,10 @@ def configure(configuration_context):
             if c.version_number >= (10, ):
                 v.CLC_CXX = c.compiler_cxx
     if v.CLC_CXX:
-        v.CLC_CXXFLAGS = ['-g', '-fno-rtti', '-fno-exceptions']
         v.CLC_CXXFLAGS_debug = ['-D_DEBUG']
         v.CLC_CXXFLAGS_profile = ['-O2', '-DNDEBUG']
         v.CLC_CXXFLAGS_final = ['-O2', '-DNDEBUG']
-        v.CLC_CXXFLAGS = ['-std=clc++']
+        v.CLC_CXXFLAGS = ['-std=clc++', '-g', '-fno-rtti', '-fno-exceptions']
         v.CLC_CXX_SRC_F = ''
         v.CLC_CXX_TGT_F = ['-o']
         v.CLC_ARCH_ST = ['-arch']

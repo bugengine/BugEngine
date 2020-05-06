@@ -63,8 +63,7 @@ struct Partition : public TAIL
     {
         be_forceuse(isConst);
         const Partition* partition = static_cast< const Partition* >(from);
-        return RTTI::Value(RTTI::Value::ByRef(
-           Helper::PartitionProductGetter< T2, T, Tail >::getProduct(*partition)));
+        return RTTI::Value(Helper::PartitionProductGetter< T2, T, Tail >::getProduct(*partition));
     }
     static void buildList(minitl::array< raw< const RTTI::Class > >::iterator index)
     {

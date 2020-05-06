@@ -16,6 +16,7 @@ keywords = (
     'type',
     'opaque',
     'addrspace',
+    'x',
 
     # COMDAT
     'comdat',
@@ -40,6 +41,8 @@ keywords = (
     # values
     'null',
     'undef',
+    'true',
+    'false',
 
     # methods
     'declare',
@@ -185,10 +188,15 @@ keywords = (
     'distinct',
 
     # opcodes
+    'to',
     'ret',
     'br',
+    'label',
     'switch',
     'unreachable',
+    'fneg',
+    'nuw',
+    'nsw',
     'add',
     'fadd',
     'sub',
@@ -213,9 +221,12 @@ keywords = (
     'extractvalue',
     'insertvalue',
     'alloca',
+    'volatile',
     'load',
     'store',
     'getelementptr',
+    'inbounds',
+    'inrange',
     'trunc',
     'zext',
     'sext',
@@ -231,8 +242,31 @@ keywords = (
     'addrspacecast',
     'icmp',
     'fcmp',
+    'eq',
+    'ne',
+    'ueq',
+    'une',
+    'ugt',
+    'uge',
+    'ult',
+    'ule',
+    'uno',
+    'sgt',
+    'sge',
+    'slt',
+    'sle',
+    'oeq',
+    'one',
+    'ogt',
+    'oge',
+    'olt',
+    'ole',
+    'ord',
     'phi',
     'select',
+    'tail',
+    'musttail',
+    'notail',
     'call',
 )
 
@@ -241,7 +275,12 @@ octal_escape = r"""([0-7]{1,3})"""
 hex_escape = r"""(x[0-9a-fA-F]+)"""
 escape_sequence = r"""(\\(""" + simple_escape + '|' + octal_escape + '|' + hex_escape + '))'
 string_char = r"""([^"\\\n]|%s)""" % escape_sequence
-t_LITERAL_STRING = '"' + string_char + '*"'
+@TOKEN('"' + string_char + '*"')
+def t_LITERAL_STRING(t):
+    # type: (LexToken) -> LexToken
+    t.value = t.value[1:-1]
+    return t
+
 t_ID_COMDAT = '\\$[a-zA-Z\._][a-zA-Z\._0-9]*'
 def t_ID_LABEL(t):
     # type: (LexToken) -> LexToken
@@ -266,7 +305,6 @@ t_LPAREN = '\\('
 t_RPAREN = '\\)'
 t_LANGLE = '<'
 t_RANGLE = '>'
-t_X = 'x'
 t_STAR = '\\*'
 t_PIPE = '\\|'
 
@@ -318,7 +356,6 @@ tokens = (
     'RANGLE',
 
     'EQUAL',
-    'X',
     'STAR',
     'COMMA',
     'COLON',

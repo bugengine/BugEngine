@@ -102,7 +102,16 @@ def p_ir_metadata_debug_attribute_list(p):
     """
         ir-metadata-debug-attribute-list : ID_LABEL COLON ir-metadata-debug-attribute COMMA ir-metadata-debug-attribute-list
                                          | ID_LABEL COLON ir-metadata-debug-attribute
-                                         | empty
+    """
+    p[0] = [(p[1], p[3])]
+    if len(p) > 4:
+        p[0] += p[5]
+
+
+def p_ir_metadata_debug_attribute_list_end(p):
+    # type: (YaccProduction) -> None
+    """
+        ir-metadata-debug-attribute-list : empty
     """
 
 

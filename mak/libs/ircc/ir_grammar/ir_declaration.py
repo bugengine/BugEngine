@@ -26,7 +26,7 @@ def p_ir_declaration(p):
                        | ir-attributes
                        | ir-metadata
     """
-    p[0] = []
+    p[0] = p[1]
 
 
 if TYPE_CHECKING:

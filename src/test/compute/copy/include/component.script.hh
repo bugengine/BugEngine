@@ -9,7 +9,12 @@
 
 namespace BugEngine { namespace Test { namespace Compute { namespace Copy {
 
-be_pod CopyComponent
+be_pod SourceComponent
+{
+    u64 data[16];
+};
+
+be_pod TargetComponent
 {
     u64 data[16];
 };

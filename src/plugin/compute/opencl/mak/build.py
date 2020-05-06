@@ -115,16 +115,12 @@ def create_cc_source(task_gen):
     task_gen.source += [cc_source]
 
 
-@extension('.ll32', '.ll64')
+@extension('.32.ll', '.64.ll')
 def cl_kernel_compile(task_gen, source):
     if 'clkernel_create' in task_gen.features:
-        ptr_size = source.name[-2:]
-        cl_source = task_gen.make_bld_node(
-            'src', source.parent, source.name[:source.name.rfind('.')] + '.generated.%s.cl' % ptr_size
-        )
-        cl_cc = task_gen.make_bld_node(
-            'src', source.parent, source.name[:source.name.rfind('.')] + '.embedded.%s.cc' % ptr_size
-        )
+        ptr_size = source.name[-5:-3]
+        cl_source = task_gen.make_bld_node('src', source.parent, source.name[:source.name.rfind('.')] + '.generated.cl')
+        cl_cc = task_gen.make_bld_node('src', source.parent, source.name[:source.name.rfind('.')] + '.embedded.cc')
 
         task_gen.create_task('ircc', [source], [cl_source], ircc_target=task_gen.env.IRCC_CL_TARGET)
         task_gen.create_task('bin2c', [cl_source], [cl_cc], var='cldata%s' % ptr_size, zero_terminate=True)

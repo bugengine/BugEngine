@@ -53,7 +53,7 @@ class IrParser:
         setattr(self.parser, 'errorfunc', lambda p: p_error(self, p))
 
     def parse(self, logger, filename):
-        # type: (Logger, str) -> IrObject
+        # type: (Logger, str) -> IrModule
         with open(filename, 'r') as input:
             self.lexer = ir_lexer.IrLexer(filename, logger)
             result = self.parser.parse(input.read(), lexer=self.lexer)
@@ -67,5 +67,5 @@ class IrParser:
 from be_typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from .ir_messages import Logger
-    from .ir_ast.ir_object import IrObject
+    from .ir_ast import IrModule
     from ply import lex, yacc
