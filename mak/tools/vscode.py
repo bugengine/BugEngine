@@ -72,7 +72,10 @@ class vscode(Build.BuildContext):
                '      "**/.clangd": true,\n' \
                '      "**/.mypy_cache": true,\n' \
                '      "%(bugenginepath)s/mak/host": true\n' \
-               '    }\n' \
+               '    },\n' \
+               '    "clangd.arguments": [\n' \
+               '      "--header-insertion=never"\n' \
+               '    ]\n' \
                '  }\n'
 
     def execute(self):
