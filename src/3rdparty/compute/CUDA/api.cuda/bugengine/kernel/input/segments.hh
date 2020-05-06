@@ -4,8 +4,8 @@
 #ifndef BE_KERNEL_CUDA_INPUT_SEGMENTS_HH_
 #define BE_KERNEL_CUDA_INPUT_SEGMENTS_HH_
 /**************************************************************************************************/
-#include    <bugengine/kernel/stdafx.h>
 #include    <bugengine/kernel/input/segment_part.hh>
+#include    <bugengine/kernel/stdafx.h>
 
 
 namespace Kernel
@@ -91,7 +91,7 @@ public:
     {
         while (count)
         {
-            if (m_currentOffset + count >= m_currentSegment->size)
+            if (m_currentOffset + count >= m_currentSegment->m_count)
             {
                 u32 progress = m_currentSegment->m_count - m_currentOffset;
                 m_totalOffset += progress;
@@ -110,14 +110,13 @@ public:
 
     __device T* operator->() const
     {
-        return m_currentSegment->begin + m_currentOffset;
+        return m_currentSegment->m_begin + m_currentOffset;
     }
 
     __device T& operator*() const
     {
-        return *(m_currentSegment->begin + m_currentOffset);
+        return *(m_currentSegment->m_begin + m_currentOffset);
     }
-
 };
 
 
