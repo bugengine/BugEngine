@@ -11,9 +11,10 @@ namespace BugEngine { namespace Test { namespace Compute { namespace Copy {
 
 class Storage
     : public World::EntityStorageFactory<
-         COMPONENT_LIST_1((CopyComponent, World::StorageSize_256k)),
+         COMPONENT_LIST_2((SourceComponent, World::StorageSize_256k),
+                          (TargetComponent, World::StorageSize_256k)),
          World::MakePartitionList<
-            BugEngine::World::MakePartition< CopyComponent >::Result >::Result >
+            BugEngine::World::MakePartition< SourceComponent, TargetComponent >::Result >::Result >
 {
     published : Storage();
     ~Storage();

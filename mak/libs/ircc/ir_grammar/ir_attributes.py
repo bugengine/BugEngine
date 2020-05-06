@@ -14,7 +14,7 @@ def p_ir_attribute_list(p):
     """
         ir-attribute-list : ir-method-attribute ir-method-attribute-list
                           | ir-parameter-attribute ir-parameter-attribute-list
-                          | ir-any-attribute ir-parameter-attribute-list
+                          | ir-any-attribute ir-attribute-list
                           | empty
     """
     p[0] = None

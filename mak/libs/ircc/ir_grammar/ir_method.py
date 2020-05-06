@@ -52,7 +52,7 @@ def p_ir_method_header(p):
 def p_ir_method_footer(p):
     # type: (YaccProduction) -> None
     """
-        ir-method-footer : ir-method-addr ir-addrspace ir-method-attribute-list ir-method-section ir-method-comdat ir-method-align ir-method-gc ir-method-prefix ir-method-prologue ir-method-personality
+        ir-method-footer : ir-method-addr ir-addrspace-opt ir-method-attribute-list ir-method-section ir-method-comdat ir-method-align ir-method-gc ir-method-prefix ir-method-prologue ir-method-personality
     """
 
 

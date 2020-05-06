@@ -21,6 +21,7 @@ def p_ir_instruction_label(p):
     # type: (YaccProduction) -> None
     """
         ir-instruction : ID_LABEL COLON
+                       | LITERAL_DECIMAL COLON
     """
     p[0] = []
 
@@ -28,7 +29,7 @@ def p_ir_instruction_label(p):
 def p_ir_instruction(p):
     # type: (YaccProduction) -> None
     """
-        ir-instruction : ir-instruction-assignment ir-opcode ir-instruction-attachment-list
+        ir-instruction : ir-instruction-assignment ir-opcode
     """
     p[0] = []
 
@@ -45,10 +46,7 @@ def p_ir_instruction_assignment(p):
 def p_ir_instruction_metadata(p):
     # type: (YaccProduction) -> None
     """
-        ir-instruction-attachment-list : COMMA ir-metadata ir-instruction-attachment-list
-                                       | COMMA ALIGN LITERAL_DECIMAL
-                                       | COMMA ADDRSPACE LPAREN LPAREN_MARK LITERAL_DECIMAL RPAREN
-                                       | COMMA ir-constant
+        ir-instruction-attachment-list : COMMA METADATA_NAME METADATA_REF ir-instruction-attachment-list
                                        | empty
     """
 

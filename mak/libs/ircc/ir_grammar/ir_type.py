@@ -9,30 +9,6 @@ def p_ir_typedecl(p):
     p[0] = []
 
 
-def p_ir_type_struct(p):
-    # type: (YaccProduction) -> None
-    """
-        ir-type : LBRACE ir-type-list RBRACE
-    """
-    p[0] = []
-
-
-def p_ir_type_struct_compact(p):
-    # type: (YaccProduction) -> None
-    """
-        ir-type : LANGLE LBRACE ir-type-list RBRACE RANGLE
-    """
-    p[0] = []
-
-
-def p_ir_typedef_opaque(p):
-    # type: (YaccProduction) -> None
-    """
-        ir-type : OPAQUE
-    """
-    p[0] = []
-
-
 def p_ir_typelist(p):
     # type: (YaccProduction) -> None
     """
@@ -55,9 +31,12 @@ def p_ir_type(p):
     """
         ir-type : ir-type-id
                 | ir-type-scalar
+                | ir-type-struct
                 | ir-type-vector
                 | ir-type-ptr
                 | ir-type-array
+                | ir-type-opaque
+                | ir-type-method
     """
     p[0] = p[1]
 
@@ -85,6 +64,22 @@ def p_ir_type_scalar(p):
     p[0] = []
 
 
+def p_ir_type_struct(p):
+    # type: (YaccProduction) -> None
+    """
+        ir-type-struct : LBRACE ir-type-list RBRACE
+    """
+    p[0] = []
+
+
+def p_ir_type_struct_compact(p):
+    # type: (YaccProduction) -> None
+    """
+        ir-type-struct : LANGLE LBRACE ir-type-list RBRACE RANGLE
+    """
+    p[0] = []
+
+
 def p_ir_type_builtin_vector(p):
     # type: (YaccProduction) -> None
     """
@@ -95,8 +90,16 @@ def p_ir_type_builtin_vector(p):
 def p_ir_type_ptr(p):
     # type: (YaccProduction) -> None
     """
-        ir-type-ptr : ir-type ir-addrspace STAR
-                    | VOID ir-addrspace STAR
+        ir-type-ptr : ir-type ir-addrspace-opt STAR
+                    | VOID ir-addrspace-opt STAR
+    """
+
+
+def p_ir_addrspace_opt(p):
+    # type: (YaccProduction) -> None
+    """
+        ir-addrspace-opt : ir-addrspace
+                         | empty
     """
 
 
@@ -107,17 +110,25 @@ def p_ir_addrspace(p):
     """
 
 
-def p_ir_type_addrspace_none(p):
-    # type: (YaccProduction) -> None
-    """
-        ir-addrspace : empty
-    """
-
-
 def p_ir_type_array(p):
     # type: (YaccProduction) -> None
     """
         ir-type-array : LBRACKET LITERAL_DECIMAL X ir-type RBRACKET
+    """
+
+
+def p_ir_typedef_opaque(p):
+    # type: (YaccProduction) -> None
+    """
+        ir-type-opaque : OPAQUE
+    """
+    p[0] = []
+
+
+def p_ir_type_method(p):
+    # type: (YaccProduction) -> None
+    """
+        ir-type-method : ir-type LPAREN LPAREN_MARK ir-type-list RPAREN
     """
 
 

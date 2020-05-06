@@ -4,8 +4,8 @@ from be_typing import TYPE_CHECKING
 def p_ir_constant(p):
     # type: (YaccProduction) -> None
     """
-        ir-constant : ir-type ir-value
-                    | METADATA ir-type ir-value
+        ir-constant : ir-type ir-parameter-attribute-list ir-value
+                    | METADATA ir-type ir-parameter-attribute-list ir-value
                     | METADATA ir-metadata-value
                     | VOID
     """
@@ -18,6 +18,8 @@ def p_ir_value(p):
         ir-value : LITERAL_DECIMAL
                  | UNDEF
                  | NULL
+                 | TRUE
+                 | FALSE
                  | ID
     """
     p[0] = []
