@@ -6,7 +6,7 @@ def p_ir_comdat(p):
     """
         ir-comdat : ID_COMDAT EQUAL COMDAT ir-comdat-kind
     """
-    p[0] = []
+    p[0] = None
 
 
 def p_ir_comdat_kind(p):
@@ -18,7 +18,7 @@ def p_ir_comdat_kind(p):
                        | NODUPLICATES
                        | SAMESIZE
     """
-    p[0] = []
+    p[0] = None
 
 
 if TYPE_CHECKING:

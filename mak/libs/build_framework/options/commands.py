@@ -6,7 +6,6 @@ try:
 except ImportError:
     import pickle
 
-
 # cache option context to use in file chnage detection
 OPTION_CONTEXT = None
 
@@ -45,6 +44,7 @@ def autoreconfigure(execute_method):
             return "SKIP"
 
         return execute_method(self)
+
     return execute
 
 
@@ -82,6 +82,7 @@ def autosetup(execute_method):
             return "SKIP"
 
         return execute_method(self)
+
     return execute
 
 
@@ -91,6 +92,7 @@ class ConfigurationContext(Configure.ConfigurationContext):
         for configure so it can be restored during a reconfigure.
     """
     cmd = 'configure'
+
     def __init__(self, **kw):
         "main init"
         super(ConfigurationContext, self).__init__(**kw)
@@ -123,6 +125,11 @@ class ConfigurationContext(Configure.ConfigurationContext):
         """
             Cleans up the cache before storing more in there
         """
+        for tool in Context.Context.tools.values():
+            if tool.__file__ not in self.files:
+                self.hash = Utils.h_list((self.hash, Utils.readf(tool.__file__, 'rb')))
+                self.files.append(tool.__file__)
+
         self.cachedir = self.bldnode.find_node(Build.CACHE_DIR)
         if self.cachedir:
             lst = self.cachedir.ant_glob('**', quiet=True)
@@ -135,6 +142,7 @@ class ConfigurationContext(Configure.ConfigurationContext):
 class ReconfigurationContext(ConfigurationContext):
     "reconfigures the project with the same options as the last call to configure"
     cmd = 'reconfigure'
+
     def __init__(self, **kw):
         "main init"
         super(ReconfigurationContext, self).__init__(**kw)
@@ -234,7 +242,12 @@ class Setup(Configure.ConfigurationContext):
         env = ConfigSet.ConfigSet()
         env.files = self.files
         env.hash = self.hash
-        env.store(os.path.join(self.bldnode.find_node(Build.CACHE_DIR).abspath(), Options.lockfile + '.%s.setup' % self.bugengine_variant))
+        env.store(
+            os.path.join(
+                self.bldnode.find_node(Build.CACHE_DIR).abspath(),
+                Options.lockfile + '.%s.setup' % self.bugengine_variant
+            )
+        )
 
 
 Build.BuildContext.execute = autoreconfigure(autosetup(Build.BuildContext.execute))
@@ -262,7 +275,6 @@ def add_build_command(toolchain, optimisation):
             variant = os.path.join(toolchain, optimisation)
 
         c[command] = Command
-
 
     class Deploy(c[Build.BuildContext]):
         cmd = 'deploy:%s:%s' % (toolchain, optimisation)
@@ -303,7 +315,6 @@ def add_all_build_commands(env):
         add_setup_command(toolchain)
         for optim in env.ALL_VARIANTS:
             add_build_command(toolchain, optim)
-
 
 
 @conf

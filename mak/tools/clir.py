@@ -92,9 +92,9 @@ def configure(configuration_context):
                 v.CLC_CXX = c.compiler_cxx
     if v.CLC_CXX:
         v.CLC_CXXFLAGS_debug = ['-D_DEBUG']
-        v.CLC_CXXFLAGS_profile = ['-O2', '-DNDEBUG']
-        v.CLC_CXXFLAGS_final = ['-O2', '-DNDEBUG']
-        v.CLC_CXXFLAGS = ['-std=clc++', '-g', '-fno-rtti', '-fno-exceptions']
+        v.CLC_CXXFLAGS_profile = ['-DNDEBUG']
+        v.CLC_CXXFLAGS_final = ['-DNDEBUG']
+        v.CLC_CXXFLAGS = ['-O0', '-std=clc++', '-g', '-fno-rtti', '-fno-exceptions', '-fno-discard-value-names']
         v.CLC_CXX_SRC_F = ''
         v.CLC_CXX_TGT_F = ['-o']
         v.CLC_ARCH_ST = ['-arch']

@@ -1,3 +1,4 @@
+from ..ir_ast import IrMetadataString, IrMetadataLink, IrMetadataNode, IrSpecializedMetadata, IrMetadataNull
 from be_typing import TYPE_CHECKING
 
 
@@ -15,7 +16,7 @@ def p_ir_metadata(p):
         ir-metadata : METADATA_NAME EQUAL ir-metadata-distinct ir-metadata-value
                     | METADATA_REF EQUAL ir-metadata-distinct ir-metadata-value
     """
-    p[0] = []
+    p[0] = None
 
 
 def p_ir_metadata_distinct(p):
@@ -24,7 +25,7 @@ def p_ir_metadata_distinct(p):
         ir-metadata-distinct : DISTINCT
                              | empty
     """
-    p[0] = []
+    p[0] = None
 
 
 def p_ir_metadata_value(p):
@@ -33,11 +34,26 @@ def p_ir_metadata_value(p):
         ir-metadata-value : ir-metadata-string
                           | ir-metadata-node
                           | ir-metadata-debug-node
-                          | NULL
-                          | METADATA_NAME
-                          | METADATA_REF
+                          | ir-metadata-ref
     """
-    p[0] = []
+    p[0] = p[1]
+
+
+def p_ir_metadata_null(p):
+    # type: (YaccProduction) -> None
+    """
+        ir-metadata-value : NULL
+    """
+    p[0] = IrMetadataNull()
+
+
+def p_ir_metadata_ref(p):
+    # type: (YaccProduction) -> None
+    """
+        ir-metadata-ref : METADATA_NAME
+                        | METADATA_REF
+    """
+    p[0] = IrMetadataLink(p[1])
 
 
 def p_ir_metadata_string(p):
@@ -45,7 +61,7 @@ def p_ir_metadata_string(p):
     """
         ir-metadata-string : METADATA_MARK LITERAL_STRING
     """
-    p[0] = []
+    p[0] = IrMetadataString(p[2])
 
 
 def p_ir_metadata_node(p):
@@ -53,17 +69,24 @@ def p_ir_metadata_node(p):
     """
         ir-metadata-node : METADATA_MARK LBRACE ir-metadata-param-list RBRACE
     """
-    p[0] = []
+    p[0] = IrMetadataNode(p[3])
 
 
 def p_ir_metadata_param_list(p):
     # type: (YaccProduction) -> None
     """
         ir-metadata-param-list : ir-metadata-param COMMA ir-metadata-param-list
-                               | ir-metadata-param
+    """
+    p[0] = [p[1]] + p[3]
+
+
+def p_ir_metadata_param_list_end(p):
+    # type: (YaccProduction) -> None
+    """
+        ir-metadata-param-list : ir-metadata-param
                                | empty
     """
-    p[0] = []
+    p[0] = [p[1]] if p[1] is not None else []
 
 
 def p_ir_metadata_param(p):
@@ -72,6 +95,7 @@ def p_ir_metadata_param(p):
         ir-metadata-param : ir-constant
                           | ir-metadata-value
     """
+    p[0] = p[1]
 
 
 def p_lex_disable_keywords(p):
@@ -95,6 +119,7 @@ def p_ir_metadata_debug_node(p):
     """
         ir-metadata-debug-node : METADATA_NAME LPAREN lex-disable-keywords LPAREN_MARK ir-metadata-debug-attribute-list RPAREN lex-enable-keywords
     """
+    p[0] = IrSpecializedMetadata(p[1][1:], p[5])
 
 
 def p_ir_metadata_debug_attribute_list(p):
@@ -113,6 +138,7 @@ def p_ir_metadata_debug_attribute_list_end(p):
     """
         ir-metadata-debug-attribute-list : empty
     """
+    p[0] = []
 
 
 def p_ir_metadata_debug_attribute(p):
@@ -125,6 +151,7 @@ def p_ir_metadata_debug_attribute(p):
                                     | NULL
                                     | ir-metadata-debug-flag-combination
     """
+    p[0] = p[1]
 
 
 def p_ir_metadata_debug_flag_combination(p):
