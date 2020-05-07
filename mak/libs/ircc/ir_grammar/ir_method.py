@@ -7,6 +7,7 @@ define [linkage] [PreemptionSpecifier] [visibility] [DLLStorageClass]
        [prologue Constant] [personality Constant] (!name !N)* { ... }
 """
 
+from ..ir_ast import IrReference, IrMethod, IrMethodBody, IrMethodParameter, IrMethodMetadataParameter
 from be_typing import TYPE_CHECKING
 
 
@@ -16,7 +17,7 @@ def p_ir_method(p):
         ir-method : ir-method-declaration
                   | ir-method-definition
     """
-    p[0] = []
+    p[0] = p[1]
 
 
 def p_ir_method_declaration(p):
@@ -24,7 +25,7 @@ def p_ir_method_declaration(p):
     """
         ir-method-declaration : DECLARE ir-method-prototype
     """
-    p[0] = []
+    p[0] = p[2]
 
 
 def p_ir_method_definition(p):
@@ -32,14 +33,16 @@ def p_ir_method_definition(p):
     """
         ir-method-definition : DEFINE ir-method-prototype ir-metadata-list LBRACE ir-instruction-list RBRACE
     """
-    p[0] = []
+    method = p[2][1]
+    p[0] = p[2]
 
 
 def p_ir_method_prototype(p):
     # type: (YaccProduction) -> None
     """
-        ir-method-prototype : ir-method-header ir-return-type ID LPAREN LPAREN_MARK ir-parameter-list RPAREN ir-method-footer 
+        ir-method-prototype : ir-method-header ir-parameter-attribute-list ir-return-type ID LPAREN LPAREN_MARK ir-parameter-list RPAREN ir-method-footer 
     """
+    p[0] = (IrReference(p[4]), IrMethod(p[3], p[7], p[1]))
 
 
 def p_ir_method_header(p):
@@ -47,6 +50,7 @@ def p_ir_method_header(p):
     """
         ir-method-header : ir-metadata-list ir-linkage ir-preemption-specifier ir-visibility ir-dll-storage ir-calling-convention
     """
+    p[0] = p[6]
 
 
 def p_ir_method_footer(p):
@@ -60,8 +64,16 @@ def p_ir_return_type(p):
     # type: (YaccProduction) -> None
     """
         ir-return-type : ir-type
-                       | VOID
     """
+    p[0] = p[1]
+
+
+def p_ir_return_type_void(p):
+    # type: (YaccProduction) -> None
+    """
+        ir-return-type : VOID
+    """
+    p[0] = None
 
 
 def p_ir_linkage(p):
@@ -125,6 +137,7 @@ def p_ir_calling_convention(p):
                               | SPIR_KERNEL
                               | SPIR_FUNC
     """
+    p[0] = p[1]
 
 
 def p_ir_calling_convention_disallowed(p):
@@ -143,31 +156,42 @@ def p_ir_calling_convention_disallowed(p):
                               | CFGUARD_CHECKCC
                               | CC LITERAL_DECIMAL
     """
+    # TODO: error
 
 
 def p_ir_parameter_list(p):
     # type: (YaccProduction) -> None
     """
         ir-parameter-list : ir-parameter COMMA ir-parameter-list
-                          | ir-parameter
     """
+    p[0] = [p[1]] + p[3]
 
 
 def p_ir_parameter_list_end(p):
     # type: (YaccProduction) -> None
     """
-        ir-parameter-list : empty
+        ir-parameter-list : ir-parameter
+                          | empty
     """
+    p[0] = [p[1]] if p[1] is not None else []
 
 
 def p_ir_parameter(p):
     # type: (YaccProduction) -> None
     """
         ir-parameter : ir-type ir-parameter-attribute-list ID
-                     | ir-type ir-parameter-attribute-list
-                     | METADATA ir-parameter-attribute-list ID
-                     | METADATA ir-parameter-attribute-list
+                     | ir-type ir-parameter-attribute-list empty
     """
+    p[0] = IrMethodParameter(p[1], p[3], p[2])
+
+
+def p_ir_parameter_metadata(p):
+    # type: (YaccProduction) -> None
+    """
+        ir-parameter : METADATA ir-parameter-attribute-list ID
+                     | METADATA ir-parameter-attribute-list empty
+    """
+    p[0] = IrMethodMetadataParameter(p[2], p[3], [])
 
 
 def p_ir_method_addr(p):

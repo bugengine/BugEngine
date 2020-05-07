@@ -2,12 +2,16 @@ from .ir_declaration import IrDeclaration
 from be_typing import TYPE_CHECKING
 
 
-class IrParameter:
-    def __init__(self, type, name):
-        # type: (IrType, IrReference) -> None
+class IrMethodParameter:
+    def __init__(self, type, name, attributes):
+        # type: (IrType, IrReference, List[str]) -> None
         self._type = type
         self._id = name
         self._name = None
+
+
+class IrMethodMetadataParameter(IrMethodParameter):
+    pass
 
 
 class IrMethodDeclaration(IrDeclaration):
@@ -28,11 +32,15 @@ class IrMethodLink(IrMethodDeclaration):
 
 
 class IrMethod(IrMethodDeclaration):
-    def __init__(self, parameters, calling_convention, definition):
-        # type: (List[IrParameter], str, Optional[IrMethodBody]) -> None
+    def __init__(self, return_type, parameters, calling_convention):
+        # type: (Optional[IrType], List[IrMethodParameter], str) -> None
         self._parameters = parameters
         self._calling_convention = calling_convention
-        self._definition = definition
+        self._definition = None    # type: Optional[IrMethodBody]
+
+    def define(self, instruction_list):
+        # type: (List[IrInstruction]) -> None
+        self._definition = IrMethodBody(instruction_list)
 
     def resolve(self, module):
         # type: (IrModule) -> IrMethod

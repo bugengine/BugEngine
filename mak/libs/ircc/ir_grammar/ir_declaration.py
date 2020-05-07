@@ -6,7 +6,7 @@ def p_ir_declaration_list(p):
     """
         ir-declaration-list : ir-declaration-list ir-declaration
     """
-    p[0] = []
+    p[0] = p[1] + ([p[2]] if p[2] is not None else [])
 
 
 def p_ir_declaration_list_end(p):
