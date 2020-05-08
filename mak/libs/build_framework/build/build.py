@@ -351,6 +351,8 @@ def make_bld_node(self, category, path, name):
 def filter_sources(self):
     self.objc = False
     self.source = self.to_nodes(getattr(self, 'source', []))
+    if self.env.PROJECTS:
+        return
     sources = []
     for file in self.source:
         basename, ext = os.path.splitext(file.name)
