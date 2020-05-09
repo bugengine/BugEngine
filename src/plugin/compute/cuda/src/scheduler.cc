@@ -35,6 +35,8 @@ void Scheduler::run(weak< Task::KernelTask > task, weak< const Kernel > kernel,
     be_forceuse(task);
     be_forceuse(kernel);
     be_forceuse(parameters);
+    // be_notreached();
+    task->completed(m_scheduler);
 }
 
 weak< IMemoryHost > Scheduler::memoryHost() const
