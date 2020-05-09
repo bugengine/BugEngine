@@ -60,7 +60,18 @@ void Object::setMethod(ref< Reference > reference)
                     if(m_overloads[0].m_callInfo.conversion >= RTTI::ConversionCost::s_incompatible)
                     {
                         // error: param list incorrect
-                        be_unimplemented();
+                        m_owner->error(m_line, minitl::format< 1024 >(
+                                                  "no overload for method %s could be found")
+                                                  | m_methodReference->name());
+                        for(minitl::vector< OverloadMatch >::const_iterator it
+                            = m_overloads.begin();
+                            it != m_overloads.end(); ++it)
+                        {
+                            m_owner->info(m_line, minitl::format< 1024 >(" candidate: %s(%s)")
+                                                     | m_methodReference->name()
+                                                     | it->m_callInfo.overload->signature());
+                        }
+                        m_overloads.clear();
                     }
                 }
                 else

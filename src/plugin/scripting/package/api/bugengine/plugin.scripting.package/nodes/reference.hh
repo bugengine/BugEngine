@@ -30,6 +30,10 @@ public:
     ~Reference();
 
     void setName(const inamespace& name);
+    const inamespace& name() const
+    {
+        return m_name;
+    }
 
     RTTI::Value getValue() const;
     RTTI::Type  getType() const;
