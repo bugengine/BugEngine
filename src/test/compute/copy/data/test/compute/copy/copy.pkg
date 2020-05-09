@@ -6,11 +6,12 @@ storage = copy.Storage
 
 task = copy.Kernels.CopyTask
 (
-    inout = storage.CopyComponent;
+    in = storage.SourceComponent;
+    out = storage.TargetComponent;
 )
 
 world = bugengine.World.World
 (
     storage = storage;
-    products = [task.inout];
+    products = [task.out];
 )
