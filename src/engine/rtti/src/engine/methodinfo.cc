@@ -46,6 +46,36 @@ Value Method::Overload::getTag(raw< const Class > type) const
     return getTag(Type::makeType(type, Type::Value, Type::Const, Type::Const));
 }
 
+minitl::format< 1024u > Method::Overload::signature() const
+{
+    char buffer[1024];
+    char* current = buffer;
+    char* end     = buffer + 1023;
+    *end          = 0;
+    for(u32 i = 0; i < params.count; ++i)
+    {
+        minitl::format< 1024u > argType = params.elements[i].type.name();
+        for(const char* arg = argType; *arg && current != end; ++arg, ++current)
+            *current = *arg;
+        if(current != end) *(current++) = ' ';
+        for(const char* arg = params.elements[i].name.c_str(); *arg && current != end; ++arg, ++current)
+            *current = *arg;
+        if(i < params.count - 1)
+        {
+            if(current != end) *(current++) = ',';
+            if(current != end) *(current++) = ' ';
+        }
+    }
+    *current = 0;
+    if(current == end)
+    {
+        *(current - 3) = '.';
+        *(current - 2) = '.';
+        *(current - 1) = '.';
+    }
+    return minitl::format< 1024u >(buffer);
+}
+
 Value Method::doCall(Value* params, u32 nparams) const
 {
     ArgInfo< Type >* args
