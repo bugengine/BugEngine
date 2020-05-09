@@ -42,6 +42,7 @@ published:
         Value getTag(raw< const Class > tagType) const;
 
     public:
+        minitl::format< 1024u > signature() const;
         Value (*call)(Value * params, u32 nparams);
     };
 
