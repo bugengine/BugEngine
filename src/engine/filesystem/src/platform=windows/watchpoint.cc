@@ -45,11 +45,11 @@ class WatchThread : public minitl::refcountable
 {
 private:
     static const u32 s_maximumWatchCount = MAXIMUM_WAIT_OBJECTS - 1;
-    HANDLE           m_thread;
     HANDLE           m_semaphore;
     minitl::vector< minitl::tuple< HANDLE, weak< FileSystem::WatchPoint > > > m_watches;
     minitl::istack< WatchRequest >                                            m_requests;
     u32                                                                       m_watchCount;
+    HANDLE                                                                    m_thread;
 
 private:
     static unsigned long WINAPI doWatchFolders(void* params);
@@ -143,10 +143,10 @@ unsigned long WINAPI WatchThread::doWatchFolders(void* params)
 }
 
 WatchThread::WatchThread()
-    : m_thread(CreateThread(0, 0, &WatchThread::doWatchFolders, this, 0, 0))
-    , m_semaphore(CreateSemaphore(NULL, 0, 65535, NULL))
+    : m_semaphore(CreateSemaphore(NULL, 0, 65535, NULL))
     , m_watches(Arena::filesystem())
     , m_watchCount(0)
+    , m_thread(CreateThread(0, 0, &WatchThread::doWatchFolders, this, 0, 0))
 {
 }
 
