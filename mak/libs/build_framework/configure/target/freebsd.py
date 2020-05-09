@@ -13,15 +13,22 @@ class FreeBSD(Configure.ConfigurationContext.Platform):
     def __init__(self):
         Configure.ConfigurationContext.Platform.__init__(self)
 
-    def get_available_compilers(self, compiler_list):
+    def get_available_compilers(self, configuration_context, compiler_list):
         result = []
         for c in compiler_list:
             for regexp in self.SUPPORTED_TARGETS:
                 if regexp.match(c.platform):
                     # FreeBSD is not really multiarch, check that proper libs are installed
-                    if c.run_cxx(['-x', 'c++', '-'],
-                                 'int main(int argc, char* argv[]) {  }')[0] == 0:
-                        result.append((c, [], self))
+                    tmpnode = configuration_context.bldnode.make_node('a.out')
+                    try:
+                        if c.run_cxx(['-x', 'c++', '-o', tmpnode.abspath(), '-'],
+                                    'int main(int argc, char* argv[]) {  }')[0] == 0:
+                            result.append((c, [], self))
+                    finally:
+                        try:
+                            tmpnode.delete()
+                        except OSError:
+                            pass
         return result
 
     def load_in_env(self, conf, compiler):

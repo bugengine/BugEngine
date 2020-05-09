@@ -19,7 +19,7 @@ def configure(configuration_context):
             if os.path.isfile(os.path.join(configuration_context.bugenginenode.abspath(), 'extra', extra, 'wscript')):
                 configuration_context.recurse(os.path.join(configuration_context.bugenginenode.abspath(), 'extra', extra))
     for p in configuration_context.platforms:
-        configuration_list = p.get_available_compilers(configuration_context.compilers)
+        configuration_list = p.get_available_compilers(configuration_context, configuration_context.compilers)
         if configuration_list:
             pprint('BLUE', ' + configuring for platform %s' % p.NAME)
             for main_toolchain, sub_toolchains, platform in configuration_list:

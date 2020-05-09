@@ -23,7 +23,7 @@ class Darwin(Configure.ConfigurationContext.Platform):
     def platform_name(self, compiler):
         return self.__class__.NAME.lower() + self.sdk[0]
 
-    def get_available_compilers(self, compiler_list):
+    def get_available_compilers(self, configuration_context, compiler_list):
         result = []
         compiler_sets = {}
         for c in compiler_list:

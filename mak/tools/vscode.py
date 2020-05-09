@@ -95,8 +95,7 @@ class vscode(Build.BuildContext):
         vscode_node = self.srcnode.make_node('.vscode')
         vscode_node.mkdir()
         for env_name in self.env.ALL_TOOLCHAINS:
-            toolchain_node = vscode_node.make_node(env_name)
-            toolchain_node.mkdir()
+            toolchain_node = vscode_node.make_node('toolchains').make_node(env_name)
             bld_env = self.all_envs[env_name]
             if bld_env.SUB_TOOLCHAINS:
                 env = self.all_envs[bld_env.SUB_TOOLCHAINS[0]]
@@ -110,7 +109,7 @@ class vscode(Build.BuildContext):
                     '      "name": "%(toolchain)s:%(variant)s",\n'
                     '      "includePath": [],\n'
                     '      "defines": [],\n'
-                    '      "compileCommands": "${workspaceFolder}/.vscode/%(toolchain)s/%(variant)s/compile_commands.json"\n'
+                    '      "compileCommands": "${workspaceFolder}/.vscode/toolchains/%(toolchain)s/%(variant)s/compile_commands.json"\n'
                     '    }' % {
                         'toolchain': env_name,
                         'variant': variant
@@ -130,10 +129,10 @@ class vscode(Build.BuildContext):
                                                     '\t\t"arguments": [%s],\n'
                                                     '\t\t"file": "%s",\n'
                                                     '\t\t"output": "%s"\n'
-                                                    '\t}' % (task.get_cwd().path_from(self.path),
-                                                            ", ".join(['"-I%s"' % i for i in task.env.INCPATHS] + ['"-D%s"' % d for d in task.env.DEFINES]),
-                                                                task.inputs[0].path_from(self.path),
-                                                                task.outputs[0].path_from(task.get_cwd())))
+                                                    '\t}' % (task.get_cwd().path_from(self.path).replace('\\', '/'),
+                                                            ", ".join(['"-I%s"' % i.replace('\\', '/') for i in task.env.INCPATHS] + ['"-D%s"' % d for d in task.env.DEFINES]),
+                                                                task.inputs[0].path_from(self.path).replace('\\', '/'),
+                                                                task.outputs[0].path_from(task.get_cwd()).replace('\\', '/')))
                 with open(variant_node.make_node('compile_commands.json').abspath(), 'w') as compile_commands:
                     compile_commands.write('[\n')
                     compile_commands.write(',\n'.join(commands))
@@ -163,12 +162,12 @@ class vscode(Build.BuildContext):
                 '    }' % {
                     'action': action,
                     'group': '{\n        "kind": "build",\n        "isDefault": true\n      }' if is_default else '"build"',
-                    'python': sys.executable,
-                    'waf': sys.argv[0],
+                    'python': sys.executable.replace('\\', '/'),
+                    'waf': sys.argv[0].replace('\\', '/'),
                     'toolchain': env_name,
                     'variant': variant,
                     'cl': ', '.join('"%s"' % o for o in options + [command]),
-                    'pwd': self.srcnode.abspath()
+                    'pwd': self.srcnode.abspath().replace('\\', '/')
                 }
             )
         with open(vscode_node.make_node('c_cpp_properties.json').abspath(), 'w') as conf_file:
