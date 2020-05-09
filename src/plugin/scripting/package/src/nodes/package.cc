@@ -7,6 +7,7 @@
 #include <bugengine/plugin.scripting.package/nodes/package.hh>
 #include <bugengine/plugin.scripting.package/nodes/reference.hh>
 #include <bugengine/resource/resourcemanager.hh>
+#include <bugengine/rtti/engine/propertyinfo.script.hh>
 
 namespace BugEngine { namespace PackageBuilder { namespace Nodes {
 
@@ -189,6 +190,28 @@ void Package::resolveReference(weak< Reference > reference)
         if(!reference->m_value)
         {
             reference->m_object = findByName(name[0]);
+            if(!reference->m_object)
+            {
+                error(reference->m_line, minitl::format< 1024u >("unable to resolve %s") | name);
+            }
+            else
+            {
+                RTTI::Type type = reference->m_object->getType();
+                for(u32 i = 1; i < name.size(); ++i)
+                {
+                    raw< const RTTI::Property > p = type.metaclass->getProperty(name[i]);
+                    if(!p)
+                    {
+                        error(reference->m_line,
+                              minitl::format< 1024u >(
+                                 "unable to resolve %s: can't resolve property %s in type %s")
+                                 | name | name[i] | type.name());
+                        reference->m_object.clear();
+                        break;
+                    }
+                    type = p->type;
+                }
+            }
         }
     }
 }
