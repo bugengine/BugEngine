@@ -10,7 +10,7 @@ class Platform:
     def __init__(self):
         self.directories = []
 
-    def get_available_compilers(self, compiler_list):
+    def get_available_compilers(self, configuration_context, compiler_list):
         result = []
         for c in compiler_list:
             for regexp in self.SUPPORTED_TARGETS:

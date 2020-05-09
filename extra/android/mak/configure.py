@@ -286,7 +286,7 @@ class AndroidLoader(Configure.ConfigurationContext.Platform):
         else:
             raise Errors.WafError('no SDK for archs')
 
-    def get_available_compilers(self, compiler_list):
+    def get_available_compilers(self, configuration_context, compiler_list):
         result = []
         compiler_sets = {}
         for c in compiler_list:
