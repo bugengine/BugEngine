@@ -1,6 +1,7 @@
 from waflib import Context, Build, TaskGen, Options
 import os
 import sys
+import json
 
 
 class vscode(Build.BuildContext):
@@ -94,6 +95,7 @@ class vscode(Build.BuildContext):
         configurations = []
         vscode_node = self.srcnode.make_node('.vscode')
         vscode_node.mkdir()
+
         for env_name in self.env.ALL_TOOLCHAINS:
             toolchain_node = vscode_node.make_node('toolchains').make_node(env_name)
             bld_env = self.all_envs[env_name]
@@ -104,17 +106,32 @@ class vscode(Build.BuildContext):
             for variant in self.env.ALL_VARIANTS:
                 variant_node = toolchain_node.make_node(variant)
                 variant_node.mkdir()
-                configurations.append(
-                    '    {\n'
-                    '      "name": "%(toolchain)s:%(variant)s",\n'
-                    '      "includePath": [],\n'
-                    '      "defines": [],\n'
-                    '      "compileCommands": "${workspaceFolder}/.vscode/toolchains/%(toolchain)s/%(variant)s/compile_commands.json"\n'
-                    '    }' % {
-                        'toolchain': env_name,
-                        'variant': variant
-                    }
-                )
+                properties = {}
+                for var in [
+                            'Prefix', 'TmpDir', 'Toolchain', 'Deploy_BinDir', 'Deploy_RunBinDir', 'Deploy_LibDir',
+                            'Deploy_IncludeDir', 'Deploy_DataDir', 'Deploy_PluginDir', 'Deploy_KernelDir', 'Deploy_RootDir'
+                        ]:
+                    properties[var] = env[var.upper()]
+                properties['Variant'] = variant
+                properties['Launcher'] = env.cxxprogram_PATTERN % self.launcher[0][0].target
+                properties['Python'] = sys.executable
+                if env.GDB:
+                    properties['DebuggerType'] = 'cppdbg'
+                    properties['DebuggerMode'] = 'gdb'
+                    properties['DebuggerPath'] = env.GDB[0]
+                elif env.CDB:
+                    properties['DebuggerType'] = 'cppvsdbg'
+                elif env.LLDB:
+                    properties['DebuggerType'] = 'cppdbg'
+                    properties['DebuggerMode'] = 'lldb'
+                    properties['DebuggerPath'] = env.LLDB[0]
+                configurations.append({
+                    'name': '%s - %s' % (env_name, variant),
+                    'includePath': [],
+                    'defines': [],
+                    'compileCommands': '${workspaceFolder}/.vscode/toolchains/%s/%s/compile_commands.json' % (env_name, variant),
+                    'properties': properties
+                })
                 commands = []
                 for g in self.groups:
                     for tg in g:
@@ -124,58 +141,57 @@ class vscode(Build.BuildContext):
                             tg.post()
                             for task in tg.tasks:
                                 if task.__class__.__name__ in ('cxx', 'c', 'objc', 'objcxx'):
-                                    commands.append('\t{\n'
-                                                    '\t\t"directory": "%s",\n'
-                                                    '\t\t"arguments": [%s],\n'
-                                                    '\t\t"file": "%s",\n'
-                                                    '\t\t"output": "%s"\n'
-                                                    '\t}' % (task.get_cwd().path_from(self.path).replace('\\', '/'),
-                                                            ", ".join(['"-I%s"' % i.replace('\\', '/') for i in task.env.INCPATHS] + ['"-D%s"' % d for d in task.env.DEFINES]),
-                                                                task.inputs[0].path_from(self.path).replace('\\', '/'),
-                                                                task.outputs[0].path_from(task.get_cwd()).replace('\\', '/')))
+                                    commands.append({
+                                        'directory': task.get_cwd().path_from(self.path),
+                                        'arguments': ['-I"%s"' % i for i in task.env.INCPATHS] + ['-D%s' % d for d in task.env.DEFINES],
+                                        'file': task.inputs[0].path_from(self.path),
+                                        'output': task.outputs[0].path_from(task.get_cwd())
+                                    })
                 with open(variant_node.make_node('compile_commands.json').abspath(), 'w') as compile_commands:
-                    compile_commands.write('[\n')
-                    compile_commands.write(',\n'.join(commands))
-                    compile_commands.write('\n]')
+                    json.dump(commands, compile_commands, indent='  ')
 
-
+        tasks_file = vscode_node.make_node('tasks.json')
+        try:
+            with open(tasks_file.abspath(), 'r') as document:
+                tasks = json.load(document)
+                tasks['tasks'] = [t for t in tasks['tasks'] if not t['label'].startswith('bugengine:')]
+                try:
+                    tasks['inputs'] = [i for i in tasks['inputs'] if not i['id'].startswith('bugengine-')]
+                except KeyError:
+                    tasks['inputs'] = []
+        except IOError:
+            tasks = {
+                'version': '2.0.0',
+                'tasks': [],
+                'inputs': []
+            }
         for action, command, is_default in [
-            ('build', 'build:${command:cpptools.activeConfigName}',
-             True), ('clean', 'clean:${command:cpptools.activeConfigName}', False),
-            ('rebuild', 'rebuild:${command:cpptools.activeConfigName}', False), ('reconfigure', 'reconfigure',
-                                                                                 False), (self.cmd, self.cmd, False)
+            ('build', 'build:${input:bugengine-Toolchain}:${input:bugengine-Variant}', True),
+            ('clean', 'clean:${input:bugengine-Toolchain}:${input:bugengine-Variant}', False),
+            ('rebuild', 'rebuild:${input:bugengine-Toolchain}:${input:bugengine-Variant}', False),
+            ('reconfigure', 'reconfigure', False),
+            (self.cmd, self.cmd, False)
         ]:
-            tasks.append(
-                '    {\n'
-                '      "label": "%(action)s",\n'
-                '      "type": "process",\n'
-                '      "command": ["%(python)s"],\n'
-                '      "args": ["%(waf)s", %(cl)s],\n'
-                '      "options":{\n'
-                '        "cwd": "%(pwd)s"\n'
-                '      },\n'
-                '      "problemMatcher": [\n'
-                '        "$gcc",\n'
-                '        "$msCompile"\n'
-                '      ],\n'
-                '      "group": %(group)s\n'
-                '    }' % {
-                    'action': action,
-                    'group': '{\n        "kind": "build",\n        "isDefault": true\n      }' if is_default else '"build"',
-                    'python': sys.executable.replace('\\', '/'),
-                    'waf': sys.argv[0].replace('\\', '/'),
-                    'toolchain': env_name,
-                    'variant': variant,
-                    'cl': ', '.join('"%s"' % o for o in options + [command]),
-                    'pwd': self.srcnode.abspath().replace('\\', '/')
-                }
-            )
+            tasks['tasks'].append({
+                'label': 'bugengine:%s' % action,
+                'type': 'process',
+                'command': [sys.executable],
+                'args': [sys.argv[0], command] + options,
+                'options': {
+                    'cwd': self.srcnode.abspath()
+                },
+                'problemMatcher': ['$gcc', '$msCompile'],
+                'group': {'kind': 'build', 'isDefault': True} if is_default else 'build'
+            })
+        for input in ('Toolchain', 'Variant'):
+            tasks['inputs'].append({
+                'id': 'bugengine-%s' % input,
+                'type': 'command',
+                'command': 'cpptools.activeConfigProperty',
+                'args': input
+            })
         with open(vscode_node.make_node('c_cpp_properties.json').abspath(), 'w') as conf_file:
-            conf_file.write('{\n  "configurations": [\n')
-            conf_file.write(',\n'.join(configurations))
-            conf_file.write('\n  ]\n}\n')
-        with open(vscode_node.make_node('tasks.json').abspath(), 'w') as task_file:
-            task_file.write('{\n  "version":"2.0.0",\n  "tasks": [\n')
-            task_file.write(',\n'.join(tasks))
-            task_file.write('\n  ]\n}\n')
+            json.dump({'configurations': configurations}, conf_file, indent='  ')
+        with open(tasks_file.abspath(), 'w') as document:
+            json.dump(tasks, document, indent='  ')
 
