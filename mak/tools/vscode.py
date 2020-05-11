@@ -1,7 +1,8 @@
-from waflib import Context, Build, TaskGen, Options
+from waflib import Context, Build, TaskGen, Options, Utils
 import os
 import sys
 import json
+from json_minify import json_minify
 
 
 class vscode(Build.BuildContext):
@@ -152,19 +153,21 @@ class vscode(Build.BuildContext):
 
         tasks_file = vscode_node.make_node('tasks.json')
         try:
-            with open(tasks_file.abspath(), 'r') as document:
-                tasks = json.load(document)
-                tasks['tasks'] = [t for t in tasks['tasks'] if not t['label'].startswith('bugengine:')]
-                try:
-                    tasks['inputs'] = [i for i in tasks['inputs'] if not i['id'].startswith('bugengine-')]
-                except KeyError:
-                    tasks['inputs'] = []
+            tasks = json.loads(json_minify(Utils.readf(tasks_file.abspath(), 'r')))
         except IOError:
             tasks = {
                 'version': '2.0.0',
                 'tasks': [],
                 'inputs': []
             }
+        else:
+            tasks['tasks'] = [t for t in tasks['tasks'] if not t['label'].startswith('bugengine:')]
+            try:
+                tasks['inputs'] = [i for i in tasks['inputs'] if not i['id'].startswith('bugengine-')]
+            except KeyError:
+                tasks['inputs'] = []
+
+
         for action, command, is_default in [
             ('build', 'build:${input:bugengine-Toolchain}:${input:bugengine-Variant}', True),
             ('clean', 'clean:${input:bugengine-Toolchain}:${input:bugengine-Variant}', False),
@@ -190,8 +193,73 @@ class vscode(Build.BuildContext):
                 'command': 'cpptools.activeConfigProperty',
                 'args': input
             })
+
+        launch_file = vscode_node.make_node('launch.json')
+        try:
+            launch_configs = json.loads(json_minify(Utils.readf(launch_file.abspath(), 'r')))
+        except IOError:
+            launch_configs = {
+                'version': '0.2.0',
+                'configurations': [],
+                'inputs': []
+            }
+        else:
+            launch_configs['configurations'] = [c for c in launch_configs['configurations'] if not c['name'].startswith('bugengine:')]
+            try:
+                launch_configs['inputs'] = [i for i in tasks['inputs'] if not i['id'].startswith('bugengine-')]
+            except KeyError:
+                launch_configs['inputs'] = []
+
+        for g in self.groups:
+            for tg in g:
+                if not isinstance(tg, TaskGen.task_gen):
+                    continue
+                if 'game' in tg.features:
+                    launch_configs['configurations'].append({
+                        'name': 'bugengine:%s' % tg.target,
+                        'type': 'cppdbg',
+                        'request': 'launch',
+                        'program': '${workspaceFolder}/${input:bugengine-Prefix}/${input:bugengine-Variant}/${input:bugengine-Deploy_BinDir}/${input:bugengine-Launcher}',
+                        'args': [tg.target],
+                        'cwd': '${workspaceFolder}',
+                        'miDebuggerPath': '${input:bugengine-DebuggerPath}',
+                        'MIMode': '${input:bugengine-DebuggerMode}',
+                        'windows': {
+                            'type': 'cppvsdbg'
+                        },
+                        'preLaunchTask': 'bugengine:build'
+                    })
+                if 'python_module' in tg.features:
+                    launch_configs['configurations'].append({
+                        'name': 'bugengine:%s' % tg.target,
+                        'type': 'cppdbg',
+                        'request': 'launch',
+                        'externalConsole': True,
+                        'program': '${input:bugengine-Python}',
+                        'miDebuggerPath': '${input:bugengine-DebuggerPath}',
+                        'MIMode': '${input:bugengine-DebuggerMode}',
+                        'args': [
+                            '-c',
+                            'import py_bugengine; py_bugengine.run()'
+                        ],
+                        'cwd': '${workspaceFolder}/${input:bugengine-Prefix}/${input:bugengine-Variant}/${input:bugengine-Deploy_RunBinDir}',
+                        'windows': {
+                            'type': 'cppvsdbg'
+                        },
+                        'preLaunchTask': 'bugengine:build'
+                    })
+        for input in ('Variant', 'Prefix', 'Deploy_RunBinDir', 'Deploy_BinDir', 'Launcher', 'Python', 'DebuggerPath', 'DebuggerMode'):
+            launch_configs['inputs'].append({
+                'id': 'bugengine-%s' % input,
+                'type': 'command',
+                'command': 'cpptools.activeConfigProperty',
+                'args': input
+            })
+
         with open(vscode_node.make_node('c_cpp_properties.json').abspath(), 'w') as conf_file:
             json.dump({'configurations': configurations}, conf_file, indent='  ')
         with open(tasks_file.abspath(), 'w') as document:
             json.dump(tasks, document, indent='  ')
+        with open(launch_file.abspath(), 'w') as document:
+            json.dump(launch_configs, document, indent='  ')
 
