@@ -48,9 +48,9 @@ Value Method::Overload::getTag(raw< const Class > type) const
 
 minitl::format< 1024u > Method::Overload::signature() const
 {
-    char buffer[1024];
+    char buffer[1023];
     char* current = buffer;
-    char* end     = buffer + 1023;
+    char* end     = buffer + 1022;
     *end          = 0;
     for(u32 i = 0; i < params.count; ++i)
     {
