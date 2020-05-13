@@ -8,6 +8,7 @@ from .ir_metadata import *
 from .ir_comdat import *
 from .ir_type import *
 from .ir_method import *
+from .ir_variable import *
 from .ir_constant import *
 from .ir_instruction import *
 from .ir_opcodes import *

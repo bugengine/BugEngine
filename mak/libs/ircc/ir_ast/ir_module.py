@@ -26,6 +26,11 @@ class IrModule:
             assert isinstance(decl, desired_type)
             return decl
 
+    def write_declarations(self):
+        # type: () -> None
+        for decl_name, decl in self._declarations.items():
+            decl.write_declaration(decl_name)
+
 
 if TYPE_CHECKING:
     from typing import List, Optional, Tuple, Type

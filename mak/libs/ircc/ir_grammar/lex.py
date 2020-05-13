@@ -72,6 +72,10 @@ keywords = (
     'hidden',
     'protected',
 
+    # variables
+    'global',
+    'constant',
+
     # method tags
     'section',
     'gc',
@@ -291,7 +295,7 @@ def t_ID_LABEL(t):
     return t
 t_LITERAL_DECIMAL = '[-+]?[0-9]+'
 t_ATTRIBUTE_GROUP = '\\#[0-9]+'
-t_METADATA_NAME = '(![-a-zA-Z\$\._][-a-zA-Z\$\._0-9]+)|(!"[^"]*")'
+t_METADATA_NAME = '(![-a-zA-Z\$\._][-a-zA-Z\$\._0-9]+)'
 t_METADATA_REF = '![0-9]+'
 t_METADATA_MARK = '!'
 t_EQUAL = '='

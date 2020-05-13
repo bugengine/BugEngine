@@ -1,12 +1,12 @@
-from ..ir_ast import IrMetadataString, IrMetadataLink, IrMetadataNode, IrSpecializedMetadata, IrMetadataNull
+from ..ir_ast import IrMetadataDeclaration, IrMetadataString, IrMetadataLink, IrMetadataNode, IrSpecializedMetadata, IrMetadataNull, IrReference
 from be_typing import TYPE_CHECKING
 
 
-def p_ir_metadata_list(p):
+def p_ir_metadata_list_opt(p):
     # type: (YaccProduction) -> None
     """
-        ir-metadata-list : METADATA_NAME METADATA_REF ir-metadata-list
-                         | empty
+        ir-metadata-list-opt : METADATA_NAME METADATA_REF ir-metadata-list-opt
+                             | empty
     """
 
 
@@ -16,7 +16,7 @@ def p_ir_metadata(p):
         ir-metadata : METADATA_NAME EQUAL ir-metadata-distinct ir-metadata-value
                     | METADATA_REF EQUAL ir-metadata-distinct ir-metadata-value
     """
-    p[0] = None
+    p[0] = (IrReference(p[1]), IrMetadataDeclaration(p[4]))
 
 
 def p_ir_metadata_distinct(p):
@@ -50,8 +50,7 @@ def p_ir_metadata_null(p):
 def p_ir_metadata_ref(p):
     # type: (YaccProduction) -> None
     """
-        ir-metadata-ref : METADATA_NAME
-                        | METADATA_REF
+        ir-metadata-ref : METADATA_REF
     """
     p[0] = IrMetadataLink(p[1])
 
@@ -144,11 +143,9 @@ def p_ir_metadata_debug_attribute_list_end(p):
 def p_ir_metadata_debug_attribute(p):
     # type: (YaccProduction) -> None
     """
-        ir-metadata-debug-attribute : LITERAL_STRING
+        ir-metadata-debug-attribute : ir-metadata-value
+                                    | LITERAL_STRING
                                     | LITERAL_DECIMAL
-                                    | METADATA_NAME
-                                    | METADATA_REF
-                                    | NULL
                                     | ir-metadata-debug-flag-combination
     """
     p[0] = p[1]

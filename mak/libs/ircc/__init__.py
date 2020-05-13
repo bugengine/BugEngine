@@ -49,7 +49,7 @@ def run():
             s = __import__(module)
             with open(arguments.output, 'wb') as out_file:
                 out_file.write(sample_kernel)
-                pass
+                result.write_declarations()
     except (SyntaxError, ExceptionType) as exception:
         logging.exception(exception)
         sys.exit(255)

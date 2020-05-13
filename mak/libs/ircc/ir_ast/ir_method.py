@@ -14,24 +14,42 @@ class IrMethodMetadataParameter(IrMethodParameter):
     pass
 
 
+class IrMethod:
+    def resolve(self, module):
+        # type: (IrModule) -> IrMethod
+        return self
+
+
 class IrMethodDeclaration(IrDeclaration):
-    pass
+    def __init__(self, method):
+        # type: (IrMethod) -> None
+        self._method = method
+
+    def resolve(self, module):
+        # type: (IrModule) -> IrDeclaration
+        self._method = self._method.resolve(module)
+        return self
+
+    def write_declaration(self, declared_name):
+        # type: (IrReference) -> None
+        #print('method - ', declared_name)
+        pass
 
 
-class IrMethodLink(IrMethodDeclaration):
+class IrMethodLink(IrMethod):
     def __init__(self, reference):
         # type: (IrReference) -> None
         self._reference = reference
 
     def resolve(self, module):
         # type: (IrModule) -> IrMethod
-        result = module.get(self._reference)
+        result = module.get(self._reference, IrMethodDeclaration)
         assert isinstance(result, IrMethod)
         result.resolve(module)
         return result
 
 
-class IrMethod(IrMethodDeclaration):
+class IrMethodObject(IrMethod):
     def __init__(self, return_type, parameters, calling_convention):
         # type: (Optional[IrType], List[IrMethodParameter], str) -> None
         self._parameters = parameters

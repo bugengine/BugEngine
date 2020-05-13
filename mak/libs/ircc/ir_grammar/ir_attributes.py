@@ -1,3 +1,4 @@
+from ..ir_ast import IrAttributeGroupDeclaration, IrAttributeGroupLink, IrAttributeGroupObject, IrAttribute, IrReference
 from be_typing import TYPE_CHECKING
 
 
@@ -6,7 +7,7 @@ def p_ir_declaration_attributes(p):
     """
         ir-attributes : ATTRIBUTES ATTRIBUTE_GROUP EQUAL LBRACE ir-attribute-list RBRACE
     """
-    p[0] = None
+    p[0] = (IrReference(p[2]), IrAttributeGroupDeclaration(p[5]))
 
 
 def p_ir_attribute_list(p):
@@ -15,9 +16,8 @@ def p_ir_attribute_list(p):
         ir-attribute-list : ir-method-attribute ir-method-attribute-list
                           | ir-parameter-attribute ir-parameter-attribute-list
                           | ir-any-attribute ir-attribute-list
-                          | empty
     """
-    p[0] = None
+    p[0] = IrAttributeGroupObject([p[1]] + p[2]._attributes)
 
 
 def p_ir_method_attribute_list(p):
@@ -25,9 +25,8 @@ def p_ir_method_attribute_list(p):
     """
         ir-method-attribute-list : ir-method-attribute ir-method-attribute-list
                                  | ir-any-attribute ir-method-attribute-list
-                                 | empty
     """
-    p[0] = None
+    p[0] = IrAttributeGroupObject([p[1]] + p[2]._attributes)
 
 
 def p_ir_parameter_attribute_list(p):
@@ -35,9 +34,18 @@ def p_ir_parameter_attribute_list(p):
     """
         ir-parameter-attribute-list : ir-parameter-attribute ir-parameter-attribute-list
                                     | ir-any-attribute ir-parameter-attribute-list
-                                    | empty
     """
-    p[0] = None
+    p[0] = IrAttributeGroupObject([p[1]] + p[2]._attributes)
+
+
+def p_ir_attribute_list_end(p):
+    # type: (YaccProduction) -> None
+    """
+        ir-attribute-list : empty
+        ir-method-attribute-list : empty
+        ir-parameter-attribute-list : empty
+    """
+    p[0] = IrAttributeGroupObject([])
 
 
 def p_ir_attribute_parameter(p):
@@ -64,6 +72,7 @@ def p_ir_attribute_parameter(p):
                                | SWIFTERROR
                                | IMMARG
     """
+    p[0] = IrAttribute(p[1])
 
 
 def p_ir_attribute_method(p):
@@ -122,8 +131,8 @@ def p_ir_attribute_method(p):
                             | UWTABLE
                             | NOCF_CHECK
                             | SHADOWCALLSTACK
-                            | ATTRIBUTE_GROUP
     """
+    p[0] = IrAttribute(p[1])
 
 
 def p_ir_attribute_any(p):
@@ -135,6 +144,15 @@ def p_ir_attribute_any(p):
                          | READONLY
                          | WRITEONLY
     """
+    p[0] = IrAttribute(p[1])
+
+
+def p_ir_attribute_group_ref(p):
+    # type: (YaccProduction) -> None
+    """
+        ir-any-attribute : ATTRIBUTE_GROUP
+    """
+    p[0] = IrAttributeGroupLink(IrReference(p[1]))
 
 
 if TYPE_CHECKING:

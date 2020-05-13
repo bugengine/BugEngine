@@ -4,6 +4,7 @@
 from waflib import Task
 from waflib.TaskGen import feature, before_method
 from waflib.Tools import c_preproc
+from waflib.Errors import WafError
 import os
 import sys
 
@@ -55,23 +56,33 @@ class cl_trampoline(Task.Task):
 
 class clc32(Task.Task):
     "clc32"
-    run_str = '${CLC_CXX} -S -emit-llvm -x cl -target spir-unknown-unknown -Xclang -finclude-default-header ${CLC_CXXFLAGS} ${CLC_CPPPATH_ST:INCPATHS} ${CLC_DEFINES_ST:DEFINES} -D_CLC=1 -DBE_COMPUTE ${CLC_CXX_SRC_F}${SRC[0].abspath()} ${CLC_CXX_TGT_F} ${TGT}'
+    run_str = '${CLC_CXX}  -S -emit-llvm -x cl -target spir-unknown-unknown -Xclang -finclude-default-header ${CLC_CPPPATH_ST:CLC_KERNEL_HEADER_PATH} ${CLC_CXXFLAGS} ${CLC_CPPPATH_ST:INCPATHS} ${CLC_DEFINES_ST:DEFINES} -D_CLC=1 -DBE_COMPUTE ${CLC_CXX_SRC_F}${SRC[0].abspath()} ${CLC_CXX_TGT_F} ${TGT}'
     ext_out = ['.32.ll']
-    scan = c_preproc.scan
     color = 'PINK'
+
+    def scan(self):
+        kernel_nodes = self.generator.to_incnodes(self.generator.to_list(self.env.CLC_KERNEL_HEADER_PATH))
+        self.generator.includes_nodes = kernel_nodes + self.generator.includes_nodes
+        return c_preproc.scan(self)
 
 
 class clc64(Task.Task):
     "clc64"
-    run_str = '${CLC_CXX} -S -emit-llvm -x cl -target spir64-unknown-unknown -Xclang -finclude-default-header ${CLC_CXXFLAGS} ${CLC_CPPPATH_ST:INCPATHS} ${CLC_DEFINES_ST:DEFINES} -D_CLC=1 -DBE_COMPUTE ${CLC_CXX_SRC_F}${SRC[0].abspath()} ${CLC_CXX_TGT_F} ${TGT}'
+    run_str = '${CLC_CXX}  -S -emit-llvm -x cl -target spir64-unknown-unknown -Xclang -finclude-default-header ${CLC_CPPPATH_ST:CLC_KERNEL_HEADER_PATH} ${CLC_CXXFLAGS} ${CLC_CPPPATH_ST:INCPATHS} ${CLC_DEFINES_ST:DEFINES} -D_CLC=1 -DBE_COMPUTE ${CLC_CXX_SRC_F}${SRC[0].abspath()} ${CLC_CXX_TGT_F} ${TGT}'
     ext_out = ['.64.ll']
-    scan = c_preproc.scan
     color = 'PINK'
+
+    def scan(self):
+        kernel_nodes = self.generator.to_incnodes(self.generator.to_list(self.env.CLC_KERNEL_HEADER_PATH))
+        self.generator.includes_nodes = kernel_nodes + self.generator.includes_nodes
+        return c_preproc.scan(self)
 
 
 @feature('kernel_create')
 @before_method('process_source')
 def cl_ir_kernel_compile(task_gen):
+    if not task_gen.env.CLC_KERNEL_HEADER_PATH:
+        raise WafError('environment CLC_KERNEL_HEADER_PATH not set; make sure setup makes this variable point to the kernel header implementation for this target')
     source = task_gen.kernel_source
     out_cl = task_gen.make_bld_node('src', source.parent, source.name[:source.name.rfind('.')] + '.trampoline.cl')
     out_ll_32 = task_gen.make_bld_node('src', source.parent, source.name[:source.name.rfind('.')] + '.32.ll')
