@@ -21,6 +21,21 @@ def p_ir_value(p):
                  | TRUE
                  | FALSE
                  | ID
+                 | ir-value-cast
+    """
+    p[0] = []
+
+
+def p_ir_value_cast(p):
+    # type: (YaccProduction) -> None
+    """
+        ir-value-cast : ir-cast-op LPAREN LPAREN_MARK ir-type ir-value TO ir-type RPAREN
+    """
+
+def p_ir_value_array(p):
+    # type: (YaccProduction) -> None
+    """
+        ir-value : LBRACKET ir-value-list RBRACKET
     """
     p[0] = []
 
@@ -28,7 +43,7 @@ def p_ir_value(p):
 def p_ir_value_aggregated(p):
     # type: (YaccProduction) -> None
     """
-        ir-value : LBRACKET ir-value-list RBRACKET
+        ir-value : LBRACE ir-value-list RBRACE
     """
     p[0] = []
 

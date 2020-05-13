@@ -107,12 +107,12 @@ public:
         return m_count;
     }
 
-    __device T* operator->() const
+    __device __global T* operator->() const
     {
         return m_currentSegment->m_begin + m_currentOffset;
     }
 
-    __device T& operator*() const
+    __device __global T& operator*() const
     {
         return *(m_currentSegment->m_begin + m_currentOffset);
     }

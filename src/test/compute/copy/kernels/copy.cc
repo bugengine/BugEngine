@@ -1,6 +1,9 @@
 #include <bugengine/kernel/input/input.hh>
 #include <component.script.hh>
 
+i32 gIndex  = 1;
+u64 gIndex2 = gIndex;
+
 __device void kmain(u32 index, u32 total,
                     Kernel::segments< BugEngine::Test::Compute::Copy::SourceComponent > in,
                     Kernel::segments< BugEngine::Test::Compute::Copy::TargetComponent > out)

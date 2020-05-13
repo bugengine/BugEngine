@@ -24,6 +24,7 @@ def p_ir_declaration(p):
                        | ir-comdat
                        | ir-method
                        | ir-attributes
+                       | ir-variable
                        | ir-metadata
     """
     p[0] = p[1]

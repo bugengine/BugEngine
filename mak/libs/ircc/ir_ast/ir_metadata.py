@@ -28,6 +28,11 @@ class IrMetadataDeclaration(IrDeclaration):
         self._metadata = self._metadata.resolve(module)
         return self
 
+    def write_declaration(self, declared_name):
+        # type: (IrReference) -> None
+        #print('metadata - ', declared_name, self._metadata.__class__.__name__)
+        pass
+
 
 class IrMetadataLink(IrMetadata):
     def __init__(self, reference):

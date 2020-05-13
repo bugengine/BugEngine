@@ -17,7 +17,7 @@ private:
     u32                m_current;
 
 public:
-    __device segment(T* begin, T* end) : m_segment(begin, end), m_current(0)
+    __device segment(__global T* begin, __global T* end) : m_segment(begin, end), m_current(0)
     {
     }
     __device segment(const segments_part< T >& s) : m_segment(s), m_current(0)
@@ -64,11 +64,11 @@ public:
         return m_segment.m_count;
     }
 
-    __device T* operator->() const
+    __device __global T* operator->() const
     {
         return m_segment.m_begin + m_current;
     }
-    __device T& operator*() const
+    __device __global T& operator*() const
     {
         return *(m_segment.m_begin + m_current);
     }

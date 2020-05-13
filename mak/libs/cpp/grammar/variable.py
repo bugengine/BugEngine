@@ -19,9 +19,16 @@ def p_variable_array_list_opt(p):
         p[0] = ''
 
 
+
+def p_variable_initial_value_opt(p):
+    """
+        variable_initial_value_opt : ASSIGN value
+                                   |
+    """
+
 def p_variable_decl(p):
     """
-        variable_decl : method_return_type ID variable_array_list_opt
+        variable_decl : method_return_type ID variable_array_list_opt variable_initial_value_opt
     """
     p[0] = Variable(p[2], p[1] + p[3])
 

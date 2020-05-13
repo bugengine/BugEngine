@@ -7,7 +7,7 @@ define [linkage] [PreemptionSpecifier] [visibility] [DLLStorageClass]
        [prologue Constant] [personality Constant] (!name !N)* { ... }
 """
 
-from ..ir_ast import IrReference, IrMethod, IrMethodBody, IrMethodParameter, IrMethodMetadataParameter
+from ..ir_ast import IrReference, IrMethodObject, IrMethodBody, IrMethodParameter, IrMethodMetadataParameter, IrMethodDeclaration
 from be_typing import TYPE_CHECKING
 
 
@@ -31,7 +31,7 @@ def p_ir_method_declaration(p):
 def p_ir_method_definition(p):
     # type: (YaccProduction) -> None
     """
-        ir-method-definition : DEFINE ir-method-prototype ir-metadata-list LBRACE ir-instruction-list RBRACE
+        ir-method-definition : DEFINE ir-method-prototype ir-metadata-list-opt LBRACE ir-instruction-list RBRACE
     """
     method = p[2][1]
     p[0] = p[2]
@@ -40,15 +40,16 @@ def p_ir_method_definition(p):
 def p_ir_method_prototype(p):
     # type: (YaccProduction) -> None
     """
-        ir-method-prototype : ir-method-header ir-parameter-attribute-list ir-return-type ID LPAREN LPAREN_MARK ir-parameter-list RPAREN ir-method-footer 
+        ir-method-prototype : ir-method-header ir-parameter-attribute-list ir-return-type ID LPAREN LPAREN_MARK ir-parameter-list RPAREN ir-method-footer
     """
-    p[0] = (IrReference(p[4]), IrMethod(p[3], p[7], p[1]))
+    p[0] = (IrReference(p[4]), IrMethodDeclaration(IrMethodObject(p[3], p[7], p[1])))
 
 
 def p_ir_method_header(p):
     # type: (YaccProduction) -> None
     """
-        ir-method-header : ir-metadata-list ir-linkage ir-preemption-specifier ir-visibility ir-dll-storage ir-calling-convention
+        ir-method-header : ir-metadata-list-opt ir-linkage ir-preemption-specifier ir-visibility ir-dll-storage ir-calling-convention
+                         | ir-metadata-list-opt EXTERNAL   ir-preemption-specifier ir-visibility ir-dll-storage ir-calling-convention
     """
     p[0] = p[6]
 
@@ -84,7 +85,6 @@ def p_ir_linkage(p):
                    | INTERNAL
                    | AVAILABLE_EXTERNALLY
                    | COMMON
-                   | EXTERNAL
     """
 
 
