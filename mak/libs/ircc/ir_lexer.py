@@ -319,8 +319,8 @@ class IrPunctuation(IrState):
 class IrLexer:
     def __init__(self, filename, logger):
         # type: (str, Logger) -> None
-        self._lexer = lex.lex(module=ir_grammar.lex)
-        self._lexer.ir_lexer = self
+        #self._lexer = lex.lex(module=ir_grammar.lex)
+        #self._lexer.ir_lexer = self
         self._filename = filename
         self._lexdata = ''
         self._lineno = 1
@@ -364,8 +364,8 @@ class IrLexer:
 
     def input(self, text):
         # type: (str) -> None
-        self._lexer.input(text)
-        self._lexdata = self._lexer.lexdata
+        #self._lexer.input(text)
+        self._lexdata = text
         self._generator = self.input_parser()
 
     def input_parser(self):
@@ -384,7 +384,6 @@ class IrLexer:
             token = self._state.token(self, start, end)
             if token is not None:
                 yield token
-        return None
 
     def token(self):
         # type: () -> Optional[lex.LexToken]
