@@ -33,6 +33,7 @@ def p_error(p):
 
 
 tokens = lex.tokens
+keywords = lex.keywords
 
 if TYPE_CHECKING:
     from ply.yacc import YaccProduction
