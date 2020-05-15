@@ -234,6 +234,23 @@ class Logger:
         """unexpected end of file"""
         return locals()
 
+    @error
+    def C0005(self, position):
+        # type: (IrPosition) -> Dict[str, Any]
+        """unmatched " before end of line"""
+        return locals()
+
+    @error
+    def C0006(self, position):
+        # type: (IrPosition) -> Dict[str, Any]
+        """invalid ID"""
+        return locals()
+
+    @error
+    def C0010(self, position, calling_convention):
+        # type: (IrPosition, str) -> Dict[str, Any]
+        """unsupported calling convention {calling_convention}"""
+        return locals()
 
 logger = None
 

@@ -48,8 +48,8 @@ def p_ir_method_prototype(p):
 def p_ir_method_header(p):
     # type: (YaccProduction) -> None
     """
-        ir-method-header : ir-metadata-list-opt ir-linkage ir-preemption-specifier ir-visibility ir-dll-storage ir-calling-convention
-                         | ir-metadata-list-opt EXTERNAL   ir-preemption-specifier ir-visibility ir-dll-storage ir-calling-convention
+        ir-method-header : ir-metadata-list-opt ir-linkage ir-preemption-specifier ir-visibility ir-dll-storage-opt ir-calling-convention
+                         | ir-metadata-list-opt EXTERNAL   ir-preemption-specifier ir-visibility ir-dll-storage-opt ir-calling-convention
     """
     p[0] = p[6]
 
@@ -57,7 +57,7 @@ def p_ir_method_header(p):
 def p_ir_method_footer(p):
     # type: (YaccProduction) -> None
     """
-        ir-method-footer : ir-method-addr ir-addrspace-opt ir-method-attribute-list ir-method-section ir-method-comdat ir-method-align ir-method-gc ir-method-prefix ir-method-prologue ir-method-personality
+        ir-method-footer : ir-method-addr-opt ir-addrspace-opt ir-method-attribute-list ir-method-section-opt ir-method-comdat-opt ir-method-align-opt ir-method-gc-opt ir-method-prefix-opt ir-method-prologue-opt ir-method-personality
     """
 
 
@@ -124,9 +124,9 @@ def p_ir_visibility(p):
 def p_ir_dll_storage(p):
     # type: (YaccProduction) -> None
     """
-        ir-dll-storage : empty
-                       | DLLIMPORT
-                       | DLLEXPORT
+        ir-dll-storage-opt : empty
+                           | DLLIMPORT
+                           | DLLEXPORT
     """
 
 
@@ -156,7 +156,7 @@ def p_ir_calling_convention_disallowed(p):
                               | CFGUARD_CHECKCC
                               | CC LITERAL_DECIMAL
     """
-    # TODO: error
+    p.lexer.logger.C0010(p.position(1), p[1])
 
 
 def p_ir_parameter_list(p):
@@ -194,13 +194,15 @@ def p_ir_parameter_metadata(p):
     p[0] = IrMethodMetadataParameter(p[2], p[3], [])
 
 
-def p_ir_method_addr(p):
+def p_ir_method_addr_opt(p):
     # type: (YaccProduction) -> None
     """
-        ir-method-addr : empty
-                       | UNNAMED_ADDR
-                       | LOCAL_UNNAMED_ADDR
+        ir-method-addr-opt : empty
+                           | UNNAMED_ADDR
+                           | LOCAL_UNNAMED_ADDR
     """
+    # unused
+    p[0] = None
 
 
 def p_ir_denormal(p):
@@ -210,55 +212,69 @@ def p_ir_denormal(p):
                     | PRESERVE_SIGN
                     | POSITIVE_ZERO
     """
+    # unused
+    p[0] = None
 
 
-def p_ir_method_section(p):
+def p_ir_method_section_opt(p):
     # type: (YaccProduction) -> None
     """
-        ir-method-section : empty
-                          | SECTION LITERAL_STRING
+        ir-method-section-opt : empty
+                              | SECTION LITERAL_STRING
     """
+    # unused
+    p[0] = None
 
 
-def p_ir_method_gc(p):
+def p_ir_method_gc_opt(p):
     # type: (YaccProduction) -> None
     """
-        ir-method-gc : empty
-                     | GC
+        ir-method-gc-opt : empty
+                         | GC
     """
+    # unused
+    p[0] = None
 
 
-def p_ir_method_comdat(p):
+def p_ir_method_comdat_opt(p):
     # type: (YaccProduction) -> None
     """
-        ir-method-comdat : empty
-                         | COMDAT
-                         | COMDAT LPAREN LPAREN_MARK ID_COMDAT RPAREN
+        ir-method-comdat-opt : empty
+                             | COMDAT
+                             | COMDAT LPAREN LPAREN_MARK ID_COMDAT RPAREN
     """
+    # unused
+    p[0] = None
 
 
-def p_ir_method_align(p):
+def p_ir_method_align_opt(p):
     # type: (YaccProduction) -> None
     """
-        ir-method-align : empty
-                        | ALIGN LITERAL_DECIMAL
+        ir-method-align-opt : empty
+                            | ALIGN LITERAL_DECIMAL
     """
+    # unused
+    p[0] = None
 
 
-def p_ir_method_prefix(p):
+def p_ir_method_prefix_opt(p):
     # type: (YaccProduction) -> None
     """
-        ir-method-prefix : empty
-                         | PREFIX ir-constant
+        ir-method-prefix-opt : empty
+                             | PREFIX ir-constant
     """
+    # unused
+    p[0] = None
 
 
-def p_ir_method_prologue(p):
+def p_ir_method_prologue_opt(p):
     # type: (YaccProduction) -> None
     """
-        ir-method-prologue : empty
-                           | PROLOGUE ir-constant
+        ir-method-prologue-opt : empty
+                               | PROLOGUE ir-constant
     """
+    # unused
+    p[0] = None
 
 
 def p_ir_method_personality(p):

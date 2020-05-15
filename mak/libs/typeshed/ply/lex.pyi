@@ -8,6 +8,7 @@ class PlyLogger:
 class LexToken:
     type: str
     value: str
+    parsed_value: Union[None, int, str]
     filename: str
     lineno: int
     lexpos: int
