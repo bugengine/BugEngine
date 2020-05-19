@@ -1,4 +1,4 @@
-from ..ir_ast import IrMetadataDeclaration, IrMetadataString, IrMetadataLink, IrMetadataNode, IrSpecializedMetadata, IrMetadataNull, IrReference
+from ..ir_ast import IrTypeMetadata, IrMetadataDeclaration, IrMetadataString, IrMetadataInteger, IrMetadataLink, IrMetadataNode, IrSpecializedMetadata, IrMetadataNull, IrMetadataFlagList, IrReference
 from be_typing import TYPE_CHECKING
 
 
@@ -91,7 +91,7 @@ def p_ir_metadata_param_list_end(p):
 def p_ir_metadata_param(p):
     # type: (YaccProduction) -> None
     """
-        ir-metadata-param : ir-constant
+        ir-metadata-param : ir-value
                           | ir-metadata-value
     """
     p[0] = p[1]
@@ -144,11 +144,25 @@ def p_ir_metadata_debug_attribute(p):
     # type: (YaccProduction) -> None
     """
         ir-metadata-debug-attribute : ir-metadata-value
-                                    | LITERAL_STRING
-                                    | LITERAL_DECIMAL
                                     | ir-metadata-debug-flag-combination
     """
     p[0] = p[1]
+
+
+def p_ir_metadata_debug_attribute_string(p):
+    # type: (YaccProduction) -> None
+    """
+        ir-metadata-debug-attribute : LITERAL_STRING
+    """
+    p[0] = IrMetadataString(getattr(p.slice[1], 'parsed_value'))
+
+
+def p_ir_metadata_debug_attribute_integer(p):
+    # type: (YaccProduction) -> None
+    """
+        ir-metadata-debug-attribute : LITERAL_DECIMAL
+    """
+    p[0] = IrMetadataInteger(getattr(p.slice[1], 'parsed_value'))
 
 
 def p_ir_metadata_debug_flag_combination(p):
@@ -157,6 +171,11 @@ def p_ir_metadata_debug_flag_combination(p):
         ir-metadata-debug-flag-combination : ir-metadata-debug-flag PIPE ir-metadata-debug-flag-combination
                                            | ir-metadata-debug-flag
     """
+    if len(p) > 2:
+        p[0] = p[3]
+        p[0].add_flag(p[1])
+    else:
+        p[0] = IrMetadataFlagList(p[1])
 
 
 def p_ir_metadata_debug_flag(p):
@@ -164,6 +183,7 @@ def p_ir_metadata_debug_flag(p):
     """
         ir-metadata-debug-flag : ID_LABEL
     """
+    p[0] = p[1]
 
 
 if TYPE_CHECKING:

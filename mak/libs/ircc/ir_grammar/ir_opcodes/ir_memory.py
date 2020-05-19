@@ -11,14 +11,14 @@ def p_ir_opcode_alloca(p):
 def p_ir_opcode_load(p):
     # type: (YaccProduction) -> None
     """
-        ir-opcode : LOAD ir-volatile-opt ir-type COMMA ir-type ir-value ir-loadstore-attachment-list 
+        ir-opcode : LOAD ir-volatile-opt ir-type COMMA ir-value ir-loadstore-attachment-list 
     """
 
 
 def p_ir_opcode_store(p):
     # type: (YaccProduction) -> None
     """
-        ir-opcode : STORE ir-volatile-opt ir-type ir-value COMMA ir-type ir-value ir-loadstore-attachment-list 
+        ir-opcode : STORE ir-volatile-opt ir-value COMMA ir-value ir-loadstore-attachment-list 
     """
 
 
@@ -32,7 +32,7 @@ def p_ir_opcode_getelementptr(p):
 def p_ir_alloca_attachment_list(p):
     # type: (YaccProduction) -> None
     """
-        ir-alloca-attachment-list : COMMA ir-constant ir-alloca-align-attachment
+        ir-alloca-attachment-list : COMMA ir-value ir-alloca-align-attachment
                                   | ir-alloca-align-attachment
         ir-alloca-align-attachment : COMMA ALIGN LITERAL_DECIMAL ir-alloca-addrspace-attachment
                                    | ir-alloca-addrspace-attachment
@@ -76,7 +76,7 @@ def p_ir_inbounds_opt(p):
 def p_ir_access_list(p):
     # type: (YaccProduction) -> None
     """
-        ir-access-list : COMMA ir-inrange-opt ir-type ir-value ir-access-list
+        ir-access-list : COMMA ir-inrange-opt ir-value ir-access-list
                        | ir-instruction-attachment-list
     """
 

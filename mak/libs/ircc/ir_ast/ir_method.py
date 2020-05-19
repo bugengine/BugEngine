@@ -1,3 +1,4 @@
+from .ir_object import IrObject
 from .ir_declaration import IrDeclaration
 from be_typing import TYPE_CHECKING
 
@@ -14,7 +15,7 @@ class IrMethodMetadataParameter(IrMethodParameter):
     pass
 
 
-class IrMethod:
+class IrMethod(IrObject):
     def resolve(self, module):
         # type: (IrModule) -> IrMethod
         return self

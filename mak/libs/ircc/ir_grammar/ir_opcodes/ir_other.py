@@ -11,14 +11,14 @@ def p_ir_opcode_call(p):
 def p_ir_opcode_cmp(p):
     # type: (YaccProduction) -> None
     """
-        ir-opcode : ICMP ir-cmp-op ir-type ir-value COMMA ir-value ir-instruction-attachment-list
+        ir-opcode : ICMP ir-cmp-op ir-type ir-expr COMMA ir-expr ir-instruction-attachment-list
     """
 
 
 def p_ir_opcode_fcmp(p):
     # type: (YaccProduction) -> None
     """
-        ir-opcode : FCMP ir-fcmp-op ir-type ir-value COMMA ir-value ir-instruction-attachment-list
+        ir-opcode : FCMP ir-fcmp-op ir-type ir-expr COMMA ir-expr ir-instruction-attachment-list
     """
 
 
@@ -32,7 +32,7 @@ def p_ir_opcode_phi(p):
 def p_ir_opcode_select(p):
     # type: (YaccProduction) -> None
     """
-        ir-opcode : SELECT ir-type ir-value COMMA ir-type ir-value COMMA ir-type ir-value ir-instruction-attachment-list
+        ir-opcode : SELECT ir-value COMMA ir-value COMMA ir-value ir-instruction-attachment-list
     """
 
 
@@ -65,8 +65,8 @@ def p_ir_cmp_op(p):
 def p_ir_phi_attachment_list(p):
     # type: (YaccProduction) -> None
     """
-        ir-phi-attachment-list : LBRACKET ir-value COMMA ir-value RBRACKET COMMA ir-phi-attachment-list
-                               | LBRACKET ir-value COMMA ir-value RBRACKET ir-instruction-attachment-list
+        ir-phi-attachment-list : LBRACKET ir-expr COMMA ir-expr RBRACKET COMMA ir-phi-attachment-list
+                               | LBRACKET ir-expr COMMA ir-expr RBRACKET ir-instruction-attachment-list
     """
 
 
@@ -95,8 +95,8 @@ def p_ir_fcmp_op(p):
 def p_ir_argument_list(p):
     # type: (YaccProduction) -> None
     """
-        ir-argument-list : ir-constant COMMA ir-argument-list
-                         | ir-constant
+        ir-argument-list : ir-value COMMA ir-argument-list
+                         | ir-value
                          | empty
     """
     p[0] = []

@@ -396,9 +396,6 @@ class IrLexer:
         else:
             new_token = copy(self._last_token)
             new_token.type = 'LPAREN_MARK'
-        if new_token:
-            new_token.ir_lexer = self
-            new_token.position = self.position(new_token)
         self._last_token = new_token
         return new_token
 

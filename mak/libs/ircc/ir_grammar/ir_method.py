@@ -261,7 +261,7 @@ def p_ir_method_prefix_opt(p):
     # type: (YaccProduction) -> None
     """
         ir-method-prefix-opt : empty
-                             | PREFIX ir-constant
+                             | PREFIX ir-value
     """
     # unused
     p[0] = None
@@ -271,7 +271,7 @@ def p_ir_method_prologue_opt(p):
     # type: (YaccProduction) -> None
     """
         ir-method-prologue-opt : empty
-                               | PROLOGUE ir-constant
+                               | PROLOGUE ir-value
     """
     # unused
     p[0] = None
@@ -281,7 +281,7 @@ def p_ir_method_personality(p):
     # type: (YaccProduction) -> None
     """
         ir-method-personality : empty
-                              | PERSONALITY ir-constant
+                              | PERSONALITY ir-value
     """
 
 

@@ -1,11 +1,16 @@
+from .ir_object import IrObject
 from .ir_declaration import IrDeclaration
 from be_typing import TYPE_CHECKING
 
 
-class IrType:
+class IrType(IrObject):
     def resolve(self, module):
         # type: (IrModule) -> IrType
         return self
+
+    def __str__(self):
+        # type: () -> str
+        raise NotImplementedError
 
 
 class IrTypeDeclaration(IrDeclaration):
@@ -20,7 +25,6 @@ class IrTypeDeclaration(IrDeclaration):
 
     def write_declaration(self, declared_name):
         # type: (IrReference) -> None
-        #print('type - ', declared_name)
         pass
 
 
@@ -35,6 +39,12 @@ class IrTypeReference(IrType):
 
 
 class IrTypeOpaque(IrType):
+    def __str__(self):
+        # type: () -> str
+        return 'opaque'
+
+
+class IrTypeMetadata(IrType):
     pass
 
 
@@ -42,6 +52,10 @@ class IrTypeBuiltin(IrType):
     def __init__(self, builtin):
         # type: (str) -> None
         self._builtin = builtin
+
+    def __str__(self):
+        # type: () -> str
+        return self._builtin
 
 
 class IrTypePtr(IrType):
@@ -55,6 +69,11 @@ class IrTypePtr(IrType):
         self._pointee = self._pointee.resolve(module)
         return self
 
+    def __str__(self):
+        # type: () -> str
+        addrspaces = ['private', 'constant', 'local', 'global', 'generic']
+        return '%s %s*' % (self._pointee, addrspaces[self._address_space])
+
 
 class IrTypeArray(IrType):
     def __init__(self, type, count):
@@ -66,6 +85,10 @@ class IrTypeArray(IrType):
         # type: (IrModule) -> IrType
         self._type = self._type.resolve(module)
         return self
+
+    def __str__(self):
+        # type: () -> str
+        return '%s[%d]' % (self._type, self._count)
 
 
 class IrTypeVector(IrType):
@@ -79,6 +102,10 @@ class IrTypeVector(IrType):
         self._type = self._type.resolve(module)
         return self
 
+    def __str__(self):
+        # type: () -> str
+        return '%s%d' % (self._type, self._count)
+
 
 class IrTypeStruct(IrType):
     def __init__(self, fields, packed):
@@ -90,6 +117,10 @@ class IrTypeStruct(IrType):
         # type: (IrModule) -> IrType
         self._fields = [f.resolve(module) for f in self._fields]
         return self
+
+    def __str__(self):
+        # type: () -> str
+        return '{%s}' % (', '.join(str(x) for x in self._fields))
 
 
 class IrTypeMethod(IrType):
@@ -104,6 +135,10 @@ class IrTypeMethod(IrType):
             self._return_type = self._return_type.resolve(module)
         self._argument_types = [t.resolve(module) for t in self._argument_types]
         return self
+
+    def __str__(self):
+        # type: () -> str
+        return '%s(*)(%s)' % (self._return_type, ', '.join(str(x) for x in self._argument_types))
 
 
 if TYPE_CHECKING:
