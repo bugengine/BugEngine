@@ -4,7 +4,7 @@ from be_typing import TYPE_CHECKING
 def p_ir_opcode_cast(p):
     # type: (YaccProduction) -> None
     """
-        ir-opcode : ir-cast-op ir-constant TO ir-type ir-instruction-attachment-list
+        ir-opcode : ir-cast-op ir-value TO ir-type ir-instruction-attachment-list
     """
 
 

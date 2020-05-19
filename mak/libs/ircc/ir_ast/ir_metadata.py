@@ -1,11 +1,7 @@
 from .ir_declaration import IrDeclaration
 from .ir_value import IrValue
-from .ir_type import IrType
+from .ir_type import IrTypeMetadata
 from be_typing import TYPE_CHECKING
-
-
-class IrTypeMetadata(IrType):
-    pass
 
 
 class IrMetadata(IrValue):
@@ -16,6 +12,10 @@ class IrMetadata(IrValue):
     def resolve(self, module):
         # type: (IrModule) -> IrMetadata
         return self
+    
+    def __str__(self):
+        # type: () -> str
+        raise NotImplementedError
 
 
 class IrMetadataDeclaration(IrDeclaration):
@@ -31,7 +31,7 @@ class IrMetadataDeclaration(IrDeclaration):
     def write_declaration(self, declared_name):
         # type: (IrReference) -> None
         #print('metadata - ', declared_name, self._metadata.__class__.__name__)
-        pass
+        self._metadata._name = declared_name
 
 
 class IrMetadataLink(IrMetadata):
@@ -54,11 +54,34 @@ class IrMetadataString(IrMetadataValue):
         # type: (str) -> None
         self._value = value
 
+    def __str__(self):
+        # type: () -> str
+        return '!"%s"' % (self._value)
+
+
+class IrMetadataInteger(IrMetadataValue):
+    def __init__(self, value):
+        # type: (int) -> None
+        self._value = value
+
+    def __str__(self):
+        # type: () -> str
+        return '!%d' % (self._value)
+
 
 class IrMetadataNode(IrMetadataValue):
-    def __init__(self, value):
+    def __init__(self, values):
         # type: (List[IrValue]) -> None
-        self._value = value
+        self._values = values
+
+    def resolve(self, module):
+        # type: (IrModule) -> IrMetadata
+        self._values = [v.resolve(module) for v in self._values]
+        return self
+    
+    def __str__(self):
+        # type: () -> str
+        return '!{%s}' % (', '.join(str(v) for v in self._values))
 
 
 class IrSpecializedMetadata(IrMetadataValue):
@@ -69,9 +92,38 @@ class IrSpecializedMetadata(IrMetadataValue):
         for property_name, property_value in properties:
             self._values[property_name] = property_value
 
+    def resolve(self, module):
+        # type: (IrModule) -> IrMetadata
+        v = {}
+        for property_name, property_value in self._values.items():
+            v[property_name] = property_value.resolve(module)
+        self._values = v
+        return self
+
+    def __str__(self):
+        # type: () -> str
+        return '!%s(%s)' % (self._specialized_class,
+                            ', '.join('%s: %s' % (k, str(v)) for k, v in self._values.items()))
+
 
 class IrMetadataNull(IrMetadata):
-    pass
+    def __str__(self):
+        # type: () -> str
+        return '!null'
+
+
+class IrMetadataFlagList(IrMetadata):
+    def __init__(self, flag):
+        # type: (str) -> None
+        self._flags = [flag]
+    
+    def add_flag(self, flag):
+        # type: (str) -> None
+        self._flags.append(flag)
+    
+    def __str__(self):
+        # type: () -> str
+        return ' | '.join(self._flags)
 
 
 if TYPE_CHECKING:

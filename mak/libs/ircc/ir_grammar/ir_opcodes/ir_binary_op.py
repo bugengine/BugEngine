@@ -4,7 +4,7 @@ from be_typing import TYPE_CHECKING
 def p_ir_opcode_binary_op(p):
     # type: (YaccProduction) -> None
     """
-        ir-opcode : ir-binary-op ir-binary-op-modifier-opt ir-type ir-value COMMA ir-value ir-instruction-attachment-list
+        ir-opcode : ir-binary-op ir-binary-op-modifier-opt ir-type ir-expr COMMA ir-expr ir-instruction-attachment-list
     """
 
 
@@ -40,7 +40,7 @@ def p_ir_binary_op_modifier_opt(p):
 def p_ir_opcode_binary_fop(p):
     # type: (YaccProduction) -> None
     """
-        ir-opcode : ir-binary-fop ir-binary-fop-modifier-opt ir-type ir-value COMMA ir-value ir-instruction-attachment-list
+        ir-opcode : ir-binary-fop ir-binary-fop-modifier-opt ir-type ir-expr COMMA ir-expr ir-instruction-attachment-list
     """
 
 

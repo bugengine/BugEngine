@@ -28,7 +28,7 @@ def p_error(self, p):
         error :
     """
     if p:
-        self.lexer.logger.C0003(p.position, p.value, p.type)
+        self.lexer.logger.C0003(p.lexer.position(p), p.value, p.type)
     else:
         self.lexer.logger.C0004(self.lexer.eof_position())
 

@@ -1,12 +1,19 @@
 from .ir_declaration import IrDeclaration
 from .ir_value import IrValue
-from be_typing import TYPE_CHECKING
+from be_typing import TYPE_CHECKING, cast
 
 
 class IrVariable(IrValue):
+    def __init__(self, type, initital_value):
+        # type: (IrType, Optional[IrValue]) -> None
+        IrValue.__init__(self, type)
+        self._initial_value = initital_value
+
     def resolve(self, module):
         # type: (IrModule) -> IrVariable
-        return self
+        if self._initial_value is not None:
+            self._initial_value = self._initial_value.resolve(module)
+        return cast('IrVariable', IrValue.resolve(self, module))
 
 
 class IrVariableDeclaration(IrDeclaration):
@@ -23,19 +30,6 @@ class IrVariableDeclaration(IrDeclaration):
         # type: (IrReference) -> None
         #print('variable - ', declared_name)
         pass
-
-
-class IrVariableObject(IrVariable):
-    def __init__(self, type, initital_value):
-        # type: (IrType, Optional[IrValue]) -> None
-        self._type = type
-        self._initial_value = initital_value
-
-    def resolve(self, module):
-        # type: (IrModule) -> IrVariableObject
-        self._type = self._type.resolve(module)
-        self._initial_value = self._initial_value and self._initial_value.resolve(module) or None
-        return self
 
 
 if TYPE_CHECKING:
