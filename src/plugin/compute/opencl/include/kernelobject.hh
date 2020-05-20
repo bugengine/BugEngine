@@ -11,20 +11,20 @@
 
 namespace BugEngine { namespace KernelScheduler { namespace OpenCL {
 
+class Context;
+
 class KernelObject : public minitl::refcountable
 {
-    friend class Scheduler;
-
 private:
     typedef const char* KernelBlob;
 
 private:
     Plugin::DynamicObject m_kernel;
     KernelBlob            m_kernelBlob;
-    Scheduler::ClKernel   m_program;
+    cl_program            m_program;
 
 public:
-    KernelObject(weak< const Scheduler > scheduler, const inamespace& name);
+    KernelObject(weak< const Context > context, const inamespace& name);
     ~KernelObject();
 
     void run(const minitl::array< weak< const IMemoryBuffer > >& params);

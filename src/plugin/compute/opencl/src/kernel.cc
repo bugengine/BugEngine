@@ -3,25 +3,25 @@
 
 #include <bugengine/plugin.compute.opencl/stdafx.h>
 #include <bugengine/plugin.compute.opencl/scheduler.hh>
+#include <context.hh>
 #include <kernelobject.hh>
 
 namespace BugEngine { namespace KernelScheduler { namespace OpenCL {
 
-KernelObject::KernelObject(weak< const Scheduler > scheduler, const inamespace& name)
+KernelObject::KernelObject(weak< const Context > context, const inamespace& name)
     : m_kernel(name, ipath("kernel"))
     , m_kernelBlob(*m_kernel.getSymbol< const char* >(
-         istring(minitl::format< 128u >("s_clKernel%d") | scheduler->m_ptrSize)))
-    , m_program(scheduler->buildKernel(
+         istring(minitl::format< 128u >("s_clKernel%d") | context->getPointerSize())))
+    , m_program(context->buildProgram(
          *m_kernel.getSymbol< const u64 >(
-            istring(minitl::format< 128u >("s_clKernel%dSize") | scheduler->m_ptrSize)),
+            istring(minitl::format< 128u >("s_clKernel%dSize") | context->getPointerSize())),
          m_kernelBlob))
 {
 }
 
 KernelObject::~KernelObject()
 {
-    clReleaseKernel(m_program.first);
-    clReleaseProgram(m_program.second);
+    clReleaseProgram(m_program);
 }
 
 void KernelObject::run(const minitl::array< weak< const IMemoryBuffer > >& params)

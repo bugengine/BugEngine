@@ -120,12 +120,12 @@ def build_plugins(bld):
         'plugin.compute.opencl', ['engine.bugengine', 'plugin.compute.cpu'], ['3rdparty.compute.OpenCL'],
         features=['OpenCL']
     )
-    bld.plugin(
-        'plugin.compute.opencl_gl',
-        ['engine.bugengine', 'plugin.graphics.GL4', 'plugin.compute.opencl', 'plugin.compute.cpu'],
-        ['3rdparty.graphics.OpenGL', '3rdparty.compute.OpenCL'],
-        features=['OpenGL', 'OpenCL', 'GUI']
-    )
+    #bld.plugin(
+    #    'plugin.compute.opencl_gl',
+    #    ['engine.bugengine', 'plugin.graphics.GL4', 'plugin.compute.opencl', 'plugin.compute.cpu'],
+    #    ['3rdparty.graphics.OpenGL', '3rdparty.compute.OpenCL'],
+    #    features=['OpenGL', 'OpenCL', 'GUI']
+    #)
     bld.plugin(
         'plugin.compute.cuda', ['engine.bugengine'], ['3rdparty.compute.CUDA'], features=['cuda']
     )

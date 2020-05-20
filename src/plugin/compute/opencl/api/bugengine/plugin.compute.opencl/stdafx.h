@@ -21,5 +21,25 @@
 #    include <CL/opencl.h>
 #endif
 
+#define checkResult(a)                                                                             \
+    do                                                                                             \
+    {                                                                                              \
+        cl_int err = a;                                                                            \
+        if(err != CL_SUCCESS) be_error("OpenCL call %s failed with error code %d" | #a | err);     \
+    } while(0)
+
+namespace BugEngine { namespace KernelScheduler { namespace OpenCL {
+
+struct CLStringInfo
+{
+    enum
+    {
+        InfoLogSize = 1024
+    };
+    char info[InfoLogSize];
+};
+
+}}}  // namespace BugEngine::KernelScheduler::OpenCL
+
 /**************************************************************************************************/
 #endif
