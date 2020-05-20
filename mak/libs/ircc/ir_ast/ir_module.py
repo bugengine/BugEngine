@@ -4,9 +4,9 @@ DeclType = TypeVar('DeclType', bound='IrDeclaration')
 
 
 class IrModule:
-    def __init__(self, header, decls):
+    def __init__(self, headers, decls):
         # type: (List[IrHeader], List[Tuple[IrReference, IrDeclaration]]) -> None
-        self._header = header
+        self._headers = headers
         self._declarations = {}
         for name, decl in decls:
             self._declarations[name] = decl
@@ -26,14 +26,16 @@ class IrModule:
             assert isinstance(decl, desired_type)
             return decl
 
-    def write_declarations(self):
-        # type: () -> None
-        for decl_name, decl in self._declarations.items():
-            decl.write_declaration(decl_name)
-
+    def visit(self, generator):
+        # type: (IrCodeGenerator) -> None
+        generator.begin_module()
+        generator.begin_header()
+        generator.end_header()
+        generator.end_module()
 
 if TYPE_CHECKING:
     from typing import List, Optional, Tuple, Type
+    from ..ir_codegen import IrCodeGenerator
     from .ir_header import IrHeader
     from .ir_reference import IrReference
     from .ir_declaration import IrDeclaration

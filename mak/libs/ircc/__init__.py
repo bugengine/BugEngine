@@ -1,10 +1,6 @@
 # LLVM IR/Spir parser
 from . import ir_parser, ir_messages
-
-sample_kernel = b"""__kernel  void _kmain()
-{
-}
-"""
+from .ir_codegen import IrCodeGenerator
 
 
 def run():
@@ -47,9 +43,9 @@ def run():
             path, module = os.path.split(arguments.processor)
             sys.path.append(path)
             s = __import__(module)
-            with open(arguments.output, 'wb') as out_file:
-                out_file.write(sample_kernel)
-                result.write_declarations()
+            with open(arguments.output, 'w') as out_file:
+                for generator in s.generators(out_file):
+                    result.visit(generator)
     except (SyntaxError, ExceptionType) as exception:
         logging.exception(exception)
         sys.exit(255)

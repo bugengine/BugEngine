@@ -31,11 +31,6 @@ class IrMethodDeclaration(IrDeclaration):
         self._method = self._method.resolve(module)
         return self
 
-    def write_declaration(self, declared_name):
-        # type: (IrReference) -> None
-        #print('method - ', declared_name)
-        pass
-
 
 class IrMethodLink(IrMethod):
     def __init__(self, reference):

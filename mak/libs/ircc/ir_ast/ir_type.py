@@ -23,10 +23,6 @@ class IrTypeDeclaration(IrDeclaration):
         self._type = self._type.resolve(module)
         return self
 
-    def write_declaration(self, declared_name):
-        # type: (IrReference) -> None
-        pass
-
 
 class IrTypeReference(IrType):
     def __init__(self, reference):
