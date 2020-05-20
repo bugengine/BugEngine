@@ -10,14 +10,15 @@
 namespace BugEngine { namespace KernelScheduler { namespace OpenCL {
 
 class Scheduler;
+class Context;
 
 class CodeLoader : public ICodeLoader
 {
 private:
-    weak< const Scheduler > m_scheduler;
+    weak< const Context > m_context;
 
 public:
-    CodeLoader(weak< const Scheduler > scheduler);
+    CodeLoader(weak< const Context > context);
     ~CodeLoader();
 
     virtual void load(weak< const Resource::Description > kernelDescription,
