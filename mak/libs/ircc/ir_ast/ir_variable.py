@@ -26,11 +26,6 @@ class IrVariableDeclaration(IrDeclaration):
         self._variable = self._variable.resolve(module)
         return self
 
-    def write_declaration(self, declared_name):
-        # type: (IrReference) -> None
-        #print('variable - ', declared_name)
-        pass
-
 
 if TYPE_CHECKING:
     from typing import List, Optional

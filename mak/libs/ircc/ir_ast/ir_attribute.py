@@ -48,11 +48,6 @@ class IrAttributeGroupDeclaration(IrDeclaration):
         self._attribute_group = self._attribute_group.resolve(module)
         return self
 
-    def write_declaration(self, declared_name):
-        # type: (IrReference) -> None
-        #print('attributes - ', declared_name, self._attribute_group)
-        pass
-
 
 class IrAttributeGroupLink(IrAttributeGroup):
     def __init__(self, reference):
