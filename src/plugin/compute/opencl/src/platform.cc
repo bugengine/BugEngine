@@ -61,13 +61,17 @@ Platform::Platform(cl_platform_id platformId) : m_platformId(platformId), m_cont
                 cl_context   context = clCreateContext(NULL, 1, &device, 0, 0, &err);
                 if(err != CL_SUCCESS)
                 {
-                    be_error("unable to create context for device %s"
-                             | getDeviceInfo(device, CL_DEVICE_NAME).info);
+                    char   deviceName[1024];
+                    size_t result;
+                    clGetDeviceInfo(device, CL_DEVICE_NAME, sizeof(deviceName), deviceName,
+                                    &result);
+                    if(result >= sizeof(deviceName)) deviceName[sizeof(deviceName) - 1] = 0;
+                    be_error("unable to create context for device %s" | deviceName);
                 }
                 else
                 {
                     m_contexts.push_back(
-                       ref< Context >::create(Arena::task(), this, device, context));
+                        ref< Context >::create(Arena::task(), this, device, context));
                 }
             }
             freea(devices);
