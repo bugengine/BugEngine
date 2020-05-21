@@ -5,6 +5,7 @@
 #include <bugengine/plugin.compute.opencl/scheduler.hh>
 #include <bugengine/plugin/plugin.hh>
 #include <bugengine/rtti/classinfo.script.hh>
+#include <context.hh>
 #include <platform.hh>
 
 namespace BugEngine { namespace KernelScheduler { namespace OpenCL {
