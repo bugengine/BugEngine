@@ -43,26 +43,30 @@ if __name__ == '__main__':
             )
             if not result:
                 sys.exit(1)
+            kernels = []
             for m in result.objects:
-                if isinstance(m, tree.OverloadedMethod) and m.name_cpp == 'kmain':
-                    break
-            else:
-                raise Exception("could not locate method kmain in kernel")
-            if len(m.overloads) > 1:
-                raise Exception("cannot overload metod kmain")
-            m = m.overloads[0]
-            args = []
-            arg0 = m.parameters[0]
-            if arg0.type.strip() != 'u32' and arg0.type.strip() != 'const u32':
-                raise Exception("invalid signature for method kmain")
-            arg1 = m.parameters[1]
-            if arg1.type.strip() != 'u32' and arg1.type.strip() != 'const u32':
-                raise Exception("invalid signature for method kmain")
-            for arg in m.parameters[2:]:
-                args.append((arg.name, arg.type))
+                if isinstance(m, tree.OverloadedMethod):
+                    for overload in m.overloads:
+                        if '__kernel' in overload.attributes:
+                            if len(m.overloads) > 1:
+                                raise Exception("cannot overload a kernel method")
+                            m = m.overloads[0]
+                            args = []
+                            arg0 = m.parameters[0]
+                            if arg0.type.strip() != 'u32' and arg0.type.strip() != 'const u32':
+                                raise Exception("invalid signature for method kmain")
+                            arg1 = m.parameters[1]
+                            if arg1.type.strip() != 'u32' and arg1.type.strip() != 'const u32':
+                                raise Exception("invalid signature for method kmain")
+                            for arg in m.parameters[2:]:
+                                args.append((arg.name, arg.type))
+                            kernels.append((m, args))
+
+            if len(kernels) == 0:
+                raise Exception("could not locate any kernel method in kernel")
 
             with open(arguments[2], 'wb') as out_file:
-                pickle.dump((arguments[0], m, args, result.includes, arguments[1]), out_file)
+                pickle.dump((arguments[0], result.includes, arguments[1], kernels), out_file)
 
             sys.exit(result.error_count)
         except Exception as e:

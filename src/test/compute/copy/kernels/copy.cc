@@ -1,9 +1,9 @@
 #include <bugengine/kernel/input/input.hh>
 #include <component.script.hh>
 
-__device void kmain(u32 index, u32 total,
-                    Kernel::segments< BugEngine::Test::Compute::Copy::SourceComponent > in,
-                    Kernel::segments< BugEngine::Test::Compute::Copy::TargetComponent > out)
+__kernel void copy(u32 index, u32 total,
+                   Kernel::segments< BugEngine::Test::Compute::Copy::SourceComponent > in,
+                   Kernel::segments< BugEngine::Test::Compute::Copy::TargetComponent > out)
 {
     u32 start = (index * in.size()) / total;
     u32 end   = ((index + 1) * in.size()) / total;

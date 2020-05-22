@@ -24,17 +24,28 @@ namespace BugEngine { namespace Plugin {
     namespace BugEngine {                                                                          \
     raw< RTTI::Class > be_##name##_Namespace()                                                     \
     {                                                                                              \
-        static RTTI::ObjectInfo ob = {{0}, {0}, "BugEngine", RTTI::Value()};                       \
-        static RTTI::Class      ci = {"BugEngine", 0,      0,     RTTI::ClassType_Namespace,       \
-                                 {0},         {0},    {&ob}, {0},                             \
-                                 {0, 0},      {0, 0}, {0},   {0},                             \
-                                 0,           0};                                             \
+        static RTTI::ObjectInfo              ob    = {{0}, {0}, "BugEngine", RTTI::Value()};       \
+        static RTTI::Class                   ci    = {istring("BugEngine"),                        \
+                                                      0,                                           \
+                                                      0,                                           \
+                                                      RTTI::ClassType_Namespace,                   \
+                                                      {0},                                         \
+                                                      {0},                                         \
+                                                      {&ob},                                       \
+                                                      {0},                                         \
+                                                      {0, 0},                                      \
+                                                      {0, 0},                                      \
+                                                      {0},                                         \
+                                                      {0},                                         \
+                                                      0,                                           \
+                                                      0};                                          \
         static raw< const RTTI::ObjectInfo > obptr = {((ob.value = RTTI::Value(&ci)), &ob)};       \
         be_forceuse(obptr);                                                                        \
         raw< RTTI::Class > ptr = {&ci};                                                            \
         return ptr;                                                                                \
     }                                                                                              \
     }
+
 #define BE_PLUGIN_NAMESPACE_REGISTER_NAMED__(name, id)                                             \
     BE_PLUGIN_REGISTER_KERNELS_(id)                                                                \
     BE_PLUGIN_NAMESPACE_CREATE_(id)                                                                \
@@ -46,7 +57,9 @@ namespace BugEngine { namespace Plugin {
     _BE_REGISTER_METHOD(id, be_pluginNamespace);
 
 #define BE_PLUGIN_NAMESPACE_REGISTER_NAMED_(name, id) BE_PLUGIN_NAMESPACE_REGISTER_NAMED__(name, id)
+
 #define BE_PLUGIN_NAMESPACE_REGISTER_NAMED(name)      BE_PLUGIN_NAMESPACE_REGISTER_NAMED_(name, name)
+
 #define BE_PLUGIN_NAMESPACE_REGISTER()                                                             \
     BE_PLUGIN_NAMESPACE_REGISTER_NAMED_(BE_PROJECTNAME, BE_PROJECTID)
 
@@ -61,7 +74,7 @@ namespace BugEngine { namespace Plugin {
             = kernelList.begin();                                                                  \
             it != kernelList.end(); ++it)                                                          \
             context.resourceManager->load(                                                         \
-               weak< const BugEngine::KernelScheduler::Kernel >(it.operator->()));                 \
+                weak< const BugEngine::KernelScheduler::Kernel >(it.operator->()));                \
         ref< minitl::refcountable > r = (*create)(context);                                        \
         if(r) r->addref();                                                                         \
         return r.operator->();                                                                     \
@@ -84,17 +97,23 @@ namespace BugEngine { namespace Plugin {
     _BE_REGISTER_METHOD(id, be_createPlugin);                                                      \
     _BE_REGISTER_METHOD(id, be_destroyPlugin);                                                     \
     _BE_REGISTER_METHOD(id, be_pluginNamespace);
+
 #define BE_PLUGIN_REGISTER_NAMED_(name, id, create) BE_PLUGIN_REGISTER_NAMED__(name, id, create)
+
 #define BE_PLUGIN_REGISTER_NAMED(name, create)      BE_PLUGIN_REGISTER_NAMED_(name, name, create)
+
 #define BE_PLUGIN_REGISTER_CREATE(create)                                                          \
     BE_PLUGIN_REGISTER_NAMED_(BE_PROJECTNAME, BE_PROJECTID, create)
+
 #define BE_PLUGIN_REGISTER__(klass, project)                                                       \
     static ref< klass > create(const BugEngine::Plugin::Context& context)                          \
     {                                                                                              \
         return ref< klass >::create(BugEngine::Arena::game(), context);                            \
     }                                                                                              \
     BE_PLUGIN_REGISTER_CREATE(&create)
+
 #define BE_PLUGIN_REGISTER_(klass, project) BE_PLUGIN_REGISTER__(klass, project)
+
 #define BE_PLUGIN_REGISTER(klass)           BE_PLUGIN_REGISTER_(klass, BE_PROJECTID)
 
 template < typename T >
@@ -139,7 +158,7 @@ Plugin< T >::~Plugin()
         if(m_interface)
         {
             DestroyFunction* destroy
-               = m_dynamicObject->getSymbol< DestroyFunction >("be_destroyPlugin");
+                = m_dynamicObject->getSymbol< DestroyFunction >("be_destroyPlugin");
             be_assert(destroy, "could not load method be_destroyPlugin");
             (*destroy)(m_interface, m_resourceManager);
         }
@@ -184,7 +203,7 @@ raw< const RTTI::Class > Plugin< T >::pluginNamespace() const
     if(m_dynamicObject && *m_dynamicObject)
     {
         GetPluginNamespace* getNamespace
-           = m_dynamicObject->getSymbol< GetPluginNamespace >("be_pluginNamespace");
+            = m_dynamicObject->getSymbol< GetPluginNamespace >("be_pluginNamespace");
         if(getNamespace)
         {
             raw< const RTTI::Class > ci = {(*getNamespace)()};

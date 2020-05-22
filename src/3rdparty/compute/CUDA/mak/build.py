@@ -7,24 +7,14 @@ try:
 except ImportError:
     import pickle
 
-template = """
-%(pch)s
-#include    <bugengine/kernel/compilers.hh>
-
-#include    "%(source)s"
-
-struct Parameter
+template_kernel = """
+_BE_PLUGIN_EXPORT void _%(kernel)s(const u32 index, const u32 total,
+                              const minitl::array< minitl::weak<const BugEngine::KernelScheduler::IMemoryBuffer> >& /*argv*/)
 {
-    void* begin;
-    void* end;
-};
-
-__device__ void _kmain(const u32 index, const u32 total, Parameter* parameters)
-{
-    kmain(index, total,
-          %(args)s
-    );
+    be_forceuse(index);
+    be_forceuse(total);
 }
+_BE_REGISTER_METHOD_NAMED(BE_KERNEL_ID, _%(kernel)s, _%(kernel)s);
 """
 
 template_cpp = """
@@ -39,15 +29,9 @@ template_cpp = """
 
 using namespace Kernel;
 
-_BE_PLUGIN_EXPORT void _kmain(const u32 index, const u32 total,
-                              const minitl::array< minitl::weak<const BugEngine::KernelScheduler::IMemoryBuffer> >& /*argv*/)
-{
-    be_forceuse(index);
-    be_forceuse(total);
-}
+%(kernels)s
 
 _BE_REGISTER_PLUGIN(BE_KERNEL_ID, BE_KERNEL_NAME);
-_BE_REGISTER_METHOD_NAMED(BE_KERNEL_ID, _kmain, _kmain);
 """
 
 class nvcc(Task.Task):
@@ -73,12 +57,12 @@ class nvcc(Task.Task):
 
 
 class cudac(Task.Task):
-    "Generates a CUDA trampoline to call the C++ kernel, and a C++ wrapper"
+    "Generates a CUDA binder to call the C++ kernel"
     color = 'PINK'
 
     def sig_vars(self):
         Task.Task.sig_vars(self)
-        self.m.update(template.encode('utf-8'))
+        self.m.update(template_kernel.encode('utf-8'))
         self.m.update(template_cpp.encode('utf-8'))
         self.m.update((self.generator.pchstop if self.generator.pchstop else '').encode('utf-8'))
 
@@ -87,47 +71,41 @@ class cudac(Task.Task):
 
     def run(self):
         with open(self.inputs[0].abspath(), 'rb') as input_file:
-            kernel_name, method, _, includes, source = pickle.load(input_file)
+            kernel_name, includes, source, kernel_methods = pickle.load(input_file)
 
-        args = []
-        for arg in method.parameters[2:]:
-            args.append((arg.name, arg.type))
+        kernels = []
+        for method, args in kernel_methods:
+            args = []
+            for arg in method.parameters[2:]:
+                args.append((arg.name, arg.type))
+            kernel_params = {
+                'args': ',\n          '.join('%s(0, 0, 0)' % arg[1] for i, arg in enumerate(args)),
+                'kernel': method.name
+            }
+            kernels.append(template_kernel % kernel_params)
         params = {
             'pch': '#include <%s>\n' % self.generator.pchstop if self.generator.pchstop else '',
-            'source': source,
-            'args': ',\n          '.join('%s(0, 0, 0)' % arg[1] for i, arg in enumerate(args)),
+            'kernels': '\n\n'.join(kernels)
         }
         with open(self.outputs[0].abspath(), 'w') as out:
-            out.write(template % params)
-        with open(self.outputs[1].abspath(), 'w') as out:
             out.write(template_cpp % params)
-
-
-@extension('.cu')
-def process_cuda_source(task_gen, cuda_source):
-    cuda_bin = task_gen.make_bld_node('obj', cuda_source.parent, cuda_source.name[:-2] + 'fatbin')
-    cuda_cc = task_gen.make_bld_node('src', cuda_source.parent, cuda_source.name[:-2] + 'cc')
-    task_gen.create_task('nvcc', [cuda_source], [cuda_bin])
-    task_gen.create_task('bin2c', [cuda_bin], [cuda_cc], var='cudaKernel')
-    task_gen.source.append(cuda_cc)
 
 
 @feature('cudakernel_create')
 @before_method('process_source')
 def build_cuda_kernels(task_gen):
-    ast = task_gen.kernel_source
-    out = ast.change_ext('.cu')
-    out_cc = ast.change_ext('.cudacall.cc')
-    task_gen.create_task('cudac', [ast], [out, out_cc])
-    task_gen.source.append(out)
-    task_gen.source.append(out_cc)
-
-
-@feature('cudakernel_create')
-@before_method('process_source')
-def set_extra_nvcc_flags(self):
     for f in getattr(self, 'extra_use', []) + getattr(self, 'features', []):
         self.env.append_value('NVCC_CXXFLAGS', self.env['NVCC_CXXFLAGS_%s' % f])
+    ast = task_gen.kernel_ast
+    cuda_source = task_gen.kernel_source
+    out_cc = ast.change_ext('.cudacall.cc')
+    task_gen.create_task('cudac', [ast], [out_cc])
+    task_gen.source.append(out_cc)
+    cuda_bin = task_gen.make_bld_node('obj', cuda_source.parent, cuda_source.name[:-2] + 'fatbin')
+    cuda_cc = task_gen.make_bld_node('src', cuda_source.parent, cuda_source.name[:-2] + 'cc')
+    task_gen.create_task('nvcc', [cuda_source], [cuda_bin])
+    task_gen.create_task('bin2c', [cuda_bin], [cuda_cc], var='cudaKernel')
+    task_gen.source.append(cuda_cc)
 
 
 @feature('preprocess')
@@ -163,7 +141,8 @@ def create_cuda_kernels(task_gen):
                         'BE_KERNEL_TARGET=%s' % kernel_type,
                     ],
                     includes=tgen.includes,
-                    kernel_source=kernel_ast,
+                    kernel_source=kernel_source,
+                    kernel_ast=kernel_ast,
                     use=tgen.use + [target_prefix + 'plugin.compute.cuda'],
                     source_nodes=tgen.source_nodes,
                 )

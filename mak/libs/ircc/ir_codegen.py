@@ -10,11 +10,23 @@ class IrCodeGenerator:
         # type: () -> None
         pass
 
-    def begin_header(self):
+    def begin_headers(self):
         # type: () -> None
         pass
 
-    def end_header(self):
+    def header_specifier(self, name, value):
+        # type: (str, str) -> None
+        pass
+
+    def end_headers(self):
+        # type: () -> None
+        pass
+
+    def begin_declarations(self):
+        # type: () -> None
+        pass
+
+    def end_declarations(self):
         # type: () -> None
         pass
 

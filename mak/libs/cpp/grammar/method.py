@@ -160,6 +160,7 @@ def p_attribute_left(p):
                        | MUTABLE
                        | __HOST
                        | __DEVICE
+                       | __KERNEL
     """
     p[0] = p[1]
 

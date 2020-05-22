@@ -9,7 +9,12 @@ class ClGenerator(IrCodeGenerator):
 
     def begin_module(self):
         # type: () -> None
-        self._out_file.write('/* generated code; do not edit */\n\n')
+        self._out_file.write('/* generated code; do not edit */\n')
+
+    def header_specifier(self, name, value):
+        # type: (str, str) -> None
+        if name == 'source_filename':
+            self._out_file.write('/* generated from %s */\n' % value)
 
     def end_module(self):
         # type: () -> None

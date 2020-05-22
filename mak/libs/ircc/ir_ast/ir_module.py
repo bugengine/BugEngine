@@ -29,8 +29,12 @@ class IrModule:
     def visit(self, generator):
         # type: (IrCodeGenerator) -> None
         generator.begin_module()
-        generator.begin_header()
-        generator.end_header()
+        generator.begin_headers()
+        for header in self._headers:
+            header.visit(generator)
+        generator.end_headers()
+        generator.begin_declarations()
+        generator.end_declarations()
         generator.end_module()
 
 if TYPE_CHECKING:

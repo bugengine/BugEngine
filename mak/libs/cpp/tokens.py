@@ -46,6 +46,7 @@ reserved = {
     '__restrict': '__RESTRICT',
     '__host': '__HOST',
     '__device': '__DEVICE',
+    '__kernel': '__KERNEL',
 }
 
 tokens = [
