@@ -94,8 +94,8 @@ class cudac(Task.Task):
 @feature('cudakernel_create')
 @before_method('process_source')
 def build_cuda_kernels(task_gen):
-    for f in getattr(self, 'extra_use', []) + getattr(self, 'features', []):
-        self.env.append_value('NVCC_CXXFLAGS', self.env['NVCC_CXXFLAGS_%s' % f])
+    for f in getattr(task_gen, 'extra_use', []) + getattr(task_gen, 'features', []):
+        task_gen.env.append_value('NVCC_CXXFLAGS', task_gen.env['NVCC_CXXFLAGS_%s' % f])
     ast = task_gen.kernel_ast
     cuda_source = task_gen.kernel_source
     out_cc = ast.change_ext('.cudacall.cc')
