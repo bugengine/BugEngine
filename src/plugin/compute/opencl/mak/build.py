@@ -39,8 +39,8 @@ _BE_REGISTER_METHOD_NAMED(BE_KERNEL_ID, , s_clKernel64Size);
 """
 
 
-class cc_cl_trampoline(Task.Task):
-    "cc_cl_trampoline"
+class embed_cl(Task.Task):
+    "embed_cl"
     color = 'PINK'
 
     def sig_vars(self):
@@ -48,16 +48,7 @@ class cc_cl_trampoline(Task.Task):
         self.m.update((self.generator.pchstop if self.generator.pchstop else '').encode('utf-8'))
 
     def run(self):
-        with open(self.inputs[0].abspath(), 'rb') as input_file:
-            kernel_name, method, _, includes, source = pickle.load(input_file)
-        args = []
-        for arg in method.parameters[2:]:
-            args.append((arg.name, arg.type))
-        params = {
-            'pch': '#include <%s>\n' % self.generator.pchstop if self.generator.pchstop else '',
-            'kernel_source': source,
-            'args': ',\n          '.join('%s(0, 0, 0)' % arg[1] for i, arg in enumerate(args)),
-        }
+        params = {'pch': '#include <%s>\n' % self.generator.pchstop if self.generator.pchstop else ''}
         with open(self.outputs[0].abspath(), 'w') as out:
             out.write(template_cc % params)
 
@@ -111,7 +102,7 @@ def create_cl_kernels(task_gen):
 def create_cc_source(task_gen):
     source = task_gen.kernel_ast
     cc_source = task_gen.make_bld_node('src', source.parent, source.name[:source.name.rfind('.')] + '.trampoline.cc')
-    task_gen.create_task('cc_cl_trampoline', [source], [cc_source])
+    task_gen.create_task('embed_cl', [source], [cc_source])
     task_gen.source += [cc_source]
 
 

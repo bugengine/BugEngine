@@ -13,46 +13,6 @@ try:
 except ImportError:
     import pickle
 
-template_cl = """
-#include "%(kernel_source)s"
-
-struct Parameter
-{
-    void* begin;
-    void* end;
-};
-
-__kernel void _kmain()
-{
-    kmain(0, 0,
-          %(args)s
-    );
-}
-"""
-
-
-class cl_trampoline(Task.Task):
-    "cl_trampoline"
-    color = 'PINK'
-
-    def sig_vars(self):
-        self.m.update(template_cl.encode('utf-8'))
-
-    def run(self):
-        with open(self.inputs[0].abspath(), 'rb') as input_file:
-            kernel_name, method, _, includes, source = pickle.load(input_file)
-
-        args = []
-        for arg in method.parameters[2:]:
-            args.append((arg.name, arg.type))
-        params = {
-            'kernel_source': source,
-            'args': ',\n          '.join('%s(0, 0, 0)' % arg[1] for i, arg in enumerate(args)),
-        }
-
-        with open(self.outputs[0].abspath(), 'w') as out:
-            out.write(template_cl % params)
-
 
 class clc32(Task.Task):
     "clc32"
@@ -82,15 +42,15 @@ class clc64(Task.Task):
 @before_method('process_source')
 def cl_ir_kernel_compile(task_gen):
     if not task_gen.env.CLC_KERNEL_HEADER_PATH:
-        raise WafError('environment CLC_KERNEL_HEADER_PATH not set; make sure setup makes this variable point to the kernel header implementation for this target')
+        raise WafError(
+            'environment CLC_KERNEL_HEADER_PATH not set; make sure setup makes this variable point to the kernel header implementation for this target'
+        )
     source = task_gen.kernel_source
-    out_cl = task_gen.make_bld_node('src', source.parent, source.name[:source.name.rfind('.')] + '.trampoline.cl')
     out_ll_32 = task_gen.make_bld_node('src', source.parent, source.name[:source.name.rfind('.')] + '.32.ll')
     out_ll_64 = task_gen.make_bld_node('src', source.parent, source.name[:source.name.rfind('.')] + '.64.ll')
 
-    task_gen.create_task('cl_trampoline', [task_gen.kernel_ast], [out_cl])
-    task_gen.create_task('clc32', [out_cl], [out_ll_32])
-    task_gen.create_task('clc64', [out_cl], [out_ll_64])
+    task_gen.create_task('clc32', [source], [out_ll_32])
+    task_gen.create_task('clc64', [source], [out_ll_64])
     task_gen.source += [out_ll_32, out_ll_64]
 
 

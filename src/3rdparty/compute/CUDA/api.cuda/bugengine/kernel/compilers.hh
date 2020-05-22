@@ -7,6 +7,7 @@
 
 #define __host    __host__
 #define __device  __device__
+#define __kernel  __device__
 
 typedef signed char         i8;
 typedef unsigned char       u8;

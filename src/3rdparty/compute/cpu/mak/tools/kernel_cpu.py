@@ -7,6 +7,16 @@ try:
 except ImportError:
     import pickle
 
+template_kernel = """
+_BE_PLUGIN_EXPORT void _%(kernelname)s%(static_variant)s(const u32 index, const u32 total,
+        const minitl::array<
+           minitl::weak< const BugEngine::KernelScheduler::IMemoryBuffer > >& /*argv*/)
+{
+    %(kernelname)s(index, total, %(args)s);
+}
+_BE_REGISTER_METHOD_NAMED(BE_KERNEL_ID, _%(kernelname)s%(static_variant)s, _%(kernelname)s);
+"""
+
 template = """
 %(pch)s
 
@@ -28,14 +38,9 @@ struct Parameter
     void* end;
 };
 
-_BE_PLUGIN_EXPORT void _kmain%(static_variant)s(const u32 index, const u32 total,
-        const minitl::array<
-           minitl::weak< const BugEngine::KernelScheduler::IMemoryBuffer > >& /*argv*/)
-{
-    kmain(index, total, %(args)s);
-}
 _BE_REGISTER_PLUGIN(BE_KERNEL_ID, BE_KERNEL_NAME);
-_BE_REGISTER_METHOD_NAMED(BE_KERNEL_ID, _kmain%(static_variant)s, _kmain);
+
+%(kernels)s
 """
 
 
@@ -43,22 +48,34 @@ class cpuc(Task.Task):
     "Generates a C++ trampoline to call the CPU kernel"
     color = 'PINK'
 
+    def sig_vars(self):
+        self.m.update(template.encode('utf-8'))
+        self.m.update(template_kernel.encode('utf-8'))
+
     def scan(self):
         return ([], [])
 
     def run(self):
         with open(self.inputs[0].abspath(), 'rb') as input_file:
-            kernel_name, method, _, includes, source = pickle.load(input_file)
+            kernel_name, includes, source, kernel_methods = pickle.load(input_file)
 
-        args = []
-        for arg in method.parameters[2:]:
-            args.append((arg.name, arg.type))
+        kernels = []
+        for method, _ in kernel_methods:
+            args = []
+            for arg in method.parameters[2:]:
+                args.append((arg.name, arg.type))
+
+            kernel_params = {
+                'kernelname': method.name,
+                'args': ',\n          '.join('%s(0, 0, 0)' % arg[1] for i, arg in enumerate(args)),
+                'static_variant': ('_' + self.generator.variant_name[1:]) if self.env.STATIC else ''
+            }
+            kernels.append(template_kernel % kernel_params)
 
         params = {
             'pch': '#include <%s>\n' % self.generator.pchstop if self.generator.pchstop else '',
             'source': source,
-            'args': ',\n          '.join('%s(0, 0, 0)' % arg[1] for i, arg in enumerate(args)),
-            'static_variant': ('_' + self.generator.variant_name[1:]) if self.env.STATIC else ''
+            'kernels': '\n'.join(kernels)
         }
 
         with open(self.outputs[0].abspath(), 'w') as out:
