@@ -32,7 +32,7 @@
 
 #define __host
 #define __device inline
-#define __kernel
+#define __kernel inline
 
 namespace BugEngine {
 
