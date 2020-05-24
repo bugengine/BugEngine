@@ -29,6 +29,7 @@ private:
     weak< const KernelScheduler::Kernel > const                m_kernel;
     weak< KernelScheduler::IScheduler >                        m_targetScheduler;
     minitl::array< weak< KernelScheduler::IParameter > > const m_parameters;
+    u32                                                        m_subTaskCount;
 
 public:
     KernelTask(istring name, KernelScheduler::SchedulerType type, color32 color,

@@ -14,6 +14,14 @@
 
 namespace BugEngine { namespace KernelScheduler { namespace Cuda {
 
+class CUDAKernelTaskItem : public IKernelTaskItem
+{
+public:
+    CUDAKernelTaskItem(weak< Task::KernelTask > owner, weak< const Kernel > kernel,
+                       u32 parmaeterCount);
+    ~CUDAKernelTaskItem();
+};
+
 Scheduler::Scheduler(const Plugin::Context& context)
     : IScheduler("Cuda", context.scheduler, GPUType)
     , m_resourceManager(context.resourceManager)
@@ -28,15 +36,23 @@ Scheduler::~Scheduler()
     m_resourceManager->detach< Kernel >(m_cudaLoader);
 }
 
-void Scheduler::run(weak< Task::KernelTask > task, weak< const Kernel > kernel,
-                    const minitl::array< weak< const IMemoryBuffer > >& parameters)
+IKernelTaskItem* Scheduler::allocateItem(weak< Task::KernelTask > owner,
+                                         weak< const Kernel > kernel, u32 parameterCount)
 {
-    /* todo */
-    be_forceuse(task);
-    be_forceuse(kernel);
-    be_forceuse(parameters);
+    return new(Arena::temporary()) CUDAKernelTaskItem(owner, kernel, parameterCount);
+}
+
+void Scheduler::deallocateItem(CUDAKernelTaskItem* item)
+{
+    item->~CUDAKernelTaskItem();
+    Arena::temporary().free(item);
+}
+
+void Scheduler::run(IKernelTaskItem* item)
+{
     // be_notreached();
-    task->completed(m_scheduler);
+    item->owner()->completed(m_scheduler);
+    deallocateItem(be_checked_cast< CUDAKernelTaskItem >(item));
 }
 
 weak< IMemoryHost > Scheduler::memoryHost() const

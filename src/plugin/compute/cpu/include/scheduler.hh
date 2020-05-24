@@ -13,6 +13,7 @@ namespace BugEngine { namespace KernelScheduler { namespace CPU {
 
 class CodeLoader;
 class MemoryHost;
+class CPUKernelTaskItem;
 
 class Scheduler : public IScheduler
 {
@@ -25,8 +26,10 @@ public:
     Scheduler(const Plugin::Context& context);
     ~Scheduler();
 
-    virtual void                run(weak< Task::KernelTask > task, weak< const Kernel > kernel,
-                                    const minitl::array< weak< const IMemoryBuffer > >& parameters) override;
+    virtual IKernelTaskItem*    allocateItem(weak< Task::KernelTask > owner,
+                                             weak< const Kernel > kernel, u32 parameterCount) override;
+    void                        deallocateItem(CPUKernelTaskItem* item);
+    virtual void                run(IKernelTaskItem* item) override;
     virtual weak< IMemoryHost > memoryHost() const override;
 };
 

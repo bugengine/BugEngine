@@ -85,10 +85,10 @@ TaskScheduler::TaskScheduler(weak< Scheduler > scheduler)
 {
     const SchedulerSettings::Scheduler& settings = SchedulerSettings::Scheduler::get();
     const size_t                        g_numWorkers
-       = settings.ThreadCount > 0
-            ? settings.ThreadCount
-            : size_t(minitl::max(1, i32(Environment::getEnvironment().getProcessorCount())
-                                       + settings.ThreadCount));
+        = settings.ThreadCount > 0
+              ? settings.ThreadCount
+              : size_t(minitl::max(1, i32(Environment::getEnvironment().getProcessorCount())
+                                          + settings.ThreadCount));
     be_info("initializing scheduler with %d workers" | g_numWorkers);
     for(size_t i = 0; i < g_numWorkers; ++i)
     {
@@ -109,7 +109,7 @@ void TaskScheduler::queue(ITaskItem* head, ITaskItem* tail, u32 count, int prior
 #if BE_ENABLE_ASSERT
     u32        debugCount = 1;
     ITaskItem* first      = head;
-    while(first != tail && first)
+    while(first != 0 && first)
     {
         debugCount++;
         first = (ITaskItem*)first->next;
@@ -140,7 +140,7 @@ void TaskScheduler::queue(ITaskItem* head, ITaskItem* tail, u32 count)
 ITaskItem* TaskScheduler::pop(Scheduler::Affinity affinity)
 {
     minitl::istack< ITaskItem >* tasks
-       = affinity == Scheduler::WorkerThread ? m_tasks : m_mainThreadTasks;
+        = affinity == Scheduler::WorkerThread ? m_tasks : m_mainThreadTasks;
     for(unsigned int i = Scheduler::Immediate; i != Scheduler::Low; --i)
     {
         ITaskItem* t = tasks[i].pop();

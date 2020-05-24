@@ -14,6 +14,7 @@ class Context;
 class CodeLoader;
 class KernelObject;
 class MemoryHost;
+class CLKernelTaskItem;
 
 class be_api(OPENCL) Scheduler : public IScheduler
 {
@@ -28,8 +29,10 @@ private:
 public:
     Scheduler(const Plugin::Context& pluginContext, ref< Context > clContext);
     ~Scheduler();
-    virtual void                run(weak< Task::KernelTask > task, weak< const Kernel > kernel,
-                                    const minitl::array< weak< const IMemoryBuffer > >& parameters) override;
+    virtual IKernelTaskItem*    allocateItem(weak< Task::KernelTask > owner,
+                                             weak< const Kernel > kernel, u32 parameterCount) override;
+    void                        deallocateItem(CLKernelTaskItem * item);
+    virtual void                run(IKernelTaskItem * item) override;
     virtual weak< IMemoryHost > memoryHost() const override;
 };
 
