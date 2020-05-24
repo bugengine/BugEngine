@@ -13,14 +13,9 @@ namespace BugEngine {
 
 namespace Task {
 class TaskScheduler;
-class KernelTask;
 class TaskGroup;
-class ITask;
 class ITaskItem;
-template < typename BODY >
-class Task;
-template < typename RANGE, typename BODY >
-class TaskItem;
+class KernelTask;
 }  // namespace Task
 
 namespace KernelScheduler {
@@ -30,11 +25,7 @@ class IScheduler;
 class be_api(SCHEDULER) Scheduler : public minitl::pointer
 {
     BE_NOCOPY(Scheduler);
-    template < typename BODY >
-    friend class Task::Task;
-    friend class Task::ITaskItem;
     friend class Task::TaskGroup;
-    friend class Task::KernelTask;
     friend class Task::TaskScheduler;
 
 public:
@@ -81,7 +72,7 @@ private:
 private:
     void notifyEnd();
 
-private:
+public:
     void  queueTasks(Task::ITaskItem * head, Task::ITaskItem * tail, u32 count, Priority priority);
     void  queueTasks(Task::ITaskItem * head, Task::ITaskItem * tail, u32 count);
     void  queueKernel(weak< Task::KernelTask >                                    task,

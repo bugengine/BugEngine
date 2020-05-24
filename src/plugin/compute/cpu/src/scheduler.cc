@@ -10,10 +10,89 @@
 #include <bugengine/scheduler/kernel/kernel.script.hh>
 #include <bugengine/scheduler/scheduler.hh>
 #include <bugengine/scheduler/task/itask.hh>
+#include <bugengine/scheduler/task/kerneltask.hh>
 #include <kernel_optims.hh>
 #include <kernelobject.hh>
 
 namespace BugEngine { namespace KernelScheduler { namespace CPU {
+
+class CPUTaskItem;
+
+class CPUKernelTaskItem : public IKernelTaskItem
+{
+    friend class Scheduler;
+
+private:
+    weak< Scheduler >    m_cpuScheduler;
+    weak< KernelObject > m_object;
+    const u32            m_jobCount;
+    i_u32                m_doneCount;
+
+public:
+    CPUKernelTaskItem(weak< Task::KernelTask > owner, weak< const Kernel > kernel,
+                      weak< Scheduler > scheduler, weak< KernelObject > object, u32 parameterCount,
+                      u32 jobCount);
+    ~CPUKernelTaskItem();
+
+    void onJobCompleted(weak< BugEngine::Scheduler > sc);
+
+    weak< KernelObject > object() const
+    {
+        return m_object;
+    }
+};
+
+CPUKernelTaskItem::CPUKernelTaskItem(weak< Task::KernelTask > owner, weak< const Kernel > kernel,
+                                     weak< Scheduler > scheduler, weak< KernelObject > object,
+                                     u32 parameterCount, u32 jobCount)
+    : IKernelTaskItem(owner, kernel, parameterCount)
+    , m_cpuScheduler(scheduler)
+    , m_object(object)
+    , m_jobCount(jobCount)
+    , m_doneCount(i_u32::create(0))
+{
+}
+
+CPUKernelTaskItem::~CPUKernelTaskItem()
+{
+}
+
+void CPUKernelTaskItem::onJobCompleted(weak< BugEngine::Scheduler > sc)
+{
+    if(++m_doneCount == m_jobCount)
+    {
+        m_owner->completed(sc);
+        m_cpuScheduler->deallocateItem(this);
+    }
+}
+
+class CPUTaskItem : public Task::ITaskItem
+{
+private:
+    CPUKernelTaskItem* m_kernelItem;
+    u32                m_index;
+    u32                m_total;
+
+public:
+    virtual void run(weak< BugEngine::Scheduler > sc) override;
+
+    CPUTaskItem(CPUKernelTaskItem* item, u32 index, u32 total);
+};
+
+CPUTaskItem::CPUTaskItem(CPUKernelTaskItem* item, u32 index, u32 total)
+    : ITaskItem(item->owner())
+    , m_kernelItem(item)
+    , m_index(index)
+    , m_total(total)
+{
+}
+
+void CPUTaskItem::run(weak< BugEngine::Scheduler > sc)
+{
+    m_kernelItem->object()->run(m_index, m_total, m_kernelItem->parameters());
+    m_kernelItem->onJobCompleted(sc);
+    this->release< CPUTaskItem >(sc);
+}
 
 Scheduler::Scheduler(const Plugin::Context& context)
     : IScheduler("CPU", context.scheduler, CPUType)
@@ -28,7 +107,7 @@ Scheduler::Scheduler(const Plugin::Context& context)
         else
             be_info("registering unoptimised CPU kernel loader");
         m_cpuLoaders.push_back(
-           ref< CodeLoader >::create(Arena::task(), inamespace(s_cpuVariants[i])));
+            ref< CodeLoader >::create(Arena::task(), inamespace(s_cpuVariants[i])));
         m_resourceManager->attach< Kernel >(m_cpuLoaders[i]);
     }
 }
@@ -42,20 +121,37 @@ Scheduler::~Scheduler()
     }
 }
 
-void Scheduler::run(weak< Task::KernelTask > task, weak< const Kernel > kernel,
-                    const minitl::array< weak< const IMemoryBuffer > >& parameters)
+IKernelTaskItem* Scheduler::allocateItem(weak< Task::KernelTask > owner,
+                                         weak< const Kernel > kernel, u32 parameterCount)
+{
+    u32                  jobCount = m_scheduler->workerCount() * /* TODO: settings */ 4;
+    weak< KernelObject > object
+        = kernel->getResource(m_cpuLoaders[0]).getRefHandle< KernelObject >();
+    be_assert(object, "kernel is not loaded");
+    return new(Arena::temporary()) /* TODO: pool */
+        CPUKernelTaskItem(owner, kernel, this, object, parameterCount, jobCount);
+}
+
+void Scheduler::deallocateItem(CPUKernelTaskItem* item)
+{
+    item->~CPUKernelTaskItem();
+    Arena::temporary().free(item);
+}
+
+void Scheduler::run(IKernelTaskItem* item)
 {
     /* TODO: set option to use Neon/AVX/SSE */
-    weak< KernelObject > object
-       = kernel->getResource(m_cpuLoaders[0]).getRefHandle< KernelObject >();
-    be_assert(object, "kernel is not loaded");
-    CPUKernelTask& taskBody = object->m_task->body;
-    taskBody.sourceTask     = task;
+    CPUKernelTaskItem* cpuItem = be_checked_cast< CPUKernelTaskItem >(item);
+    CPUTaskItem *      head = 0, *tail = 0;
+    for(u32 i = 0, jobCount = cpuItem->m_jobCount; i < jobCount; ++i)
     {
-        minitl::array< weak< const IMemoryBuffer > > params = parameters;
-        taskBody.params.swap(params);
+        CPUTaskItem* item
+            = new(m_scheduler->allocateTask< CPUTaskItem >()) CPUTaskItem(cpuItem, i, jobCount);
+        if(!tail) tail = item;
+        item->next = head;
+        head       = item;
     }
-    object->m_task->schedule(m_scheduler);
+    m_scheduler->queueTasks(head, tail, cpuItem->m_jobCount);
 }
 
 weak< IMemoryHost > Scheduler::memoryHost() const

@@ -15,11 +15,29 @@ namespace BugEngine { namespace KernelScheduler { namespace OpenCL {
 
 static const int s_profilingMode =
 #if BE_OPTIM_LEVEL_AT_MOST(BE_OPTIM_LVEL_PROFILE)
-   CL_QUEUE_PROFILING_ENABLE
+    CL_QUEUE_PROFILING_ENABLE
 #else
-   0
+    0
 #endif
-   ;
+    ;
+
+class CLKernelTaskItem : public IKernelTaskItem
+{
+public:
+    CLKernelTaskItem(weak< Task::KernelTask > owner, weak< const Kernel > kernel,
+                     u32 parmaeterCount);
+    ~CLKernelTaskItem();
+};
+
+CLKernelTaskItem::CLKernelTaskItem(weak< Task::KernelTask > owner, weak< const Kernel > kernel,
+                                   u32 parameterCount)
+    : IKernelTaskItem(owner, kernel, parameterCount)
+{
+}
+
+CLKernelTaskItem::~CLKernelTaskItem()
+{
+}
 
 Scheduler::Scheduler(const Plugin::Context& pluginContext, ref< Context > clContext)
     : IScheduler("OpenCL", pluginContext.scheduler, GPUType)
@@ -46,13 +64,23 @@ Scheduler::~Scheduler()
     }
 }
 
-void Scheduler::run(weak< Task::KernelTask > task, weak< const Kernel > kernel,
-                    const minitl::array< weak< const IMemoryBuffer > >& parameters)
+IKernelTaskItem* Scheduler::allocateItem(weak< Task::KernelTask > owner,
+                                         weak< const Kernel > kernel, u32 parameterCount)
 {
-    be_forceuse(kernel);
-    be_forceuse(parameters);
+    return new(Arena::temporary()) CLKernelTaskItem(owner, kernel, parameterCount);
+}
+
+void Scheduler::deallocateItem(CLKernelTaskItem* item)
+{
+    item->~CLKernelTaskItem();
+    Arena::temporary().free(item);
+}
+
+void Scheduler::run(IKernelTaskItem* item)
+{
     // be_notreached();
-    task->completed(m_scheduler);
+    item->owner()->completed(m_scheduler);
+    deallocateItem(be_checked_cast< CLKernelTaskItem >(item));
 }
 
 weak< IMemoryHost > Scheduler::memoryHost() const

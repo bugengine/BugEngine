@@ -61,12 +61,13 @@ void Scheduler::queueKernel(weak< Task::KernelTask >                            
                                                                                paramCount);
     weak< KernelScheduler::IScheduler >  scheduler = task->m_targetScheduler;
     weak< KernelScheduler::IMemoryHost > memHost   = scheduler->memoryHost();
+    KernelScheduler::IKernelTaskItem*    item
+        = scheduler->allocateItem(task, task->m_kernel, paramCount);
     for(u32 i = 0; i < paramCount; ++i)
     {
-        weak< const KernelScheduler::IMemoryBuffer > bank = parameters[i]->getBank(memHost);
-        kernelParams[i]                                   = bank;
+        item->m_parameters[i] = parameters[i]->getBank(memHost);
     }
-    scheduler->run(task, task->m_kernel, kernelParams);
+    scheduler->run(item);
 }
 
 void Scheduler::mainThreadJoin()
