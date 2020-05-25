@@ -449,6 +449,8 @@ def rc_file(self, node):
     """
     Bind the .rc extension to a winrc task
     """
+    if not self.env.WINRC:
+        return
     obj_ext = '.o'
     if self.env['WINRC_TGT_F'] == '/fo':
         obj_ext = '.res'

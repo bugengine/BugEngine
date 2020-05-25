@@ -28,10 +28,8 @@ def apply_pdb_flag(self):
     if self.env.CC_NAME == 'msvc':
         for task in getattr(self, 'compiled_tasks', []) + getattr(self, 'preprocessed_tasks', []):
             if task:
-                task.env.append_unique('CPPFLAGS', '/Fd%s' % task.outputs[0].change_ext('.pdb').abspath())
                 task.env.append_unique('CFLAGS', '/Fd%s' % task.outputs[0].change_ext('.pdb').abspath())
                 task.env.append_unique('CXXFLAGS', '/Fd%s' % task.outputs[0].change_ext('.pdb').abspath())
-                task.env.append_unique('CPPFLAGS', '/Fd%s' % task.outputs[0].change_ext('.pdb').abspath())
 
 
 @feature('cshlib', 'cxxshlib')

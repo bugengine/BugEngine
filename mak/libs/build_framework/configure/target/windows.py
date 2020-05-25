@@ -6,7 +6,7 @@ import re
 class Windows(Configure.ConfigurationContext.Platform):
     NAME = 'windows'
     SUPPORTED_TARGETS = (re.compile('.*mingw32.*'), re.compile('.*windows-gnu'), re.compile('.*windows-msvc'),
-                         re.compile('.*windows-intel'), re.compile('.*windows-wsdk'))
+                         re.compile('.*windows-intel'), re.compile('.*windows-wsdk'), re.compile('.*windows-buildtools'),)
 
     def is_valid(self, compiler):
         node = self.conf.bldnode.make_node('main.cxx')
