@@ -25,7 +25,10 @@ def build(bld):
     package_final = tg.make_bld_node('apk', '', appname + '.apk')
 
     bld.android_package_task = tg.create_task('aapt_pkg', [resources.destfile], [package_unsigned])
-    sign_task = tg.create_task('jarsigner', [package_unsigned], [package_unaligned])
+    if bld.env.JARSIGNER:
+        sign_task = tg.create_task('jarsigner', [package_unsigned], [package_unaligned])
+    else:
+        sign_task = tg.create_task('apksigner', [package_unsigned], [package_unaligned])
     align_task = tg.create_task('zipalign', [package_unaligned], [package_final])
 
     bld.add_to_group(tg)

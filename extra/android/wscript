@@ -13,6 +13,19 @@ def options(option_context):
     sdk_path = ''
     ndk_paths = []
     path_list = os.environ.get('PATH', '').split(os.pathsep)
+    for vstudio_root_path in (r'C:\Microsoft\AndroidSDK', r'C:\ProgramData\Microsoft\AndroidSDK'):
+        try:
+            for p in os.listdir(vstudio_root_path):
+                path_list.append(os.path.join(vstudio_root_path, p, 'tools'))
+        except OSError:
+            pass
+    for vstudio_root_path in (r'C:\Microsoft\AndroidNDK64', r'C:\ProgramData\Microsoft\AndroidNDK64',
+                              r'C:\Microsoft\AndroidNDK', r'C:\ProgramData\Microsoft\AndroidNDK'):
+        try:
+            for p in os.listdir(vstudio_root_path):
+                path_list.append(os.path.join(vstudio_root_path, p))
+        except OSError:
+            pass
     for path in path_list:
         for ext in ['.exe', '.cmd', '.sh', '.bat', '']:
             p = os.path.join(path, 'adb'+ext)

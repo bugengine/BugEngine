@@ -107,6 +107,15 @@ class aapt_pkg(Task.Task):
             return self.exec_command(cmd, cwd=root.abspath())
 
 
+class apksigner(Task.Task):
+    """
+    Signs APK file
+    """
+    color   = 'PINK'
+    run_str = '${APKSIGNER} sign ${APKSIGNER_FLAGS} --out ${TGT} ${SRC}'
+
+
+
 class jarsigner(Task.Task):
     """
     Signs jar file
