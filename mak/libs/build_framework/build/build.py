@@ -395,7 +395,7 @@ def filter_sources(self):
 def create_master_file(task):
     with open(task.outputs[0].abspath(), 'w') as f:
         for src in task.inputs:
-            f.write('#include "%s"\n' % src.path_from(task.generator.bld.bldnode).replace('\\', '/'))
+            f.write('#include "%s"\n' % src.abspath().replace('\\', '/'))
 
 
 def master_sig_deps(task):
