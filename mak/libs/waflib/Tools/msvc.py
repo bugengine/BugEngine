@@ -354,21 +354,8 @@ class target_compiler(object):
 		return repr((self.compiler, self.cpu, self.version, self.bat_target, self.bat))
 
 @conf
-def gather_wsdk_versions(conf, versions):
-	"""
-	Use winreg to add the msvc versions to the input list
-
-	:param versions: list to modify
-	:type versions: list
-	"""
+def gather_wsdk_versions_from_root(conf, versions, all_versions):
 	version_pattern = re.compile('^v..?.?\...?.?')
-	try:
-		all_versions = Utils.winreg.OpenKey(Utils.winreg.HKEY_LOCAL_MACHINE, 'SOFTWARE\\Wow6432node\\Microsoft\\Microsoft SDKs\\Windows')
-	except OSError:
-		try:
-			all_versions = Utils.winreg.OpenKey(Utils.winreg.HKEY_LOCAL_MACHINE, 'SOFTWARE\\Microsoft\\Microsoft SDKs\\Windows')
-		except OSError:
-			return
 	index = 0
 	while 1:
 		try:
@@ -390,22 +377,43 @@ def gather_wsdk_versions(conf, versions):
 			versions['wsdk ' + version[1:]] = targets
 
 @conf
-def gather_msvc_targets(conf, versions, version, vc_path):
+def gather_wsdk_versions(conf, versions):
+	"""
+	Use winreg to add the msvc versions to the input list
+
+	:param versions: list to modify
+	:type versions: list
+	"""
+	try:
+		all_versions = Utils.winreg.OpenKey(Utils.winreg.HKEY_LOCAL_MACHINE, 'SOFTWARE\\Wow6432node\\Microsoft\\Microsoft SDKs\\Windows')
+	except OSError:
+		pass
+	else:
+		conf.gather_wsdk_versions_from_root(versions, all_versions)
+	try:
+		all_versions = Utils.winreg.OpenKey(Utils.winreg.HKEY_LOCAL_MACHINE, 'SOFTWARE\\Microsoft\\Microsoft SDKs\\Windows')
+	except OSError:
+		pass
+	else:
+		conf.gather_wsdk_versions_from_root(versions, all_versions)
+
+@conf
+def gather_msvc_targets(conf, versions, version, vc_path, vc_kind='msvc'):
 	#Looking for normal MSVC compilers!
 	targets = {}
 
 	if os.path.isfile(os.path.join(vc_path, 'VC', 'Auxiliary', 'Build', 'vcvarsall.bat')):
 		for target,realtarget in all_msvc_platforms[::-1]:
-			targets[target] = target_compiler(conf, 'msvc', realtarget, version, target, os.path.join(vc_path, 'VC', 'Auxiliary', 'Build', 'vcvarsall.bat'))
+			targets[target] = target_compiler(conf, vc_kind, realtarget, version, target, os.path.join(vc_path, 'VC', 'Auxiliary', 'Build', 'vcvarsall.bat'))
 	elif os.path.isfile(os.path.join(vc_path, 'vcvarsall.bat')):
 		for target,realtarget in all_msvc_platforms[::-1]:
-			targets[target] = target_compiler(conf, 'msvc', realtarget, version, target, os.path.join(vc_path, 'vcvarsall.bat'))
+			targets[target] = target_compiler(conf, vc_kind, realtarget, version, target, os.path.join(vc_path, 'vcvarsall.bat'))
 	elif os.path.isfile(os.path.join(vc_path, 'Common7', 'Tools', 'vsvars32.bat')):
-		targets['x86'] = target_compiler(conf, 'msvc', 'x86', version, 'x86', os.path.join(vc_path, 'Common7', 'Tools', 'vsvars32.bat'))
+		targets['x86'] = target_compiler(conf, vc_kind, 'x86', version, 'x86', os.path.join(vc_path, 'Common7', 'Tools', 'vsvars32.bat'))
 	elif os.path.isfile(os.path.join(vc_path, 'Bin', 'vcvars32.bat')):
-		targets['x86'] = target_compiler(conf, 'msvc', 'x86', version, '', os.path.join(vc_path, 'Bin', 'vcvars32.bat'))
+		targets['x86'] = target_compiler(conf, vc_kind, 'x86', version, '', os.path.join(vc_path, 'Bin', 'vcvars32.bat'))
 	if targets:
-		versions['msvc %s' % version] = targets
+		versions['%s %s' % (vc_kind, version)] = targets
 
 @conf
 def gather_wince_targets(conf, versions, version, vc_path, vsvars, supported_platforms):
@@ -449,7 +457,7 @@ def gather_vswhere_versions(conf, versions):
 	prg_path = os.environ.get('ProgramFiles(x86)', os.environ.get('ProgramFiles', 'C:\\Program Files (x86)'))
 
 	vswhere = os.path.join(prg_path, 'Microsoft Visual Studio', 'Installer', 'vswhere.exe')
-	args = [vswhere, '-products', '*', '-legacy', '-format', 'json']
+	args = [vswhere, '-products', 'Microsoft.VisualStudio.Product.BuildTools', '-format', 'json']
 	try:
 		txt = conf.cmd_and_log(args)
 	except Errors.WafError as e:
@@ -467,8 +475,8 @@ def gather_vswhere_versions(conf, versions):
 		ver = entry['installationVersion']
 		ver = str('.'.join(ver.split('.')[:2]))
 		path = str(os.path.abspath(entry['installationPath']))
-		if os.path.exists(path) and ('msvc %s' % ver) not in versions:
-			conf.gather_msvc_targets(versions, ver, path)
+		if os.path.exists(path) and ('buildtools %s' % ver) not in versions:
+			conf.gather_msvc_targets(versions, ver, path, 'buildtools')
 
 @conf
 def gather_msvc_versions(conf, versions):

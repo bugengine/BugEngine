@@ -1,4 +1,4 @@
-from waflib import Configure, Utils
+from waflib import Configure, Utils, Errors
 from waflib.Configure import conf
 from waflib.Tools import msvc
 import os
@@ -23,8 +23,8 @@ class MSVC(Configure.ConfigurationContext.Compiler):
         self.targets = [self.target]
 
     def set_optimisation_options(self, conf):
-        conf.env.append_unique('CPPFLAGS_debug', ['/Od', '/Ob1', '/EHsc', '/RTC1', '/RTCc', '/Zi', '/MTd', '/D_DEBUG'])
-        conf.env.append_unique('CFLAGS_debug', ['/Od', '/Ob1', '/EHsc', '/RTC1', '/RTCc', '/Zi', '/MTd', '/D_DEBUG'])
+        conf.env.append_unique('CPPFLAGS_debug', ['/Od', '/Ob1', '/EHsc', '/RTC1', '/RTCc', '/Zi', '/MTd', '/D_DEBUG', '/D_ALLOW_RTCc_IN_STL=1'])
+        conf.env.append_unique('CFLAGS_debug', ['/Od', '/Ob1', '/EHsc', '/RTC1', '/RTCc', '/Zi', '/MTd', '/D_DEBUG', '/D_ALLOW_RTCc_IN_STL=1'])
         conf.env.append_unique(
             'CXXFLAGS_debug', ['/Od', '/Ob1', '/EHsc', '/RTC1', '/RTCc', '/Zi', '/MTd', '/D_DEBUG', '/GR']
         )
@@ -88,6 +88,8 @@ class MSVC(Configure.ConfigurationContext.Compiler):
         env = conf.env
         version = '%s %s' % (self.NAMES[0], self.version)
         version_number = float(self.version.replace('Exp', ''))
+        if self.NAMES[0] == 'msvc' and self.version_number < (7,):
+            raise Errors.WafError('unsupported compiler')
         env.NO_MSVC_DETECT = 1
         env.INCLUDES = self.includes
         env.LIBPATH = self.libdirs
@@ -101,6 +103,9 @@ class MSVC(Configure.ConfigurationContext.Compiler):
         env.COMPILER_NAME = 'msvc'
         env.COMPILER_TARGET = 'windows-win32-msvc-%s' % version
         conf.load('msvc')
+        if self.NAMES[0] == 'intel':
+            env.append_value('CFLAGS', ['/Qmultibyte-chars-'])
+            env.append_value('CXXFLAGS', ['/Qmultibyte-chars-'])
         if (
             (self.NAMES[0] == 'msvc' and version_number >= 8) or (self.NAMES[0] == 'wsdk' and version_number >= 6)
             or (self.NAMES[0] == 'intel' and version_number >= 11)
