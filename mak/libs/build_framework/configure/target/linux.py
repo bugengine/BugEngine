@@ -15,6 +15,29 @@ class Linux(Configure.ConfigurationContext.Platform):
     def __init__(self):
         Configure.ConfigurationContext.Platform.__init__(self)
 
+    def is_valid(self, configuration_context, compiler):
+        node = configuration_context.bldnode.make_node('main.cxx')
+        tgtnode = node.change_ext('')
+        node.write('#include <cstdio>\n#include <cfloat>\n#include <new>\nint main() {}\n')
+        try:
+            result, out, err = compiler.run_cxx([node.abspath(), '-x', 'c++', '-o', tgtnode.abspath()])
+        except Exception as e:
+            return False
+        finally:
+            #if result:
+            #    print(compiler.name())
+            node.delete()
+            tgtnode.delete()
+        return result == 0
+
+    def get_available_compilers(self, configuration_context, compiler_list):
+        result = []
+        for c in compiler_list:
+            for regexp in self.SUPPORTED_TARGETS:
+                if regexp.match(c.platform) and self.is_valid(configuration_context, c):
+                    result.append((c, [], self))
+        return result
+
     def load_in_env(self, conf, compiler):
         env = conf.env
 

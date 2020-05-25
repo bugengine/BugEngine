@@ -30,8 +30,17 @@
 #    include <bugengine/kernel/compilers/syntax.hh>
 #endif
 
+#ifdef __host
+#    undef __host
+#endif
 #define __host
+#ifdef __device
+#    undef __device
+#endif
 #define __device inline
+#ifdef __kernel
+#    undef __kernel
+#endif
 #define __kernel inline
 
 namespace BugEngine {

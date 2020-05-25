@@ -184,11 +184,12 @@ class AndroidLoader(Configure.ConfigurationContext.Platform):
 
         conf.load('javaw')
         conf.env.append_value('JAVACFLAGS', ['-source', '1.6', '-target', '1.6'])
-        conf.find_program('jarsigner', var='JARSIGNER')
         key_debug = conf.path.parent.make_node('debug.keystore')
         conf.env.JARSIGNER_FLAGS = ['-sigalg', 'MD5withRSA', '-digestalg', 'SHA1', '-keystore', key_debug.abspath(),
                                     '-storepass', 'android', '-keypass', 'android']
         conf.env.JARSIGNER_KEY = 'androiddebugkey'
+        conf.env.APKSIGNER_FLAGS = ['--ks', key_debug.abspath(),
+                                    '--ks-pass', 'pass:android', '--key-pass', 'pass:android']
 
         sdk_build_tool_path = self.get_build_tool_path(Options.options.android_sdk_path)
         sdk_tools_paths = self.get_tools_paths(Options.options.android_sdk_path)
@@ -197,6 +198,10 @@ class AndroidLoader(Configure.ConfigurationContext.Platform):
         if not os.path.isfile(conf.env.DEX):
             raise Errors.WafError('Unable to locate dx.jar')
         conf.find_program('zipalign', var='ZIPALIGN', path_list=sdk_tools_paths+[sdk_build_tool_path])
+        conf.find_program('jarsigner', var='JARSIGNER', mandatory=False)
+        conf.find_program('apksigner', var='APKSIGNER', path_list=[sdk_build_tool_path], mandatory=False)
+        if not conf.env.JARSIGNER and not conf.env.APKSIGNER:
+            raise Errors.WafError('Unable to locate jarsigner or apksigner')
         conf.env.DEXCREATE = '--dex'
         conf.env.DEX_TGT_PATTERN = '--output=%s'
         conf.find_program('aapt', path_list=[sdk_build_tool_path])
@@ -289,22 +294,23 @@ class AndroidLoader(Configure.ConfigurationContext.Platform):
     def get_available_compilers(self, configuration_context, compiler_list):
         result = []
         compiler_sets = {}
-        for c in compiler_list:
-            compiler_path = os.path.normpath(c.compiler_c)
-            for ndk_path in Options.options.android_ndk_path.split(','):
-                ndk_path = os.path.normpath(os.path.abspath(ndk_path))
-                if compiler_path.startswith(ndk_path):
-                    c_name = c.NAMES[0].lower()
-                    try:
-                        subset = compiler_sets[c_name]
-                    except KeyError:
-                        subset = compiler_sets[c_name] = {}
-                    k = (c.NAMES[0], c.version, ndk_path)
-                    try:
-                        subset[k].append(c)
-                    except KeyError:
-                        subset[k] = [c]
-                    break
+        for compiler in compiler_list:
+            for c in [compiler] + compiler.siblings:
+                compiler_path = os.path.normpath(c.compiler_c)
+                for ndk_path in Options.options.android_ndk_path.split(','):
+                    ndk_path = os.path.normpath(os.path.abspath(ndk_path))
+                    if compiler_path.startswith(ndk_path):
+                        c_name = c.NAMES[0].lower()
+                        try:
+                            subset = compiler_sets[c_name]
+                        except KeyError:
+                            subset = compiler_sets[c_name] = {}
+                        k = (c.NAMES[0], c.version, ndk_path)
+                        try:
+                            subset[k].append(c)
+                        except KeyError:
+                            subset[k] = [c]
+                        break
 
         def add_compiler_set(compilers):
             archs = [c.arch for c in compilers]
@@ -314,12 +320,15 @@ class AndroidLoader(Configure.ConfigurationContext.Platform):
                 raise
             else:
                 for ndk_root, sdk_root, archs, sdk_version in android_sdks:
-                    valid_compilers = [c for c in compilers if c.arch in archs]
-                    if len(valid_compilers) > 1:
+                    valid_compilers = []
+                    seen = set([])
+                    for c in compilers:
+                        if c.arch in archs and c.arch not in seen:
+                            seen.add(c.arch)
+                            valid_compilers.append(c)
+                    if len(valid_compilers) >= 1:
                         result.append((valid_compilers[0], valid_compilers,
                                       AndroidPlatform(self.conf, ndk_root, sdk_root, sdk_version)))
-                    else:
-                        result.append((valid_compilers[0], [], AndroidPlatform(self.conf, sdk_version)))
 
         # find all GCC targets
         seen = set([])
