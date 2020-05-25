@@ -209,8 +209,7 @@ def module(
                 'BE_PROJECTNAME=%s' % name
             ] + extra_defines,
             export_defines=[] + extra_public_defines,
-            includes=extra_includes + api + platform_api + include + platform_include + master_includes +
-            [bld.bugenginenode],
+            includes=extra_includes + api + platform_api + include + platform_include + master_includes,
             libs=[],
             lib_paths=lib_paths,
             export_includes=api + platform_api + extra_public_includes,
