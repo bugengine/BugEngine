@@ -22,6 +22,16 @@ public:
     ~CUDAKernelTaskItem();
 };
 
+CUDAKernelTaskItem::CUDAKernelTaskItem(weak< Task::KernelTask > owner, weak< const Kernel > kernel,
+                                       u32 parameterCount)
+    : IKernelTaskItem(owner, kernel, parameterCount)
+{
+}
+
+CUDAKernelTaskItem::~CUDAKernelTaskItem()
+{
+}
+
 Scheduler::Scheduler(const Plugin::Context& context)
     : IScheduler("Cuda", context.scheduler, GPUType)
     , m_resourceManager(context.resourceManager)
