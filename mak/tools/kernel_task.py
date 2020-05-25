@@ -104,6 +104,10 @@ BugEngine::KernelScheduler::Kernel::KernelList&  getKernelList_%(module)s();
 
 ref< %(Name)sKernel > %(Name)sKernel::s_kernel = ref< %(Name)sKernel >::create(BugEngine::Arena::task());
 
+%(end_Namespace)s
+// this is important for visual studio 2003
+%(Namespace)s
+
 %(Tasks_CC)s
 
 %(end_Namespace)s
