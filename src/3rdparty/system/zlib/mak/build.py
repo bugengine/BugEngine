@@ -6,7 +6,7 @@ def build(bld):
         dll_defs = (not bld.env.STATIC) and ['ZLIB_DLL'] or []
         bld.shared_library('3rdparty.system.zlib', bld.platforms,
                            path=bld.path.parent, use_master=False,
-                           extra_defines=dll_defs + ['ZLIB_INTERNAL'],
+                           extra_defines=dll_defs,
                            extra_public_defines=dll_defs,
                            warnings=False, export_all=True)
     else:

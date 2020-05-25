@@ -145,11 +145,11 @@ void Scheduler::run(IKernelTaskItem* item)
     CPUTaskItem *      head = 0, *tail = 0;
     for(u32 i = 0, jobCount = cpuItem->m_jobCount; i < jobCount; ++i)
     {
-        CPUTaskItem* item
+        CPUTaskItem* taskItem
             = new(m_scheduler->allocateTask< CPUTaskItem >()) CPUTaskItem(cpuItem, i, jobCount);
-        if(!tail) tail = item;
-        item->next = head;
-        head       = item;
+        if(!tail) tail = taskItem;
+        taskItem->next = head;
+        head           = taskItem;
     }
     m_scheduler->queueTasks(head, tail, cpuItem->m_jobCount);
 }
