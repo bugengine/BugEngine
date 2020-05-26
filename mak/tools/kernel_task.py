@@ -37,18 +37,10 @@ TEMPLATE_H = """
 #include    <bugengine/scheduler/kernel/parameters/parameters.hh>
 #include    <bugengine/scheduler/task/kerneltask.hh>
 #include    <bugengine/kernel/colors.hh>
+#include    <bugengine/plugin/resourcehook.hh>
 %(includes)s
 
 %(Namespace)s
-
-class %(Name)sKernel : public BugEngine::KernelScheduler::Kernel
-{
-public:
-    %(Name)sKernel();
-    ~%(Name)sKernel();
-
-    static ref<%(Name)sKernel> s_kernel;
-};
 
 %(Tasks_H)s
 
@@ -65,7 +57,7 @@ TEMPLATE_CLASS_CC = """
                                                         BugEngine::KernelScheduler::GPUType,
                                                         BugEngine::Colors::Red::Red,
                                                         BugEngine::Scheduler::High,
-                                                        %(Name)sKernel::s_kernel,
+                                                        s_%(Name)sKernel,
                                                         makeParameters()))%(callback_assign)s%(argument_out_assign)s
 {
 }
@@ -87,22 +79,10 @@ TEMPLATE_CC = """
 %(pch)s
 #include "%(header)s"
 
-BugEngine::KernelScheduler::Kernel::KernelList&  getKernelList_%(module)s();
-
 %(Namespace)s
 
-%(Name)sKernel::%(Name)sKernel()
-    :   BugEngine::KernelScheduler::Kernel("%(plugin)s.%(kernel_full_name)s")
-{
-    getKernelList_%(module)s().push_back(*this);
-}
-
-%(Name)sKernel::~%(Name)sKernel()
-{
-    KernelList::item::unhook();
-}
-
-ref< %(Name)sKernel > %(Name)sKernel::s_kernel = ref< %(Name)sKernel >::create(BugEngine::Arena::task());
+ref< ::BugEngine::KernelScheduler::Kernel > s_%(Name)sKernel = ref< ::BugEngine::KernelScheduler::Kernel >::create(::BugEngine::Arena::task(), ::BugEngine::inamespace("%(plugin)s.%(kernel_full_name)s"));
+BE_EXPORT ::BugEngine::Plugin::PluginHook< BugEngine::Plugin::ResourceHook< ::BugEngine::KernelScheduler::Kernel > > g_%(Name)sKernelHook = ::BugEngine::Plugin::PluginHook< ::BugEngine::Plugin::ResourceHook< ::BugEngine::KernelScheduler::Kernel > >(::BugEngine::Plugin::ResourceHook< ::BugEngine::KernelScheduler::Kernel >(s_%(Name)sKernel));
 
 %(Tasks_CC)s
 
