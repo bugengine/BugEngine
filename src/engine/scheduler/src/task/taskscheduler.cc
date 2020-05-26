@@ -109,7 +109,7 @@ void TaskScheduler::queue(ITaskItem* head, ITaskItem* tail, u32 count, int prior
 #if BE_ENABLE_ASSERT
     u32        debugCount = 1;
     ITaskItem* first      = head;
-    while(first != 0 && first)
+    while(first != tail && first)
     {
         debugCount++;
         first = (ITaskItem*)first->next;
