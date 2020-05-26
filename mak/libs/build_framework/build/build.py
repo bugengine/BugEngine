@@ -554,8 +554,9 @@ def cc_hook(self, node):
 
 
 @feature('master', 'master_folder')
-def dummy_hook_master(self):
-    pass
+@after_method('apply_incpaths')
+def incpath_master(self):
+    self.env.INCPATHS = [self.bld.srcnode.abspath()] + self.env.INCPATHS
 
 
 @feature('c', 'cxx')
