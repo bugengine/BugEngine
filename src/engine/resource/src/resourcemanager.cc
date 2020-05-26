@@ -27,7 +27,7 @@ ResourceManager::LoaderInfo& ResourceManager::getLoaderInfo(raw< const RTTI::Cla
 {
     for(minitl::array< LoaderInfo >::iterator it = m_loaders.begin(); it != m_loaders.end(); ++it)
     {
-        if(classinfo->isA(it->classinfo)) return *it;
+        if(classinfo == it->classinfo) return *it;
         if(!it->classinfo)
         {
             it->classinfo = classinfo;

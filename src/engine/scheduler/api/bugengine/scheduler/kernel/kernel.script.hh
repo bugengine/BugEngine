@@ -25,11 +25,10 @@ public:
 protected:
     const inamespace m_name;
 
-protected:
+public:
     Kernel(const inamespace& name);
     ~Kernel();
 
-public:
     inamespace name() const
     {
         return m_name;

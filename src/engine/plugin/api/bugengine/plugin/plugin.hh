@@ -6,6 +6,7 @@
 /**************************************************************************************************/
 #include <bugengine/plugin/stdafx.h>
 #include <bugengine/plugin/dynobject.hh>
+#include <bugengine/plugin/hook.hh>
 
 #include <bugengine/filesystem/folder.script.hh>
 #include <bugengine/resource/resourcemanager.hh>

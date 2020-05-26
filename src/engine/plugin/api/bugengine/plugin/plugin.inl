@@ -4,21 +4,14 @@
 #include <bugengine/plugin/stdafx.h>
 #include <bugengine/core/environment.hh>
 #include <bugengine/plugin/dynobjectlist.hh>
+#include <bugengine/plugin/hook.hh>
 #include <bugengine/plugin/plugin.hh>
 #include <bugengine/rtti/classinfo.script.hh>
 #include <bugengine/rtti/engine/helper/staticarray.hh>
 #include <bugengine/rtti/engine/objectinfo.script.hh>
 #include <bugengine/rtti/value.hh>
-#include <bugengine/scheduler/kernel/kernel.script.hh>
 
 namespace BugEngine { namespace Plugin {
-
-#define BE_PLUGIN_REGISTER_KERNELS_(id)                                                            \
-    BugEngine::KernelScheduler::Kernel::KernelList& getKernelList_##id()                           \
-    {                                                                                              \
-        static BugEngine::KernelScheduler::Kernel::KernelList s_result;                            \
-        return s_result;                                                                           \
-    }
 
 #define BE_PLUGIN_NAMESPACE_CREATE_(name)                                                          \
     namespace BugEngine {                                                                          \
@@ -26,19 +19,19 @@ namespace BugEngine { namespace Plugin {
     {                                                                                              \
         static RTTI::ObjectInfo              ob    = {{0}, {0}, "BugEngine", RTTI::Value()};       \
         static RTTI::Class                   ci    = {istring("BugEngine"),                        \
-                                                      0,                                           \
-                                                      0,                                           \
-                                                      RTTI::ClassType_Namespace,                   \
-                                                      {0},                                         \
-                                                      {0},                                         \
-                                                      {&ob},                                       \
-                                                      {0},                                         \
-                                                      {0, 0},                                      \
-                                                      {0, 0},                                      \
-                                                      {0},                                         \
-                                                      {0},                                         \
-                                                      0,                                           \
-                                                      0};                                          \
+                                 0,                                           \
+                                 0,                                           \
+                                 RTTI::ClassType_Namespace,                   \
+                                 {0},                                         \
+                                 {0},                                         \
+                                 {&ob},                                       \
+                                 {0},                                         \
+                                 {0, 0},                                      \
+                                 {0, 0},                                      \
+                                 {0},                                         \
+                                 {0},                                         \
+                                 0,                                           \
+                                 0};                                          \
         static raw< const RTTI::ObjectInfo > obptr = {((ob.value = RTTI::Value(&ci)), &ob)};       \
         be_forceuse(obptr);                                                                        \
         raw< RTTI::Class > ptr = {&ci};                                                            \
@@ -47,7 +40,6 @@ namespace BugEngine { namespace Plugin {
     }
 
 #define BE_PLUGIN_NAMESPACE_REGISTER_NAMED__(name, id)                                             \
-    BE_PLUGIN_REGISTER_KERNELS_(id)                                                                \
     BE_PLUGIN_NAMESPACE_CREATE_(id)                                                                \
     _BE_PLUGIN_EXPORT const BugEngine::RTTI::Class* be_pluginNamespace()                           \
     {                                                                                              \
@@ -58,23 +50,21 @@ namespace BugEngine { namespace Plugin {
 
 #define BE_PLUGIN_NAMESPACE_REGISTER_NAMED_(name, id) BE_PLUGIN_NAMESPACE_REGISTER_NAMED__(name, id)
 
-#define BE_PLUGIN_NAMESPACE_REGISTER_NAMED(name)      BE_PLUGIN_NAMESPACE_REGISTER_NAMED_(name, name)
+#define BE_PLUGIN_NAMESPACE_REGISTER_NAMED(name) BE_PLUGIN_NAMESPACE_REGISTER_NAMED_(name, name)
 
 #define BE_PLUGIN_NAMESPACE_REGISTER()                                                             \
     BE_PLUGIN_NAMESPACE_REGISTER_NAMED_(BE_PROJECTNAME, BE_PROJECTID)
 
 #define BE_PLUGIN_REGISTER_NAMED__(name, id, create)                                               \
     BE_PLUGIN_NAMESPACE_CREATE_(id);                                                               \
-    BE_PLUGIN_REGISTER_KERNELS_(id)                                                                \
+    minitl::intrusive_list< BugEngine::Plugin::IPluginHook > g_pluginHooks_##id;                   \
     _BE_PLUGIN_EXPORT                                                                              \
     minitl::refcountable* be_createPlugin(const ::BugEngine::Plugin::Context& context)             \
     {                                                                                              \
-        const BugEngine::KernelScheduler::Kernel::KernelList& kernelList = getKernelList_##id();   \
-        for(BugEngine::KernelScheduler::Kernel::KernelList::const_iterator it                      \
-            = kernelList.begin();                                                                  \
-            it != kernelList.end(); ++it)                                                          \
-            context.resourceManager->load(                                                         \
-                weak< const BugEngine::KernelScheduler::Kernel >(it.operator->()));                \
+        for(minitl::intrusive_list< BugEngine::Plugin::IPluginHook >::iterator it                  \
+            = g_pluginHooks_##id.begin();                                                          \
+            it != g_pluginHooks_##id.end(); ++it)                                                  \
+            it->onload(context);                                                                   \
         ref< minitl::refcountable > r = (*create)(context);                                        \
         if(r) r->addref();                                                                         \
         return r.operator->();                                                                     \
@@ -83,11 +73,10 @@ namespace BugEngine { namespace Plugin {
                                             weak< BugEngine::Resource::ResourceManager > manager)  \
     {                                                                                              \
         if(cls) cls->decref();                                                                     \
-        const BugEngine::KernelScheduler::Kernel::KernelList& kernelList = getKernelList_##id();   \
-        for(BugEngine::KernelScheduler::Kernel::KernelList::const_iterator it                      \
-            = kernelList.begin();                                                                  \
-            it != kernelList.end(); ++it)                                                          \
-            manager->unload(weak< const BugEngine::KernelScheduler::Kernel >(it.operator->()));    \
+        for(minitl::intrusive_list< BugEngine::Plugin::IPluginHook >::iterator it                  \
+            = g_pluginHooks_##id.begin();                                                          \
+            it != g_pluginHooks_##id.end(); ++it)                                                  \
+            it->onunload(manager);                                                                 \
     }                                                                                              \
     _BE_PLUGIN_EXPORT const BugEngine::RTTI::Class* be_pluginNamespace()                           \
     {                                                                                              \
@@ -100,7 +89,7 @@ namespace BugEngine { namespace Plugin {
 
 #define BE_PLUGIN_REGISTER_NAMED_(name, id, create) BE_PLUGIN_REGISTER_NAMED__(name, id, create)
 
-#define BE_PLUGIN_REGISTER_NAMED(name, create)      BE_PLUGIN_REGISTER_NAMED_(name, name, create)
+#define BE_PLUGIN_REGISTER_NAMED(name, create) BE_PLUGIN_REGISTER_NAMED_(name, name, create)
 
 #define BE_PLUGIN_REGISTER_CREATE(create)                                                          \
     BE_PLUGIN_REGISTER_NAMED_(BE_PROJECTNAME, BE_PROJECTID, create)
@@ -114,7 +103,7 @@ namespace BugEngine { namespace Plugin {
 
 #define BE_PLUGIN_REGISTER_(klass, project) BE_PLUGIN_REGISTER__(klass, project)
 
-#define BE_PLUGIN_REGISTER(klass)           BE_PLUGIN_REGISTER_(klass, BE_PROJECTID)
+#define BE_PLUGIN_REGISTER(klass) BE_PLUGIN_REGISTER_(klass, BE_PROJECTID)
 
 template < typename T >
 Plugin< T >::Plugin()
