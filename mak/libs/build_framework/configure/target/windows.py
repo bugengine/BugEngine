@@ -23,6 +23,21 @@ class Windows(Configure.ConfigurationContext.Platform):
             tgtnode.delete()
         return result == 0
 
+    def is_valid_msvc(self, compiler):
+        node = self.conf.bldnode.make_node('main.cxx')
+        tgtnode = node.change_ext('')
+        node.write('#include <cstdio>\n#include <cfloat>\n#include <new>\nint main() {}\n')
+        try:
+            result, out, err = compiler.run_cxx([node.abspath(), '/nologo', '/c', '/Fo', tgtnode.abspath()] + ['/I%s' % i for i in compiler.includes])
+        except Exception as e:
+            return False
+        finally:
+            #if result:
+            #    print(compiler.name())
+            node.delete()
+            tgtnode.delete()
+        return result == 0
+
     def __init__(self, conf=None):
         Configure.ConfigurationContext.Platform.__init__(self)
         self.conf = conf
@@ -39,7 +54,7 @@ class Windows(Configure.ConfigurationContext.Platform):
                         if self.is_valid(c):
                             result.append((c, [], Windows_GCC()))
                     elif 'msvc' in c.NAMES:
-                        if c.arch in ('amd64', 'x86'):
+                        if c.arch not in ('ia64',) and self.is_valid_msvc(c):
                             result.append((c, [], Windows_MSVC()))
                     else:
                         result.append((c, [], self))
