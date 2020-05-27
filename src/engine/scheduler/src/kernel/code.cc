@@ -2,15 +2,15 @@
    see LICENSE for detail */
 
 #include <bugengine/scheduler/stdafx.h>
-#include <bugengine/scheduler/kernel/kernel.script.hh>
+#include <bugengine/scheduler/kernel/code.script.hh>
 
 namespace BugEngine { namespace KernelScheduler {
 
-Kernel::Kernel(ref< const Code > code, const istring& name) : m_kernelCode(code), m_name(name)
+Code::Code(const inamespace& name) : m_name(name)
 {
 }
 
-Kernel::~Kernel()
+Code::~Code()
 {
 }
 

@@ -1,38 +1,26 @@
 /* BugEngine <bugengine.devel@gmail.com> / 2008-2014
    see LICENSE for detail */
 
-#ifndef BE_SCHEDULER_KERNEL_KERNEL_SCRIPT_HH_
-#define BE_SCHEDULER_KERNEL_KERNEL_SCRIPT_HH_
+#ifndef BE_SCHEDULER_KERNEL_CODE_SCRIPT_HH_
+#define BE_SCHEDULER_KERNEL_CODE_SCRIPT_HH_
 /**************************************************************************************************/
 #include <bugengine/scheduler/stdafx.h>
 #include <bugengine/resource/description.script.hh>
-#include <bugengine/scheduler/kernel/code.script.hh>
 
 namespace BugEngine { namespace KernelScheduler {
 
-enum SchedulerType
+class be_api(SCHEDULER) Code : public Resource::Description
 {
-    CPUType,
-    GPUType
-};
-
-class be_api(SCHEDULER) Kernel : public Resource::Description
-{
-private:
-    ref< const Code > m_kernelCode;
-    const istring     m_name;
+protected:
+    const inamespace m_name;
 
 public:
-    Kernel(ref< const Code > code, const istring& name);
-    ~Kernel();
+    Code(const inamespace& name);
+    ~Code();
 
-    istring name() const
+    inamespace name() const
     {
         return m_name;
-    }
-    weak< const Code > code() const
-    {
-        return m_kernelCode;
     }
 };
 

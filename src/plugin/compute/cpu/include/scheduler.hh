@@ -12,15 +12,16 @@
 namespace BugEngine { namespace KernelScheduler { namespace CPU {
 
 class CodeLoader;
+class KernelLoader;
 class MemoryHost;
 class CPUKernelTaskItem;
 
 class Scheduler : public IScheduler
 {
 private:
-    weak< Resource::ResourceManager >   m_resourceManager;
-    minitl::vector< ref< CodeLoader > > m_cpuLoaders;
-    scoped< MemoryHost >                m_memoryHost;
+    weak< Resource::ResourceManager >     m_resourceManager;
+    minitl::vector< ref< KernelLoader > > m_cpuLoaders;
+    scoped< MemoryHost >                  m_memoryHost;
 
 public:
     Scheduler(const Plugin::Context& context);
