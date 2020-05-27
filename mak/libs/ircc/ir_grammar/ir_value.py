@@ -5,7 +5,7 @@ from be_typing import TYPE_CHECKING
 def p_ir_value(p):
     # type: (YaccProduction) -> None
     """
-        ir-value : ir-type ir-parameter-attribute-list ir-expr
+        ir-value : ir-type ir-parameter-attribute-list-opt ir-expr
     """
     p[0] = IrValueExpr(p[1], p[3])
 

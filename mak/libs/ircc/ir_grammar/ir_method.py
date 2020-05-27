@@ -40,7 +40,7 @@ def p_ir_method_definition(p):
 def p_ir_method_prototype(p):
     # type: (YaccProduction) -> None
     """
-        ir-method-prototype : ir-method-header ir-parameter-attribute-list ir-return-type ID LPAREN LPAREN_MARK ir-parameter-list RPAREN ir-method-footer
+        ir-method-prototype : ir-method-header ir-parameter-attribute-list-opt ir-return-type ID LPAREN LPAREN_MARK ir-parameter-list RPAREN ir-method-footer
     """
     p[0] = (IrReference(p[4]), IrMethodDeclaration(IrMethodObject(p[3], p[7], p[1])))
 
@@ -57,7 +57,7 @@ def p_ir_method_header(p):
 def p_ir_method_footer(p):
     # type: (YaccProduction) -> None
     """
-        ir-method-footer : ir-method-addr-opt ir-addrspace-opt ir-method-attribute-list ir-method-section-opt ir-method-comdat-opt ir-method-align-opt ir-method-gc-opt ir-method-prefix-opt ir-method-prologue-opt ir-method-personality
+        ir-method-footer : ir-method-addr-opt ir-addrspace-opt ir-method-attribute-list-opt ir-method-section-opt ir-method-comdat-opt ir-method-align-opt ir-method-gc-opt ir-method-prefix-opt ir-method-prologue-opt ir-method-personality
     """
 
 
@@ -179,8 +179,8 @@ def p_ir_parameter_list_end(p):
 def p_ir_parameter(p):
     # type: (YaccProduction) -> None
     """
-        ir-parameter : ir-type ir-parameter-attribute-list ID
-                     | ir-type ir-parameter-attribute-list empty
+        ir-parameter : ir-type ir-parameter-attribute-list-opt ID
+                     | ir-type ir-parameter-attribute-list-opt empty
     """
     p[0] = IrMethodParameter(p[1], p[3], p[2])
 
@@ -188,8 +188,8 @@ def p_ir_parameter(p):
 def p_ir_parameter_metadata(p):
     # type: (YaccProduction) -> None
     """
-        ir-parameter : METADATA ir-parameter-attribute-list ID
-                     | METADATA ir-parameter-attribute-list empty
+        ir-parameter : METADATA ir-parameter-attribute-list-opt ID
+                     | METADATA ir-parameter-attribute-list-opt empty
     """
     p[0] = IrMethodMetadataParameter(p[2], p[3], [])
 

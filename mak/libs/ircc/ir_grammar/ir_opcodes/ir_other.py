@@ -4,7 +4,7 @@ from be_typing import TYPE_CHECKING
 def p_ir_opcode_call(p):
     # type: (YaccProduction) -> None
     """
-        ir-opcode : ir-tail-type CALL ir-calling-convention ir-parameter-attribute-list ir-return-type ID LPAREN LPAREN_MARK ir-argument-list RPAREN ir-attribute-list ir-instruction-attachment-list
+        ir-opcode : ir-tail-type CALL ir-calling-convention ir-parameter-attribute-list-opt ir-return-type ID LPAREN LPAREN_MARK ir-argument-list RPAREN ir-attribute-list-opt ir-instruction-attachment-list
     """
 
 

@@ -11,8 +11,7 @@
 namespace BugEngine { namespace KernelScheduler { namespace OpenCL {
 
 class Context;
-class CodeLoader;
-class KernelObject;
+class KernelLoader;
 class MemoryHost;
 class CLKernelTaskItem;
 
@@ -21,7 +20,7 @@ class be_api(OPENCL) Scheduler : public IScheduler
 private:
     ref< Context >                    m_context;
     weak< Resource::ResourceManager > m_resourceManager;
-    scoped< CodeLoader >              m_loader;
+    scoped< KernelLoader >            m_loader;
     scoped< MemoryHost >              m_memoryHost;
     int                               m_errorCode;
     cl_command_queue                  m_commandQueue;

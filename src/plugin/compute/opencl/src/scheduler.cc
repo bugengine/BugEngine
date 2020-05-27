@@ -10,6 +10,7 @@
 #include <bugengine/scheduler/task/itask.hh>
 #include <codeloader.hh>
 #include <context.hh>
+#include <kernelloader.hh>
 
 namespace BugEngine { namespace KernelScheduler { namespace OpenCL {
 
@@ -43,7 +44,8 @@ Scheduler::Scheduler(const Plugin::Context& pluginContext, ref< Context > clCont
     : IScheduler("OpenCL", pluginContext.scheduler, GPUType)
     , m_context(clContext)
     , m_resourceManager(pluginContext.resourceManager)
-    , m_loader(scoped< CodeLoader >::create(Arena::task(), m_context))
+    , m_loader(scoped< KernelLoader >::create(Arena::task(),
+                                              ref< CodeLoader >::create(Arena::task(), m_context)))
     , m_memoryHost(scoped< MemoryHost >::create(Arena::task()))
     , m_errorCode(0)
     , m_commandQueue(clCreateCommandQueue(m_context->m_context, m_context->m_device,
@@ -51,6 +53,7 @@ Scheduler::Scheduler(const Plugin::Context& pluginContext, ref< Context > clCont
 {
     if(m_context->m_context)
     {
+        m_resourceManager->attach< Code >(m_loader->codeLoader());
         m_resourceManager->attach< Kernel >(weak< Resource::ILoader >(m_loader));
     }
 }
@@ -59,7 +62,8 @@ Scheduler::~Scheduler()
 {
     if(m_context->m_context)
     {
-        m_resourceManager->detach< Kernel >(weak< const Resource::ILoader >(m_loader));
+        m_resourceManager->detach< Kernel >(m_loader->codeLoader());
+        m_resourceManager->detach< Code >(weak< const Resource::ILoader >(m_loader));
         clReleaseCommandQueue(m_commandQueue);
     }
 }

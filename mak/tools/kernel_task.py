@@ -9,7 +9,7 @@ except ImportError:
     import pickle
 
 TEMPLATE_CLASS_H = """
-class %(KernelName)sTask : public minitl::refcountable
+class %(KernelName)s : public minitl::refcountable
 {
 private:
     %(argument_field)s
@@ -19,8 +19,8 @@ private:
     minitl::array< weak<BugEngine::KernelScheduler::IParameter> > makeParameters() const;
 published:
     %(argument_outs)s
-    %(KernelName)sTask(%(argument_params)s);
-    ~%(KernelName)sTask();
+    %(KernelName)s(%(argument_params)s);
+    ~%(KernelName)s();
 };
 """
 
@@ -54,7 +54,7 @@ TEMPLATE_CLASS_CC = """
 static ref< ::BugEngine::KernelScheduler::Kernel > s_%(Name)sKernel%(KernelName)s = ref< ::BugEngine::KernelScheduler::Kernel >::create(::BugEngine::Arena::task(), s_%(Name)sKernelCode, ::BugEngine::istring("%(kernelName)s"));
 BE_EXPORT ::BugEngine::Plugin::PluginHook< BugEngine::Plugin::ResourceHook< ::BugEngine::KernelScheduler::Kernel > > g_%(Name)sKernel%(KernelName)sHook = ::BugEngine::Plugin::PluginHook< ::BugEngine::Plugin::ResourceHook< ::BugEngine::KernelScheduler::Kernel > >(::BugEngine::Plugin::ResourceHook< ::BugEngine::KernelScheduler::Kernel >(s_%(Name)sKernel%(KernelName)s));
 
-%(KernelName)sTask::%(KernelName)sTask(%(argument_params)s)
+%(KernelName)s::%(KernelName)s(%(argument_params)s)
     :   %(argument_assign)sm_task(ref<BugEngine::Task::KernelTask>::create(BugEngine::Arena::task(),
                                                         "%(kernel_full_name)s.%(KernelName)s",
                                                         BugEngine::KernelScheduler::GPUType,
@@ -65,11 +65,11 @@ BE_EXPORT ::BugEngine::Plugin::PluginHook< BugEngine::Plugin::ResourceHook< ::Bu
 {
 }
 
-%(KernelName)sTask::~%(KernelName)sTask()
+%(KernelName)s::~%(KernelName)s()
 {
 }
 
-minitl::array< weak<BugEngine::KernelScheduler::IParameter> > %(KernelName)sTask::makeParameters() const
+minitl::array< weak<BugEngine::KernelScheduler::IParameter> > %(KernelName)s::makeParameters() const
 {
     minitl::array< weak<BugEngine::KernelScheduler::IParameter> > result(BugEngine::Arena::task(), %(argument_count)d);
     %(argument_result_assign)s
@@ -147,7 +147,7 @@ class kernel_task(Task.Task):
                 'kernelName':
                     method.name,
                 'KernelName':
-                    method.name.capitalize(),
+                    method.name[0].upper() + method.name[1:],
                 'argument_count':
                     len(args),
                 'argument_field':

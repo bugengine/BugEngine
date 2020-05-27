@@ -8,7 +8,7 @@
 
 namespace BugEngine { namespace KernelScheduler {
 
-IKernelLoader::IKernelLoader(ref< const ICodeLoader > codeLoader) : m_codeLoader(codeLoader)
+IKernelLoader::IKernelLoader(ref< ICodeLoader > codeLoader) : m_codeLoader(codeLoader)
 {
 }
 

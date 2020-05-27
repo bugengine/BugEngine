@@ -4,14 +4,20 @@ storage = copy.Storage
 (
 )
 
-task = copy.Kernels.CopyTask
+taskA = copy.Kernels.CopyA
 (
     in = storage.SourceComponent;
+    out = storage.IntermediateComponent;
+)
+
+taskB = copy.Kernels.CopyB
+(
+    in = taskA.out;
     out = storage.TargetComponent;
 )
 
 world = bugengine.World.World
 (
     storage = storage;
-    products = [task.out];
+    products = [taskB.out];
 )

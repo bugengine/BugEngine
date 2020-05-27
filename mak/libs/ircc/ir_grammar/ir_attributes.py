@@ -5,7 +5,7 @@ from be_typing import TYPE_CHECKING
 def p_ir_declaration_attributes(p):
     # type: (YaccProduction) -> None
     """
-        ir-attributes : ATTRIBUTES ATTRIBUTE_GROUP EQUAL LBRACE ir-attribute-list RBRACE
+        ir-attributes : ATTRIBUTES ATTRIBUTE_GROUP EQUAL LBRACE ir-attribute-list-opt RBRACE
     """
     p[0] = (IrReference(p[2]), IrAttributeGroupDeclaration(p[5]))
 
@@ -13,9 +13,9 @@ def p_ir_declaration_attributes(p):
 def p_ir_attribute_list(p):
     # type: (YaccProduction) -> None
     """
-        ir-attribute-list : ir-method-attribute ir-method-attribute-list
-                          | ir-parameter-attribute ir-parameter-attribute-list
-                          | ir-any-attribute ir-attribute-list
+        ir-attribute-list-opt : ir-method-attribute ir-method-attribute-list-opt
+                              | ir-parameter-attribute ir-parameter-attribute-list-opt
+                              | ir-any-attribute ir-attribute-list-opt
     """
     p[0] = IrAttributeGroupObject([p[1]] + p[2]._attributes)
 
@@ -23,8 +23,8 @@ def p_ir_attribute_list(p):
 def p_ir_method_attribute_list(p):
     # type: (YaccProduction) -> None
     """
-        ir-method-attribute-list : ir-method-attribute ir-method-attribute-list
-                                 | ir-any-attribute ir-method-attribute-list
+        ir-method-attribute-list-opt : ir-method-attribute ir-method-attribute-list-opt
+                                     | ir-any-attribute ir-method-attribute-list-opt
     """
     p[0] = IrAttributeGroupObject([p[1]] + p[2]._attributes)
 
@@ -32,8 +32,8 @@ def p_ir_method_attribute_list(p):
 def p_ir_parameter_attribute_list(p):
     # type: (YaccProduction) -> None
     """
-        ir-parameter-attribute-list : ir-parameter-attribute ir-parameter-attribute-list
-                                    | ir-any-attribute ir-parameter-attribute-list
+        ir-parameter-attribute-list-opt : ir-parameter-attribute ir-parameter-attribute-list-opt
+                                        | ir-any-attribute ir-parameter-attribute-list-opt
     """
     p[0] = IrAttributeGroupObject([p[1]] + p[2]._attributes)
 
@@ -41,9 +41,9 @@ def p_ir_parameter_attribute_list(p):
 def p_ir_attribute_list_end(p):
     # type: (YaccProduction) -> None
     """
-        ir-attribute-list : empty
-        ir-method-attribute-list : empty
-        ir-parameter-attribute-list : empty
+        ir-attribute-list-opt : empty
+        ir-method-attribute-list-opt : empty
+        ir-parameter-attribute-list-opt : empty
     """
     p[0] = IrAttributeGroupObject([])
 
