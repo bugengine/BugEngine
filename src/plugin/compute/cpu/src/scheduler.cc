@@ -3,6 +3,7 @@
 
 #include <bugengine/plugin.compute.cpu/stdafx.h>
 #include <codeloader.hh>
+#include <kernelloader.hh>
 #include <memoryhost.hh>
 #include <scheduler.hh>
 
@@ -106,18 +107,21 @@ Scheduler::Scheduler(const Plugin::Context& context)
             be_info("registering optimised CPU kernel loader for %s" | s_cpuVariants[i]);
         else
             be_info("registering unoptimised CPU kernel loader");
-        m_cpuLoaders.push_back(
-            ref< CodeLoader >::create(Arena::task(), inamespace(s_cpuVariants[i])));
+        ref< CodeLoader > codeLoader
+            = ref< CodeLoader >::create(Arena::task(), inamespace(s_cpuVariants[i]));
+        m_cpuLoaders.push_back(ref< KernelLoader >::create(Arena::task(), codeLoader));
+        m_resourceManager->attach< Code >(codeLoader);
         m_resourceManager->attach< Kernel >(m_cpuLoaders[i]);
     }
 }
 
 Scheduler::~Scheduler()
 {
-    for(minitl::vector< ref< CodeLoader > >::const_reverse_iterator it = m_cpuLoaders.rbegin();
+    for(minitl::vector< ref< KernelLoader > >::const_reverse_iterator it = m_cpuLoaders.rbegin();
         it != m_cpuLoaders.rend(); ++it)
     {
         m_resourceManager->detach< Kernel >(*it);
+        m_resourceManager->detach< Code >((*it)->codeLoader());
     }
 }
 

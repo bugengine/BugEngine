@@ -3,13 +3,14 @@
 
 #include <bugengine/plugin.compute.cpu/stdafx.h>
 #include <bugengine/scheduler/kernel/ischeduler.hh>
+#include <codeobject.hh>
 #include <kernelobject.hh>
 
 namespace BugEngine { namespace KernelScheduler { namespace CPU {
 
-KernelObject::KernelObject(const inamespace& name)
-    : m_kernel(name, ipath("kernel"))
-    , m_entryPoint(m_kernel.getSymbol< KernelMain >("_kmain"))
+KernelObject::KernelObject(weak< const CodeObject > code, const istring name)
+    : m_entryPoint(
+        code->m_kernel.getSymbol< KernelMain >((minitl::format< 256u >("_%s") | name).c_str()))
 {
     be_debug("kernel entry point: %p" | m_entryPoint);
 }

@@ -35,7 +35,8 @@ public:
     }
 
     static Resource& null();
-                     operator const void*() const
+
+    operator const void*() const
     {
         return (const void*)(this - &null());
     }

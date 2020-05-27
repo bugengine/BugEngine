@@ -5,11 +5,10 @@
 #define BE_COMPUTE_CPU_KERNELOBJECT_HH_
 /**************************************************************************************************/
 #include <bugengine/plugin.compute.cpu/stdafx.h>
-#include <bugengine/plugin/dynobject.hh>
-#include <bugengine/scheduler/task/task.hh>
 
 namespace BugEngine { namespace KernelScheduler { namespace CPU {
 
+class CodeObject;
 class Scheduler;
 
 class KernelObject : public minitl::refcountable
@@ -21,11 +20,10 @@ private:
                              const minitl::array< weak< const IMemoryBuffer > >& params);
 
 private:
-    Plugin::DynamicObject m_kernel;
-    KernelMain*           m_entryPoint;
+    KernelMain* m_entryPoint;
 
 public:
-    KernelObject(const inamespace& name);
+    KernelObject(weak< const CodeObject > code, const istring name);
     ~KernelObject();
 
     void run(const u32 index, const u32 total,

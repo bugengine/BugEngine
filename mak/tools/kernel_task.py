@@ -51,13 +51,16 @@ TEMPLATE_H = """
 """
 
 TEMPLATE_CLASS_CC = """
+static ref< ::BugEngine::KernelScheduler::Kernel > s_%(Name)sKernel%(KernelName)s = ref< ::BugEngine::KernelScheduler::Kernel >::create(::BugEngine::Arena::task(), s_%(Name)sKernelCode, ::BugEngine::istring("%(kernelName)s"));
+BE_EXPORT ::BugEngine::Plugin::PluginHook< BugEngine::Plugin::ResourceHook< ::BugEngine::KernelScheduler::Kernel > > g_%(Name)sKernel%(KernelName)sHook = ::BugEngine::Plugin::PluginHook< ::BugEngine::Plugin::ResourceHook< ::BugEngine::KernelScheduler::Kernel > >(::BugEngine::Plugin::ResourceHook< ::BugEngine::KernelScheduler::Kernel >(s_%(Name)sKernel%(KernelName)s));
+
 %(KernelName)sTask::%(KernelName)sTask(%(argument_params)s)
     :   %(argument_assign)sm_task(ref<BugEngine::Task::KernelTask>::create(BugEngine::Arena::task(),
                                                         "%(kernel_full_name)s.%(KernelName)s",
                                                         BugEngine::KernelScheduler::GPUType,
                                                         BugEngine::Colors::Red::Red,
                                                         BugEngine::Scheduler::High,
-                                                        s_%(Name)sKernel,
+                                                        s_%(Name)sKernel%(KernelName)s,
                                                         makeParameters()))%(callback_assign)s%(argument_out_assign)s
 {
 }
@@ -81,8 +84,8 @@ TEMPLATE_CC = """
 
 %(Namespace)s
 
-ref< ::BugEngine::KernelScheduler::Kernel > s_%(Name)sKernel = ref< ::BugEngine::KernelScheduler::Kernel >::create(::BugEngine::Arena::task(), ::BugEngine::inamespace("%(plugin)s.%(kernel_full_name)s"));
-BE_EXPORT ::BugEngine::Plugin::PluginHook< BugEngine::Plugin::ResourceHook< ::BugEngine::KernelScheduler::Kernel > > g_%(Name)sKernelHook = ::BugEngine::Plugin::PluginHook< ::BugEngine::Plugin::ResourceHook< ::BugEngine::KernelScheduler::Kernel > >(::BugEngine::Plugin::ResourceHook< ::BugEngine::KernelScheduler::Kernel >(s_%(Name)sKernel));
+static ref< ::BugEngine::KernelScheduler::Code > s_%(Name)sKernelCode = ref< ::BugEngine::KernelScheduler::Code >::create(::BugEngine::Arena::task(), ::BugEngine::inamespace("%(plugin)s.%(kernel_full_name)s"));
+BE_EXPORT ::BugEngine::Plugin::PluginHook< BugEngine::Plugin::ResourceHook< ::BugEngine::KernelScheduler::Code > > g_%(Name)sKernelHook = ::BugEngine::Plugin::PluginHook< ::BugEngine::Plugin::ResourceHook< ::BugEngine::KernelScheduler::Code > >(::BugEngine::Plugin::ResourceHook< ::BugEngine::KernelScheduler::Code >(s_%(Name)sKernelCode));
 
 %(Tasks_CC)s
 
@@ -141,6 +144,8 @@ class kernel_task(Task.Task):
                     kernel_name.capitalize(),
                 'kernel_full_name':
                     '.'.join(kernel_full_name),
+                'kernelName':
+                    method.name,
                 'KernelName':
                     method.name.capitalize(),
                 'argument_count':
