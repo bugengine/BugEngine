@@ -40,6 +40,7 @@ keywords = (
 
     # values
     'null',
+    'None',
     'undef',
     'true',
     'false',

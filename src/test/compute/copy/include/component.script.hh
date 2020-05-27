@@ -14,6 +14,11 @@ be_pod SourceComponent
     u64 data[16];
 };
 
+be_pod IntermediateComponent
+{
+    u64 data[16];
+};
+
 be_pod TargetComponent
 {
     u64 data[16];

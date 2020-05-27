@@ -116,7 +116,7 @@ def p_lex_enable_keywords(p):
 def p_ir_metadata_debug_node(p):
     # type: (YaccProduction) -> None
     """
-        ir-metadata-debug-node : METADATA_NAME LPAREN lex-disable-keywords LPAREN_MARK ir-metadata-debug-attribute-list RPAREN lex-enable-keywords
+        ir-metadata-debug-node : METADATA_NAME LPAREN lex-disable-keywords LPAREN_MARK ir-metadata-debug-attribute-list-opt RPAREN lex-enable-keywords
     """
     p[0] = IrSpecializedMetadata(p[1][1:], p[5])
 
@@ -124,18 +124,21 @@ def p_ir_metadata_debug_node(p):
 def p_ir_metadata_debug_attribute_list(p):
     # type: (YaccProduction) -> None
     """
-        ir-metadata-debug-attribute-list : ID_LABEL COLON ir-metadata-debug-attribute COMMA ir-metadata-debug-attribute-list
-                                         | ID_LABEL COLON ir-metadata-debug-attribute
+        ir-metadata-debug-attribute-list-opt : ID_LABEL lex-enable-keywords COLON ir-metadata-debug-attribute lex-disable-keywords COMMA ir-metadata-debug-attribute-list-opt
+                                             | ID_LABEL lex-enable-keywords COLON ir-metadata-debug-attribute lex-disable-keywords
     """
-    p[0] = [(p[1], p[3])]
-    if len(p) > 4:
-        p[0] += p[5]
+    if p[4]:
+        p[0] = [(p[1], p[4])]
+    else:
+        p[0] = []
+    if len(p) > 6:
+        p[0] += p[7]
 
 
 def p_ir_metadata_debug_attribute_list_end(p):
     # type: (YaccProduction) -> None
     """
-        ir-metadata-debug-attribute-list : empty
+        ir-metadata-debug-attribute-list-opt : empty
     """
     p[0] = []
 
@@ -144,6 +147,7 @@ def p_ir_metadata_debug_attribute(p):
     # type: (YaccProduction) -> None
     """
         ir-metadata-debug-attribute : ir-metadata-value
+                                    | ir-value
                                     | ir-metadata-debug-flag-combination
     """
     p[0] = p[1]
@@ -163,6 +167,30 @@ def p_ir_metadata_debug_attribute_integer(p):
         ir-metadata-debug-attribute : LITERAL_DECIMAL
     """
     p[0] = IrMetadataInteger(getattr(p.slice[1], 'parsed_value'))
+
+
+def p_ir_metadata_debug_attribute_bool(p):
+    # type: (YaccProduction) -> None
+    """
+        ir-metadata-debug-attribute : TRUE
+                                    | FALSE
+    """
+
+
+def p_ir_metadata_debug_attribute_none(p):
+    # type: (YaccProduction) -> None
+    """
+        ir-metadata-debug-attribute : NONE
+    """
+    p[0] = None #IrMetadataInteger(getattr(p.slice[1], 'parsed_value'))
+
+
+def p_ir_metadata_debug_attribute_error(p):
+    # type: (YaccProduction) -> None
+    """
+        ir-metadata-debug-attribute : error
+    """
+    p[0] = None
 
 
 def p_ir_metadata_debug_flag_combination(p):

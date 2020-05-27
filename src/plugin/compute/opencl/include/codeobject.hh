@@ -1,28 +1,28 @@
 /* BugEngine <bugengine.devel@gmail.com> / 2008-2014
    see LICENSE for detail */
 
-#ifndef BE_COMPUTE_OPENCL_KERNELOBJECT_HH_
-#define BE_COMPUTE_OPENCL_KERNELOBJECT_HH_
+#ifndef BE_COMPUTE_OPENCL_CODEOBJECT_HH_
+#define BE_COMPUTE_OPENCL_CODEOBJECT_HH_
 /**************************************************************************************************/
 #include <bugengine/plugin.compute.opencl/stdafx.h>
-#include <bugengine/plugin.compute.opencl/scheduler.hh>
 #include <bugengine/plugin/dynobject.hh>
-#include <bugengine/scheduler/task/task.hh>
 
 namespace BugEngine { namespace KernelScheduler { namespace OpenCL {
 
-class CodeObject;
+class Context;
+class KernelObject;
 
-class KernelObject : public minitl::refcountable
+class CodeObject : public minitl::refcountable
 {
+    friend class KernelObject;
+
 private:
-    cl_kernel m_kernel;
+    Plugin::DynamicObject m_kernel;
+    cl_program            m_program;
 
 public:
-    KernelObject(weak< const CodeObject > context, const istring name);
-    ~KernelObject();
-
-    void run(const minitl::array< weak< const IMemoryBuffer > >& params);
+    CodeObject(weak< const Context > context, const inamespace& name);
+    ~CodeObject();
 };
 
 }}}  // namespace BugEngine::KernelScheduler::OpenCL

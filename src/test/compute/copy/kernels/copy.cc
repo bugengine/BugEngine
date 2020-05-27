@@ -1,9 +1,8 @@
 #include <bugengine/kernel/input/input.hh>
 #include <component.script.hh>
 
-__kernel void copy(u32 index, u32 total,
-                   Kernel::segments< BugEngine::Test::Compute::Copy::SourceComponent > in,
-                   Kernel::segments< BugEngine::Test::Compute::Copy::TargetComponent > out)
+template < typename T1, typename T2 >
+void copy(u32 index, u32 total, Kernel::segments< T1 > in, Kernel::segments< T2 > out)
 {
     u32 start = (index * in.size()) / total;
     u32 end   = ((index + 1) * in.size()) / total;
@@ -17,4 +16,18 @@ __kernel void copy(u32 index, u32 total,
         ++out;
         ++in;
     }
+}
+
+__kernel void copyA(u32 index, u32 total,
+                    Kernel::segments< BugEngine::Test::Compute::Copy::SourceComponent >       in,
+                    Kernel::segments< BugEngine::Test::Compute::Copy::IntermediateComponent > out)
+{
+    copy(index, total, in, out);
+}
+
+__kernel void copyB(u32 index, u32 total,
+                    Kernel::segments< BugEngine::Test::Compute::Copy::IntermediateComponent > in,
+                    Kernel::segments< BugEngine::Test::Compute::Copy::TargetComponent >       out)
+{
+    copy(index, total, in, out);
 }

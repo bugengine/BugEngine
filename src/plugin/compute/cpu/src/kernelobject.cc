@@ -12,7 +12,7 @@ KernelObject::KernelObject(weak< const CodeObject > code, const istring name)
     : m_entryPoint(
         code->m_kernel.getSymbol< KernelMain >((minitl::format< 256u >("_%s") | name).c_str()))
 {
-    be_debug("kernel entry point: %p" | m_entryPoint);
+    be_debug("[%s]: %p" | name | m_entryPoint);
 }
 
 KernelObject::~KernelObject()

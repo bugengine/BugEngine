@@ -4,8 +4,8 @@
 #include <bugengine/plugin.compute.opencl/stdafx.h>
 #include <bugengine/scheduler/kernel/kernel.script.hh>
 #include <codeloader.hh>
+#include <codeobject.hh>
 #include <context.hh>
-#include <kernelobject.hh>
 
 namespace BugEngine { namespace KernelScheduler { namespace OpenCL {
 
@@ -20,10 +20,10 @@ CodeLoader::~CodeLoader()
 void CodeLoader::load(weak< const Resource::Description > kernelDescription,
                       Resource::Resource&                 resource)
 {
-    be_info("loading OpenCL kernel %s"
-            | be_checked_cast< const Kernel >(kernelDescription)->name());
-    inamespace name = be_checked_cast< const Kernel >(kernelDescription)->name() + inamespace("cl");
-    resource.setRefHandle(ref< KernelObject >::create(Arena::task(), m_context, name));
+    be_info("loading OpenCL kernel code %s"
+            | be_checked_cast< const Code >(kernelDescription)->name());
+    inamespace name = be_checked_cast< const Code >(kernelDescription)->name() + inamespace("cl");
+    resource.setRefHandle(ref< CodeObject >::create(Arena::task(), m_context, name));
 }
 
 void CodeLoader::reload(weak< const Resource::Description > /*oldKernelDescription*/,
