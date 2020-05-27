@@ -13,6 +13,8 @@
 #        include <bugengine/kernel/msvc/amd64/interlocked.inl>
 #    elif defined(_PPC)
 #        include <bugengine/kernel/msvc/ppc/interlocked.inl>
+#    elif defined(_ARM64)
+#        include <bugengine/kernel/msvc/arm64/interlocked.inl>
 #    elif defined(_ARM)
 #        include <bugengine/kernel/msvc/arm/interlocked.inl>
 #    else
@@ -153,7 +155,7 @@ public:
     __host __device T* setConditional(T* value, T* condition)
     {
         return reinterpret_cast< T* >(
-           impl::set_conditional((value_t*)&m_value, (value_t)value, (value_t)condition));
+            impl::set_conditional((value_t*)&m_value, (value_t)value, (value_t)condition));
     }
 };
 
