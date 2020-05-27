@@ -45,7 +45,10 @@ class AndroidPlatform(Configure.ConfigurationContext.Platform):
             '24': 'Nougat_7.0',
             '25': 'Nougat_7.1',
             '26': 'Oreo_8.0',
-            '27': 'Oreo_8.1'
+            '27': 'Oreo_8.1',
+            '28': 'Pie_9.0',
+            '29': '10',
+            '30': '11',
         }
         return versions.get(sdk_version, 'api'+sdk_version)
 
