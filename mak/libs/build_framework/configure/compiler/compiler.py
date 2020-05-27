@@ -36,6 +36,8 @@ class Compiler:
         'mips64': 'mips64',
         'mips64el': 'mips64el',
         'mipsel64': 'mips64el',
+        'ia64': 'ia64',
+        'itanium': 'ia64',
     }
     VECTORIZED_FLAGS = {}
 

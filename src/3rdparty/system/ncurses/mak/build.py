@@ -8,6 +8,7 @@ def build(bld):
                            depends=['3rdparty.system.win32'],
                            extra_includes=includes,
                            extra_defines=['PDC_DLL_BUILD'],
+                           extra_public_defines=['PDC_DLL_BUILD'],
                            warnings=False, use_master=False)
         bld.add_feature('ncurses')
     else:

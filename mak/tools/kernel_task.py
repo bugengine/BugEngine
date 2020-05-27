@@ -87,6 +87,10 @@ TEMPLATE_CC = """
 static ref< ::BugEngine::KernelScheduler::Code > s_%(Name)sKernelCode = ref< ::BugEngine::KernelScheduler::Code >::create(::BugEngine::Arena::task(), ::BugEngine::inamespace("%(plugin)s.%(kernel_full_name)s"));
 BE_EXPORT ::BugEngine::Plugin::PluginHook< BugEngine::Plugin::ResourceHook< ::BugEngine::KernelScheduler::Code > > g_%(Name)sKernelHook = ::BugEngine::Plugin::PluginHook< ::BugEngine::Plugin::ResourceHook< ::BugEngine::KernelScheduler::Code > >(::BugEngine::Plugin::ResourceHook< ::BugEngine::KernelScheduler::Code >(s_%(Name)sKernelCode));
 
+%(end_Namespace)s
+// this is important for visual studio 2003
+%(Namespace)s
+
 %(Tasks_CC)s
 
 %(end_Namespace)s
