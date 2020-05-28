@@ -2,8 +2,11 @@
    see LICENSE for detail */
 
 #include <bugengine/plugin.compute.opencl/stdafx.h>
-#include <bugengine/scheduler/kernel/kernel.script.hh>
 #include <kernelloader.hh>
+
+#include <bugengine/scheduler/kernel/kernel.script.hh>
+#include <codeloader.hh>
+#include <codeobject.hh>
 #include <kernelobject.hh>
 
 namespace BugEngine { namespace KernelScheduler { namespace OpenCL {
