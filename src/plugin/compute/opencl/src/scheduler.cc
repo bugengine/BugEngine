@@ -62,8 +62,8 @@ Scheduler::~Scheduler()
 {
     if(m_context->m_context)
     {
-        m_resourceManager->detach< Kernel >(m_loader->codeLoader());
-        m_resourceManager->detach< Code >(weak< const Resource::ILoader >(m_loader));
+        m_resourceManager->detach< Kernel >(weak< const Resource::ILoader >(m_loader));
+        m_resourceManager->detach< Code >(m_loader->codeLoader());
         clReleaseCommandQueue(m_commandQueue);
     }
 }
