@@ -88,7 +88,7 @@ public:
 #else
 
 #    define _BE_PLUGIN_EXPORT_VAR(var, value)                                                      \
-        BE_EXPORT var;                                                                             \
+        _BE_PLUGIN_EXPORT var;                                                                     \
         var = value;
 #    define _BE_PLUGIN_EXPORT extern "C" BE_EXPORT
 #    define _BE_REGISTER_PLUGIN(id, name)
