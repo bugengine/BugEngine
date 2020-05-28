@@ -2,7 +2,7 @@
 #include <component.script.hh>
 
 template < typename T1, typename T2 >
-void copy(u32 index, u32 total, Kernel::segments< T1 > in, Kernel::segments< T2 > out)
+__device void copy(u32 index, u32 total, Kernel::segments< T1 > in, Kernel::segments< T2 > out)
 {
     u32 start = (index * in.size()) / total;
     u32 end   = ((index + 1) * in.size()) / total;
