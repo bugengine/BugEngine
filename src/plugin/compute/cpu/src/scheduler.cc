@@ -8,10 +8,11 @@
 #include <scheduler.hh>
 
 #include <bugengine/resource/resourcemanager.hh>
+#include <bugengine/scheduler/kernel/ischeduler.hh>
 #include <bugengine/scheduler/kernel/kernel.script.hh>
 #include <bugengine/scheduler/scheduler.hh>
-#include <bugengine/scheduler/task/itask.hh>
 #include <bugengine/scheduler/task/kerneltask.hh>
+#include <bugengine/scheduler/task/task.hh>
 #include <kernel_optims.hh>
 #include <kernelobject.hh>
 

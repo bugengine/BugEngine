@@ -2,7 +2,10 @@
    see LICENSE for detail */
 
 #include <bugengine/plugin.compute.cpu/stdafx.h>
+#include <codeobject.hh>
+
 #include <bugengine/scheduler/kernel/kernel.script.hh>
+#include <codeloader.hh>
 #include <kernelloader.hh>
 #include <kernelobject.hh>
 

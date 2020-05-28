@@ -4,6 +4,7 @@
 #include <bugengine/plugin.compute.opencl/stdafx.h>
 #include <bugengine/scheduler/kernel/ischeduler.hh>
 #include <codeobject.hh>
+#include <context.hh>
 
 namespace BugEngine { namespace KernelScheduler { namespace OpenCL {
 
