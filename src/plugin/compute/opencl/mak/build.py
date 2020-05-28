@@ -21,10 +21,10 @@ extern const unsigned long s_cldata32_size;
 extern const unsigned char s_cldata64[];
 extern const unsigned long s_cldata64_size;
 
-_BE_PLUGIN_EXPORT const unsigned char* s_clKernel32 = s_cldata32;
-_BE_PLUGIN_EXPORT const u64 s_clKernel32Size = s_cldata32_size;
-_BE_PLUGIN_EXPORT const unsigned char* s_clKernel64 = s_cldata64;
-_BE_PLUGIN_EXPORT const u64 s_clKernel64Size = s_cldata64_size;
+_BE_PLUGIN_EXPORT_VAR(const unsigned char* s_clKernel32, s_cldata32);
+_BE_PLUGIN_EXPORT_VAR(const u64 s_clKernel32Size, s_cldata32_size);
+_BE_PLUGIN_EXPORT_VAR(const unsigned char* s_clKernel64, s_cldata64);
+_BE_PLUGIN_EXPORT_VAR(const u64 s_clKernel64Size, s_cldata64_size);
 
 _BE_REGISTER_PLUGIN(BE_KERNEL_ID, BE_KERNEL_NAME);
 _BE_REGISTER_METHOD(BE_KERNEL_ID, s_clKernel32);
