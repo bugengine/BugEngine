@@ -81,7 +81,7 @@ class copy(Task.Task):
     color   = 'PINK'
 
     def run(self):
-        self.outputs[0].write(self.inputs[0].read())
+        self.outputs[0].write(self.inputs[0].read(flags='rb'), flags='wb')
         return 0
 
 
@@ -95,7 +95,7 @@ class aapt_pkg(Task.Task):
         bld = self.generator.bld
         root = bld.bldnode
         root = root.make_node('zip')
-        self.outputs[0].write(self.inputs[0].read())
+        self.outputs[0].write(self.inputs[0].read(flags='rb'), flags='wb')
         if self.env._7Z:
             compression_level = 2 if bld.__class__.optim != 'final' else 9
             cmd = self.env._7Z + ['a', '-tzip', '-mx%d'%compression_level,
