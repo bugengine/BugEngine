@@ -23,16 +23,20 @@ static ref< Logger >                  s_logger(Logger::instance("scripting.lua")
 static const raw< const RTTI::Class > s_voidClass = be_class< void >();
 
 static const char* s_metaTables[]
-   = {"BugEngine.Object", "BugEngine.Resource", "BugEngine.ResourceManager", "BugEngine.Plugin"};
+    = {"BugEngine.Object", "BugEngine.Resource", "BugEngine.ResourceManager", "BugEngine.Plugin"};
 
 static const luaL_Reg loadedlibs[] = {{"_G", luaopen_base},
                                       //{LUA_LOADLIBNAME, luaopen_package},
                                       {LUA_COLIBNAME, luaopen_coroutine},
                                       {LUA_TABLIBNAME, luaopen_table},
-                                      //{LUA_IOLIBNAME, luaopen_io},
-                                      //{LUA_OSLIBNAME, luaopen_os},
+#if 0
+                                      {LUA_IOLIBNAME, luaopen_io},
+                                      {LUA_OSLIBNAME, luaopen_os},
+#endif
                                       {LUA_STRLIBNAME, luaopen_string},
+#ifdef LUA_BITLIBNAME
                                       {LUA_BITLIBNAME, luaopen_bit32},
+#endif
                                       {LUA_MATHLIBNAME, luaopen_math},
                                       {LUA_DBLIBNAME, luaopen_debug},
                                       {NULL, NULL}};
@@ -174,7 +178,7 @@ minitl::format< 1024u > Context::tostring(lua_State* state, int element)
             lua_pop(state, 2);
             RTTI::Value* userdata = (RTTI::Value*)lua_touserdata(state, element);
             const char*  constness
-               = (userdata->type().constness == RTTI::Type::Const) ? "const " : "mutable ";
+                = (userdata->type().constness == RTTI::Type::Const) ? "const " : "mutable ";
             const char* reference;
             const char* closing;
             switch(userdata->type().indirection)
@@ -212,7 +216,7 @@ minitl::format< 1024u > Context::tostring(lua_State* state, int element)
         {
             lua_pop(state, 2);
             Plugin::Plugin< void >* userdata
-               = (Plugin::Plugin< void >*)lua_touserdata(state, element);
+                = (Plugin::Plugin< void >*)lua_touserdata(state, element);
             return minitl::format< 1024u >("BugEngine.Plugin[%s]") | userdata->name();
         }
         lua_pop(state, 1);
@@ -264,8 +268,7 @@ extern "C" int luaPrint(lua_State* L)
         lua_pushvalue(L, i);  /* value to print */
         lua_call(L, 1, 1);
         s = lua_tostring(L, -1); /* get result */
-        if(s == NULL)
-            return luaL_error(L, LUA_QL("tostring") " must return a string to " LUA_QL("print"));
+        if(s == NULL) return luaL_error(L, "'tostring' must return a string to 'print'");
         lua_Debug ar;
         if(lua_getstack(L, 1, &ar))
         {

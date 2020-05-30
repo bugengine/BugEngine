@@ -3,7 +3,7 @@ import os
 
 
 def setup(conf):
-    for v in '-5.3', '5.3', '-5.2', '5.2', '-5.1', '5.1':
+    for v in '-5.4', '5.4', '-5.3', '5.3', '-5.2', '5.2', '-5.1', '5.1':
         try:
             conf.pkg_config('lua%s' % v, var='lua')
         except Exception as e:
