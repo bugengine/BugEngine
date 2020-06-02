@@ -126,6 +126,10 @@ class vscode(Build.BuildContext):
                     properties['DebuggerType'] = 'cppdbg'
                     properties['DebuggerMode'] = 'lldb'
                     properties['DebuggerPath'] = env.LLDB[0]
+                else:
+                    properties['DebuggerType'] = 'cppdbg'
+                    properties['DebuggerMode'] = 'gdb'
+                    properties['DebuggerPath'] = '/usr/bin/gdb'
                 configurations.append({
                     'name': '%s - %s' % (env_name, variant),
                     'includePath': [],
@@ -144,7 +148,7 @@ class vscode(Build.BuildContext):
                                 if task.__class__.__name__ in ('cxx', 'c', 'objc', 'objcxx'):
                                     commands.append({
                                         'directory': task.get_cwd().path_from(self.path),
-                                        'arguments': ['-I"%s"' % i for i in task.env.INCPATHS] + ['-D%s' % d for d in task.env.DEFINES],
+                                        'arguments': ['-I"%s"' % i for i in env.INCLUDES + task.env.INCPATHS] + ['-D%s' % d for d in task.env.DEFINES + env.DEFINES],
                                         'file': task.inputs[0].path_from(self.path),
                                         'output': task.outputs[0].path_from(task.get_cwd())
                                     })
