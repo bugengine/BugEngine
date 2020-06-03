@@ -112,7 +112,7 @@ class vscode(Build.BuildContext):
                             'Prefix', 'TmpDir', 'Toolchain', 'Deploy_BinDir', 'Deploy_RunBinDir', 'Deploy_LibDir',
                             'Deploy_IncludeDir', 'Deploy_DataDir', 'Deploy_PluginDir', 'Deploy_KernelDir', 'Deploy_RootDir'
                         ]:
-                    properties[var] = env[var.upper()]
+                    properties[var] = bld_env[var.upper()]
                 properties['Variant'] = variant
                 properties['Launcher'] = env.cxxprogram_PATTERN % self.launcher[0][0].target
                 properties['Python'] = sys.executable
