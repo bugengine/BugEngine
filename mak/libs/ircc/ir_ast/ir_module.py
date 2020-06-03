@@ -28,12 +28,17 @@ class IrModule:
 
     def visit(self, generator):
         # type: (IrCodeGenerator) -> None
+        declarations = []
+        for name, decl in self._declarations.items():
+            declarations += decl.collect(name)
         generator.begin_module()
         generator.begin_headers()
         for header in self._headers:
             header.visit(generator)
         generator.end_headers()
         generator.begin_declarations()
+        for name, decl in declarations:
+            decl.visit(generator, name)
         generator.end_declarations()
         generator.end_module()
 
