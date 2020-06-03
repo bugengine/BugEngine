@@ -7,7 +7,7 @@ define [linkage] [PreemptionSpecifier] [visibility] [DLLStorageClass]
        [prologue Constant] [personality Constant] (!name !N)* { ... }
 """
 
-from ..ir_ast import IrReference, IrMethodObject, IrMethodBody, IrMethodParameter, IrMethodMetadataParameter, IrMethodDeclaration
+from ..ir_ast import IrReference, IrMethodObject, IrMethodBody, IrMethodParameter, IrMethodMetadataParameter, IrMethodDeclaration, IrTypeMetadata
 from be_typing import TYPE_CHECKING
 
 
@@ -191,7 +191,7 @@ def p_ir_parameter_metadata(p):
         ir-parameter : METADATA ir-parameter-attribute-list-opt ID
                      | METADATA ir-parameter-attribute-list-opt empty
     """
-    p[0] = IrMethodMetadataParameter(p[2], p[3], [])
+    p[0] = IrMethodMetadataParameter(IrTypeMetadata(), p[3], [2])
 
 
 def p_ir_method_addr_opt(p):
