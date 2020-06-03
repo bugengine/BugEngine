@@ -87,7 +87,7 @@ def p_ir_type_builtin_vector(p):
         ir-type-vector : LANGLE LITERAL_DECIMAL X ir-type-scalar RANGLE
                        | LANGLE LITERAL_DECIMAL X ir-type-ptr RANGLE
     """
-    p[0] = IrTypeVector(p[4], p[2])
+    p[0] = IrTypeVector(p[4], p.slice[2].parsed_value)
 
 
 def p_ir_type_ptr(p):
@@ -120,7 +120,7 @@ def p_ir_addrspace(p):
     """
         ir-addrspace : ADDRSPACE LPAREN LPAREN_MARK LITERAL_DECIMAL RPAREN
     """
-    p[0] = p[4]
+    p[0] = p.slice[4].parsed_value
 
 
 def p_ir_type_array(p):
@@ -128,7 +128,7 @@ def p_ir_type_array(p):
     """
         ir-type-array : LBRACKET LITERAL_DECIMAL X ir-type RBRACKET
     """
-    p[0] = IrTypeArray(p[4], p[2])
+    p[0] = IrTypeArray(p[4], p.slice[2].parsed_value)
 
 
 def p_ir_typedef_opaque(p):
