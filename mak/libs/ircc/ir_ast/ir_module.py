@@ -27,7 +27,7 @@ class IrModule:
             return decl
 
     def visit(self, generator):
-        # type: (IrCodeGenerator) -> None
+        # type: (IrccGenerator) -> None
         declarations = []
         for name, decl in self._declarations.items():
             declarations += decl.collect(name)
@@ -37,14 +37,17 @@ class IrModule:
             header.visit(generator)
         generator.end_headers()
         generator.begin_declarations()
+        seen = set([])
         for name, decl in declarations:
-            decl.visit(generator, name)
+            if name not in seen:
+                seen.add(name)
+                decl.visit(generator, name)
         generator.end_declarations()
         generator.end_module()
 
 if TYPE_CHECKING:
     from typing import List, Optional, Tuple, Type
-    from ..ir_codegen import IrCodeGenerator
+    from ..ir_codegen import IrccGenerator
     from .ir_header import IrHeader
     from .ir_reference import IrReference
     from .ir_declaration import IrDeclaration

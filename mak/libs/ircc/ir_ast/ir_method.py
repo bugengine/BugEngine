@@ -44,7 +44,7 @@ class IrMethodDeclaration(IrDeclaration):
         return self
 
     def visit(self, generator, name):
-        # type: (IrCodeGenerator, str) -> None
+        # type: (IrccGenerator, str) -> None
         if self._method._return_type is not None:
             return_type = self._method._return_type.create_generator_type(generator)
         else:
@@ -102,4 +102,4 @@ if TYPE_CHECKING:
     from .ir_reference import IrReference
     from .ir_instruction import IrInstruction
     from .ir_type import IrType
-    from ..ir_codegen import IrCodeGenerator
+    from ..ir_codegen import IrccGenerator
