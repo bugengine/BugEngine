@@ -34,6 +34,7 @@ def p_ir_method_definition(p):
         ir-method-definition : DEFINE ir-method-prototype ir-metadata-list-opt LBRACE ir-instruction-list RBRACE
     """
     method = p[2][1]
+    method._method.define(IrMethodBody(p[5]))
     p[0] = p[2]
 
 

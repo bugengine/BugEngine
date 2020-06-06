@@ -8,11 +8,11 @@ class ClDeclaration(IrccCDeclaration):
         # type: (TextIO) -> None
         IrccCDeclaration.__init__(self, file)
         self._address_spaces = {
-            0: '',
+            0: '__private',
             1: '__global',
             2: '__constant',
             3: '__local',
-            4: '__todo'
+            4: '#invalid'
         }
 
     def make_address_space(self, type, address_space):

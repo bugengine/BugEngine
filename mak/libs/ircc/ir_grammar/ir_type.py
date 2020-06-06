@@ -112,7 +112,7 @@ def p_ir_addrspace_opt(p):
         ir-addrspace-opt : ir-addrspace
                          | empty
     """
-    p[0] = p[1] if p[1] is not None else 4
+    p[0] = p[1] if p[1] is not None else 0
 
 
 def p_ir_addrspace(p):

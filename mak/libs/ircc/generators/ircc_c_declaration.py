@@ -71,7 +71,7 @@ class IrccCDeclaration(IrccGenerator):
 
     def begin_method(self, name, return_type, parameters):
         # type: (str, str, List[Tuple[str, str]]) -> None
-        self._out_file.write('%s %s(%s)' % (return_type, name, ', '.join('%s' % t.format(['', '', name, '']) for t, n in parameters)))
+        self._out_file.write('%s %s(%s)' % (return_type.format(['', '', '', '']), name, ', '.join('%s' % t.format(['', '', name, '']) for t, n in parameters)))
 
     def end_method(self):
         # type: () -> None
