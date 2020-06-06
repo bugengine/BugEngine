@@ -19,7 +19,7 @@ class IrccCDefinition(IrccCDeclaration):
 
     def begin_method(self, name, return_type, parameters):
         # type: (str, str, List[Tuple[str, str]]) -> None
-        self._out_file.write('%s %s(%s)\n{\n' % (return_type, name, ', '.join('%s %s' % (t, n) for t, n in parameters)))
+        self._out_file.write('%s %s(%s)\n{\n' % (return_type.format(['', '', '', '']), name, ', '.join(t.format(['', '', n, '']) for t, n in parameters)))
 
     def end_method(self):
         # type: () -> None

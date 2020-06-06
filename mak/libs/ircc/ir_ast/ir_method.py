@@ -34,7 +34,6 @@ class IrMethodDeclaration(IrDeclaration):
     def __init__(self, method):
         # type: (IrMethodObject) -> None
         self._method = method
-        assert self._method._name is None
         self._method._name = 'method_%d' % IrMethodDeclaration.METHOD_INDEX
         IrMethodDeclaration.METHOD_INDEX += 1
 
@@ -42,6 +41,11 @@ class IrMethodDeclaration(IrDeclaration):
         # type: (IrModule) -> IrDeclaration
         self._method = self._method.resolve(module)
         return self
+
+    def collect(self, ir_name):
+        # type: (str) -> List[Tuple[str, IrDeclaration]]
+        assert self._method is not None
+        return [(ir_name+'_%d'%index, IrMethodDeclaration(instance)) for index, instance in enumerate(self._method._instances)]
 
     def visit(self, generator, name):
         # type: (IrccGenerator, str) -> None
@@ -76,11 +80,15 @@ class IrMethodObject(IrMethod):
         for i, p in enumerate(self._parameters):
             p._name = 'param_%d'%i
         self._calling_convention = calling_convention
-        self._definition = None    # type: Optional[IrMethodBody]
+        self._definition = None  # type: Optional[IrMethodBody]
+        self._instances = []  # type: List[IrMethodObject]
 
     def define(self, instruction_list):
         # type: (List[IrInstruction]) -> None
         self._definition = IrMethodBody(instruction_list)
+        if self._calling_convention == 'spir_kernel':
+            self._instances.append(self)
+            self._definition._instantiate()
 
     def resolve(self, module):
         # type: (IrModule) -> IrMethodObject
@@ -95,9 +103,12 @@ class IrMethodBody:
         # type: (List[IrInstruction]) -> None
         self._instruction_list = instruction_list
 
+    def _instantiate(self):
+        pass
+
 
 if TYPE_CHECKING:
-    from typing import List, Optional
+    from typing import List, Optional, Tuple
     from .ir_module import IrModule
     from .ir_reference import IrReference
     from .ir_instruction import IrInstruction
