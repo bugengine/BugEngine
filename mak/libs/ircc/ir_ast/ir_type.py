@@ -19,7 +19,7 @@ class IrType(IrObject):
 
     @abstractmethod
     def create_generator_type(self, generator):
-        # type: (IrCodeGenerator) -> str
+        # type: (IrccGenerator) -> str
         raise NotImplementedError
 
 
@@ -45,7 +45,7 @@ class IrTypeDeclaration(IrDeclaration):
         return result
 
     def visit(self, generator, ir_name):
-        # type: (IrCodeGenerator, str) -> None
+        # type: (IrccGenerator, str) -> None
         assert self._type is not None
         assert self._type._name is not None
         generator.declare_type(self._type.create_generator_type(generator), self._type._name, ir_name)
@@ -71,7 +71,7 @@ class IrTypeReference(IrType):
         return self._declaration.collect(self._reference)
 
     def create_generator_type(self, generator):
-        # type: (IrCodeGenerator) -> str
+        # type: (IrccGenerator) -> str
         assert self._target is not None
         assert self._target._name is not None
         return generator.type_declared(self._target._name)
@@ -83,13 +83,13 @@ class IrTypeOpaque(IrType):
         return 'opaque'
 
     def create_generator_type(self, generator):
-        # type: (IrCodeGenerator) -> str
+        # type: (IrccGenerator) -> str
         return generator.type_void()
 
 
 class IrTypeMetadata(IrType):
     def create_generator_type(self, generator):
-        # type: (IrCodeGenerator) -> str
+        # type: (IrccGenerator) -> str
         return 'metadata'
 
 
@@ -104,7 +104,7 @@ class IrTypeBuiltin(IrType):
         return self._builtin
 
     def create_generator_type(self, generator):
-        # type: (IrCodeGenerator) -> str
+        # type: (IrccGenerator) -> str
         return generator.type_builtin(self._builtin)
 
 
@@ -126,7 +126,7 @@ class IrTypePtr(IrType):
         return '%s %s*' % (self._pointee, addrspaces[self._address_space])
 
     def create_generator_type(self, generator):
-        # type: (IrCodeGenerator) -> str
+        # type: (IrccGenerator) -> str
         return generator.make_ptr(generator.make_address_space(self._pointee.create_generator_type(generator), self._address_space))
 
 
@@ -151,7 +151,7 @@ class IrTypeArray(IrType):
         return '%s[%d]' % (self._type, self._count)
 
     def create_generator_type(self, generator):
-        # type: (IrCodeGenerator) -> str
+        # type: (IrccGenerator) -> str
         return generator.make_array(self._type.create_generator_type(generator), self._count)
 
 
@@ -200,7 +200,7 @@ class IrTypeStruct(IrType):
         return '{%s}' % (', '.join(str(x) for x,_ in self._fields))
 
     def create_generator_type(self, generator):
-        # type: (IrCodeGenerator) -> str
+        # type: (IrccGenerator) -> str
         return generator.make_struct([(f.create_generator_type(generator), n) for f, n in self._fields])
 
 
@@ -234,4 +234,4 @@ if TYPE_CHECKING:
     from typing import List, Optional, Tuple
     from .ir_module import IrModule
     from .ir_reference import IrReference
-    from ..ir_codegen import IrCodeGenerator
+    from ..ir_codegen import IrccGenerator, IrccType

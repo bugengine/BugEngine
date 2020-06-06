@@ -1,7 +1,11 @@
 from be_typing import TYPE_CHECKING
 
 
-class IrCodeGenerator:
+class IrccGenerator:
+    def __init__(self, file):
+        # type: (TextIO) -> None
+        self._out_file = file
+
     def begin_module(self):
         # type: () -> None
         pass
@@ -32,4 +36,4 @@ class IrCodeGenerator:
 
 
 if TYPE_CHECKING:
-    from typing import Any
+    from typing import TextIO

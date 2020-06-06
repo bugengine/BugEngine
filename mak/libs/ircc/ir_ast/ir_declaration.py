@@ -14,11 +14,11 @@ class IrDeclaration:
         return []
 
     def visit(self, generator, ir_name):
-        # type: (IrCodeGenerator, str) -> None
+        # type: (IrccGenerator, str) -> None
         pass
 
 if TYPE_CHECKING:
     from typing import List, Tuple
     from .ir_module import IrModule
     from .ir_reference import IrReference
-    from ..ir_codegen import IrCodeGenerator
+    from ..ir_codegen import IrccGenerator
