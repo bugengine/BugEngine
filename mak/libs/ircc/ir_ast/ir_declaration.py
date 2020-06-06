@@ -3,6 +3,9 @@ from abc import abstractmethod
 
 
 class IrDeclaration:
+    def __init__(self):
+        pass
+
     @abstractmethod
     def resolve(self, module):
         # type: (IrModule) -> IrDeclaration
