@@ -142,8 +142,8 @@ class AndroidPlatform(Configure.ConfigurationContext.Platform):
         env.DEPLOY_KERNELDIR = os.path.join('lib', target_folder)
 
         env.append_value('CFLAGS', self.get_android_c_flags(compiler))
-        env.append_value('CXXFLAGS', self.get_android_c_flags(compiler) + ['-nostdinc++', '-nostdlib++'])
-        env.append_value('LDFLAGS', self.get_android_ld_flags(compiler) + ['-nostdlib++'])
+        env.append_value('CXXFLAGS', self.get_android_c_flags(compiler) + ['-nostdinc++'])
+        env.append_value('LDFLAGS', self.get_android_ld_flags(compiler))
 
         env.ANDROID_SDK = self.sdk_version
         env.ANDROID_SDK_PATH = self.sdk_path
