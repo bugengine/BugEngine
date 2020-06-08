@@ -9,8 +9,9 @@
 namespace BugEngine { namespace KernelScheduler { namespace OpenCL {
 
 KernelObject::KernelObject(weak< const CodeObject > code, const istring name)
-    : m_kernel(clCreateKernel(code->m_program, name.c_str(), 0))
+    : m_kernel(clCreateKernel(code->m_program, (minitl::format< 128u >("%s_") | name), 0))
 {
+    be_info("OpenCL kernel entry point: %p" | m_kernel);
 }
 
 KernelObject::~KernelObject()

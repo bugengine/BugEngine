@@ -14,5 +14,6 @@ class IrccType:
         decl = [(a + ' ' + b).strip() for a, b in zip(self._declaration, names)]
         return ' '.join(d for d in decl if d)
 
+
 if TYPE_CHECKING:
     from typing import List, Optional

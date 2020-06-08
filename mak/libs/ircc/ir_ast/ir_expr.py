@@ -70,7 +70,7 @@ class IrExpressionReference(IrExpression):
         # type: (IrReference) -> None
         IrExpression.__init__(self)
         self._reference = reference
-    
+
     def resolve(self, module):
         # type: (IrModule) -> IrExpression
         # TODO

@@ -1,4 +1,5 @@
 from ..ir_ast import IrTypeBuiltin, IrTypePtr, IrTypeArray, IrTypeVector, IrTypeStruct, IrTypeReference, IrTypeOpaque, IrTypeMethod, IrReference, IrTypeDeclaration
+from ply.lex import LexToken
 from be_typing import TYPE_CHECKING
 
 
@@ -87,6 +88,8 @@ def p_ir_type_builtin_vector(p):
         ir-type-vector : LANGLE LITERAL_DECIMAL X ir-type-scalar RANGLE
                        | LANGLE LITERAL_DECIMAL X ir-type-ptr RANGLE
     """
+    assert isinstance(p.slice[2], LexToken)
+    assert isinstance(p.slice[2].parsed_value, int)
     p[0] = IrTypeVector(p[4], p.slice[2].parsed_value)
 
 
@@ -120,6 +123,8 @@ def p_ir_addrspace(p):
     """
         ir-addrspace : ADDRSPACE LPAREN LPAREN_MARK LITERAL_DECIMAL RPAREN
     """
+    assert isinstance(p.slice[4], LexToken)
+    assert isinstance(p.slice[4].parsed_value, int)
     p[0] = p.slice[4].parsed_value
 
 
@@ -128,6 +133,8 @@ def p_ir_type_array(p):
     """
         ir-type-array : LBRACKET LITERAL_DECIMAL X ir-type RBRACKET
     """
+    assert isinstance(p.slice[2], LexToken)
+    assert isinstance(p.slice[2].parsed_value, int)
     p[0] = IrTypeArray(p[4], p.slice[2].parsed_value)
 
 

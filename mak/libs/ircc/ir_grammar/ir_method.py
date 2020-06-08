@@ -192,7 +192,7 @@ def p_ir_parameter_metadata(p):
         ir-parameter : METADATA ir-parameter-attribute-list-opt ID
                      | METADATA ir-parameter-attribute-list-opt empty
     """
-    p[0] = IrMethodMetadataParameter(IrTypeMetadata(), p[3], [2])
+    p[0] = IrMethodMetadataParameter(IrTypeMetadata(), p[3], p[2])
 
 
 def p_ir_method_addr_opt(p):

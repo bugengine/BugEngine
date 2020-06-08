@@ -50,7 +50,7 @@ class IrValueMetadata(IrValue):
         # type: (IrMetadata) -> None
         IrValue.__init__(self, IrTypeMetadata())
         self._metadata = metadata
-    
+
     def resolve(self, module):
         # type: (IrModule) -> IrValue
         self._metadata = self._metadata.resolve(module)
@@ -59,6 +59,7 @@ class IrValueMetadata(IrValue):
     def __str__(self):
         # type: () -> str
         return 'metadata %s' % str(self._metadata)
+
 
 if TYPE_CHECKING:
     from .ir_type import IrType

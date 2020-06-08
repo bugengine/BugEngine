@@ -12,7 +12,7 @@ class IrMetadata(IrValue):
     def resolve(self, module):
         # type: (IrModule) -> IrMetadata
         return self
-    
+
     def __str__(self):
         # type: () -> str
         raise NotImplementedError
@@ -73,7 +73,7 @@ class IrMetadataNode(IrMetadataValue):
         # type: (IrModule) -> IrMetadata
         self._values = [v.resolve(module) for v in self._values]
         return self
-    
+
     def __str__(self):
         # type: () -> str
         return '!{%s}' % (', '.join(str(v) for v in self._values))
@@ -97,8 +97,7 @@ class IrSpecializedMetadata(IrMetadataValue):
 
     def __str__(self):
         # type: () -> str
-        return '!%s(%s)' % (self._specialized_class,
-                            ', '.join('%s: %s' % (k, str(v)) for k, v in self._values.items()))
+        return '!%s(%s)' % (self._specialized_class, ', '.join('%s: %s' % (k, str(v)) for k, v in self._values.items()))
 
 
 class IrMetadataNull(IrMetadata):
@@ -111,11 +110,11 @@ class IrMetadataFlagList(IrMetadata):
     def __init__(self, flag):
         # type: (str) -> None
         self._flags = [flag]
-    
+
     def add_flag(self, flag):
         # type: (str) -> None
         self._flags.append(flag)
-    
+
     def __str__(self):
         # type: () -> str
         return ' | '.join(self._flags)

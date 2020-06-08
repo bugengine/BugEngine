@@ -40,15 +40,20 @@ class YaccProduction:
 
 class Parser:
     ir_parser: 'ir_parser.IrParser'
+
     def errok(self) -> None:
         ...
-    def parse(self,
-              input: Optional[str] = ...,
-              lexer: Optional[ir_lexer.IrLexer] = ...,
-              debug: bool = ...,
-              tracking: bool = ...,
-              tokenfunc: Optional[Any] = ...):
+
+    def parse(
+        self,
+        input: Optional[str] = ...,
+        lexer: Optional[ir_lexer.IrLexer] = ...,
+        debug: bool = ...,
+        tracking: bool = ...,
+        tokenfunc: Optional[Any] = ...
+    ):
         ...
+
 
 def yacc(
     method: str = ...,
