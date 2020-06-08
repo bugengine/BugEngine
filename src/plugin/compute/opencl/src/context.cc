@@ -79,7 +79,13 @@ cl_program Context::buildProgram(const u64 size, const char* code) const
         be_error("failed to load OpenCL kernel: clBuildProgram failed with code %d" | errorCode);
         return program;
     }
-    checkResult(clGetProgramInfo(program, CL_PROGRAM_BINARIES, 0, 0, &len));
+    {
+        checkResult(clGetProgramInfo(program, CL_PROGRAM_KERNEL_NAMES, 0, 0, &len));
+        char* buffer = (char*)malloca(len + 1);
+        clGetProgramInfo(program, CL_PROGRAM_KERNEL_NAMES, (len + 1), buffer, &len);
+        be_info("list of kernels:\n%s" | buffer);
+        freea(buffer);
+    }
     /*kernel = clCreateKernel(program, "_kmain", &errorCode);
     if(errorCode != CL_SUCCESS)
     {

@@ -1,5 +1,6 @@
 from .ir_object import IrObject
 from .ir_declaration import IrDeclaration
+from ..ir_codegen import IrccType
 from be_typing import TYPE_CHECKING
 from abc import abstractmethod
 
@@ -17,14 +18,19 @@ class IrType(IrObject):
         # type: () -> List[Tuple[str, IrDeclaration]]
         return []
 
+    def flatten(self, allow_pointer=True):
+        # type: (bool) -> List[IrType]
+        return [self]
+
     @abstractmethod
     def create_generator_type(self, generator):
-        # type: (IrccGenerator) -> str
+        # type: (IrccGenerator) -> IrccType
         raise NotImplementedError
 
 
 class IrTypeDeclaration(IrDeclaration):
     TYPE_INDEX = 0
+
     def __init__(self, type):
         # type: (IrType) -> None
         IrDeclaration.__init__(self)
@@ -56,8 +62,8 @@ class IrTypeReference(IrType):
         # type: (IrReference) -> None
         IrType.__init__(self)
         self._reference = reference
-        self._declaration = None # type: Optional[IrTypeDeclaration]
-        self._target = None # type: Optional[IrType]
+        self._declaration = None   # type: Optional[IrTypeDeclaration]
+        self._target = None        # type: Optional[IrType]
 
     def resolve(self, module):
         # type: (IrModule) -> IrType
@@ -71,10 +77,19 @@ class IrTypeReference(IrType):
         return self._declaration.collect(self._reference)
 
     def create_generator_type(self, generator):
-        # type: (IrccGenerator) -> str
+        # type: (IrccGenerator) -> IrccType
         assert self._target is not None
         assert self._target._name is not None
         return generator.type_declared(self._target._name)
+
+    def flatten(self, allow_pointer=True):
+        # type: (bool) -> List[IrType]
+        assert self._target is not None
+        return self._target.flatten(allow_pointer)
+
+    def __str__(self):
+        # type: () -> str
+        return str(self._reference)
 
 
 class IrTypeOpaque(IrType):
@@ -83,14 +98,14 @@ class IrTypeOpaque(IrType):
         return 'opaque'
 
     def create_generator_type(self, generator):
-        # type: (IrccGenerator) -> str
+        # type: (IrccGenerator) -> IrccType
         return generator.type_void()
 
 
 class IrTypeMetadata(IrType):
     def create_generator_type(self, generator):
-        # type: (IrccGenerator) -> str
-        return 'metadata'
+        # type: (IrccGenerator) -> IrccType
+        raise NotImplementedError
 
 
 class IrTypeBuiltin(IrType):
@@ -104,7 +119,7 @@ class IrTypeBuiltin(IrType):
         return self._builtin
 
     def create_generator_type(self, generator):
-        # type: (IrccGenerator) -> str
+        # type: (IrccGenerator) -> IrccType
         return generator.type_builtin(self._builtin)
 
 
@@ -126,8 +141,17 @@ class IrTypePtr(IrType):
         return '%s %s*' % (self._pointee, addrspaces[self._address_space])
 
     def create_generator_type(self, generator):
-        # type: (IrccGenerator) -> str
-        return generator.make_ptr(generator.make_address_space(self._pointee.create_generator_type(generator), self._address_space))
+        # type: (IrccGenerator) -> IrccType
+        return generator.make_ptr(
+            generator.make_address_space(self._pointee.create_generator_type(generator), self._address_space)
+        )
+
+    def flatten(self, allow_pointer=True):
+        # type: (bool) -> List[IrType]
+        #if not allow_pointer:
+        #    # todo: source location
+        #    raise Exception('invalid kernel parameter')
+        return [self]
 
 
 class IrTypeArray(IrType):
@@ -151,7 +175,7 @@ class IrTypeArray(IrType):
         return '%s[%d]' % (self._type, self._count)
 
     def create_generator_type(self, generator):
-        # type: (IrccGenerator) -> str
+        # type: (IrccGenerator) -> IrccType
         return generator.make_array(self._type.create_generator_type(generator), self._count)
 
 
@@ -175,12 +199,16 @@ class IrTypeVector(IrType):
         # type: () -> str
         return '%s%d' % (self._type, self._count)
 
+    def create_generator_type(self, generator):
+        # type: (IrccGenerator) -> IrccType
+        raise NotImplementedError
+
 
 class IrTypeStruct(IrType):
     def __init__(self, fields, packed):
         # type: (List[IrType], bool) -> None
         IrType.__init__(self)
-        self._fields = [(f, 'field_%d'%i) for i, f in enumerate(fields)]
+        self._fields = [(f, 'field_%d' % i) for i, f in enumerate(fields)]
         self._packed = packed
 
     def _dependency_list(self):
@@ -197,11 +225,18 @@ class IrTypeStruct(IrType):
 
     def __str__(self):
         # type: () -> str
-        return '{%s}' % (', '.join(str(x) for x,_ in self._fields))
+        return '{%s}' % (', '.join(str(x) for x, _ in self._fields))
 
     def create_generator_type(self, generator):
-        # type: (IrccGenerator) -> str
+        # type: (IrccGenerator) -> IrccType
         return generator.make_struct([(f.create_generator_type(generator), n) for f, n in self._fields])
+
+    def flatten(self, allow_pointer=True):
+        # type: (bool) -> List[IrType]
+        result = []
+        for field in self._fields:
+            result += field[0].flatten(False)
+        return result
 
 
 class IrTypeMethod(IrType):
@@ -228,6 +263,10 @@ class IrTypeMethod(IrType):
     def __str__(self):
         # type: () -> str
         return '%s(*)(%s)' % (self._return_type, ', '.join(str(x) for x in self._argument_types))
+
+    def create_generator_type(self, generator):
+        # type: (IrccGenerator) -> IrccType
+        raise NotImplementedError
 
 
 if TYPE_CHECKING:

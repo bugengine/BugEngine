@@ -4,6 +4,7 @@ from abc import abstractmethod
 
 class IrDeclaration:
     def __init__(self):
+        # type: () -> None
         pass
 
     @abstractmethod
@@ -11,7 +12,6 @@ class IrDeclaration:
         # type: (IrModule) -> IrDeclaration
         raise NotImplementedError
 
-    @abstractmethod
     def collect(self, ir_name):
         # type: (str) -> List[Tuple[str, IrDeclaration]]
         return []
@@ -19,6 +19,7 @@ class IrDeclaration:
     def visit(self, generator, ir_name):
         # type: (IrccGenerator, str) -> None
         pass
+
 
 if TYPE_CHECKING:
     from typing import List, Tuple

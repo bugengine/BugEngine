@@ -4,15 +4,13 @@ from . import ir_grammar
 from be_typing import TYPE_CHECKING
 from copy import copy
 
-
 DIGITS = set('0123456789')
 ALPHABET = set('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_')
 
 ID = DIGITS | ALPHABET
 EXTENDED_ID = DIGITS | ALPHABET | set('-.')
 
-KEYWORDS = set(ir_grammar.keywords)
-
+KEYWORDS = set(ir_grammar.keywords)    # type: Set[str]
 
 
 class IrState:
@@ -74,7 +72,7 @@ class IrComment(IrState):
     def consume(self, char):
         # type: (str) -> Optional[IrState]
         return self if char != '\n' else None
-    
+
     def token(self, lexer, start, end):
         # type: (IrLexer, int, int) -> Optional[lex.LexToken]
         #print('comment')
@@ -210,6 +208,7 @@ class IrRegularID(IrState):
         # type: (str) -> Optional[IrState]
         return self if char in EXTENDED_ID else None
 
+
 class IrID(IrState):
     def __init__(self):
         # type: () -> None
@@ -246,7 +245,7 @@ class IrDecimal(IrState):
     def token(self, lexer, start, end):
         # type: (IrLexer, int, int) -> Optional[lex.LexToken]
         result = IrState.token(self, lexer, start, end)
-        assert(result)
+        assert (result)
         result.parsed_value = int(result.value)
         return result
 
@@ -325,7 +324,7 @@ class IrLexer:
         self._lexdata = ''
         self._lineno = 1
         self._keywords_enabled = True
-        self._last_token = None    # type: Optional[lex.LexToken]
+        self._last_token = None               # type: Optional[lex.LexToken]
         self.logger = logger
         states = {
             ';': IrComment(),
@@ -360,7 +359,7 @@ class IrLexer:
         for char in DIGITS:
             states[char] = number_state
         self._start_state = IrStart(states)
-        self._state = self._start_state  # type: IrState
+        self._state = self._start_state       # type: IrState
 
     def input(self, text):
         # type: (str) -> None
@@ -417,5 +416,5 @@ class IrLexer:
 
 
 if TYPE_CHECKING:
-    from typing import Generator, Dict, Optional
+    from typing import Dict, Generator, Optional, Set
     from .ir_messages import Logger

@@ -45,8 +45,7 @@ def run():
             sys.path.append(path)
             s = __import__(module)
             with open(arguments.output, 'w') as out_file:
-                for generator in s.generators(out_file):
-                    result.visit(generator)
+                result.visit(s.generators(out_file))
     except (SyntaxError, ExceptionType) as exception:
         logging.exception(exception)
         sys.exit(255)

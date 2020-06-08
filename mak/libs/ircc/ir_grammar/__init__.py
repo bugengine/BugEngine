@@ -34,7 +34,8 @@ def p_error(p):
 
 
 tokens = lex.tokens
-keywords = lex.keywords
+keywords = lex.keywords    # type: Tuple[str, ...]
 
 if TYPE_CHECKING:
+    from typing import Tuple
     from ply.yacc import YaccProduction

@@ -1,4 +1,5 @@
-from ..ir_ast import IrAttributeGroupDeclaration, IrAttributeGroupLink, IrAttributeGroupObject, IrAttribute, IrReference
+from ..ir_ast import IrAttributeGroupDeclaration, IrAttributeGroupLink, IrAttributeGroupObject, IrAttribute, IrReference, IrExpressionConstant
+from ply.lex import LexToken
 from be_typing import TYPE_CHECKING
 
 
@@ -55,24 +56,34 @@ def p_ir_attribute_parameter(p):
                                | SIGNEXT
                                | INREG
                                | BYVAL
-                               | BYVAL LPAREN LPAREN_MARK ir-type RPAREN
                                | PREALLOCATED
-                               | PREALLOCATED LPAREN LPAREN_MARK LITERAL_DECIMAL RPAREN
                                | INALLOCA
                                | SRET
-                               | ALIGN LITERAL_DECIMAL
                                | NOALIAS
                                | NOCAPTURE
                                | NEST
                                | RETURNED
                                | NONNULL
-                               | DEREFERENCEABLE LPAREN LPAREN_MARK LITERAL_DECIMAL RPAREN
-                               | DEREFERENCEABLE_OR_NULL LPAREN LPAREN_MARK LITERAL_DECIMAL RPAREN
                                | SWIFTSELF
                                | SWIFTERROR
                                | IMMARG
     """
     p[0] = IrAttribute(p[1])
+
+
+def p_ir_attribute_parameter_value(p):
+    # type: (YaccProduction) -> None
+    """
+        ir-parameter-attribute : BYVAL LPAREN LPAREN_MARK ir-type RPAREN
+                               | PREALLOCATED LPAREN LPAREN_MARK ir-literal-decimal RPAREN
+                               | ALIGN ir-literal-decimal
+                               | DEREFERENCEABLE LPAREN LPAREN_MARK ir-literal-decimal RPAREN
+                               | DEREFERENCEABLE_OR_NULL LPAREN LPAREN_MARK ir-literal-decimal RPAREN
+    """
+    if len(p) > 3:
+        p[0] = IrAttribute(p[1], [p[4]])
+    else:
+        p[0] = IrAttribute(p[1], [p[2]])
 
 
 def p_ir_attribute_method(p):
@@ -153,6 +164,15 @@ def p_ir_attribute_group_ref(p):
         ir-any-attribute : ATTRIBUTE_GROUP
     """
     p[0] = IrAttributeGroupLink(IrReference(p[1]))
+
+
+def p_ir_literal_decimal(p):
+    # type: (YaccProduction) -> None
+    """
+        ir-literal-decimal : LITERAL_DECIMAL
+    """
+    assert isinstance(p.slice[1], LexToken)
+    p[0] = IrExpressionConstant(p.slice[1].parsed_value)
 
 
 if TYPE_CHECKING:

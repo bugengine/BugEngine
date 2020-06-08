@@ -26,27 +26,29 @@ class IrModule:
             assert isinstance(decl, desired_type)
             return decl
 
-    def visit(self, generator):
-        # type: (IrccGenerator) -> None
+    def visit(self, generators):
+        # type: (Generator[IrccGenerator, None, None]) -> None
         declarations = []
         for name, decl in self._declarations.items():
             declarations += decl.collect(name)
-        generator.begin_module()
-        generator.begin_headers()
-        for header in self._headers:
-            header.visit(generator)
-        generator.end_headers()
-        generator.begin_declarations()
-        seen = set([])
-        for name, decl in declarations:
-            if name not in seen:
-                seen.add(name)
-                decl.visit(generator, name)
-        generator.end_declarations()
-        generator.end_module()
+        for generator in generators:
+            generator.begin_module()
+            generator.begin_headers()
+            for header in self._headers:
+                header.visit(generator)
+            generator.end_headers()
+            generator.begin_declarations()
+            seen = set([])
+            for name, decl in declarations:
+                if name not in seen:
+                    seen.add(name)
+                    decl.visit(generator, name)
+            generator.end_declarations()
+            generator.end_module()
+
 
 if TYPE_CHECKING:
-    from typing import List, Optional, Tuple, Type
+    from typing import Generator, List, Optional, Tuple, Type
     from ..ir_codegen import IrccGenerator
     from .ir_header import IrHeader
     from .ir_reference import IrReference
