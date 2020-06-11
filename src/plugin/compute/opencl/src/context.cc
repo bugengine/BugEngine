@@ -69,10 +69,10 @@ cl_program Context::buildProgram(const u64 size, const char* code) const
     clGetProgramBuildInfo(program, m_device, CL_PROGRAM_BUILD_LOG, 0, 0, &len);
     if(len > 1)
     {
-        char* buffer = (char*)malloca(len);
-        clGetProgramBuildInfo(program, m_device, CL_PROGRAM_BUILD_LOG, len, buffer, &len);
-        be_info("compilation result:\n%s" | buffer);
-        freea(buffer);
+        minitl::Allocator::Block< char > buffer(Arena::temporary(), len + 1);
+        clGetProgramBuildInfo(program, m_device, CL_PROGRAM_BUILD_LOG, (len + 1), buffer.data(),
+                              &len);
+        be_info("compilation result:\n%s" | buffer.data());
     }
     if(errorCode != CL_SUCCESS)
     {
@@ -81,9 +81,9 @@ cl_program Context::buildProgram(const u64 size, const char* code) const
     }
     {
         checkResult(clGetProgramInfo(program, CL_PROGRAM_KERNEL_NAMES, 0, 0, &len));
-        char* buffer = (char*)malloca(len + 1);
-        clGetProgramInfo(program, CL_PROGRAM_KERNEL_NAMES, (len + 1), buffer, &len);
-        be_info("list of kernels:\n%s" | buffer);
+        minitl::Allocator::Block< char > buffer(Arena::temporary(), len + 1);
+        clGetProgramInfo(program, CL_PROGRAM_KERNEL_NAMES, (len + 1), buffer.data(), &len);
+        be_info("list of kernels:\n%s" | buffer.data());
         freea(buffer);
     }
     /*kernel = clCreateKernel(program, "_kmain", &errorCode);
