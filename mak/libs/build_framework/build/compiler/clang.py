@@ -30,9 +30,10 @@ def clang_exec_command(exec_command):
             return exec_command(task, cmd, **kw_args)
     return exec_command_response_file
 
+for cls_name in 'c', 'cxx', 'cshlib', 'cxxshlib', 'cprogram', 'cxxprogram':
+    cls = Task.classes.get(cls_name, None)
+    derived = type(cls_name, (cls, ), {})
+    derived.exec_command = clang_exec_command(derived.exec_command)
 
 def build(bld):
-    for cls_name in 'c', 'cxx', 'cshlib', 'cxxshlib', 'cprogram', 'cxxprogram':
-        cls = Task.classes.get(cls_name, None)
-        derived = type(cls_name, (cls, ), {})
-        derived.exec_command = clang_exec_command(derived.exec_command)
+    pass
