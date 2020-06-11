@@ -9,12 +9,24 @@ class IrInstRet(IrInstruction):
         IrInstruction.__init__(self, 'ret', None, metadata)
         self._return_value = return_value
 
+    def terminal(self):
+        # type: () -> bool
+        return True
+
 
 class IrInstBranch(IrInstruction):
     def __init__(self, target, metadata):
         # type: (str, List[Tuple[IrMetadataLink, IrMetadataLink]]) -> None
         IrInstruction.__init__(self, 'br', None, metadata)
         self._target = target
+
+    def terminal(self):
+        # type: () -> bool
+        return True
+
+    def labels(self):
+        # type: () -> List[str]
+        return [self._target[1:]]
 
 
 class IrInstConditionalBranch(IrInstruction):
@@ -25,6 +37,13 @@ class IrInstConditionalBranch(IrInstruction):
         self._target_true = target_true
         self._target_false = target_false
 
+    def terminal(self):
+        # type: () -> bool
+        return True
+
+    def labels(self):
+        # type: () -> List[str]
+        return [self._target_true[1:], self._target_false[1:]]
 
 class IrInstSwitch(IrInstruction):
     def __init__(self, condition, default_label, targets, metadata):
@@ -34,11 +53,23 @@ class IrInstSwitch(IrInstruction):
         self._default_label = default_label
         self._targets = targets
 
+    def terminal(self):
+        # type: () -> bool
+        return True
+
+    def labels(self):
+        # type: () -> List[str]
+        return [self._default_label[1:]] + [t[1:] for _, t in self._targets]
+
 
 class IrInstUnreachable(IrInstruction):
     def __init__(self, metadata):
         # type: (List[Tuple[IrMetadataLink, IrMetadataLink]]) -> None
         IrInstruction.__init__(self, 'unreachable', None, metadata)
+
+    def terminal(self):
+        # type: () -> bool
+        return True
 
 
 if TYPE_CHECKING:
