@@ -25,9 +25,9 @@ static raw< const RTTI::Method::Overload > getMethodFromClass(raw< const RTTI::C
     if(method)
     {
         RTTI::ArgInfo< RTTI::Type > args[2]
-           = {RTTI::ArgInfo< RTTI::Type >(RTTI::Type::makeType(
-                 type, RTTI::Type::RawPtr, RTTI::Type::Const, RTTI::Type::Mutable)),
-              RTTI::ArgInfo< RTTI::Type >(be_type< World& >())};
+            = {RTTI::ArgInfo< RTTI::Type >(RTTI::Type::makeType(
+                   type, RTTI::Type::RawPtr, RTTI::Type::Const, RTTI::Type::Mutable)),
+               RTTI::ArgInfo< RTTI::Type >(be_type< World& >())};
         RTTI::CallInfo info = RTTI::resolve(method, args, 2);
         if(info.conversion < RTTI::ConversionCost::s_incompatible)
         {
@@ -78,7 +78,7 @@ struct ComponentGroup::OperationBuffer
     OperationBuffer*        m_prev;
     i_u32                   m_offset;
     i_u32                   m_used;
-    byte                    m_data[1];
+    byte                    m_data[sizeof(EntityOperationRemove)];
     OperationBuffer(OperationBuffer* previous)
         : m_next(0)
         , m_prev(previous)
@@ -459,9 +459,9 @@ struct TryMergeOperation
             buffer->forEach(operation->next(), m);
 
             minitl::tuple< Bucket*, Bucket* > buckets
-               = owner->findBuckets(m.maskBefore, m.maskAfter);
+                = owner->findBuckets(m.maskBefore, m.maskAfter);
             const u32 dummyOffset
-               = be_checked_numcast< u32 >(owner->m_buckets.end() - owner->m_buckets.begin());
+                = be_checked_numcast< u32 >(owner->m_buckets.end() - owner->m_buckets.begin());
             if(buckets.first != buckets.second)
             {
                 owner->copyComponents(storage, operation->owner, componentBuffer,
@@ -474,12 +474,12 @@ struct TryMergeOperation
                     EntityOperationRemove* removeOperation = new(memory) EntityOperationRemove;
                     removeOperation->operation.owner       = operation->owner;
                     removeOperation->operation.maskBefore
-                       = be_checked_numcast< u32 >(buckets.first - owner->m_buckets.begin());
+                        = be_checked_numcast< u32 >(buckets.first - owner->m_buckets.begin());
                     removeOperation->operation.maskAfter = dummyOffset;
                     removeOperation->operation.size      = sizeof(EntityOperationRemove);
                     deltas[buckets.first - owner->m_buckets.begin()].removed++;
                     u32 absoluteComponentIndex
-                       = owner->firstComponent + buckets.first->firstComponent;
+                        = owner->firstComponent + buckets.first->firstComponent;
                     EntityInfo::BucketInfo& bucketInfo = info.buckets[absoluteComponentIndex];
                     be_assert(bucketInfo.bucket == buckets.first - owner->m_buckets.begin(),
                               "EntityInfo bucket does not match entity mask");
@@ -490,11 +490,11 @@ struct TryMergeOperation
                 {
                     u32              extraSize = buckets.second->componentSize;
                     EntityOperation* addOperation
-                       = new(owner->allocOperation(extraSize)) EntityOperation;
+                        = new(owner->allocOperation(extraSize)) EntityOperation;
                     addOperation->owner      = operation->owner;
                     addOperation->maskBefore = dummyOffset;
                     addOperation->maskAfter
-                       = be_checked_numcast< u32 >(buckets.second - owner->m_buckets.begin());
+                        = be_checked_numcast< u32 >(buckets.second - owner->m_buckets.begin());
                     addOperation->size = sizeof(EntityOperation) + extraSize;
                     deltas[buckets.second - owner->m_buckets.begin()].added++;
                     owner->packComponents(buckets.second->acceptMask, componentBuffer,
@@ -507,7 +507,7 @@ struct TryMergeOperation
                 u32 remainderMaskRemove = m.maskBefore & ~m.maskAfter & ~buckets.first->acceptMask;
                 u32 remainderMaskAdd    = m.maskAfter & ~m.maskBefore & ~buckets.second->acceptMask;
                 u32 remainderMaskMoved
-                   = m.maskAfter & buckets.first->acceptMask & ~buckets.second->acceptMask;
+                    = m.maskAfter & buckets.first->acceptMask & ~buckets.second->acceptMask;
                 for(u32 i = 0; remainderMaskRemove | remainderMaskAdd | remainderMaskMoved;
                     remainderMaskRemove >>= 1, remainderMaskAdd >>= 1, remainderMaskMoved >>= 1,
                         ++i, ++componentBucket)
@@ -520,7 +520,7 @@ struct TryMergeOperation
                         EntityOperationRemove* removeOperation = new(memory) EntityOperationRemove;
                         removeOperation->operation.owner       = operation->owner;
                         removeOperation->operation.maskBefore
-                           = be_checked_numcast< u32 >(componentBucket - owner->m_buckets.begin());
+                            = be_checked_numcast< u32 >(componentBucket - owner->m_buckets.begin());
                         removeOperation->operation.maskAfter = dummyOffset;
                         removeOperation->operation.size = sizeof(EntityOperation) + sizeof(u32);
                         deltas[componentBucket - owner->m_buckets.begin()].removed++;
@@ -535,12 +535,12 @@ struct TryMergeOperation
                         be_assert(componentBucket->acceptMask == (1u << i),
                                   "invalid component bucket for component %d" | i);
                         EntityOperation* addOperation
-                           = new(owner->allocOperation(owner->m_components[i].size))
-                              EntityOperation;
+                            = new(owner->allocOperation(owner->m_components[i].size))
+                                EntityOperation;
                         addOperation->owner      = operation->owner;
                         addOperation->maskBefore = dummyOffset;
                         addOperation->maskAfter
-                           = be_checked_numcast< u32 >(componentBucket - owner->m_buckets.begin());
+                            = be_checked_numcast< u32 >(componentBucket - owner->m_buckets.begin());
                         addOperation->size = sizeof(EntityOperation) + owner->m_components[i].size;
                         owner->packComponents(componentBucket->acceptMask, componentBuffer,
                                               addOperation->components(), componentOffsets);
@@ -588,7 +588,7 @@ ComponentGroup::OperationBuffer* ComponentGroup::sortEntityOperations(OperationD
                 for(u32 opCount = placedOp; opCount != deltas[i].added; /*nothing*/)
                 {
                     OperationBuffer* newBuffer
-                       = new(m_allocator.allocate()) OperationBuffer(current);
+                        = new(m_allocator.allocate()) OperationBuffer(current);
                     current->m_next  = newBuffer;
                     current          = newBuffer;
                     u32 maxOpsNext   = (bufferSpace - current->m_used) / operationAddSize;
@@ -616,7 +616,7 @@ ComponentGroup::OperationBuffer* ComponentGroup::sortEntityOperations(OperationD
                 for(u32 opCount = placedOp; opCount != deltas[i].removed; /*nothing*/)
                 {
                     OperationBuffer* newBuffer
-                       = new(m_allocator.allocate()) OperationBuffer(current);
+                        = new(m_allocator.allocate()) OperationBuffer(current);
                     current->m_next  = newBuffer;
                     current          = newBuffer;
                     u32 maxOpsNext   = (bufferSpace - current->m_used) / operationRemoveSize;
@@ -635,7 +635,7 @@ ComponentGroup::OperationBuffer* ComponentGroup::sortEntityOperations(OperationD
 
     typedef minitl::tuple< OperationBuffer*, u32 > CurrentBufferOffset;
     const u32                                      bufferSize
-       = be_checked_numcast< u32 >(m_buckets.size() * sizeof(CurrentBufferOffset));
+        = be_checked_numcast< u32 >(m_buckets.size() * sizeof(CurrentBufferOffset));
     CurrentBufferOffset* addOffsets    = (CurrentBufferOffset*)malloca(bufferSize);
     CurrentBufferOffset* removeOffsets = (CurrentBufferOffset*)malloca(bufferSize);
     for(u32 i = 0; i < m_buckets.size(); ++i)
@@ -657,8 +657,8 @@ ComponentGroup::OperationBuffer* ComponentGroup::sortEntityOperations(OperationD
             operation                  = operation->next())
         {
             CurrentBufferOffset& offset = operation->maskBefore == dummyOffset
-                                             ? addOffsets[operation->maskAfter]
-                                             : removeOffsets[operation->maskBefore];
+                                              ? addOffsets[operation->maskAfter]
+                                              : removeOffsets[operation->maskBefore];
             u32 size = operation->size;
             memcpy(offset.first->m_data + offset.second, operation, size);
             offset.second += size;
@@ -701,11 +701,11 @@ void ComponentGroup::repack(weak< EntityStorage > storage, u32 componentIndex, B
         }
     }
     EntityStorage::ComponentStorage& componentStorage
-       = absoluteComponentIndex != lastComponent ? *storage->m_components[absoluteComponentIndex]
-                                                 : *storage->m_componentBackLinks[index];
+        = absoluteComponentIndex != lastComponent ? *storage->m_components[absoluteComponentIndex]
+                                                  : *storage->m_componentBackLinks[index];
     EntityStorage::ComponentStorage& backlinkStorage = *storage->m_componentBackLinks[index];
     const u32                        componentSize
-       = absoluteComponentIndex != lastComponent ? m_components[componentIndex].size : sizeof(u32);
+        = absoluteComponentIndex != lastComponent ? m_components[componentIndex].size : sizeof(u32);
     const u32        entityCount    = bucket.entityCount;
     const u32        newFirstEntity = firstEntity + offset;
     const u32        newEntityCount = bucket.entityCount + operations.added - operations.removed;
@@ -733,13 +733,13 @@ void ComponentGroup::repack(weak< EntityStorage > storage, u32 componentIndex, B
             lastRemoveOpBuffer = lastRemoveOpBuffer->m_next;
         }
         const EntityOperationRemove* firstRemoveOp
-           = reinterpret_cast< const EntityOperationRemove* >(bufferRemove->m_data
-                                                              + bufferRemoveOffset);
+            = reinterpret_cast< const EntityOperationRemove* >(bufferRemove->m_data
+                                                               + bufferRemoveOffset);
         be_assert(firstRemoveOp->operation.maskBefore == (u32)(&bucket - m_buckets.begin()),
                   "Operation buffer inconsistency");
         const EntityOperationRemove* lastRemoveOp
-           = reinterpret_cast< const EntityOperationRemove* >(lastRemoveOpBuffer->m_data
-                                                              + lastRemoveOpOffset);
+            = reinterpret_cast< const EntityOperationRemove* >(lastRemoveOpBuffer->m_data
+                                                               + lastRemoveOpOffset);
         be_assert(lastRemoveOp->operation.maskBefore == (u32)(&bucket - m_buckets.begin()),
                   "Operation buffer inconsistency");
         for(u32 entityIndex = entityCount; entityIndex > newEntityCount; --entityIndex)
@@ -761,14 +761,14 @@ void ComponentGroup::repack(weak< EntityStorage > storage, u32 componentIndex, B
                     lastRemoveOpOffset = lastRemoveOpBuffer->m_used - sizeof(EntityOperationRemove);
                 }
                 lastRemoveOp = reinterpret_cast< const EntityOperationRemove* >(
-                   lastRemoveOpBuffer->m_data + lastRemoveOpOffset);
+                    lastRemoveOpBuffer->m_data + lastRemoveOpOffset);
                 be_assert(lastRemoveOp->operation.maskBefore == (u32)(&bucket - m_buckets.begin()),
                           "Operation buffer inconsistency");
             }
             else
             {
                 Entity      e    = {*reinterpret_cast< u32* >(
-                   backlinkStorage.getElement(firstEntityStorage + entityIndex - 1))};
+                    backlinkStorage.getElement(firstEntityStorage + entityIndex - 1))};
                 EntityInfo& info = storage->getEntityInfo(e);
                 u32 pageSrc   = (firstEntity + entityIndex - 1) / componentStorage.elementsPerPage;
                 u32 offsetSrc = (firstEntity + entityIndex - 1) % componentStorage.elementsPerPage;
@@ -781,7 +781,7 @@ void ComponentGroup::repack(weak< EntityStorage > storage, u32 componentIndex, B
                     be_assert(info.buckets[absoluteComponentIndex].group == index,
                               "inconsistend backlink buffer");
                     be_assert(info.buckets[absoluteComponentIndex].bucket
-                                 == be_checked_numcast< u16 >(&bucket - m_buckets.begin()),
+                                  == be_checked_numcast< u16 >(&bucket - m_buckets.begin()),
                               "inconsistend backlink buffer");
                     be_assert(info.buckets[absoluteComponentIndex].offset == entityIndex - 1,
                               "inconsistend backlink buffer");
@@ -805,9 +805,9 @@ void ComponentGroup::repack(weak< EntityStorage > storage, u32 componentIndex, B
                     }
                     ++currentRemoveOperationFront;
                     firstRemoveOp = reinterpret_cast< const EntityOperationRemove* >(
-                       bufferRemove->m_data + bufferRemoveOffset);
+                        bufferRemove->m_data + bufferRemoveOffset);
                     be_assert(firstRemoveOp->operation.maskBefore
-                                 == (u32)(&bucket - m_buckets.begin()),
+                                  == (u32)(&bucket - m_buckets.begin()),
                               "Operation buffer inconsistency");
                 }
             }
@@ -891,7 +891,7 @@ void ComponentGroup::repack(weak< EntityStorage > storage, u32 componentIndex, B
     {
         byte*                        buffer = bufferRemove->m_data + bufferRemoveOffset;
         const EntityOperationRemove* remove
-           = reinterpret_cast< const EntityOperationRemove* >(buffer);
+            = reinterpret_cast< const EntityOperationRemove* >(buffer);
         be_assert(remove->operation.maskBefore == (u32)(&bucket - m_buckets.begin()),
                   "Operation buffer inconsistency");
         be_assert(remove->componentIndex < entitiesToMove, "mismatch added/removed ops");
@@ -904,7 +904,7 @@ void ComponentGroup::repack(weak< EntityStorage > storage, u32 componentIndex, B
 
         u32 pageDst = (newFirstEntity + remove->componentIndex) / componentStorage.elementsPerPage;
         u32 offsetDst
-           = (newFirstEntity + remove->componentIndex) % componentStorage.elementsPerPage;
+            = (newFirstEntity + remove->componentIndex) % componentStorage.elementsPerPage;
 
         memcpy(componentStorage.pages[pageDst] + offsetDst * componentSize,
                reinterpret_cast< const byte* >(add) + componentOffset, componentSize);
@@ -973,7 +973,7 @@ void ComponentGroup::executeEntityOperations(weak< EntityStorage > storage,
     {
         u32                              absoluteComponentIndex = componentIndex + firstComponent;
         EntityStorage::ComponentStorage& componentStorage
-           = *storage->m_components[absoluteComponentIndex];
+            = *storage->m_components[absoluteComponentIndex];
         const u32 mask = 1 << componentIndex;
         for(u32 i = 0; i < bucketSize; ++i)
             new(&offsets[i]) Offsets;
@@ -1022,7 +1022,7 @@ void ComponentGroup::executeEntityOperations(weak< EntityStorage > storage,
                 {
                     bool spaceLeft = i == 1 || bucketsProcessed[i - 2] || offsets[i - 1].first >= 0;
                     bool spaceRight
-                       = i == bucketSize - 1 || bucketsProcessed[i] || offsets[i].first <= 0;
+                        = i == bucketSize - 1 || bucketsProcessed[i] || offsets[i].first <= 0;
                     if(spaceLeft && spaceRight)
                     {
                         bucketsToProcess[done++] = i - 1;
@@ -1090,7 +1090,7 @@ void ComponentGroup::executeEntityOperations(weak< EntityStorage > storage,
                 {
                     bool spaceLeft = i == 1 || bucketsProcessed[i - 2] || offsets[i - 1].first >= 0;
                     bool spaceRight
-                       = i == bucketSize - 1 || bucketsProcessed[i] || offsets[i].first <= 0;
+                        = i == bucketSize - 1 || bucketsProcessed[i] || offsets[i].first <= 0;
                     if(spaceLeft && spaceRight)
                     {
                         bucketsToProcess[done++] = i - 1;
