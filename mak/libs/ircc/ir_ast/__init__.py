@@ -8,3 +8,4 @@ from .ir_reference import IrReference
 from .ir_attribute import IrAttribute, IrAttributeGroupDeclaration, IrAttributeGroupLink, IrAttributeGroupObject
 from .ir_value import IrValueExpr, IrValueVoid, IrValueMetadata
 from .ir_expr import IrExpressionConstant, IrExpressionReference, IrExpressionCast, IrExpressionAggregate, IrExpressionArray, IrExpressionUndef
+from .ir_code import IrInstruction
