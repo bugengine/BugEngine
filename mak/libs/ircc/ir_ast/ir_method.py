@@ -164,6 +164,6 @@ if TYPE_CHECKING:
     from typing import List, Optional, Tuple
     from .ir_module import IrModule
     from .ir_reference import IrReference
-    from .ir_instruction import IrInstruction
+    from .ir_code import IrInstruction
     from .ir_type import IrType
     from ..ir_codegen import IrccGenerator
