@@ -7,7 +7,7 @@ define [linkage] [PreemptionSpecifier] [visibility] [DLLStorageClass]
        [prologue Constant] [personality Constant] (!name !N)* { ... }
 """
 
-from ..ir_ast import IrReference, IrMethodObject, IrMethodBody, IrMethodParameter, IrMethodMetadataParameter, IrMethodDeclaration, IrTypeMetadata
+from ..ir_ast import IrReference, IrMethodObject, IrMethodParameter, IrMethodMetadataParameter, IrMethodDeclaration, IrTypeMetadata
 from be_typing import TYPE_CHECKING
 
 
@@ -34,7 +34,7 @@ def p_ir_method_definition(p):
         ir-method-definition : DEFINE ir-method-prototype ir-metadata-list-opt LBRACE ir-instruction-list RBRACE
     """
     method = p[2][1]
-    method._method.define(IrMethodBody(p[5]))
+    method._method.define(p[5])
     p[0] = p[2]
 
 

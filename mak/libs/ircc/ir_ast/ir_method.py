@@ -2,6 +2,7 @@ from .ir_object import IrObject
 from .ir_declaration import IrDeclaration
 from .ir_type import IrTypePtr
 from .ir_attribute import IrAttributeGroup, IrAttributeGroupObject
+from .ir_code import IrCodeBlock
 from be_typing import TYPE_CHECKING
 
 
@@ -153,7 +154,7 @@ class IrMethodObject(IrMethod):
 class IrMethodBody:
     def __init__(self, instruction_list):
         # type: (List[IrInstruction]) -> None
-        self._instruction_list = instruction_list
+        self._code = IrCodeBlock(instruction_list)
 
     def _instantiate(self):
         # type: () -> None
