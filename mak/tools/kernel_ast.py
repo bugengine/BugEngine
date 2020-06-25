@@ -15,7 +15,7 @@ class kernel_ast(Task.Task):
         return ([], [])
 
 
-@feature('preprocess')
+@feature('bugengine:preprocess')
 @before_method('process_source')
 def kernel_generate_ast(self):
     for kernel, source, out in getattr(self, 'kernels', []):

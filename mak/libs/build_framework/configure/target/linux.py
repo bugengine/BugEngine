@@ -60,6 +60,9 @@ class Linux(Configure.ConfigurationContext.Platform):
             env.append_unique('CPPFLAGS', ['-fPIC'])
             env.append_unique('CFLAGS', ['-fPIC'])
             env.append_unique('CXXFLAGS', ['-fPIC'])
+            env.COMPILER_ABI = 'gcc'
+        else:
+            env.COMPILER_ABI = 'suncc'
         env.append_unique('DEFINES', ['_GNU_SOURCE'])
         env.RPATH = ['$ORIGIN/../share/bugengine/plugin:$ORIGIN/../lib:$ORIGIN:$ORIGIN/../plugin:$ORIGIN/../../../lib']
         env.append_unique('LIB', ['dl', 'rt', 'pthread', 'm'])

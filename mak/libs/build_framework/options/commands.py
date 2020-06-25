@@ -48,37 +48,42 @@ def autoreconfigure(execute_method):
     return execute
 
 
+@conf
+def schedule_setup(self):
+    """
+        Checks if setup is needed, if so adds it to the list of commands
+    """
+    self.init_dirs()
+    do_setup = False
+    try:
+        env = ConfigSet.ConfigSet()
+        env.load(os.path.join(self.cache_dir, Options.lockfile + '.%s' % self.bugengine_variant))
+    except (AttributeError, IOError):
+        Logs.warn('setup not run; setting up the toolchain')
+        do_setup = True
+    else:
+        hash_value = 0
+        for filename in env['files']:
+            try:
+                hash_value = Utils.h_list((hash_value, Utils.readf(filename, 'rb')))
+            except IOError:
+                do_config = True
+        do_setup = (hash_value != env.hash)
+        if do_setup:
+            Logs.warn('wscript files have changed; setting up the toolchain')
+
+    if do_setup:
+        Options.commands.insert(0, self.cmd)
+        Options.commands.insert(0, 'setup:%s' % self.bugengine_toolchain)
+    return do_setup
+
+
 def autosetup(execute_method):
     """
         Decorator used to set the commands that can be setup automatically
     """
     def execute(self):
-        """
-            First check if setup is needed, then triggers the
-            normal execute.
-        """
-        self.init_dirs()
-        do_setup = False
-        try:
-            env = ConfigSet.ConfigSet()
-            env.load(os.path.join(self.cache_dir, Options.lockfile + '.%s' % self.bugengine_variant))
-        except (AttributeError, IOError):
-            Logs.warn('setup not run; setting up the toolchain')
-            do_setup = True
-        else:
-            hash_value = 0
-            for filename in env['files']:
-                try:
-                    hash_value = Utils.h_list((hash_value, Utils.readf(filename, 'rb')))
-                except IOError:
-                    do_config = True
-            do_setup = (hash_value != env.hash)
-            if do_setup:
-                Logs.warn('wscript files have changed; setting up the toolchain')
-
-        if do_setup:
-            Options.commands.insert(0, self.cmd)
-            Options.commands.insert(0, 'setup:%s' % self.bugengine_toolchain)
+        if self.schedule_setup():
             return "SKIP"
 
         return execute_method(self)
@@ -311,6 +316,7 @@ def add_build_command(toolchain, optimisation):
 
 
 def add_all_build_commands(env):
+    add_setup_command('projects')
     for toolchain in env.ALL_TOOLCHAINS:
         add_setup_command(toolchain)
         for optim in env.ALL_VARIANTS:

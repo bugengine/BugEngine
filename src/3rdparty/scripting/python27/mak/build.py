@@ -1,6 +1,6 @@
 import os
 from waflib import Errors
 
-def build(bld):
-    bld.thirdparty('3rdparty.scripting.python27')
 
+def build(bld):
+    bld.thirdparty('3rdparty.scripting.python27', feature='python')

@@ -13,6 +13,7 @@ ARCHS = [
     (6, 1),
     (7, 0),
     (7, 5),
+    (8, 0),
 ]
 
 
@@ -86,6 +87,9 @@ def check_nvcc(configuration_context, nvcc):
 
 
 def setup(configuration_context):
+    if configuration_context.env.PROJECTS:
+        Logs.pprint('GREEN', '+cuda', sep=' ')
+        return
     if configuration_context.env.COMPILER_NAME == 'suncc':
         return
     if configuration_context.env.NVCC_COMPILERS:

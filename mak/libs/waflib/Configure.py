@@ -225,7 +225,7 @@ class ConfigurationContext(Context.Context):
 			import pickle
 		with open(n.abspath(), 'wb') as pickle_file:
 			v = {'version': Context.HEXVERSION, 'tools': self.tools}
-			pickle.dump(v, pickle_file, pickle.HIGHEST_PROTOCOL)
+			pickle.dump(v, pickle_file, 2)
 
 		if not self.all_envs:
 			self.fatal('nothing to store in the configuration context!')

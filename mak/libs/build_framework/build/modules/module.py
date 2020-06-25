@@ -1,7 +1,9 @@
 import os
-import re
 from waflib import Errors
 from waflib.Configure import conf
+from waflib.TaskGen import feature, before_method
+
+COMPILE_EXTENSIONS = ['cxx', 'cpp', 'cc', 'c', 'rc', 'm', 'mm', 'def']
 
 
 def safe_name(name):
@@ -19,124 +21,65 @@ def add_feature(self, feature, env=None):
             env.append_unique('FEATURES', feature)
 
 
+def get_source_nodes(build_context, path, name):
+    if path is None:
+        path = build_context.path
+        for n in name.split('.'):
+            path = path.find_node(n)
+            if not path:
+                raise Errors.WafError('could not find module %s in %s' % (name, build_context.path.abspath()))
+    source_nodes = [path]
+    if path.is_child_of(build_context.bugenginenode):
+        relative_path = path.path_from(build_context.bugenginenode)
+        for platform in build_context.bugenginenode.find_node('extra').listdir():
+            if build_context.env.PROJECTS or platform in build_context.env.VALID_PLATFORMS:
+                node = build_context.bugenginenode.find_node('extra').find_node(platform).find_node(relative_path)
+                if node:
+                    source_nodes.append(node)
+    return source_nodes
+
+
 @conf
-def module(
-    bld,
-    name,
-    module_path=None,
-    depends=[],
-    private_depends=[],
-    valid_platforms=[],
-    features=[],
-    build_features=[],
-    extra_includes=[],
-    extra_defines=[],
-    extra_public_includes=[],
-    extra_public_defines=[],
-    use_master=False,
-    warnings=True,
-    export_all=False,
-    root_namespace=None
-):
-    platforms = bld.env.VALID_PLATFORMS
-    archs = bld.env.ARCHITECTURES
-    build = len(valid_platforms) == 0
-    for p in valid_platforms:
-        if p in platforms:
-            build = True
+def preprocess(build_context, name, path, root_namespace, plugin_name):
+    if build_context.env.PROJECTS:
+        return None
+    source_nodes = get_source_nodes(build_context, path, name)
 
-    if module_path is None:
-        source_node = bld.path.make_node(name.replace('.', '/'))
+    pp_env = build_context.common_env.derive()
+    pp_env.PLUGIN = plugin_name.replace('.', '_')
+
+    preprocess_sources = []
+    globs = ['src/**/*.yy', 'src/**/*.ll', 'src/**/*.plist', 'api/**/*.script.hh', 'include/**/*.script.hh']
+    for source_node in source_nodes:
+        preprocess_sources += source_node.ant_glob(globs)
+
+    api = source_node.find_node('api')
+    include = source_node.find_node('include')
+    pchstop = source_node.find_node('api/bugengine/%s/stdafx.h' % name)
+    if pchstop:
+        pchstop = pchstop.path_from(api)
     else:
-        source_node = module_path
-    try:
-        bld.recurse(os.path.join(source_node.path_from(bld.path), 'mak/build.py'))
-    except Errors.WafError:
-        pass
-    project_path = source_node.path_from(bld.srcnode).replace('/', '.').replace('\\', '.')
-    if 'plugin' in features:
-        plugin_name = name.replace('.', '_')
-    else:
-        plugin_name = 'bugengine'
+        pchstop = source_node.find_node('api/%s/stdafx.h' % name)
+        if pchstop:
+            pchstop = pchstop.path_from(api)
+        else:
+            pchstop = source_node.find_node('include/stdafx.h')
+            if pchstop:
+                pchstop = pchstop.path_from(include)
 
-    compile_extensions = ['cxx', 'cpp', 'cc', 'c', 'rc', 'm', 'mm', 'def']
-    preprocess_extensions = ['yy', 'll', 'plist']
-    try:
-        sources = source_node.ant_glob(['src/**/*.%s' % (ext) for ext in compile_extensions])
-    except OSError:
-        sources = []
-    try:
-        preprocess_sources = source_node.ant_glob(['src/**/*.%s' % (ext) for ext in preprocess_extensions])
-    except OSError:
-        preprocess_sources = []
-    try:
-        preprocess_sources += source_node.ant_glob(['api/**/*.script.hh'])
-    except OSError:
-        pass
-    try:
-        preprocess_sources += source_node.ant_glob(['include/**/*.script.hh'])
-    except OSError:
-        pass
+    preprocess = build_context(
+        env=pp_env,
+        target=name + '.preprocess',
+        parent=name,
+        features=['bugengine:preprocess'],
+        pchstop=pchstop,
+        source=preprocess_sources,
+        kernels=[],
+        source_nodes=source_nodes,
+        root_namespace=root_namespace
+    )
 
-    extras = []
-    static_defines = bld.env.STATIC and ['BE_STATIC=1'] or []
-    extra_defines = extra_defines + static_defines
-    if source_node.is_child_of(bld.bugenginenode):
-        relative_path = source_node.path_from(bld.bugenginenode)
-        for platform in bld.bugenginenode.make_node('extra').listdir():
-            path = os.path.join('extra', platform, relative_path)
-            extra_source_node = bld.bugenginenode.find_node(path)
-            if extra_source_node:
-                extras.append((platform, extra_source_node))
-                source_filter = ['src/**/*.%s' % ext for ext in compile_extensions]
-                sources += extra_source_node.ant_glob(source_filter)
-                preprocess_sources += extra_source_node.ant_glob(['src/**/*'], excl=source_filter)
-
-    api = [i for i in [source_node.make_node('api')] if os.path.isdir(i.abspath())]
-    include = [i for i in [source_node.make_node('include')] if os.path.isdir(i.abspath())] + [bld.bldnode]
-    lib_paths = [i.path_from(bld.bldnode) for i in [source_node.make_node('lib')] if os.path.isdir(i.abspath())]
-
-    if api and os.path.isfile(os.path.join(api[0].abspath(), name.split('.')[-1], 'stdafx.h')):
-        pchstop = '%s/%s' % (name.split('.')[-1], 'stdafx.h')
-    elif api and os.path.isfile(os.path.join(api[0].abspath(), 'bugengine', name.split('.')[-1], 'stdafx.h')):
-        pchstop = 'bugengine/%s/%s' % (name.split('.')[-1], 'stdafx.h')
-    elif api and os.path.isfile(os.path.join(api[0].abspath(), 'bugengine', name, 'stdafx.h')):
-        pchstop = 'bugengine/%s/%s' % (name, 'stdafx.h')
-    elif include and os.path.isfile(os.path.join(include[0].abspath(), 'stdafx.h')):
-        pchstop = 'stdafx.h'
-    else:
-        pchstop = None
-
-    master_includes = []
-    if use_master == 'folder':
-        features = features + ['master_folder']
-        master_includes.append(bld.bldnode)
-    elif use_master is True:
-        features = features + ['master']
-        master_includes.append(bld.bldnode)
-    elif use_master is not False:
-        raise Errors.WafError('unknown value for use_master: %s' % use_master)
-    if warnings:
-        extra_features = ['warnall', bld.__class__.optim] + (bld.env.STATIC and [] or ['dynamic'])
-    else:
-        extra_features = ['warnnone', bld.__class__.optim] + (bld.env.STATIC and [] or ['dynamic'])
-
-    result = []
-    internal_deps = []
-
-    if build and not bld.env.PROJECTS:
-        preprocess = bld(
-            env=bld.common_env.derive(),
-            target=name + '.preprocess',
-            parent=name,
-            features=['preprocess'],
-            pchstop=pchstop,
-            source=preprocess_sources,
-            kernels=[],
-            source_nodes=[source_node] + [e for _, e in extras],
-            root_namespace=root_namespace
-        )
-        preprocess.env.PLUGIN = plugin_name
+    for source_node in source_nodes:
         if os.path.isdir(os.path.join(source_node.abspath(), 'kernels')):
             kernelspath = source_node.make_node('kernels')
             for kernel in kernelspath.ant_glob('**'):
@@ -148,102 +91,77 @@ def module(
                         preprocess.make_bld_node('src/kernels', None, '%s.ast' % (os.path.join(*kernel_name)))
                     )
                 )
+
+    return preprocess
+
+
+@conf
+def module(
+    build_context, name, env, path, depends, private_depends, features, source_list, extra_includes,
+    extra_public_includes, extra_defines, extra_public_defines, conditions, **kw_args
+):
+    for condition in conditions:
+        if condition not in env.FEATURES:
+            return None
+    source_nodes = get_source_nodes(build_context, path, name)
+    source_filter = ['src/**/*.%s' % ext for ext in COMPILE_EXTENSIONS]
+    includes = []
+    api = []
+    platform_specific = ['']
+    platform_specific += ['.%s' % p for p in env.VALID_PLATFORMS]
+    platform_specific += ['.%s' % a for a in env.VALID_ARCHITECTURES]
+    platform_specific += ['.%s.%s' % (p, a) for p in env.VALID_PLATFORMS for a in env.VALID_ARCHITECTURES]
+    if source_list is None:
+        source_list = []
+        for node in source_nodes:
+            source_list.append(node.ant_glob(source_filter))
+            for suffix in platform_specific:
+                if node.find_node('include%s' % suffix):
+                    includes.append(node.find_node('include%s' % suffix))
+                if node.find_node('api%s' % suffix):
+                    api.append(node.find_node('api%s' % suffix))
+    else:
+        source_list = source_nodes[0].ant_glob(source_list)
+    if not build_context.env.PROJECTS:
+        preprocess = build_context.get_tgen_by_name('%s.preprocess' % name)
     else:
         preprocess = None
 
-    for env in bld.multiarch_envs:
-        exit = False
-        if not env.PROJECTS:
-            for feature in build_features:
-                if feature not in env.FEATURES:
-                    exit = True
-        if exit:
-            continue
-        archs = env.VALID_ARCHITECTURES
-        platform_specific = archs + platforms + ['%s.%s' % (p, a) for p in platforms for a in archs]
+    task_gen = build_context(
+        env=env.derive(),
+        target=env.ENV_PREFIX % name,
+        target_name=name,
+        features=features[:],
+        use=[env.ENV_PREFIX % d for d in depends],
+        private_use=[env.ENV_PREFIX % d for d in private_depends],
+        uselib=[build_context.__class__.optim] + (build_context.env.STATIC and [] or ['dynamic']),
+        preprocess=preprocess,
+        source_nodes=source_nodes,
+        source=source_list,
+        defines=[
+            'building_%s' % safe_name(name.split('.')[-1]),
+            'BE_PROJECTID=%s' % name.replace('.', '_'),
+            'BE_PROJECTNAME=%s' % name
+        ] + extra_defines,
+        export_defines=extra_public_defines[:],
+        includes=extra_includes + includes + api +
+        [build_context.bugenginenode, build_context.srcnode, build_context.bldnode],
+        export_includes=extra_public_includes + api,
+    )
+    return task_gen
 
-        platform_api = [
-            i for i in [source_node.make_node('api.%s' % platform) for platform in platform_specific]
-            if os.path.isdir(i.abspath())
-        ]
-        platform_include = [
-            i for i in [source_node.make_node('include.%s' % platform) for platform in platform_specific]
-            if os.path.isdir(i.abspath())
-        ]
-        platform_lib_paths = [
-            i for i in [source_node.make_node('lib.%s' % platform) for platform in platform_specific]
-            if os.path.isdir(i.abspath())
-        ]
 
-        for platform, extra_source_node in extras:
-            if platform in platforms:
-                n = extra_source_node.make_node('api')
-                if os.path.isdir(n.abspath()):
-                    api += [n]
-                n = extra_source_node.make_node('include')
-                if os.path.isdir(n.abspath()):
-                    include += [n]
-        target_prefix = (env.ENV_PREFIX + '/') if env.ENV_PREFIX else ''
-
-        if not build:
-            sources = []
-            if 'cxxshlib' in features:
-                features.remove('cxxshlib')
-            if 'cxxprogram' in features:
-                features.remove('cxxprogram')
-            if 'cxxstlib' in features:
-                features.remove('cxxstlib')
-        task_gen = bld(
-            env=env.derive(),
-            bld_env=env,
-            target=target_prefix + name,
-            target_name=name,
-            module_path=project_path,
-            use=[target_prefix + d for d in depends],
-            private_use=[target_prefix + d for d in private_depends],
-            features=features,
-            extra_use=extra_features,
-            defines=[
-                'building_%s' % safe_name(name.split('.')[-1]),
-                'BE_PROJECTID=%s' % name.replace('.', '_'),
-                'BE_PROJECTNAME=%s' % name
-            ] + extra_defines,
-            export_defines=[] + extra_public_defines,
-            includes=extra_includes + api + platform_api + include + platform_include + master_includes +
-                     [bld.bugenginenode] + [bld.srcnode],
-            libs=[],
-            lib_paths=lib_paths,
-            export_includes=api + platform_api + extra_public_includes,
-            frameworks=[],
-            source=sources[:],
-            pchstop=pchstop,
-            preprocess=preprocess,
-            export_all=export_all,
-            source_nodes=[source_node] + [e for _, e in extras],
-            root_namespace=root_namespace
-        )
-
-        result.append(task_gen)
-        if target_prefix:
-            internal_deps.append(target_prefix + name)
-    multiarch = bld(target=name, features=['multiarch'], use=internal_deps) if internal_deps else None
-
-    if multiarch or result:
-        install_tg = multiarch if multiarch else result[0]
-        for p, e in [('data', 'DEPLOY_DATADIR'), ('bin', 'DEPLOY_RUNBINDIR')]:
-            node = source_node.make_node(p)
-            if os.path.isdir(node.abspath()):
-                install_tg.deploy_directory(bld.env, node, '', e)
-            for tp in platforms:
-                node = source_node.make_node(p + '.' + tp)
-                if os.path.isdir(node.abspath()):
-                    install_tg.deploy_directory(bld.env, node, '', e)
-                for a in archs:
-                    node = source_node.make_node(p + '.' + tp + '.' + a)
-                    if os.path.isdir(node.abspath()):
-                        install_tg.deploy_directory(bld.env, node, '', e)
-
-    return (result, multiarch)
+@conf
+def multiarch(build_context, name, arch_modules):
+    arch_modules = [m for m in arch_modules if m is not None]
+    if arch_modules:
+        if len(build_context.multiarch_envs) == 1:
+            task_gen = arch_modules[0]
+        else:
+            task_gen = build_context(target=name, use=[arch_module.target for arch_module in arch_modules])
+        return task_gen
+    else:
+        return None
 
 
 def build(build_context):

@@ -49,13 +49,15 @@ def link_library_test(self):
 
     bld = self.bld
     bld(rule=write_test_file, target='main.cc', code=self.code)
-    bld(features='cxx cxxprogram',
+    bld(
+        features='cxx cxxprogram',
         source='main.cc',
         target='app',
         lib=self.libname,
         libpath=self.libpath,
         includes=self.includepath,
-        use=self.use)
+        use=self.use
+    )
 
 
 @feature("link_framework")
@@ -77,27 +79,57 @@ def link_framework_test(self):
     if self.version:
         env.append_unique('CXXFLAGS', [self.version])
         env.append_unique('LINKFLAGS', [self.version])
-    bld(features='cxx cxxprogram',
+    bld(
+        features='cxx cxxprogram',
         source='main.mm',
         target='app',
         lib=self.libname,
         libpath=self.libpath,
         includes=self.includepath,
         env=env,
-        use=self.use)
+        use=self.use
+    )
 
 
 @conf
-def check_lib(self,
-              libname,
-              var='',
-              libpath=[],
-              includepath=[],
-              includes=[],
-              includes_externc=[],
-              functions=[],
-              defines=[],
-              code=USE_LIBRARY_CODE):
+def check_package(
+    self,
+    libname,
+    path,
+    var='',
+    libpath=[],
+    includepath=[],
+    includes=[],
+    includes_externc=[],
+    functions=[],
+    defines=[],
+    code=USE_LIBRARY_CODE
+):
+    if path.find_node('api'):
+        includepath = includepath + [path.find_node('api').abspath()]
+    if path.find_node('include'):
+        includepath = includepath + [path.find_node('include').abspath()]
+    for suffix in [''] + ['.%s' % s for s in self.env.VALID_PLATFORMS] + [
+        '.%s' % s for s in self.env.VALID_ARCHITECTURES
+    ] + ['.%s.%s' % (p, a) for p in self.env.VALID_PLATFORMS for a in self.env.VALID_ARCHITECTURES]:
+        if path.find_node('lib' + suffix):
+            libpath = libpath + [path.find_node('lib' + suffix).abspath()]
+    return self.check_lib(libname, var, libpath, includepath, includes, includes_externc, functions, defines, code)
+
+
+@conf
+def check_lib(
+    self,
+    libname,
+    var='',
+    libpath=[],
+    includepath=[],
+    includes=[],
+    includes_externc=[],
+    functions=[],
+    defines=[],
+    code=USE_LIBRARY_CODE
+):
     def cut(string):
         if len(string) > 19:
             return string[0:17] + '...'
@@ -114,20 +146,22 @@ def check_lib(self,
             functions = '\n'.join(['i = *(int*)(&%s);' % f for f in functions])
         else:
             functions = 'i = *(int*)0;'
-        self.check(env=env,
-                   compile_filename=[],
-                   features='link_library',
-                   msg='check for libraries %s' % cut(','.join(libname)),
-                   libname=libname,
-                   libpath=libpath,
-                   code=code % {
-                       'include': '\n'.join(['#include <%s>' % i for i in includes]),
-                       'include_externc': '\n'.join(['#include <%s>' % i for i in includes_externc]),
-                       'function': functions
-                   },
-                   includepath=includepath,
-                   use=['debug'],
-                   envname=self.env.TOOLCHAIN)
+        self.check(
+            env=env,
+            compile_filename=[],
+            features='link_library',
+            msg='check for libraries %s' % cut(','.join(libname)),
+            libname=libname,
+            libpath=libpath,
+            code=code % {
+                'include': '\n'.join(['#include <%s>' % i for i in includes]),
+                'include_externc': '\n'.join(['#include <%s>' % i for i in includes_externc]),
+                'function': functions
+            },
+            includepath=includepath,
+            use=['debug'],
+            envname=self.env.TOOLCHAIN
+        )
     except self.errors.ConfigurationError as e:
         #Logs.pprint('YELLOW', '-%s' % var, sep=' ')
         pass
@@ -153,15 +187,17 @@ def check_header(self, headername, var='', libpath=[], includepath=[], code=USE_
     headername = Utils.to_list(headername)
     if not var: var = self.path.parent.name
     try:
-        self.check(compile_filename=[],
-                   features='link_library',
-                   msg='check for header %s' % cut(','.join(headername)),
-                   libname=[],
-                   libpath=libpath,
-                   code='\n'.join(["#include <%s>" % h for h in headername]) + '\n' + code,
-                   includepath=includepath,
-                   use=['debug'],
-                   envname=self.env.TOOLCHAIN)
+        self.check(
+            compile_filename=[],
+            features='link_library',
+            msg='check for header %s' % cut(','.join(headername)),
+            libname=[],
+            libpath=libpath,
+            code='\n'.join(["#include <%s>" % h for h in headername]) + '\n' + code,
+            includepath=includepath,
+            use=['debug'],
+            envname=self.env.TOOLCHAIN
+        )
     except self.errors.ConfigurationError as e:
         pass
     else:
@@ -172,15 +208,17 @@ def check_header(self, headername, var='', libpath=[], includepath=[], code=USE_
 
 
 @conf
-def check_framework(self,
-                    frameworks,
-                    var='',
-                    libpath=[],
-                    includepath=[],
-                    includes=[],
-                    includes_externc=[],
-                    functions=[],
-                    code=USE_LIBRARY_CODE):
+def check_framework(
+    self,
+    frameworks,
+    var='',
+    libpath=[],
+    includepath=[],
+    includes=[],
+    includes_externc=[],
+    functions=[],
+    code=USE_LIBRARY_CODE
+):
     def cut(string):
         if len(string) > 19:
             return string[0:17] + '...'
@@ -194,22 +232,24 @@ def check_framework(self,
             functions = ' + '.join(['*(int*)(&%s)' % f for f in functions])
         else:
             functions = '*(int*)0'
-        self.check(compile_filename=[],
-                   features='link_framework',
-                   msg='check for framework %s' % cut(','.join(frameworks)),
-                   libname=[],
-                   frameworks=frameworks,
-                   libpath=libpath,
-                   code=code % {
-                       'include': '\n'.join(['#include <%s>' % i for i in includes]),
-                       'include_externc': '\n'.join(['#include <%s>' % i for i in includes_externc]),
-                       'function': functions
-                   },
-                   includepath=includepath,
-                   sdk='',
-                   version='',
-                   use=['debug'],
-                   envname=self.env.TOOLCHAIN)
+        self.check(
+            compile_filename=[],
+            features='link_framework',
+            msg='check for framework %s' % cut(','.join(frameworks)),
+            libname=[],
+            frameworks=frameworks,
+            libpath=libpath,
+            code=code % {
+                'include': '\n'.join(['#include <%s>' % i for i in includes]),
+                'include_externc': '\n'.join(['#include <%s>' % i for i in includes_externc]),
+                'function': functions
+            },
+            includepath=includepath,
+            sdk='',
+            version='',
+            use=['debug'],
+            envname=self.env.TOOLCHAIN
+        )
     except self.errors.ConfigurationError as e:
         #Logs.pprint('YELLOW', '-%s' % var, sep=' ')
         pass
@@ -234,21 +274,23 @@ def check_sdk(self, compiler, flags, sdk, version, frameworks=[], libpath=[], in
     env.CXXLNK_TGT_F = ['-o']
 
     code = '\n'.join(['#include <%s/%s.h>' % (f, f) for f in frameworks]) + '\n' + code
-    self.check(env=env,
-               compile_filename=[],
-               features='link_framework',
-               msg='check for SDK %s' % os.path.split(sdk)[1],
-               libname=[],
-               frameworks=frameworks,
-               libpath=libpath,
-               code=code,
-               includepath=includepath,
-               sdk=sdk,
-               version=version,
-               use=['debug'],
-               errmsg='not usable',
-               compiler=compiler,
-               envname=self.env.TOOLCHAIN)
+    self.check(
+        env=env,
+        compile_filename=[],
+        features='link_framework',
+        msg='check for SDK %s' % os.path.split(sdk)[1],
+        libname=[],
+        frameworks=frameworks,
+        libpath=libpath,
+        code=code,
+        includepath=includepath,
+        sdk=sdk,
+        version=version,
+        use=['debug'],
+        errmsg='not usable',
+        compiler=compiler,
+        envname=self.env.TOOLCHAIN
+    )
 
 
 @conf

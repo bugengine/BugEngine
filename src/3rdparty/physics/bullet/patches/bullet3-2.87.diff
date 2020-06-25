@@ -1,0 +1,743 @@
+diff -r -u bullet3-2.87.orig/src/BulletCollision/CollisionDispatch/btCollisionWorld.cpp bullet3-2.87/src/BulletCollision/CollisionDispatch/btCollisionWorld.cpp
+--- bullet3-2.87.orig/src/BulletCollision/CollisionDispatch/btCollisionWorld.cpp	2017-09-30 01:20:39.000000000 +0200
++++ bullet3-2.87/src/BulletCollision/CollisionDispatch/btCollisionWorld.cpp	2020-06-14 15:41:31.592536900 +0200
+@@ -287,6 +287,89 @@
+ 	btCollisionWorld::rayTestSingleInternal(rayFromTrans,rayToTrans,&colObWrap,resultCallback);
+ }
+ 
++
++struct LocalInfoAdder2 : public btCollisionWorld::RayResultCallback
++{
++	RayResultCallback* m_userCallback;
++	int m_i;
++
++	LocalInfoAdder2(int i, RayResultCallback *user)
++		: m_userCallback(user), m_i(i)
++	{
++		m_closestHitFraction = m_userCallback->m_closestHitFraction;
++		m_flags = m_userCallback->m_flags;
++	}
++	virtual bool needsCollision(btBroadphaseProxy* p) const
++	{
++		return m_userCallback->needsCollision(p);
++	}
++
++	virtual btScalar addSingleResult(btCollisionWorld::LocalRayResult &r, bool b)
++	{
++		btCollisionWorld::LocalShapeInfo shapeInfo;
++		shapeInfo.m_shapePart = -1;
++		shapeInfo.m_triangleIndex = m_i;
++		if (r.m_localShapeInfo == NULL)
++			r.m_localShapeInfo = &shapeInfo;
++
++		const btScalar result = m_userCallback->addSingleResult(r, b);
++		m_closestHitFraction = m_userCallback->m_closestHitFraction;
++		return result;
++	}
++};
++
++struct RayTester : btDbvt::ICollide
++{
++	const btCollisionObject* m_collisionObject;
++	const btCompoundShape* m_compoundShape;
++	const btTransform& m_colObjWorldTransform;
++	const btTransform& m_rayFromTrans;
++	const btTransform& m_rayToTrans;
++	btCollisionWorld::RayResultCallback& m_resultCallback;
++
++	RayTester(const btCollisionObject* collisionObject,
++		const btCompoundShape* compoundShape,
++		const btTransform& colObjWorldTransform,
++		const btTransform& rayFromTrans,
++		const btTransform& rayToTrans,
++		btCollisionWorld::RayResultCallback& resultCallback) :
++		m_collisionObject(collisionObject),
++		m_compoundShape(compoundShape),
++		m_colObjWorldTransform(colObjWorldTransform),
++		m_rayFromTrans(rayFromTrans),
++		m_rayToTrans(rayToTrans),
++		m_resultCallback(resultCallback)
++	{
++
++	}
++
++	void ProcessLeaf(int i)
++	{
++		const btCollisionShape* childCollisionShape = m_compoundShape->getChildShape(i);
++		const btTransform& childTrans = m_compoundShape->getChildTransform(i);
++		btTransform childWorldTrans = m_colObjWorldTransform * childTrans;
++
++		btCollisionObjectWrapper tmpOb(0, childCollisionShape, m_collisionObject, childWorldTrans, -1, i);
++		// replace collision shape so that callback can determine the triangle
++
++
++
++		LocalInfoAdder2 my_cb(i, &m_resultCallback);
++
++		btCollisionWorld::rayTestSingleInternal(
++			m_rayFromTrans,
++			m_rayToTrans,
++			&tmpOb,
++			my_cb);
++
++	}
++
++	void Process(const btDbvtNode* leaf)
++	{
++		ProcessLeaf(leaf->dataAsInt);
++	}
++};
++
+ void	btCollisionWorld::rayTestSingleInternal(const btTransform& rayFromTrans,const btTransform& rayToTrans,
+ 										const btCollisionObjectWrapper* collisionObjectWrap,
+ 										RayResultCallback& resultCallback)
+@@ -474,88 +557,6 @@
+ 			//			BT_PROFILE("rayTestCompound");
+ 			if (collisionShape->isCompound())
+ 			{
+-				struct LocalInfoAdder2 : public RayResultCallback
+-				{
+-					RayResultCallback* m_userCallback;
+-					int m_i;
+-					
+-					LocalInfoAdder2 (int i, RayResultCallback *user)
+-						: m_userCallback(user), m_i(i)
+-					{ 
+-						m_closestHitFraction = m_userCallback->m_closestHitFraction;
+-						m_flags = m_userCallback->m_flags;
+-					}
+-					virtual bool needsCollision(btBroadphaseProxy* p) const
+-					{
+-						return m_userCallback->needsCollision(p);
+-					}
+-
+-					virtual btScalar addSingleResult (btCollisionWorld::LocalRayResult &r, bool b)
+-					{
+-						btCollisionWorld::LocalShapeInfo shapeInfo;
+-						shapeInfo.m_shapePart = -1;
+-						shapeInfo.m_triangleIndex = m_i;
+-						if (r.m_localShapeInfo == NULL)
+-							r.m_localShapeInfo = &shapeInfo;
+-
+-						const btScalar result = m_userCallback->addSingleResult(r, b);
+-						m_closestHitFraction = m_userCallback->m_closestHitFraction;
+-						return result;
+-					}
+-				};
+-				
+-				struct RayTester : btDbvt::ICollide
+-				{
+-					const btCollisionObject* m_collisionObject;
+-					const btCompoundShape* m_compoundShape;
+-					const btTransform& m_colObjWorldTransform;
+-					const btTransform& m_rayFromTrans;
+-					const btTransform& m_rayToTrans;
+-					RayResultCallback& m_resultCallback;
+-					
+-					RayTester(const btCollisionObject* collisionObject,
+-							const btCompoundShape* compoundShape,
+-							const btTransform& colObjWorldTransform,
+-							const btTransform& rayFromTrans,
+-							const btTransform& rayToTrans,
+-							RayResultCallback& resultCallback):
+-						m_collisionObject(collisionObject),
+-						m_compoundShape(compoundShape),
+-						m_colObjWorldTransform(colObjWorldTransform),
+-						m_rayFromTrans(rayFromTrans),
+-						m_rayToTrans(rayToTrans),
+-						m_resultCallback(resultCallback)
+-					{
+-						
+-					}
+-					
+-					void ProcessLeaf(int i)
+-					{
+-						const btCollisionShape* childCollisionShape = m_compoundShape->getChildShape(i);
+-						const btTransform& childTrans = m_compoundShape->getChildTransform(i);
+-						btTransform childWorldTrans = m_colObjWorldTransform * childTrans;
+-						
+-						btCollisionObjectWrapper tmpOb(0,childCollisionShape,m_collisionObject,childWorldTrans,-1,i);
+-						// replace collision shape so that callback can determine the triangle
+-
+-						
+-
+-						LocalInfoAdder2 my_cb(i, &m_resultCallback);
+-
+-						rayTestSingleInternal(
+-							m_rayFromTrans,
+-							m_rayToTrans,
+-							&tmpOb,
+-							my_cb);
+-						
+-					}
+-				
+-					void Process(const btDbvtNode* leaf)
+-					{
+-						ProcessLeaf(leaf->dataAsInt);
+-					}
+-				};
+-				
+ 				const btCompoundShape* compoundShape = static_cast<const btCompoundShape*>(collisionShape);
+ 				const btDbvt* dbvt = compoundShape->getDynamicAabbTree();
+ 
+@@ -597,6 +598,90 @@
+ 	btCollisionWorld::objectQuerySingleInternal(castShape,convexFromTrans,convexToTrans,&tmpOb,resultCallback,allowedPenetration);
+ }
+ 
++
++struct	btCompoundLeafCallback : btDbvt::ICollide
++{
++	btCompoundLeafCallback(
++		const btCollisionObjectWrapper* colObjWrap,
++		const btConvexShape* castShape,
++		const btTransform& convexFromTrans,
++		const btTransform& convexToTrans,
++		btScalar allowedPenetration,
++		const btCompoundShape* compoundShape,
++		const btTransform& colObjWorldTransform,
++		btCollisionWorld::ConvexResultCallback& resultCallback)
++		:
++		m_colObjWrap(colObjWrap),
++		m_castShape(castShape),
++		m_convexFromTrans(convexFromTrans),
++		m_convexToTrans(convexToTrans),
++		m_allowedPenetration(allowedPenetration),
++		m_compoundShape(compoundShape),
++		m_colObjWorldTransform(colObjWorldTransform),
++		m_resultCallback(resultCallback) {
++	}
++
++	const btCollisionObjectWrapper* m_colObjWrap;
++	const btConvexShape* m_castShape;
++	const btTransform& m_convexFromTrans;
++	const btTransform& m_convexToTrans;
++	btScalar m_allowedPenetration;
++	const btCompoundShape* m_compoundShape;
++	const btTransform& m_colObjWorldTransform;
++	btCollisionWorld::ConvexResultCallback& m_resultCallback;
++
++public:
++
++	void		ProcessChild(int index, const btTransform& childTrans, const btCollisionShape* childCollisionShape)
++	{
++		btTransform childWorldTrans = m_colObjWorldTransform * childTrans;
++
++		struct	LocalInfoAdder : public btCollisionWorld::ConvexResultCallback {
++			btCollisionWorld::ConvexResultCallback* m_userCallback;
++			int m_i;
++
++			LocalInfoAdder(int i, btCollisionWorld::ConvexResultCallback *user)
++				: m_userCallback(user), m_i(i)
++			{
++				m_closestHitFraction = m_userCallback->m_closestHitFraction;
++			}
++			virtual bool needsCollision(btBroadphaseProxy* p) const
++			{
++				return m_userCallback->needsCollision(p);
++			}
++			virtual btScalar addSingleResult(btCollisionWorld::LocalConvexResult&	r, bool b)
++			{
++				btCollisionWorld::LocalShapeInfo	shapeInfo;
++				shapeInfo.m_shapePart = -1;
++				shapeInfo.m_triangleIndex = m_i;
++				if (r.m_localShapeInfo == NULL)
++					r.m_localShapeInfo = &shapeInfo;
++				const btScalar result = m_userCallback->addSingleResult(r, b);
++				m_closestHitFraction = m_userCallback->m_closestHitFraction;
++				return result;
++
++			}
++		};
++
++		LocalInfoAdder my_cb(index, &m_resultCallback);
++
++		btCollisionObjectWrapper tmpObj(m_colObjWrap, childCollisionShape, m_colObjWrap->getCollisionObject(), childWorldTrans, -1, index);
++
++		btCollisionWorld::objectQuerySingleInternal(m_castShape, m_convexFromTrans, m_convexToTrans, &tmpObj, my_cb, m_allowedPenetration);
++	}
++
++	void		Process(const btDbvtNode* leaf)
++	{
++		// Processing leaf node
++		int index = leaf->dataAsInt;
++
++		btTransform childTrans = m_compoundShape->getChildTransform(index);
++		const btCollisionShape* childCollisionShape = m_compoundShape->getChildShape(index);
++
++		ProcessChild(index, childTrans, childCollisionShape);
++	}
++};
++
+ void	btCollisionWorld::objectQuerySingleInternal(const btConvexShape* castShape,const btTransform& convexFromTrans,const btTransform& convexToTrans,
+ 											const btCollisionObjectWrapper* colObjWrap,
+ 											ConvexResultCallback& resultCallback, btScalar allowedPenetration)
+@@ -810,89 +895,6 @@
+ 		} else {
+ 			if (collisionShape->isCompound())
+ 			{
+-				struct	btCompoundLeafCallback : btDbvt::ICollide
+-				{
+-					btCompoundLeafCallback(
+-										   const btCollisionObjectWrapper* colObjWrap,
+-										   const btConvexShape* castShape,
+-										   const btTransform& convexFromTrans,
+-										   const btTransform& convexToTrans,
+-										   btScalar allowedPenetration,
+-										   const btCompoundShape* compoundShape,
+-										   const btTransform& colObjWorldTransform,
+-										   ConvexResultCallback& resultCallback)
+-					: 
+-					  m_colObjWrap(colObjWrap),
+-						m_castShape(castShape),
+-						m_convexFromTrans(convexFromTrans),
+-						m_convexToTrans(convexToTrans),
+-						m_allowedPenetration(allowedPenetration),
+-						m_compoundShape(compoundShape),
+-						m_colObjWorldTransform(colObjWorldTransform),
+-						m_resultCallback(resultCallback) {
+-					}
+-
+-				  const btCollisionObjectWrapper* m_colObjWrap;
+-					const btConvexShape* m_castShape;
+-					const btTransform& m_convexFromTrans;
+-					const btTransform& m_convexToTrans;
+-					btScalar m_allowedPenetration;
+-					const btCompoundShape* m_compoundShape;
+-					const btTransform& m_colObjWorldTransform;
+-					ConvexResultCallback& m_resultCallback;
+-
+-				public:
+-
+-					void		ProcessChild(int index, const btTransform& childTrans, const btCollisionShape* childCollisionShape)
+-					{
+-						btTransform childWorldTrans = m_colObjWorldTransform * childTrans;
+-
+-						struct	LocalInfoAdder : public ConvexResultCallback {
+-							ConvexResultCallback* m_userCallback;
+-							int m_i;
+-
+-							LocalInfoAdder(int i, ConvexResultCallback *user)
+-								: m_userCallback(user), m_i(i)
+-							{
+-								m_closestHitFraction = m_userCallback->m_closestHitFraction;
+-							}
+-							virtual bool needsCollision(btBroadphaseProxy* p) const
+-							{
+-								return m_userCallback->needsCollision(p);
+-							}
+-							virtual btScalar addSingleResult(btCollisionWorld::LocalConvexResult&	r, bool b)
+-							{
+-								btCollisionWorld::LocalShapeInfo	shapeInfo;
+-								shapeInfo.m_shapePart = -1;
+-								shapeInfo.m_triangleIndex = m_i;
+-								if (r.m_localShapeInfo == NULL)
+-									r.m_localShapeInfo = &shapeInfo;
+-								const btScalar result = m_userCallback->addSingleResult(r, b);
+-								m_closestHitFraction = m_userCallback->m_closestHitFraction;
+-								return result;
+-
+-							}
+-						};
+-
+-						LocalInfoAdder my_cb(index, &m_resultCallback);
+-
+-						btCollisionObjectWrapper tmpObj(m_colObjWrap, childCollisionShape, m_colObjWrap->getCollisionObject(), childWorldTrans, -1, index);
+-
+-						objectQuerySingleInternal(m_castShape, m_convexFromTrans, m_convexToTrans, &tmpObj, my_cb, m_allowedPenetration);
+-					}
+-
+-					void		Process(const btDbvtNode* leaf)
+-					{
+-						// Processing leaf node
+-						int index = leaf->dataAsInt;
+-
+-						btTransform childTrans = m_compoundShape->getChildTransform(index);
+-						const btCollisionShape* childCollisionShape = m_compoundShape->getChildShape(index);
+-
+-						ProcessChild(index, childTrans, childCollisionShape);
+-					}
+-				};
+-
+ 				BT_PROFILE("convexSweepCompound");
+ 				const btCompoundShape* compoundShape = static_cast<const btCompoundShape*>(collisionShape);
+ 
+diff -r -u bullet3-2.87.orig/src/BulletCollision/CollisionDispatch/btCompoundCollisionAlgorithm.cpp bullet3-2.87/src/BulletCollision/CollisionDispatch/btCompoundCollisionAlgorithm.cpp
+--- bullet3-2.87.orig/src/BulletCollision/CollisionDispatch/btCompoundCollisionAlgorithm.cpp	2017-09-30 01:20:39.000000000 +0200
++++ bullet3-2.87/src/BulletCollision/CollisionDispatch/btCompoundCollisionAlgorithm.cpp	2020-06-14 15:41:31.620535500 +0200
+@@ -98,7 +98,7 @@
+ 
+ 
+ 
+-struct	btCompoundLeafCallback : btDbvt::ICollide
++struct	btCompoundLeafCallback2 : btDbvt::ICollide
+ {
+ 
+ public:
+@@ -111,7 +111,7 @@
+ 	btCollisionAlgorithm**	m_childCollisionAlgorithms;
+ 	btPersistentManifold*	m_sharedManifold;
+ 	
+-	btCompoundLeafCallback (const btCollisionObjectWrapper* compoundObjWrap,const btCollisionObjectWrapper* otherObjWrap,btDispatcher* dispatcher,const btDispatcherInfo& dispatchInfo,btManifoldResult*	resultOut,btCollisionAlgorithm**	childCollisionAlgorithms,btPersistentManifold*	sharedManifold)
++	btCompoundLeafCallback2 (const btCollisionObjectWrapper* compoundObjWrap,const btCollisionObjectWrapper* otherObjWrap,btDispatcher* dispatcher,const btDispatcherInfo& dispatchInfo,btManifoldResult*	resultOut,btCollisionAlgorithm**	childCollisionAlgorithms,btPersistentManifold*	sharedManifold)
+ 		:m_compoundColObjWrap(compoundObjWrap),m_otherObjWrap(otherObjWrap),m_dispatcher(dispatcher),m_dispatchInfo(dispatchInfo),m_resultOut(resultOut),
+ 		m_childCollisionAlgorithms(childCollisionAlgorithms),
+ 		m_sharedManifold(sharedManifold)
+@@ -258,7 +258,7 @@
+     
+ 	const btDbvt* tree = compoundShape->getDynamicAabbTree();
+ 	//use a dynamic aabb tree to cull potential child-overlaps
+-	btCompoundLeafCallback  callback(colObjWrap,otherObjWrap,m_dispatcher,dispatchInfo,resultOut,&m_childCollisionAlgorithms[0],m_sharedManifold);
++	btCompoundLeafCallback2  callback(colObjWrap, otherObjWrap, m_dispatcher, dispatchInfo, resultOut, &m_childCollisionAlgorithms[0], m_sharedManifold);
+ 
+ 	///we need to refresh all contact manifolds
+ 	///note that we should actually recursively traverse all children, btCompoundShape can nested more then 1 level deep
+diff -r -u bullet3-2.87.orig/src/BulletCollision/CollisionDispatch/btDefaultCollisionConfiguration.cpp bullet3-2.87/src/BulletCollision/CollisionDispatch/btDefaultCollisionConfiguration.cpp
+--- bullet3-2.87.orig/src/BulletCollision/CollisionDispatch/btDefaultCollisionConfiguration.cpp	2017-09-30 01:20:39.000000000 +0200
++++ bullet3-2.87/src/BulletCollision/CollisionDispatch/btDefaultCollisionConfiguration.cpp	2020-06-14 15:41:31.698536700 +0200
+@@ -121,7 +121,7 @@
+ 		m_persistentManifoldPool = new (mem) btPoolAllocator(sizeof(btPersistentManifold),constructionInfo.m_defaultMaxPersistentManifoldPoolSize);
+ 	}
+ 	
+-	collisionAlgorithmMaxElementSize = (collisionAlgorithmMaxElementSize+16)&0xffffffffffff0;
++	collisionAlgorithmMaxElementSize = (collisionAlgorithmMaxElementSize+16)&0xffffffffffff0ll;
+ 	if (constructionInfo.m_collisionAlgorithmPool)
+ 	{
+ 		m_ownsCollisionAlgorithmPool = false;
+diff -r -u bullet3-2.87.orig/src/BulletCollision/CollisionShapes/btBvhTriangleMeshShape.h bullet3-2.87/src/BulletCollision/CollisionShapes/btBvhTriangleMeshShape.h
+--- bullet3-2.87.orig/src/BulletCollision/CollisionShapes/btBvhTriangleMeshShape.h	2017-09-30 01:20:39.000000000 +0200
++++ bullet3-2.87/src/BulletCollision/CollisionShapes/btBvhTriangleMeshShape.h	2020-06-14 15:41:31.872534100 +0200
+@@ -40,7 +40,7 @@
+ 	bool m_useQuantizedAabbCompression;
+ 	bool m_ownsBvh;
+ #ifdef __clang__
+-	bool m_pad[11] __attribute__((unused));////need padding due to alignment
++	bool m_pad[11]; //__attribute__((unused));////need padding due to alignment
+ #else
+ 	bool m_pad[11];////need padding due to alignment
+ #endif
+diff -r -u bullet3-2.87.orig/src/BulletCollision/CollisionShapes/btCapsuleShape.h bullet3-2.87/src/BulletCollision/CollisionShapes/btCapsuleShape.h
+--- bullet3-2.87.orig/src/BulletCollision/CollisionShapes/btCapsuleShape.h	2017-09-30 01:20:39.000000000 +0200
++++ bullet3-2.87/src/BulletCollision/CollisionShapes/btCapsuleShape.h	2020-06-14 15:41:31.884534400 +0200
+@@ -46,7 +46,7 @@
+ 
+ 	virtual void	batchedUnitVectorGetSupportingVertexWithoutMargin(const btVector3* vectors,btVector3* supportVerticesOut,int numVectors) const;
+ 	
+-	virtual void setMargin(btScalar collisionMargin)
++	virtual void setMargin(btScalar /*collisionMargin*/)
+ 	{
+ 		//don't override the margin for capsules, their entire radius == margin
+ 	}
+diff -r -u bullet3-2.87.orig/src/BulletCollision/CollisionShapes/btConvexShape.cpp bullet3-2.87/src/BulletCollision/CollisionShapes/btConvexShape.cpp
+--- bullet3-2.87.orig/src/BulletCollision/CollisionShapes/btConvexShape.cpp	2017-09-30 01:20:39.000000000 +0200
++++ bullet3-2.87/src/BulletCollision/CollisionShapes/btConvexShape.cpp	2020-06-14 15:41:32.008534300 +0200
+@@ -313,20 +313,24 @@
+ 	return localGetSupportVertexWithoutMarginNonVirtual(localDirNorm)+ getMarginNonVirtual() * localDirNorm;
+ }
+ 
++#ifdef _MSC_VER
++#if _MSC_VER < 1500
++#pragma message("disabling optimizations")
++#pragma optimize("", off)
++#endif
++#endif
+ /* TODO: This should be bumped up to btCollisionShape () */
+ btScalar btConvexShape::getMarginNonVirtual () const
+ {
+ 	switch (m_shapeType)
+ 	{
+-    case SPHERE_SHAPE_PROXYTYPE:
++	case SPHERE_SHAPE_PROXYTYPE:
+ 	{
+-		btSphereShape* sphereShape = (btSphereShape*)this;
+-		return sphereShape->getRadius ();
++		return ((btSphereShape*)this)->getRadius();
+ 	}
+ 	case BOX_SHAPE_PROXYTYPE:
+ 	{
+-		btBoxShape* convexShape = (btBoxShape*)this;
+-		return convexShape->getMarginNV ();
++		return ((btBoxShape*)this)->getMarginNV();
+ 	}
+ 	case TRIANGLE_SHAPE_PROXYTYPE:
+ 	{
+@@ -367,6 +371,12 @@
+ 	btAssert (0);
+ 	return btScalar(0.0f);
+ }
++#ifdef _MSC_VER
++#if _MSC_VER < 1500
++#pragma optimize("", on)
++#endif
++#endif
++
+ #ifndef __SPU__
+ void btConvexShape::getAabbNonVirtual (const btTransform& t, btVector3& aabbMin, btVector3& aabbMax) const
+ {
+diff -r -u bullet3-2.87.orig/src/BulletDynamics/ConstraintSolver/btSolverBody.h bullet3-2.87/src/BulletDynamics/ConstraintSolver/btSolverBody.h
+--- bullet3-2.87.orig/src/BulletDynamics/ConstraintSolver/btSolverBody.h	2017-09-30 01:20:39.000000000 +0200
++++ bullet3-2.87/src/BulletDynamics/ConstraintSolver/btSolverBody.h	2020-06-14 15:41:32.984849900 +0200
+@@ -59,7 +59,7 @@
+ 		return m_vec128;
+ 	}
+ 
+-	SIMD_FORCE_INLINE	const __m128	get128() const
++	SIMD_FORCE_INLINE	__m128	get128() const
+ 	{
+ 		return m_vec128;
+ 	}
+diff -r -u bullet3-2.87.orig/src/BulletDynamics/Dynamics/btSimulationIslandManagerMt.cpp bullet3-2.87/src/BulletDynamics/Dynamics/btSimulationIslandManagerMt.cpp
+--- bullet3-2.87.orig/src/BulletDynamics/Dynamics/btSimulationIslandManagerMt.cpp	2017-09-30 01:20:39.000000000 +0200
++++ bullet3-2.87/src/BulletDynamics/Dynamics/btSimulationIslandManagerMt.cpp	2020-06-14 15:41:33.082836300 +0200
+@@ -71,7 +71,7 @@
+ }
+ 
+ 
+-SIMD_FORCE_INLINE	int	btGetConstraintIslandId( const btTypedConstraint* lhs )
++SIMD_FORCE_INLINE	int	btGetConstraintIslandIdEx( const btTypedConstraint* lhs )
+ {
+     const btCollisionObject& rcolObj0 = lhs->getRigidBodyA();
+     const btCollisionObject& rcolObj1 = lhs->getRigidBodyB();
+@@ -473,7 +473,7 @@
+         btTypedConstraint* constraint = constraints[ i ];
+         if ( constraint->isEnabled() )
+         {
+-            int islandId = btGetConstraintIslandId( constraint );
++            int islandId = btGetConstraintIslandIdEx( constraint );
+             // if island is not sleeping,
+             if ( Island* island = getIsland( islandId ) )
+             {
+diff -r -u bullet3-2.87.orig/src/BulletSoftBody/btSoftRigidDynamicsWorld.cpp bullet3-2.87/src/BulletSoftBody/btSoftRigidDynamicsWorld.cpp
+--- bullet3-2.87.orig/src/BulletSoftBody/btSoftRigidDynamicsWorld.cpp	2017-09-30 01:20:39.000000000 +0200
++++ bullet3-2.87/src/BulletSoftBody/btSoftRigidDynamicsWorld.cpp	2020-06-14 15:41:37.560186800 +0200
+@@ -184,7 +184,7 @@
+ 
+ 
+ 
+-struct btSoftSingleRayCallback : public btBroadphaseRayCallback
++struct btSoftSingleRayCallback2 : public btBroadphaseRayCallback
+ {
+ 	btVector3	m_rayFromWorld;
+ 	btVector3	m_rayToWorld;
+@@ -195,7 +195,7 @@
+ 	const btSoftRigidDynamicsWorld*	m_world;
+ 	btCollisionWorld::RayResultCallback&	m_resultCallback;
+ 
+-	btSoftSingleRayCallback(const btVector3& rayFromWorld,const btVector3& rayToWorld,const btSoftRigidDynamicsWorld* world,btCollisionWorld::RayResultCallback& resultCallback)
++	btSoftSingleRayCallback2(const btVector3& rayFromWorld, const btVector3& rayToWorld, const btSoftRigidDynamicsWorld* world, btCollisionWorld::RayResultCallback& resultCallback)
+ 	:m_rayFromWorld(rayFromWorld),
+ 	m_rayToWorld(rayToWorld),
+ 	m_world(world),
+@@ -266,7 +266,7 @@
+ 	BT_PROFILE("rayTest");
+ 	/// use the broadphase to accelerate the search for objects, based on their aabb
+ 	/// and for each object with ray-aabb overlap, perform an exact ray test
+-	btSoftSingleRayCallback rayCB(rayFromWorld,rayToWorld,this,resultCallback);
++	btSoftSingleRayCallback2 rayCB(rayFromWorld, rayToWorld, this, resultCallback);
+ 
+ #ifndef USE_BRUTEFORCE_RAYBROADPHASE
+ 	m_broadphasePairCache->rayTest(rayFromWorld,rayToWorld,rayCB);
+diff -r -u bullet3-2.87.orig/src/LinearMath/btConvexHullComputer.cpp bullet3-2.87/src/LinearMath/btConvexHullComputer.cpp
+--- bullet3-2.87.orig/src/LinearMath/btConvexHullComputer.cpp	2017-09-30 01:20:39.000000000 +0200
++++ bullet3-2.87/src/LinearMath/btConvexHullComputer.cpp	2020-06-14 15:41:37.629186800 +0200
+@@ -19,18 +19,13 @@
+ #include "btMinMax.h"
+ #include "btVector3.h"
+ 
+-#ifdef __GNUC__
++#ifndef _MSC_VER
+ 	#include <stdint.h>
+-#elif defined(_MSC_VER)
++#else
+ 	typedef __int32 int32_t;
+ 	typedef __int64 int64_t;
+ 	typedef unsigned __int32 uint32_t;
+ 	typedef unsigned __int64 uint64_t;
+-#else
+-	typedef int int32_t;
+-	typedef long long int int64_t;
+-	typedef unsigned int uint32_t;
+-	typedef unsigned long long int uint64_t;
+ #endif
+ 
+ 
+@@ -632,9 +627,10 @@
+ 					p11 += high(p01);
+ 					p11 += high(p10);
+ 					p11 += high(p0110);
+-					shlHalf(p0110);
+-					p00 += p0110;
+-					if (p00 < p0110)
++					UWord p0110h = UWord(low(p0110));
++					shlHalf(p0110h);
++					p00 += p0110h;
++					if (p00 < p0110h)
+ 					{
+ 						++p11;
+ 					}
+diff -r -u bullet3-2.87.orig/src/LinearMath/btQuaternion.h bullet3-2.87/src/LinearMath/btQuaternion.h
+--- bullet3-2.87.orig/src/LinearMath/btQuaternion.h	2017-09-30 01:20:39.000000000 +0200
++++ bullet3-2.87/src/LinearMath/btQuaternion.h	2020-06-14 15:41:37.749186300 +0200
+@@ -60,14 +60,14 @@
+ #if (defined(BT_USE_SSE_IN_API) && defined(BT_USE_SSE))|| defined(BT_USE_NEON) 
+ 	// Set Vector 
+ 	SIMD_FORCE_INLINE btQuaternion(const btSimdFloat4 vec)
++		: btQuadWord(vec)
+ 	{
+-		mVec128 = vec;
+ 	}
+ 
+ 	// Copy constructor
+ 	SIMD_FORCE_INLINE btQuaternion(const btQuaternion& rhs)
++		: btQuadWord(rhs.mVec128)
+ 	{
+-		mVec128 = rhs.mVec128;
+ 	}
+ 
+ 	// Assignment Operator
+diff -r -u bullet3-2.87.orig/src/LinearMath/btQuickprof.cpp bullet3-2.87/src/LinearMath/btQuickprof.cpp
+--- bullet3-2.87.orig/src/LinearMath/btQuickprof.cpp	2017-09-30 01:20:39.000000000 +0200
++++ bullet3-2.87/src/LinearMath/btQuickprof.cpp	2020-06-14 15:41:37.755185000 +0200
+@@ -43,6 +43,7 @@
+ 
+ #ifdef _XBOX
+ 	#include <Xtl.h>
++#define GetTickCount64 GetTickCount
+ #else //_XBOX
+ 	#include <windows.h>
+ 
+diff -r -u bullet3-2.87.orig/src/LinearMath/btScalar.h bullet3-2.87/src/LinearMath/btScalar.h
+--- bullet3-2.87.orig/src/LinearMath/btScalar.h	2017-09-30 01:20:39.000000000 +0200
++++ bullet3-2.87/src/LinearMath/btScalar.h	2020-06-14 15:49:29.337742100 +0200
+@@ -20,9 +20,9 @@
+ #pragma unmanaged
+ #endif
+ 
++#include <float.h>
+ #include <math.h>
+ #include <stdlib.h>  //size_t for MSVC 6.0
+-#include <float.h>
+ 
+ /* SVN $Revision$ on $Date$ from http://bullet.googlecode.com*/
+ #define BT_BULLET_VERSION 287
+@@ -90,7 +90,7 @@
+  			#define btFsel(a,b,c) __fsel((a),(b),(c))
+ 		#else
+ 
+-#if defined (_M_ARM)
++#if defined (_M_ARM) ||defined(_M_ARM64)
+             //Do not turn SSE on for ARM (may want to turn on BT_USE_NEON however)
+ #elif (defined (_WIN32) && (_MSC_VER) && _MSC_VER >= 1400) && (!defined (BT_USE_DOUBLE_PRECISION))
+ 			#if _MSC_VER>1400
+@@ -101,7 +101,11 @@
+ 			#ifdef BT_USE_SSE
+ 
+ #if (_MSC_FULL_VER >= 170050727)//Visual Studio 2012 can compile SSE4/FMA3 (but SSE4/FMA3 is not enabled by default)
+-			#define BT_ALLOW_SSE4
++			#if !defined(__clang__)
++				#define BT_ALLOW_SSE4
++			#else
++				#define BT_NO_SIMD_OPERATOR_OVERLOADS 1
++			#endif
+ #endif //(_MSC_FULL_VER >= 160040219)
+ 
+ 			//BT_USE_SSE_IN_API is disabled under Windows by default, because 
+@@ -120,7 +124,7 @@
+ 	#endif //__MINGW32__
+ 
+ 	#ifdef BT_DEBUG
+-		#ifdef _MSC_VER
++		#if defined(_MSC_VER) && !defined(__clang__)
+ 			#include <stdio.h>
+ 			#define btAssert(x) { if(!(x)){printf("Assert "__FILE__ ":%u (%s)\n", __LINE__, #x);__debugbreak();	}}
+ 		#else//_MSC_VER
+@@ -440,6 +444,9 @@
+ 	SIMD_FORCE_INLINE btScalar btFmod(btScalar x, btScalar y) { return fmod(x, y); }
+ 
+ #else//BT_USE_DOUBLE_PRECISION
++#include <cmath>
++namespace std {}
++
+ 
+ 	SIMD_FORCE_INLINE btScalar btSqrt(btScalar y)
+ 	{
+@@ -469,20 +476,22 @@
+ 		return x * y;
+ 	#endif
+ 	#else
+-		return sqrtf(y);
++		using namespace std;
++		return sqrt(y);
+ 	#endif
+ 	}
+-	SIMD_FORCE_INLINE btScalar btFabs(btScalar x) { return fabsf(x); }
+-	SIMD_FORCE_INLINE btScalar btCos(btScalar x) { return cosf(x); }
+-	SIMD_FORCE_INLINE btScalar btSin(btScalar x) { return sinf(x); }
+-	SIMD_FORCE_INLINE btScalar btTan(btScalar x) { return tanf(x); }
++	SIMD_FORCE_INLINE btScalar btFabs(btScalar x) { using namespace std; return fabs(x); }
++	SIMD_FORCE_INLINE btScalar btCos(btScalar x) { using namespace std; return cos(x); }
++	SIMD_FORCE_INLINE btScalar btSin(btScalar x) { using namespace std; return sin(x); }
++	SIMD_FORCE_INLINE btScalar btTan(btScalar x) { using namespace std; return tan(x); }
+ 	SIMD_FORCE_INLINE btScalar btAcos(btScalar x)
+ 	{
+ 		if (x < btScalar(-1))
+ 			x = btScalar(-1);
+ 		if (x > btScalar(1))
+ 			x = btScalar(1);
+-		return acosf(x);
++		using namespace std;
++		return acos(x);
+ 	}
+ 	SIMD_FORCE_INLINE btScalar btAsin(btScalar x)
+ 	{
+@@ -490,14 +499,15 @@
+ 			x = btScalar(-1);
+ 		if (x > btScalar(1))
+ 			x = btScalar(1);
+-		return asinf(x);
++        using namespace std;
++		return asin(x);
+ 	}
+-	SIMD_FORCE_INLINE btScalar btAtan(btScalar x) { return atanf(x); }
+-	SIMD_FORCE_INLINE btScalar btAtan2(btScalar x, btScalar y) { return atan2f(x, y); }
+-	SIMD_FORCE_INLINE btScalar btExp(btScalar x) { return expf(x); }
+-	SIMD_FORCE_INLINE btScalar btLog(btScalar x) { return logf(x); }
+-	SIMD_FORCE_INLINE btScalar btPow(btScalar x, btScalar y) { return powf(x, y); }
+-	SIMD_FORCE_INLINE btScalar btFmod(btScalar x, btScalar y) { return fmodf(x, y); }
++	SIMD_FORCE_INLINE btScalar btAtan(btScalar x) { using namespace std; return atan(x); }
++	SIMD_FORCE_INLINE btScalar btAtan2(btScalar x, btScalar y) { using namespace std; return atan2(x, y); }
++	SIMD_FORCE_INLINE btScalar btExp(btScalar x) { using namespace std; return exp(x); }
++	SIMD_FORCE_INLINE btScalar btLog(btScalar x) { using namespace std; return log(x); }
++	SIMD_FORCE_INLINE btScalar btPow(btScalar x, btScalar y) { using namespace std; return pow(x, y); }
++	SIMD_FORCE_INLINE btScalar btFmod(btScalar x, btScalar y) { using namespace std; return fmod(x, y); }
+ 
+ #endif//BT_USE_DOUBLE_PRECISION
+ 
+diff -r -u bullet3-2.87.orig/src/LinearMath/btThreads.h bullet3-2.87/src/LinearMath/btThreads.h
+--- bullet3-2.87.orig/src/LinearMath/btThreads.h	2017-09-30 01:20:39.000000000 +0200
++++ bullet3-2.87/src/LinearMath/btThreads.h	2020-06-14 15:41:37.825186900 +0200
+@@ -72,6 +72,8 @@
+ {
+ #if BT_THREADSAFE
+     mutex->lock();
++#else
++    (void)mutex;
+ #endif // #if BT_THREADSAFE
+ }
+ 
+@@ -79,6 +81,8 @@
+ {
+ #if BT_THREADSAFE
+     mutex->unlock();
++#else
++    (void)mutex;
+ #endif // #if BT_THREADSAFE
+ }
+ 
+@@ -87,6 +91,7 @@
+ #if BT_THREADSAFE
+     return mutex->tryLock();
+ #else
++    (void)mutex;
+     return true;
+ #endif // #if BT_THREADSAFE
+ }

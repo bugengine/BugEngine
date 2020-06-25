@@ -1,4 +1,5 @@
 from waflib.Configure import conf
+from waflib import Errors
 
 
 @conf
@@ -6,36 +7,45 @@ def engine(
     bld,
     name,
     depends=[],
-    private_use=[],
+    private_depends=[],
+    path=None,
     features=[],
-    platforms=[],
     extra_includes=[],
     extra_defines=[],
     extra_public_includes=[],
     extra_public_defines=[],
-    extra_tasks=[],
-    path=None,
-    use_master=True,
-    warnings=True,
-    root_namespace='BugEngine'
+    source_list=None,
+    conditions=[],
+    root_namespace='BugEngine',
+    env=None
 ):
-    if getattr(bld, 'launcher', None) != None:
-        raise Errors.WafError('Only one engine can be defined')
-    if not bld.env.PROJECTS:
-        for p in platforms:
-            if p not in bld.env.VALID_PLATFORMS:
-                return None
-    bld.launcher = bld.module(
-        name, path, depends + ['3rdparty.system.console'], private_use, platforms,
-        extra_tasks + ['cxx', 'cxxprogram', 'launcher'], features, extra_includes, extra_defines, extra_public_includes,
-        extra_public_defines, use_master, warnings, False, root_namespace
-    )
-    if 'windows' in bld.env.VALID_PLATFORMS:
-        bld.module(
-            name + 'w', path, depends, private_use, platforms, extra_tasks + ['cxx', 'cxxprogram', 'launcher'],
-            features, extra_includes, extra_defines, extra_public_includes, extra_public_defines, use_master, warnings,
-            False, root_namespace
+    if env is None:
+        if getattr(bld, 'launcher', None) != None:
+            raise Errors.WafError('Only one engine can be defined')
+        bld.preprocess(name, path, root_namespace, 'bugengine')
+        bld.launcher = bld.multiarch(
+            name, [
+                engine(
+                    bld, name, depends + ['3rdparty.system.console'], private_depends, path, features, extra_includes,
+                    extra_defines, extra_public_includes, extra_public_defines, source_list, conditions, root_namespace,
+                    env
+                ) for env in bld.multiarch_envs
+            ]
         )
+        if 'windows' in bld.env.VALID_PLATFORMS:
+            bld.preprocess(name + 'w', path, root_namespace, 'bugengine')
+            bld.multiarch(
+                name, [
+                    engine(
+                        bld, name + 'w', depends, private_depends, path, features, extra_includes, extra_defines,
+                        extra_public_includes, extra_public_defines, source_list, conditions, root_namespace, env
+                    ) for env in bld.multiarch_envs
+                ]
+            )
+        return bld.launcher
+    else:
+        features = features + ['c', 'cxx', 'cxxprogram', 'bugengine:c', 'bugengine:cxx', 'bugengine:launcher']
+        return bld.module(**locals())
 
 
 def build(build_context):

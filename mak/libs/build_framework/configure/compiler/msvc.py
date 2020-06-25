@@ -9,7 +9,9 @@ class MSVC(Configure.ConfigurationContext.Compiler):
     def __init__(self, cl, name, version, target_arch, arch, bat, args, path, includes, libdirs):
         self.NAMES = [name, 'msvc']
         flags = ['/I%s' % i for i in includes] + ['/LIBPATH:%i' for l in libdirs]
-        Configure.ConfigurationContext.Compiler.__init__(self, cl, cl, version, 'windows-%s' % name, arch, {}, {'PATH': ';'.join(path)})
+        Configure.ConfigurationContext.Compiler.__init__(
+            self, cl, cl, version, 'windows-%s' % name, arch, {}, {'PATH': ';'.join(path)}
+        )
         self.batfile = bat
         self.path = [p for p in path if p not in os.environ.get('PATH', '').split(os.pathsep)]
         self.args = args
@@ -23,17 +25,16 @@ class MSVC(Configure.ConfigurationContext.Compiler):
         self.targets = [self.target]
 
     def set_optimisation_options(self, conf):
-        conf.env.append_unique('CPPFLAGS_debug', ['/Od', '/Ob1', '/EHsc', '/RTC1', '/RTCc', '/Zi', '/MTd', '/D_DEBUG', '/D_ALLOW_RTCc_IN_STL=1'])
-        conf.env.append_unique('CFLAGS_debug', ['/Od', '/Ob1', '/EHsc', '/RTC1', '/RTCc', '/Zi', '/MTd', '/D_DEBUG', '/D_ALLOW_RTCc_IN_STL=1'])
-        conf.env.append_unique(
-            'CXXFLAGS_debug', ['/Od', '/Ob1', '/EHsc', '/RTC1', '/RTCc', '/Zi', '/MTd', '/D_DEBUG', '/GR']
-        )
-        conf.env.append_unique('LINKFLAGS_debug', ['/DEBUG', '/INCREMENTAL:no'])
+        conf.env.append_unique('CFLAGS_debug_rtc', ['/RTC1', '/RTCc', '/D_ALLOW_RTCc_IN_STL=1'])
+        conf.env.append_unique('CFLAGS_debug_nortc', [])
+        conf.env.append_unique('CFLAGS_debug', ['/Od', '/Ob1', '/Zi', '/MTd', '/D_DEBUG', '/GR'])
+        conf.env.append_unique('CXXFLAGS_debug_rtc', ['/EHsc', '/RTC1', '/RTCc', '/D_ALLOW_RTCc_IN_STL=1'])
+        conf.env.append_unique('CXXFLAGS_debug_nortc', ['/D_HAS_EXCEPTIONS=0'])
+        conf.env.append_unique('CXXFLAGS_debug', ['/Od', '/Ob1', '/Zi', '/MTd', '/D_DEBUG', '/GR'])
+        conf.env.append_unique('LINKFLAGS', ['/DEBUG'])
+        conf.env.append_unique('LINKFLAGS_debug', ['/INCREMENTAL:no'])
         conf.env.append_unique('ARFLAGS_debug', [])
 
-        conf.env.append_unique(
-            'CPPFLAGS_profile', ['/DNDEBUG', '/MT', '/Ox', '/Ob2', '/Oi', '/Ot', '/GT', '/GF', '/FD', '/Gy', '/GR-']
-        )
         conf.env.append_unique(
             'CFLAGS_profile', ['/DNDEBUG', '/MT', '/Ox', '/Ob2', '/Oi', '/Ot', '/GT', '/GF', '/FD', '/Gy', '/GR-']
         )
@@ -41,12 +42,9 @@ class MSVC(Configure.ConfigurationContext.Compiler):
             'CXXFLAGS_profile',
             ['/DNDEBUG', '/D_HAS_EXCEPTIONS=0', '/MT', '/Ox', '/Ob2', '/Oi', '/Ot', '/GT', '/GF', '/FD', '/Gy', '/GR-']
         )
-        conf.env.append_unique('LINKFLAGS_profile', ['/DEBUG', '/INCREMENTAL:no'])
+        conf.env.append_unique('LINKFLAGS_profile', ['/INCREMENTAL:no'])
         conf.env.append_unique('ARFLAGS_profile', [])
 
-        conf.env.append_unique(
-            'CPPFLAGS_final', ['/DNDEBUG', '/MT', '/Ox', '/Ob2', '/Oi', '/Ot', '/GT', '/GF', '/FD', '/Gy', '/GR-']
-        )
         conf.env.append_unique(
             'CFLAGS_final', ['/DNDEBUG', '/MT', '/Ox', '/Ob2', '/Oi', '/Ot', '/GT', '/GF', '/FD', '/Gy', '/GR-']
         )
@@ -54,11 +52,17 @@ class MSVC(Configure.ConfigurationContext.Compiler):
             'CXXFLAGS_final',
             ['/DNDEBUG', '/D_HAS_EXCEPTIONS=0', '/MT', '/Ox', '/Ob2', '/Oi', '/Ot', '/GT', '/GF', '/FD', '/Gy', '/GR-']
         )
-        conf.env.append_unique('LINKFLAGS_final', ['/DEBUG', '/INCREMENTAL:no'])
+        conf.env.append_unique('LINKFLAGS_final', ['/INCREMENTAL:no'])
         conf.env.append_unique('ARFLAGS_final', [])
 
+        if self.arch == 'x86':
+            conf.env.append_unique('CFLAGS', ['/arch:SSE2'])
+            conf.env.append_unique('CXXFLAGS', ['/arch:SSE2'])
         if self.NAMES[0] != 'msvc' or self.version_number >= (8, ):
-            conf.env.append_unique('CPPFLAGS_final', ['/GS-'])
+            conf.env.append_unique('CFLAGS_debug_nortc', ['/GS-'])
+            conf.env.append_unique('CXXFLAGS_debug_nortc', ['/GS-'])
+            conf.env.append_unique('CFLAGS_profile', ['/GS-'])
+            conf.env.append_unique('CXXFLAGS_profile', ['/GS-'])
             conf.env.append_unique('CFLAGS_final', ['/GS-'])
             conf.env.append_unique('CXXFLAGS_final', ['/GS-'])
         if self.NAMES[0] != 'intel' or self.version_number >= (9, 1):
@@ -88,7 +92,7 @@ class MSVC(Configure.ConfigurationContext.Compiler):
         env = conf.env
         version = '%s %s' % (self.NAMES[0], self.version)
         version_number = float(self.version.replace('Exp', ''))
-        if self.NAMES[0] == 'msvc' and self.version_number < (7,):
+        if self.NAMES[0] == 'msvc' and self.version_number < (7, ):
             raise Errors.WafError('unsupported compiler')
         env.NO_MSVC_DETECT = 1
         env.INCLUDES = self.includes
@@ -111,6 +115,8 @@ class MSVC(Configure.ConfigurationContext.Compiler):
             or (self.NAMES[0] == 'intel' and version_number >= 11)
         ):
             env.append_unique('LINKFLAGS', ['/MANIFEST:NO'])
+        if self.version_number >= (14, ):
+            env.append_unique('LIB', ['legacy_stdio_definitions'])
 
     def load_in_env(self, conf, platform):
         Configure.ConfigurationContext.Compiler.load_in_env(self, conf, platform)

@@ -6,13 +6,17 @@ import os
 
 def build(bld):
     bld.platforms.append(bld.external('3rdparty.system.cocoa'))
+
     def wrap_class(cls_name):
         cls = Task.classes.get(cls_name, None)
         derived = type(cls_name, (cls, ), {})
+
         def exec_command_clean(self, *k, **kw):
             self.outputs[0].delete(evict=False)
             return cls.exec_command(self, *k, **kw)
+
         derived.exec_command = exec_command_clean
+
     for cls_name in 'cshlib', 'cxxshlib', 'cprogram', 'cxxprogram', 'lipo':
         wrap_class(cls_name)
 
@@ -31,20 +35,29 @@ def install_plist_darwin(self, node):
 @after_method('process_use')
 def set_osx_shlib_name(self):
     if 'macosx' in self.env.VALID_PLATFORMS:
-        if 'plugin' in self.features:
-            self.env.append_unique('LINKFLAGS', [
-                '-install_name',
-                os.path.join('@executable_path', '..', 'share', 'bugengine', 'plugin', self.link_task.outputs[0].name)
-            ])
-        elif 'kernel' in self.features:
-            self.env.append_unique('LINKFLAGS', [
-                '-install_name',
-                os.path.join('@executable_path', '..', 'share', 'bugengine', 'plugin', self.link_task.outputs[0].name)
-            ])
+        if 'bugengine:plugin' in self.features:
+            self.env.append_unique(
+                'LINKFLAGS', [
+                    '-install_name',
+                    os.path.join(
+                        '@executable_path', '..', 'share', 'bugengine', 'plugin', self.link_task.outputs[0].name
+                    )
+                ]
+            )
+        elif 'bugengine:kernel' in self.features:
+            self.env.append_unique(
+                'LINKFLAGS', [
+                    '-install_name',
+                    os.path.join(
+                        '@executable_path', '..', 'share', 'bugengine', 'plugin', self.link_task.outputs[0].name
+                    )
+                ]
+            )
         else:
             self.env.append_unique(
                 'LINKFLAGS',
-                ['-install_name', os.path.join('@loader_path', self.link_task.outputs[0].name)])
+                ['-install_name', os.path.join('@loader_path', self.link_task.outputs[0].name)]
+            )
 
 
 @feature('cprogram', 'cxxprogram', 'cshlib', 'cxxshlib')
@@ -52,7 +65,8 @@ def set_osx_shlib_name(self):
 def add_objc_lib(self):
     if 'darwin' in self.env.VALID_PLATFORMS:
         self.env.append_unique('LINKFLAGS', [
-            '-l', 'objc',
+            '-l',
+            'objc',
         ])
 
 
@@ -103,8 +117,10 @@ def darwin_postlink_task(self, link_task):
     dsymtask.set_inputs(out_node)
     dsymtask.set_outputs(out_dsymdir.make_node(out_node.name))
     self.install_as(
-        os.path.join(self.bld.env.PREFIX, self.bld.optim, appname + '.app.dSYM', 'Contents', 'Resources', 'DWARF',
-                     out_node.name), dsymtask.outputs[-1])
+        os.path.join(
+            self.bld.env.PREFIX, self.bld.optim, appname + '.app.dSYM', 'Contents', 'Resources', 'DWARF', out_node.name
+        ), dsymtask.outputs[-1]
+    )
     return self.sign_task
 
 
@@ -114,11 +130,11 @@ def darwin_postlink_task(self, link_task):
 @before_method('install_step')
 def apply_postlink_darwin(self):
     if 'darwin' in self.env.VALID_PLATFORMS:
-        if not self.env.ENV_PREFIX:
+        if not self.env.SUBARCH:
             self.darwin_postlink_task(self.link_task)
 
 
-@feature('multiarch')
+@feature('bugengine:multiarch')
 @after_method('apply_link')
 @after_method('process_use')
 @after_method('apply_postlink_darwin')
@@ -133,10 +149,10 @@ def apply_multiarch_darwin(self):
             if getattr(task_gen, 'link_task', None):
                 inputs.append(task_gen.link_task.outputs[0])
                 features += task_gen.features
-        if 'plugin' in features:
+        if 'bugengine:plugin' in features:
             out_name = task_gen.env.cxxshlib_PATTERN % self.target
             out_path = self.env.DEPLOY_PLUGINDIR
-        elif 'kernel' in features:
+        elif 'bugengine:kernel' in features:
             out_name = task_gen.env.cxxshlib_PATTERN % self.target
             out_path = self.env.DEPLOY_KERNELDIR
         elif 'cshlib' in features or 'cxxshlib' in features:
@@ -152,6 +168,6 @@ def apply_multiarch_darwin(self):
 
         self.lipo_task = self.create_task('lipo', inputs, [out_node_full])
         l = self.darwin_postlink_task(self.lipo_task)
-        self.install_as(os.path.join(self.bld.env.PREFIX, self.bld.optim, out_path, out_name),
-                        l.outputs[0],
-                        chmod=Utils.O755)
+        self.install_as(
+            os.path.join(self.bld.env.PREFIX, self.bld.optim, out_path, out_name), l.outputs[0], chmod=Utils.O755
+        )

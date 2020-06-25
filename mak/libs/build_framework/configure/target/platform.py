@@ -42,7 +42,11 @@ class Platform:
             v.TOOLCHAIN = toolchain
             v.append_unique('DEFINES', ['BE_PLATFORM=platform_%s' % v.VALID_PLATFORMS[0]])
             if not add:
-                v.ENV_PREFIX = compiler.arch
+                v.ENV_PREFIX = compiler.arch + '/%s'
+                v.SUBARCH = True
+            else:
+                v.ENV_PREFIX = '%s'
+                v.SUBARCH = False
             if not sub_compilers:
                 conf.recurse('../arch/arch.py', once=False)
         except Exception as e:

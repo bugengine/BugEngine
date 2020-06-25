@@ -5,8 +5,14 @@ import re
 
 class Windows(Configure.ConfigurationContext.Platform):
     NAME = 'windows'
-    SUPPORTED_TARGETS = (re.compile('.*mingw32.*'), re.compile('.*windows-gnu'), re.compile('.*windows-msvc'),
-                         re.compile('.*windows-intel'), re.compile('.*windows-wsdk'), re.compile('.*windows-buildtools'),)
+    SUPPORTED_TARGETS = (
+        re.compile('.*mingw32.*'),
+        re.compile('.*windows-gnu'),
+        re.compile('.*windows-msvc'),
+        re.compile('.*windows-intel'),
+        re.compile('.*windows-wsdk'),
+        re.compile('.*windows-buildtools'),
+    )
 
     def is_valid(self, compiler):
         node = self.conf.bldnode.make_node('main.cxx')
@@ -28,7 +34,9 @@ class Windows(Configure.ConfigurationContext.Platform):
         tgtnode = node.change_ext('')
         node.write('#include <cstdio>\n#include <cfloat>\n#include <new>\nint main() {}\n')
         try:
-            result, out, err = compiler.run_cxx([node.abspath(), '/nologo', '/c', '/Fo', tgtnode.abspath()] + ['/I%s' % i for i in compiler.includes])
+            result, out, err = compiler.run_cxx(
+                [node.abspath(), '/nologo', '/c', '/Fo', tgtnode.abspath()] + ['/I%s' % i for i in compiler.includes]
+            )
         except Exception as e:
             return False
         finally:
@@ -54,7 +62,7 @@ class Windows(Configure.ConfigurationContext.Platform):
                         if self.is_valid(c):
                             result.append((c, [], Windows_GCC()))
                     elif 'msvc' in c.NAMES:
-                        if c.arch not in ('ia64',) and self.is_valid_msvc(c):
+                        if c.arch not in ('ia64', ) and self.is_valid_msvc(c):
                             result.append((c, [], Windows_MSVC()))
                     else:
                         result.append((c, [], self))
@@ -84,13 +92,13 @@ class Windows(Configure.ConfigurationContext.Platform):
 
         env.append_unique(
             'DEFINES',
-            ['_WIN32_WINNT=0x0502', 'WINVER=0x0502', '_CRT_SECURE_NO_DEPRECATE=1', '_CRT_SECURE_NO_WARNINGS=1'])
+            ['_WIN32_WINNT=0x0502', 'WINVER=0x0502', '_CRT_SECURE_NO_DEPRECATE=1', '_CRT_SECURE_NO_WARNINGS=1']
+        )
 
     def find_winres(self, conf, compiler):
-        winres = conf.find_program(compiler.target + '-windres',
-                                   var='WINRC',
-                                   path_list=compiler.directories,
-                                   mandatory=False)
+        winres = conf.find_program(
+            compiler.target + '-windres', var='WINRC', path_list=compiler.directories, mandatory=False
+        )
         if not winres:
             winres = conf.find_program('windres', var='WINRC', path_list=compiler.directories, mandatory=False)
         if not winres:
@@ -112,30 +120,37 @@ class Windows_Clang(Windows):
         if not compiler.target.endswith('-msvc'):
             env.append_unique('LINKFLAGS', ['-static-libgcc'])
             env.STRIP_BINARY = True
-            env.implib_PATTERN = '%s.dll.a'
+            env.implib_PATTERN = 'lib%s.a'
+            env.COMPILER_ABI = 'gcc'
         else:
-            env.SHLIB_MARKER        = []
-            env.STLIB_MARKER        = []
-            env.cstlib_PATTERN      = '%s.lib'
-            env.cxxstlib_PATTERN    = '%s.lib'
+            env.SHLIB_MARKER = []
+            env.STLIB_MARKER = []
+            env.cstlib_PATTERN = '%s.lib'
+            env.cxxstlib_PATTERN = '%s.lib'
             env.implib_PATTERN = '%s.lib'
             env.append_unique('DEFINES', ['_DLL'])
             env.append_unique('CXXFLAGS_warnall', ['-Wno-microsoft-enum-value', '-Wno-deprecated-register'])
             env.append_unique('LINKFLAGS', ['-Wl,-nodefaultlib:libcmt'])
             env.append_unique('LIB', ['msvcrt'])
+            env.COMPILER_ABI = 'msvc'
         env.append_unique('CXXFLAGS_warnall', ['-Wno-unknown-pragmas', '-Wno-comment'])
         self.find_winres(conf, compiler)
         conf.env.DEFINES_console = ['_CONSOLE=1']
         env.LINKFLAGS_console = ['-mconsole']
-        env.cprogram_PATTERN    = '%s.exe'
-        env.cxxprogram_PATTERN    = '%s.exe'
-        env.cshlib_PATTERN      = '%s.dll'
-        env.cxxshlib_PATTERN      = '%s.dll'
+        env.cprogram_PATTERN = '%s.exe'
+        env.cxxprogram_PATTERN = '%s.exe'
+        env.cshlib_PATTERN = '%s.dll'
+        env.cxxshlib_PATTERN = '%s.dll'
         for option in ('-fpic', '-fPIC'):
-            try: env.CFLAGS_cshlib.remove(option)
-            except ValueError: pass
-            try: env.CXXFLAGS_cxxshlib.remove(option)
-            except ValueError: pass
+            try:
+                env.CFLAGS_cshlib.remove(option)
+            except ValueError:
+                pass
+            try:
+                env.CXXFLAGS_cxxshlib.remove(option)
+            except ValueError:
+                pass
+
 
 class Windows_GCC(Windows):
     def load_in_env(self, conf, compiler):
@@ -145,6 +160,7 @@ class Windows_GCC(Windows):
         env.append_unique('CXXFLAGS', ['-static-libgcc'])
         env.append_unique('LINKFLAGS', ['-static-libgcc'])
         env.append_unique('CXXFLAGS_warnall', ['-Wno-unknown-pragmas', '-Wno-comment'])
+        env.COMPILER_ABI = 'gcc'
         if compiler.version_number >= (4, 5):
             env.append_unique('CFLAGS', ['-static-libstdc++'])
             env.append_unique('CXXFLAGS', ['-static-libstdc++'])
@@ -153,16 +169,20 @@ class Windows_GCC(Windows):
         env.DEFINES_console = ['_CONSOLE=1']
         env.LINKFLAGS_console = ['-mconsole']
         env.STRIP_BINARY = True
-        env.cprogram_PATTERN    = '%s.exe'
-        env.cxxprogram_PATTERN    = '%s.exe'
-        env.cshlib_PATTERN      = '%s.dll'
-        env.cxxshlib_PATTERN      = '%s.dll'
-        env.implib_PATTERN = '%s.dll.a'
+        env.cprogram_PATTERN = '%s.exe'
+        env.cxxprogram_PATTERN = '%s.exe'
+        env.cshlib_PATTERN = '%s.dll'
+        env.cxxshlib_PATTERN = '%s.dll'
+        env.implib_PATTERN = 'lib%s.a'
         for option in ('-fpic', '-fPIC'):
-            try: env.CFLAGS_cshlib.remove(option)
-            except ValueError: pass
-            try: env.CXXFLAGS_cxxshlib.remove(option)
-            except ValueError: pass
+            try:
+                env.CFLAGS_cshlib.remove(option)
+            except ValueError:
+                pass
+            try:
+                env.CXXFLAGS_cxxshlib.remove(option)
+            except ValueError:
+                pass
 
 
 class Windows_MSVC(Windows):
@@ -174,6 +194,7 @@ class Windows_MSVC(Windows):
             conf.env.CXXFLAGS.append('/D_ARM_WINAPI_PARTITION_DESKTOP_SDK_AVAILABLE=1')
         conf.env.DEFINES_console = ['_CONSOLE=1']
         conf.env.LINKFLAGS_console = ['/SUBSYSTEM:console']
+        conf.env.COMPILER_ABI = 'msvc'
 
 
 def options(opt):

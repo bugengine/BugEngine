@@ -2,7 +2,7 @@
 # set Android specific options
 
 import os
-from waflib import Options
+from waflib import Options, Utils
 from be_typing import TYPE_CHECKING
 
 
@@ -46,6 +46,21 @@ def options(option_context):
             p = os.path.join(path, 'ndk-build'+ext)
             if os.path.isfile(p):
                 ndk_paths.append(path)
+    jdk_path = ''
+    if Utils.winreg:
+        try:
+            try:
+                key = Utils.winreg.OpenKey(Utils.winreg.HKEY_LOCAL_MACHINE, r'SOFTWARE\Wow6432Node\Microsoft\VisualStudio\Android')
+            except OSError:
+                key = Utils.winreg.OpenKey(Utils.winreg.HKEY_LOCAL_MACHINE, r'SOFTWARE\Microsoft\VisualStudio\Android')
+            jdk_path = Utils.winreg.QueryValueEx(key, 'JavaHome')[0]
+        except OSError:
+            pass
+    option_group.add_option('--android-jdk',
+                            action='store',
+                            default=jdk_path,
+                            dest='android_jdk',
+                            help='Path to the android JDK home')
     option_group.add_option('--android-sdk',
                             action='store',
                             default='all',

@@ -48,7 +48,7 @@ class embed_cl(Task.Task):
             out.write(template_cc % params)
 
 
-@feature('preprocess')
+@feature('bugengine:preprocess')
 def create_cl_kernels(task_gen):
     internal_deps = []
 
@@ -71,8 +71,8 @@ def create_cl_kernels(task_gen):
                     target_name=target_prefix + task_gen.parent,
                     kernel=kernel,
                     features=[
-                        'cxx', task_gen.bld.env.STATIC and 'cxxobjects' or 'cxxshlib', 'kernel', 'kernel_create',
-                        'clkernel_create'
+                        'cxx', task_gen.bld.env.STATIC and 'cxxobjects' or 'cxxshlib', 'bugengine:kernel',
+                        'bugengine:kernel_create', 'bugengine:cl:kernel_create'
                     ],
                     extra_use=tgen.extra_use,
                     pchstop=tgen.pchstop,
@@ -92,7 +92,7 @@ def create_cl_kernels(task_gen):
             tgt = task_gen.bld(target=kernel_target, features=['multiarch'], use=internal_deps)
 
 
-@feature('clkernel_create')
+@feature('bugengine:cl:kernel_create')
 @before_method('process_source')
 def create_cc_source(task_gen):
     source = task_gen.kernel_ast

@@ -32,16 +32,17 @@ setattr(Task.Task, 'keyword', (lambda self: ''))
 def build(bld):
     # type: (Build.BuildContext) -> None
     "Loads main build file as well as the target-specific build file that can declare extra modules"
-    if not bld.env.PROJECTS:
-        if getattr(bld, 'bugengine_variant', None) is None:
-            raise Errors.WafError(
-                'Call %s %s %s:toolchain:variant\n'
-                '  (with toolchain in:\n    %s)\n  (with variant in:\n    %s)' % (
-                    sys.executable, sys.argv[0], bld.cmd, '\n    '.join(bld.env.ALL_TOOLCHAINS
-                                                                        ), '\n    '.join(bld.env.ALL_VARIANTS)
-                )
+    if getattr(bld, 'bugengine_variant', None) is None:
+        raise Errors.WafError(
+            'Call %s %s %s:toolchain:variant\n'
+            '  (with toolchain in:\n    %s)\n  (with variant in:\n    %s)' % (
+                sys.executable, sys.argv[0], bld.cmd, '\n    '.join(bld.env.ALL_TOOLCHAINS
+                                                                    ), '\n    '.join(bld.env.ALL_VARIANTS)
             )
-        bld.env = bld.all_envs[bld.bugengine_variant]
+        )
+    bld.env = bld.all_envs[bld.bugengine_variant]
+    bld.package_env = bld.all_envs['packages']
+    bld.package_node = bld.bldnode.parent.parent.make_node('packages')
     bld.platforms = []
 
     tool_dir = os.path.join(bld.bugenginenode.abspath(), 'mak', 'tools')
@@ -82,18 +83,28 @@ def build(bld):
 
 
 @taskgen_method
-def deploy_directory(self, env, node, local_path, env_variable):
+def install_directory(self, env, node, local_path, env_variable):
     target_path = os.path.join(self.bld.env.PREFIX, self.bld.__class__.optim, env[env_variable], local_path)
     for n in node.listdir():
         sn = node.make_node(n)
         if os.path.isdir(sn.abspath()):
-            self.deploy_directory(env, sn, os.path.join(local_path, n), env_variable)
+            self.install_directory(env, sn, os.path.join(local_path, n), env_variable)
         else:
             self.install_files(target_path, [sn])
 
 
 @taskgen_method
 def install_files(self, out_dir, file_list, chmod=Utils.O644):
+    self.deploy_files(out_dir, file_list)
+
+
+@taskgen_method
+def install_as(self, target_path, file, chmod=Utils.O644):
+    self.deploy_as(target_path, file, chmod)
+
+
+@taskgen_method
+def deploy_files(self, out_dir, file_list, chmod=Utils.O644):
     try:
         install_task = self.bug_install_task
     except AttributeError:
@@ -105,7 +116,7 @@ def install_files(self, out_dir, file_list, chmod=Utils.O644):
 
 
 @taskgen_method
-def install_as(self, target_path, file, chmod=Utils.O644):
+def deploy_as(self, target_path, file, chmod=Utils.O644):
     try:
         install_task = self.bug_install_task
     except AttributeError:
@@ -115,14 +126,14 @@ def install_as(self, target_path, file, chmod=Utils.O644):
     install_task.install_step.append((file, target_path, chmod))
 
 
-@feature('c', 'cxx')
+@feature('bugengine:c', 'bugengine:cxx')
 def set_optim_define(self):
     o = getattr(self.bld, 'optim', None)
     if o:
         self.env.append_unique('DEFINES', ['BE_%s' % o.upper()])
 
 
-@feature('cxx')
+@feature('bugengine:cxx')
 def set_building_name_inherits(self):
     seen = set([])
     use = getattr(self, 'use', [])[:]
@@ -141,7 +152,7 @@ def set_building_name_inherits(self):
                 self.env.append_unique('DEFINES', 'building_%s' % y.target_name.split('.')[-1])
 
 
-@feature('launcher', 'python_module')
+@feature('bugengine:launcher', 'python_module')
 @before_method('apply_link')
 @before_method('process_use')
 def static_dependencies(self):
@@ -150,21 +161,18 @@ def static_dependencies(self):
             for task_gen in g:
                 if not isinstance(task_gen, TaskGen.task_gen):
                     continue
-                if ('kernel' in task_gen.features or 'plugin' in task_gen.features) and 'cxx' in task_gen.features:
+                if (
+                    'bugengine:kernel' in task_gen.features or 'bugengine:plugin' in task_gen.features
+                ) and 'cxx' in task_gen.features:
                     task_gen.post()
                     if task_gen.env.TOOLCHAIN == self.env.TOOLCHAIN:
                         self.use.append(task_gen.target)
 
 
-@feature('launcher_static')
+@feature('bugengine:launcher_static')
 @before_method('apply_link')
 def rename_executable(self):
     self.target = self.real_target
-
-
-@feature('launcher')
-def launcher_feature(task):
-    pass
 
 
 @feature('cxxobjects')
@@ -177,7 +185,17 @@ def makefile_feature(task):
     pass
 
 
-@feature('cxx')
+@feature('bugengine:masterfiles:off', 'bugengine:masterfiles:folder')
+def masterfiles_feature(task):
+    pass
+
+
+@feature('bugengine:warnings:off', 'bugengine:compat')
+def warning_feature(task):
+    pass
+
+
+@feature('bugengine:c', 'bugengine:cxx')
 @before_method('process_source')
 def process_export_all_flag(self):
     if getattr(self, 'export_all', False):
@@ -186,7 +204,7 @@ def process_export_all_flag(self):
         self.env.append_unique('CXXFLAGS', self.env.CXXFLAGS_exportall)
 
 
-@feature('cxx')
+@feature('bugengine:c', 'bugengine:cxx')
 @before_method('process_source')
 def set_extra_flags(self):
     for f in getattr(self, 'extra_use', []) + getattr(self, 'features', []):
@@ -217,8 +235,29 @@ def check_use_taskgens(self):
                     self.uselib = [name]
 
 
+@feature('bugengine:c', 'bugengine:cxx')
+def process_warning_flags(self):
+    warning_flag_name = 'warnnone' if 'bugengine:warnings:off' in self.features else 'warnall'
+    for var in self.get_uselib_vars():
+        self.env.append_value(var, self.env['%s_%s' % (var, warning_flag_name)])
+
+
 @taskgen_method
 def process_use_flags(self):
+    if 'bugengine:compat' not in self.features:
+        self.env.append_unique('CFLAGS_debug', self.env.CFLAGS_debug_rtc)
+        self.env.append_unique('CFLAGS_profile', self.env.CFLAGS_profile_rtc)
+        self.env.append_unique('CFLAGS_final', self.env.CFLAGS_final_rtc)
+        self.env.append_unique('CXXFLAGS_debug', self.env.CXXFLAGS_debug_rtc)
+        self.env.append_unique('CXXFLAGS_profile', self.env.CXXFLAGS_profile_rtc)
+        self.env.append_unique('CXXFLAGS_final', self.env.CXXFLAGS_final_rtc)
+    else:
+        self.env.append_unique('CFLAGS_debug', self.env.CFLAGS_debug_nortc)
+        self.env.append_unique('CFLAGS_profile', self.env.CFLAGS_profile_nortc)
+        self.env.append_unique('CFLAGS_final', self.env.CFLAGS_final_nortc)
+        self.env.append_unique('CXXFLAGS_debug', self.env.CXXFLAGS_debug_nortc)
+        self.env.append_unique('CXXFLAGS_profile', self.env.CXXFLAGS_profile_nortc)
+        self.env.append_unique('CXXFLAGS_final', self.env.CXXFLAGS_final_nortc)
     dependencies = [self.bld.get_tgen_by_name(i) for i in getattr(self, 'use', []) + getattr(self, 'private_use', [])]
     seen = set([self])
     while dependencies:
@@ -294,7 +333,7 @@ def process_use(self):
                 self.uselib.append(k)
 
 
-@feature('cxx')
+@feature('bugengine:c', 'bugengine:cxx')
 @before_method('filter_sources')
 def gather_extra_source(self):
     preprocess = getattr(self, 'preprocess', None)
@@ -316,6 +355,18 @@ def make_bld_node(self, category, path, name):
     elif isinstance(path, Node.Node):
         if path.is_child_of(self.bld.bldnode):
             out_dir = path.path_from(self.bld.bldnode)
+            # skip variant
+            #out_dir = out_dir[out_dir.find(os.path.sep)+1:]
+            # skip optim
+            #out_dir = out_dir[out_dir.find(os.path.sep)+1:]
+            # skip target
+            out_dir = out_dir[out_dir.find(os.path.sep) + 1:]
+            # skip category
+            out_dir = out_dir[out_dir.find(os.path.sep) + 1:]
+            node = node.make_node(out_dir)
+            node = node.make_node(name)
+        elif path.is_child_of(self.bld.bldnode.parent.parent):
+            out_dir = path.path_from(self.bld.bldnode.parent.parent)
             # skip variant
             #out_dir = out_dir[out_dir.find(os.path.sep)+1:]
             # skip optim
@@ -465,98 +516,107 @@ def rc_file(self, node):
 
 @extension('.c', '.m')
 def c_hook(self, node):
-    if 'master_folder' in self.features and not Options.options.nomaster:
-        try:
-            mastertask_c = self.mastertasks_c_folders[node.parent]
-            mastertask_c.set_inputs([node])
-        except AttributeError:
-            output = self.make_bld_node('src', None, 'master-c-%s-0.%s' % (node.parent.name, self.objc and 'm' or 'c'))
-            mastertask_c = self.create_task('master', [node], [output])
-            self.mastertasks_c_folders = {node.parent: mastertask_c}
-            self.create_compiled_task('c', output)
-        except KeyError:
-            output = self.make_bld_node(
-                'src', None,
-                'master-c-%s-%d.%s' % (node.parent.name, len(self.mastertasks_c_folders), self.objc and 'm' or 'c')
-            )
-            mastertask_c = self.create_task('master', [node], [output])
-            self.mastertasks_c_folders[node.parent] = mastertask_c
-            self.create_compiled_task('c', output)
-    elif 'master' in self.features and not Options.options.nomaster:
-        try:
-            mastertask_c = self.mastertasks_c[-1]
-            if len(mastertask_c.inputs) <= 10:
+    if 'bugengine:c' in self.features:
+        if 'bugengine:masterfiles:folder' in self.features and not Options.options.nomaster:
+            try:
+                mastertask_c = self.mastertasks_c_folders[node.parent]
                 mastertask_c.set_inputs([node])
-            else:
+            except AttributeError:
                 output = self.make_bld_node(
-                    'src', None, 'master-c-%d.%s' % (len(self.mastertasks_c), self.objc and 'm' or 'c')
+                    'src', None, 'master-c-%s-0.%s' % (node.parent.name, self.objc and 'm' or 'c')
                 )
                 mastertask_c = self.create_task('master', [node], [output])
-                self.mastertasks_c.append(mastertask_c)
+                self.mastertasks_c_folders = {node.parent: mastertask_c}
                 self.create_compiled_task('c', output)
-        except:
-            output = self.make_bld_node('src', None, 'master-c-0.%s' % (self.objc and 'm' or 'c'))
-            mastertask_c = self.create_task('master', [node], [output])
-            self.mastertasks_c = [mastertask_c]
-            self.create_compiled_task('c', output)
+            except KeyError:
+                output = self.make_bld_node(
+                    'src', None,
+                    'master-c-%s-%d.%s' % (node.parent.name, len(self.mastertasks_c_folders), self.objc and 'm' or 'c')
+                )
+                mastertask_c = self.create_task('master', [node], [output])
+                self.mastertasks_c_folders[node.parent] = mastertask_c
+                self.create_compiled_task('c', output)
+        elif 'bugengine:masterfiles:off' not in self.features and not Options.options.nomaster:
+            try:
+                mastertask_c = self.mastertasks_c[-1]
+                if len(mastertask_c.inputs) <= 10:
+                    mastertask_c.set_inputs([node])
+                else:
+                    output = self.make_bld_node(
+                        'src', None, 'master-c-%d.%s' % (len(self.mastertasks_c), self.objc and 'm' or 'c')
+                    )
+                    mastertask_c = self.create_task('master', [node], [output])
+                    self.mastertasks_c.append(mastertask_c)
+                    self.create_compiled_task('c', output)
+            except:
+                output = self.make_bld_node('src', None, 'master-c-0.%s' % (self.objc and 'm' or 'c'))
+                mastertask_c = self.create_task('master', [node], [output])
+                self.mastertasks_c = [mastertask_c]
+                self.create_compiled_task('c', output)
+        else:
+            self.create_compiled_task('c', node)
     else:
         self.create_compiled_task('c', node)
 
 
 @extension('.cc', '.cxx', '.cpp', '.mm')
 def cc_hook(self, node):
-    if 'master_folder' in self.features and not Options.options.nomaster:
-        try:
-            mastertask_cxx = self.mastertasks_cxx_folders[node.parent]
-            mastertask_cxx.set_inputs([node])
-        except AttributeError:
-            output = self.make_bld_node(
-                'src', None, 'master-c-%s-0.%s' % (node.parent.name, self.objc and 'mm' or 'cc')
-            )
-            mastertask_cxx = self.create_task('master', [node], [output])
-            self.mastertasks_cxx_folders = {node.parent: mastertask_cxx}
-            self.create_compiled_task('cxx', output)
-        except KeyError:
-            output = self.make_bld_node(
-                'src', None,
-                'master-c-%s-%d.%s' % (node.parent.name, len(self.mastertasks_cxx_folders), self.objc and 'mm' or 'cc')
-            )
-            mastertask_cxx = self.create_task('master', [node], [output])
-            self.mastertasks_cxx_folders[node.parent] = mastertask_cxx
-            self.create_compiled_task('cxx', output)
-    elif 'master' in self.features and not Options.options.nomaster:
-        if node.name.endswith('-instances.cc'):
+    if 'bugengine:cxx' in self.features:
+        if 'bugengine:masterfiles:folder' in self.features and not Options.options.nomaster:
             try:
-                self.instancetask_cxx.set_inputs([node])
-            except:
-                output = self.make_bld_node('src', None, 'instances-master-cxx.%s' % (self.objc and 'mm' or 'cc'))
-                self.instancetask_cxx = self.create_task('master', [node], [output])
-                self.create_compiled_task('cxx', output)
-        else:
-            try:
-                mastertask_cxx = self.mastertasks_cxx[-1]
-                if len(mastertask_cxx.inputs) <= 10:
-                    mastertask_cxx.set_inputs([node])
-                else:
-                    output = self.make_bld_node(
-                        'src', None, 'master-cxx-%d.%s' % (len(self.mastertasks_cxx), self.objc and 'mm' or 'cc')
-                    )
-                    mastertask_cxx = self.create_task('master', [node], [output])
-                    self.mastertasks_cxx.append(mastertask_cxx)
-                    self.create_compiled_task('cxx', output)
-            except:
-                output = self.make_bld_node('src', None, 'master-cxx-0.%s' % (self.objc and 'mm' or 'cc'))
+                mastertask_cxx = self.mastertasks_cxx_folders[node.parent]
+                mastertask_cxx.set_inputs([node])
+            except AttributeError:
+                output = self.make_bld_node(
+                    'src', None, 'master-c-%s-0.%s' % (node.parent.name, self.objc and 'mm' or 'cc')
+                )
                 mastertask_cxx = self.create_task('master', [node], [output])
-                self.mastertasks_cxx = [mastertask_cxx]
+                self.mastertasks_cxx_folders = {node.parent: mastertask_cxx}
                 self.create_compiled_task('cxx', output)
+            except KeyError:
+                output = self.make_bld_node(
+                    'src', None, 'master-c-%s-%d.%s' %
+                    (node.parent.name, len(self.mastertasks_cxx_folders), self.objc and 'mm' or 'cc')
+                )
+                mastertask_cxx = self.create_task('master', [node], [output])
+                self.mastertasks_cxx_folders[node.parent] = mastertask_cxx
+                self.create_compiled_task('cxx', output)
+        elif 'bugengine:masterfiles:off' not in self.features and not Options.options.nomaster:
+            if node.name.endswith('-instances.cc'):
+                try:
+                    self.instancetask_cxx.set_inputs([node])
+                except:
+                    output = self.make_bld_node('src', None, 'instances-master-cxx.%s' % (self.objc and 'mm' or 'cc'))
+                    self.instancetask_cxx = self.create_task('master', [node], [output])
+                    self.create_compiled_task('cxx', output)
+            else:
+                try:
+                    mastertask_cxx = self.mastertasks_cxx[-1]
+                    if len(mastertask_cxx.inputs) <= 10:
+                        mastertask_cxx.set_inputs([node])
+                    else:
+                        output = self.make_bld_node(
+                            'src', None, 'master-cxx-%d.%s' % (len(self.mastertasks_cxx), self.objc and 'mm' or 'cc')
+                        )
+                        mastertask_cxx = self.create_task('master', [node], [output])
+                        self.mastertasks_cxx.append(mastertask_cxx)
+                        self.create_compiled_task('cxx', output)
+                except:
+                    output = self.make_bld_node('src', None, 'master-cxx-0.%s' % (self.objc and 'mm' or 'cc'))
+                    mastertask_cxx = self.create_task('master', [node], [output])
+                    self.mastertasks_cxx = [mastertask_cxx]
+                    self.create_compiled_task('cxx', output)
+        else:
+            self.create_compiled_task('cxx', node)
     else:
         self.create_compiled_task('cxx', node)
 
 
-@feature('master', 'master_folder')
+@feature('bugengine:c', 'bugengine:cxx')
 @after_method('apply_incpaths')
 def incpath_master(self):
-    self.env.INCPATHS = [self.bld.srcnode.abspath()] + self.env.INCPATHS
+    if not Options.options.nomaster and 'bugengine:masterfiles:off' not in self.features:
+        self.env.INCPATHS = [self.bld.srcnode.abspath()] + self.env.INCPATHS
 
 
 @feature('c', 'cxx')
@@ -586,8 +646,15 @@ def apply_link(self):
 
 @feature('cshlib', 'cxxshlib')
 @after_method('apply_link')
+@after_method('apply_flags_msvc')
 def apply_implib(self):
-    pass
+    if self.env.DEST_BINFMT == 'pe':
+        target_name = self.target.split('/')[-1]
+        target_file = self.env.implib_PATTERN % target_name
+        implib_node = self.link_task.outputs[0].parent.make_node(target_file)
+        self.link_task.outputs.append(implib_node)
+        if self.env.COMPILER_NAME != 'msvc':
+            self.link_task.env.append_value('LINKFLAGS', ['-Wl,--out-implib,%s' % implib_node.abspath()])
 
 
 @feature('cprogram', 'cxxprogram', 'cshlib', 'cxxshlib')
@@ -603,7 +670,7 @@ def install_step(self):
     pass
 
 
-@feature('c', 'cxx')
+@feature('bugengine:c', 'bugengine:cxx')
 def set_macosx_deployment_target(self):
     pass
 
@@ -648,9 +715,9 @@ def strip_debug_info_impl(self):
             stripped_prog = out_dir.make_node(full_link.name + '.stripped')
             stripped_linked_prog = out_dir.make_node(full_link.name)
 
-            if 'plugin' in self.features:
+            if 'bugengine:plugin' in self.features:
                 out_path = self.env.DEPLOY_PLUGINDIR
-            elif 'kernel' in self.features:
+            elif 'bugengine:kernel' in self.features:
                 out_path = self.env.DEPLOY_KERNELDIR
             elif 'cshlib' in self.features or 'cxxshlib' in self.features:
                 out_path = self.env.DEPLOY_RUNBINDIR
@@ -671,5 +738,5 @@ def strip_debug_info_impl(self):
 @before_method('install_step')
 @after_method('set_postlink_task')
 def strip_debug_info(self):
-    if not self.env.ENV_PREFIX:
+    if not self.env.SUBARCH:
         self.strip_debug_info_impl()

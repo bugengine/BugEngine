@@ -390,8 +390,6 @@ class GnuCompiler(Configure.ConfigurationContext.Compiler):
                     line = line[10:].strip()
                     libs = self.split_path_list(line)
             env.append_unique('SYSTEM_LIBPATHS', libs)
-        self.set_warning_options(conf)
-        self.set_optimisation_options(conf)
 
     def split_path_list(self, line):
         return line.split(os.pathsep)

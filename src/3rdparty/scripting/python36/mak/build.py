@@ -1,5 +1,5 @@
 from waflib import Errors
 
-def build(bld):
-    bld.thirdparty('3rdparty.scripting.python36')
 
+def build(bld):
+    bld.thirdparty('3rdparty.scripting.python36', feature='python')

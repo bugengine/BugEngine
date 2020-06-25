@@ -91,7 +91,7 @@ class cudac(Task.Task):
             out.write(template_cpp % params)
 
 
-@feature('cudakernel_create')
+@feature('bugengine:cuda:kernel_create')
 @before_method('process_source')
 def build_cuda_kernels(task_gen):
     for f in getattr(task_gen, 'extra_use', []) + getattr(task_gen, 'features', []):
@@ -108,7 +108,7 @@ def build_cuda_kernels(task_gen):
     task_gen.source.append(cuda_cc)
 
 
-@feature('preprocess')
+@feature('bugengine:preprocess')
 def create_cuda_kernels(task_gen):
     internal_deps = []
 
@@ -131,7 +131,7 @@ def create_cuda_kernels(task_gen):
                     target_name=target_prefix + task_gen.parent,
                     kernel=kernel,
                     features=[
-                        'cxx', task_gen.bld.env.STATIC and 'cxxobjects' or 'cxxshlib', 'kernel', 'cudakernel_create'
+                        'cxx', task_gen.bld.env.STATIC and 'cxxobjects' or 'cxxshlib', 'bugengine:kernel', 'bugengine:cuda:kernel_create'
                     ],
                     extra_use=tgen.extra_use,
                     pchstop=tgen.pchstop,
@@ -148,7 +148,7 @@ def create_cuda_kernels(task_gen):
                 )
                 kernel_task_gen.env.PLUGIN = kernel_task_gen.env.plugin_name
         if internal_deps:
-            tgt = task_gen.bld(target=kernel_target, features=['multiarch'], use=internal_deps)
+            tgt = task_gen.bld(target=kernel_target, features=['bugengine:multiarch'], use=internal_deps)
 
 def build(bld):
     cuda = bld.thirdparty('3rdparty.compute.CUDA')

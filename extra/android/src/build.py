@@ -9,15 +9,19 @@ def build(bld):
 
     source_node = root.find_node('src/engine/launcher/src')
     resource_node = root.find_node('src/engine/launcher/res')
-    resources = bld(target = 'engine.android.resource',
-                    features=['aapt_resource'],
-                    resource=resource_node,
-                    destfile=tg.make_bld_node('apk', '', 'resources.apk'))
+    resources = bld(
+        target='engine.android.resource',
+        features=['bugengine:android:aapt_resource'],
+        resource=resource_node,
+        destfile=tg.make_bld_node('apk', '', 'resources.apk')
+    )
     out_dir = tg.make_bld_node('jar', '', '')
-    launcher = bld(target = 'engine.android.launcher',
-                   features=['cxx', 'javac', 'dex'],
-                   source_nodes = [source_node, resource_node],
-                   destfile='classes.dex')
+    launcher = bld(
+        target='engine.android.launcher',
+        features=['cxx', 'javac', 'dex'],
+        source_nodes=[source_node, resource_node],
+        destfile='classes.dex'
+    )
 
     appname = getattr(Context.g_module, Context.APPNAME, bld.srcnode.name)
     package_unsigned = tg.make_bld_node('apk', '', appname + '.unsigned.apk')
@@ -40,4 +44,3 @@ def build(bld):
 
 def plugin(bld):
     pass
-

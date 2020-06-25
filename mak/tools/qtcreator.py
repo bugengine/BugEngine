@@ -462,9 +462,13 @@ class QtCreator(Build.BuildContext):
     PROJECT_TYPE = 'GenericProjectManager.GenericBuildConfiguration'
 
     def execute(self):
+        if self.schedule_setup():
+            return "SKIP"
+
         self.restore()
         if not self.all_envs:
             self.load_envs()
+        self.variant = self.__class__.bugengine_variant
         self.env.PROJECTS = [self.__class__.cmd]
         self.env.VARIANT = to_var('Variant')
         self.env.TOOLCHAIN = to_var('Toolchain')
@@ -497,7 +501,7 @@ class QtCreator(Build.BuildContext):
             for task_gen in group:
                 project_file = self.write_project(task_gen)
                 projects.append(project_file)
-                if task_gen == self.launcher[0][0]:
+                if task_gen == self.launcher:
                     launcher_project = project_file
                 self.write_files(task_gen)
                 includes, defines = self.gather_includes_defines(task_gen)
@@ -933,7 +937,7 @@ class QtCreator(Build.BuildContext):
                                                           'Deploy_DataDir')) +
                                    ('OUT_NAME=%s' %
                                     os.path.join(self.srcnode.abspath(), bld_env.PREFIX, variant, env.DEPLOY_BINDIR,
-                                                 env.cxxprogram_PATTERN % self.launcher[0][0].target), 'OUT_DIR=%s' %
+                                                 env.cxxprogram_PATTERN % self.launcher.target), 'OUT_DIR=%s' %
                                     os.path.join(self.srcnode.abspath(), bld_env.PREFIX, variant), 'RUNBIN_DIR=%s' %
                                     os.path.join(self.srcnode.abspath(), bld_env.PREFIX, variant, env.DEPLOY_RUNBINDIR),
                                     'TERM=msys', 'Python="%s"' % sys.executable, 'SrcDir="%s"' % self.srcnode.abspath(),
@@ -945,7 +949,7 @@ class QtCreator(Build.BuildContext):
                         run_configurations = []
                         index = 0
                         for task_gen in task_gens:
-                            if 'game' in task_gen.features:
+                            if 'bugengine:game' in task_gen.features:
                                 if 'android' in env.VALID_PLATFORMS:
                                     executable = env.ADB[0]
                                     arguments = 'shell am start com.bugengine/.BugEngineActivity --es %s' % task_gen.target
@@ -982,7 +986,7 @@ class QtCreator(Build.BuildContext):
                                     ('ProjectExplorer.ProjectConfiguration.DefaultDisplayName',
                                      'Run %s' % task_gen.target),
                                     ('ProjectExplorer.ProjectConfiguration.DisplayName',
-                                     '%s:%s' % (self.launcher[0][0].target, task_gen.name)),
+                                     '%s:%s' % (self.launcher.target, task_gen.name)),
                                     ('ProjectExplorer.ProjectConfiguration.Id',
                                      'ProjectExplorer.CustomExecutableRunConfiguration'),
                                     ('RunConfiguration.QmlDebugServerPort', 3768),
@@ -993,7 +997,7 @@ class QtCreator(Build.BuildContext):
                                     ('RunConfiguration.UseQmlDebuggerAuto', True),
                                 ]))
                                 index += 1
-                            elif 'python_module' in task_gen.features:
+                            elif 'bugengine:python_module' in task_gen.features:
                                 run_configurations.append(('ProjectExplorer.Target.RunConfiguration.%d' % index, [
                                     ('Analyzer.Valgrind.AddedSuppressionFiles', ()),
                                     ('Analyzer.Valgrind.Callgrind.CollectBusEvents', False),
@@ -1137,9 +1141,13 @@ class Qbs(QtCreator):
     PROJECT_TYPE = 'Qbs.QbsBuildConfiguration'
 
     def execute(self):
+        if self.schedule_setup():
+            return "SKIP"
+
         self.restore()
         if not self.all_envs:
             self.load_envs()
+        self.variant = self.__class__.bugengine_variant
         self.env.PROJECTS = [self.__class__.cmd]
         self.env.VARIANT = to_var('Variant')
         self.env.TOOLCHAIN = to_var('Toolchain')
@@ -1254,6 +1262,8 @@ class QtCreator2(QtCreator):
     cmd = 'qtcreator2'
     fun = 'build'
     optim = 'debug'
+    bugengine_toolchain = 'projects'
+    bugengine_variant = 'projects.setup'
     variant = 'projects/qtcreator2'
     version = (2, 12)
 
@@ -1263,6 +1273,8 @@ class QtCreator3(QtCreator):
     cmd = 'qtcreator3'
     fun = 'build'
     optim = 'debug'
+    bugengine_toolchain = 'projects'
+    bugengine_variant = 'projects.setup'
     variant = 'projects/qtcreator3'
     version = (3, 15)
 
@@ -1272,6 +1284,8 @@ class QtCreator4(QtCreator):
     cmd = 'qtcreator4'
     fun = 'build'
     optim = 'debug'
+    bugengine_toolchain = 'projects'
+    bugengine_variant = 'projects.setup'
     variant = 'projects/qtcreator4'
     version = (4, 18)
 
@@ -1281,6 +1295,8 @@ class Qbs2(Qbs):
     cmd = 'qbs2'
     fun = 'build'
     optim = 'debug'
+    bugengine_toolchain = 'projects'
+    bugengine_variant = 'projects.setup'
     variant = 'projects/qbs2'
     version = (2, 12)
 
@@ -1290,6 +1306,8 @@ class Qbs3(Qbs):
     cmd = 'qbs3'
     fun = 'build'
     optim = 'debug'
+    bugengine_toolchain = 'projects'
+    bugengine_variant = 'projects.setup'
     variant = 'projects/qbs3'
     version = (3, 15)
 
@@ -1299,5 +1317,7 @@ class Qbs4(Qbs):
     cmd = 'qbs4'
     fun = 'build'
     optim = 'debug'
+    bugengine_toolchain = 'projects'
+    bugengine_variant = 'projects.setup'
     variant = 'projects/qbs4'
     version = (4, 18)

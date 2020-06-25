@@ -15,17 +15,24 @@ class sublime3(Build.BuildContext):
     cmd = 'sublime'
     fun = 'build'
     optim = 'debug'
-    variant = '%(toolchain)s/%(optim)s'
+    bugengine_toolchain = 'projects'
+    bugengine_variant = 'projects.setup'
+    variant = 'projects/sublime'
+
     #bugengine_variant = '%(bugengine_variant)s'
 
     def execute(self):
         """
         Entry point
         """
+        if self.schedule_setup():
+            return "SKIP"
+
         Options.options.nomaster = True
         self.restore()
         if not self.all_envs:
             self.load_envs()
+        self.variant = self.__class__.bugengine_variant
         self.env.PROJECTS = [self.__class__.cmd]
 
         self.env.VARIANT = '${Variant}'
@@ -70,32 +77,36 @@ class sublime3(Build.BuildContext):
         systems = []
         for env_name in self.env.ALL_TOOLCHAINS:
             for variant in self.env.ALL_VARIANTS:
-                systems.append('\t\t{\n'
-                               '\t\t\t"name": "%s - %s",\n'
-                               '\t\t\t"cmd": ["%s", "%s", "build:%s:%s"]\n'
-                               '\t\t}' % (env_name, variant, sys.executable, sys.argv[0], env_name, variant))
+                systems.append(
+                    '\t\t{\n'
+                    '\t\t\t"name": "%s - %s",\n'
+                    '\t\t\t"cmd": ["%s", "%s", "build:%s:%s"]\n'
+                    '\t\t}' % (env_name, variant, sys.executable, sys.argv[0], env_name, variant)
+                )
 
         with open(workspace_node.abspath(), 'w') as workspace:
             workspace.write('{\n\t"folders":\n\t[\n')
             workspace.write(',\n'.join(folders))
-            workspace.write('\n'
-                            '\t],\n'
-                            '\t"settings":\n'
-                            '\t{\n'
-                            '\t\t"LSP":\n'
-                            '\t\t{\n'
-                            '\t\t\t"pyls":\n'
-                            '\t\t\t{\n'
-                            '\t\t\t\t"enabled": true\n'
-                            '\t\t\t},\n'
-                            '\t\t\t"clangd":\n'
-                            '\t\t\t{\n'
-                            '\t\t\t\t"enabled": true\n'
-                            '\t\t\t}\n'
-                            '\t\t}\n'
-                            '\t},\n'
-                            '\t"build_systems":\n'
-                            '\t[\n'
-                            '%s'
-                            '\t]\n'
-                            '}\n' % (',\n'.join(systems)))
+            workspace.write(
+                '\n'
+                '\t],\n'
+                '\t"settings":\n'
+                '\t{\n'
+                '\t\t"LSP":\n'
+                '\t\t{\n'
+                '\t\t\t"pyls":\n'
+                '\t\t\t{\n'
+                '\t\t\t\t"enabled": true\n'
+                '\t\t\t},\n'
+                '\t\t\t"clangd":\n'
+                '\t\t\t{\n'
+                '\t\t\t\t"enabled": true\n'
+                '\t\t\t}\n'
+                '\t\t}\n'
+                '\t},\n'
+                '\t"build_systems":\n'
+                '\t[\n'
+                '%s'
+                '\t]\n'
+                '}\n' % (',\n'.join(systems))
+            )

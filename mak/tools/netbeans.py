@@ -57,6 +57,8 @@ class Netbeans(Build.BuildContext):
     cmd = 'netbeans'
     fun = 'build'
     optim = 'debug'
+    bugengine_toolchain = 'projects'
+    bugengine_variant = 'projects.setup'
     variant = 'projects/netbeans'
     version = 79
 
@@ -104,12 +106,14 @@ class Netbeans(Build.BuildContext):
         doc = Document()
         doc.encoding = "UTF-8"
         cd = add(doc, doc, 'configurationDescriptor', {'version': '%i' % self.__class__.version})
-        lf = add(doc, cd, 'logicalFolder', {
-            'name': 'root',
-            'displayName': 'root',
-            'projectFiles': 'true',
-            'kind': "ROOT"
-        })
+        lf = add(
+            doc, cd, 'logicalFolder', {
+                'name': 'root',
+                'displayName': 'root',
+                'projectFiles': 'true',
+                'kind': "ROOT"
+            }
+        )
         self.subfolders = {}
         options = []
         for task_gen in task_gens:
@@ -133,12 +137,14 @@ class Netbeans(Build.BuildContext):
             #		f, subs = subs[subname]
             #f.setAttribute('displayName', '['+project[-1]+']')
             #self.addSourceTree(doc, f, source, source.prefix)
-        impfiles = add(doc, lf, 'logicalFolder', {
-            'name': 'ExternalFiles',
-            'displayName': 'waf',
-            'projectFiles': 'false',
-            'kind': 'IMPORTANT_FILES_FOLDER'
-        })
+        impfiles = add(
+            doc, lf, 'logicalFolder', {
+                'name': 'ExternalFiles',
+                'displayName': 'waf',
+                'projectFiles': 'false',
+                'kind': 'IMPORTANT_FILES_FOLDER'
+            }
+        )
         add(doc, impfiles, 'itemPath', sys.argv[0])
         #add(doc, cd, 'sourceFolderFilter')
         srl = add(doc, cd, 'sourceRootList')
@@ -175,12 +181,16 @@ class Netbeans(Build.BuildContext):
                 add(doc, mtool, 'buildCommand', '%s %s build:%s:%s' % (sys.executable, sys.argv[0], toolchain, variant))
                 add(doc, mtool, 'cleanCommand', '%s %s clean:%s:%s' % (sys.executable, sys.argv[0], toolchain, variant))
                 if env.ABI == 'mach_o':
-                    add(doc, mtool, 'executablePath',
+                    add(
+                        doc, mtool, 'executablePath',
                         os.path.join(bld_env.PREFIX, variant,
-                                     getattr(Context.g_module, 'APPNAME', 'noname') + '.app'))
+                                     getattr(Context.g_module, 'APPNAME', 'noname') + '.app')
+                    )
                 else:
-                    add(doc, mtool, 'executablePath',
-                        os.path.join(bld_env.PREFIX, variant, env.DEPLOY_BINDIR, env.cxxprogram_PATTERN % out.target))
+                    add(
+                        doc, mtool, 'executablePath',
+                        os.path.join(bld_env.PREFIX, variant, env.DEPLOY_BINDIR, env.cxxprogram_PATTERN % out.target)
+                    )
                 if self.__class__.version >= 70:
                     ctool = add(doc, mtool, 'cTool')
                     cincdir = add(doc, ctool, 'incDir')
@@ -220,9 +230,13 @@ class Netbeans(Build.BuildContext):
         """
         Entry point
         """
+        if self.schedule_setup():
+            return "SKIP"
+
         self.restore()
         if not self.all_envs:
             self.load_envs()
+        self.variant = self.__class__.bugengine_variant
         self.env.PROJECTS = [self.__class__.cmd]
         self.env.TOOLCHAIN = '$(TOOLCHAIN)'
         self.env.VARIANT = '$(CONFIG)'
@@ -244,14 +258,14 @@ class Netbeans(Build.BuildContext):
         project = path.make_node('project.xml')
         confs = path.make_node('configurations.xml')
         deps = []
-        out = self.launcher[0][0]
+        out = self.launcher
 
         for g in self.groups:
             for tg in g:
                 if not isinstance(tg, TaskGen.task_gen):
                     continue
                 tg.post()
-                if not 'kernel' in tg.features:
+                if not 'bugengine:kernel' in tg.features:
                     deps.append(tg)
 
         p = self.generateProjectXml(appname, self)

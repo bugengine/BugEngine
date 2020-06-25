@@ -26,7 +26,6 @@ def build_externals(bld):
     bld.external('3rdparty.system.freetype')
     bld.external('3rdparty.system.fontconfig')
     bld.external('3rdparty.scripting.lua')
-    bld.external('3rdparty.scripting.squirrel')
     bld.external('3rdparty.system.ncurses')
     bld.external('3rdparty.scripting.tcltk')
     bld.external('3rdparty.scripting.python')
@@ -36,7 +35,7 @@ def build_bugengine(bld):
     """
         Declares the main library and entry point
     """
-    bld.module('engine.mak', bld.bugenginenode.find_node('mak'), features=['Makefile'])
+    bld.headers('engine.mak', path=bld.bugenginenode.find_node('mak'), features=['Makefile'])
     bld.headers('engine.kernel', [], extra_public_includes=[bld.path.make_node('engine/kernel/api.cpu')])
     bld.library('engine.minitl', bld.platforms + ['engine.mak', 'engine.kernel'])
     bld.library('engine.core', ['engine.minitl', 'engine.kernel'])
@@ -93,14 +92,13 @@ def build_plugins(bld):
     #           ['3rdparty.audio.OpenAL'])
 
     bld.plugin('plugin.scripting.lua', ['engine.bugengine'], ['3rdparty.scripting.lua'])
-    bld.plugin('plugin.scripting.squirrel', ['engine.bugengine'], ['3rdparty.scripting.squirrel'])
     bld.plugin('plugin.input.input', ['engine.bugengine'])
-    bld.shared_library('plugin.scripting.pythonlib', ['engine.bugengine'], platforms=['pc'])
-    bld.plugin('plugin.scripting.python', ['engine.bugengine', 'plugin.scripting.pythonlib'], platforms=['pc'])
+    bld.shared_library('plugin.scripting.pythonlib', ['engine.bugengine'], conditions=['python'])
+    bld.plugin('plugin.scripting.python', ['engine.bugengine', 'plugin.scripting.pythonlib'], conditions=['python'])
     bld.python_module(
         'py_bugengine', ['engine.bugengine', 'plugin.scripting.pythonlib'],
         path=bld.path.find_node('plugin/scripting/pythonmodule'),
-        platforms=['pc']
+        conditions=['python']
     )
     if bld.env.PROJECTS:
         python_deps = ['3rdparty.scripting.python%s' % version.replace('.', '') for version in bld.env.PYTHON_VERSIONS]
@@ -112,13 +110,13 @@ def build_plugins(bld):
                 'plugin.scripting.python%s' % short_version, ['engine.bugengine', 'plugin.scripting.python'],
                 ['3rdparty.scripting.python%s' % short_version],
                 path=bld.path.find_node('plugin/scripting/pythonbinding'),
-                features=['python%s' % version]
+                conditions=['python%s' % version]
             )
 
-    bld.plugin('plugin.compute.cpu', ['engine.bugengine'], extra_tasks=['generate_cpu_variants'])
+    bld.plugin('plugin.compute.cpu', ['engine.bugengine'], features=['bugengine:cpu:variants'])
     bld.plugin(
         'plugin.compute.opencl', ['engine.bugengine', 'plugin.compute.cpu'], ['3rdparty.compute.OpenCL'],
-        features=['OpenCL']
+        conditions=['OpenCL']
     )
     #bld.plugin(
     #    'plugin.compute.opencl_gl',
@@ -126,9 +124,7 @@ def build_plugins(bld):
     #    ['3rdparty.graphics.OpenGL', '3rdparty.compute.OpenCL'],
     #    features=['OpenGL', 'OpenCL', 'GUI']
     #)
-    bld.plugin(
-        'plugin.compute.cuda', ['engine.bugengine'], ['3rdparty.compute.CUDA'], features=['cuda']
-    )
+    bld.plugin('plugin.compute.cuda', ['engine.bugengine'], ['3rdparty.compute.CUDA'], conditions=['cuda'])
 
     bld.plugin(
         'plugin.graphics.nullrender', [
@@ -139,27 +135,27 @@ def build_plugins(bld):
     bld.plugin(
         'plugin.graphics.windowing', ['engine.bugengine', 'plugin.graphics.3d'],
         ['3rdparty.system.X11', '3rdparty.graphics.OpenGL'],
-        features=['GUI']
+        conditions=['GUI']
     )
     bld.plugin(
         'plugin.graphics.GL4', ['engine.bugengine', 'plugin.graphics.windowing'], ['3rdparty.graphics.OpenGL'],
-        features=['OpenGL', 'GUI']
+        conditions=['OpenGL', 'GUI']
     )
     bld.plugin(
         'plugin.graphics.Dx9', ['engine.bugengine', 'plugin.graphics.windowing'], ['3rdparty.graphics.DirectX9'],
-        features=['DirectX9', 'GUI']
+        conditions=['DirectX9', 'GUI']
     )
     #bld.plugin('plugin.graphics.Dx10',
     #           ['engine.bugengine', 'plugin.graphics.windowing'],
     #           ['3rdparty.graphics.DirectX10'],
-    #           features=['DirectX10', 'GUI'])
+    #           conditions=['DirectX10', 'GUI'])
     #bld.plugin('plugin.graphics.Dx11',
     #           ['engine.bugengine', 'plugin.graphics.windowing'],
     #           ['3rdparty.graphics.DirectX11'],
-    #           features=['DirectX11', 'GUI'])
+    #           conditions=['DirectX11', 'GUI'])
     bld.plugin(
         'plugin.graphics.GLES2', ['engine.bugengine', 'plugin.graphics.windowing'], ['3rdparty.graphics.OpenGLES2'],
-        features=['OpenGLES2', 'GUI']
+        conditions=['OpenGLES2', 'GUI']
     )
 
     bld.plugin(
@@ -167,9 +163,9 @@ def build_plugins(bld):
         ['3rdparty.system.freetype', '3rdparty.system.fontconfig']
     )
 
-    bld.plugin('plugin.ui.console', ['engine.bugengine'], ['3rdparty.system.ncurses'], platforms=['pc'])
+    bld.plugin('plugin.ui.console', ['engine.bugengine'], ['3rdparty.system.ncurses'], conditions='ncurses')
 
-    bld.plugin('tool.bugeditor.ui', ['engine.bugengine'], platforms=['pc'])
+    bld.plugin('tool.bugeditor.ui', ['engine.bugengine'])
 
 
 def build_games(bld):
@@ -178,21 +174,18 @@ def build_games(bld):
     """
     bld.game(
         'bugeditor', ['engine.bugengine', 'tool.bugeditor.ui', 'plugin.scripting.package'],
-        path=bld.path.find_node('tool/bugeditor/main'),
-        platforms=['pc']
+        path=bld.path.find_node('tool/bugeditor/main')
     )
     bld.game('sample.text', ['engine.bugengine', 'plugin.scripting.package', 'plugin.graphics.3d'])
     bld.game('sample.python', ['engine.bugengine', 'plugin.scripting.package'])
     bld.game('sample.lua', ['engine.bugengine', 'plugin.scripting.package', 'plugin.scripting.lua'])
     bld.game(
         'help', ['engine.bugengine', 'plugin.ui.console', 'plugin.scripting.package'],
-        path=bld.path.find_node('tool/help'),
-        platforms=['pc']
+        path=bld.path.find_node('tool/help')
     )
     if Options.options.tests:
         bld.game('test.settings', ['engine.bugengine'])
-        bld.game('test.compute.copy', ['engine.bugengine', 'plugin.scripting.package'],
-                 root_namespace='BugEngine::Test::Compute::Copy')
+        bld.game('test.compute.copy', ['engine.bugengine', 'plugin.scripting.package'])
 
 
 def build(bld):

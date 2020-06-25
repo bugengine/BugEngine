@@ -1,6 +1,7 @@
 import os
 from be_typing import TYPE_CHECKING
 
+
 def options(option_context):
     # type: (Options.OptionsContext) -> None
     "Creates main option groups and load options for the host and all targets"
@@ -27,7 +28,9 @@ def options(option_context):
     )
     gr.add_option('--silent', action='store_true', default=False, dest='silent', help='do not print build log from Waf')
 
-    option_context.add_option('--profile', action='store_true', default=False, dest='profile', help='run WAF in the profiler')
+    option_context.add_option(
+        '--profile', action='store_true', default=False, dest='profile', help='run WAF in the profiler'
+    )
 
     tool_dir = os.path.join(option_context.bugenginenode.abspath(), 'mak', 'tools')
     option_context.load('visualstudio', tooldir=[tool_dir])

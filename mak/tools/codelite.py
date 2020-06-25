@@ -46,7 +46,8 @@ class Project(XmlFile):
                     'BuildCmpWithGlobalSettings': 'append',
                     'BuildLnkWithGlobalSettings': 'append',
                     'BuildResWithGlobalSettings': 'append'
-                })
+                }
+            )
             if task_gen.type == 'game':
                 general = self.add(
                     conf, 'General', {
@@ -56,15 +57,18 @@ class Project(XmlFile):
                             '%s/%s/%s' % (env.PREFIX, env.DEPLOY['bin'], env.program_PATTERN % builder.game.name),
                         'CommandArguments':
                             task_gen.name
-                    })
+                    }
+                )
             completion = self.add(conf, 'Completion')
             search_paths = self.add(completion, 'SearchPaths')
             custom_build = self.add(conf, 'CustomBuild', {'Enabled': 'Yes'})
             if task_gen.type == 'waf':
                 self.add(custom_build, 'BuildCommand', '%s %s build:%s' % (sys.executable, sys.argv[0], env_name))
                 self.add(custom_build, 'CleanCommand', '%s %s clean:%s' % (sys.executable, sys.argv[0], env_name))
-                self.add(custom_build, 'RebuildCommand',
-                         '%s %s clean:%s build:%s' % (sys.executable, sys.argv[0], env_name, env_name))
+                self.add(
+                    custom_build, 'RebuildCommand',
+                    '%s %s clean:%s build:%s' % (sys.executable, sys.argv[0], env_name, env_name)
+                )
 
     def add_files(self, container, source_tree, local_path):
         local_path = os.path.join(local_path, source_tree.prefix)
@@ -78,10 +82,12 @@ class Project(XmlFile):
 class Workspace(XmlFile):
     def __init__(self, appname, env_list):
         XmlFile.__init__(self)
-        self.project = self.add(self.doc, 'CodeLite_Workspace', {
-            'Name': appname,
-            'Database': 'mak/codelite/%s.tags' % appname
-        })
+        self.project = self.add(
+            self.doc, 'CodeLite_Workspace', {
+                'Name': appname,
+                'Database': 'mak/codelite/%s.tags' % appname
+            }
+        )
         self.build_matrix = self.add(self.project, 'BuildMatrix')
         self.configs = {}
         for env in env_list:
@@ -89,11 +95,13 @@ class Workspace(XmlFile):
 
     def addProject(self, task_gen):
         project_name = task_gen.category + '.' + task_gen.name
-        self.add(self.project, 'Project', {
-            'Name': project_name,
-            'Path': '.build/codelite/%s.project' % project_name,
-            'Active': 'No'
-        })
+        self.add(
+            self.project, 'Project', {
+                'Name': project_name,
+                'Path': '.build/codelite/%s.project' % project_name,
+                'Active': 'No'
+            }
+        )
         for env, conf in self.configs.iteritems():
             self.add(conf, 'Project', {'Name': project_name, 'ConfigName': env})
 
@@ -102,15 +110,21 @@ class codelite(Build.BuildContext):
     cmd = 'codelite'
     fun = 'build'
     optim = 'debug'
+    bugengine_toolchain = 'projects'
+    bugengine_variant = 'projects.setup'
     variant = 'projects/codelite'
 
     def execute(self):
         """
-		Entry point
-		"""
+        Entry point
+        """
+        if self.schedule_setup():
+            return "SKIP"
+
         self.restore()
         if not self.all_envs:
             self.load_envs()
+        self.variant = self.__class__.bugengine_variant
         self.env.PROJECTS = [self.__class__.cmd]
         self.recurse([self.run_dir])
 

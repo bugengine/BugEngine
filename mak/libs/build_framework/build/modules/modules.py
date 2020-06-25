@@ -9,3 +9,4 @@ def build(build_context):
     build_context.recurse('engine.py')
     build_context.recurse('game.py')
     build_context.recurse('plugin.py')
+    build_context.recurse('package.py')

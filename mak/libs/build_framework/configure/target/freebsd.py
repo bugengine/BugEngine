@@ -35,6 +35,7 @@ class FreeBSD(Configure.ConfigurationContext.Platform):
         env = conf.env
         env.DEST_OS = 'freebsd'
         env.ABI = 'elf'
+        env.COMPILER_ABI = 'gcc'
         env.VALID_PLATFORMS = ['freebsd', 'posix', 'pc']
         if compiler.arch.startswith('arm') and compiler.arch != 'arm64':
             if 'GCC' in compiler.NAMES:

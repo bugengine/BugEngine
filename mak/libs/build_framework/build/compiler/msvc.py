@@ -4,26 +4,27 @@ from waflib.Tools import msvc
 import os
 
 
-def build(bld):
-    def wrap_class(cls_name):
-        cls = Task.classes.get(cls_name, None)
-        derived = type(cls_name, (cls, ), {})
+def wrap_class(cls_name):
+    cls = Task.classes.get(cls_name, None)
+    derived = type(cls_name, (cls, ), {})
 
-        def exec_command_filter(self, *k, **kw):
-            if self.env.CC_NAME == 'msvc':
-                kw['filter_stdout'] = lambda x: x[1:]
-            if self.env.CC_NAME == 'msvc' and os.path.basename(self.env.LINK_CC[0])[0] in ('I', 'X'):
-                kw['filter_stderr'] = lambda x: x[1:]
-            return super(derived, self).exec_command(*k, **kw)
+    def exec_command_filter(self, *k, **kw):
+        if self.env.CC_NAME == 'msvc':
+            kw['filter_stdout'] = lambda x: x[1:]
+        if self.env.CC_NAME == 'msvc' and os.path.basename(self.env.LINK_CC[0])[0] in ('I', 'X'):
+            kw['filter_stderr'] = lambda x: x[1:]
+        return super(derived, self).exec_command(*k, **kw)
 
-        derived.exec_command = exec_command_filter
-
-    for task in 'c', 'cxx', 'cshlib', 'cxxshlib', 'cstlib', 'cxxstlib', 'cprogram', 'cxxprogram':
-        wrap_class(task)
+    derived.exec_command = exec_command_filter
 
 
-@feature('c', 'cxx', 'kernel')
+for task in 'c', 'cxx', 'cshlib', 'cxxshlib', 'cstlib', 'cxxstlib', 'cprogram', 'cxxprogram':
+    wrap_class(task)
+
+
+@feature('c', 'cxx', 'bugengine:kernel')
 @after_method('process_source')
+@after_method('propagate_uselib_vars')
 def apply_pdb_flag(self):
     if self.env.CC_NAME == 'msvc':
         for task in getattr(self, 'compiled_tasks', []) + getattr(self, 'preprocessed_tasks', []):
@@ -38,3 +39,7 @@ def apply_def_flag(self):
     if self.env.CC_NAME == 'msvc':
         for f in getattr(self, 'def_files', []):
             self.env.append_unique('LINKFLAGS', ['/DEF:%s' % f.abspath()])
+
+
+def build(bld):
+    pass

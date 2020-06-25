@@ -38,7 +38,7 @@ class clc64(Task.Task):
         return c_preproc.scan(self)
 
 
-@feature('kernel_create')
+@feature('bugengine:kernel_create')
 @before_method('process_source')
 def cl_ir_kernel_compile(task_gen):
     if not task_gen.env.CLC_KERNEL_HEADER_PATH:

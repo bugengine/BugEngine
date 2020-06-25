@@ -54,10 +54,10 @@ def unique(seq):
 
 
 def gather_includes_defines(task_gen):
-    defines = getattr(task_gen, 'defines', []) + getattr(task_gen, 'export_defines', []) + getattr(
-        task_gen, 'extra_defines', [])
-    includes = getattr(task_gen, 'includes', []) + getattr(task_gen, 'export_includes', []) + getattr(
-        task_gen, 'extra_includes', [])
+    defines = getattr(task_gen, 'defines', []) + getattr(task_gen, 'export_defines',
+                                                         []) + getattr(task_gen, 'extra_defines', [])
+    includes = getattr(task_gen, 'includes', []) + getattr(task_gen, 'export_includes',
+                                                           []) + getattr(task_gen, 'extra_includes', [])
     seen = set([])
     use = getattr(task_gen, 'use', []) + getattr(task_gen, 'private_use', [])
     while use:
@@ -70,10 +70,11 @@ def gather_includes_defines(task_gen):
                 pass
             else:
                 use = use + getattr(t, 'use', [])
-                includes = includes + getattr(t, 'includes', []) + getattr(t, 'export_includes', []) + getattr(
-                    task_gen, 'extra_includes', [])
-                defines = defines + getattr(t, 'defines', []) + getattr(t, 'export_defines', []) + getattr(
-                    task_gen, 'extra_defines', [])
+                includes = includes + getattr(t, 'includes',
+                                              []) + getattr(t, 'export_includes',
+                                                            []) + getattr(task_gen, 'extra_includes', [])
+                defines = defines + getattr(t, 'defines', []) + getattr(t, 'export_defines',
+                                                                        []) + getattr(task_gen, 'extra_defines', [])
     return unique(includes), unique(defines)
 
 
@@ -116,10 +117,12 @@ class XmlFile:
 class Solution:
     def __init__(self, bld, appname, version_number, version_name, use_folders, vstudio_ide_version):
         self.header = '\xef\xbb\xbf\r\nMicrosoft Visual Studio Solution File, Format Version %s\r\n# %s' % (
-            version_number, version_name)
+            version_number, version_name
+        )
         if vstudio_ide_version:
-            self.header += '\r\nVisualStudioVersion = %s\r\nMinimumVIsualStudioVersion = %s' % (vstudio_ide_version,
-                                                                                                vstudio_ide_version)
+            self.header += '\r\nVisualStudioVersion = %s\r\nMinimumVIsualStudioVersion = %s' % (
+                vstudio_ide_version, vstudio_ide_version
+            )
         self.projects = []
         self.project_configs = []
         self.configs = [
@@ -141,7 +144,8 @@ class Solution:
                 self.folders_made[folder_name] = folder
                 self.projects.append(
                     'Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "%s", "%s", "%s"\r\nEndProject' %
-                    (names[-1], names[-1], folder))
+                    (names[-1], names[-1], folder)
+                )
                 parent = self.addFolder(folder_name)
                 if parent:
                     self.folders.append((folder, parent))
@@ -152,13 +156,16 @@ class Solution:
     def get_dependency(self, project):
         if self.master and project.GUID == VCproj.GUID:
             return "	ProjectSection(ProjectDependencies) = postProject\r\n		%s = %s\r\n	EndProjectSection\r\n" % (
-                self.master, self.master)
+                self.master, self.master
+            )
         else:
             return ''
 
     def add(self, task_gen, project, project_path, build=False):
-        self.projects.append('Project("%s") = "%s", "%s", "%s"\r\n%sEndProject' %
-                             (project.GUID, project.name, project_path, project.guid, self.get_dependency(project)))
+        self.projects.append(
+            'Project("%s") = "%s", "%s", "%s"\r\n%sEndProject' %
+            (project.GUID, project.name, project_path, project.guid, self.get_dependency(project))
+        )
         project_config = []
         for t in task_gen.bld.env.ALL_TOOLCHAINS:
             env = task_gen.bld.all_envs[t]
@@ -183,10 +190,12 @@ class Solution:
         nested_projects = ''
         if self.use_folders:
             nested_projects = '\tGlobalSection(NestedProjects) = preSolution\r\n%s\n\tEndGlobalSection\r\n' % '\r\n'.join(
-                ['\t\t%s = %s' % (project, parent) for project, parent in self.folders])
+                ['\t\t%s = %s' % (project, parent) for project, parent in self.folders]
+            )
         newsolution = '%s\r\n%s\r\nGlobal\r\n\tGlobalSection(SolutionConfigurationPlatforms) = preSolution\r\n%s\r\n\tEndGlobalSection\r\n\tGlobalSection(ProjectConfigurationPlatforms) = postSolution\r\n%s\r\n\tEndGlobalSection\r\n%sEndGlobal\r\n' % (
-            self.header, '\n'.join(self.projects), '\n'.join(self.configs), '\r\n'.join(
-                self.project_configs), nested_projects)
+            self.header, '\n'.join(self.projects), '\n'.join(self.configs), '\r\n'.join(self.project_configs
+                                                                                        ), nested_projects
+        )
         try:
             solution = node.read()
         except IOError:
@@ -235,14 +244,15 @@ class VCproj:
         self.guid = generateGUID(task_gen.target)
         self.vcproj = XmlDocument(StringIO.StringIO(), 'UTF-8')
         with XmlNode(
-                self.vcproj, 'VisualStudioProject', {
-                    'ProjectType': 'Visual C++',
-                    'Version': version_project,
-                    'Name': self.name,
-                    'ProjectGUID': self.guid,
-                    'RootNamespace': task_gen.target,
-                    'Keyword': 'Win32Proj'
-                }) as project:
+            self.vcproj, 'VisualStudioProject', {
+                'ProjectType': 'Visual C++',
+                'Version': version_project,
+                'Name': self.name,
+                'ProjectGUID': self.guid,
+                'RootNamespace': task_gen.target,
+                'Keyword': 'Win32Proj'
+            }
+        ) as project:
             with XmlNode(project, 'Platforms') as platforms:
                 for p in task_gen.bld.__class__.platforms:
                     XmlNode(platforms, 'Platform', {'Name': p}).close()
@@ -257,33 +267,38 @@ class VCproj:
                     for variant in task_gen.bld.env.ALL_VARIANTS:
                         platform = task_gen.bld.get_platform(env.MS_PROJECT_PLATFORM)
                         with XmlNode(
-                                configurations, 'Configuration', {
-                                    'Name': '%s-%s|%s' % (toolchain, variant, platform),
-                                    'OutputDirectory': '$(SolutionDir)%s\\%s\\' % (sub_env.PREFIX, variant),
-                                    'IntermediateDirectory': '$(SolutionDir)%s\\%s\\' % (sub_env.PREFIX, variant),
-                                    'ConfigurationType': '0',
-                                    'CharacterSet': '2'
-                                }) as configuration:
+                            configurations, 'Configuration', {
+                                'Name': '%s-%s|%s' % (toolchain, variant, platform),
+                                'OutputDirectory': '$(SolutionDir)%s\\%s\\' % (sub_env.PREFIX, variant),
+                                'IntermediateDirectory': '$(SolutionDir)%s\\%s\\' % (sub_env.PREFIX, variant),
+                                'ConfigurationType': '0',
+                                'CharacterSet': '2'
+                            }
+                        ) as configuration:
                             tool = {'Name': 'VCNMakeTool'}
                             command = getattr(task_gen, 'command', '')
                             if command:
                                 command = command % {'toolchain': toolchain, 'variant': variant}
-                                tool['BuildCommandLine'] = 'cd $(SolutionDir) && %s %s %s %s' % (sys.executable,
-                                                                                                 sys.argv[0], command,
-                                                                                                 ' '.join(options))
+                                tool['BuildCommandLine'] = 'cd $(SolutionDir) && %s %s %s %s' % (
+                                    sys.executable, sys.argv[0], command, ' '.join(options)
+                                )
                             else:
                                 tool['BuildCommandLine'] = 'cd $(SolutionDir) && %s %s build:%s:%s %s --targets=%s' % (
-                                    sys.executable, sys.argv[0], toolchain, variant, ' '.join(options), task_gen.target)
+                                    sys.executable, sys.argv[0], toolchain, variant, ' '.join(options), task_gen.target
+                                )
                                 tool['CleanCommandLine'] = 'cd $(SolutionDir) && %s %s clean:%s:%s %s --targets=%s' % (
-                                    sys.executable, sys.argv[0], toolchain, variant, ' '.join(options), task_gen.target)
-                                tool[
-                                    'ReBuildCommandLine'] = 'cd $(SolutionDir) && %s %s clean:%s:%s instal:%s:%s %s --targets=%s' % (
-                                        sys.executable, sys.argv[0], toolchain, variant, toolchain, variant,
-                                        ' '.join(options), task_gen.target)
+                                    sys.executable, sys.argv[0], toolchain, variant, ' '.join(options), task_gen.target
+                                )
+                                tool['ReBuildCommandLine'
+                                     ] = 'cd $(SolutionDir) && %s %s clean:%s:%s instal:%s:%s %s --targets=%s' % (
+                                         sys.executable, sys.argv[0], toolchain, variant, toolchain, variant,
+                                         ' '.join(options), task_gen.target
+                                     )
                             if 'cxxprogram' in task_gen.features:
-                                tool['Output'] = '$(OutDir)\\%s\\%s' % (env.DEPLOY_BINDIR,
-                                                                        sub_env.cxxprogram_PATTERN % task_gen.target)
-                            elif 'game' in task_gen.features:
+                                tool['Output'] = '$(OutDir)\\%s\\%s' % (
+                                    env.DEPLOY_BINDIR, sub_env.cxxprogram_PATTERN % task_gen.target
+                                )
+                            elif 'bugengine:game' in task_gen.features:
                                 deps = task_gen.use[:]
                                 seen = set([])
                                 program = None
@@ -299,21 +314,26 @@ class VCproj:
                                         except:
                                             pass
                                 if program:
-                                    tool['Output'] = '$(OutDir)\\%s\\%s' % (env.DEPLOY_BINDIR,
-                                                                            sub_env.cxxprogram_PATTERN % program.target)
+                                    tool['Output'] = '$(OutDir)\\%s\\%s' % (
+                                        env.DEPLOY_BINDIR, sub_env.cxxprogram_PATTERN % program.target
+                                    )
                                     debug_command = '$(NMakeOutput)'
                                     debug_command_arguments = task_gen.target
                                 else:
-                                    tool['Output'] = '$(OutDir)\\%s\\%s' % (env.DEPLOY_BINDIR,
-                                                                            sub_env.cxxprogram_PATTERN %
-                                                                            task_gen.bld.launcher[0][0].target)
+                                    tool['Output'] = '$(OutDir)\\%s\\%s' % (
+                                        env.DEPLOY_BINDIR, sub_env.cxxprogram_PATTERN % task_gen.bld.launcher.target
+                                    )
                             if float(version_project) >= 8:
-                                tool['PreprocessorDefinitions'] = ';'.join(defines + sub_env.DEFINES +
-                                                                           sub_env.SYSTEM_DEFINES)
-                                tool['IncludeSearchPath'] = ';'.join([
-                                    path_from(p, task_gen.bld) for p in includes + sub_env.INCLUDES +
-                                    sub_env.SYSTEM_INCLUDES + [os.path.join(sub_env.SYSROOT or '', 'usr', 'include')]
-                                ])
+                                tool['PreprocessorDefinitions'] = ';'.join(
+                                    defines + sub_env.DEFINES + sub_env.SYSTEM_DEFINES
+                                )
+                                tool['IncludeSearchPath'] = ';'.join(
+                                    [
+                                        path_from(p, task_gen.bld)
+                                        for p in includes + sub_env.INCLUDES + sub_env.SYSTEM_INCLUDES +
+                                        [os.path.join(sub_env.SYSROOT or '', 'usr', 'include')]
+                                    ]
+                                )
                             XmlNode(configuration, 'Tool', tool).close()
             XmlNode(project, 'References').close()
             with XmlNode(project, 'Files') as files:
@@ -354,7 +374,8 @@ class VCxproj:
                 'DefaultTargets': 'Build',
                 'ToolsVersion': version_project[2],
                 'xmlns': 'http://schemas.microsoft.com/developer/msbuild/2003'
-            })
+            }
+        )
         self.filter_nodes = self.vcxfilters._add(project, 'ItemGroup')
         self.file_nodes = self.vcxfilters._add(project, 'ItemGroup')
 
@@ -364,14 +385,16 @@ class VCxproj:
                 'DefaultTargets': 'Build',
                 'ToolsVersion': version_project[2],
                 'xmlns': 'http://schemas.microsoft.com/developer/msbuild/2003'
-            })
+            }
+        )
         configs = self.vcxproj._add(project, 'ItemGroup', {'Label': 'ProjectConfigurations'})
         for toolchain in task_gen.bld.env.ALL_TOOLCHAINS:
             env = task_gen.bld.all_envs[toolchain]
             platform = task_gen.bld.get_platform(env.MS_PROJECT_PLATFORM)
             for variant in task_gen.bld.env.ALL_VARIANTS:
-                config = self.vcxproj._add(configs, 'ProjectConfiguration',
-                                           {'Include': '%s-%s|%s' % (toolchain, variant, platform)})
+                config = self.vcxproj._add(
+                    configs, 'ProjectConfiguration', {'Include': '%s-%s|%s' % (toolchain, variant, platform)}
+                )
                 self.vcxproj._add(config, 'Configuration', '%s-%s' % (toolchain, variant))
                 self.vcxproj._add(config, 'Platform', platform)
         for toolchain in task_gen.bld.env.ALL_TOOLCHAINS:
@@ -396,10 +419,12 @@ class VCxproj:
             platform = task_gen.bld.get_platform(env.MS_PROJECT_PLATFORM)
             for prop in env.MS_PROJECT_IMPORT_PROPS:
                 for variant in task_gen.bld.env.ALL_VARIANTS:
-                    self.vcxproj._add(project, 'Import', {
-                        'Condition': "'$(Configuration)'=='%s-%s'" % (toolchain, variant),
-                        'Project': prop
-                    })
+                    self.vcxproj._add(
+                        project, 'Import', {
+                            'Condition': "'$(Configuration)'=='%s-%s'" % (toolchain, variant),
+                            'Project': prop
+                        }
+                    )
 
         for toolchain in task_gen.bld.env.ALL_TOOLCHAINS:
             env = task_gen.bld.all_envs[toolchain]
@@ -409,10 +434,11 @@ class VCxproj:
             for variant in task_gen.bld.env.ALL_VARIANTS:
                 properties = self.vcxproj._add(
                     project, 'PropertyGroup',
-                    {'Condition': "'$(Configuration)|$(Platform)'=='%s-%s|%s'" % (toolchain, variant, platform)})
+                    {'Condition': "'$(Configuration)|$(Platform)'=='%s-%s|%s'" % (toolchain, variant, platform)}
+                )
                 for var in [
-                        'Prefix', 'TmpDir', 'Toolchain', 'Deploy_BinDir', 'Deploy_RunBinDir', 'Deploy_LibDir',
-                        'Deploy_IncludeDir', 'Deploy_DataDir', 'Deploy_PluginDir', 'Deploy_KernelDir', 'Deploy_RootDir'
+                    'Prefix', 'TmpDir', 'Toolchain', 'Deploy_BinDir', 'Deploy_RunBinDir', 'Deploy_LibDir',
+                    'Deploy_IncludeDir', 'Deploy_DataDir', 'Deploy_PluginDir', 'Deploy_KernelDir', 'Deploy_RootDir'
                 ]:
                     self.vcxproj._add(properties, var, env[var.upper()].replace('/', '\\'))
                 self.vcxproj._add(properties, 'Variant', variant)
@@ -427,7 +453,8 @@ class VCxproj:
                     project, 'PropertyGroup', {
                         'Label': 'Configuration',
                         'Condition': "'$(Configuration)|$(Platform)'=='%s-%s|%s'" % (toolchain, variant, platform)
-                    })
+                    }
+                )
                 self.vcxproj._add(configuration, 'ConfigurationType', 'Makefile')
                 self.vcxproj._add(configuration, 'PlatformToolset', 'v%d' % (float(version_project[1]) * 10))
                 self.vcxproj._add(configuration, 'OutDir', '$(SolutionDir)$(Prefix)\\$(Variant)\\')
@@ -442,7 +469,8 @@ class VCxproj:
                 if env.MS_PROJECT_VARIABLES:
                     properties = self.vcxproj._add(
                         project, 'PropertyGroup',
-                        {'Condition': "'$(Configuration)|$(Platform)'=='%s-%s|%s'" % (toolchain, variant, platform)})
+                        {'Condition': "'$(Configuration)|$(Platform)'=='%s-%s|%s'" % (toolchain, variant, platform)}
+                    )
                     for var, value in env.MS_PROJECT_VARIABLES:
                         self.vcxproj._add(properties, var, value)
 
@@ -457,45 +485,61 @@ class VCxproj:
             for variant in task_gen.bld.env.ALL_VARIANTS:
                 properties = self.vcxproj._add(
                     project, 'PropertyGroup',
-                    {'Condition': "'$(Configuration)|$(Platform)'=='%s-%s|%s'" % (toolchain, variant, platform)})
+                    {'Condition': "'$(Configuration)|$(Platform)'=='%s-%s|%s'" % (toolchain, variant, platform)}
+                )
                 command = getattr(task_gen, 'command', '')
                 if command:
                     command = command % {'toolchain': toolchain, 'variant': variant}
-                    self.vcxproj._add(properties, 'NMakeBuildCommandLine',
-                                      'cd $(SolutionDir) && %s %s %s %s' % (sys.executable, sys.argv[0], command, ' '.join(options)))
+                    self.vcxproj._add(
+                        properties, 'NMakeBuildCommandLine',
+                        'cd $(SolutionDir) && %s %s %s %s' % (sys.executable, sys.argv[0], command, ' '.join(options))
+                    )
                 else:
                     self.vcxproj._add(
                         properties, 'NMakeBuildCommandLine', 'cd $(SolutionDir) && %s %s build:%s:%s %s --targets=%s' %
-                        (sys.executable, sys.argv[0], toolchain, variant, ' '.join(options), task_gen.target))
+                        (sys.executable, sys.argv[0], toolchain, variant, ' '.join(options), task_gen.target)
+                    )
                     self.vcxproj._add(
                         properties, 'NMakeReBuildCommandLine',
-                        'cd $(SolutionDir) && %s %s clean:%s:%s build:%s:%s %s --targets=%s' %
-                        (sys.executable, sys.argv[0], toolchain, variant, ' '.join(options), toolchain, variant, task_gen.target))
+                        'cd $(SolutionDir) && %s %s clean:%s:%s build:%s:%s %s --targets=%s' % (
+                            sys.executable, sys.argv[0], toolchain, variant, ' '.join(options), toolchain, variant,
+                            task_gen.target
+                        )
+                    )
                     self.vcxproj._add(
                         properties, 'NMakeCleanCommandLine', 'cd $(SolutionDir) && %s %s clean:%s:%s %s --targets=%s' %
-                        (sys.executable, sys.argv[0], toolchain, variant, ' '.join(options),  task_gen.target))
+                        (sys.executable, sys.argv[0], toolchain, variant, ' '.join(options), task_gen.target)
+                    )
                     if 'cxxprogram' in task_gen.features:
                         self.vcxproj._add(
                             properties, 'NMakeOutput',
-                            '$(OutDir)\\%s\\%s' % (env.DEPLOY_BINDIR, sub_env.cxxprogram_PATTERN % task_gen.target))
-                    elif 'game' in task_gen.features:
+                            '$(OutDir)\\%s\\%s' % (env.DEPLOY_BINDIR, sub_env.cxxprogram_PATTERN % task_gen.target)
+                        )
+                    elif 'bugengine:game' in task_gen.features:
                         self.vcxproj._add(
                             properties, 'NMakeOutput', '$(OutDir)\\%s\\%s' %
-                            (env.DEPLOY_BINDIR, sub_env.cxxprogram_PATTERN % task_gen.bld.launcher[0][0].target))
+                            (env.DEPLOY_BINDIR, sub_env.cxxprogram_PATTERN % task_gen.bld.launcher.target)
+                        )
                         self.vcxproj._add(properties, 'LocalDebuggerCommand', '$(NMakeOutput)')
                         self.vcxproj._add(properties, 'LocalDebuggerCommandArguments', task_gen.target)
-                    elif 'python_module' in task_gen.features:
+                    elif 'bugengine:python_module' in task_gen.features:
                         self.vcxproj._add(properties, 'LocalDebuggerCommand', sys.executable)
-                        self.vcxproj._add(properties, 'LocalDebuggerCommandArguments', '-c "import {target}; {target}.run()"'.format(target=task_gen.target))
+                        self.vcxproj._add(
+                            properties, 'LocalDebuggerCommandArguments',
+                            '-c "import {target}; {target}.run()"'.format(target=task_gen.target)
+                        )
                         self.vcxproj._add(properties, 'LocalDebuggerWorkingDirectory', '$(OutDir)')
-                    self.vcxproj._add(properties, 'NMakePreprocessorDefinitions',
-                                      ';'.join(defines + sub_env.DEFINES + sub_env.SYSTEM_DEFINES))
+                    self.vcxproj._add(
+                        properties, 'NMakePreprocessorDefinitions',
+                        ';'.join(defines + sub_env.DEFINES + sub_env.SYSTEM_DEFINES)
+                    )
                     if sub_env.SYS_ROOT:
                         includes.append('%s/usr/include' % sub_env.SYSROOT or '')
                     self.vcxproj._add(
-                        properties, 'NMakeIncludeSearchPath',
-                        ';'.join([path_from(i, task_gen.bld)
-                                  for i in includes] + sub_env.INCLUDES + sub_env.SYSTEM_INCLUDES))
+                        properties, 'NMakeIncludeSearchPath', ';'.join(
+                            [path_from(i, task_gen.bld) for i in includes] + sub_env.INCLUDES + sub_env.SYSTEM_INCLUDES
+                        )
+                    )
         self.vcxproj._add(project, 'Import', {'Project': '$(VCTargetsPath)\\Microsoft.Cpp.props'})
         files = self.vcxproj._add(project, 'ItemGroup')
 
@@ -514,7 +558,8 @@ class VCxproj:
                         project, 'Import', {
                             'Condition': "'$(Configuration)|$(Platform)'=='%s-%s|%s'" % (toolchain, variant, platform),
                             'Project': target
-                        })
+                        }
+                    )
         properties = self.vcxproj._add(project, 'PropertyGroup')
         self.vcxproj._add(properties, 'LocalDebuggerWorkingDirectory', '$(OutDir)')
 
@@ -531,16 +576,19 @@ class VCxproj:
                     filter = self.filters[path]
                 except KeyError:
                     filter = generateGUID(path)
-                    n = self.vcxfilters._add(self.filter_nodes, 'Filter',
-                                             {'Include': node.path_from(project_node).replace('/', '\\')})
+                    n = self.vcxfilters._add(
+                        self.filter_nodes, 'Filter', {'Include': node.path_from(project_node).replace('/', '\\')}
+                    )
                     self.vcxfilters._add(n, 'UniqueIdentifier', filter)
             for subdir in node.listdir():
                 self.add_node(root_node, project_node, node.make_node(subdir), files)
         elif os.path.isfile(path):
-            self.vcxproj._add(files, 'None',
-                              {'Include': '$(SolutionDir)%s' % node.path_from(root_node).replace('/', '\\')})
-            n = self.vcxfilters._add(self.file_nodes, 'None',
-                                     {'Include': '$(SolutionDir)%s' % node.path_from(root_node).replace('/', '\\')})
+            self.vcxproj._add(
+                files, 'None', {'Include': '$(SolutionDir)%s' % node.path_from(root_node).replace('/', '\\')}
+            )
+            n = self.vcxfilters._add(
+                self.file_nodes, 'None', {'Include': '$(SolutionDir)%s' % node.path_from(root_node).replace('/', '\\')}
+            )
             self.vcxfilters._add(n, 'Filter', node.parent.path_from(project_node).replace('/', '\\'))
 
 
@@ -560,13 +608,17 @@ class PyProj:
                 'DefaultTargets': 'Build',
                 'ToolsVersion': '4.0',
                 'xmlns': 'http://schemas.microsoft.com/developer/msbuild/2003'
-            })
+            }
+        )
         propgroup = self.pyproj._add(project, 'PropertyGroup')
         paths = sys.path + [task_gen.bld.bugenginenode.make_node('mak').make_node('libs').abspath().replace('/', '\\')]
         self.pyproj._add(propgroup, 'SchemaVersion', '2.0')
         self.pyproj._add(propgroup, 'ProjectGuid', self.guid[1:-1])
         self.pyproj._add(propgroup, 'ProjectHome', '..\..')
-        self.pyproj._add(propgroup, 'StartupFile', task_gen.bld.bugenginenode.make_node('waf').abspath().replace('/', '\\'))
+        self.pyproj._add(
+            propgroup, 'StartupFile',
+            task_gen.bld.bugenginenode.make_node('waf').abspath().replace('/', '\\')
+        )
         self.pyproj._add(propgroup, 'SearchPath', ';'.join(paths))
         self.pyproj._add(propgroup, 'WorkingDirectory', task_gen.bld.srcnode.abspath().replace('/', '\\'))
         self.pyproj._add(propgroup, 'OutputPath', '.')
@@ -575,19 +627,20 @@ class PyProj:
         self.pyproj._add(propgroup, 'LaunchProvider', 'Standard Python launcher')
         self.pyproj._add(propgroup, 'EnableNativeCodeDebugging', 'False')
         self.pyproj._add(propgroup, 'IsWindowsApplication', 'False')
-        self.pyproj._add(propgroup, 'InterpreterId', 'MSBuild|env-%s|$(MSBuildProjectFullPath)'%task_gen.target)
+        self.pyproj._add(propgroup, 'InterpreterId', 'MSBuild|env-%s|$(MSBuildProjectFullPath)' % task_gen.target)
         for toolchain in task_gen.bld.env.ALL_TOOLCHAINS:
             for variant in task_gen.bld.env.ALL_VARIANTS:
-                properties = self.pyproj._add(project, 'PropertyGroup',
-                                              {'Condition': "'$(Configuration)'=='%s-%s'" % (toolchain, variant)})
+                properties = self.pyproj._add(
+                    project, 'PropertyGroup', {'Condition': "'$(Configuration)'=='%s-%s'" % (toolchain, variant)}
+                )
                 self.pyproj._add(properties, 'CommandLineArguments', 'build:%s:%s' % (toolchain, variant))
                 self.pyproj._add(properties, 'DebugSymbols', 'true')
                 self.pyproj._add(properties, 'EnableUnmanagedDebugging', 'false')
 
         self.pyproj._add(project, 'ItemGroup')
         ig_env = self.pyproj._add(project, 'ItemGroup')
-        interpreter = self.pyproj._add(ig_env, 'Interpreter', {'Include': '%s\\'%os.path.dirname(sys.executable)})
-        self.pyproj._add(interpreter, 'Id', 'env-%s'%task_gen.target)
+        interpreter = self.pyproj._add(ig_env, 'Interpreter', {'Include': '%s\\' % os.path.dirname(sys.executable)})
+        self.pyproj._add(interpreter, 'Id', 'env-%s' % task_gen.target)
         self.pyproj._add(interpreter, 'Version', '.'.join(str(i) for i in sys.version_info[0:2]))
         self.pyproj._add(interpreter, 'Description', 'python-%s' % task_gen.target)
         self.pyproj._add(interpreter, 'InterpreterPath', sys.executable)
@@ -596,17 +649,24 @@ class PyProj:
         self.pyproj._add(interpreter, 'Architecture', 'x64')
         folders = self.pyproj._add(project, 'ItemGroup')
         folder_cache = set([])
+
         def add_folder(folder):
             if folder != task_gen.bld.srcnode:
                 if folder not in folder_cache:
                     add_folder(folder.parent)
                     folder_cache.add(folder)
                     self.pyproj._add(folders, 'Folder', {'Include': folder.path_from(task_gen.bld.srcnode)})
+
         files = self.pyproj._add(project, 'ItemGroup')
         for f in task_gen.all_sources:
             add_folder(f.parent)
             self.pyproj._add(files, 'Compile', {'Include': f.path_from(task_gen.bld.srcnode)})
-        self.pyproj._add(project, 'Import', {'Project': "$(MSBuildExtensionsPath32)\\Microsoft\\VisualStudio\\v$(VisualStudioVersion)\\Python Tools\\Microsoft.PythonTools.targets"})
+        self.pyproj._add(
+            project, 'Import', {
+                'Project':
+                    "$(MSBuildExtensionsPath32)\\Microsoft\\VisualStudio\\v$(VisualStudioVersion)\\Python Tools\\Microsoft.PythonTools.targets"
+            }
+        )
         self.pyproj._add(project, 'Target', {'Name': 'BeforeBuild'})
         self.pyproj._add(project, 'Target', {'Name': 'AfterBuild'})
 
@@ -621,6 +681,8 @@ class vs2003(Build.BuildContext):
     optim = 'debug'
     version = (('Visual Studio .NET 2003', '8.00', False, None), (VCproj, '7.10'))
     platforms = ['Win32']
+    bugengine_toolchain = 'projects'
+    bugengine_variant = 'projects.setup'
     variant = 'projects/vs'
 
     def get_platform(self, platform_name):
@@ -630,9 +692,12 @@ class vs2003(Build.BuildContext):
         """
         Entry point
         """
+        if self.schedule_setup():
+            return "SKIP"
         self.restore()
         if not self.all_envs:
             self.load_envs()
+        self.variant = self.__class__.bugengine_variant
         self.env.PROJECTS = [self.__class__.cmd]
 
         self.env.VARIANT = '$(Variant)'
@@ -663,9 +728,10 @@ class vs2003(Build.BuildContext):
 
         solution = Solution(self, appname, version_number, version_name, folders, ide_version)
 
-        for target, command, do_build in [('build.reconfigure', 'reconfigure', False),
-                                          ('build.%s' % version, version, False),
-                                          ('build.all', 'build:%(toolchain)s:%(variant)s', True)]:
+        for target, command, do_build in [
+            ('build.reconfigure', 'reconfigure', False), ('build.%s' % version, version, False),
+            ('build.all', 'build:%(toolchain)s:%(variant)s', True)
+        ]:
             task_gen = lambda: None
             task_gen.target = target
             task_gen.command = command
@@ -691,7 +757,7 @@ class vs2003(Build.BuildContext):
             for tg in g:
                 if not isinstance(tg, TaskGen.task_gen):
                     continue
-                if not 'kernel' in tg.features:
+                if not 'bugengine:kernel' in tg.features:
                     tg.post()
 
                     nodes = [projects.make_node("%s.%s" % (tg.target, ext)) for ext in klass.extensions]

@@ -1,5 +1,11 @@
 import os
 from be_typing import TYPE_CHECKING
+from waflib import Options, Configure
+
+
+@Configure.conf
+def register_setup_option(conf, option_name):
+    conf.env.append_value('SETUP_OPTIONS', [(option_name, getattr(Options.options, option_name))])
 
 
 def setup(conf):
@@ -15,6 +21,7 @@ def setup(conf):
 def multiarch_setup(conf):
     # type: (Configure.ConfigurationContext) -> None
     conf.recurse('checks.py')
+    conf.recurse('package.py')
     conf.fun = 'setup'
     if conf.env.SUB_TOOLCHAINS:
         for t in conf.env.SUB_TOOLCHAINS:
@@ -29,7 +36,7 @@ def multiarch_setup(conf):
             else:
                 conf.env.BUGENGINE_SETUP = True
             finally:
-                conf.setenv(conf.bugengine_variant)
+                conf.variant = conf.bugengine_variant
         conf.setenv(conf.bugengine_variant + '.setup', conf.all_envs[conf.bugengine_variant])
         conf.env.SUB_TOOLCHAINS = [t + '.setup' for t in conf.env.SUB_TOOLCHAINS]
         conf.env.BUGENGINE_SETUP = True

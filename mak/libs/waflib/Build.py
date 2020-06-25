@@ -42,7 +42,7 @@ POST_AT_ONCE = 0
 POST_LAZY = 1
 """Post mode: post the task generators group after group, the tasks in the next group are created when the tasks in the previous groups are done"""
 
-PROTOCOL = -1
+PROTOCOL = 2
 if sys.platform == 'cli':
 	PROTOCOL = 0
 

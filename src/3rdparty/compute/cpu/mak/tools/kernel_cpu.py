@@ -102,7 +102,7 @@ class cpu_header(Task.Task):
             )
 
 
-@feature('generate_cpu_variants')
+@feature('bugengine:cpu:variants')
 @before_method('process_source')
 def generate_cpu_variant_header(self):
     for kernel_name, toolchain in self.env.KERNEL_TOOLCHAINS:
@@ -114,7 +114,7 @@ def generate_cpu_variant_header(self):
             self.env.append_unique('INCLUDES', [out_header.parent.abspath()])
 
 
-@feature('cpukernel_create')
+@feature('bugengine:cpu:kernel_create')
 def build_cpu_kernels(task_gen):
     ast = task_gen.kernel_source
     out = ast.change_ext('.cpu%s.cc' % task_gen.variant_name)
@@ -122,7 +122,7 @@ def build_cpu_kernels(task_gen):
     task_gen.source.append(out)
 
 
-@feature('preprocess')
+@feature('bugengine:preprocess')
 def create_cpu_kernels(task_gen):
     internal_deps = {}
 
@@ -145,7 +145,8 @@ def create_cpu_kernels(task_gen):
                         variant_name=variant,
                         kernel=kernel,
                         features=[
-                            'cxx', task_gen.bld.env.STATIC and 'cxxobjects' or 'cxxshlib', 'kernel', 'cpukernel_create'
+                            'cxx', task_gen.bld.env.STATIC and 'cxxobjects' or 'cxxshlib', 'bugengine:kernel',
+                            'bugengine:cpu:kernel_create'
                         ],
                         extra_use=tgen.extra_use,
                         pchstop=tgen.pchstop,
@@ -167,4 +168,4 @@ def create_cpu_kernels(task_gen):
                         except KeyError:
                             internal_deps[kernel_target] = [target_prefix + kernel_target]
     for multiarch_target, deps in internal_deps.items():
-        tgt = task_gen.bld(target=multiarch_target, features=['multiarch'], use=deps)
+        tgt = task_gen.bld(target=multiarch_target, features=['bugengine:multiarch'], use=deps)

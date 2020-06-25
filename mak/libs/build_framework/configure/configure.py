@@ -12,11 +12,20 @@ def configure(configuration_context):
         if os.path.isdir(directory) and os.path.isfile(os.path.join(directory, 'wscript')):
             configuration_context.recurse(extra.make_node(extra_platform).abspath(), name='host_configure')
     tool_dir = os.path.join(configuration_context.bugenginenode.abspath(), 'mak', 'tools')
+
+    configuration_context.setenv('projects', configuration_context.env.derive())
+    configuration_context.env.TOOLCHAIN = 'projects'
+    configuration_context.env.PROJECTS = True
+    configuration_context.env.ENV_PREFIX = '%s'
+    configuration_context.env.SUBARCH = False
+    configuration_context.variant = ''
+
     configuration_context.load('flex', tooldir=[tool_dir])
     configuration_context.load('bison', tooldir=[tool_dir])
     configuration_context.recurse('compiler/compiler.py')
     configuration_context.load('clir', tooldir=[tool_dir])
     configuration_context.recurse('target/target.py')
+    configuration_context.recurse('package.py')
     configuration_context.env.ALL_TOOLCHAINS.sort(key=lambda x: x.split('-'))
 
 

@@ -1,9 +1,9 @@
 from waflib.TaskGen import feature, before_method, after_method
-from waflib import Context, Node, Utils, Errors, Build, TaskGen
+from waflib import Options, Context, Node, Utils, Errors, Build, TaskGen
 import os
 
 
-@feature('aapt_resource')
+@feature('bugengine:android:aapt_resource')
 def aapt_resource(self):
     if 'android' in self.env.VALID_PLATFORMS:
         self.manifest = self.make_bld_node('src', '', 'AndroidManifest.xml')
@@ -52,14 +52,20 @@ def dex_files(self):
 
 
 def build(bld):
+    if Options.options.android_jdk:
+        if not bld.env.env:
+            bld.env.env = dict(os.environ)
+        bld.env.env['JAVA_HOME'] = Options.options.android_jdk
+        bld.env.env['JRE_HOME'] = os.path.join(Options.options.android_jdk, 'jre')
+
     bld.recurse('tasks.py')
     bld.recurse('install.py')
 
 
-
-@feature('multiarch')
+@feature('bugengine:multiarch')
 def apply_multiarch_android(self):
     pass
+
 
 @feature('cprogram', 'cxxprogram', 'cshlib', 'cxxshlib')
 @before_method('install_step')
@@ -68,13 +74,17 @@ def strip_debug_info(self):
     if self.env.ENV_PREFIX:
         self.strip_debug_info_impl()
 
-@feature('launcher')
+
+@feature('bugengine:launcher')
 @after_method('install_step')
 def install_program_android(self):
     if 'android' in self.env.VALID_PLATFORMS:
-        if self.env.ENV_PREFIX: #in multiarch, also install the lib
-            self.install_as(os.path.join(self.env.PREFIX, self.bld.optim, self.env.DEPLOY_BINDIR,
-                                         self.env.cxxprogram_PATTERN%self.target_name),
-                            self.postlink_task.outputs[0],
-                            chmod=Utils.O755)
-
+        if self.env.ENV_PREFIX:                                              #in multiarch, also install the lib
+            self.install_as(
+                os.path.join(
+                    self.env.PREFIX, self.bld.optim, self.env.DEPLOY_BINDIR,
+                    self.env.cxxprogram_PATTERN % self.target_name
+                ),
+                self.postlink_task.outputs[0],
+                chmod=Utils.O755
+            )
