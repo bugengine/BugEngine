@@ -123,6 +123,7 @@ def setup(configuration_context):
                 include_paths, lib_paths, archs = configuration_context.check_nvcc(compiler)
             except Exception as e:
                 configuration_context.setenv(toolchain)
+                del configuration_context.all_envs[cuda_toolchain]
             else:
                 for a in archs:
                     v.append_value('NVCC_CXXFLAGS', ['-gencode', 'arch=compute_{0}{1},code=sm_{0}{1}'.format(*a)])
@@ -132,6 +133,7 @@ def setup(configuration_context):
                 cuda_available = True
 
                 configuration_context.setenv(toolchain)
+                del configuration_context.all_envs[cuda_toolchain]
                 configuration_context.env.append_value('INCLUDES_cuda', include_paths)
                 configuration_context.env.append_value('STLIBPATH_cuda', lib_paths)
                 configuration_context.env.append_value('FEATURES', ['cuda'])
