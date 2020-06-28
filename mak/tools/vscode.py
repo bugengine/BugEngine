@@ -149,7 +149,7 @@ class vscode(Build.BuildContext):
                         'defines': [],
                         'compileCommands':
                             '${workspaceFolder}/.vscode/toolchains/%s/%s/compile_commands.json' % (env_name, variant),
-                        'properties':
+                        'customConfigurationVariables':
                             properties
                     }
                 )
@@ -217,7 +217,7 @@ class vscode(Build.BuildContext):
                 {
                     'id': 'bugengine-%s' % input,
                     'type': 'command',
-                    'command': 'cpptools.activeConfigProperty',
+                    'command': 'cpptools.activeConfigCustomVariable',
                     'args': input
                 }
             )
@@ -300,7 +300,7 @@ class vscode(Build.BuildContext):
                 {
                     'id': 'bugengine-%s' % input,
                     'type': 'command',
-                    'command': 'cpptools.activeConfigProperty',
+                    'command': 'cpptools.activeConfigCustomVariable',
                     'args': input
                 }
             )
