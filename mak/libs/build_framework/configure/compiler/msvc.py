@@ -25,32 +25,25 @@ class MSVC(Configure.ConfigurationContext.Compiler):
         self.targets = [self.target]
 
     def set_optimisation_options(self, conf):
+        conf.env.append_unique('CFLAGS_debug', ['/Od', '/Ob1', '/Zi', '/MDd', '/D_DEBUG', '/GR'])
         conf.env.append_unique('CFLAGS_debug_rtc', ['/RTC1', '/RTCc', '/D_ALLOW_RTCc_IN_STL=1'])
-        conf.env.append_unique('CFLAGS_debug_nortc', [])
-        conf.env.append_unique('CFLAGS_debug', ['/Od', '/Ob1', '/Zi', '/MTd', '/D_DEBUG', '/GR'])
-        conf.env.append_unique('CXXFLAGS_debug_rtc', ['/EHsc', '/RTC1', '/RTCc', '/D_ALLOW_RTCc_IN_STL=1'])
-        conf.env.append_unique('CXXFLAGS_debug_nortc', ['/D_HAS_EXCEPTIONS=0'])
-        conf.env.append_unique('CXXFLAGS_debug', ['/Od', '/Ob1', '/Zi', '/MTd', '/D_DEBUG', '/GR'])
+        conf.env.append_unique('CXXFLAGS_debug', ['/Od', '/Ob1', '/Zi', '/MDd', '/D_DEBUG', '/GR', '/EHsc'])
+        conf.env.append_unique('CXXFLAGS_debug_rtc', ['/RTC1', '/RTCc', '/D_ALLOW_RTCc_IN_STL=1'])
         conf.env.append_unique('LINKFLAGS', ['/DEBUG'])
         conf.env.append_unique('LINKFLAGS_debug', ['/INCREMENTAL:no'])
         conf.env.append_unique('ARFLAGS_debug', [])
 
-        conf.env.append_unique(
-            'CFLAGS_profile', ['/DNDEBUG', '/MT', '/Ox', '/Ob2', '/Oi', '/Ot', '/GT', '/GF', '/FD', '/Gy', '/GR-']
-        )
+        conf.env.append_unique('CFLAGS_profile', ['/DNDEBUG', '/MD', '/O2', '/Oy-', '/GT', '/GF', '/FD', '/Gy', '/GR-'])
         conf.env.append_unique(
             'CXXFLAGS_profile',
-            ['/DNDEBUG', '/D_HAS_EXCEPTIONS=0', '/MT', '/Ox', '/Ob2', '/Oi', '/Ot', '/GT', '/GF', '/FD', '/Gy', '/GR-']
+            ['/DNDEBUG', '/D_HAS_EXCEPTIONS=0', '/MD', '/O2', '/Oy-', '/GT', '/GF', '/FD', '/Gy', '/GR-']
         )
         conf.env.append_unique('LINKFLAGS_profile', ['/INCREMENTAL:no'])
         conf.env.append_unique('ARFLAGS_profile', [])
 
+        conf.env.append_unique('CFLAGS_final', ['/DNDEBUG', '/MD', '/O2', '/GT', '/GF', '/FD', '/Gy', '/GR-'])
         conf.env.append_unique(
-            'CFLAGS_final', ['/DNDEBUG', '/MT', '/Ox', '/Ob2', '/Oi', '/Ot', '/GT', '/GF', '/FD', '/Gy', '/GR-']
-        )
-        conf.env.append_unique(
-            'CXXFLAGS_final',
-            ['/DNDEBUG', '/D_HAS_EXCEPTIONS=0', '/MT', '/Ox', '/Ob2', '/Oi', '/Ot', '/GT', '/GF', '/FD', '/Gy', '/GR-']
+            'CXXFLAGS_final', ['/DNDEBUG', '/D_HAS_EXCEPTIONS=0', '/MD', '/O2', '/GT', '/GF', '/FD', '/Gy', '/GR-']
         )
         conf.env.append_unique('LINKFLAGS_final', ['/INCREMENTAL:no'])
         conf.env.append_unique('ARFLAGS_final', [])
@@ -59,8 +52,6 @@ class MSVC(Configure.ConfigurationContext.Compiler):
             conf.env.append_unique('CFLAGS', ['/arch:SSE2'])
             conf.env.append_unique('CXXFLAGS', ['/arch:SSE2'])
         if self.NAMES[0] != 'msvc' or self.version_number >= (8, ):
-            conf.env.append_unique('CFLAGS_debug_nortc', ['/GS-'])
-            conf.env.append_unique('CXXFLAGS_debug_nortc', ['/GS-'])
             conf.env.append_unique('CFLAGS_profile', ['/GS-'])
             conf.env.append_unique('CXXFLAGS_profile', ['/GS-'])
             conf.env.append_unique('CFLAGS_final', ['/GS-'])

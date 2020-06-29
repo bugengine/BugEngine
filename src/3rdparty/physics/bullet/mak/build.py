@@ -11,10 +11,14 @@ def deploy_bullet_package(task_gen):
     if Options.options.bullet_pkg:
         bullet_dest = 'bullet-2.87-%s-multiarch-%s' % (task_gen.env.VALID_PLATFORMS[0], task_gen.env.COMPILER_ABI)
         src = path.make_node('src')
-        for h in src.ant_glob(
-            ['*.h', 'BulletCollision/**/*.h', 'BulletDynamics/**/*.h', 'BulletSoftBody/**/*.h', 'LinearMath/**/*.h']
-        ):
-            task_gen.deploy_as(os.path.join('packages', bullet_dest, 'api', h.path_from(src)), h)
+        if task_gen.env.TOOLCHAIN == task_gen.bld.multiarch_envs[0].TOOLCHAIN:
+            for h in src.ant_glob(
+                [
+                    '*.h', 'BulletCollision/**/*.h', 'BulletDynamics/**/*.h', 'BulletSoftBody/**/*.h',
+                    'LinearMath/**/*.h'
+                ]
+            ):
+                task_gen.deploy_as(os.path.join('packages', bullet_dest, 'api', h.path_from(src)), h)
         lib_file = task_gen.link_task.outputs[0]
         if task_gen.bld.__class__.optim == 'debug':
             task_gen.deploy_as(
@@ -35,7 +39,7 @@ def build_source(bld, name, env, path):
         name,
         bld.platforms,
         path=path,
-        features=['bugengine:warnings:off', 'bugengine:bullet:deploy', 'bugengine:compat'],
+        features=['bugengine:warnings:off', 'bugengine:bullet:deploy', 'bugengine:nortc'],
         extra_includes=[path.make_node('src')],
         extra_public_includes=[path.make_node('src')],
         extra_defines=[

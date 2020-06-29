@@ -4,7 +4,7 @@ from waflib import Options
 import os
 
 FT_SOURCES = 'https://download.savannah.gnu.org/releases/freetype/freetype-2.10.2.tar.gz'
-FT_BINARIES = 'https://github.com/bugengine/BugEngine/releases/download/v0.0/freetype-2.10.2-%(platform)s-%(arch)s.tgz'
+FT_BINARIES = 'https://github.com/bugengine/BugEngine/releases/download/prebuilt-freetype/freetype-2.10.2-%(platform)s-%(arch)s-%(abi)s.tgz'
 
 
 def setup(conf):
@@ -23,7 +23,7 @@ def setup(conf):
             pprint('GREEN', '+freetype', sep=' ')
     else:
         try:
-            freetype_node = conf.pkg_unpack('freetype_bin_%(platform)s-%(arch)s', FT_BINARIES)
+            freetype_node = conf.pkg_unpack('freetype_bin_%(platform)s-%(arch)s-%(abi)s', FT_BINARIES)
             if not conf.check_package(
                 '3rdparty.system.freetype',
                 freetype_node,

@@ -18,7 +18,7 @@
 #ifdef BE_PLATFORM_MACOS
 #    include <OpenCL/opencl.h>
 #else
-#    include <CL/opencl.h>
+#    include <CL/cl.h>
 #endif
 
 #define checkResult(a)                                                                             \

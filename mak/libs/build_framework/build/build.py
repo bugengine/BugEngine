@@ -190,18 +190,16 @@ def masterfiles_feature(task):
     pass
 
 
-@feature('bugengine:warnings:off', 'bugengine:compat')
+@feature('bugengine:warnings:off', 'bugengine:nortc')
 def warning_feature(task):
     pass
 
 
-@feature('bugengine:c', 'bugengine:cxx')
+@feature('bugengine:export_all')
 @before_method('process_source')
 def process_export_all_flag(self):
-    if getattr(self, 'export_all', False):
-        self.env = self.env.derive()
-        self.env.append_unique('CFLAGS', self.env.CFLAGS_exportall)
-        self.env.append_unique('CXXFLAGS', self.env.CXXFLAGS_exportall)
+    self.env.append_unique('CFLAGS', self.env.CFLAGS_exportall)
+    self.env.append_unique('CXXFLAGS', self.env.CXXFLAGS_exportall)
 
 
 @feature('bugengine:c', 'bugengine:cxx')
@@ -244,7 +242,7 @@ def process_warning_flags(self):
 
 @taskgen_method
 def process_use_flags(self):
-    if 'bugengine:compat' not in self.features:
+    if 'bugengine:nortc' not in self.features:
         self.env.append_unique('CFLAGS_debug', self.env.CFLAGS_debug_rtc)
         self.env.append_unique('CFLAGS_profile', self.env.CFLAGS_profile_rtc)
         self.env.append_unique('CFLAGS_final', self.env.CFLAGS_final_rtc)

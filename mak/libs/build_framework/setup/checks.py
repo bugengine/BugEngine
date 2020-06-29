@@ -159,7 +159,7 @@ def check_lib(
                 'function': functions
             },
             includepath=includepath,
-            use=['debug'],
+            use=[],
             envname=self.env.TOOLCHAIN
         )
     except self.errors.ConfigurationError as e:
@@ -195,7 +195,7 @@ def check_header(self, headername, var='', libpath=[], includepath=[], code=USE_
             libpath=libpath,
             code='\n'.join(["#include <%s>" % h for h in headername]) + '\n' + code,
             includepath=includepath,
-            use=['debug'],
+            use=[],
             envname=self.env.TOOLCHAIN
         )
     except self.errors.ConfigurationError as e:
@@ -247,7 +247,7 @@ def check_framework(
             includepath=includepath,
             sdk='',
             version='',
-            use=['debug'],
+            use=[],
             envname=self.env.TOOLCHAIN
         )
     except self.errors.ConfigurationError as e:
@@ -286,7 +286,7 @@ def check_sdk(self, compiler, flags, sdk, version, frameworks=[], libpath=[], in
         includepath=includepath,
         sdk=sdk,
         version=version,
-        use=['debug'],
+        use=[],
         errmsg='not usable',
         compiler=compiler,
         envname=self.env.TOOLCHAIN

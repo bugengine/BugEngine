@@ -15,7 +15,7 @@ def expand_libpath(bld, libpath):
 def expand_nodepath(bld, nodepath):
     result = []
     for n in nodepath:
-        if n.make_node(bld.__class__.optim):
+        if n.make_node(bld.__class__.optim).isdir():
             result.append(n.make_node(bld.__class__.optim))
         else:
             result.append(n)
@@ -50,6 +50,7 @@ def thirdparty(bld, name, feature='', path='', source_node=None, var='', use=[],
                     export_defines=env['check_%s_defines' % var] + ['BE_HAVE_%s' % var_id],
                     export_libpath=expand_libpath(bld, env['check_%s_libpath' % var]),
                     export_lib=env['check_%s_libs' % var],
+                    export_stlib=env['check_%s_libs' % var],
                     export_framework=env['check_%s_frameworks' % var],
                     export_cflags=env['check_%s_cflags' % var],
                     export_cxxflags=env['check_%s_cxxflags' % var],
@@ -114,6 +115,7 @@ def thirdparty(bld, name, feature='', path='', source_node=None, var='', use=[],
                 export_defines=env['check_%s_defines' % var] + ['BE_HAVE_%s' % var_id],
                 export_libpath=expand_libpath(bld, env['check_%s_libpath' % var]),
                 export_lib=env['check_%s_libs' % var],
+                export_stlib=env['check_%s_libs' % var],
                 export_framework=env['check_%s_frameworks' % var],
                 export_cflags=env['check_%s_cflags' % var],
                 export_cxxflags=env['check_%s_cxxflags' % var],

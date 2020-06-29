@@ -1,46 +1,32 @@
-import os
 from waflib.Logs import pprint
+from waflib.Errors import WafError
+from waflib import Options
+import os
 
-
-def setup_shipped(conf):
-    include = 'CL/cl.h'
-    libpath = [
-        os.path.join(conf.path.parent.abspath(), 'lib.%s.%s' % (conf.env.VALID_PLATFORMS[0], a))
-        for a in conf.env.VALID_ARCHITECTURES
-    ]
-    if not conf.check_lib(
-        'OpenCL',
-        includes=[include],
-        libpath=libpath,
-        includepath=[os.path.join(conf.path.parent.abspath(), 'api')],
-        functions=['clGetDeviceInfo']
-    ):
-        pprint('YELLOW', '-OpenCL', sep=' ')
+CL_ICD_BINARIES = 'https://github.com/bugengine/BugEngine/releases/download/prebuilt-opencl/OpenCL-icd-2.2-%(platform)s.tgz'
 
 
 def setup(conf):
     if conf.env.CLC_CXX:
-        if 'darwin' in conf.env.VALID_PLATFORMS:
-            include = 'OpenCL/cl.h'
-            libpath = [os.path.join(conf.path.parent.abspath(), 'lib.%s' % (conf.env.VALID_PLATFORMS[0]))]
-            if not conf.check_lib(
-                'OpenCL',
-                includes=[include],
-                libpath=libpath,
-                includepath=[os.path.join(conf.path.parent.abspath(), 'api')],
-                functions=['clGetDeviceInfo']
-            ):
-                pprint('YELLOW', '-OpenCL', sep=' ')
-        elif conf.env.CC_NAME == 'icc':
-            setup_shipped(conf)
+        if conf.env.PROJECTS:
+            pprint('BLUE', '=OpenCL', sep=' ')
         else:
+            if 'posix' in conf.env.VALID_PLATFORMS:
+                try:
+                    conf.pkg_config('OpenCL', var='OpenCL')
+                except Exception as e:
+                    pass
+                else:
+                    conf.env.OPENCL_BINARY = True
+                    pprint('GREEN', '+OpenCL', sep=' ')
+                    return
             try:
-                conf.pkg_config('OpenCL')
-            except Exception as e:
-                setup_shipped(conf)
-            else:
-                conf.env.append_value('check_OpenCL_includes', [os.path.join(conf.path.parent.abspath(), 'api')]),
-                conf.env.SYSTEM_OPENCL = True
-                pprint('GREEN', '+OpenCL', sep=' ')
+                cl_node = conf.pkg_unpack('cl_bin_%(platform)s', CL_ICD_BINARIES)
+                if not conf.check_package('OpenCL', cl_node, var='OpenCL'):
+                    raise WafError('no OpenCL')
+                conf.env.OPENCL_BINARY = cl_node.path_from(conf.package_node)
+                #pprint('GREEN', '+OpenCL', sep=' ')
+            except WafError:
+                pprint('YELLOW', '-OpenCL', sep=' ')
     else:
         pprint('YELLOW', '-OpenCL', sep=' ')

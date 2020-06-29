@@ -1,4 +1,4 @@
-from waflib import Configure
+from waflib import Configure, Errors
 import os
 import re
 
@@ -31,11 +31,12 @@ class Windows(Configure.ConfigurationContext.Platform):
 
     def is_valid_msvc(self, compiler):
         node = self.conf.bldnode.make_node('main.cxx')
-        tgtnode = node.change_ext('')
+        tgtnode = node.change_ext('obj')
         node.write('#include <cstdio>\n#include <cfloat>\n#include <new>\nint main() {}\n')
         try:
             result, out, err = compiler.run_cxx(
-                [node.abspath(), '/nologo', '/c', '/Fo', tgtnode.abspath()] + ['/I%s' % i for i in compiler.includes]
+                [node.abspath(), '/nologo', '/c', '/Fo%s' % tgtnode.abspath()] +
+                ['/I%s' % i for i in compiler.includes]
             )
         except Exception as e:
             return False
@@ -132,7 +133,7 @@ class Windows_Clang(Windows):
             env.append_unique('CXXFLAGS_warnall', ['-Wno-microsoft-enum-value', '-Wno-deprecated-register'])
             env.append_unique('LINKFLAGS', ['-Wl,-nodefaultlib:libcmt'])
             env.append_unique('LIB', ['msvcrt'])
-            env.COMPILER_ABI = 'msvc'
+            env.COMPILER_ABI = 'msvc140'
         env.append_unique('CXXFLAGS_warnall', ['-Wno-unknown-pragmas', '-Wno-comment'])
         self.find_winres(conf, compiler)
         conf.env.DEFINES_console = ['_CONSOLE=1']
@@ -194,7 +195,20 @@ class Windows_MSVC(Windows):
             conf.env.CXXFLAGS.append('/D_ARM_WINAPI_PARTITION_DESKTOP_SDK_AVAILABLE=1')
         conf.env.DEFINES_console = ['_CONSOLE=1']
         conf.env.LINKFLAGS_console = ['/SUBSYSTEM:console']
-        conf.env.COMPILER_ABI = 'msvc'
+        for l in conf.env.LIBPATH:
+            msvcrt_path = os.path.join(l, 'msvcprt.lib')
+            if os.path.isfile(msvcrt_path):
+                with open(msvcrt_path, 'rb') as file:
+                    code = file.read()
+                    reference = re.search(b'msvcp(\d\d\d?).dll', code, re.IGNORECASE)
+                    if reference is None:
+                        continue
+                    else:
+                        api = reference.group(1).decode()
+                break
+        else:
+            raise Errors.WafError('can\'t determine ABI of the SDK')
+        conf.env.COMPILER_ABI = 'msvc%s' % api
 
 
 def options(opt):

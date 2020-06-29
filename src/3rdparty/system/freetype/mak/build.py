@@ -26,7 +26,15 @@ FT_SOURCE_LIST = [
     'src/base/ftwinfnt.c',
     'src/bdf/bdf.c',
     'src/bzip2/ftbzip2.c',
-    'src/cache/ftcache.c',
+                                   #'src/cache/ftcache.c',
+    'src/cache/ftcbasic.c',
+    'src/cache/ftccache.c',
+    'src/cache/ftccmap.c',
+    'src/cache/ftcglyph.c',
+    'src/cache/ftcimage.c',
+    'src/cache/ftcmanag.c',
+    'src/cache/ftcmru.c',
+    'src/cache/ftcsbits.c',
     'src/cff/cff.c',
     'src/cid/type1cid.c',
     'src/gxvalid/gxvalid.c',
@@ -54,7 +62,7 @@ FT_SOURCE_LIST = [
 def deploy_freetype_package(task_gen):
     path = task_gen.source_nodes[0]
     if Options.options.freetype_pkg:
-        ft_dest = 'freetype-2.10.2-%s-multiarch' % (task_gen.env.VALID_PLATFORMS[0])
+        ft_dest = 'freetype-2.10.2-%s-multiarch-%s' % (task_gen.env.VALID_PLATFORMS[0], task_gen.env.COMPILER_ABI)
 
         def deploy_to(file, subdir):
             if task_gen.bld.__class__.optim == 'debug':
@@ -94,7 +102,9 @@ def build_source(bld, name, env, path):
             extra_includes=[include_path],
             extra_public_includes=[include_path],
             extra_defines=defines,
-            features=['bugengine:masterfiles:off', 'bugengine:warnings:off', 'bugengine:freetype:deploy'],
+            features=[
+                'bugengine:masterfiles:off', 'bugengine:warnings:off', 'bugengine:freetype:deploy', 'bugengine:nortc'
+            ],
             source_list=FT_SOURCE_LIST
         )
     else:
@@ -105,7 +115,9 @@ def build_source(bld, name, env, path):
             extra_includes=[include_path],
             extra_public_includes=[include_path],
             extra_defines=defines + ['DLL_EXPORT'],
-            features=['bugengine:masterfiles:off', 'bugengine:warnings:off', 'bugengine:freetype:deploy'],
+            features=[
+                'bugengine:masterfiles:off', 'bugengine:warnings:off', 'bugengine:freetype:deploy', 'bugengine:nortc'
+            ],
             source_list=FT_SOURCE_LIST
         )
 

@@ -473,6 +473,36 @@ diff -r -u bullet3-2.87.orig/src/BulletCollision/CollisionShapes/btConvexShape.c
  #ifndef __SPU__
  void btConvexShape::getAabbNonVirtual (const btTransform& t, btVector3& aabbMin, btVector3& aabbMax) const
  {
+diff -r -u bullet3-2.87.orig/src/BulletCollision/CollisionShapes/btScaledBvhTriangleMeshShape.cpp bullet3-2.87/src/BulletCollision/CollisionShapes/btScaledBvhTriangleMeshShape.cpp
+--- bullet3-2.87.orig/src/BulletCollision/CollisionShapes/btScaledBvhTriangleMeshShape.cpp	2017-09-30 01:20:39.000000000 +0200
++++ bullet3-2.87/src/BulletCollision/CollisionShapes/btScaledBvhTriangleMeshShape.cpp	2020-06-27 23:42:41.940016300 +0200
+@@ -76,18 +76,15 @@
+ 
+ void	btScaledBvhTriangleMeshShape::getAabb(const btTransform& trans,btVector3& aabbMin,btVector3& aabbMax) const
+ {
+-	btVector3 localAabbMin = m_bvhTriMeshShape->getLocalAabbMin();
+-	btVector3 localAabbMax = m_bvhTriMeshShape->getLocalAabbMax();
++	btVector3 tmpLocalAabbMin = m_bvhTriMeshShape->getLocalAabbMin() * m_localScaling;
++	btVector3 tmpLocalAabbMax = m_bvhTriMeshShape->getLocalAabbMax() * m_localScaling;
+ 
+-	btVector3 tmpLocalAabbMin = localAabbMin * m_localScaling;
+-	btVector3 tmpLocalAabbMax = localAabbMax * m_localScaling;
+-
+-	localAabbMin[0] = (m_localScaling.getX() >= 0.) ? tmpLocalAabbMin[0] : tmpLocalAabbMax[0];
+-	localAabbMin[1] = (m_localScaling.getY() >= 0.) ? tmpLocalAabbMin[1] : tmpLocalAabbMax[1];
+-	localAabbMin[2] = (m_localScaling.getZ() >= 0.) ? tmpLocalAabbMin[2] : tmpLocalAabbMax[2];
+-	localAabbMax[0] = (m_localScaling.getX() <= 0.) ? tmpLocalAabbMin[0] : tmpLocalAabbMax[0];
+-	localAabbMax[1] = (m_localScaling.getY() <= 0.) ? tmpLocalAabbMin[1] : tmpLocalAabbMax[1];
+-	localAabbMax[2] = (m_localScaling.getZ() <= 0.) ? tmpLocalAabbMin[2] : tmpLocalAabbMax[2];
++	btVector3 localAabbMin = btVector3((m_localScaling.getX() >= 0.) ? tmpLocalAabbMin[0] : tmpLocalAabbMax[0],
++									   (m_localScaling.getY() >= 0.) ? tmpLocalAabbMin[1] : tmpLocalAabbMax[1],
++									   (m_localScaling.getZ() >= 0.) ? tmpLocalAabbMin[2] : tmpLocalAabbMax[2]);
++	btVector3 localAabbMax = btVector3((m_localScaling.getX() <= 0.) ? tmpLocalAabbMin[0] : tmpLocalAabbMax[0],
++									   (m_localScaling.getY() <= 0.) ? tmpLocalAabbMin[1] : tmpLocalAabbMax[1],
++									   (m_localScaling.getZ() <= 0.) ? tmpLocalAabbMin[2] : tmpLocalAabbMax[2]);
+ 
+ 	btVector3 localHalfExtents = btScalar(0.5)*(localAabbMax-localAabbMin);
+ 	btScalar margin = m_bvhTriMeshShape->getMargin();
 diff -r -u bullet3-2.87.orig/src/BulletDynamics/ConstraintSolver/btSolverBody.h bullet3-2.87/src/BulletDynamics/ConstraintSolver/btSolverBody.h
 --- bullet3-2.87.orig/src/BulletDynamics/ConstraintSolver/btSolverBody.h	2017-09-30 01:20:39.000000000 +0200
 +++ bullet3-2.87/src/BulletDynamics/ConstraintSolver/btSolverBody.h	2020-06-14 15:41:32.984849900 +0200

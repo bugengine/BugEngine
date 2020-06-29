@@ -9,7 +9,6 @@ def build_externals(bld):
         Declares all external modules
     """
     bld.external('3rdparty.system.zlib')
-    bld.external('3rdparty.system.minizip')
     bld.external('3rdparty.system.console')
     bld.external('3rdparty.system.X11')
     bld.external('3rdparty.system.win32')
@@ -20,13 +19,10 @@ def build_externals(bld):
     bld.external('3rdparty.graphics.OpenGLES2')
     bld.external('3rdparty.compute.OpenCL')
     bld.external('3rdparty.compute.CUDA')
-    bld.external('3rdparty.audio.OpenAL')
-    bld.external('3rdparty.audio.oggvorbis')
     bld.external('3rdparty.physics.bullet')
     bld.external('3rdparty.system.freetype')
     bld.external('3rdparty.system.fontconfig')
     bld.external('3rdparty.scripting.lua')
-    bld.external('3rdparty.system.ncurses')
     bld.external('3rdparty.scripting.tcltk')
     bld.external('3rdparty.scripting.python')
 
@@ -116,7 +112,9 @@ def build_plugins(bld):
     bld.plugin('plugin.compute.cpu', ['engine.bugengine'], features=['bugengine:cpu:variants'])
     bld.plugin(
         'plugin.compute.opencl', ['engine.bugengine', 'plugin.compute.cpu'], ['3rdparty.compute.OpenCL'],
-        conditions=['OpenCL']
+        conditions=['OpenCL'],
+        extra_defines=['CL_TARGET_OPENCL_VERSION=120'],
+        extra_public_defines=['CL_TARGET_OPENCL_VERSION=120']
     )
     #bld.plugin(
     #    'plugin.compute.opencl_gl',
@@ -163,8 +161,6 @@ def build_plugins(bld):
         ['3rdparty.system.freetype', '3rdparty.system.fontconfig']
     )
 
-    bld.plugin('plugin.ui.console', ['engine.bugengine'], ['3rdparty.system.ncurses'], conditions='ncurses')
-
     bld.plugin('tool.bugeditor.ui', ['engine.bugengine'])
 
 
@@ -179,10 +175,7 @@ def build_games(bld):
     bld.game('sample.text', ['engine.bugengine', 'plugin.scripting.package', 'plugin.graphics.3d'])
     bld.game('sample.python', ['engine.bugengine', 'plugin.scripting.package'])
     bld.game('sample.lua', ['engine.bugengine', 'plugin.scripting.package', 'plugin.scripting.lua'])
-    bld.game(
-        'help', ['engine.bugengine', 'plugin.ui.console', 'plugin.scripting.package'],
-        path=bld.path.find_node('tool/help')
-    )
+    bld.game('help', ['engine.bugengine', 'plugin.scripting.package'], path=bld.path.find_node('tool/help'))
     if Options.options.tests:
         bld.game('test.settings', ['engine.bugengine'])
         bld.game('test.compute.copy', ['engine.bugengine', 'plugin.scripting.package'])
