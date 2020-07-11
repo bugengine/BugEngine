@@ -1,8 +1,12 @@
-from waflib.Logs import pprint
+from waflib.Errors import WafError
+from waflib import Options
 import os
 
+LUA_SOURCES = 'https://www.lua.org/ftp/lua-5.3.5.tar.gz'
+LUA_BINARIES = 'https://github.com/bugengine/BugEngine/releases/download/prebuilt-lua/lua-5.3.5-%(platform)s-%(arch)s-%(abi)s.tgz'
 
-def setup(conf):
+
+def setup_system(conf):
     for v in '-5.4', '5.4', '-5.3', '5.3', '-5.2', '5.2', '-5.1', '5.1':
         try:
             conf.pkg_config('lua%s' % v, var='lua')
@@ -10,17 +14,47 @@ def setup(conf):
             pass
         else:
             conf.env.SYSTEM_LUA = True
-            pprint('GREEN', '+lua%s' % v, sep=' ')
-            break
+            conf.end_msg('version %s from system' % v)
+            return True
     else:
-        conf.env.SYSTEM_LUA = conf.check_lib('lua', var='lua',
-                       libpath=[os.path.join(conf.path.parent.abspath(),
-                                            'lib.%s.%s'%(conf.env.VALID_PLATFORMS[0], a))
-                                for a in conf.env.VALID_ARCHITECTURES],
-                       includepath=[os.path.join(conf.path.parent.abspath(), 'api')],
-                       includes_externc=['lua.h', 'lauxlib.h'],
-                       defines=['LUA_LIB'],
-                       functions=['luaL_newmetatable'])
-        if not conf.env.SYSTEM_LUA:
-            pprint('BLUE', '=lua', sep=' ')
+        return False
 
+
+def setup_prebuilt(conf):
+    try:
+        node = conf.pkg_unpack('lua_bin_%(platform)s-%(arch)s-%(abi)s', LUA_BINARIES)
+        if not conf.check_package('3rdparty.scripting.lua', node, var='lua'):
+            raise WafError('no prebuilt binaries')
+    except WafError:
+        return False
+    else:
+        conf.env.LUA_BINARY = node.path_from(conf.package_node)
+        conf.end_msg('from prebuilt')
+        return True
+
+
+def setup_source(conf):
+    try:
+        node = conf.pkg_unpack('lua_src', LUA_SOURCES, conf.path.parent.ant_glob(['patches/*.*']))
+    except WafError:
+        return False
+    else:
+        conf.env.LUA_SOURCE = node.path_from(conf.package_node)
+        conf.end_msg('from source')
+        return True
+
+
+def setup(conf):
+    conf.register_setup_option('lua_package')
+    conf.start_msg_setup()
+    found = False
+    if conf.env.PROJECTS:
+        found = setup_source(conf)
+    if not found and Options.options.lua_package in ('best', 'system'):
+        found = setup_system(conf)
+    if not found and Options.options.lua_package in ('best', 'prebuilt'):
+        found = setup_prebuilt(conf)
+    if not found and Options.options.lua_package in ('best', 'source'):
+        found = setup_source(conf)
+    if not found:
+        conf.end_msg('disabled', color='RED')

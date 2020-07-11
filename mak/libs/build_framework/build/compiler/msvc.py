@@ -18,7 +18,7 @@ def wrap_class(cls_name):
     derived.exec_command = exec_command_filter
 
 
-for task in 'c', 'cxx':
+for task in 'c', 'cxx', 'cshlib', 'cxxshlib', 'cstlib', 'cxxstlib', 'cprogram', 'cxxprogram':
     wrap_class(task)
 
 

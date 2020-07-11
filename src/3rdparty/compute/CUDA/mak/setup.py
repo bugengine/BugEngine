@@ -1,4 +1,4 @@
-from waflib import Utils, Configure, Logs
+from waflib import Utils, Configure
 import os
 import sys
 import shlex
@@ -88,9 +88,10 @@ def check_nvcc(configuration_context, nvcc):
 
 def setup(configuration_context):
     if configuration_context.env.PROJECTS:
-        Logs.pprint('GREEN', '+cuda', sep=' ')
         return
+    configuration_context.start_msg_setup()
     if configuration_context.env.COMPILER_NAME == 'suncc':
+        configuration_context.end_msg('not available with sunCC', color='YELLOW')
         return
     if configuration_context.env.NVCC_COMPILERS:
         cuda_available = False
@@ -140,6 +141,6 @@ def setup(configuration_context):
                 break
         if cuda_available:
             configuration_context.env.append_value('KERNEL_TOOLCHAINS', [('cuda', cuda_toolchain)])
-            Logs.pprint('GREEN', '+cuda{} [{}]'.format(version, ', '.join('{}.{}'.format(*a) for a in archs)), sep=' ')
+            configuration_context.end_msg('cuda {} [{}]'.format(version, ', '.join('{}.{}'.format(*a) for a in archs)))
         else:
-            Logs.pprint('YELLOW', '-cuda', sep=' ')
+            configuration_context.end_msg('not found', color='YELLOW')

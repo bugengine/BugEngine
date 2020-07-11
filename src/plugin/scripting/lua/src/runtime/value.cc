@@ -193,9 +193,9 @@ static bool convertTableToValue(lua_State* state, int index, const RTTI::Type& t
     if(type.metaclass->type() == RTTI::ClassType_Array)
     {
         RTTI::Type   arrayType  = type.metaclass->apiMethods->arrayScripting->value_type;
-        int          count      = luaL_len(state, index);
+        u32          count      = be_checked_numcast< u32 >(luaL_len(state, index));
         RTTI::Value* parameters = (RTTI::Value*)malloca(
-           minitl::align(count * sizeof(RTTI::Value), be_alignof(RTTI::Value)));
+            minitl::align(count * sizeof(RTTI::Value), be_alignof(RTTI::Value)));
 
         lua_pushnil(state);
         int  i      = 0;

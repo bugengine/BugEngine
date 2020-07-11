@@ -1,0 +1,12 @@
+diff -r -u lua-5.3.5.orig/src/liolib.c lua-5.3.5/src/liolib.c
+--- lua-5.3.5.orig/src/liolib.c	2017-04-19 19:29:57.000000000 +0200
++++ lua-5.3.5/src/liolib.c	2020-07-01 11:33:55.985081200 +0200
+@@ -112,7 +112,7 @@
+ #define l_seeknum		off_t
+ 
+ #elif defined(LUA_USE_WINDOWS) && !defined(_CRTIMP_TYPEINFO) \
+-   && defined(_MSC_VER) && (_MSC_VER >= 1400)	/* }{ */
++   && defined(_MSC_VER) && (_MSC_VER >= 1400) && 0	/* }{ */
+ 
+ /* Windows (but not DDK) and Visual C++ 2005 or higher */
+ #define l_fseek(f,o,w)		_fseeki64(f,o,w)

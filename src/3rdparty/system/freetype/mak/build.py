@@ -60,32 +60,32 @@ FT_SOURCE_LIST = [
 @after_method('install_step')
 @after_method('apply_link')
 def deploy_freetype_package(task_gen):
+    if task_gen.env.PROJECTS:
+        return
+
     path = task_gen.source_nodes[0]
-    if Options.options.freetype_pkg:
-        ft_dest = 'freetype-2.10.2-%s-multiarch-%s' % (task_gen.env.VALID_PLATFORMS[0], task_gen.env.COMPILER_ABI)
+    ft_dest = 'freetype-2.10.2-%s-multiarch-%s' % (task_gen.env.VALID_PLATFORMS[0], task_gen.env.COMPILER_ABI)
 
-        def deploy_to(file, subdir):
-            if task_gen.bld.__class__.optim == 'debug':
-                task_gen.deploy_as(
-                    os.path.join('packages', ft_dest, subdir, task_gen.bld.__class__.optim, file.name), file
-                )
-            else:
-                task_gen.deploy_as(os.path.join('packages', ft_dest, subdir, file.name), file)
-
-        if task_gen.env.TOOLCHAIN == task_gen.bld.multiarch_envs[0].TOOLCHAIN:
-            include = path.make_node('include')
-            for h in include.ant_glob(['**/*.*']):
-                task_gen.deploy_as(os.path.join('packages', ft_dest, 'api', h.path_from(include)), h)
-        if task_gen.env.STATIC:
-            deploy_to(task_gen.link_task.outputs[0], 'lib.%s' % task_gen.env.VALID_ARCHITECTURES[0])
+    def deploy_to(file, subdir):
+        if task_gen.bld.__class__.optim == 'debug':
+            task_gen.deploy_as(os.path.join('packages', ft_dest, subdir, task_gen.bld.__class__.optim, file.name), file)
         else:
-            if task_gen.env.DEST_BINFMT == 'pe':
-                for file in task_gen.link_task.outputs[:-1]:
-                    deploy_to(file, 'bin.%s' % task_gen.env.VALID_ARCHITECTURES[0])
-                deploy_to(task_gen.link_task.outputs[-1], 'lib.%s' % task_gen.env.VALID_ARCHITECTURES[0])
-            else:
-                for file in task_gen.link_task.outputs:
-                    deploy_to(file, 'bin.%s' % task_gen.env.VALID_ARCHITECTURES[0])
+            task_gen.deploy_as(os.path.join('packages', ft_dest, subdir, file.name), file)
+
+    if task_gen.env.TOOLCHAIN == task_gen.bld.multiarch_envs[0].TOOLCHAIN:
+        include = path.make_node('include')
+        for h in include.ant_glob(['**/*.*']):
+            task_gen.deploy_as(os.path.join('packages', ft_dest, 'api', h.path_from(include)), h)
+    if task_gen.env.STATIC:
+        deploy_to(task_gen.link_task.outputs[0], 'lib.%s' % task_gen.env.VALID_ARCHITECTURES[0])
+    else:
+        if task_gen.env.DEST_BINFMT == 'pe':
+            for file in task_gen.link_task.outputs[:-1]:
+                deploy_to(file, 'bin.%s' % task_gen.env.VALID_ARCHITECTURES[0])
+            deploy_to(task_gen.link_task.outputs[-1], 'lib.%s' % task_gen.env.VALID_ARCHITECTURES[0])
+        else:
+            for file in task_gen.link_task.outputs:
+                deploy_to(file, 'bin.%s' % task_gen.env.VALID_ARCHITECTURES[0])
 
 
 def build_source(bld, name, env, path):

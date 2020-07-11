@@ -26,66 +26,70 @@ MINIZIP_SOURCE_LIST = ['contrib/minizip/ioapi.c', 'contrib/minizip/unzip.c']
 @after_method('install_step')
 @after_method('apply_link')
 def deploy_zlib_package(task_gen):
+    if task_gen.env.PROJECTS:
+        return
+
     path = task_gen.source_nodes[0]
-    if Options.options.zlib_pkg:
-        zlib_dest = 'zlib-1.2.11-%s-multiarch-%s' % (task_gen.env.VALID_PLATFORMS[0], task_gen.env.COMPILER_ABI)
+    zlib_dest = 'zlib-1.2.11-%s-multiarch-%s' % (task_gen.env.VALID_PLATFORMS[0], task_gen.env.COMPILER_ABI)
 
-        def deploy_to(file, subdir):
-            if task_gen.bld.__class__.optim == 'debug':
-                task_gen.deploy_as(
-                    os.path.join('packages', zlib_dest, subdir, task_gen.bld.__class__.optim, file.name), file
-                )
-            else:
-                task_gen.deploy_as(os.path.join('packages', zlib_dest, subdir, file.name), file)
-
-        if task_gen.env.TOOLCHAIN == task_gen.bld.multiarch_envs[0].TOOLCHAIN:
-            task_gen.deploy_as(os.path.join('packages', zlib_dest, 'api', 'zconf.h'), path.find_node('zconf.h'))
-            task_gen.deploy_as(os.path.join('packages', zlib_dest, 'api', 'zlib.h'), path.find_node('zlib.h'))
-        if task_gen.env.STATIC:
-            deploy_to(task_gen.link_task.outputs[0], 'lib.%s' % task_gen.env.VALID_ARCHITECTURES[0])
+    def deploy_to(file, subdir):
+        if task_gen.bld.__class__.optim == 'debug':
+            task_gen.deploy_as(
+                os.path.join('packages', zlib_dest, subdir, task_gen.bld.__class__.optim, file.name), file
+            )
         else:
-            if task_gen.env.DEST_BINFMT == 'pe':
-                for file in task_gen.link_task.outputs[:-1]:
-                    deploy_to(file, 'bin.%s' % task_gen.env.VALID_ARCHITECTURES[0])
-                deploy_to(task_gen.link_task.outputs[-1], 'lib.%s' % task_gen.env.VALID_ARCHITECTURES[0])
-            else:
-                for file in task_gen.link_task.outputs:
-                    deploy_to(file, 'bin.%s' % task_gen.env.VALID_ARCHITECTURES[0])
+            task_gen.deploy_as(os.path.join('packages', zlib_dest, subdir, file.name), file)
+
+    if task_gen.env.TOOLCHAIN == task_gen.bld.multiarch_envs[0].TOOLCHAIN:
+        task_gen.deploy_as(os.path.join('packages', zlib_dest, 'api', 'zconf.h'), path.find_node('zconf.h'))
+        task_gen.deploy_as(os.path.join('packages', zlib_dest, 'api', 'zlib.h'), path.find_node('zlib.h'))
+    if task_gen.env.STATIC:
+        deploy_to(task_gen.link_task.outputs[0], 'lib.%s' % task_gen.env.VALID_ARCHITECTURES[0])
+    else:
+        if task_gen.env.DEST_BINFMT == 'pe':
+            for file in task_gen.link_task.outputs[:-1]:
+                deploy_to(file, 'bin.%s' % task_gen.env.VALID_ARCHITECTURES[0])
+            deploy_to(task_gen.link_task.outputs[-1], 'lib.%s' % task_gen.env.VALID_ARCHITECTURES[0])
+        else:
+            for file in task_gen.link_task.outputs:
+                deploy_to(file, 'bin.%s' % task_gen.env.VALID_ARCHITECTURES[0])
 
 
 @feature('bugengine:minizip:deploy')
 @after_method('install_step')
 @after_method('apply_link')
 def deploy_minizip_package(task_gen):
+    if task_gen.env.PROJECTS:
+        return
+
     path = task_gen.source_nodes[0]
-    if Options.options.minizip_pkg:
-        minizip_dest = 'minizip-1.2.11-%s-multiarch-%s' % (task_gen.env.VALID_PLATFORMS[0], task_gen.env.COMPILER_ABI)
+    minizip_dest = 'minizip-1.2.11-%s-multiarch-%s' % (task_gen.env.VALID_PLATFORMS[0], task_gen.env.COMPILER_ABI)
 
-        def deploy_to(file, subdir):
-            if task_gen.bld.__class__.optim == 'debug':
-                task_gen.deploy_as(
-                    os.path.join('packages', minizip_dest, subdir, task_gen.bld.__class__.optim, file.name), file
-                )
-            else:
-                task_gen.deploy_as(os.path.join('packages', minizip_dest, subdir, file.name), file)
-
-        if task_gen.env.TOOLCHAIN == task_gen.bld.multiarch_envs[0].TOOLCHAIN:
+    def deploy_to(file, subdir):
+        if task_gen.bld.__class__.optim == 'debug':
             task_gen.deploy_as(
-                os.path.join('packages', minizip_dest, 'api', 'ioapi.h'), path.find_node('contrib/minizip/ioapi.h')
+                os.path.join('packages', minizip_dest, subdir, task_gen.bld.__class__.optim, file.name), file
             )
-            task_gen.deploy_as(
-                os.path.join('packages', minizip_dest, 'api', 'unzip.h'), path.find_node('contrib/minizip/unzip.h')
-            )
-        if task_gen.env.STATIC:
-            deploy_to(task_gen.link_task.outputs[0], 'lib.%s' % task_gen.env.VALID_ARCHITECTURES[0])
         else:
-            if task_gen.env.DEST_BINFMT == 'pe':
-                for file in task_gen.link_task.outputs[:-1]:
-                    deploy_to(file, 'bin.%s' % task_gen.env.VALID_ARCHITECTURES[0])
-                deploy_to(task_gen.link_task.outputs[-1], 'lib.%s' % task_gen.env.VALID_ARCHITECTURES[0])
-            else:
-                for file in task_gen.link_task.outputs:
-                    deploy_to(file, 'bin.%s' % task_gen.env.VALID_ARCHITECTURES[0])
+            task_gen.deploy_as(os.path.join('packages', minizip_dest, subdir, file.name), file)
+
+    if task_gen.env.TOOLCHAIN == task_gen.bld.multiarch_envs[0].TOOLCHAIN:
+        task_gen.deploy_as(
+            os.path.join('packages', minizip_dest, 'api', 'ioapi.h'), path.find_node('contrib/minizip/ioapi.h')
+        )
+        task_gen.deploy_as(
+            os.path.join('packages', minizip_dest, 'api', 'unzip.h'), path.find_node('contrib/minizip/unzip.h')
+        )
+    if task_gen.env.STATIC:
+        deploy_to(task_gen.link_task.outputs[0], 'lib.%s' % task_gen.env.VALID_ARCHITECTURES[0])
+    else:
+        if task_gen.env.DEST_BINFMT == 'pe':
+            for file in task_gen.link_task.outputs[:-1]:
+                deploy_to(file, 'bin.%s' % task_gen.env.VALID_ARCHITECTURES[0])
+            deploy_to(task_gen.link_task.outputs[-1], 'lib.%s' % task_gen.env.VALID_ARCHITECTURES[0])
+        else:
+            for file in task_gen.link_task.outputs:
+                deploy_to(file, 'bin.%s' % task_gen.env.VALID_ARCHITECTURES[0])
 
 
 def build_zlib_source(bld, name, env, path):

@@ -2,11 +2,26 @@ import os
 from be_typing import TYPE_CHECKING
 
 
+def add_package_options(option_context, package_name):
+    # type: (Options.OptionsContext) -> None
+    gr = option_context.get_option_group('3rd party libraries')
+    gr.add_option(
+        '--with-%s' % package_name,
+        action='store',
+        dest='%s_package' % package_name,
+        help='source of the ' + package_name +
+        ' package. Default is "best" (try system, prebuilt, source in that order)',
+        default='best',
+        choices=('best', 'system', 'prebuilt', 'source', 'disabled')
+    )
+
+
 def options(option_context):
     # type: (Options.OptionsContext) -> None
     "Creates main option groups and load options for the host and all targets"
     option_context.add_option_group('SDK paths and options')
     option_context.add_option_group('3rd party libraries')
+    option_context.add_package_options = lambda package_name: add_package_options(option_context, package_name)
 
     gr = option_context.get_option_group('build and install options')
     gr.add_option('--nomaster', action='store_true', default=False, dest='nomaster', help='build without master files')

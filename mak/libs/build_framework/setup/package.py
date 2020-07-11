@@ -3,13 +3,20 @@ from waflib import Errors, Utils
 import tarfile
 import shutil
 import sys
+import stat
 import os
 import tempfile
 from patch import fromfile
+from waflib.Logs import pprint
 if sys.version_info < (3, ):
     import urllib2 as request
 else:
     from urllib import request
+
+
+def remove_readonly(func, path, excinfo):
+    os.chmod(path, stat.S_IWRITE)
+    func(path)
 
 
 @conf
@@ -72,18 +79,22 @@ def pkg_unpack(configuration_context, package_id_template, package_url, patch_li
         raise Errors.WafError('failed to download package "%s": %s' % (package_url, e))
 
     try:
-        shutil.rmtree(os.path.join(configuration_context.package_node.abspath(), package_id))
-    except OSError:
+        shutil.rmtree(os.path.join(configuration_context.package_node.abspath(), package_id), onerror=remove_readonly)
+    except OSError as e:
         pass
 
     with tempfile.TemporaryFile(mode='w+b') as archive_file:
+        pprint('PINK', 'downloading...', sep=' ')
         archive_file.write(pkg.read())
         archive_file.seek(0)
+        pprint('PINK', 'unpacking...', sep=' ')
         archive = tarfile.open(fileobj=archive_file, mode='r')
         root_path = ''
         info = archive.getmembers()[0]
         root_path = info.name
         archive.extractall(path=os.path.join(configuration_context.package_node.abspath(), package_id))
+        if patch_list:
+            pprint('PINK', 'patching...', sep=' ')
         for patch in patch_list:
             patch = fromfile(patch.abspath())
             patch.apply(1, configuration_context.package_node.make_node(os.path.join(package_id, root_path)).abspath())

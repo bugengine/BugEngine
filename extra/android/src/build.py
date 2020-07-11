@@ -40,7 +40,7 @@ def build(bld):
 
     #bld.platforms.append(bld.external('3rdparty.android.stl-gabi++'))
     bld.platforms.append(bld.external('3rdparty.android.libc++'))
-    bld.platforms.append(bld.external('3rdparty.android.rand')) 
+    bld.platforms.append(bld.external('3rdparty.android.libklcompat'))
 
 
 def plugin(bld):

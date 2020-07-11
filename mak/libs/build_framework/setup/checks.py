@@ -1,4 +1,4 @@
-from waflib import Utils, ConfigSet, Errors, Logs
+from waflib import Utils, ConfigSet, Errors
 from waflib.Configure import conf
 from waflib.TaskGen import feature, before_method, after_method, extension
 import platform
@@ -171,7 +171,6 @@ def check_lib(
         self.env.append_unique('check_%s_libpath' % var, libpath)
         self.env.append_unique('check_%s_includes' % var, includepath)
         self.env.append_unique('check_%s_defines' % var, defines)
-        Logs.pprint('GREEN', '+%s' % var, sep=' ')
 
     return self.env['check_%s' % var]
 
@@ -259,7 +258,6 @@ def check_framework(
         self.env.append_unique('check_%s_includes' % var, includepath)
         self.env.append_unique('check_%s_libpath' % var, libpath)
         self.env.append_unique('XCODE_FRAMEWORKS', frameworks)
-        Logs.pprint('GREEN', '+%s' % var, sep=' ')
     return self.env['check_%s_frameworks' % var]
 
 
@@ -385,6 +383,8 @@ def run_pkg_config(conf, name):
 
 @conf
 def pkg_config(conf, name, var=''):
+    if 'windows' in conf.env.VALID_PLATFORMS:
+        raise Errors.WafError('pkg_config disabled on Windows')
     if not var: var = conf.path.parent.name
     cflags, libs, ldflags = conf.run_pkg_config(name)
     conf.env['check_%s' % var] = True

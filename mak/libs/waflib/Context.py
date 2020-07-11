@@ -381,7 +381,10 @@ class Context(ctx):
 			if self.logger:
 				self.logger.debug('out: %s', '\n'.join(out))
 			else:
-				out = '\n'.join(filter_stdout(out))
+				if ret == 0:
+					out = '\n'.join(filter_stdout(out))
+				else:
+					out = '\n'.join(out)
 				if out:
 					Logs.info(out, extra={'stream':sys.stdout, 'c1': ''})
 		if err:
@@ -391,7 +394,10 @@ class Context(ctx):
 			if self.logger:
 				self.logger.error('err: %s' % err)
 			else:
-				err = '\n'.join(filter_stderr(err))
+				if ret == 0:
+					err = '\n'.join(filter_stderr(err))
+				else:
+					err = '\n'.join(err)
 				if err:
 					Logs.info(err, extra={'stream':sys.stderr, 'c1': ''})
 

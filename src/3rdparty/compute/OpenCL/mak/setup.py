@@ -1,4 +1,3 @@
-from waflib.Logs import pprint
 from waflib.Errors import WafError
 from waflib import Options
 import os
@@ -7,10 +6,9 @@ CL_ICD_BINARIES = 'https://github.com/bugengine/BugEngine/releases/download/preb
 
 
 def setup(conf):
-    if conf.env.CLC_CXX:
-        if conf.env.PROJECTS:
-            pprint('BLUE', '=OpenCL', sep=' ')
-        else:
+    if not conf.env.PROJECTS:
+        conf.start_msg_setup()
+        if conf.env.CLC_CXX:
             if 'posix' in conf.env.VALID_PLATFORMS:
                 try:
                     conf.pkg_config('OpenCL', var='OpenCL')
@@ -18,15 +16,15 @@ def setup(conf):
                     pass
                 else:
                     conf.env.OPENCL_BINARY = True
-                    pprint('GREEN', '+OpenCL', sep=' ')
+                    conf.end_msg('using system', color='GREEN')
                     return
             try:
                 cl_node = conf.pkg_unpack('cl_bin_%(platform)s', CL_ICD_BINARIES)
                 if not conf.check_package('OpenCL', cl_node, var='OpenCL'):
                     raise WafError('no OpenCL')
                 conf.env.OPENCL_BINARY = cl_node.path_from(conf.package_node)
-                #pprint('GREEN', '+OpenCL', sep=' ')
+                conf.end_msg('using prebuilt', color='GREEN')
             except WafError:
-                pprint('YELLOW', '-OpenCL', sep=' ')
-    else:
-        pprint('YELLOW', '-OpenCL', sep=' ')
+                conf.end_msg('not found', color='YELLOW')
+        else:
+            conf.end_msg('not found', color='YELLOW')

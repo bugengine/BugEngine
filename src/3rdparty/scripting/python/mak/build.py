@@ -41,6 +41,6 @@ def build(bld):
     bld.env.PYTHON_VERSIONS = Options.options.python_versions.split(',')
     for version in bld.env.PYTHON_VERSIONS:
         try:
-            bld.recurse('../../python%s/mak/build.py' % (version.replace('.', '')))
+            bld.recurse('../python%s/mak/build.py' % (version.replace('.', '')))
         except Errors.WafError as e:
             pass
