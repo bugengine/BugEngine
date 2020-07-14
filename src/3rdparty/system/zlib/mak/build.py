@@ -35,14 +35,14 @@ def deploy_zlib_package(task_gen):
     def deploy_to(file, subdir):
         if task_gen.bld.__class__.optim == 'debug':
             task_gen.deploy_as(
-                os.path.join('packages', zlib_dest, subdir, task_gen.bld.__class__.optim, file.name), file
+                os.path.join('bld', 'packages', zlib_dest, subdir, task_gen.bld.__class__.optim, file.name), file
             )
         else:
-            task_gen.deploy_as(os.path.join('packages', zlib_dest, subdir, file.name), file)
+            task_gen.deploy_as(os.path.join('bld', 'packages', zlib_dest, subdir, file.name), file)
 
     if task_gen.env.TOOLCHAIN == task_gen.bld.multiarch_envs[0].TOOLCHAIN:
-        task_gen.deploy_as(os.path.join('packages', zlib_dest, 'api', 'zconf.h'), path.find_node('zconf.h'))
-        task_gen.deploy_as(os.path.join('packages', zlib_dest, 'api', 'zlib.h'), path.find_node('zlib.h'))
+        task_gen.deploy_as(os.path.join('bld', 'packages', zlib_dest, 'api', 'zconf.h'), path.find_node('zconf.h'))
+        task_gen.deploy_as(os.path.join('bld', 'packages', zlib_dest, 'api', 'zlib.h'), path.find_node('zlib.h'))
     if task_gen.env.STATIC:
         deploy_to(task_gen.link_task.outputs[0], 'lib.%s' % task_gen.env.VALID_ARCHITECTURES[0])
     else:
@@ -68,17 +68,17 @@ def deploy_minizip_package(task_gen):
     def deploy_to(file, subdir):
         if task_gen.bld.__class__.optim == 'debug':
             task_gen.deploy_as(
-                os.path.join('packages', minizip_dest, subdir, task_gen.bld.__class__.optim, file.name), file
+                os.path.join('bld', 'packages', minizip_dest, subdir, task_gen.bld.__class__.optim, file.name), file
             )
         else:
-            task_gen.deploy_as(os.path.join('packages', minizip_dest, subdir, file.name), file)
+            task_gen.deploy_as(os.path.join('bld', 'packages', minizip_dest, subdir, file.name), file)
 
     if task_gen.env.TOOLCHAIN == task_gen.bld.multiarch_envs[0].TOOLCHAIN:
         task_gen.deploy_as(
-            os.path.join('packages', minizip_dest, 'api', 'ioapi.h'), path.find_node('contrib/minizip/ioapi.h')
+            os.path.join('bld', 'packages', minizip_dest, 'api', 'ioapi.h'), path.find_node('contrib/minizip/ioapi.h')
         )
         task_gen.deploy_as(
-            os.path.join('packages', minizip_dest, 'api', 'unzip.h'), path.find_node('contrib/minizip/unzip.h')
+            os.path.join('bld', 'packages', minizip_dest, 'api', 'unzip.h'), path.find_node('contrib/minizip/unzip.h')
         )
     if task_gen.env.STATIC:
         deploy_to(task_gen.link_task.outputs[0], 'lib.%s' % task_gen.env.VALID_ARCHITECTURES[0])

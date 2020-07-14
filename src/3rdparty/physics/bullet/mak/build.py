@@ -18,18 +18,18 @@ def deploy_bullet_package(task_gen):
         for h in src.ant_glob(
             ['*.h', 'BulletCollision/**/*.h', 'BulletDynamics/**/*.h', 'BulletSoftBody/**/*.h', 'LinearMath/**/*.h']
         ):
-            task_gen.deploy_as(os.path.join('packages', bullet_dest, 'api', h.path_from(src)), h)
+            task_gen.deploy_as(os.path.join('bld', 'packages', bullet_dest, 'api', h.path_from(src)), h)
     lib_file = task_gen.link_task.outputs[0]
     if task_gen.bld.__class__.optim == 'debug':
         task_gen.deploy_as(
             os.path.join(
-                'packages', bullet_dest, 'lib.%s' % task_gen.env.VALID_ARCHITECTURES[0], task_gen.bld.__class__.optim,
-                lib_file.name
+                'bld', 'packages', bullet_dest, 'lib.%s' % task_gen.env.VALID_ARCHITECTURES[0],
+                task_gen.bld.__class__.optim, lib_file.name
             ), lib_file
         )
     else:
         task_gen.deploy_as(
-            os.path.join('packages', bullet_dest, 'lib.%s' % task_gen.env.VALID_ARCHITECTURES[0], lib_file.name),
+            os.path.join('bld', 'packages', bullet_dest, 'lib.%s' % task_gen.env.VALID_ARCHITECTURES[0], lib_file.name),
             lib_file
         )
 
