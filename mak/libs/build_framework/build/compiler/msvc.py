@@ -1,7 +1,15 @@
 from waflib import Task
-from waflib.TaskGen import feature, before_method, after_method
+from waflib.TaskGen import feature, before_method, after_method, extension
 from waflib.Tools import msvc
 import os
+
+
+class masm(Task.Task):
+    """
+    run MASM
+    """
+    color = 'GREEN'
+    run_str = '${ML} /nologo /c /Fo ${TGT[0].abspath()} ${SRC}'
 
 
 def wrap_class(cls_name):
@@ -18,8 +26,13 @@ def wrap_class(cls_name):
     derived.exec_command = exec_command_filter
 
 
-for task in 'c', 'cxx', 'cshlib', 'cxxshlib', 'cstlib', 'cxxstlib', 'cprogram', 'cxxprogram':
+for task in 'c', 'cxx', 'cshlib', 'cxxshlib', 'cstlib', 'cxxstlib', 'cprogram', 'cxxprogram', 'masm':
     wrap_class(task)
+
+
+@extension('.masm')
+def masm_hook(self, node):
+    return self.create_compiled_task('masm', node)
 
 
 @feature('c', 'cxx', 'bugengine:kernel')

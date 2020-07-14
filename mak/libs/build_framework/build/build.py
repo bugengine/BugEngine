@@ -407,6 +407,7 @@ def filter_sources(self):
         basename, ext = os.path.splitext(file.name)
         add_platform = True
         add_arch = True
+        add_compiler = True
         platform = file.name.find('-p=')
         if platform != -1:
             add_platform = False
@@ -419,8 +420,14 @@ def filter_sources(self):
             architectures = basename[arch + 3:].split(',')
             for a in architectures:
                 add_arch = add_arch or a in self.env.VALID_ARCHITECTURES
+        compiler = file.name.find('-c=')
+        if compiler != -1:
+            add_compiler = False
+            compilers = basename[compiler + 3:].split(',')
+            for c in compilers:
+                add_compiler = add_compiler or c == self.env.COMPILER_NAME
         node = file.parent
-        while add_platform and add_arch and node and node != self.path and node != self.bld.srcnode:
+        while add_platform and add_arch and add_compiler and node and node != self.path and node != self.bld.srcnode:
             if node.name.startswith('platform='):
                 add_platform = False
                 platforms = node.name[9:].split(',')
@@ -431,10 +438,15 @@ def filter_sources(self):
                 architectures = node.name[5:].split(',')
                 for a in architectures:
                     add_arch = add_arch or a in self.env.VALID_ARCHITECTURES
+            elif node.name.startswith('compiler='):
+                add_compiler = False
+                compilers = node.name[9:].split(',')
+                for c in compilers:
+                    add_compiler = add_compiler or c == self.env.COMPILER_NAME
             elif node.parent.name == 'extra' and node.parent.parent == self.bld.bugenginenode:
                 add_platform = node.name in self.bld.env.VALID_PLATFORMS
             node = node.parent
-        if add_platform and add_arch:
+        if add_platform and add_arch and add_compiler:
             sources.append(file)
             if ext in ['.m', '.mm']:
                 self.objc = True

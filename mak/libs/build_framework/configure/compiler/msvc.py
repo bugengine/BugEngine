@@ -111,10 +111,12 @@ class MSVC(Configure.ConfigurationContext.Compiler):
 
     def load_in_env(self, conf, platform):
         Configure.ConfigurationContext.Compiler.load_in_env(self, conf, platform)
+        if self.arch == 'amd64':
+            conf.find_program('ml64', var='ML', path_list=conf.env.PATH, mandatory=False)
+        if self.arch == 'x86':
+            conf.find_program('ml', var='ML', path_list=conf.env.PATH, mandatory=False)
         env = conf.env
         env.IDIRAFTER = '/I'
-        if self.arch == 'amd64':
-            env.append_unique('STLIB', [conf.bugenginenode.make_node('mak/compiler/msvc/set_conditional').abspath()])
         if os_platform().endswith('64'):
             conf.find_program('cdb64', var='CDB', mandatory=False)
         else:

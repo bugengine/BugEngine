@@ -3,7 +3,7 @@ from waflib import Errors
 from waflib.Configure import conf
 from waflib.TaskGen import feature, before_method
 
-COMPILE_EXTENSIONS = ['cxx', 'cpp', 'cc', 'c', 'rc', 'm', 'mm', 'def']
+COMPILE_EXTENSIONS = ['cxx', 'cpp', 'cc', 'c', 'rc', 'm', 'mm', 'def', 'masm']
 
 
 def safe_name(name):

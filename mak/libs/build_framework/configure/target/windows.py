@@ -122,7 +122,7 @@ class Windows_Clang(Windows):
             env.append_unique('LINKFLAGS', ['-static-libgcc'])
             env.STRIP_BINARY = True
             env.implib_PATTERN = 'lib%s.a'
-            env.COMPILER_ABI = 'gcc'
+            env.COMPILER_ABI = 'mingw'
         else:
             env.SHLIB_MARKER = []
             env.STLIB_MARKER = []
@@ -161,7 +161,7 @@ class Windows_GCC(Windows):
         env.append_unique('CXXFLAGS', ['-static-libgcc'])
         env.append_unique('LINKFLAGS', ['-static-libgcc'])
         env.append_unique('CXXFLAGS_warnall', ['-Wno-unknown-pragmas', '-Wno-comment'])
-        env.COMPILER_ABI = 'gcc'
+        env.COMPILER_ABI = 'mingw'
         if compiler.version_number >= (4, 5):
             env.append_unique('CFLAGS', ['-static-libstdc++'])
             env.append_unique('CXXFLAGS', ['-static-libstdc++'])
