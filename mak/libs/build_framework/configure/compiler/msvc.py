@@ -121,7 +121,8 @@ class MSVC(Configure.ConfigurationContext.Compiler):
             conf.find_program('cdb64', var='CDB', mandatory=False)
         else:
             conf.find_program('cdb', var='CDB', mandatory=False)
-        conf.find_program('dumpbin', path_list=self.path)
+        conf.find_program('dumpbin', path_list=self.path, mandatory=False)
+        conf.find_program('nm', mandatory=False)
 
 
 all_icl_platforms = (
