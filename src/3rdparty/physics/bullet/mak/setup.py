@@ -3,7 +3,7 @@ from waflib import Options
 import os
 
 BULLET_SOURCES = 'https://github.com/bulletphysics/bullet3/archive/2.87.tar.gz'
-BULLET_BINARIES = 'https://github.com/bugengine/BugEngine/releases/download/prebuilt-bullet/bullet-2.87-%(platform)s-%(arch)s-%(abi)s.tgz'
+BULLET_BINARIES = 'https://github.com/bugengine/BugEngine/releases/download/prebuilt-%(platform)s-%(abi)s/bullet-2.87-%(platform)s-%(arch)s-%(abi)s.tgz'
 
 
 def setup_system(conf):

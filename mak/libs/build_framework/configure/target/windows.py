@@ -119,7 +119,7 @@ class Windows_Clang(Windows):
         Windows.load_in_env(self, conf, compiler)
         env = conf.env
         if not compiler.target.endswith('-msvc'):
-            env.append_unique('LINKFLAGS', ['-static-libgcc'])
+            env.append_unique('LINKFLAGS', ['-static'])
             env.STRIP_BINARY = True
             env.implib_PATTERN = 'lib%s.a'
             env.COMPILER_ABI = 'mingw'
@@ -157,15 +157,9 @@ class Windows_GCC(Windows):
     def load_in_env(self, conf, compiler):
         Windows.load_in_env(self, conf, compiler)
         env = conf.env
-        env.append_unique('CFLAGS', ['-static-libgcc'])
-        env.append_unique('CXXFLAGS', ['-static-libgcc'])
-        env.append_unique('LINKFLAGS', ['-static-libgcc'])
+        env.append_unique('LINKFLAGS', ['-static'])
         env.append_unique('CXXFLAGS_warnall', ['-Wno-unknown-pragmas', '-Wno-comment'])
         env.COMPILER_ABI = 'mingw'
-        if compiler.version_number >= (4, 5):
-            env.append_unique('CFLAGS', ['-static-libstdc++'])
-            env.append_unique('CXXFLAGS', ['-static-libstdc++'])
-            env.append_unique('LINKFLAGS', ['-static-libstdc++'])
         self.find_winres(conf, compiler)
         env.DEFINES_console = ['_CONSOLE=1']
         env.LINKFLAGS_console = ['-mconsole']

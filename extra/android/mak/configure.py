@@ -130,7 +130,7 @@ class AndroidPlatform(Configure.ConfigurationContext.Platform):
         env.CFLAGS_cxxshlib = []
         env.CXXFLAGS_cxxshlib = []
         env.STATIC = True
-        env.COMPILER_ABI = 'gcc'
+        env.COMPILER_ABI = 'androideabi'
 
         env.DEPLOY_ROOTDIR = appname
         env.DEPLOY_BINDIR = os.path.join('lib', target_folder)

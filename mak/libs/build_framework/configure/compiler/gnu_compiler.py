@@ -100,7 +100,9 @@ class GnuCompiler(Configure.ConfigurationContext.Compiler):
         self.sysroot = None
         extra_args = deepcopy(extra_args)
         version, platform, arch = self.get_version(compiler_cxx, extra_args, extra_env)
-        Configure.ConfigurationContext.Compiler.__init__(self, compiler_c, compiler_cxx, version, platform, arch, extra_args, extra_env)
+        Configure.ConfigurationContext.Compiler.__init__(
+            self, compiler_c, compiler_cxx, version, platform, arch, extra_args, extra_env
+        )
         target = self.target.split('-')
         for t in self.targets:
             target_dir = os.path.normpath(os.path.join(self.directories[0], '..', t, 'bin'))
@@ -216,7 +218,8 @@ class GnuCompiler(Configure.ConfigurationContext.Compiler):
             for multilib in multilibs:
                 try:
                     c = self.__class__(
-                        self.compiler_c, self.compiler_cxx, {
+                        self.compiler_c,
+                        self.compiler_cxx, {
                             'c': self.extra_args.get('c', []) + multilib[0],
                             'cxx': self.extra_args.get('cxx', []) + multilib[0],
                             'link': self.extra_args.get('link', []) + multilib[0],
@@ -258,6 +261,7 @@ class GnuCompiler(Configure.ConfigurationContext.Compiler):
         v.CXXFLAGS_debug = ['-pipe', '-g', '-D_DEBUG'] + v.CXXFLAGS_debug
         v.ASFLAGS_debug = ['-pipe', '-g', '-D_DEBUG'] + v.ASFLAGS_debug
         v.LINKFLAGS_debug = ['-pipe', '-g'] + v.LINKFLAGS_debug
+        v.CXXFLAGS_debug_nortc = ['-fno-exceptions']
 
         v.CPPFLAGS_profile = ['-DNDEBUG'] + v.CPPFLAGS_profile
         v.CFLAGS_profile = ['-pipe', '-g', '-DNDEBUG', '-O3'] + v.CFLAGS_profile
@@ -323,6 +327,7 @@ class GnuCompiler(Configure.ConfigurationContext.Compiler):
         os_paths = os.environ['PATH'].split(os.pathsep)
         self.find_target_program(conf, platform, self.ARCHIVER, os_paths=os_paths)
         self.find_target_program(conf, platform, 'strip', os_paths=os_paths)
+        self.find_target_program(conf, platform, 'nm', os_paths=os_paths)
         self.find_target_program(conf, platform, 'objcopy', mandatory=False, os_paths=os_paths)
         self.find_target_program(conf, platform, 'gdb', mandatory=False, os_paths=os_paths)
         if not conf.env.GDB:

@@ -3,8 +3,8 @@ from waflib import Options
 import os
 
 ZLIB_SOURCES = 'https://zlib.net/zlib-1.2.11.tar.gz'
-ZLIB_BINARIES = 'https://github.com/bugengine/BugEngine/releases/download/prebuilt-zlib/zlib-1.2.11-%(platform)s-%(arch)s-%(abi)s.tgz'
-MINIZIP_BINARIES = 'https://github.com/bugengine/BugEngine/releases/download/prebuilt-zlib/minizip-1.2.11-%(platform)s-%(arch)s-%(abi)s.tgz'
+ZLIB_BINARIES = 'https://github.com/bugengine/BugEngine/releases/download/prebuilt-%(platform)s-%(abi)s/zlib-1.2.11-%(platform)s-%(arch)s-%(abi)s.tgz'
+MINIZIP_BINARIES = 'https://github.com/bugengine/BugEngine/releases/download/prebuilt-%(platform)s-%(abi)s/minizip-1.2.11-%(platform)s-%(arch)s-%(abi)s.tgz'
 
 
 def setup_system_zlib(conf):

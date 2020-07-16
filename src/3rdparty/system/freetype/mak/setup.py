@@ -3,7 +3,7 @@ from waflib import Options
 import os
 
 FT_SOURCES = 'https://download.savannah.gnu.org/releases/freetype/freetype-2.10.2.tar.gz'
-FT_BINARIES = 'https://github.com/bugengine/BugEngine/releases/download/prebuilt-freetype/freetype-2.10.2-%(platform)s-%(arch)s-%(abi)s.tgz'
+FT_BINARIES = 'https://github.com/bugengine/BugEngine/releases/download/prebuilt-%(platform)s-%(abi)s/freetype-2.10.2-%(platform)s-%(arch)s-%(abi)s.tgz'
 
 
 def setup_system(conf):

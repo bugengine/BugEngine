@@ -145,10 +145,7 @@ def build_minizip_source(bld, name, env, path):
             extra_includes=[include_path],
             extra_public_includes=[include_path],
             extra_defines=['USE_FILE32API', 'ZLIB_INTERNAL'],
-            features=[
-                'bugengine:masterfiles:off', 'bugengine:warnings:off', 'bugengine:minizip:deploy',
-                'bugengine:export_all'
-            ],
+            features=['bugengine:masterfiles:off', 'bugengine:warnings:off', 'bugengine:minizip:deploy'],
             source_list=MINIZIP_SOURCE_LIST
         )
 

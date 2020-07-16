@@ -243,16 +243,20 @@ def process_warning_flags(self):
 @taskgen_method
 def process_use_flags(self):
     if 'bugengine:nortc' not in self.features:
+        self.env.append_unique('CFLAGS', self.env.CFLAGS_rtc)
         self.env.append_unique('CFLAGS_debug', self.env.CFLAGS_debug_rtc)
         self.env.append_unique('CFLAGS_profile', self.env.CFLAGS_profile_rtc)
         self.env.append_unique('CFLAGS_final', self.env.CFLAGS_final_rtc)
+        self.env.append_unique('CXXFLAGS', self.env.CXXFLAGS_rtc)
         self.env.append_unique('CXXFLAGS_debug', self.env.CXXFLAGS_debug_rtc)
         self.env.append_unique('CXXFLAGS_profile', self.env.CXXFLAGS_profile_rtc)
         self.env.append_unique('CXXFLAGS_final', self.env.CXXFLAGS_final_rtc)
     else:
+        self.env.append_unique('CFLAGS', self.env.CFLAGS_nortc)
         self.env.append_unique('CFLAGS_debug', self.env.CFLAGS_debug_nortc)
         self.env.append_unique('CFLAGS_profile', self.env.CFLAGS_profile_nortc)
         self.env.append_unique('CFLAGS_final', self.env.CFLAGS_final_nortc)
+        self.env.append_unique('CXXFLAGS', self.env.CXXFLAGS_nortc)
         self.env.append_unique('CXXFLAGS_debug', self.env.CXXFLAGS_debug_nortc)
         self.env.append_unique('CXXFLAGS_profile', self.env.CXXFLAGS_profile_nortc)
         self.env.append_unique('CXXFLAGS_final', self.env.CXXFLAGS_final_nortc)

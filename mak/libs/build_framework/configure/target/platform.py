@@ -54,7 +54,7 @@ class Platform:
             conf.variant = ''
             return None
         else:
-            conf.end_msg('OK')
+            conf.end_msg(conf.env.COMPILER_ABI)
             #if not sub_compilers:
             #    conf.recurse(conf.bugenginenode.abspath(), name='setup', once=False)
             if v.STATIC:
