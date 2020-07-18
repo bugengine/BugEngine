@@ -56,20 +56,29 @@ def schedule_setup(self):
     self.init_dirs()
     do_setup = False
     try:
-        env = ConfigSet.ConfigSet()
-        env.load(os.path.join(self.cache_dir, Options.lockfile + '.%s' % self.bugengine_variant))
+        lock = ConfigSet.ConfigSet()
+        lock.load(os.path.join(self.cache_dir, Options.lockfile + '.%s' % self.bugengine_variant))
     except (AttributeError, IOError):
         Logs.warn('setup not run; setting up the toolchain')
         do_setup = True
     else:
+        env = ConfigSet.ConfigSet()
+        env.load(os.path.join(self.cache_dir, '%s_cache.py' % self.bugengine_variant))
+        for option_name, value in env.SETUP_OPTIONS:
+            new_value = getattr(Options.options, option_name)
+            if new_value != value:
+                do_setup = True
+                Logs.warn(
+                    'value of %s has changed (%s => %s); setting up the toolchain' % (option_name, value, new_value)
+                )
         hash_value = 0
-        for filename in env['files']:
+        for filename in lock['files']:
             try:
                 hash_value = Utils.h_list((hash_value, Utils.readf(filename, 'rb')))
             except IOError:
-                do_config = True
-        do_setup = (hash_value != env.hash)
-        if do_setup:
+                do_setup = True
+        if hash_value != lock.hash:
+            do_setup = True
             Logs.warn('wscript files have changed; setting up the toolchain')
 
     if do_setup:
