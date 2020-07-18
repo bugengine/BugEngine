@@ -327,7 +327,6 @@ class GnuCompiler(Configure.ConfigurationContext.Compiler):
         os_paths = os.environ['PATH'].split(os.pathsep)
         self.find_target_program(conf, platform, self.ARCHIVER, os_paths=os_paths)
         self.find_target_program(conf, platform, 'strip', os_paths=os_paths)
-        self.find_target_program(conf, platform, 'nm', os_paths=os_paths)
         self.find_target_program(conf, platform, 'objcopy', mandatory=False, os_paths=os_paths)
         self.find_target_program(conf, platform, 'gdb', mandatory=False, os_paths=os_paths)
         if not conf.env.GDB:
