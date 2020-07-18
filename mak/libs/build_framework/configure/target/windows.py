@@ -115,11 +115,18 @@ class Windows(Configure.ConfigurationContext.Platform):
 
 
 class Windows_Clang(Windows):
+    def platform_name(self, compiler):
+        if not compiler.target.endswith('-msvc'):
+            return 'mingw'
+        return Windows.platform_name(compiler)
+
     def load_in_env(self, conf, compiler):
         Windows.load_in_env(self, conf, compiler)
         env = conf.env
         if not compiler.target.endswith('-msvc'):
             env.append_unique('LINKFLAGS', ['-static'])
+            if compiler.version_number >= (3, 7):
+                env.append_unique('LINKFLAGS', ['-Wl,--exclude-all-symbols'])
             env.STRIP_BINARY = True
             env.implib_PATTERN = 'lib%s.a'
             env.COMPILER_ABI = 'mingw'
@@ -154,10 +161,13 @@ class Windows_Clang(Windows):
 
 
 class Windows_GCC(Windows):
+    def platform_name(self, compiler):
+        return 'mingw'
+
     def load_in_env(self, conf, compiler):
         Windows.load_in_env(self, conf, compiler)
         env = conf.env
-        env.append_unique('LINKFLAGS', ['-static'])
+        env.append_unique('LINKFLAGS', ['-static', '-Wl,--exclude-all-symbols'])
         env.append_unique('CXXFLAGS_warnall', ['-Wno-unknown-pragmas', '-Wno-comment'])
         env.COMPILER_ABI = 'mingw'
         self.find_winres(conf, compiler)

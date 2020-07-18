@@ -56,7 +56,7 @@ typedef u8       byte;
 #    ifndef _WIN32
 #        define BE_EXPORT __attribute__((visibility("default")))
 #        define BE_IMPORT __attribute__((visibility("default")))
-#    elif defined(_MSC_VER)
+#    elif(__clang_major__ > 3) || (__clang_major__ == 3 && __clang_minor__ > 6)
 #        define BE_EXPORT __declspec(dllexport)
 #        define BE_IMPORT __declspec(dllimport)
 #    else
