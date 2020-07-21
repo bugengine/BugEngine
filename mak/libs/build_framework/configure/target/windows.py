@@ -118,15 +118,23 @@ class Windows_Clang(Windows):
     def platform_name(self, compiler):
         if not compiler.target.endswith('-msvc'):
             return 'mingw'
-        return Windows.platform_name(compiler)
+        return Windows.platform_name(self, compiler)
 
     def load_in_env(self, conf, compiler):
         Windows.load_in_env(self, conf, compiler)
         env = conf.env
         if not compiler.target.endswith('-msvc'):
-            env.append_unique('LINKFLAGS', ['-static'])
+            env.append_value('DEFINES', ['__MSVCRT_VERSION__=0x0700'])
+            env.append_unique('LINKFLAGS', ['-static', '-Wl,--enable-auto-import'])
+            if compiler.version_number >= (5, ):
+                env.append_unique('LINKFLAGS', ['-pthread'])
             if compiler.version_number >= (3, 7):
                 env.append_unique('LINKFLAGS', ['-Wl,--exclude-all-symbols'])
+            if compiler.version_number < (3, 8):
+                env.append_unique('LINKFLAGS', ['-Wl,--allow-multiple-definition'])
+            env.IMPLIB_ST = '-Wl,--out-implib,%s'
+            env.DEF_ST = '-Wl,-d,%s'
+            env.LINKFLAGS_console = ['-Wl,--subsystem,console']
             env.STRIP_BINARY = True
             env.implib_PATTERN = 'lib%s.a'
             env.COMPILER_ABI = 'mingw'
@@ -140,11 +148,13 @@ class Windows_Clang(Windows):
             env.append_unique('CXXFLAGS_warnall', ['-Wno-microsoft-enum-value', '-Wno-deprecated-register'])
             env.append_unique('LINKFLAGS', ['-Wl,-nodefaultlib:libcmt'])
             env.append_unique('LIB', ['msvcrt'])
+            env.IMPLIB_ST = '-Wl,-implib:%s'
+            env.LINKFLAGS_console = ['-Wl,-subsystem:console']
             env.COMPILER_ABI = 'msvc140'
+            env.CC_NAME = 'clang_msvc'
         env.append_unique('CXXFLAGS_warnall', ['-Wno-unknown-pragmas', '-Wno-comment'])
         self.find_winres(conf, compiler)
-        conf.env.DEFINES_console = ['_CONSOLE=1']
-        env.LINKFLAGS_console = ['-mconsole']
+        env.DEFINES_console = ['_CONSOLE=1']
         env.cprogram_PATTERN = '%s.exe'
         env.cxxprogram_PATTERN = '%s.exe'
         env.cshlib_PATTERN = '%s.dll'
@@ -179,6 +189,8 @@ class Windows_GCC(Windows):
         env.cshlib_PATTERN = '%s.dll'
         env.cxxshlib_PATTERN = '%s.dll'
         env.implib_PATTERN = 'lib%s.a'
+        env.IMPLIB_ST = '-Wl,--out-implib,%s'
+        env.DEF_ST = '-Wl,-d,%s'
         for option in ('-fpic', '-fPIC'):
             try:
                 env.CFLAGS_cshlib.remove(option)
@@ -199,6 +211,8 @@ class Windows_MSVC(Windows):
             conf.env.CXXFLAGS.append('/D_ARM_WINAPI_PARTITION_DESKTOP_SDK_AVAILABLE=1')
         conf.env.DEFINES_console = ['_CONSOLE=1']
         conf.env.LINKFLAGS_console = ['/SUBSYSTEM:console']
+        conf.env.IMPLIB_ST = '/IMPLIB:%s'
+        conf.env.DEF_ST = '/DEF:%s'
         for l in conf.env.LIBPATH:
             msvcrt_path = os.path.join(l, 'msvcprt.lib')
             if os.path.isfile(msvcrt_path):
