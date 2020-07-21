@@ -351,8 +351,7 @@ script:
     fi
   - if [[ "x${BUILD_INCLUDED_LIBS}" != "xno" ]]; then
         ./waf build:${TARGET_OS}-${COMPILER}-${COMPILER_VERSION}:${FLAVOR} --nomaster --tests
-            --with-included-bullet --with-included-freetype --with-included-lua --with-included-squirrel
-            --with-included-zlib --with-included-minizip --with-included-oggvorbis;
+            --with-bullet=source --with-freetype=source --with-lua=source --with-zlib=source --with-minizip=source;
     fi
 
 after_failure:
