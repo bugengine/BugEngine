@@ -2,6 +2,25 @@ from waflib import Errors, Options, Logs
 from waflib.Configure import conf
 from waflib.TaskGen import feature, before_method, after_method
 
+PYTHON_PACKAGE = 'https://github.com/bugengine/BugEngine/releases/download/prebuilt-python/python{version}-%(platform)s.tgz'
+
+
+@conf
+def python_package(configuration_context, version, version_number):
+    try:
+        node = configuration_context.pkg_unpack(
+            'python{version}-%(platform)s'.format(version=version),
+            PYTHON_PACKAGE.format(version=version),
+        )
+    except Errors.WafError:
+        raise
+    else:
+        configuration_context.env['PYTHON%s_BINARY' % version_number
+                                  ] = node.path_from(configuration_context.package_node)
+        configuration_context.env['check_python%s' % version_number] = True
+        configuration_context.env['check_python%s_defines' % version_number] = ['PYTHON_LIBRARY=python%s' % version]
+        return True
+
 
 @feature("check_python")
 @before_method("process_source")
@@ -51,16 +70,13 @@ def python_config(conf, version, var=''):
             if lib.startswith('python'):
                 lib_name = lib
         conf.env['check_%s_defines' % var] = ['PYTHON_LIBRARY=%s' % lib_name]
-    elif 'macosx' in conf.env.VALID_PLATFORMS:
-        conf.recurse('../python%s/mak/setup.py' % version_number, name='setup_python', once=False)
-    elif 'windows' in conf.env.VALID_PLATFORMS:
-        conf.recurse('../python%s/mak/setup.py' % version_number, name='setup_python', once=False)
     else:
-        raise Errors.WafError('TODO')
+        conf.python_package(version, version_number)
 
 
 def setup(conf):
     if not conf.env.PROJECTS:
+        conf.recurse('tcltk/setup.py')
         conf.start_msg_setup()
         py_versions = []
         for version in Options.options.python_versions.split(','):

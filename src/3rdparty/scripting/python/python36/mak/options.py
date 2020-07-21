@@ -1,2 +1,0 @@
-def options(opt):
-    pass

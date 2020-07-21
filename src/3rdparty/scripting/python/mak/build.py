@@ -40,7 +40,22 @@ def install_python_module(self):
 def build(bld):
     bld.env.PYTHON_VERSIONS = Options.options.python_versions.split(',')
     for version in bld.env.PYTHON_VERSIONS:
-        try:
-            bld.recurse('../python%s/mak/build.py' % (version.replace('.', '')))
-        except Errors.WafError as e:
-            pass
+        bld.recurse('tcltk/build.py')
+        version_number = version.replace('.', '')
+        path = bld.env['PYTHON%s_BINARY' % version_number]
+        if path:
+            path = bld.package_node.make_node(path)
+            bld.thirdparty(
+                '3rdparty.scripting.python%s' % version_number,
+                var='python%s' % version_number,
+                source_node=path,
+                private_use=['3rdparty.scripting.tcltk'],
+                feature='python'
+            )
+        else:
+            bld.thirdparty(
+                '3rdparty.scripting.python%s' % version_number,
+                var='python%s' % version_number,
+                private_use=['3rdparty.scripting.tcltk'],
+                feature='python'
+            )
