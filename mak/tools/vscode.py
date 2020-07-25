@@ -176,7 +176,7 @@ class vscode(Build.BuildContext):
                                         }
                                     )
                 with open(variant_node.make_node('compile_commands.json').abspath(), 'w') as compile_commands:
-                    json.dump(commands, compile_commands, indent='  ')
+                    json.dump(commands, compile_commands, indent=2)
 
         tasks_file = vscode_node.make_node('tasks.json')
         try:
@@ -306,8 +306,8 @@ class vscode(Build.BuildContext):
             )
 
         with open(vscode_node.make_node('c_cpp_properties.json').abspath(), 'w') as conf_file:
-            json.dump({'configurations': configurations}, conf_file, indent='  ')
+            json.dump({'configurations': configurations}, conf_file, indent=2)
         with open(tasks_file.abspath(), 'w') as document:
-            json.dump(tasks, document, indent='  ')
+            json.dump(tasks, document, indent=2)
         with open(launch_file.abspath(), 'w') as document:
-            json.dump(launch_configs, document, indent='  ')
+            json.dump(launch_configs, document, indent=2)
