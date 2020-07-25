@@ -15,10 +15,10 @@ def build_externals(bld):
     bld.external('3rdparty.graphics.DirectX')
     bld.external('3rdparty.graphics.OpenGL')
     bld.external('3rdparty.graphics.OpenGLES2')
+    bld.external('3rdparty.graphics.freetype')
     bld.external('3rdparty.compute.OpenCL')
     bld.external('3rdparty.compute.CUDA')
     bld.external('3rdparty.physics.bullet')
-    bld.external('3rdparty.system.freetype')
     bld.external('3rdparty.scripting.lua')
     bld.external('3rdparty.scripting.python')
 
@@ -154,7 +154,7 @@ def build_plugins(bld):
 
     bld.plugin(
         'plugin.graphics.text', ['engine.bugengine', 'plugin.graphics.3d'],
-        ['3rdparty.system.freetype', '3rdparty.system.fontconfig']
+        ['3rdparty.graphics.freetype', '3rdparty.system.fontconfig']
     )
 
     bld.plugin('tool.bugeditor.ui', ['engine.bugengine'])
