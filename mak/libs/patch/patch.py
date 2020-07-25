@@ -1107,7 +1107,10 @@ class PatchSet(object):
     tgt.close()
     src.close()
     # [ ] TODO: add test for permission copy
-    shutil.copymode(srcname, tgtname)
+    try:
+        shutil.copymode(srcname, tgtname)
+    except OSError:
+        pass
     return True
 
 
