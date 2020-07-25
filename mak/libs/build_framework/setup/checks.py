@@ -36,6 +36,11 @@ int main(int argc, const char *argv[])
 """
 
 
+@feature('cxxtest')
+def dummy_cxxtest_feature(task_gen):
+    pass
+
+
 @extension('.mm')
 def mm_hook(self, node):
     self.create_compiled_task('cxx', node)
@@ -50,7 +55,7 @@ def link_library_test(self):
     bld = self.bld
     bld(rule=write_test_file, target='main.cc', code=self.code)
     bld(
-        features='cxx cxxprogram',
+        features='cxx cxxprogram cxxtest',
         source='main.cc',
         target='app',
         lib=self.libname,
@@ -80,7 +85,7 @@ def link_framework_test(self):
         env.append_unique('CXXFLAGS', [self.version])
         env.append_unique('LINKFLAGS', [self.version])
     bld(
-        features='cxx cxxprogram',
+        features='cxx cxxprogram cxxtest',
         source='main.mm',
         target='app',
         lib=self.libname,
