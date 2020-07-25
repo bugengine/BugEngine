@@ -104,6 +104,10 @@ def build_zlib_source(bld, name, env, path):
             source_list=ZLIB_SOURCE_LIST
         )
     else:
+        if 'windows' not in bld.env.VALID_PLATFORMS:
+            features = ['bugengine:export_all']
+        else:
+            features = []
         return bld.shared_library(
             name, ['3rdparty.system.win32'],
             env=env,
@@ -112,7 +116,7 @@ def build_zlib_source(bld, name, env, path):
             extra_public_includes=[path],
             extra_defines=['ZLIB_DLL'],
             extra_public_defines=['ZLIB_DLL'],
-            features=['bugengine:masterfiles:off', 'bugengine:warnings:off', 'bugengine:zlib:deploy'],
+            features=['bugengine:masterfiles:off', 'bugengine:warnings:off', 'bugengine:zlib:deploy'] + features,
             source_list=ZLIB_SOURCE_LIST
         )
 
@@ -138,6 +142,10 @@ def build_minizip_source(bld, name, env, path):
             source_list=MINIZIP_SOURCE_LIST
         )
     else:
+        if 'windows' not in bld.env.VALID_PLATFORMS:
+            features = ['bugengine:export_all']
+        else:
+            features = []
         return bld.shared_library(
             name, ['3rdparty.system.zlib', '3rdparty.system.win32'],
             env=env,
@@ -145,7 +153,7 @@ def build_minizip_source(bld, name, env, path):
             extra_includes=[include_path],
             extra_public_includes=[include_path],
             extra_defines=['USE_FILE32API', 'ZLIB_INTERNAL'],
-            features=['bugengine:masterfiles:off', 'bugengine:warnings:off', 'bugengine:minizip:deploy'],
+            features=['bugengine:masterfiles:off', 'bugengine:warnings:off', 'bugengine:minizip:deploy'] + features,
             source_list=MINIZIP_SOURCE_LIST
         )
 

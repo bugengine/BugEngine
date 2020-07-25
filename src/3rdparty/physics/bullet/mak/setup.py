@@ -25,7 +25,7 @@ def setup_prebuilt(conf):
         bullet_node = conf.pkg_unpack('bullet_bin_%(platform)s-%(arch)s-%(abi)s', BULLET_BINARIES)
         if not conf.check_package('3rdparty.physics.bullet', bullet_node, var='bullet'):
             raise WafError('using bullet from source')
-    except WafError:
+    except WafError as e:
         return False
     else:
         conf.env.BULLET_BINARY = bullet_node.path_from(conf.package_node)

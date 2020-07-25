@@ -13,7 +13,7 @@ def setup_system(conf):
         except Exception as e:
             pass
         else:
-            conf.env.SYSTEM_LUA = True
+            conf.env.LUA_BINARY = True
             conf.end_msg('version %s from system' % v)
             return True
     else:
