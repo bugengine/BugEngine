@@ -20,12 +20,12 @@ class Linux(Configure.ConfigurationContext.Platform):
         tgtnode = node.change_ext('')
         node.write('#include <cstdio>\n#include <cfloat>\n#include <new>\nint main() {}\n')
         try:
-            result, out, err = compiler.run_cxx([node.abspath(), '-x', 'c++', '-o', tgtnode.abspath()])
+            result, out, err = compiler.run_cxx([node.abspath(), '-o', tgtnode.abspath()])
         except Exception as e:
             return False
         finally:
             #if result:
-            #    print(compiler.name())
+            #    print(compiler.name(), err)
             node.delete()
             tgtnode.delete()
         return result == 0
@@ -60,9 +60,9 @@ class Linux(Configure.ConfigurationContext.Platform):
             env.append_unique('CPPFLAGS', ['-fPIC'])
             env.append_unique('CFLAGS', ['-fPIC'])
             env.append_unique('CXXFLAGS', ['-fPIC'])
-            env.COMPILER_ABI = 'gcc'
+            env.COMPILER_ABI = 'gnu'
         else:
-            env.COMPILER_ABI = 'suncc'
+            env.COMPILER_ABI = 'sun'
         env.append_unique('DEFINES', ['_GNU_SOURCE'])
         env.RPATH = ['$ORIGIN/../share/bugengine/plugin:$ORIGIN/../lib:$ORIGIN:$ORIGIN/../plugin:$ORIGIN/../../../lib']
         env.append_unique('LIB', ['dl', 'rt', 'pthread', 'm'])

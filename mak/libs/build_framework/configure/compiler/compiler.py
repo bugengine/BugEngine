@@ -30,6 +30,8 @@ class Compiler:
         'powerpc': 'ppc',
         'ppc64': 'ppc64',
         'powerpc64': 'ppc64',
+        'ppc64le': 'ppc64le',
+        'powerpc64le': 'ppc64le',
         'spu': 'spu',
         'mips': 'mips',
         'mipsel': 'mipsel',
@@ -93,11 +95,9 @@ class Compiler:
     @classmethod
     def run(self, cmd, input=None, env=None):
         try:
-            p = Utils.subprocess.Popen(cmd,
-                                       stdin=Utils.subprocess.PIPE,
-                                       stdout=Utils.subprocess.PIPE,
-                                       stderr=Utils.subprocess.PIPE,
-                                       env=env)
+            p = Utils.subprocess.Popen(
+                cmd, stdin=Utils.subprocess.PIPE, stdout=Utils.subprocess.PIPE, stderr=Utils.subprocess.PIPE, env=env
+            )
             if input is not None:
                 p.stdin.write(input.encode())
             out, err = p.communicate()
