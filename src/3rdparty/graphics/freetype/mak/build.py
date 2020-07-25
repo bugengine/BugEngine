@@ -129,4 +129,4 @@ def build_binary(bld, name, env, path):
 
 
 def build(bld):
-    bld.package('3rdparty.system.freetype', 'FREETYPE_BINARY', build_binary, 'FREETYPE_SOURCE', build_source)
+    bld.package('3rdparty.graphics.freetype', 'FREETYPE_BINARY', build_binary, 'FREETYPE_SOURCE', build_source)
