@@ -21,8 +21,10 @@ class FreeBSD(Configure.ConfigurationContext.Platform):
                     # FreeBSD is not really multiarch, check that proper libs are installed
                     tmpnode = configuration_context.bldnode.make_node('a.out')
                     try:
-                        if c.run_cxx(['-x', 'c++', '-o', tmpnode.abspath(), '-'],
-                                    'int main(int argc, char* argv[]) {  }')[0] == 0:
+                        return_code, out, err = c.run_c(
+                            ['-x', 'c', '-o', tmpnode.abspath(), '-'], 'int main(int argc, char* argv[]) {  }'
+                        )
+                        if return_code == 0:
                             result.append((c, [], self))
                     finally:
                         try:
@@ -35,7 +37,7 @@ class FreeBSD(Configure.ConfigurationContext.Platform):
         env = conf.env
         env.DEST_OS = 'freebsd'
         env.ABI = 'elf'
-        env.COMPILER_ABI = 'gcc'
+        env.COMPILER_ABI = 'freebsd'
         env.VALID_PLATFORMS = ['freebsd', 'posix', 'pc']
         if compiler.arch.startswith('arm') and compiler.arch != 'arm64':
             if 'GCC' in compiler.NAMES:
@@ -56,6 +58,9 @@ class FreeBSD(Configure.ConfigurationContext.Platform):
                     env.append_unique('CFLAGS', ['-target', env.FREEBSD_HOST_TRIPLE])
                     env.append_unique('CXXFLAGS', ['-target', env.FREEBSD_HOST_TRIPLE])
                     env.append_unique('LINKFLAGS', ['-target', env.FREEBSD_HOST_TRIPLE])
+        if 'Clang' in compiler.NAMES:
+            env.append_unique('CXXFLAGS', ['-stdlib=libc++'])
+            env.append_unique('LINKFLAGS', ['-stdlib=libc++'])
 
         env.DEPLOY_ROOTDIR = ''
         env.DEPLOY_BINDIR = 'bin'

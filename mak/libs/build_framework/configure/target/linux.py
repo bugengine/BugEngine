@@ -65,7 +65,7 @@ class Linux(Configure.ConfigurationContext.Platform):
             env.COMPILER_ABI = 'sun'
         env.append_unique('DEFINES', ['_GNU_SOURCE'])
         env.RPATH = ['$ORIGIN/../share/bugengine/plugin:$ORIGIN/../lib:$ORIGIN:$ORIGIN/../plugin:$ORIGIN/../../../lib']
-        env.append_unique('LIB', ['dl', 'rt', 'pthread', 'm'])
+        env.append_unique('LDFLAGS', ['-ldl', '-lrt', '-lpthread', '-lm', '-lc'])
         env.append_unique('LINKFLAGS_dynamic', ['-Wl,--export-dynamic', '-Wl,-E', '-Wl,-z,origin'])
 
     def platform_name(self, compiler):

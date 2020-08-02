@@ -17,7 +17,7 @@ def gxx_modifier_platform(conf):
 
 def get_msvc_build_tools(configuration_context):
     # finds all possible VCToolsInstallDir
-    result = [] 
+    result = []
     products = []
     for extra in ([], ['-products', 'Microsoft.VisualStudio.Product.BuildTools']):
         try:
@@ -39,7 +39,9 @@ def get_msvc_build_tools(configuration_context):
     for product in products:
         vs_path = product['installationPath']
         try:
-            with open(os.path.join(vs_path, 'VC', 'Auxiliary', 'Build', 'Microsoft.VCToolsVersion.default.txt'), 'r') as prop_file:
+            with open(
+                os.path.join(vs_path, 'VC', 'Auxiliary', 'Build', 'Microsoft.VCToolsVersion.default.txt'), 'r'
+            ) as prop_file:
                 version = prop_file.read().strip()
         except OSError:
             pass
@@ -74,7 +76,7 @@ class Clang(Configure.ConfigurationContext.GnuCompiler):
             if self.version_number >= (3, 6):
                 conf.env.CXXFLAGS_warnall.append('-Wno-unused-local-typedefs')
 
-    def get_multilib_compilers(self, vs_install_paths):
+    def get_multilib_compilers(self, vs_install_paths, sysroots):
         result = []
         seen = set([self.arch])
         if self.has_arch_flag():
@@ -87,7 +89,8 @@ class Clang(Configure.ConfigurationContext.GnuCompiler):
                             'c': self.extra_args.get('c', []) + ['-arch', arch_target],
                             'cxx': self.extra_args.get('cxx', []) + ['-arch', arch_target],
                             'link': self.extra_args.get('link', []) + ['-arch', arch_target],
-                        })
+                        }
+                    )
                 except Exception as e:
                     pass
                 else:
@@ -113,11 +116,12 @@ class Clang(Configure.ConfigurationContext.GnuCompiler):
             else:
                 result.append(c)
                 result += Configure.ConfigurationContext.GnuCompiler.get_multilib_compilers(c)
-            if c.version_number >= (5,):
+            if c.version_number >= (5, ):
                 for product, path in vs_install_paths:
                     try:
                         c = self.__class__(
-                            self.compiler_c, self.compiler_cxx, {
+                            self.compiler_c,
+                            self.compiler_cxx, {
                                 'c': self.extra_args.get('c', []),
                                 'cxx': self.extra_args.get('cxx', []) + ['-fms-compatibility-version=19'],
                                 'link': self.extra_args.get('link', []),
@@ -127,10 +131,10 @@ class Clang(Configure.ConfigurationContext.GnuCompiler):
                     except Exception as e:
                         pass
                     else:
-                        c.NAMES = ('clang_%s' % product,) + c.NAMES
+                        c.NAMES = ('clang_%s' % product, ) + c.NAMES
                         result.append(c)
                         for c in Configure.ConfigurationContext.GnuCompiler.get_multilib_compilers(c):
-                            c.NAMES = ('clang_%s' % product,) + c.NAMES
+                            c.NAMES = ('clang_%s' % product, ) + c.NAMES
                             result.append(c)
             else:
                 result.append(self)
@@ -168,7 +172,8 @@ class Clang(Configure.ConfigurationContext.GnuCompiler):
                                                     'c': self.extra_args.get('c', []) + ['--target=%s' % x],
                                                     'cxx': self.extra_args.get('cxx', []) + ['--target=%s' % x],
                                                     'link': self.extra_args.get('link', []) + ['--target=%s' % x],
-                                                })
+                                                }
+                                            )
                                         except Exception:
                                             pass
                                         else:
@@ -176,23 +181,47 @@ class Clang(Configure.ConfigurationContext.GnuCompiler):
                                                 continue
                                             result.append(c)
                                             seen.add(c.arch)
-        if not result:
-            result = Configure.ConfigurationContext.GnuCompiler.get_multilib_compilers(self)
+            if len(result) == 1:
+                result += Configure.ConfigurationContext.GnuCompiler.get_multilib_compilers(self)
+            if self.sysroot is None:
+                for sysroot_path, targets in sysroots:
+                    for target in targets:
+                        try:
+                            c = self.__class__(
+                                self.compiler_c, self.compiler_cxx, {
+                                    'c':
+                                        self.extra_args.get('c', []) +
+                                        ['--sysroot', sysroot_path, '--target=%s' % target],
+                                    'cxx':
+                                        self.extra_args.get('cxx', []) +
+                                        ['--sysroot', sysroot_path, '--target=%s' % target],
+                                    'link':
+                                        self.extra_args.get('link', []) +
+                                        ['--sysroot', sysroot_path, '--target=%s' % target],
+                                }
+                            )
+                        except Exception:
+                            pass
+                        else:
+                            result.append(c)
         return result
 
     def load_in_env(self, conf, platform):
         Configure.ConfigurationContext.GnuCompiler.load_in_env(self, conf, platform)
         env = conf.env
         if self.version_number < (3, 1):
-            env.append_value('CXXFLAGS', [
-                '-include', 'bits/c++config.h', '-include',
-                os.path.join(conf.bugenginenode.abspath(), 'mak/compiler/clang/no_atomic_builtin.h')
-            ])
+            env.append_value(
+                'CXXFLAGS', [
+                    '-include', 'bits/c++config.h', '-include',
+                    os.path.join(conf.bugenginenode.abspath(), 'mak/compiler/clang/no_atomic_builtin.h')
+                ]
+            )
         # Typedef of __float128 on older clangs
         if self.version_number < (3, 9):
             env.append_value(
                 'CXXFLAGS',
-                ['-include', os.path.join(conf.bugenginenode.abspath(), 'mak/compiler/clang/float128.h')])
+                ['-include', os.path.join(conf.bugenginenode.abspath(), 'mak/compiler/clang/float128.h')]
+            )
         # Add multiarch directories
         sysroot = env.SYSROOT or '/'
         for target in self.targets:
@@ -257,7 +286,7 @@ def detect_clang(conf):
                     clangs.append(c)
     msvc_versions = get_msvc_build_tools(conf)
     for c in clangs:
-        for multilib_compiler in c.get_multilib_compilers(msvc_versions):
+        for multilib_compiler in c.get_multilib_compilers(msvc_versions, conf.env.SYSROOTS):
             if not multilib_compiler.is_valid(conf):
                 continue
             try:

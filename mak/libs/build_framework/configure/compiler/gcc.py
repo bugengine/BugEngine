@@ -1,4 +1,4 @@
-from waflib import Utils, Logs, Configure
+from waflib import Utils, Logs, Configure, Options
 from waflib.Tools import c_config, gcc, gxx
 import os
 import sys
@@ -45,8 +45,8 @@ class GCC(Configure.ConfigurationContext.GnuCompiler):
         Configure.ConfigurationContext.GnuCompiler.load_in_env(self, conf, platform)
         v = conf.env
         if self.version_number < (
-                4,
-                3,
+            4,
+            3,
         ):
             v.append_unique('CFLAGS', ['-static-libgcc'])
             v.append_unique('CXXFLAGS', ['-static-libgcc'])

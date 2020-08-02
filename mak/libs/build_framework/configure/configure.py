@@ -22,6 +22,7 @@ def configure(configuration_context):
 
     configuration_context.load('flex', tooldir=[tool_dir])
     configuration_context.load('bison', tooldir=[tool_dir])
+    configuration_context.recurse('sysroot.py')
     configuration_context.recurse('compiler/compiler.py')
     configuration_context.load('clir', tooldir=[tool_dir])
     configuration_context.recurse('target/target.py')
