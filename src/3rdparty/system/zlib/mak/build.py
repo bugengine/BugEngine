@@ -114,7 +114,7 @@ def build_zlib_source(bld, name, env, path):
             path=path,
             extra_includes=[path],
             extra_public_includes=[path],
-            extra_defines=['ZLIB_DLL'],
+            extra_defines=['ZLIB_DLL', 'Z_HAVE_UNISTD_H'],
             extra_public_defines=['ZLIB_DLL'],
             features=['bugengine:masterfiles:off', 'bugengine:warnings:off', 'bugengine:zlib:deploy'] + features,
             source_list=ZLIB_SOURCE_LIST

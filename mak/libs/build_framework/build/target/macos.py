@@ -94,6 +94,8 @@ class codesign(Task.Task):
 
 @taskgen_method
 def darwin_postlink_task(self, link_task):
+    if 'cxxtest' in self.features:
+        return
     appname = getattr(Context.g_module, Context.APPNAME, self.bld.srcnode.name)
 
     bldnode = self.bld.bldnode

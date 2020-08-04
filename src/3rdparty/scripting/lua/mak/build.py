@@ -30,12 +30,12 @@ LUA_SOURCES = [
     'src/ldblib.c',
     'src/liolib.c',
     'src/lmathlib.c',
-    'src/loslib.c',
+    #'src/loslib.c',
     'src/lstrlib.c',
     'src/ltablib.c',
     'src/lutf8lib.c',
     'src/loadlib.c',
-    'src/linit.c',
+    #'src/linit.c',
 ]
 
 
@@ -94,7 +94,7 @@ def build_source(bld, name, env, path):
             extra_defines=['LUA_LIB', 'lua_getlocaledecpoint()=\'.\''] + dll_flags,
             extra_includes=[path.make_node('src')],
             extra_public_includes=[path.make_node('src')],
-            features=['bugengine:masterfiles:off', 'bugengine:lua:deploy', 'bugengine:warnings:off'],
+            features=['bugengine:masterfiles:off', 'bugengine:export_all', 'bugengine:lua:deploy', 'bugengine:warnings:off'],
             source_list=LUA_SOURCES
         )
 
