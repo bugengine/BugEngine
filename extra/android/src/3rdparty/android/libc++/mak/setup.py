@@ -1,16 +1,3 @@
-<<<<<<< HEAD
-import os
-
-
-def setup(conf):
-    paths = [os.path.join(conf.path.parent.abspath(), 'bin.%s'%a) for a in conf.env.VALID_ARCHITECTURES]
-    paths += [os.path.join(conf.path.parent.abspath(), 'lib.%s'%a) for a in conf.env.VALID_ARCHITECTURES]
-    paths = [p for p in paths if os.path.isdir(p)]
-    conf.check_lib('c++', var='libc++',
-                   libpath=paths,
-                   includepath=[os.path.join(conf.path.parent.abspath(), 'api')],
-                   includes=['cassert'])
-=======
 from waflib import Errors
 from waflib.TaskGen import feature
 import os
@@ -39,4 +26,3 @@ def setup(configuration_context):
     else:
         configuration_context.env.LIBCPP_BINARY = node.path_from(configuration_context.package_node)
         configuration_context.end_msg('from prebuilt')
->>>>>>> 021413941... readded libklcompat/libc++ files that were deleted in massive prune
