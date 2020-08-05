@@ -27,11 +27,6 @@ class GCC(Configure.ConfigurationContext.GnuCompiler):
     def __init__(self, gcc, gxx, extra_args={}, extra_env={}):
         Configure.ConfigurationContext.GnuCompiler.__init__(self, gcc, gxx, extra_args, extra_env)
 
-    def set_warning_options(self, conf):
-        Configure.ConfigurationContext.GnuCompiler.set_warning_options(self, conf)
-        if self.version_number >= (4, 8):
-            v.CXXFLAGS_warnall.append('-Wno-unused-local-typedefs')
-
     def set_optimisation_options(self, conf):
         Configure.ConfigurationContext.GnuCompiler.set_optimisation_options(self, conf)
 

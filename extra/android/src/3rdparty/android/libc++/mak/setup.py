@@ -15,7 +15,7 @@ from waflib import Errors
 from waflib.TaskGen import feature
 import os
 
-LIBCPP_BINARY = 'https://github.com/bugengine/BugEngine/releases/download/prebuilt-%(platform)s-%(abi)s/libc++-%(platform)s-%(arch)s-%(abi)s.tgz'
+LIBCPP_BINARY = 'https://github.com/bugengine/BugEngine/releases/download/prebuilt-libc++/libc++-%(platform)s-%(arch)s-%(abi)s.tgz'
 
 
 @feature('cxxtest')
