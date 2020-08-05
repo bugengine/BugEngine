@@ -190,14 +190,23 @@ class Clang(Configure.ConfigurationContext.GnuCompiler):
                             c = self.__class__(
                                 self.compiler_c, self.compiler_cxx, {
                                     'c':
-                                        self.extra_args.get('c', []) +
-                                        ['--sysroot', sysroot_path, '--target=%s' % target],
+                                        self.extra_args.get('c', []) + [
+                                            '--sysroot', sysroot_path, '-gcc-toolchain',
+                                            os.path.join(sysroot_path, 'usr'),
+                                            '--target=%s' % target, '-Wno-unused-command-line-argument'
+                                        ],
                                     'cxx':
-                                        self.extra_args.get('cxx', []) +
-                                        ['--sysroot', sysroot_path, '--target=%s' % target],
+                                        self.extra_args.get('cxx', []) + [
+                                            '--sysroot', sysroot_path, '-gcc-toolchain',
+                                            os.path.join(sysroot_path, 'usr'),
+                                            '--target=%s' % target, '-Wno-unused-command-line-argument'
+                                        ],
                                     'link':
-                                        self.extra_args.get('link', []) +
-                                        ['--sysroot', sysroot_path, '--target=%s' % target],
+                                        self.extra_args.get('link', []) + [
+                                            '--sysroot', sysroot_path, '-gcc-toolchain',
+                                            os.path.join(sysroot_path, 'usr'),
+                                            '--target=%s' % target, '-Wno-unused-command-line-argument'
+                                        ],
                                 }
                             )
                         except Exception:

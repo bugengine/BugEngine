@@ -135,6 +135,7 @@ def detect_gcc_from_path(conf, path, seen):
 
 
 def detect_multilib_compilers(conf, gcc_compilers, seen):
+    multilib_compilers = []
     for c in gcc_compilers:
         for multilib_compiler in c.get_multilib_compilers():
             if not multilib_compiler.is_valid(conf):
@@ -143,7 +144,28 @@ def detect_multilib_compilers(conf, gcc_compilers, seen):
                 seen[multilib_compiler.name()].add_sibling(multilib_compiler)
             except KeyError:
                 seen[multilib_compiler.name()] = multilib_compiler
-                conf.compilers.append(multilib_compiler)
+                multilib_compilers.append(multilib_compiler)
+    for c in gcc_compilers + multilib_compilers:
+        for sysroot_path, targets in conf.env.SYSROOTS:
+            for target in targets:
+                if target == c.target:
+                    try:
+                        compiler = c.__class__(
+                            c.compiler_c, c.compiler_cxx, {
+                                'c': c.extra_args.get('c', []) + ['--sysroot', sysroot_path],
+                                'cxx': c.extra_args.get('cxx', []) + ['--sysroot', sysroot_path],
+                                'link': c.extra_args.get('link', []) + ['--sysroot', sysroot_path],
+                            }
+                        )
+                    except Exception as e:
+                        pass
+                    else:
+                        try:
+                            seen[compiler.name()].add_sibling(compiler)
+                        except KeyError:
+                            seen[compiler.name()] = compiler
+                            multilib_compilers.append(compiler)
+    conf.compilers += multilib_compilers
 
 
 def get_native_gcc(conf, seen):
