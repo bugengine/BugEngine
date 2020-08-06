@@ -124,32 +124,29 @@ def build_cpu_kernels(task_gen):
 
 @feature('bugengine:preprocess')
 def create_cpu_kernels(task_gen):
-    internal_deps = {}
-
     for kernel, kernel_source, kernel_ast in task_gen.kernels:
+        kernel_gens = {}
         for env in task_gen.bld.multiarch_envs:
             for kernel_type, toolchain in env.KERNEL_TOOLCHAINS:
                 if kernel_type != 'cpu':
                     continue
                 kernel_env = task_gen.bld.all_envs[toolchain]
-                target_prefix = (env.ENV_PREFIX + '/') if env.ENV_PREFIX else ''
                 for variant in [''] + kernel_env.VECTOR_OPTIM_VARIANTS:
-                    tgen = task_gen.bld.get_tgen_by_name(target_prefix + task_gen.parent)
+                    tgen = task_gen.bld.get_tgen_by_name(env.ENV_PREFIX % task_gen.parent)
                     target_suffix = '.'.join([kernel_type] + ([variant[1:]] if variant else []))
                     kernel_target = task_gen.parent + '.' + '.'.join(kernel) + '.' + target_suffix
                     kernel_task_gen = task_gen.bld(
                         env=kernel_env.derive(),
                         bld_env=env,
-                        target=target_prefix + kernel_target,
-                        target_name=target_prefix + task_gen.parent,
+                        target=env.ENV_PREFIX % kernel_target,
+                        target_name=env.ENV_PREFIX % task_gen.parent,
                         variant_name=variant,
                         kernel=kernel,
                         features=[
-                            'cxx', task_gen.bld.env.STATIC and 'cxxobjects' or 'cxxshlib', 'bugengine:kernel',
-                            'bugengine:cpu:kernel_create'
+                            'cxx', task_gen.bld.env.STATIC and 'cxxobjects' or 'cxxshlib', 'bugengine:cxx',
+                            'bugengine:shared_lib', 'bugengine:kernel', 'bugengine:cpu:kernel_create'
                         ],
-                        extra_use=tgen.extra_use,
-                        pchstop=tgen.pchstop,
+                        pchstop=tgen.preprocess.pchstop,
                         defines=tgen.defines + [
                             'BE_KERNEL_ID=%s_%s' % (task_gen.parent.replace('.', '_'), kernel_target.replace('.', '_')),
                             'BE_KERNEL_NAME=%s' % (kernel_target),
@@ -159,13 +156,13 @@ def create_cpu_kernels(task_gen):
                         includes=tgen.includes,
                         kernel_source=kernel_ast,
                         source_nodes=tgen.source_nodes,
-                        use=tgen.use + [target_prefix + 'plugin.compute.cpu'] + ([variant] if variant else []),
+                        use=tgen.use + [env.ENV_PREFIX % 'plugin.compute.cpu'] + ([variant] if variant else []),
+                        uselib=tgen.uselib,
                     )
                     kernel_task_gen.env.PLUGIN = task_gen.env.plugin_name
-                    if target_prefix:
-                        try:
-                            internal_deps[kernel_target].append(target_prefix + kernel_target)
-                        except KeyError:
-                            internal_deps[kernel_target] = [target_prefix + kernel_target]
-    for multiarch_target, deps in internal_deps.items():
-        tgt = task_gen.bld(target=multiarch_target, features=['bugengine:multiarch'], use=deps)
+                    try:
+                        kernel_gens[kernel_target].append(kernel_task_gen)
+                    except KeyError:
+                        kernel_gens[kernel_target] = [kernel_task_gen]
+        for kernel_target, kernel_gen_list in kernel_gens.items():
+            task_gen.bld.multiarch(kernel_target, kernel_gen_list)

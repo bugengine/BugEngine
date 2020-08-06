@@ -205,7 +205,7 @@ def process_export_all_flag(self):
 @feature('bugengine:c', 'bugengine:cxx')
 @before_method('process_source')
 def set_extra_flags(self):
-    for f in getattr(self, 'extra_use', []) + getattr(self, 'features', []):
+    for f in getattr(self, 'features', []):
         self.env.append_unique('CLT_CXXFLAGS', self.env['CLT_CXXFLAGS_%s' % f])
         self.env.append_unique('CPPFLAGS', self.env['CPPFLAGS_%s' % f])
         self.env.append_unique('CFLAGS', self.env['CFLAGS_%s' % f])

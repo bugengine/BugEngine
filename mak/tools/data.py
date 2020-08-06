@@ -84,7 +84,7 @@ def datagen(self, node):
     outs.append(out_node.change_ext('.doc'))
     outs.append(out_node.change_ext('.namespaces'))
     tsk = self.create_task('datagen', node, outs)
-    tsk.env.DDF = self.bld.bugenginenode.find_node('mak/bin/ddf.py').abspath()
+    tsk.env.DDF = self.bld.bugenginenode.find_node('mak/tools/bin/ddf.py').abspath()
     tsk.env.MACROS_IGNORE = self.bld.bugenginenode.find_node('mak/libs/cpp/macros_ignore').abspath()
     tsk.env.TMPDIR = self.bld.bldnode.parent.parent.abspath()
     tsk.path = self.bld.variant_dir
@@ -92,7 +92,7 @@ def datagen(self, node):
     tsk.env.PCH = self.pchstop and [self.pchstop] or []
     tsk.env.ROOT_ALIAS = self.root_namespace
     out_node.parent.mkdir()
-    tsk.dep_nodes = [self.bld.bugenginenode.find_node('mak/bin/ddf.py')]
+    tsk.dep_nodes = [self.bld.bugenginenode.find_node('mak/tools/bin/ddf.py')]
     tsk.dep_nodes += self.bld.bugenginenode.find_node('mak/libs/cpp').ant_glob('**/*.py')
     try:
         self.out_sources += outs[:2]

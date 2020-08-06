@@ -30,16 +30,16 @@ LUA_SOURCES = [
     'src/ldblib.c',
     'src/liolib.c',
     'src/lmathlib.c',
-    #'src/loslib.c',
+                       #'src/loslib.c',
     'src/lstrlib.c',
     'src/ltablib.c',
     'src/lutf8lib.c',
     'src/loadlib.c',
-    #'src/linit.c',
+                       #'src/linit.c',
 ]
 
 
-@feature('bugengine:lua:deploy')
+@feature('bugengine:deploy:lua')
 @after_method('install_step')
 @after_method('apply_link')
 def deploy_lua_package(task_gen):
@@ -82,7 +82,9 @@ def build_source(bld, name, env, path):
             extra_defines=['LUA_LIB', 'lua_getlocaledecpoint()=\'.\''],
             extra_includes=[path.make_node('src')],
             extra_public_includes=[path.make_node('src')],
-            features=['bugengine:masterfiles:off', 'bugengine:lua:deploy', 'bugengine:warnings:off'],
+            features=[
+                'bugengine:masterfiles:off', 'bugengine:deploy:off', 'bugengine:deploy:lua', 'bugengine:warnings:off'
+            ],
             source_list=LUA_SOURCES
         )
 
@@ -94,7 +96,10 @@ def build_source(bld, name, env, path):
             extra_defines=['LUA_LIB', 'lua_getlocaledecpoint()=\'.\''] + dll_flags,
             extra_includes=[path.make_node('src')],
             extra_public_includes=[path.make_node('src')],
-            features=['bugengine:masterfiles:off', 'bugengine:export_all', 'bugengine:lua:deploy', 'bugengine:warnings:off'],
+            features=[
+                'bugengine:masterfiles:off', 'bugengine:export_all', 'bugengine:deploy:off', 'bugengine:deploy:lua',
+                'bugengine:warnings:off'
+            ],
             source_list=LUA_SOURCES
         )
 

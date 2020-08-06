@@ -11,7 +11,7 @@ def package(build_context, name, system_var, binary_build, source_var, source_bu
             if env[source_var]:
                 path = build_context.package_node.make_node(env[source_var])
                 if not preprocess:
-                    preprocess = build_context.preprocess(name, path, '', name)
+                    preprocess = build_context.preprocess(name, path, '', name, extra_features=['bugengine:deploy:off'])
                 arch_list.append(source_build(build_context, name, env, path))
         else:
             if not isinstance(pkg_path, bool):

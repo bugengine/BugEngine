@@ -56,6 +56,7 @@ def build_plugins(bld):
     """
         Declares all plugins
     """
+    bld.recurse('plugin/compute/opencl/mak/build.py')
     bld.plugin('plugin.debug.runtime', ['engine.bugengine'])
     bld.plugin('plugin.debug.assert', ['engine.bugengine', 'plugin.debug.runtime'])
 

@@ -3,7 +3,7 @@ from waflib.TaskGen import feature, after_method
 import os
 
 
-@feature('bugengine:bullet:deploy')
+@feature('bugengine:deploy:bullet')
 @after_method('install_step')
 @after_method('apply_link')
 def deploy_bullet_package(task_gen):
@@ -45,7 +45,7 @@ def build_source(bld, name, env, path):
             name,
             bld.platforms,
             path=path,
-            features=['bugengine:warnings:off', 'bugengine:bullet:deploy', 'bugengine:nortc'],
+            features=['bugengine:warnings:off', 'bugengine:deploy:off', 'bugengine:deploy:bullet', 'bugengine:nortc'],
             extra_includes=[path.make_node('src')],
             extra_public_includes=[path.make_node('src')],
             extra_defines=[
@@ -63,7 +63,9 @@ def build_source(bld, name, env, path):
             name,
             bld.platforms,
             path=path,
-            features=['bugengine:warnings:off', 'bugengine:bullet:deploy', 'bugengine:export_all'],
+            features=[
+                'bugengine:warnings:off', 'bugengine:deploy:off', 'bugengine:deploy:bullet', 'bugengine:export_all'
+            ],
             extra_includes=[path.make_node('src')],
             extra_public_includes=[path.make_node('src')],
             extra_defines=[

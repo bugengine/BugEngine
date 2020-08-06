@@ -1,6 +1,6 @@
 import os
 import sys
-sys.path.append(os.path.join(os.path.dirname(os.path.dirname(sys.argv[0])), 'libs'))
+sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(sys.argv[0]))), 'libs'))
 from cpp import parser, tree
 from optparse import OptionParser
 import traceback
@@ -39,7 +39,8 @@ if __name__ == '__main__':
     else:
         try:
             result = parser.parse(
-                arguments[1], os.path.join(options.tmp_dir, 'cpp_grammar.pickle'), options.macro_file, options.module, 'BugEngine'
+                arguments[1], os.path.join(options.tmp_dir, 'cpp_grammar.pickle'), options.macro_file, options.module,
+                'BugEngine'
             )
             if not result:
                 sys.exit(1)

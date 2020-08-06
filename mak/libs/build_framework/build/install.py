@@ -52,6 +52,30 @@ class install(Task.Task):
         return 0
 
 
+@feature('bugengine:deploy:off')
+def dummy_deploy_off(self):
+    pass
+
+
+@feature('bugengine:preprocess')
+def install_module_files(self):
+    if 'bugengine:deploy:off' not in self.features:
+        env = self.env
+        for source_node in self.source_nodes:
+            bin_paths = [
+                i for i in [source_node.make_node('bin')] +
+                [source_node.make_node('bin.%s' % p) for p in env.VALID_PLATFORMS] if os.path.isdir(i.abspath())
+            ]
+            data_paths = [
+                i for i in [source_node.make_node('data')] +
+                [source_node.make_node('data.%s' % p) for p in env.VALID_PLATFORMS] if os.path.isdir(i.abspath())
+            ]
+            for bin_path in bin_paths:
+                self.install_directory(env, bin_path, '', 'DEPLOY_RUNBINDIR')
+            for data_path in data_paths:
+                self.install_directory(env, data_path, '', 'DEPLOY_DATADIR')
+
+
 @feature('bugengine:kernel')
 @after_method('install_step')
 def install_kernel(self):

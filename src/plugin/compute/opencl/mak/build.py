@@ -50,32 +50,28 @@ class embed_cl(Task.Task):
 
 @feature('bugengine:preprocess')
 def create_cl_kernels(task_gen):
-    internal_deps = []
-
     for kernel, kernel_source, kernel_ast in task_gen.kernels:
+        kernel_gens = []
         kernel_target = '.'.join([task_gen.parent, '.'.join(kernel), 'cl'])
         for env in task_gen.bld.multiarch_envs:
             for kernel_type, toolchain in env.KERNEL_TOOLCHAINS:
                 if kernel_type != 'opencl':
                     continue
                 kernel_env = task_gen.bld.all_envs[toolchain]
-                target_prefix = (env.ENV_PREFIX + '/') if env.ENV_PREFIX else ''
-                if target_prefix:
-                    internal_deps.append(target_prefix + kernel_target)
-                tgen = task_gen.bld.get_tgen_by_name(target_prefix + task_gen.parent)
+                tgen = task_gen.bld.get_tgen_by_name(env.ENV_PREFIX % task_gen.parent)
 
                 kernel_task_gen = task_gen.bld(
                     env=kernel_env.derive(),
                     bld_env=env,
-                    target=target_prefix + kernel_target,
-                    target_name=target_prefix + task_gen.parent,
+                    target=env.ENV_PREFIX % kernel_target,
+                    target_name=env.ENV_PREFIX % task_gen.parent,
                     kernel=kernel,
                     features=[
-                        'cxx', task_gen.bld.env.STATIC and 'cxxobjects' or 'cxxshlib', 'bugengine:kernel',
-                        'bugengine:kernel_create', 'bugengine:cl:kernel_create'
+                        'cxx', task_gen.bld.env.STATIC and 'cxxobjects' or 'cxxshlib', 'bugengine:cxx',
+                        'bugengine:shared_lib', 'bugengine:kernel', 'bugengine:kernel_create',
+                        'bugengine:cl:kernel_create'
                     ],
-                    extra_use=tgen.extra_use,
-                    pchstop=tgen.pchstop,
+                    pchstop=tgen.preprocess.pchstop,
                     defines=tgen.defines + [
                         'BE_KERNEL_ID=%s_%s' % (task_gen.parent.replace('.', '_'), kernel_target.replace('.', '_')),
                         'BE_KERNEL_NAME=%s' % (kernel_target),
@@ -84,12 +80,13 @@ def create_cl_kernels(task_gen):
                     includes=tgen.includes,
                     kernel_source=kernel_source,
                     kernel_ast=kernel_ast,
-                    use=tgen.use + [target_prefix + 'plugin.compute.opencl'],
+                    use=tgen.use + [env.ENV_PREFIX % 'plugin.compute.opencl'],
+                    uselib=tgen.uselib,
                     source_nodes=tgen.source_nodes
                 )
                 kernel_task_gen.env.PLUGIN = kernel_task_gen.env.plugin_name
-        if internal_deps:
-            tgt = task_gen.bld(target=kernel_target, features=['multiarch'], use=internal_deps)
+                kernel_gens.append(kernel_task_gen)
+        task_gen.bld.multiarch(kernel_target, kernel_gens)
 
 
 @feature('bugengine:cl:kernel_create')
@@ -103,7 +100,7 @@ def create_cc_source(task_gen):
 
 @extension('.32.ll', '.64.ll')
 def cl_kernel_compile(task_gen, source):
-    if 'clkernel_create' in task_gen.features:
+    if 'bugengine:cl:kernel_create' in task_gen.features:
         ptr_size = source.name[-5:-3]
         cl_source = task_gen.make_bld_node('src', source.parent, source.name[:source.name.rfind('.')] + '.generated.cl')
         cl_cc = task_gen.make_bld_node('src', source.parent, source.name[:source.name.rfind('.')] + '.embedded.cc')

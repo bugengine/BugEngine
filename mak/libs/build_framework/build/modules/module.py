@@ -1,4 +1,5 @@
 import os
+import re
 from waflib import Errors
 from waflib.Configure import conf
 from waflib.TaskGen import feature, before_method
@@ -40,7 +41,7 @@ def get_source_nodes(build_context, path, name):
 
 
 @conf
-def preprocess(build_context, name, path, root_namespace, plugin_name):
+def preprocess(build_context, name, path, root_namespace, plugin_name, extra_features=[]):
     if build_context.env.PROJECTS:
         return None
     source_nodes = get_source_nodes(build_context, path, name)
@@ -71,7 +72,7 @@ def preprocess(build_context, name, path, root_namespace, plugin_name):
         env=pp_env,
         target=name + '.preprocess',
         parent=name,
-        features=['bugengine:preprocess'],
+        features=['bugengine:preprocess'] + extra_features,
         pchstop=pchstop,
         source=preprocess_sources,
         kernels=[],
@@ -158,7 +159,11 @@ def multiarch(build_context, name, arch_modules):
         if len(build_context.multiarch_envs) == 1:
             task_gen = arch_modules[0]
         else:
-            task_gen = build_context(target=name, use=[arch_module.target for arch_module in arch_modules])
+            task_gen = build_context(
+                target=name,
+                features=['bugengine:multiarch'],
+                use=[arch_module.target for arch_module in arch_modules],
+            )
         return task_gen
     else:
         return None

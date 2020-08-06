@@ -22,7 +22,7 @@ ZLIB_SOURCE_LIST = [
 MINIZIP_SOURCE_LIST = ['contrib/minizip/ioapi.c', 'contrib/minizip/unzip.c']
 
 
-@feature('bugengine:zlib:deploy')
+@feature('bugengine:deploy:zlib')
 @after_method('install_step')
 @after_method('apply_link')
 def deploy_zlib_package(task_gen):
@@ -55,7 +55,7 @@ def deploy_zlib_package(task_gen):
                 deploy_to(file, 'bin.%s' % task_gen.env.VALID_ARCHITECTURES[0])
 
 
-@feature('bugengine:minizip:deploy')
+@feature('bugengine:deploy:minizip')
 @after_method('install_step')
 @after_method('apply_link')
 def deploy_minizip_package(task_gen):
@@ -100,7 +100,9 @@ def build_zlib_source(bld, name, env, path):
             path=path,
             extra_includes=[path],
             extra_public_includes=[path],
-            features=['bugengine:masterfiles:off', 'bugengine:warnings:off', 'bugengine:zlib:deploy'],
+            features=[
+                'bugengine:masterfiles:off', 'bugengine:warnings:off', 'bugengine:deploy:off', 'bugengine:deploy:zlib'
+            ],
             source_list=ZLIB_SOURCE_LIST
         )
     else:
@@ -116,7 +118,9 @@ def build_zlib_source(bld, name, env, path):
             extra_public_includes=[path],
             extra_defines=['ZLIB_DLL', 'Z_HAVE_UNISTD_H'],
             extra_public_defines=['ZLIB_DLL'],
-            features=['bugengine:masterfiles:off', 'bugengine:warnings:off', 'bugengine:zlib:deploy'] + features,
+            features=[
+                'bugengine:masterfiles:off', 'bugengine:warnings:off', 'bugengine:deploy:off', 'bugengine:deploy:zlib'
+            ] + features,
             source_list=ZLIB_SOURCE_LIST
         )
 
@@ -138,7 +142,10 @@ def build_minizip_source(bld, name, env, path):
             extra_includes=[include_path],
             extra_public_includes=[include_path],
             extra_defines=['USE_FILE32API', 'ZLIB_INTERNAL'],
-            features=['bugengine:masterfiles:off', 'bugengine:warnings:off', 'bugengine:minizip:deploy'],
+            features=[
+                'bugengine:masterfiles:off', 'bugengine:warnings:off', 'bugengine:deploy:off',
+                'bugengine:deploy:minizip'
+            ],
             source_list=MINIZIP_SOURCE_LIST
         )
     else:
@@ -153,7 +160,10 @@ def build_minizip_source(bld, name, env, path):
             extra_includes=[include_path],
             extra_public_includes=[include_path],
             extra_defines=['USE_FILE32API', 'ZLIB_INTERNAL'],
-            features=['bugengine:masterfiles:off', 'bugengine:warnings:off', 'bugengine:minizip:deploy'] + features,
+            features=[
+                'bugengine:masterfiles:off', 'bugengine:warnings:off', 'bugengine:deploy:off',
+                'bugengine:deploy:minizip'
+            ] + features,
             source_list=MINIZIP_SOURCE_LIST
         )
 

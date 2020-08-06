@@ -134,7 +134,6 @@ def setup(configuration_context):
                 cuda_available = True
 
                 configuration_context.setenv(toolchain)
-                del configuration_context.all_envs[cuda_toolchain]
                 configuration_context.env.append_value('INCLUDES_cuda', include_paths)
                 configuration_context.env.append_value('STLIBPATH_cuda', lib_paths)
                 configuration_context.env.append_value('FEATURES', ['cuda'])

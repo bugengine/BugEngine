@@ -1,4 +1,3 @@
-
 from waflib import Task
 from waflib.TaskGen import feature, before_method, taskgen_method, extension
 from waflib.Tools import c_preproc
@@ -34,6 +33,7 @@ using namespace Kernel;
 _BE_REGISTER_PLUGIN(BE_KERNEL_ID, BE_KERNEL_NAME);
 """
 
+
 class nvcc(Task.Task):
     "nvcc"
     run_str = '${NVCC_CXX} ${NVCC_CXXFLAGS} --fatbin ${NVCC_FRAMEWORKPATH_ST:FRAMEWORKPATH} ${NVCC_CPPPATH_ST:INCPATHS} -DBE_COMPUTE=1 ${NVCC_DEFINES_ST:DEFINES} -D_NVCC=1 ${NVCC_CXX_SRC_F}${SRC[0].abspath()} ${NVCC_CXX_TGT_F} ${TGT}'
@@ -53,7 +53,6 @@ class nvcc(Task.Task):
         return (tmp.nodes, tmp.names)
 
     color = 'GREEN'
-
 
 
 class cudac(Task.Task):
@@ -94,7 +93,7 @@ class cudac(Task.Task):
 @feature('bugengine:cuda:kernel_create')
 @before_method('process_source')
 def build_cuda_kernels(task_gen):
-    for f in getattr(task_gen, 'extra_use', []) + getattr(task_gen, 'features', []):
+    for f in getattr(task_gen, 'features', []):
         task_gen.env.append_value('NVCC_CXXFLAGS', task_gen.env['NVCC_CXXFLAGS_%s' % f])
     ast = task_gen.kernel_ast
     cuda_source = task_gen.kernel_source
@@ -110,31 +109,27 @@ def build_cuda_kernels(task_gen):
 
 @feature('bugengine:preprocess')
 def create_cuda_kernels(task_gen):
-    internal_deps = []
-
     for kernel, kernel_source, kernel_ast in task_gen.kernels:
         kernel_target = '.'.join([task_gen.parent, '.'.join(kernel), 'cuda'])
+        kernel_gens = []
         for env in task_gen.bld.multiarch_envs:
             for kernel_type, toolchain in env.KERNEL_TOOLCHAINS:
                 if kernel_type != 'cuda':
                     continue
                 kernel_env = task_gen.bld.all_envs[toolchain]
-                target_prefix = (env.ENV_PREFIX + '/') if env.ENV_PREFIX else ''
-                if target_prefix:
-                    internal_deps.append(target_prefix + kernel_target)
-                tgen = task_gen.bld.get_tgen_by_name(target_prefix + task_gen.parent)
+                tgen = task_gen.bld.get_tgen_by_name(env.ENV_PREFIX % task_gen.parent)
 
                 kernel_task_gen = task_gen.bld(
                     env=kernel_env.derive(),
                     bld_env=env,
-                    target=target_prefix + kernel_target,
-                    target_name=target_prefix + task_gen.parent,
+                    target=env.ENV_PREFIX % kernel_target,
+                    target_name=env.ENV_PREFIX % task_gen.parent,
                     kernel=kernel,
                     features=[
-                        'cxx', task_gen.bld.env.STATIC and 'cxxobjects' or 'cxxshlib', 'bugengine:kernel', 'bugengine:cuda:kernel_create'
+                        'cxx', task_gen.bld.env.STATIC and 'cxxobjects' or 'cxxshlib', 'bugengine:cxx',
+                        'bugengine:shared_lib', 'bugengine:kernel', 'bugengine:cuda:kernel_create'
                     ],
-                    extra_use=tgen.extra_use,
-                    pchstop=tgen.pchstop,
+                    pchstop=tgen.preprocess.pchstop,
                     defines=tgen.defines + [
                         'BE_KERNEL_ID=%s_%s' % (task_gen.parent.replace('.', '_'), kernel_target.replace('.', '_')),
                         'BE_KERNEL_NAME=%s' % (kernel_target),
@@ -143,15 +138,16 @@ def create_cuda_kernels(task_gen):
                     includes=tgen.includes,
                     kernel_source=kernel_source,
                     kernel_ast=kernel_ast,
-                    use=tgen.use + [target_prefix + 'plugin.compute.cuda'],
+                    use=tgen.use + [env.ENV_PREFIX % 'plugin.compute.cuda'],
+                    uselib=tgen.uselib,
                     source_nodes=tgen.source_nodes,
                 )
                 kernel_task_gen.env.PLUGIN = kernel_task_gen.env.plugin_name
-        if internal_deps:
-            tgt = task_gen.bld(target=kernel_target, features=['bugengine:multiarch'], use=internal_deps)
+                kernel_gens.append(kernel_task_gen)
+        task_gen.bld.multiarch(kernel_target, kernel_gens)
+
 
 def build(bld):
     cuda = bld.thirdparty('3rdparty.compute.CUDA')
     if cuda:
         cuda.export_lib += ['cudart_static']
-

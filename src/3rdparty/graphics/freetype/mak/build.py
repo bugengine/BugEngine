@@ -56,7 +56,7 @@ FT_SOURCE_LIST = [
 ]
 
 
-@feature('bugengine:freetype:deploy')
+@feature('bugengine:deploy:freetype')
 @after_method('install_step')
 @after_method('apply_link')
 def deploy_freetype_package(task_gen):
@@ -105,7 +105,8 @@ def build_source(bld, name, env, path):
             extra_public_includes=[include_path],
             extra_defines=defines,
             features=[
-                'bugengine:masterfiles:off', 'bugengine:warnings:off', 'bugengine:freetype:deploy', 'bugengine:nortc'
+                'bugengine:masterfiles:off', 'bugengine:warnings:off', 'bugengine:deploy:off',
+                'bugengine:deploy:freetype', 'bugengine:nortc'
             ],
             source_list=FT_SOURCE_LIST
         )
@@ -118,7 +119,8 @@ def build_source(bld, name, env, path):
             extra_public_includes=[include_path],
             extra_defines=defines + ['DLL_EXPORT'],
             features=[
-                'bugengine:masterfiles:off', 'bugengine:warnings:off', 'bugengine:freetype:deploy', 'bugengine:nortc'
+                'bugengine:masterfiles:off', 'bugengine:warnings:off', 'bugengine:deploy:off',
+                'bugengine:deploy:freetype', 'bugengine:nortc'
             ],
             source_list=FT_SOURCE_LIST
         )

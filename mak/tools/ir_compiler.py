@@ -16,7 +16,7 @@ class ircc(Task.Task):
 
     def scan(self):
         mak_node = self.generator.bld.bugenginenode.make_node('mak')
-        dep_nodes = [mak_node.find_node('bin/ir_compile.py')]
+        dep_nodes = [mak_node.find_node('tools/bin/ir_compile.py')]
         dep_nodes += mak_node.find_node('libs/ircc').ant_glob('**/*.py')
         dep_nodes += mak_node.find_node('libs/ply').ant_glob('**/*.py')
         dep_nodes += self.ircc_target.ant_glob('**/*.py')
@@ -28,4 +28,4 @@ def build(build_context):
         import ircc
         tmp_node = build_context.bldnode.parent.parent
         ircc.ir_parser.IrParser(tmp_node.abspath())
-        build_context.env.KERNEL_CLT = build_context.bugenginenode.make_node('mak/bin/ir_compile.py').abspath()
+        build_context.env.KERNEL_CLT = build_context.bugenginenode.make_node('mak/tools/bin/ir_compile.py').abspath()

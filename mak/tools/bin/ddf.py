@@ -1,6 +1,6 @@
 import os
 import sys
-sys.path.append(os.path.join(os.path.dirname(os.path.dirname(sys.argv[0])), 'libs'))
+sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(sys.argv[0]))), 'libs'))
 from cpp import parser
 from optparse import OptionParser
 import traceback
@@ -35,7 +35,8 @@ if __name__ == '__main__':
     else:
         try:
             result = parser.parse(
-                args[0], os.path.join(options.tmp_dir, 'cpp_grammar.pickle'), options.macro_file, options.module, options.root
+                args[0], os.path.join(options.tmp_dir, 'cpp_grammar.pickle'), options.macro_file, options.module,
+                options.root
             )
             classes = StringIO()
             instances = StringIO()
