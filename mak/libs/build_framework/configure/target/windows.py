@@ -150,7 +150,7 @@ class Windows_Clang(Windows):
             env.append_unique('LIB', ['msvcrt'])
             env.IMPLIB_ST = '-Wl,-implib:%s'
             env.LINKFLAGS_console = ['-Wl,-subsystem:console']
-            env.COMPILER_ABI = 'msvc140'
+            env.COMPILER_ABI = 'msvc'
             env.CC_NAME = 'clang_msvc'
         env.append_unique('CXXFLAGS_warnall', ['-Wno-unknown-pragmas', '-Wno-comment'])
         self.find_winres(conf, compiler)
@@ -213,20 +213,20 @@ class Windows_MSVC(Windows):
         conf.env.LINKFLAGS_console = ['/SUBSYSTEM:console']
         conf.env.IMPLIB_ST = '/IMPLIB:%s'
         conf.env.DEF_ST = '/DEF:%s'
-        for l in conf.env.LIBPATH:
-            msvcrt_path = os.path.join(l, 'msvcprt.lib')
-            if os.path.isfile(msvcrt_path):
-                with open(msvcrt_path, 'rb') as file:
-                    code = file.read()
-                    reference = re.search(b'msvcp(\d\d\d?).dll', code, re.IGNORECASE)
-                    if reference is None:
-                        continue
-                    else:
-                        api = reference.group(1).decode()
-                break
-        else:
-            raise Errors.WafError('can\'t determine ABI of the SDK')
-        conf.env.COMPILER_ABI = 'msvc%s' % api
+        #for l in conf.env.LIBPATH:
+        #    msvcrt_path = os.path.join(l, 'msvcprt.lib')
+        #    if os.path.isfile(msvcrt_path):
+        #        with open(msvcrt_path, 'rb') as file:
+        #            code = file.read()
+        #            reference = re.search(b'msvcp(\d\d\d?).dll', code, re.IGNORECASE)
+        #            if reference is None:
+        #                continue
+        #            else:
+        #                api = reference.group(1).decode()
+        #        break
+        #else:
+        #    raise Errors.WafError('can\'t determine ABI of the SDK')
+        conf.env.COMPILER_ABI = 'msvc'
 
 
 def options(opt):
