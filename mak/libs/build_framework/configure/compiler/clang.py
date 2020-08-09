@@ -21,7 +21,7 @@ def get_msvc_build_tools(configuration_context):
     products = []
     for extra in ([], ['-products', 'Microsoft.VisualStudio.Product.BuildTools']):
         try:
-            vswhere = configuration_context.bugenginenode.find_node('mak/host/win32/bin/vswhere.exe')
+            vswhere = configuration_context.bldnode.find_node('host/win32/bin/vswhere.exe')
             p = Utils.subprocess.Popen(
                 [vswhere.abspath(), '-format', 'json'] + extra,
                 stdin=Utils.subprocess.PIPE,
