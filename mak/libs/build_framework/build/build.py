@@ -95,7 +95,7 @@ def install_directory(self, env, node, local_path, env_variable):
 
 @taskgen_method
 def install_files(self, out_dir, file_list, chmod=Utils.O644):
-    self.deploy_files(out_dir, file_list)
+    self.deploy_files(out_dir, file_list, chmod)
 
 
 @taskgen_method
