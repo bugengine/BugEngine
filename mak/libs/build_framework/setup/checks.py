@@ -298,6 +298,8 @@ def check_sdk(self, compiler, flags, sdk, version, frameworks=[], libpath=[], in
 
 @conf
 def run_pkg_config(conf, name):
+    if conf.env.PKGCONFIG_DISABLE:
+        raise Errors.WafError('turned off')
     sysroot = conf.env.SYSROOT or ''
 
     def extend_lib_path(lib_path):

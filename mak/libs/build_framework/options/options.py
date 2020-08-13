@@ -10,9 +10,9 @@ def add_package_options(option_context, package_name):
         action='store',
         dest='%s_package' % package_name,
         help='source of the ' + package_name +
-        ' package. Default is "best" (try system, prebuilt, source in that order)',
+        ' package. Default is "best" (try pkgconfig, system, prebuilt, source in that order)',
         default='best',
-        choices=('best', 'system', 'prebuilt', 'source', 'disabled')
+        choices=('best', 'pkgconfig', 'system', 'prebuilt', 'source', 'disabled')
     )
 
 

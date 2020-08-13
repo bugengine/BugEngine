@@ -39,6 +39,27 @@ class FreeBSD(Configure.ConfigurationContext.Platform):
         env.ABI = 'elf'
         env.COMPILER_ABI = 'freebsd'
         env.VALID_PLATFORMS = ['freebsd', 'posix', 'pc']
+        sysroot = compiler.sysroot if compiler.sysroot is not None else ''
+        if '-m32' in compiler.extra_args['cxx']:
+            env.PKGCONFIG_DISABLE = True
+            ldconfig = '%s/usr/local/libdata/ldconfig32' % sysroot
+            if 'GCC' in compiler.NAMES:
+                gcc_name = 'gcc' + compiler.compiler_c.split('gcc')[-1]
+                gcc_libpath = os.path.join(os.path.dirname(os.path.dirname(compiler.compiler_c)), 'lib32')
+                if os.path.isdir('%s/usr/lib32' % sysroot):
+                    env.append_unique('LINKFLAGS', ['-B%s/usr/lib32' % sysroot])
+                if os.path.isdir(sysroot + gcc_libpath):
+                    env.append_unique('LINKFLAGS', ['-B%s%s' % (sysroot, gcc_libpath)])
+                if os.path.isdir(sysroot + os.path.join(gcc_libpath, gcc_name)):
+                    env.append_unique('LINKFLAGS', ['-B%s%s' % (sysroot, os.path.join(gcc_libpath, gcc_name))])
+        else:
+            ldconfig = '%s/usr/local/libdata/ldconfig' % (compiler.sysroot or '')
+        libpaths = []
+        for ldconfig_conf in os.listdir(ldconfig):
+            with open(os.path.join(ldconfig, ldconfig_conf), 'r') as conf_file:
+                for line in conf_file:
+                    if line not in libpaths:
+                        libpaths.append('%s%s' % (compiler.sysroot or '', line))
         if compiler.arch.startswith('arm') and compiler.arch != 'arm64':
             if 'GCC' in compiler.NAMES:
                 env.append_value('CXXFLAGS', ['-nostdinc++', '-isystem', '/usr/include/c++/v1'])
@@ -80,7 +101,7 @@ class FreeBSD(Configure.ConfigurationContext.Platform):
         env.append_unique('LIB', ['rt', 'pthread', 'm'])
         env.append_unique('CFLAGS', ['-I%s/usr/local/include' % (compiler.sysroot or '')])
         env.append_unique('CXXFLAGS', ['-I%s/usr/local/include' % (compiler.sysroot or '')])
-        env.append_unique('LIBPATH', ['%s/usr/local/lib' % (compiler.sysroot or '')])
+        env.append_unique('LIBPATH', libpaths)
         env.append_unique('DEFINES', ['_BSD_SOURCE'])
         env.append_unique('LINKFLAGS_dynamic', ['-rdynamic', '-Wl,-E', '-Wl,-z,origin'])
 

@@ -12,12 +12,15 @@ def setup(conf):
             if 'posix' in conf.env.VALID_PLATFORMS:
                 try:
                     conf.pkg_config('OpenCL', var='OpenCL')
-                except Exception as e:
+                except WafError:
                     pass
                 else:
                     conf.env.OPENCL_BINARY = True
                     conf.end_msg('using system', color='GREEN')
                     return
+            if conf.check_lib('OpenCL', var='OpenCL'):
+                conf.env.OPENCL_BINARY = True
+                return
             try:
                 cl_node = conf.pkg_unpack('cl_bin_%(platform)s', CL_ICD_BINARIES)
                 if not conf.check_package('OpenCL', cl_node, var='OpenCL'):

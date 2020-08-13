@@ -89,11 +89,11 @@ def check_nvcc(configuration_context, nvcc):
 def setup(configuration_context):
     if configuration_context.env.PROJECTS:
         return
-    configuration_context.start_msg_setup()
-    if configuration_context.env.COMPILER_NAME == 'suncc':
-        configuration_context.end_msg('not available with sunCC', color='YELLOW')
-        return
     if configuration_context.env.NVCC_COMPILERS:
+        configuration_context.start_msg_setup()
+        if configuration_context.env.COMPILER_NAME == 'suncc':
+            configuration_context.end_msg('not available with sunCC', color='YELLOW')
+            return
         cuda_available = False
         toolchain = configuration_context.env.TOOLCHAIN
         for version, compiler in configuration_context.env.NVCC_COMPILERS[::-1]:
