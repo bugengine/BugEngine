@@ -23,7 +23,7 @@ class symbols(Task.Task):
                     for symbol in table:
                         export_file.write('/* %s */\n' % (str(symbol)))
                         if symbol.storagecls == coff.IMAGE_SYM_CLASS_EXTERNAL and (
-                            symbol.value != 0 or symbol.size != 0
+                            symbol.sectnum > 0
                         ) and symbol.name not in seen:
                             seen.add(symbol.name)
                             if self.generator.env.CC_NAME not in ('msvc', 'clang_msvc'):
