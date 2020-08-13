@@ -109,52 +109,55 @@ carray_BugHelper< T, Count >::trampoline_method_Index_overload_1(RTTI::Value* pa
 
 template < typename T, u32 Count >
 const RTTI::ObjectInfo carray_BugHelper< T, Count >::s_prop_value_type_object_value_type
-   = {{0}, {0}, istring(istring("value_type")), RTTI::Value(value_type)};
+    = {{0}, {0}, istring(istring("value_type")), RTTI::Value(value_type)};
 
 template < typename T, u32 Count >
 const RTTI::Method::Parameter carray_BugHelper< T, Count >::s_method_size_overload_0_params[]
-   = {{{0},
-       istring("this"),
-       be_type< const ArrayType& >(),
-       {&RTTI::Method::Parameter::s_noDefaultValue}}};
+    = {{{0},
+        istring("this"),
+        be_type< const ArrayType& >(),
+        {&RTTI::Method::Parameter::s_noDefaultValue}}};
 
 template < typename T, u32 Count >
 const RTTI::Method::Overload carray_BugHelper< T, Count >::s_method_size_overloads[]
-   = {{{0},
-       {1, s_method_size_overload_0_params},
-       be_type< u32 >(),
-       false,
-       &trampoline_method_size_overload_0}};
+    = {{{0},
+        {1, s_method_size_overload_0_params},
+        be_type< u32 >(),
+        false,
+        {0, 0},
+        &trampoline_method_size_overload_0}};
 
 template < typename T, u32 Count >
 const RTTI::Method::Parameter carray_BugHelper< T, Count >::s_method_Index_overload_0_params[]
-   = {{{0},
-       istring("this"),
-       be_type< const ArrayType& >(),
-       {&RTTI::Method::Parameter::s_noDefaultValue}},
-      {{0}, istring("index"), be_type< u32 >(), {&RTTI::Method::Parameter::s_noDefaultValue}}};
+    = {{{0},
+        istring("this"),
+        be_type< const ArrayType& >(),
+        {&RTTI::Method::Parameter::s_noDefaultValue}},
+       {{0}, istring("index"), be_type< u32 >(), {&RTTI::Method::Parameter::s_noDefaultValue}}};
 
 template < typename T, u32 Count >
-const RTTI::Method::Parameter carray_BugHelper< T, Count >::s_method_Index_overload_1_params[]
-   = {{{0}, istring("this"), be_type< ArrayType& >(), {&RTTI::Method::Parameter::s_noDefaultValue}},
-      {{0}, istring("index"), be_type< u32 >(), {&RTTI::Method::Parameter::s_noDefaultValue}}};
+const RTTI::Method::Parameter carray_BugHelper< T, Count >::s_method_Index_overload_1_params[] = {
+    {{0}, istring("this"), be_type< ArrayType& >(), {&RTTI::Method::Parameter::s_noDefaultValue}},
+    {{0}, istring("index"), be_type< u32 >(), {&RTTI::Method::Parameter::s_noDefaultValue}}};
 
 template < typename T, u32 Count >
 const RTTI::Method::Overload carray_BugHelper< T, Count >::s_method_Index_overloads[]
-   = {{{0},
-       {2, s_method_Index_overload_0_params},
-       be_type< const T& >(),
-       false,
-       &trampoline_method_Index_overload_0},
-      {{0},
-       {2, s_method_Index_overload_1_params},
-       be_type< T& >(),
-       false,
-       &trampoline_method_Index_overload_1}};
+    = {{{0},
+        {2, s_method_Index_overload_0_params},
+        be_type< const T& >(),
+        false,
+        {0, 0},
+        &trampoline_method_Index_overload_0},
+       {{0},
+        {2, s_method_Index_overload_1_params},
+        be_type< T& >(),
+        false,
+        {0, 0},
+        &trampoline_method_Index_overload_1}};
 
 template < typename T, u32 Count >
 const RTTI::ScriptingArrayAPI carray_BugHelper< T, Count >::scriptingArrayAPI
-   = {be_type< T >(), &array_size, &index, &indexConst};
+    = {be_type< T >(), &array_size, &index, &indexConst};
 
 template < typename T, u32 Count >
 const RTTI::ScriptingAPI carray_BugHelper< T, Count >::scriptingAPI = {{&scriptingArrayAPI}};
@@ -167,12 +170,12 @@ BE_EXPORT raw< const RTTI::Class > ClassID< T[Count] >::klass()
      * (shared/edgcpfe/lower_init.c, line 6280)
      */
     static const RTTI::Method s_methods[2]
-       = {{istring("size"),
-           {1, carray_BugHelper< T, Count >::s_method_size_overloads},
-           {&s_methods[1]}},
-          {istring("Index"),
-           {2, carray_BugHelper< T, Count >::s_method_Index_overloads},
-           {&s_methods[2]}}};
+        = {{istring("size"),
+            {1, carray_BugHelper< T, Count >::s_method_size_overloads},
+            {&s_methods[1]}},
+           {istring("Index"),
+            {2, carray_BugHelper< T, Count >::s_method_Index_overloads},
+            {&s_methods[2]}}};
     static const RTTI::Class s_class = {"array",
                                         u32(sizeof(T[Count])),
                                         0,
@@ -199,12 +202,12 @@ BE_EXPORT raw< const RTTI::Class > ClassID< const T[Count] >::klass()
      * (shared/edgcpfe/lower_init.c, line 6280)
      */
     static const RTTI::Method s_methods[2]
-       = {{istring("size"),
-           {1, carray_BugHelper< const T, Count >::s_method_size_overloads},
-           {&s_methods[1]}},
-          {istring("Index"),
-           {2, carray_BugHelper< const T, Count >::s_method_Index_overloads},
-           {&s_methods[2]}}};
+        = {{istring("size"),
+            {1, carray_BugHelper< const T, Count >::s_method_size_overloads},
+            {&s_methods[1]}},
+           {istring("Index"),
+            {2, carray_BugHelper< const T, Count >::s_method_Index_overloads},
+            {&s_methods[2]}}};
     static const RTTI::Class s_class = {"array",
                                         u32(sizeof(const T[Count])),
                                         0,

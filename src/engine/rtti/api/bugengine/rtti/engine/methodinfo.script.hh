@@ -42,6 +42,9 @@ published:
         Value getTag(raw< const Class > tagType) const;
 
     public:
+        staticarray< const Value > extraParameters;
+
+    public:
         minitl::format< 1024u > signature() const;
         Value (*call)(Value * params, u32 nparams);
     };
@@ -50,6 +53,7 @@ published:
     istring                                    name;
     staticarray< const Overload >              overloads;
     be_tag(Alias("?call")) raw< const Method > call;
+
 published:
     Value doCall(Value * params, u32 nparams) const;
 };

@@ -61,15 +61,15 @@ void Object::setMethod(ref< Reference > reference)
                     {
                         // error: param list incorrect
                         m_owner->error(m_line, minitl::format< 1024 >(
-                                                  "no overload for method %s could be found")
-                                                  | m_methodReference->name());
+                                                   "no overload for method %s could be found")
+                                                   | m_methodReference->name());
                         for(minitl::vector< OverloadMatch >::const_iterator it
                             = m_overloads.begin();
                             it != m_overloads.end(); ++it)
                         {
                             m_owner->info(m_line, minitl::format< 1024 >(" candidate: %s(%s)")
-                                                     | m_methodReference->name()
-                                                     | it->m_callInfo.overload->signature());
+                                                      | m_methodReference->name()
+                                                      | it->m_callInfo.overload->signature());
                         }
                         m_overloads.clear();
                     }
@@ -77,25 +77,28 @@ void Object::setMethod(ref< Reference > reference)
                 else
                 {
                     // error: call method is null
-                    be_unimplemented();
+                    m_owner->error(m_line,
+                                   minitl::format< 1024 >("%s does not have any constructor")
+                                       | m_methodReference->name());
                 }
             }
             else
             {
                 // error: call is not a method
-                be_unimplemented();
+                m_owner->error(m_line, minitl::format< 1024 >("%s has an invalid call object")
+                                           | m_methodReference->name());
             }
         }
         else
         {
             // error: no call
-            be_unimplemented();
+            m_owner->error(m_line, minitl::format< 1024 >("%s is not a callable object")
+                                       | m_methodReference->name());
         }
     }
     else
     {
-        // error: no value?
-        be_unimplemented();
+        // error: no value, it should already have been reported by the reference
     }
 }
 

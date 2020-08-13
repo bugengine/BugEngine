@@ -420,6 +420,7 @@ class OverloadedMethod(CppObject):
                     '        %s,\n'
                     '        ::be_type< %s >(),\n'
                     '        %s,\n'
+                    '        {0, 0},\n'
                     '        &%s\n'
                     '    }' % (
                         o[1], o[2], o[0].return_type, o[0].vararg and "true"

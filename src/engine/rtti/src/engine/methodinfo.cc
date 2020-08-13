@@ -48,7 +48,7 @@ Value Method::Overload::getTag(raw< const Class > type) const
 
 minitl::format< 1024u > Method::Overload::signature() const
 {
-    char buffer[1023];
+    char  buffer[1023];
     char* current = buffer;
     char* end     = buffer + 1022;
     *end          = 0;
@@ -58,7 +58,8 @@ minitl::format< 1024u > Method::Overload::signature() const
         for(const char* arg = argType; *arg && current != end; ++arg, ++current)
             *current = *arg;
         if(current != end) *(current++) = ' ';
-        for(const char* arg = params.elements[i].name.c_str(); *arg && current != end; ++arg, ++current)
+        for(const char* arg = params.elements[i].name.c_str(); *arg && current != end;
+            ++arg, ++current)
             *current = *arg;
         if(i < params.count - 1)
         {
@@ -79,7 +80,7 @@ minitl::format< 1024u > Method::Overload::signature() const
 Value Method::doCall(Value* params, u32 nparams) const
 {
     ArgInfo< Type >* args
-       = static_cast< ArgInfo< Type >* >(malloca(sizeof(ArgInfo< Type >) * nparams));
+        = static_cast< ArgInfo< Type >* >(malloca(sizeof(ArgInfo< Type >) * nparams));
     for(u32 i = 0; i < nparams; ++i)
     {
         new(&args[i]) ArgInfo< Type >(params[i].type());
@@ -88,7 +89,28 @@ Value Method::doCall(Value* params, u32 nparams) const
     CallInfo            c       = resolve(thisPtr, args, nparams);
     if(c.conversion < ConversionCost::s_incompatible)
     {
-        return c.overload->call(params, nparams);
+        if(c.overload->extraParameters.count == 0)
+            return c.overload->call(params, nparams);
+        else
+        {
+            Value* values = static_cast< Value* >(
+                malloca(sizeof(Value) * (nparams + c.overload->extraParameters.count)));
+            for(u32 i = 0; i < c.overload->extraParameters.count; ++i)
+            {
+                new(values + i) Value(c.overload->extraParameters[i]);
+            }
+            for(u32 i = 0; i < nparams; ++i)
+            {
+                new(values + c.overload->extraParameters.count + i) Value(params[i]);
+            }
+            Value v = c.overload->call(values, c.overload->extraParameters.count + nparams);
+            for(u32 i = c.overload->extraParameters.count + nparams; i > 0; --i)
+            {
+                values[i - 1].~Value();
+            }
+            freea(values);
+            return v;
+        }
     }
     else
     {

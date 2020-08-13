@@ -311,8 +311,6 @@ def run_pkg_config(conf, name):
         else:
             return lib_path
 
-    expand = {}
-    configs = {}
     lib_paths = conf.env.SYSTEM_LIBPATHS
     if conf.env.HOST in conf.env.VALID_PLATFORMS or sysroot:
         lib_paths += ['=/usr/lib', '=/usr/local/lib', '=/usr/libdata', '=/usr/local/libdata']
@@ -320,72 +318,86 @@ def run_pkg_config(conf, name):
         lib_paths.append('=/usr/lib/%s' % t)
         lib_paths.append('=/usr/libdata/%s' % t)
     lib_paths = [extend_lib_path(l) for l in lib_paths]
-    for l in lib_paths:
-        config_file = os.path.join(l, 'pkgconfig', name + '.pc')
-        config_file = os.path.normpath(config_file)
-        if os.path.isfile(config_file):
-            break
-    else:
-        raise Errors.WafError('No pkg-config file for library %s' % name)
 
-    if not sysroot:
-        os_name = platform.uname()[0].lower().split('-')[0]
-        if os_name == 'windows':
-            sysroot = os.path.dirname(config_file)
-            sysroot = os.path.dirname(sysroot)
-            sysroot = os.path.dirname(sysroot)
-            sysroot = os.path.dirname(sysroot)
+    seen = set([name])
+    def _run_pkg_config(name):
+        seen.add(name)
+        expand = {'pc_sysrootdir': sysroot if sysroot else '/'}
+        configs = {}
+        for l in lib_paths:
+            config_file = os.path.join(l, 'pkgconfig', name + '.pc')
+            config_file = os.path.normpath(config_file)
+            if os.path.isfile(config_file):
+                break
         else:
-            sysroot = ''
-    with open(config_file, 'r') as config:
-        lines = config.readlines()
-        for line in lines:
-            line = line.strip()
-            if not line:
-                continue
-            if line[0] == '#':
-                continue
-            pos = line.find('=')
-            if pos != -1:
-                var_name = line[:pos].strip()
-                value = line[pos + 1:].strip()
-                if value[0] == '"' and value[-1] == '"':
-                    value = value[1:-1]
-                if sysroot and value[0] == '/':
-                    value = os.path.join(sysroot, value[1:])
-                value = value.replace('${', '{')
-                value = value.format(value, **expand)
-                expand[var_name] = value
-                continue
-            pos = line.find(':')
-            if pos != -1:
-                var_name = line[:pos].strip()
-                value = line[pos + 1:].strip()
-                value = value.replace('${', '{')
-                value = value.format(value, **expand)
-                configs[var_name.strip()] = value.strip().split()
-    cflags = []
-    libs = []
-    ldflags = []
-    for f in configs.get('Cflags') or []:
-        if f.startswith('-I'):
-            include = f[2:]
-            if include[0] == '/' and not include.startswith(sysroot):
-                include = os.path.join(sysroot, include[1:])
-            cflags += [conf.env.IDIRAFTER, include]
-        else:
-            cflags.append(f)
-    for f in configs.get('Libs') or []:
-        if f.startswith('-l'):
-            libs.append(f[2:])
-        elif f[0:2] == '-L':
-            libdir = f[2:]
-            if libdir[0] == '/' and not libdir.startswith(sysroot):
-                libdir = os.path.join(sysroot, libdir)
-            ldflags += ['-L%s' % libdir]
-        else:
-            ldflags.append(f)
-    return cflags, libs, ldflags
+            raise Errors.WafError('No pkg-config file for library %s' % name)
+
+        with open(config_file, 'r') as config:
+            lines = config.readlines()
+            for line in lines:
+                line = line.strip()
+                if not line:
+                    continue
+                if line[0] == '#':
+                    continue
+                pos = line.find('=')
+                pos2 = line.find(':')
+                if pos != -1 and (pos2 == -1 or pos2 > pos):
+                    var_name = line[:pos].strip()
+                    value = line[pos + 1:].strip()
+                    if value[0] == '"' and value[-1] == '"':
+                        value = value[1:-1]
+                    if sysroot and value[0] == '/':
+                        value = os.path.join(sysroot, value[1:])
+                    value = value.replace('${', '{')
+                    value = value.format(value, **expand)
+                    expand[var_name] = value
+                    continue
+                pos = line.find(':')
+                if pos != -1:
+                    var_name = line[:pos].strip()
+                    value = line[pos + 1:].strip()
+                    value = value.replace('${', '{')
+                    value = value.format(value, **expand)
+                    configs[var_name.strip()] = sum([x.strip().split() for x in value.split(',')], [])
+        cflags = []
+        libs = []
+        ldflags = []
+        skip = False
+        for d in configs.get('Requires', []) + configs.get('Requires.private', []):
+            if skip:
+                skip = False
+            elif d in ('=', '<', '<=', '>', '>='):
+                skip = True
+            else:
+                if d not in seen:
+                    dep_flags = _run_pkg_config(d)
+                    cflags += dep_flags[0]
+                    libs += dep_flags[1]
+                    ldflags += dep_flags[2]
+        for f in configs.get('Cflags') or []:
+            if f.startswith('-I'):
+                include = f[2:]
+                if include[0] == '/' and not include.startswith(sysroot):
+                    include = os.path.join(sysroot, include[1:])
+                if include not in cflags:
+                    cflags += [conf.env.IDIRAFTER, include]
+            else:
+                if f not in cflags:
+                    cflags.append(f)
+        for f in configs.get('Libs') or []:
+            if f.startswith('-l'):
+                libs.append(f[2:])
+            elif f[0:2] == '-L':
+                libdir = f[2:]
+                if libdir[0] == '/' and not libdir.startswith(sysroot):
+                    libdir = os.path.join(sysroot, libdir)
+                if '-L%s' % libdir not in ldflags:
+                    ldflags += ['-L%s' % libdir]
+            else:
+                ldflags.append(f)
+        return cflags, libs, ldflags
+    return _run_pkg_config(name)
 
 
 @conf

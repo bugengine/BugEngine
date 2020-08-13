@@ -84,7 +84,7 @@ ClassID< minitl::array< T > >::trampoline_method_Index_overload_0(RTTI::Value* p
     be_forceuse(parameters);
     be_forceuse(parameterCount);
     return RTTI::Value(RTTI::Value::ByRef(
-       parameters[0].as< const minitl::array< T >& >().operator[](parameters[1].as< u32 >())));
+        parameters[0].as< const minitl::array< T >& >().operator[](parameters[1].as< u32 >())));
 }
 
 template < typename T >
@@ -95,7 +95,7 @@ ClassID< minitl::array< T > >::trampoline_method_Index_overload_1(RTTI::Value* p
     be_forceuse(parameters);
     be_forceuse(parameterCount);
     return RTTI::Value(RTTI::Value::ByRef(
-       parameters[0].as< minitl::array< T >& >().operator[](parameters[1].as< u32 >())));
+        parameters[0].as< minitl::array< T >& >().operator[](parameters[1].as< u32 >())));
 }
 
 template < typename T >
@@ -115,59 +115,67 @@ ClassID< minitl::array< T > >::trampoline_method_array_overload_0(RTTI::Value* p
 
 template < typename T >
 const RTTI::ObjectInfo ClassID< minitl::array< T > >::s_prop_value_type_object_value_type
-   = {{0}, {0}, istring(istring("value_type")), RTTI::Value(value_type)};
+    = {{0}, {0}, istring(istring("value_type")), RTTI::Value(value_type)};
 
 template < typename T >
 const RTTI::Method::Overload ClassID< minitl::array< T > >::s_method_array_overloads[]
-   = {{{0}, {0, 0}, be_type< minitl::array< T > >(), true, &trampoline_method_array_overload_0}};
+    = {{{0},
+        {0, 0},
+        be_type< minitl::array< T > >(),
+        true,
+        {0, 0},
+        &trampoline_method_array_overload_0}};
 
 template < typename T >
 const RTTI::Method::Parameter ClassID< minitl::array< T > >::s_method_size_overload_0_params[]
-   = {{{0},
-       istring("this"),
-       be_type< const minitl::array< T >& >(),
-       {&RTTI::Method::Parameter::s_noDefaultValue}}};
+    = {{{0},
+        istring("this"),
+        be_type< const minitl::array< T >& >(),
+        {&RTTI::Method::Parameter::s_noDefaultValue}}};
 
 template < typename T >
 const RTTI::Method::Overload ClassID< minitl::array< T > >::s_method_size_overloads[]
-   = {{{0},
-       {1, s_method_size_overload_0_params},
-       be_type< u32 >(),
-       false,
-       &trampoline_method_size_overload_0}};
+    = {{{0},
+        {1, s_method_size_overload_0_params},
+        be_type< u32 >(),
+        false,
+        {0, 0},
+        &trampoline_method_size_overload_0}};
 
 template < typename T >
 const RTTI::Method::Parameter ClassID< minitl::array< T > >::s_method_Index_overload_0_params[]
-   = {{{0},
-       istring("this"),
-       be_type< const minitl::array< T >& >(),
-       {&RTTI::Method::Parameter::s_noDefaultValue}},
-      {{0}, istring("index"), be_type< u32 >(), {&RTTI::Method::Parameter::s_noDefaultValue}}};
+    = {{{0},
+        istring("this"),
+        be_type< const minitl::array< T >& >(),
+        {&RTTI::Method::Parameter::s_noDefaultValue}},
+       {{0}, istring("index"), be_type< u32 >(), {&RTTI::Method::Parameter::s_noDefaultValue}}};
 
 template < typename T >
 const RTTI::Method::Parameter ClassID< minitl::array< T > >::s_method_Index_overload_1_params[]
-   = {{{0},
-       istring("this"),
-       be_type< minitl::array< T >& >(),
-       {&RTTI::Method::Parameter::s_noDefaultValue}},
-      {{0}, istring("index"), be_type< u32 >(), {&RTTI::Method::Parameter::s_noDefaultValue}}};
+    = {{{0},
+        istring("this"),
+        be_type< minitl::array< T >& >(),
+        {&RTTI::Method::Parameter::s_noDefaultValue}},
+       {{0}, istring("index"), be_type< u32 >(), {&RTTI::Method::Parameter::s_noDefaultValue}}};
 
 template < typename T >
 const RTTI::Method::Overload ClassID< minitl::array< T > >::s_method_Index_overloads[]
-   = {{{0},
-       {2, s_method_Index_overload_0_params},
-       be_type< const T& >(),
-       false,
-       &trampoline_method_Index_overload_0},
-      {{0},
-       {2, s_method_Index_overload_1_params},
-       be_type< T& >(),
-       false,
-       &trampoline_method_Index_overload_1}};
+    = {{{0},
+        {2, s_method_Index_overload_0_params},
+        be_type< const T& >(),
+        false,
+        {0, 0},
+        &trampoline_method_Index_overload_0},
+       {{0},
+        {2, s_method_Index_overload_1_params},
+        be_type< T& >(),
+        false,
+        {0, 0},
+        &trampoline_method_Index_overload_1}};
 
 template < typename T >
 const RTTI::ScriptingArrayAPI ClassID< minitl::array< T > >::scriptingArrayAPI
-   = {be_type< T >(), &array_size, &index, &indexConst};
+    = {be_type< T >(), &array_size, &index, &indexConst};
 
 template < typename T >
 const RTTI::ScriptingAPI ClassID< minitl::array< T > >::scriptingAPI = {{&scriptingArrayAPI}};
@@ -180,15 +188,15 @@ BE_EXPORT raw< const RTTI::Class > ClassID< minitl::array< T > >::klass()
      * (shared/edgcpfe/lower_init.c, line 6280)
      */
     static const RTTI::Method s_methods[3]
-       = {{istring("array"),
-           {1, ClassID< minitl::array< T > >::s_method_array_overloads},
-           {&s_methods[0]}},
-          {istring("size"),
-           {1, ClassID< minitl::array< T > >::s_method_size_overloads},
-           {&s_methods[1]}},
-          {istring("Index"),
-           {2, ClassID< minitl::array< T > >::s_method_Index_overloads},
-           {&s_methods[2]}}};
+        = {{istring("array"),
+            {1, ClassID< minitl::array< T > >::s_method_array_overloads},
+            {&s_methods[0]}},
+           {istring("size"),
+            {1, ClassID< minitl::array< T > >::s_method_size_overloads},
+            {&s_methods[1]}},
+           {istring("Index"),
+            {2, ClassID< minitl::array< T > >::s_method_Index_overloads},
+            {&s_methods[2]}}};
     static const RTTI::Class s_class = {"array",
                                         u32(sizeof(minitl::array< T >)),
                                         0,

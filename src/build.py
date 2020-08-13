@@ -16,6 +16,7 @@ def build_externals(bld):
     bld.external('3rdparty.graphics.OpenGL')
     bld.external('3rdparty.graphics.OpenGLES2')
     bld.external('3rdparty.graphics.freetype')
+    bld.external('3rdparty.gui.gtk3')
     bld.external('3rdparty.compute.OpenCL')
     bld.external('3rdparty.compute.CUDA')
     bld.external('3rdparty.physics.bullet')
@@ -158,6 +159,8 @@ def build_plugins(bld):
         ['3rdparty.graphics.freetype', '3rdparty.system.fontconfig']
     )
 
+    if bld.env.check_gtk3 or bld.env.PROJECTS:
+        bld.plugin('plugin.gui.gtk3', ['engine.bugengine'], ['3rdparty.gui.gtk3'])
     bld.plugin('tool.bugeditor.ui', ['engine.bugengine'])
 
 

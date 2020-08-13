@@ -100,11 +100,11 @@ RTTI::Value Settings_BugHelper< T >::trampoline_method_get_overload_0(RTTI::Valu
 
 template < typename T >
 const RTTI::Method::Overload Settings_BugHelper< T >::s_method_get_overloads[]
-   = {{{0}, {0, 0}, be_type< T& >(), false, &trampoline_method_get_overload_0}};
+    = {{{0}, {0, 0}, be_type< T& >(), false, {0, 0}, &trampoline_method_get_overload_0}};
 
 template < typename T >
 const RTTI::Method Settings_BugHelper< T >::s_methods[1]
-   = {{istring("get"), {1, s_method_get_overloads}, {0}}};
+    = {{istring("get"), {1, s_method_get_overloads}, {0}}};
 
 }  // namespace Settings
 

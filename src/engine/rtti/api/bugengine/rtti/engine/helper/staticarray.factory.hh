@@ -85,50 +85,55 @@ ClassID< RTTI::staticarray< T > >::callStaticArrayOperatorIndexConst(RTTI::Value
 {
     be_assert(paramCount == 2, "expected 2 parameter; received %d" | paramCount);
     return RTTI::Value(
-       params[0].as< const RTTI::staticarray< T >& >().operator[](params[1].as< u32 >()));
+        params[0].as< const RTTI::staticarray< T >& >().operator[](params[1].as< u32 >()));
 }
 
 template < typename T >
 const RTTI::Method::Parameter ClassID< RTTI::staticarray< T > >::s_index_0_params[2]
-   = {{{0},
-       istring("this"),
-       be_type< RTTI::staticarray< T >& >(),
-       {&::BugEngine::RTTI::Method::Parameter::s_noDefaultValue}},
-      {{0},
-       istring("index"),
-       be_type< u32 >(),
-       {&::BugEngine::RTTI::Method::Parameter::s_noDefaultValue}}};
+    = {{{0},
+        istring("this"),
+        be_type< RTTI::staticarray< T >& >(),
+        {&::BugEngine::RTTI::Method::Parameter::s_noDefaultValue}},
+       {{0},
+        istring("index"),
+        be_type< u32 >(),
+        {&::BugEngine::RTTI::Method::Parameter::s_noDefaultValue}}};
 
 template < typename T >
 const RTTI::Method::Parameter ClassID< RTTI::staticarray< T > >::s_index_1_params[2]
-   = {{{0},
-       istring("this"),
-       be_type< const RTTI::staticarray< T >& >(),
-       {&::BugEngine::RTTI::Method::Parameter::s_noDefaultValue}},
-      {{0},
-       istring("index"),
-       be_type< u32 >(),
-       {&::BugEngine::RTTI::Method::Parameter::s_noDefaultValue}}};
+    = {{{0},
+        istring("this"),
+        be_type< const RTTI::staticarray< T >& >(),
+        {&::BugEngine::RTTI::Method::Parameter::s_noDefaultValue}},
+       {{0},
+        istring("index"),
+        be_type< u32 >(),
+        {&::BugEngine::RTTI::Method::Parameter::s_noDefaultValue}}};
 
 template < typename T >
-const RTTI::Method::Overload ClassID< RTTI::staticarray< T > >::s_method_index_overloads[2] = {
-   {{0}, {2, s_index_0_params}, be_type< const T& >(), false, &callStaticArrayOperatorIndexConst},
-   {{0}, {2, s_index_1_params}, be_type< T& >(), false, &callStaticArrayOperatorIndex}};
+const RTTI::Method::Overload ClassID< RTTI::staticarray< T > >::s_method_index_overloads[2]
+    = {{{0},
+        {2, s_index_0_params},
+        be_type< const T& >(),
+        false,
+        {0, 0},
+        &callStaticArrayOperatorIndexConst},
+       {{0}, {2, s_index_1_params}, be_type< T& >(), false, {0, 0}, &callStaticArrayOperatorIndex}};
 
 template < typename T >
 const RTTI::Method::Parameter ClassID< RTTI::staticarray< T > >::s_size_params[1]
-   = {{{0},
-       istring("this"),
-       be_type< const RTTI::staticarray< T >& >(),
-       {&::BugEngine::RTTI::Method::Parameter::s_noDefaultValue}}};
+    = {{{0},
+        istring("this"),
+        be_type< const RTTI::staticarray< T >& >(),
+        {&::BugEngine::RTTI::Method::Parameter::s_noDefaultValue}}};
 
 template < typename T >
 const RTTI::Method::Overload ClassID< RTTI::staticarray< T > >::s_method_size_overloads[1]
-   = {{{0}, {1, s_size_params}, be_type< u32 >(), false, &callStaticArraySize}};
+    = {{{0}, {1, s_size_params}, be_type< u32 >(), false, {0, 0}, &callStaticArraySize}};
 
 template < typename T >
 const RTTI::ScriptingArrayAPI ClassID< RTTI::staticarray< T > >::scriptingArrayAPI
-   = {value_type, &array_size, &index, &indexConst};
+    = {value_type, &array_size, &index, &indexConst};
 
 template < typename T >
 const RTTI::ScriptingAPI ClassID< RTTI::staticarray< T > >::scriptingAPI = {{&scriptingArrayAPI}};
@@ -141,27 +146,27 @@ BE_EXPORT raw< const RTTI::Class > ClassID< RTTI::staticarray< T > >::klass()
      * (shared/edgcpfe/lower_init.c, line 6280)
      */
     static const RTTI::Method s_methods[2]
-       = {{RTTI::Class::nameOperatorIndex(),
-           {2, ClassID< RTTI::staticarray< T > >::s_method_index_overloads},
-           {&s_methods[0]}},
-          {istring("size"),
-           {1, ClassID< RTTI::staticarray< T > >::s_method_size_overloads},
-           {&s_methods[1]}}};
+        = {{RTTI::Class::nameOperatorIndex(),
+            {2, ClassID< RTTI::staticarray< T > >::s_method_index_overloads},
+            {&s_methods[0]}},
+           {istring("size"),
+            {1, ClassID< RTTI::staticarray< T > >::s_method_size_overloads},
+            {&s_methods[1]}}};
     static const ::BugEngine::RTTI::Class s_class
-       = {istring(minitl::format< 1024u >("staticarray<%s>") | be_type< T >().name()),
-          u32(sizeof(RTTI::staticarray< T >)),
-          0,
-          RTTI::ClassType_Array,
-          {be_bugengine_Namespace().m_ptr},
-          {be_class< void >().m_ptr},
-          {0},
-          {0},
-          {0, 0},
-          {2, s_methods},
-          {0},
-          {&ClassID< RTTI::staticarray< T > >::scriptingAPI},
-          &RTTI::wrap< RTTI::staticarray< T > >::copy,
-          &RTTI::wrap< RTTI::staticarray< T > >::destroy};
+        = {istring(minitl::format< 1024u >("staticarray<%s>") | be_type< T >().name()),
+           u32(sizeof(RTTI::staticarray< T >)),
+           0,
+           RTTI::ClassType_Array,
+           {be_bugengine_Namespace().m_ptr},
+           {be_class< void >().m_ptr},
+           {0},
+           {0},
+           {0, 0},
+           {2, s_methods},
+           {0},
+           {&ClassID< RTTI::staticarray< T > >::scriptingAPI},
+           &RTTI::wrap< RTTI::staticarray< T > >::copy,
+           &RTTI::wrap< RTTI::staticarray< T > >::destroy};
     raw< const RTTI::Class > result = {&s_class};
     return result;
 }
