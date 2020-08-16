@@ -6,7 +6,7 @@ BULLET_SOURCES = 'https://github.com/bulletphysics/bullet3/archive/2.87.tar.gz'
 BULLET_BINARIES = 'https://github.com/bugengine/BugEngine/releases/download/prebuilt-%(platform)s-%(abi)s/bullet-2.87-%(platform)s-%(arch)s-%(abi)s.tgz'
 
 
-def setup_system(conf):
+def setup_pkgconfig(conf):
     if conf.env.CXX_NAME != 'sun':     # sunCC does not have the same ABI on Linux
         try:
             conf.pkg_config('bullet')
@@ -14,8 +14,21 @@ def setup_system(conf):
             return False
         else:
             conf.env.BULLET_BINARY = True
-            conf.end_msg('from system')
+            conf.end_msg('from pkg-config')
             return True
+    else:
+        return False
+
+
+def setup_system(conf):
+    if conf.check_lib(['BulletSoftBody', 'BulletDynamics', 'BulletCollision', 'LinearMath'],
+                      var='bullet',
+                      includepath=['=/usr/include/bullet', '=/usr/local/include/bullet'],
+                      includes=['LinearMath/btAlignedAllocator.h'],
+                      functions=['btAlignedAllocSetCustom']):
+        conf.env.BULLET_BINARY = True
+        conf.end_msg('from system')
+        return True
     else:
         return False
 
@@ -50,6 +63,8 @@ def setup(conf):
     conf.start_msg_setup()
     if conf.env.PROJECTS:
         found = setup_source(conf)
+    if not found and Options.options.bullet_package in ('best', 'pkgconfig'):
+        found = setup_pkgconfig(conf)
     if not found and Options.options.bullet_package in ('best', 'system'):
         found = setup_system(conf)
     if not found and Options.options.bullet_package in ('best', 'prebuilt'):

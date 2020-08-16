@@ -256,7 +256,7 @@ class Clang(Configure.ConfigurationContext.GnuCompiler):
                 result.append(line[:index])
                 line = line[index + 1:]
         except ValueError:
-            pass
+            result.append(line)
         return result
 
 

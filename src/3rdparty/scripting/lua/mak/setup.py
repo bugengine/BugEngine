@@ -6,13 +6,28 @@ LUA_SOURCES = 'https://www.lua.org/ftp/lua-5.3.5.tar.gz'
 LUA_BINARIES = 'https://github.com/bugengine/BugEngine/releases/download/prebuilt-%(platform)s-%(abi)s/lua-5.3.5-%(platform)s-%(arch)s-%(abi)s.tgz'
 
 
-def setup_system(conf):
+def setup_pkgconfig(conf):
     for v in '-5.4', '5.4', '-5.3', '5.3', '-5.2', '5.2', '-5.1', '5.1':
         try:
             conf.pkg_config('lua%s' % v, var='lua')
-        except Exception as e:
+        except WafError as e:
             pass
         else:
+            conf.env.LUA_BINARY = True
+            conf.end_msg('version %s from pkg-config' % v)
+            return True
+    else:
+        return False
+
+
+def setup_system(conf):
+    for v in '-5.4', '5.4', '-5.3', '5.3', '-5.2', '5.2', '-5.1', '5.1':
+        version = '%s%s' % (v[-3], v[-1])
+        if conf.check_lib('lua%s' % v,
+                          var='lua',
+                          includepath=['=/usr/include/lua%s' % version, '=/usr/local/include/lua%s' % version],
+                          includes_externc=['lua.h'],
+                          functions=['lua_newstate']):
             conf.env.LUA_BINARY = True
             conf.end_msg('version %s from system' % v)
             return True
@@ -50,6 +65,8 @@ def setup(conf):
     found = False
     if conf.env.PROJECTS:
         found = setup_source(conf)
+    if not found and Options.options.lua_package in ('best', 'pkgconfig'):
+        found = setup_pkgconfig(conf)
     if not found and Options.options.lua_package in ('best', 'system'):
         found = setup_system(conf)
     if not found and Options.options.lua_package in ('best', 'prebuilt'):

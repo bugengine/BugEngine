@@ -5,16 +5,29 @@ import os
 FT_SOURCES = 'https://download.savannah.gnu.org/releases/freetype/freetype-2.10.2.tar.gz'
 FT_BINARIES = 'https://github.com/bugengine/BugEngine/releases/download/prebuilt-%(platform)s-%(abi)s/freetype-2.10.2-%(platform)s-%(arch)s-%(abi)s.tgz'
 
-
-def setup_system(conf):
+def setup_pkgconfig(conf):
     try:
         conf.pkg_config('freetype2', var='freetype')
-    except Exception as e:
+    except WafError as e:
         return False
     else:
         conf.env.FREETYPE_BINARY = True
+        conf.end_msg('from pkg-config')
+        return True
+
+
+def setup_system(conf):
+    if conf.check_lib(
+        'freetype',
+        var='freetype',
+        includes=['ft2build.h', 'freetype/freetype.h', 'freetype/t1tables.h'],
+        includepath=['=/usr/include/freetype2', '=/usr/local/include/freetype2'],
+        functions=['FT_Get_PS_Font_Info']
+    ):
+        conf.env.FREETYPE_BINARY = True
         conf.end_msg('from system')
         return True
+    return False
 
 
 def setup_prebuilt(conf):
@@ -51,6 +64,8 @@ def setup(conf):
     found = False
     if conf.env.PROJECTS:
         found = setup_source(conf)
+    if not found and Options.options.freetype_package in ('best', 'pkgconfig'):
+        found = setup_pkgconfig(conf)
     if not found and Options.options.freetype_package in ('best', 'system'):
         found = setup_system(conf)
     if not found and Options.options.freetype_package in ('best', 'prebuilt'):

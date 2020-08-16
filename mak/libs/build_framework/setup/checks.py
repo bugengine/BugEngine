@@ -35,6 +35,15 @@ int main(int argc, const char *argv[])
 { return EXIT_SUCCESS; }
 """
 
+def extend_path(path, sysroot):
+    if path[0] == '=':
+        if sysroot:
+            return os.path.join(sysroot, path[2:])
+        else:
+            return path[1:]
+    else:
+        return path
+
 
 @feature('cxxtest')
 def dummy_cxxtest_feature(task_gen):
@@ -141,6 +150,7 @@ def check_lib(
         else:
             return string
 
+    sysroot = self.env.SYSROOT or ''
     libname = Utils.to_list(libname)
     env = self.env.derive()
     env.detach()
@@ -157,26 +167,24 @@ def check_lib(
             features='link_library',
             msg='check for libraries %s' % cut(','.join(libname)),
             libname=libname,
-            libpath=libpath,
+            libpath=[extend_path(p, sysroot) for p in libpath],
             code=code % {
                 'include': '\n'.join(['#include <%s>' % i for i in includes]),
                 'include_externc': '\n'.join(['#include <%s>' % i for i in includes_externc]),
                 'function': functions
             },
-            includepath=includepath,
+            includepath=[extend_path(p, sysroot) for p in includepath],
             use=[],
             envname=self.env.TOOLCHAIN
         )
     except self.errors.ConfigurationError as e:
-        #Logs.pprint('YELLOW', '-%s' % var, sep=' ')
         pass
     else:
         self.env['check_%s' % var] = True
         self.env.append_unique('check_%s_libs' % var, libname)
-        self.env.append_unique('check_%s_libpath' % var, libpath)
-        self.env.append_unique('check_%s_includes' % var, includepath)
+        self.env.append_unique('check_%s_libpath' % var, [extend_path(p, sysroot) for p in libpath])
+        self.env.append_unique('check_%s_includes' % var, [extend_path(p, sysroot) for p in includepath])
         self.env.append_unique('check_%s_defines' % var, defines)
-
     return self.env['check_%s' % var]
 
 
@@ -188,6 +196,7 @@ def check_header(self, headername, var='', libpath=[], includepath=[], code=USE_
         else:
             return string
 
+    sysroot = self.env.SYSROOT or ''
     headername = Utils.to_list(headername)
     if not var: var = self.path.parent.name
     try:
@@ -196,9 +205,9 @@ def check_header(self, headername, var='', libpath=[], includepath=[], code=USE_
             features='link_library',
             msg='check for header %s' % cut(','.join(headername)),
             libname=[],
-            libpath=libpath,
+            libpath=[extend_path(p, sysroot) for p in libpath],
             code='\n'.join(["#include <%s>" % h for h in headername]) + '\n' + code,
-            includepath=includepath,
+            includepath=[extend_path(p, sysroot) for p in includepath],
             use=[],
             envname=self.env.TOOLCHAIN
         )
@@ -206,8 +215,8 @@ def check_header(self, headername, var='', libpath=[], includepath=[], code=USE_
         pass
     else:
         self.env['check_%s' % var] = True
-        self.env.append_unique('check_%s_includes' % var, includepath)
-        self.env.append_unique('check_%s_libpath' % var, libpath)
+        self.env.append_unique('check_%s_includes' % var, [extend_path(p, sysroot) for p in includepath])
+        self.env.append_unique('check_%s_libpath' % var, [extend_path(p, sysroot) for p in libpath])
     return self.env['%s_includess' % var]
 
 
@@ -302,22 +311,13 @@ def run_pkg_config(conf, name):
         raise Errors.WafError('turned off')
     sysroot = conf.env.SYSROOT or ''
 
-    def extend_lib_path(lib_path):
-        if lib_path[0] == '=':
-            if sysroot:
-                return os.path.join(sysroot, lib_path[2:])
-            else:
-                return lib_path[1:]
-        else:
-            return lib_path
-
     lib_paths = conf.env.SYSTEM_LIBPATHS[:]
     if conf.env.HOST in conf.env.VALID_PLATFORMS or sysroot:
-        lib_paths += ['=/usr/share', '=/usr/local/share']
+        lib_paths += ['=/usr/share', '=/usr/local/share', '=/usr/libdata', '=/usr/local/libdata']
     for t in conf.env.TARGETS:
         lib_paths.append('=/usr/lib/%s' % t)
         lib_paths.append('=/usr/libdata/%s' % t)
-    lib_paths = [extend_lib_path(l) for l in lib_paths]
+    lib_paths = [extend_path(l, sysroot) for l in lib_paths]
 
     seen = set([name])
     def _run_pkg_config(name):
@@ -356,15 +356,20 @@ def run_pkg_config(conf, name):
                 pos = line.find(':')
                 if pos != -1:
                     var_name = line[:pos].strip()
+                    var_name = var_name.strip()
                     value = line[pos + 1:].strip()
                     value = value.replace('${', '{')
                     value = value.format(value, **expand)
-                    configs[var_name.strip()] = sum([x.strip().split() for x in value.split(',')], [])
+                    value = value.strip()
+                    if var_name in ('Requires', 'Requires.private'):
+                        configs[var_name] = sum([x.strip().split() for x in value.split(',')], [])
+                    else:
+                        configs[var_name] = [x.strip() for x in value.split()]
         cflags = []
         libs = []
         ldflags = []
         skip = False
-        for d in configs.get('Requires', []) + configs.get('Requires.private', []):
+        for d in configs.get('Requires', []): # + configs.get('Requires.private', []):
             if skip:
                 skip = False
             elif d in ('=', '<', '<=', '>', '>='):
@@ -397,6 +402,7 @@ def run_pkg_config(conf, name):
             else:
                 ldflags.append(f)
         return cflags, libs, ldflags
+
     return _run_pkg_config(name)
 
 

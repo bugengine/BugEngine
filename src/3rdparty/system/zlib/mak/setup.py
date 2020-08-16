@@ -7,26 +7,48 @@ ZLIB_BINARIES = 'https://github.com/bugengine/BugEngine/releases/download/prebui
 MINIZIP_BINARIES = 'https://github.com/bugengine/BugEngine/releases/download/prebuilt-%(platform)s-%(abi)s/minizip-1.2.11-%(platform)s-%(arch)s-%(abi)s.tgz'
 
 
-def setup_system_zlib(conf):
+def setup_pkgconfig_zlib(conf):
     try:
         conf.pkg_config('zlib', var='zlib')
     except Exception as e:
         return False
     else:
         conf.env.ZLIB_BINARY = True
-        conf.end_msg('from system')
+        conf.end_msg('from pkg-config')
         return True
 
 
-def setup_system_minizip(conf):
+def setup_pkgconfig_minizip(conf):
     try:
         conf.pkg_config('minizip', var='minizip')
     except Exception as e:
         return False
     else:
         conf.env.MINIZIP_BINARY = True
+        conf.end_msg('from pkg-config')
+        return True
+
+
+def setup_system_zlib(conf):
+    if conf.check_lib('z', var='zlib', includes=['zlib.h'], functions=['deflate']):
+        conf.env.ZLIB_BINARY = True
         conf.end_msg('from system')
         return True
+    else:
+        return False
+
+
+def setup_system_minizip(conf):
+    if conf.check_lib('minizip',
+                      var='minizip',
+                      includepath=['=/usr/include/minizip', '=/usr/local/include/minizip'],
+                      includes=['unzip.h'],
+                      functions=['unzClose']):
+        conf.env.MINIZIP_BINARY = True
+        conf.end_msg('from system')
+        return True
+    else:
+        return False
 
 
 def setup_prebuilt_zlib(conf):
@@ -85,6 +107,8 @@ def setup(conf):
     found = False
     if conf.env.PROJECTS:
         found = setup_source_zlib(conf)
+    if not found and Options.options.zlib_package in ('best', 'pkgconfig'):
+        found = setup_pkgconfig_zlib(conf)
     if not found and Options.options.zlib_package in ('best', 'system'):
         found = setup_system_zlib(conf)
     if not found and Options.options.zlib_package in ('best', 'prebuilt'):
@@ -98,6 +122,8 @@ def setup(conf):
     found = False
     if conf.env.PROJECTS:
         found = setup_source_minizip(conf)
+    if not found and Options.options.minizip_package in ('best', 'pkgconfig'):
+        found = setup_pkgconfig_minizip(conf)
     if not found and Options.options.minizip_package in ('best', 'system'):
         found = setup_system_minizip(conf)
     if not found and Options.options.minizip_package in ('best', 'prebuilt'):

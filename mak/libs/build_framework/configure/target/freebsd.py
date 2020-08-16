@@ -46,13 +46,21 @@ class FreeBSD(Configure.ConfigurationContext.Platform):
             if 'GCC' in compiler.NAMES:
                 gcc_name = 'gcc' + compiler.compiler_c.split('gcc')[-1]
                 gcc_libpath = os.path.join(os.path.dirname(os.path.dirname(compiler.compiler_c)), 'lib32')
-                if os.path.isdir('%s/usr/lib32' % sysroot):
-                    env.append_unique('LINKFLAGS', ['-B%s/usr/lib32' % sysroot])
                 if os.path.isdir(sysroot + gcc_libpath):
                     env.append_unique('LINKFLAGS', ['-B%s%s' % (sysroot, gcc_libpath)])
                 if os.path.isdir(sysroot + os.path.join(gcc_libpath, gcc_name)):
                     env.append_unique('LINKFLAGS', ['-B%s%s' % (sysroot, os.path.join(gcc_libpath, gcc_name))])
+                if os.path.isdir('%s/usr/lib32' % sysroot):
+                    env.append_unique('LINKFLAGS', ['-B%s/usr/lib32' % sysroot])
+                if os.path.isdir('%s/usr/local/lib32' % sysroot):
+                    env.append_unique('LINKFLAGS', ['-B%s/usr/local/lib32' % sysroot])
+            else:
+                if os.path.isdir('%s/usr/lib32' % sysroot):
+                    env.append_unique('LINKFLAGS', ['-L%s/usr/lib32' % sysroot])
+                if os.path.isdir('%s/usr/local/lib32' % sysroot):
+                    env.append_unique('LINKFLAGS', ['-L%s/usr/local/lib32' % sysroot])
         else:
+            env.append_unique('LINKFLAGS', ['-L%s/usr/local/lib' % sysroot])
             ldconfig = '%s/usr/local/libdata/ldconfig' % (compiler.sysroot or '')
         libpaths = []
         for ldconfig_conf in os.listdir(ldconfig):

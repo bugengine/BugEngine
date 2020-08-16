@@ -36,4 +36,4 @@ def setup(conf):
                     conf.end_msg('not found', color='YELLOW')
             else:
                 conf.env.SYSTEM_OPENGL = True
-                conf.end_msg('from system')
+                conf.end_msg('from pkg-config')
