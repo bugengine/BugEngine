@@ -52,12 +52,16 @@ def find_cuda_paths(configuration_context):
         try:
             developer_dirs = os.listdir('/Developer/NVIDIA')
         except OSError:
-            local_dirs = os.listdir('/usr/local')
-            for local_dir in local_dirs:
-                if local_dir.startswith('cuda'):
-                    local_dir = os.path.join('/usr/local', local_dir)
-                    if os.path.isdir(local_dir) and not os.path.islink(local_dir):
-                        bindirs.append(os.path.join(local_dir, 'bin'))
+            try:
+                local_dirs = os.listdir('/usr/local')
+            except OSError:
+                pass
+            else:
+                for local_dir in local_dirs:
+                    if local_dir.startswith('cuda'):
+                        local_dir = os.path.join('/usr/local', local_dir)
+                        if os.path.isdir(local_dir) and not os.path.islink(local_dir):
+                            bindirs.append(os.path.join(local_dir, 'bin'))
         else:
             for cuda_dir in developer_dirs:
                 cuda_dir = os.path.join('/Developer/NVIDIA', cuda_dir)
