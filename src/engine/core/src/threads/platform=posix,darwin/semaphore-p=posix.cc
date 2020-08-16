@@ -43,10 +43,8 @@ void Semaphore::release(int count)
 Threads::Waitable::WaitResult Semaphore::wait()
 {
     int result;
-    do
-    {
-        result = sem_wait(reinterpret_cast< sem_t* >(m_data));
-    } while(result != 0 || errno == EINTR);
+    while ((result = sem_wait(reinterpret_cast< sem_t* >(m_data))) == -1 && errno == EINTR)
+        continue;
     if(result == 0)
     {
         return Finished;

@@ -7,6 +7,7 @@
 #include <bugengine/minitl/stdafx.h>
 #include <bugengine/minitl/swap.hh>
 #include <cstring>
+#include <string.h>
 
 namespace minitl {
 

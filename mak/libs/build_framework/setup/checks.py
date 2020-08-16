@@ -311,9 +311,9 @@ def run_pkg_config(conf, name):
         else:
             return lib_path
 
-    lib_paths = conf.env.SYSTEM_LIBPATHS
+    lib_paths = conf.env.SYSTEM_LIBPATHS[:]
     if conf.env.HOST in conf.env.VALID_PLATFORMS or sysroot:
-        lib_paths += ['=/usr/lib', '=/usr/local/lib', '=/usr/libdata', '=/usr/local/libdata']
+        lib_paths += ['=/usr/share', '=/usr/local/share']
     for t in conf.env.TARGETS:
         lib_paths.append('=/usr/lib/%s' % t)
         lib_paths.append('=/usr/libdata/%s' % t)
@@ -345,9 +345,9 @@ def run_pkg_config(conf, name):
                 if pos != -1 and (pos2 == -1 or pos2 > pos):
                     var_name = line[:pos].strip()
                     value = line[pos + 1:].strip()
-                    if value[0] == '"' and value[-1] == '"':
+                    if len(value) > 0 and value[0] == '"' and value[-1] == '"':
                         value = value[1:-1]
-                    if sysroot and value[0] == '/':
+                    if sysroot and len(value) > 0 and value[0] == '/':
                         value = os.path.join(sysroot, value[1:])
                     value = value.replace('${', '{')
                     value = value.format(value, **expand)

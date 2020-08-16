@@ -12,6 +12,7 @@ class SunCC(Configure.ConfigurationContext.GnuCompiler):
         '__sun': 'sunos',
     }
     SUNCC_ARCHS = {
+        '__i386': 'x86',
         '__i386__': 'x86',
         '__x86_64__': 'amd64',
     }
@@ -203,8 +204,6 @@ class SunCC(Configure.ConfigurationContext.GnuCompiler):
         Configure.ConfigurationContext.GnuCompiler.load_in_env(self, conf, platform)
         v = conf.env
         v['RPATH_ST'] = '-R%s'
-        cpp = conf.detect_executable('cpp')
-        v.CC_CPP = Utils.to_list(cpp) + ['-E']
         if platform.NAME == 'Linux':
             v.IDIRAFTER = '-I'
             #v.STATIC = 1
