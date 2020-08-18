@@ -17,7 +17,6 @@ class vscode(Build.BuildContext):
     SETTINGS = '  {\n' \
                '    "editor.formatOnSave": true,\n' \
                '    "editor.formatOnType": true,\n' \
-               '    "python.formatting.provider": "yapf",\n' \
                '    "python.linting.mypyArgs": [\n' \
                '      "--follow-imports=silent"\n' \
                '    ],\n' \
@@ -27,7 +26,7 @@ class vscode(Build.BuildContext):
                '      "--style=%(bugenginepath)s/setup.cfg"\n' \
                '    ],\n' \
                '    "python.formatting.autopep8Path": "yapf",\n' \
-               '    "python.formatting.provider": "autopep8"\n' \
+               '    "python.formatting.provider": "autopep8",\n' \
                '    "python.autoComplete.extraPaths": [\n' \
                '      "%(bugenginepath)s/mak/libs"\n' \
                '    ],\n' \
