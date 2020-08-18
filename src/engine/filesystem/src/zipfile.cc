@@ -65,7 +65,7 @@ void ZipFile::doFillBuffer(weak< File::Ticket > ticket) const
         }
     }
 
-    if(unzeof(m_handle))
+    if(unzEndOfFile(m_handle))
     {
         s_fileOffset  = 0;
         s_currentFile = 0;
