@@ -2,7 +2,7 @@ from waflib.Errors import WafError
 
 
 def setup(configuration_context):
-    third_party_node = configuration_context.path.make_node('3rdparty')
+    third_party_node = configuration_context.path.make_node('bugengine/3rdparty')
     for category in third_party_node.listdir():
         if category[0] != '.':
             category_node = third_party_node.make_node(category)

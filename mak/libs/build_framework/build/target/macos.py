@@ -5,7 +5,7 @@ import os
 
 
 def build(bld):
-    bld.platforms.append(bld.external('3rdparty.system.cocoa'))
+    bld.platforms.append(bld.external('bugengine.3rdparty.system.cocoa'))
 
     def wrap_class(cls_name):
         cls = Task.classes.get(cls_name, None)

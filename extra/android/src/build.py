@@ -7,17 +7,17 @@ def build(bld):
     root = bld.path.parent
     tg = task_gen(bld=bld, target='package')
 
-    source_node = root.find_node('src/engine/launcher/src')
-    resource_node = root.find_node('src/engine/launcher/res')
+    source_node = root.find_node('src/bugengine/launcher/src')
+    resource_node = root.find_node('src/bugengine/launcher/res')
     resources = bld(
-        target='engine.android.resource',
+        target='bugengine.android.resource',
         features=['bugengine:android:aapt_resource'],
         resource=resource_node,
         destfile=tg.make_bld_node('apk', '', 'resources.apk')
     )
     out_dir = tg.make_bld_node('jar', '', '')
     launcher = bld(
-        target='engine.android.launcher',
+        target='bugengine.android.launcher',
         features=['cxx', 'javac', 'dex'],
         source_nodes=[source_node, resource_node],
         destfile='classes.dex'
@@ -38,9 +38,8 @@ def build(bld):
     bld.add_to_group(tg)
     tg.install_files(os.path.join(bld.env.PREFIX, bld.optim), package_final, original_install=True)
 
-    #bld.platforms.append(bld.external('3rdparty.android.stl-gabi++'))
-    bld.platforms.append(bld.external('3rdparty.android.libc++'))
-    bld.platforms.append(bld.external('3rdparty.android.libklcompat'))
+    bld.platforms.append(bld.external('bugengine.3rdparty.android.libc++'))
+    bld.platforms.append(bld.external('bugengine.3rdparty.android.libklcompat'))
 
 
 def plugin(bld):

@@ -1,0 +1,7 @@
+#include "src/bugengine/core/src/memory/system-p=posix,darwin.cc"
+#include "src/bugengine/core/src/threads/platform=posix,darwin/criticalsection.cc"
+#include "src/bugengine/core/src/threads/platform=posix,darwin/event.cc"
+#include "src/bugengine/core/src/threads/platform=posix,darwin/mutex.cc"
+#include "src/bugengine/core/src/threads/platform=posix,darwin/semaphore-p=posix.cc"
+#include "src/bugengine/core/src/threads/platform=posix,darwin/thread.cc"
+#include "src/bugengine/core/src/timer-p=posix.cc"

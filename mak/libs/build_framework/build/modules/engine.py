@@ -26,7 +26,7 @@ def engine(
         bld.launcher = bld.multiarch(
             name, [
                 engine(
-                    bld, name, depends + ['3rdparty.system.console'], private_depends, path, features, extra_includes,
+                    bld, name, depends + ['bugengine.3rdparty.system.console'], private_depends, path, features, extra_includes,
                     extra_defines, extra_public_includes, extra_public_defines, source_list, conditions, root_namespace,
                     env
                 ) for env in bld.multiarch_envs

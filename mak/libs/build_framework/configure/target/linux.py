@@ -51,8 +51,8 @@ class Linux(Configure.ConfigurationContext.Platform):
         env.DEPLOY_LIBDIR = 'lib'
         env.DEPLOY_INCLUDEDIR = 'include'
         env.DEPLOY_DATADIR = os.path.join('share', 'bugengine')
-        env.DEPLOY_PLUGINDIR = os.path.join('share', 'bugengine', 'plugin')
-        env.DEPLOY_KERNELDIR = os.path.join('share', 'bugengine', 'kernel')
+        env.DEPLOY_PLUGINDIR = os.path.join(env.DEPLOY_RUNBINDIR, 'bugengine')
+        env.DEPLOY_KERNELDIR = os.path.join(env.DEPLOY_RUNBINDIR, 'bugengine')
         env.pymodule_PATTERN = '%s.so'
         env.STRIP_BINARY = True
 
@@ -64,7 +64,13 @@ class Linux(Configure.ConfigurationContext.Platform):
         else:
             env.COMPILER_ABI = 'sun'
         env.append_unique('DEFINES', ['_GNU_SOURCE'])
-        env.RPATH = ['$ORIGIN/../share/bugengine/plugin:$ORIGIN/../lib:$ORIGIN:$ORIGIN/../plugin:$ORIGIN/../../../lib']
+        env.RPATH = [
+            ':'.join(
+                ['$ORIGIN', '$ORIGIN/../lib/', '$ORIGIN/../lib/bugengine/'] +
+                ['$ORIGIN/../lib/%s' % target for target in compiler.targets] +
+                ['$ORIGIN/../lib/%s/bugengine' % target for target in compiler.targets]
+            )
+        ]
         env.append_unique('LDFLAGS', ['-ldl', '-lrt', '-lpthread', '-lm', '-lc'])
         env.append_unique('LINKFLAGS_dynamic', ['-Wl,--export-dynamic', '-Wl,-E', '-Wl,-z,origin'])
 

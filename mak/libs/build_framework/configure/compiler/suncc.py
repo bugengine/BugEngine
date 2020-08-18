@@ -230,6 +230,7 @@ class SunCC(Configure.ConfigurationContext.GnuCompiler):
             v.CXXFLAGS_exportall = ['-xldscope=symbolic']
             v.SHLIB_MARKER = '-Bdynamic'
             v.STLIB_MARKER = '-Bstatic'
+        v.TARGETS = self.targets
 
     def populate_useful_variables(self, conf, sysroot):
         pass

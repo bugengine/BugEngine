@@ -1,7 +1,0 @@
-#include "src/engine/core/src/timer-p=posix.cc"
-#include "src/engine/core/src/threads/platform=posix,darwin/criticalsection.cc"
-#include "src/engine/core/src/threads/platform=posix,darwin/event.cc"
-#include "src/engine/core/src/threads/platform=posix,darwin/mutex.cc"
-#include "src/engine/core/src/threads/platform=posix,darwin/semaphore-p=posix.cc"
-#include "src/engine/core/src/threads/platform=posix,darwin/thread.cc"
-#include "src/engine/core/src/memory/system-p=posix,darwin.cc"

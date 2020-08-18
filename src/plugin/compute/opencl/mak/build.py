@@ -68,8 +68,7 @@ def create_cl_kernels(task_gen):
                     kernel=kernel,
                     features=[
                         'cxx', task_gen.bld.env.STATIC and 'cxxobjects' or 'cxxshlib', 'bugengine:cxx',
-                        'bugengine:shared_lib', 'bugengine:kernel', 'bugengine:kernel_create',
-                        'bugengine:cl:kernel_create'
+                        'bugengine:kernel', 'bugengine:kernel_create', 'bugengine:cl:kernel_create'
                     ],
                     pchstop=tgen.preprocess.pchstop,
                     defines=tgen.defines + [
