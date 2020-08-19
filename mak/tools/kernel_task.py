@@ -16,6 +16,9 @@ private:
     ref<BugEngine::Task::KernelTask> m_task;
     %(callbacks)s
 private:
+    typedef ::BugEngine::Plugin::ResourceHook< ::BugEngine::KernelScheduler::Kernel > ResourceHook;
+    typedef ::BugEngine::Plugin::PluginHook< ResourceHook > PluginHook;
+    static BE_EXPORT PluginHook g_kernelHook;
     minitl::array< weak<BugEngine::KernelScheduler::IParameter> > makeParameters() const;
 published:
     %(argument_outs)s
@@ -52,7 +55,7 @@ TEMPLATE_H = """
 
 TEMPLATE_CLASS_CC = """
 static ref< ::BugEngine::KernelScheduler::Kernel > s_%(Name)sKernel%(KernelName)s = ref< ::BugEngine::KernelScheduler::Kernel >::create(::BugEngine::Arena::task(), s_%(Name)sKernelCode, ::BugEngine::istring("%(kernelName)s"));
-BE_EXPORT ::BugEngine::Plugin::PluginHook< BugEngine::Plugin::ResourceHook< ::BugEngine::KernelScheduler::Kernel > > g_%(Name)sKernel%(KernelName)sHook(::BugEngine::Plugin::ResourceHook< ::BugEngine::KernelScheduler::Kernel >(s_%(Name)sKernel%(KernelName)s));
+%(KernelName)s::PluginHook %(KernelName)s::g_kernelHook = %(KernelName)s::PluginHook(%(KernelName)s::ResourceHook(s_%(Name)sKernel%(KernelName)s));
 
 %(KernelName)s::%(KernelName)s(%(argument_params)s)
     :   %(argument_assign)sm_task(ref<BugEngine::Task::KernelTask>::create(BugEngine::Arena::task(),
@@ -103,6 +106,8 @@ class kernel_task(Task.Task):
     def sig_vars(self):
         self.m.update(TEMPLATE_CLASS_CC.encode('utf-8'))
         self.m.update(TEMPLATE_CC.encode('utf-8'))
+        self.m.update(TEMPLATE_CLASS_H.encode('utf-8'))
+        self.m.update(TEMPLATE_H.encode('utf-8'))
 
     def scan(self):
         return ([], [])
