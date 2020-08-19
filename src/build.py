@@ -41,7 +41,8 @@ def build_bugengine(bld):
     bld.library('bugengine.scheduler', ['bugengine.core', 'bugengine.rtti', 'bugengine.resource', 'bugengine.settings'])
     bld.library('bugengine.world', ['bugengine.core', 'bugengine.rtti', 'bugengine.resource', 'bugengine.scheduler'])
     bld.library(
-        'bugengine.plugin', ['bugengine.core', 'bugengine.rtti', 'bugengine.filesystem', 'bugengine.resource', 'bugengine.scheduler']
+        'bugengine.plugin',
+        ['bugengine.core', 'bugengine.rtti', 'bugengine.filesystem', 'bugengine.resource', 'bugengine.scheduler']
     )
     bld.shared_library(
         'bugengine', [
@@ -68,9 +69,7 @@ def build_plugins(bld):
 
     bld.plugin('plugin.graphics.3d', ['bugengine'])
     bld.plugin('plugin.graphics.shadermodel1', ['bugengine', 'plugin.graphics.3d'])
-    bld.plugin(
-        'plugin.graphics.shadermodel2', ['bugengine', 'plugin.graphics.3d', 'plugin.graphics.shadermodel1']
-    )
+    bld.plugin('plugin.graphics.shadermodel2', ['bugengine', 'plugin.graphics.3d', 'plugin.graphics.shadermodel1'])
     bld.plugin(
         'plugin.graphics.shadermodel3',
         ['bugengine', 'plugin.graphics.3d', 'plugin.graphics.shadermodel1', 'plugin.graphics.shadermodel2']
@@ -96,7 +95,9 @@ def build_plugins(bld):
         conditions=['python']
     )
     if bld.env.PROJECTS:
-        python_deps = ['bugengine.3rdparty.scripting.python%s' % version.replace('.', '') for version in bld.env.PYTHON_VERSIONS]
+        python_deps = [
+            'bugengine.3rdparty.scripting.python%s' % version.replace('.', '') for version in bld.env.PYTHON_VERSIONS
+        ]
         bld.plugin('plugin.scripting.pythonbinding', ['bugengine', 'plugin.scripting.pythonlib'] + python_deps)
     else:
         for version in bld.env.PYTHON_VERSIONS:
@@ -179,7 +180,10 @@ def build_games(bld):
     bld.game('help', ['bugengine', 'plugin.scripting.package'], path=bld.path.find_node('tool/help'))
     if Options.options.tests:
         bld.game('test.settings', ['bugengine'])
-        bld.game('test.compute.copy', ['bugengine', 'plugin.scripting.package'])
+        bld.game(
+            'test.compute.copy', ['bugengine', 'plugin.scripting.package'],
+            root_namespace='BugEngine::Test::Compute::Copy'
+        )
 
 
 def build(bld):
