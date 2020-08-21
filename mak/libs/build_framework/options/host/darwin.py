@@ -9,6 +9,8 @@ def options(opt):
         os.path.join('/', 'Applications', d, 'Contents', 'Developer') for d in os.listdir('/Applications')
         if d.startswith('Xcode')
     ]
+    if os.path.isdir('/Library/Developer/CommandLineTools'):
+        sdks += ['/Library/Developer/CommandLineTools']
     try:
         p = Utils.subprocess.Popen(['xcode-select', '--print-path'],
                                    stdin=Utils.subprocess.PIPE,

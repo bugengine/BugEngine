@@ -62,6 +62,61 @@ class LLVM(GCC):
         GCC.__init__(self, gcc, gxx, extra_args)
 
 
+def detect_gcc_version(conf, bindir, version, target, seen):
+    gcc_compilers = []
+    v = version.split('.')
+    versions = [
+        '.'.join(v),
+        ''.join(v),
+        '.'.join(v[0:2]),
+        ''.join(v[0:2]),
+        v[0],
+        '-' + '.'.join(v),
+        '-' + ''.join(v),
+        '-' + '.'.join(v[0:2]),
+        '-' + ''.join(v[0:2]),
+        '-' + v[0],
+        '',
+    ]
+
+    def find_target_gcc(gcc_name_prefix, cls):
+        cc = cxx = None
+        for v in versions:
+            cc = conf.detect_executable('%s-gcc%s' % (gcc_name_prefix, v), path_list=[bindir])
+            if cc:
+                break
+        for v in versions:
+            cxx = conf.detect_executable('%s-g++%s' % (gcc_name_prefix, v), path_list=[bindir])
+            if cxx:
+                break
+        if cc and cxx:
+            try:
+                c = cls(cc, cxx)
+            except Exception as e:
+                #Logs.pprint('YELLOW', '%s: %s' % (cc, e))
+                pass
+            else:
+                if not c.is_valid(conf):
+                    return
+                try:
+                    seen[c.name()].add_sibling(c)
+                except KeyError:
+                    seen[c.name()] = c
+                    conf.compilers.append(c)
+
+                return c
+
+    c = find_target_gcc(target, GCC)
+    if c:
+        gcc_compilers.append(c)
+        result, out, err = c.run_c(['-fplugin=dragonegg', '-E', '-'], '')
+        if result == 0:
+            c = find_target_gcc('llvm', LLVM)
+            if c:
+                gcc_compilers.append(c)
+    return gcc_compilers
+
+
 def detect_gcc_from_path(conf, path, seen):
     gcc_compilers = []
     for subdir, relative in [('', '../..'), ('lib/gcc', '../../../..'), ('gcc', '../../..'), ('llvm', '../../..')]:
@@ -81,56 +136,12 @@ def detect_gcc_from_path(conf, path, seen):
                 if os.path.islink(os.path.join(libdir, target, version)):
                     continue
                 bindir = os.path.normpath(os.path.join(libdir, relative, 'bin'))
-                v = version.split('.')
-                versions = [
-                    '.'.join(v),
-                    ''.join(v),
-                    '.'.join(v[0:2]),
-                    ''.join(v[0:2]),
-                    v[0],
-                    '-' + '.'.join(v),
-                    '-' + ''.join(v),
-                    '-' + '.'.join(v[0:2]),
-                    '-' + ''.join(v[0:2]),
-                    '-' + v[0],
-                    '',
-                ]
-
-                def find_target_gcc(gcc_name_prefix, cls):
-                    cc = cxx = None
-                    for v in versions:
-                        cc = conf.detect_executable('%s-gcc%s' % (gcc_name_prefix, v), path_list=[bindir])
-                        if cc:
-                            break
-                    for v in versions:
-                        cxx = conf.detect_executable('%s-g++%s' % (gcc_name_prefix, v), path_list=[bindir])
-                        if cxx:
-                            break
-                    if cc and cxx:
-                        try:
-                            c = cls(cc, cxx)
-                        except Exception as e:
-                            #Logs.pprint('YELLOW', '%s: %s' % (cc, e))
-                            pass
-                        else:
-                            if not c.is_valid(conf):
-                                return
-                            try:
-                                seen[c.name()].add_sibling(c)
-                            except KeyError:
-                                seen[c.name()] = c
-                                conf.compilers.append(c)
-
-                            return c
-
-                c = find_target_gcc(target, GCC)
-                if c:
-                    gcc_compilers.append(c)
-                    result, out, err = c.run_c(['-fplugin=dragonegg', '-E', '-'], '')
-                    if result == 0:
-                        c = find_target_gcc('llvm', LLVM)
-                        if c:
-                            gcc_compilers.append(c)
+                gcc_compilers += detect_gcc_version(conf, bindir, version, target, seen)
+    for version in os.listdir(path):
+        if os.path.isdir(os.path.join(path, version, 'gcc')):
+            for target in os.listdir(os.path.join(path, version, 'gcc')):
+                bindir = os.path.normpath(os.path.join(path, '..', '..', 'bin'))
+                gcc_compilers += detect_gcc_version(conf, bindir, version, target, seen)
     return gcc_compilers
 
 
@@ -217,7 +228,11 @@ def detect_gcc(conf):
         try:
             for lib in os.listdir(path):
                 if lib.startswith('gcc'):
-                    gcc_compilers += detect_gcc_from_path(conf, os.path.join(path, lib), seen)
+                    gcc_lib_path = os.path.join(path, lib)
+                    gcc_compilers += detect_gcc_from_path(conf, gcc_lib_path, seen)
+                    for version in os.listdir(gcc_lib_path):
+                        if os.path.isdir(os.path.join(gcc_lib_path, version, 'gcc')):
+                            gcc_compilers += detect_gcc_from_path(conf, os.path.join(gcc_lib_path, version, 'gcc'), seen)
         except OSError:
             pass
     detect_multilib_compilers(conf, gcc_compilers, seen)

@@ -24,7 +24,11 @@ def setup(conf):
                 return
             try:
                 cl_node = conf.pkg_unpack('cl_bin_%(platform)s', CL_ICD_BINARIES)
-                if not conf.check_package('OpenCL', cl_node, var='OpenCL'):
+                if not conf.check_package(
+                    'OpenCL', cl_node, var='OpenCL',
+                      includepath=[conf.path.parent.make_node('api').abspath()],
+                      includes=['CL/cl.h'],
+                      functions=['clCreateKernel']):
                     raise WafError('no OpenCL')
                 conf.env.OPENCL_BINARY = cl_node.path_from(conf.package_node)
                 conf.end_msg('from prebuilt', color='GREEN')

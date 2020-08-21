@@ -61,11 +61,9 @@ cl_program Context::buildProgram(const u64 size, const char* code) const
     }
 
     errorCode = clBuildProgram(program, 1, &m_device, "", 0, 0);
-    cl_program_build_info  info;
-    cl_program_binary_type type;
-    size_t                 len = 0;
+    cl_program_build_info info;
+    size_t                len = 0;
     clGetProgramBuildInfo(program, m_device, CL_PROGRAM_BUILD_STATUS, sizeof(info), &info, &len);
-    clGetProgramBuildInfo(program, m_device, CL_PROGRAM_BINARY_TYPE, sizeof(type), &type, &len);
     clGetProgramBuildInfo(program, m_device, CL_PROGRAM_BUILD_LOG, 0, 0, &len);
     if(len > 1)
     {
@@ -79,6 +77,7 @@ cl_program Context::buildProgram(const u64 size, const char* code) const
         be_error("failed to load OpenCL kernel: clBuildProgram failed with code %d" | errorCode);
         return program;
     }
+#if CL_VERSION_1_2
     {
         checkResult(clGetProgramInfo(program, CL_PROGRAM_KERNEL_NAMES, 0, 0, &len));
         minitl::Allocator::Block< char > buffer(Arena::temporary(), len + 1);
@@ -86,6 +85,7 @@ cl_program Context::buildProgram(const u64 size, const char* code) const
         be_info("list of kernels:\n%s" | buffer.data());
         freea(buffer);
     }
+#endif
     /*kernel = clCreateKernel(program, "_kmain", &errorCode);
     if(errorCode != CL_SUCCESS)
     {
