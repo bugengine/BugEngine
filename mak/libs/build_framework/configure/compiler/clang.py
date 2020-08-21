@@ -247,6 +247,8 @@ class Clang(Configure.ConfigurationContext.GnuCompiler):
                 env.append_unique('CXXFLAGS', ['-fvisibility=hidden'])
                 env.CFLAGS_exportall = ['-fvisibility=default']
                 env.CXXFLAGS_exportall = ['-fvisibility=default']
+        if self.version_number < (3, 7):
+            env.DISABLE_DLLEXPORT = True
 
     def split_path_list(self, line):
         result = []

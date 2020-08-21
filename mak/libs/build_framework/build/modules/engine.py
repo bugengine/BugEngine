@@ -21,24 +21,24 @@ def engine(
 ):
     if env is None:
         if getattr(bld, 'launcher', None) != None:
-            raise Errors.WafError('Only one engine can be defined')
-        bld.preprocess(name, path, root_namespace, 'bugengine')
+            raise Errors.WafError('Only one engine launcher can be defined')
+        p = bld.preprocess(name, path, root_namespace, 'bugengine')
         bld.launcher = bld.multiarch(
             name, [
                 engine(
-                    bld, name, depends + ['bugengine.3rdparty.system.console'], private_depends, path, features, extra_includes,
-                    extra_defines, extra_public_includes, extra_public_defines, source_list, conditions, root_namespace,
-                    env
+                    bld, name, depends, private_depends, path, features, extra_includes, extra_defines,
+                    extra_public_includes, extra_public_defines, source_list, conditions, root_namespace, env
                 ) for env in bld.multiarch_envs
             ]
         )
         if 'windows' in bld.env.VALID_PLATFORMS:
-            bld.preprocess(name + 'w', path, root_namespace, 'bugengine')
+            bld.preprocess(name + '.console', p.source_nodes[0], root_namespace, 'bugengine')
             bld.multiarch(
-                name, [
+                name + '.console', [
                     engine(
-                        bld, name + 'w', depends, private_depends, path, features, extra_includes, extra_defines,
-                        extra_public_includes, extra_public_defines, source_list, conditions, root_namespace, env
+                        bld, name + '.console', depends, private_depends + ['console'], p.source_nodes[0], features,
+                        extra_includes, extra_defines, extra_public_includes, extra_public_defines, source_list,
+                        conditions, root_namespace, env
                     ) for env in bld.multiarch_envs
                 ]
             )

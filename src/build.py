@@ -9,7 +9,6 @@ def build_externals(bld):
         Declares all external modules
     """
     bld.external('bugengine.3rdparty.system.zlib')
-    bld.external('bugengine.3rdparty.system.console')
     bld.external('bugengine.3rdparty.system.X11')
     bld.external('bugengine.3rdparty.system.win32')
     bld.external('bugengine.3rdparty.graphics.DirectX')

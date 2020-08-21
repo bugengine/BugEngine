@@ -111,17 +111,23 @@ def build_source(bld, name, env, path):
             source_list=FT_SOURCE_LIST
         )
     else:
+        if not bld.env.DISABLE_DLLEXPORT:
+            dll_flags = ['DLL_EXPORT']
+            dll_features = []
+        else:
+            dll_flags = []
+            dll_features = ['bugengine:export_all']
         return bld.shared_library(
             name, ['bugengine.3rdparty.system.zlib'],
             env=env,
             path=path,
             extra_includes=[include_path],
             extra_public_includes=[include_path],
-            extra_defines=defines + ['DLL_EXPORT'],
+            extra_defines=defines + dll_flags,
             features=[
                 'bugengine:masterfiles:off', 'bugengine:warnings:off', 'bugengine:deploy:off',
                 'bugengine:deploy:freetype', 'bugengine:nortc'
-            ],
+            ] + dll_features,
             source_list=FT_SOURCE_LIST
         )
 
@@ -131,4 +137,6 @@ def build_binary(bld, name, env, path):
 
 
 def build(bld):
-    bld.package('bugengine.3rdparty.graphics.freetype', 'FREETYPE_BINARY', build_binary, 'FREETYPE_SOURCE', build_source)
+    bld.package(
+        'bugengine.3rdparty.graphics.freetype', 'FREETYPE_BINARY', build_binary, 'FREETYPE_SOURCE', build_source
+    )

@@ -7,7 +7,7 @@
 
 namespace BugEngine { namespace KernelScheduler { namespace CPU {
 
-CodeObject::CodeObject(const inamespace& name) : m_kernel(name, ipath("bugengine/kernel"))
+CodeObject::CodeObject(const inamespace& name) : m_kernel(name, ipath("kernel"))
 {
 }
 

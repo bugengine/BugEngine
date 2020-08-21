@@ -9,7 +9,7 @@
 namespace BugEngine { namespace KernelScheduler { namespace OpenCL {
 
 CodeObject::CodeObject(weak< const Context > context, const inamespace& name)
-    : m_kernel(name, ipath("bugengine/kernel"))
+    : m_kernel(name, ipath("kernel"))
 {
     const char* kernelSource = *m_kernel.getSymbol< const char* >(
         istring(minitl::format< 128u >("s_clKernel%d") | context->getPointerSize()));

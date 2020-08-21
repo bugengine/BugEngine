@@ -46,7 +46,7 @@ private:
 };
 
 KernelObject::KernelObject(const inamespace& name)
-    : m_kernel(name, ipath("bugengine/kernel"))
+    : m_kernel(name, ipath("kernel"))
     , m_entryPoint(m_kernel.getSymbol< KernelMain >("_kmain"))
     , m_task(scoped< Task::Task< CudaKernelTask > >::create(Arena::task(), istring(name.str().name),
                                                             Colors::make(231, 231, 231, 0),

@@ -73,7 +73,12 @@ def deploy_lua_package(task_gen):
 
 
 def build_source(bld, name, env, path):
-    dll_flags = 'windows' in bld.env.VALID_PLATFORMS and ['LUA_BUILD_AS_DLL'] or []
+    if 'windows' in bld.env.VALID_PLATFORMS and not bld.env.DISABLE_DLLEXPORT:
+        dll_flags = ['LUA_BUILD_AS_DLL']
+        dll_features = []
+    else:
+        dll_flags = []
+        dll_features = ['bugengine:export_all']
     if bld.env.STATIC:
         return bld.static_library(
             name,
@@ -97,9 +102,8 @@ def build_source(bld, name, env, path):
             extra_includes=[path.make_node('src')],
             extra_public_includes=[path.make_node('src')],
             features=[
-                'bugengine:masterfiles:off', 'bugengine:export_all', 'bugengine:deploy:off', 'bugengine:deploy:lua',
-                'bugengine:warnings:off'
-            ],
+                'bugengine:masterfiles:off', 'bugengine:deploy:off', 'bugengine:deploy:lua', 'bugengine:warnings:off'
+            ] + dll_features,
             source_list=LUA_SOURCES
         )
 

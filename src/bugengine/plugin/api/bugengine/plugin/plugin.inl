@@ -117,7 +117,7 @@ Plugin< T >::Plugin()
 template < typename T >
 Plugin< T >::Plugin(const inamespace& pluginName, PreloadType /*preload*/)
     : m_name(pluginName)
-    , m_dynamicObject(new(Arena::general()) DynamicObject(pluginName, ipath("bugengine/plugin")))
+    , m_dynamicObject(new(Arena::general()) DynamicObject(pluginName, ipath("plugin")))
     , m_interface(0)
     , m_refCount(new(Arena::general()) i_u32(i_u32::create(1)))
 {
@@ -127,7 +127,7 @@ template < typename T >
 Plugin< T >::Plugin(const inamespace& pluginName, const Context& context)
     : m_name(pluginName)
     , m_resourceManager(context.resourceManager)
-    , m_dynamicObject(new(Arena::general()) DynamicObject(pluginName, ipath("bugengine/plugin")))
+    , m_dynamicObject(new(Arena::general()) DynamicObject(pluginName, ipath("plugin")))
     , m_interface(0)
     , m_refCount(new(Arena::general()) i_u32(i_u32::create(1)))
 {
