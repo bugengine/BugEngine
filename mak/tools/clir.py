@@ -59,8 +59,11 @@ def configure(configuration_context):
     v = configuration_context.env
     for c in configuration_context.compilers:
         if 'Clang' in c.NAMES:
-            if c.version_number >= (10, ):
+            if 'AppleClang' not in c.NAMES and c.version_number >= (10, ):
                 v.CLC_CXX = c.compiler_cxx
+            elif 'AppleClang' in c.NAMES:
+                # Apple still has to release a clang10-based AppleClang compiler
+                pass
     if v.CLC_CXX:
         v.CLC_CXXFLAGS_debug = ['-D_DEBUG']
         v.CLC_CXXFLAGS_profile = ['-DNDEBUG']
