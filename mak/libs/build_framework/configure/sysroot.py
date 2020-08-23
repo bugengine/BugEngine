@@ -9,7 +9,7 @@ PLATFORMS = {
     'ELFOSABI_SOLARIS': 'solaris',
 }
 ARCHITECTURES = {
-    'EM_386': 'x86',
+    'EM_386': 'i386',
     'EM_X86_64': 'x86_64',
     'EM_PPC': 'ppc',
     'EM_PPC64': 'ppc64',
@@ -25,6 +25,27 @@ LITTLE_ENDIAN = {
 
 BIG_ENDIAN = {
     'arm': 'armbe',
+}
+
+ARM_NAMES = {
+    0 : 'Pre-v4',
+    1 : 'v4',
+    2 : 'v4T',
+    3 : 'v5T',
+    4 : 'v5TE',
+    5 : 'v5TEJ',
+    6 : 'v6',
+    7 : 'v6KZ',
+    8 : 'v6T2',
+    9 : 'v6K',
+    10: 'v7',
+    11: 'v6-M',
+    12: 'v6S-M',
+    13: 'v7E-M',
+    14: 'v8',
+    15: 'v8-R',
+    16: 'v8-M.baseline',
+    17: 'v8-M.mainline',
 }
 
 
@@ -80,10 +101,20 @@ def configure(configuration_context):
                                 else:
                                     platform = PLATFORMS.get(elf.header.e_ident['EI_OSABI'], platform)
                                     arch = ARCHITECTURES.get(elf.header.e_machine, arch)
+                                    if arch == 'arm':
+                                        for section in elf.iter_sections():
+                                            if section['sh_type'] == 'SHT_ARM_ATTRIBUTES':
+                                                for subsection in section.iter_subsections():
+                                                    for subsubsection in subsection.iter_subsubsections():
+                                                        for attribute in subsubsection.attributes:
+                                                            if attribute.tag == 'TAG_CPU_ARCH':
+                                                                arch += ARM_NAMES[attribute.value]
                                     if elf.header.e_ident['EI_DATA'] == 'ELFDATA2LSB':
                                         arch = LITTLE_ENDIAN.get(arch, arch)
                                     elif elf.header.e_ident['EI_DATA'] == 'ELFDATA2MSB':
                                         arch = BIG_ENDIAN.get(arch, arch)
+                                    if elf.header.e_flags & 0x00000400:
+                                        arch = arch + 'hf'
                                     if platform is not None and arch is not None:
                                         targets.append('%s-%s' % (arch, platform))
                                     break

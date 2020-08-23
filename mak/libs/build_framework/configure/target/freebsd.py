@@ -88,6 +88,7 @@ class FreeBSD(Configure.ConfigurationContext.Platform):
                     env.append_unique('CXXFLAGS', ['-target', env.FREEBSD_HOST_TRIPLE])
                     env.append_unique('LINKFLAGS', ['-target', env.FREEBSD_HOST_TRIPLE])
         if 'Clang' in compiler.NAMES:
+            env.append_unique('CXXFLAGS_debug', ['-fdwarf-exceptions'])
             env.append_unique('CXXFLAGS', ['-stdlib=libc++'])
             env.append_unique('LINKFLAGS', ['-stdlib=libc++'])
 

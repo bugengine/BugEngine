@@ -1,5 +1,23 @@
 import os
+import shlex
 from be_typing import TYPE_CHECKING
+
+
+def get_jail_sysroots():
+    try:
+        with open('/etc/jail.conf', 'r') as jail_conf:
+            jail = jail_conf.readlines()
+    except OSError:
+        return []
+    else:
+        roots = []
+        for line in jail:
+            line = line.split('#')[0].strip()
+            line = line.split('=')
+            if len(line) == 2:
+                if line[0].strip() == 'path':
+                    roots.append(shlex.split(line[1][:-1])[0])
+        return roots
 
 
 def options(option_context):
@@ -17,10 +35,11 @@ def options(option_context):
                 absolute_path = os.path.join(path, dir)
                 if os.path.isdir(absolute_path):
                     sysroots.append(absolute_path)
+
     gr.add_option(
         '--sysroot',
         action='append',
-        default=sysroots,
+        default=sysroots + get_jail_sysroots(),
         dest='sysroots',
         help="List of directories that map to a platform's sysroot"
     )

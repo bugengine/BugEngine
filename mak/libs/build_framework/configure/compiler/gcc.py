@@ -159,7 +159,7 @@ def detect_multilib_compilers(conf, gcc_compilers, seen):
     for c in gcc_compilers + multilib_compilers:
         for sysroot_path, targets in conf.env.SYSROOTS:
             for target in targets:
-                if target == c.target:
+                if c.target.startswith(target):
                     try:
                         compiler = c.__class__(
                             c.compiler_c, c.compiler_cxx, {
