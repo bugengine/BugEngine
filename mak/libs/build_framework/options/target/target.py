@@ -7,7 +7,7 @@ def get_jail_sysroots():
     try:
         with open('/etc/jail.conf', 'r') as jail_conf:
             jail = jail_conf.readlines()
-    except OSError:
+    except (OSError, IOError):
         return []
     else:
         roots = []
