@@ -135,7 +135,7 @@ def module(
         features=features[:],
         use=[env.ENV_PREFIX % d for d in depends],
         private_use=[env.ENV_PREFIX % d for d in private_depends],
-        uselib=[build_context.__class__.optim] + (build_context.env.STATIC and [] or ['dynamic']),
+        uselib=[build_context.__class__.optim] + (build_context.env.STATIC and ['static'] or ['dynamic']),
         preprocess=preprocess,
         source_nodes=source_nodes,
         source=source_list,

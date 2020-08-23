@@ -41,6 +41,7 @@ class Platform:
             v.ARCH_NAME = compiler.arch
             v.TOOLCHAIN = toolchain
             v.append_unique('DEFINES', ['BE_PLATFORM=platform_%s' % v.VALID_PLATFORMS[0]])
+            v.append_unique('DEFINES_static', ['BE_STATIC=1'])
             if not add:
                 v.ENV_PREFIX = compiler.arch + '/%s'
                 v.SUBARCH = True
