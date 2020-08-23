@@ -90,6 +90,8 @@ def configure(configuration_context):
                 else:
                     platform = None
                     arch = None
+                    abi = None
+                    suffix = None
                     for item in content:
                         path = os.path.join(libpath, item)
                         if os.path.isfile(path):
@@ -102,21 +104,33 @@ def configure(configuration_context):
                                     platform = PLATFORMS.get(elf.header.e_ident['EI_OSABI'], platform)
                                     arch = ARCHITECTURES.get(elf.header.e_machine, arch)
                                     if arch == 'arm':
+                                        abi_flags = elf.header.e_flags >> 24
+                                        if abi_flags != 0:
+                                            abi = 'gnueabi'
                                         for section in elf.iter_sections():
                                             if section['sh_type'] == 'SHT_ARM_ATTRIBUTES':
                                                 for subsection in section.iter_subsections():
                                                     for subsubsection in subsection.iter_subsubsections():
                                                         for attribute in subsubsection.attributes:
+                                                            if attribute.tag == 'TAG_ABI_VFP_ARGS':
+                                                                suffix = 'hf'
                                                             if attribute.tag == 'TAG_CPU_ARCH':
                                                                 arch += ARM_NAMES[attribute.value]
                                     if elf.header.e_ident['EI_DATA'] == 'ELFDATA2LSB':
                                         arch = LITTLE_ENDIAN.get(arch, arch)
                                     elif elf.header.e_ident['EI_DATA'] == 'ELFDATA2MSB':
                                         arch = BIG_ENDIAN.get(arch, arch)
-                                    if elf.header.e_flags & 0x00000400:
+                                    if suffix is not None:
+                                        #arch = arch + suffix
+                                        if abi is not None:
+                                            abi = abi + suffix
+                                    elif elf.header.e_flags & 0x00000400:
                                         arch = arch + 'hf'
                                     if platform is not None and arch is not None:
-                                        targets.append('%s-%s' % (arch, platform))
+                                        if abi is not None:
+                                            targets.append('%s-%s-%s' % (arch, platform, abi))
+                                        else:
+                                            targets.append('%s-%s' % (arch, platform))
                                     break
         configuration_context.env.append_value('SYSROOTS', [(sysroot, targets)])
         configuration_context.end_msg(', '.join(targets))
