@@ -72,7 +72,12 @@ const RTTI::Method::Parameter ClassID< minitl::tuple< T1, T2 > >::s_method_tuple
 
 template < typename T1, typename T2 >
 const RTTI::Method::Overload ClassID< minitl::tuple< T1, T2 > >::s_method_tuple_overloads[] = {
-    {{0}, {0, 0}, be_type< minitl::tuple< T1, T2 > >(), false, &trampoline_method_tuple_overload_0},
+    {{0},
+     {0, 0},
+     be_type< minitl::tuple< T1, T2 > >(),
+     false,
+     {0, 0},
+     &trampoline_method_tuple_overload_0},
     {{0},
      {2, s_method_tuple_overload_1_params},
      be_type< minitl::tuple< T1, T2 > >(),
