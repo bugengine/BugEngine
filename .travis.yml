@@ -318,6 +318,24 @@ matrix:
     - os: linux
       dist: trusty
       env: COMPILER=gcc_x86 COMPILER_VERSION=4.2.1 TARGET_OS=i586_mingw32msvc_x86 FLAVOR=final
+    - os: linux
+      arch: ppc64el
+      env: COMPILER=gcc_ppc64el COMPILER_VERSION=8.2.1 TARGET_OS=linux_ppc64el FLAVOR=debug
+    - os: linux
+      arch: ppc64el
+      env: COMPILER=gcc_ppc64el COMPILER_VERSION=8.2.1 TARGET_OS=linux_ppc64el FLAVOR=profile
+    - os: linux
+      arch: ppc64el
+      env: COMPILER=gcc_ppc64el COMPILER_VERSION=8.2.1 TARGET_OS=linux_ppc64el FLAVOR=final
+    - os: linux
+      arch: arm64
+      env: COMPILER=gcc_arm64 COMPILER_VERSION=8.2.1 TARGET_OS=linux_arm64 FLAVOR=debug
+    - os: linux
+      arch: arm64
+      env: COMPILER=gcc_arm64 COMPILER_VERSION=8.2.1 TARGET_OS=linux_arm64 FLAVOR=profile
+    - os: linux
+      arch: arm64
+      env: COMPILER=gcc_arm64 COMPILER_VERSION=8.2.1 TARGET_OS=linux_arm64 FLAVOR=final
     - os: osx
       env: COMPILER=appleclang COMPILER_VERSION=9.1.0 TARGET_OS=macos10.13 FLAVOR=debug
     - os: osx
