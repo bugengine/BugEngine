@@ -10,12 +10,9 @@ import re
 import struct
 from xml.parsers.expat import ParserCreate
 
-
-
 #
 # XML support
 #
-
 
 # XML 'header'
 PLISTHEADER = b"""\
@@ -23,20 +20,22 @@ PLISTHEADER = b"""\
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 """
 
-
 # Regex to find any control chars, except for \t \n and \r
 _controlCharPat = re.compile(
     r"[\x00\x01\x02\x03\x04\x05\x06\x07\x08\x0b\x0c\x0e\x0f"
-    r"\x10\x11\x12\x13\x14\x15\x16\x17\x18\x19\x1a\x1b\x1c\x1d\x1e\x1f]")
+    r"\x10\x11\x12\x13\x14\x15\x16\x17\x18\x19\x1a\x1b\x1c\x1d\x1e\x1f]"
+)
+
 
 def _encode_base64(s, maxlinelength=76):
     # copied from base64.encodebytes(), with added maxlinelength argument
-    maxbinsize = (maxlinelength//4)*3
+    maxbinsize = (maxlinelength // 4) * 3
     pieces = []
     for i in range(0, len(s), maxbinsize):
-        chunk = s[i : i + maxbinsize]
+        chunk = s[i:i + maxbinsize]
         pieces.append(binascii.b2a_base64(chunk))
     return b''.join(pieces)
+
 
 def _decode_base64(s):
     if isinstance(s, str):
@@ -45,10 +44,13 @@ def _decode_base64(s):
     else:
         return binascii.a2b_base64(s)
 
+
 # Contents should conform to a subset of ISO 8601
 # (in particular, YYYY '-' MM '-' DD 'T' HH ':' MM ':' SS 'Z'.  Smaller units
 # may be omitted with #  a loss of precision)
-_dateParser = re.compile(r"(?P<year>\d\d\d\d)(?:-(?P<month>\d\d)(?:-(?P<day>\d\d)(?:T(?P<hour>\d\d)(?::(?P<minute>\d\d)(?::(?P<second>\d\d))?)?)?)?)?Z")
+_dateParser = re.compile(
+    r"(?P<year>\d\d\d\d)(?:-(?P<month>\d\d)(?:-(?P<day>\d\d)(?:T(?P<hour>\d\d)(?::(?P<minute>\d\d)(?::(?P<second>\d\d))?)?)?)?)?Z"
+)
 
 
 def _date_from_string(s):
@@ -64,22 +66,20 @@ def _date_from_string(s):
 
 
 def _date_to_string(d):
-    return '%04d-%02d-%02dT%02d:%02d:%02dZ' % (
-        d.year, d.month, d.day,
-        d.hour, d.minute, d.second
-    )
+    return '%04d-%02d-%02dT%02d:%02d:%02dZ' % (d.year, d.month, d.day, d.hour, d.minute, d.second)
+
 
 def _escape(text):
     m = _controlCharPat.search(text)
     if m is not None:
-        raise ValueError("strings can't contains control characters; "
-                         "use bytes instead")
-    text = text.replace("\r\n", "\n")       # convert DOS line endings
-    text = text.replace("\r", "\n")         # convert Mac line endings
-    text = text.replace("&", "&amp;")       # escape '&'
-    text = text.replace("<", "&lt;")        # escape '<'
-    text = text.replace(">", "&gt;")        # escape '>'
+        raise ValueError("strings can't contains control characters; " "use bytes instead")
+    text = text.replace("\r\n", "\n")  # convert DOS line endings
+    text = text.replace("\r", "\n")    # convert Mac line endings
+    text = text.replace("&", "&amp;")  # escape '&'
+    text = text.replace("<", "&lt;")   # escape '<'
+    text = text.replace(">", "&gt;")   # escape '>'
     return text
+
 
 class _PlistParser:
     def __init__(self):
@@ -112,8 +112,7 @@ class _PlistParser:
     def add_object(self, value):
         if self.current_key is not None:
             if not isinstance(self.stack[-1], type({})):
-                raise ValueError("unexpected element at line %d" %
-                                 self.parser.CurrentLineNumber)
+                raise ValueError("unexpected element at line %d" % self.parser.CurrentLineNumber)
             self.stack[-1][self.current_key] = value
             self.current_key = None
         elif not self.stack:
@@ -121,8 +120,7 @@ class _PlistParser:
             self.root = value
         else:
             if not isinstance(self.stack[-1], type([])):
-                raise ValueError("unexpected element at line %d" %
-                                 self.parser.CurrentLineNumber)
+                raise ValueError("unexpected element at line %d" % self.parser.CurrentLineNumber)
             self.stack[-1].append(value)
 
     def get_data(self):
@@ -139,14 +137,14 @@ class _PlistParser:
 
     def end_dict(self):
         if self.current_key:
-            raise ValueError("missing value for key '%s' at line %d" %
-                             (self.current_key,self.parser.CurrentLineNumber))
+            raise ValueError(
+                "missing value for key '%s' at line %d" % (self.current_key, self.parser.CurrentLineNumber)
+            )
         self.stack.pop()
 
     def end_key(self):
         if self.current_key or not isinstance(self.stack[-1], type({})):
-            raise ValueError("unexpected key at line %d" %
-                             self.parser.CurrentLineNumber)
+            raise ValueError("unexpected key at line %d" % self.parser.CurrentLineNumber)
         self.current_key = self.get_data()
 
     def begin_array(self, attrs):
@@ -190,13 +188,13 @@ def _is_fmt_xml(header):
     # overkill because the Apple tools (and plistlib) will not
     # generate files with these encodings.
     for bom, encoding in (
-                (codecs.BOM_UTF8, "utf-8"),
-                (codecs.BOM_UTF16_BE, "utf-16-be"),
-                (codecs.BOM_UTF16_LE, "utf-16-le"),
-                # expat does not support utf-32
-                #(codecs.BOM_UTF32_BE, "utf-32-be"),
-                #(codecs.BOM_UTF32_LE, "utf-32-le"),
-            ):
+        (codecs.BOM_UTF8, "utf-8"),
+        (codecs.BOM_UTF16_BE, "utf-16-be"),
+        (codecs.BOM_UTF16_LE, "utf-16-le"),
+                                            # expat does not support utf-32
+                                            #(codecs.BOM_UTF32_BE, "utf-32-be"),
+                                            #(codecs.BOM_UTF32_LE, "utf-32-le"),
+    ):
         if not header.startswith(bom):
             continue
 
@@ -207,18 +205,21 @@ def _is_fmt_xml(header):
 
     return False
 
+
 #
 # Binary Plist
 #
 
 
-class InvalidFileException (ValueError):
+class InvalidFileException(ValueError):
     def __init__(self, message="Invalid file"):
         ValueError.__init__(self, message)
+
 
 _BINARY_FORMAT = {1: 'B', 2: 'H', 4: 'L', 8: 'Q'}
 
 _undefined = object()
+
 
 class _BinaryPlistParser:
     """
@@ -243,23 +244,23 @@ class _BinaryPlistParser:
             trailer = self._fp.read(32)
             if len(trailer) != 32:
                 raise InvalidFileException()
-            (
-                offset_size, self._ref_size, num_objects, top_object,
-                offset_table_offset
-            ) = struct.unpack('>6xBBQQQ', trailer)
+            (offset_size, self._ref_size, num_objects, top_object,
+             offset_table_offset) = struct.unpack('>6xBBQQQ', trailer)
             self._fp.seek(offset_table_offset)
             self._object_offsets = self._read_ints(num_objects, offset_size)
             self._objects = [_undefined] * num_objects
             return self._read_object(top_object)
 
-        except (OSError, IndexError, struct.error, OverflowError,
-                UnicodeDecodeError):
+        except (OSError, IndexError, struct.error, OverflowError, UnicodeDecodeError):
             raise InvalidFileException()
 
     def _get_size(self, tokenL):
         """ return the size of the next object."""
         if tokenL == 0xF:
-            m = self._fp.read(1)[0] & 0x3
+            m = self._fp.read(1)[0]
+            if isinstance(m, str):
+                m = ord(m)
+            m &= 0x3
             s = 1 << m
             f = '>' + _BINARY_FORMAT[s]
             return struct.unpack(f, self._fp.read(s))[0]
@@ -273,8 +274,7 @@ class _BinaryPlistParser:
         else:
             if not size or len(data) != size * n:
                 raise InvalidFileException()
-            return tuple(int.from_bytes(data[i: i + size], 'big')
-                         for i in range(0, size * n, size))
+            return tuple(int.from_bytes(data[i:i + size], 'big') for i in range(0, size * n, size))
 
     def _read_refs(self, n):
         return self._read_ints(n, self._ref_size)
@@ -292,6 +292,8 @@ class _BinaryPlistParser:
         offset = self._object_offsets[ref]
         self._fp.seek(offset)
         token = self._fp.read(1)[0]
+        if isinstance(token, str):
+            token = ord(token)
         tokenH, tokenL = token & 0xF0, token & 0x0F
 
         if token == 0x00:
@@ -309,40 +311,38 @@ class _BinaryPlistParser:
         elif token == 0x0f:
             result = b''
 
-        elif tokenH == 0x10:  # int
-            result = int.from_bytes(self._fp.read(1 << tokenL),
-                                    'big', signed=tokenL >= 3)
+        elif tokenH == 0x10:   # int
+            result = int.from_bytes(self._fp.read(1 << tokenL), 'big', signed=tokenL >= 3)
 
-        elif token == 0x22: # real
+        elif token == 0x22:    # real
             result = struct.unpack('>f', self._fp.read(4))[0]
 
-        elif token == 0x23: # real
+        elif token == 0x23:    # real
             result = struct.unpack('>d', self._fp.read(8))[0]
 
-        elif token == 0x33:  # date
+        elif token == 0x33:    # date
             f = struct.unpack('>d', self._fp.read(8))[0]
-            # timestamp 0 of binary plists corresponds to 1/1/2001
-            # (year of Mac OS X 10.0), instead of 1/1/1970.
-            result = (datetime.datetime(2001, 1, 1) +
-                      datetime.timedelta(seconds=f))
+                               # timestamp 0 of binary plists corresponds to 1/1/2001
+                               # (year of Mac OS X 10.0), instead of 1/1/1970.
+            result = (datetime.datetime(2001, 1, 1) + datetime.timedelta(seconds=f))
 
-        elif tokenH == 0x40:  # data
+        elif tokenH == 0x40:   # data
             s = self._get_size(tokenL)
             result = self._fp.read(s)
 
-        elif tokenH == 0x50:  # ascii string
+        elif tokenH == 0x50:   # ascii string
             s = self._get_size(tokenL)
-            result =  self._fp.read(s).decode('ascii')
+            result = self._fp.read(s).decode('ascii')
             result = result
 
-        elif tokenH == 0x60:  # unicode string
+        elif tokenH == 0x60:   # unicode string
             s = self._get_size(tokenL)
             result = self._fp.read(s * 2).decode('utf-16be')
 
         # tokenH == 0x80 is documented as 'UID' and appears to be used for
         # keyed-archiving, not in plists.
 
-        elif tokenH == 0xA0:  # array
+        elif tokenH == 0xA0:   # array
             s = self._get_size(tokenL)
             obj_refs = self._read_refs(s)
             result = []
@@ -355,7 +355,7 @@ class _BinaryPlistParser:
         # tokenH == 0xC0 is documented as 'set', but sets cannot be used in
         # plists.
 
-        elif tokenH == 0xD0:  # dict
+        elif tokenH == 0xD0:   # dict
             s = self._get_size(tokenL)
             key_refs = self._read_refs(s)
             obj_refs = self._read_refs(s)
@@ -379,7 +379,7 @@ def _is_fmt_binary(header):
 # Generic bits
 #
 
-_FORMATS={
+_FORMATS = {
     'FMT_XML': dict(
         detect=_is_fmt_xml,
         parser=_PlistParser,

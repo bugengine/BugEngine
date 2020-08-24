@@ -67,6 +67,7 @@ class Platform:
                 t = self.add_toolchain(conf, c, add=False)
                 if t:
                     v.append_unique('SUB_TOOLCHAINS', [t])
+            print(toolchain)
             if add:
                 conf.env.append_unique('ALL_TOOLCHAINS', toolchain)
             return toolchain

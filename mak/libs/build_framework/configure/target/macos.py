@@ -356,8 +356,9 @@ def parse_sdk_settings(sdk_settings_path):
         settings = plist_smalllib.load(sdk_settings_file)
     sdk_name = settings['DefaultProperties']['PLATFORM_NAME']
     sdk_version = settings['Version']
-    sdk_version = sdk_version.split('.')
-    return sdk_name, sdk_version
+    sdk_version = [str(x) for x in sdk_version.split('.')]
+    print(repr(sdk_version))
+    return str(sdk_name), sdk_version
 
 
 _CPU_ARCH_ABI64 = 0x01000000
