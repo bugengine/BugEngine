@@ -30,8 +30,6 @@ def thirdparty(bld, name, feature='', path='', source_node=None, var='', use=[],
     platform_specific = platforms
     if source_node is None:
         source_node = bld.path.parent.make_node(path and path.replace('.', '/') or '.')
-    project_path = source_node.parent.path_from(bld.srcnode).replace('/', '.').replace('\\', '.')
-    project_path = '%s.%s' % (project_path, name.split('.')[-1])
     if env is None:
         internal_deps = []
         supported = False
@@ -45,7 +43,6 @@ def thirdparty(bld, name, feature='', path='', source_node=None, var='', use=[],
                 tg = bld(
                     target=target_name,
                     features=['c', 'cxx'],
-                    module_path=project_path,
                     export_includes=env['check_%s_includes' % var],
                     export_defines=env['check_%s_defines' % var] + ['BE_HAVE_%s' % var_id],
                     export_libpath=expand_libpath(bld, env['check_%s_libpath' % var]),
@@ -109,7 +106,6 @@ def thirdparty(bld, name, feature='', path='', source_node=None, var='', use=[],
             tg = bld(
                 target=target_name,
                 features=['c', 'cxx'],
-                module_path=project_path,
                 export_includes=env['check_%s_includes' % var],
                 export_defines=env['check_%s_defines' % var] + ['BE_HAVE_%s' % var_id],
                 export_libpath=expand_libpath(bld, env['check_%s_libpath' % var]),

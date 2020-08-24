@@ -127,7 +127,7 @@ class Darwin(Configure.ConfigurationContext.Platform):
         conf.env.append_unique(
             'LINKFLAGS', [
                 '-m%s-version-min=%s' % (self.OS_NAME, self.sdk[3]), '-isysroot', self.sdk[1],
-                '-L%s/usr/lib' % self.sdk[1]
+                '-L%s/usr/lib' % self.sdk[1], '-lgcc_s.10.5'
             ] + ['-B%s' % bin_path for bin_path in self.directories]
         )
         if compiler.arch == 'x86':

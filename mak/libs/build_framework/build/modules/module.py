@@ -128,6 +128,15 @@ def module(
     else:
         preprocess = None
 
+    module_path = None
+    if path:
+        path_node = source_nodes[0]
+        if path_node.is_child_of(build_context.path):
+            module_path = path_node.path_from(build_context.path).replace('/', '.').replace('\\', '. ')
+        elif path_node.is_child_of(build_context.package_node):
+            pass
+        elif path_node.is_child_of(build_context.bugenginenode):
+            module_path = path_node.path_from(build_context.bugenginenode).replace('/', '.').replace('\\', '. ')
     task_gen = build_context(
         env=env.derive(),
         target=env.ENV_PREFIX % name,
@@ -149,6 +158,8 @@ def module(
         [build_context.bugenginenode, build_context.srcnode, build_context.bldnode],
         export_includes=extra_public_includes + api,
     )
+    if module_path is not None:
+        task_gen.module_path = module_path
     return task_gen
 
 

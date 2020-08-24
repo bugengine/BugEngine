@@ -18,19 +18,19 @@ def configure(conf):
             conf.os_sdk_paths.append(os.path.normpath(os.path.join(p, 'SDKs')))
         try:
             for platform in os.listdir(os.path.join(p, 'Platforms')):
-                conf.env.append_value('EXTRA_PATH',
-                                      [os.path.join(p, 'Platforms', platform, 'Developer', 'usr', 'bin')])
+                conf.env.append_value('EXTRA_PATH', [os.path.join(p, 'Platforms', platform, 'Developer', 'usr', 'bin')])
                 s_path = os.path.normpath(os.path.join(p, 'Platforms', platform, 'Developer', 'SDKs'))
                 if os.path.isdir(s_path):
-                    os_sdk_paths.append(s_path)
+                    conf.os_sdk_paths.append(s_path)
         except OSError:
             pass
-        conf.env.append_value('EXTRA_PATH', ['%s/Toolchains/XcodeDefault.xctoolchain/usr/bin'%p,
-                                             '%s/usr/bin' % p])
+        conf.env.append_value('EXTRA_PATH', ['%s/Toolchains/XcodeDefault.xctoolchain/usr/bin' % p, '%s/usr/bin' % p])
     # find valid code signing identity
-    process = Utils.subprocess.Popen(['security', 'find-identity', '-p', 'codesigning', '-v'],
-                                     stdout=Utils.subprocess.PIPE,
-                                     stderr=Utils.subprocess.STDOUT)
+    process = Utils.subprocess.Popen(
+        ['security', 'find-identity', '-p', 'codesigning', '-v'],
+        stdout=Utils.subprocess.PIPE,
+        stderr=Utils.subprocess.STDOUT
+    )
     output, error = process.communicate()
     if not isinstance(output, str):
         output = output.decode(sys.stdout.encoding)
