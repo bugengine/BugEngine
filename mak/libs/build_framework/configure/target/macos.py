@@ -425,7 +425,7 @@ def configure(conf):
     for p in getattr(conf, 'os_sdk_paths', []):
         for sdk in os.listdir(p):
             sdk_path = os.path.join(p, sdk)
-            if os.path.isfile(os.path.join(p.sdk, 'SDKSettings.plist')):
+            if os.path.isfile(os.path.join(p, sdk, 'SDKSettings.plist')):
                 sdks.append(sdk_path)
     for sysroot, _ in conf.env.SYSROOTS:
         if os.path.isfile(os.path.join(sysroot, 'SDKSettings.plist')):
