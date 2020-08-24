@@ -63,11 +63,16 @@ class FreeBSD(Configure.ConfigurationContext.Platform):
             env.append_unique('LINKFLAGS', ['-L%s/usr/local/lib' % sysroot])
             ldconfig = '%s/usr/local/libdata/ldconfig' % (compiler.sysroot or '')
         libpaths = []
-        for ldconfig_conf in os.listdir(ldconfig):
-            with open(os.path.join(ldconfig, ldconfig_conf), 'r') as conf_file:
-                for line in conf_file:
-                    if line not in libpaths:
-                        libpaths.append('%s%s' % (compiler.sysroot or '', line))
+        try:
+            ldconfig_confs = os.listdir(ldconfig)
+        except OSError:
+            pass
+        else:
+            for ldconfig_conf in ldconfig_confs:
+                with open(os.path.join(ldconfig, ldconfig_conf), 'r') as conf_file:
+                    for line in conf_file:
+                        if line not in libpaths:
+                            libpaths.append('%s%s' % (compiler.sysroot or '', line))
         if compiler.arch.startswith('arm') and compiler.arch != 'arm64':
             if 'GCC' in compiler.NAMES:
                 env.append_value('CXXFLAGS', ['-nostdinc++', '-isystem', '/usr/include/c++/v1'])

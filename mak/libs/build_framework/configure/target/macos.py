@@ -4,6 +4,9 @@ from waflib import Configure, Options, Context, Errors, Utils
 from waflib.Configure import conf
 import os
 import re
+import sys
+import plist_smalllib
+from macholib import MachO
 
 
 class Darwin(Configure.ConfigurationContext.Platform):
@@ -60,8 +63,16 @@ class Darwin(Configure.ConfigurationContext.Platform):
     def load_in_env(self, conf, compiler):
         platform = self.SDK_NAME.lower()
         compiler.find_target_program(conf, self, 'lipo', mandatory=False) or conf.find_program('lipo')
-        compiler.find_target_program(conf, self, 'codesign', mandatory=False) or conf.find_program('codesign')
-        compiler.find_target_program(conf, self, 'dsymutil', mandatory=False) or conf.find_program('dsymutil')
+        compiler.find_target_program(conf, self, 'codesign', mandatory=False)
+        if not conf.env.CODESIGN:
+            conf.find_program('codesign', mandatory=False)
+        compiler.find_target_program(conf, self, 'dsymutil', mandatory=False)
+        if not conf.env.DSYMUTIL:
+            conf.find_program('dsymutil', mandatory=False)
+        if not conf.env.DSYMUTIL:
+            compiler.find_target_program(conf, self, 'llvm-dsymutil', var='DSYMUTIL', mandatory=False)
+        if not conf.env.DSYMUTIL:
+            conf.find_program('llvm-dsymutil', var='DSYMUTIL', mandatory=False)
         environ = getattr(conf, 'environ', os.environ)
         conf.env.PATH = os.path.pathsep.join(self.directories + compiler.directories + [environ['PATH']])
         conf.env.ABI = 'mach_o'
@@ -117,8 +128,11 @@ class Darwin(Configure.ConfigurationContext.Platform):
             'LINKFLAGS', [
                 '-m%s-version-min=%s' % (self.OS_NAME, self.sdk[3]), '-isysroot', self.sdk[1],
                 '-L%s/usr/lib' % self.sdk[1]
-            ]
+            ] + ['-B%s' % bin_path for bin_path in self.directories]
         )
+        if compiler.arch == 'x86':
+            conf.env.append_unique('CFLAGS', ['-msse2'])
+            conf.env.append_unique('CXXFLAGS', ['-msse2'])
         conf.env.env = dict(os.environ)
 
     platform_sdk_re = re.compile('.*/Platforms/\w*\.platform/Developer/SDKs/[\.\w]*\.sdk')
@@ -217,7 +231,7 @@ class Darwin(Configure.ConfigurationContext.Platform):
         relpath = os.path.join('Platforms', '%s.platform' % self.SDK_NAME, 'Developer', 'SDKs')
 
         try:
-            all_sdks = self.conf.darwin_sdks[self.SDK_NAME]
+            all_sdks = getattr(self.conf, 'darwin_sdks', {})[self.SDK_NAME]
         except KeyError:
             raise Errors.WafError('No SDK detected for platform %s' % self.SDK_NAME)
         else:
@@ -246,6 +260,13 @@ class Darwin(Configure.ConfigurationContext.Platform):
                     ] if os.path.isdir(i) and i != '/usr/bin'
                 ]
                 strip = self.conf.detect_executable('strip', path_list=sdk_bin_paths)
+                if strip is None:
+                    otool = self.conf.detect_executable('otool', path_list=sdk_bin_paths)
+                    if otool is None:
+                        otool = self.conf.detect_executable('otool')
+                    if otool is not None:
+                        strip = self.conf.detect_executable('strip', path_list=os.path.dirname(otool))
+
                 for a in sdk_archs:
                     for c in compilers:
                         if self.match(c, sdk_path, all_sdks) and c.arch == a:
@@ -263,7 +284,8 @@ class Darwin(Configure.ConfigurationContext.Platform):
                                 [
                                     sdk_option, '-g', '-O2', '-c', '-o',
                                     obj_node.abspath(), '-isysroot', sdk_path,
-                                    src_node.abspath()
+                                    src_node.abspath(),
+                                    '-B%s' % os.path.dirname(strip)
                                 ],
                                 env=env
                             )
@@ -276,7 +298,8 @@ class Darwin(Configure.ConfigurationContext.Platform):
                                             '-o',
                                             exe_node.abspath(),
                                             '-L%s' % os.path.join(sdk_path, 'usr', 'lib'), '-isysroot', sdk_path,
-                                            obj_node.abspath(), '-lobjc'
+                                            obj_node.abspath(), '-lobjc',
+                                            '-B%s' % os.path.dirname(strip)
                                         ],
                                         env=env
                                     )
@@ -286,7 +309,9 @@ class Darwin(Configure.ConfigurationContext.Platform):
                                             sdk_compilers.append(c)
                                             break
                 if len(sdk_compilers) > len(best_sdk[2]):
-                    best_sdk = ('.'.join(sdk_version), sdk_path, sdk_compilers, sdk_bin_paths)
+                    best_sdk = (
+                        '.'.join(sdk_version), sdk_path, sdk_compilers, [os.path.dirname(strip)] + sdk_bin_paths
+                    )
             if best_sdk[2]:
                 return best_sdk[2], (best_sdk[0], best_sdk[1], best_sdk[3], '.'.join(os_version_min))
             else:
@@ -300,7 +325,7 @@ class MacOS(Darwin):
     NAME = 'MacOS'
     CERTIFICATE_NAME = 'Mac Developer'
     PLATFORMS = ['macos', 'macosx', 'pc', 'darwin']
-    SDK_NAME = 'MacOSX'
+    SDK_NAME = 'macosx'
     OS_NAME = 'macosx'
     OS_VERSION_MIN = ('10', '5')
 
@@ -308,5 +333,135 @@ class MacOS(Darwin):
         Darwin.__init__(self, conf, sdk)
 
 
+def run_command(cmd, input=None, env=None):
+    try:
+        p = Utils.subprocess.Popen(
+            cmd, stdin=Utils.subprocess.PIPE, stdout=Utils.subprocess.PIPE, stderr=Utils.subprocess.PIPE, env=env
+        )
+        if input is not None:
+            p.stdin.write(input.encode())
+        out, err = p.communicate()
+    except Exception as e:
+        return (-1, '', str(e))
+    else:
+        if not isinstance(out, str):
+            out = out.decode(sys.stdout.encoding, errors='ignore')
+        if not isinstance(err, str):
+            err = err.decode(sys.stderr.encoding, errors='ignore')
+        return (p.returncode, out, err)
+
+
+def parse_sdk_settings(sdk_settings_path):
+    with open(sdk_settings_path, 'rb') as sdk_settings_file:
+        settings = plist_smalllib.load(sdk_settings_file)
+    sdk_name = settings['DefaultProperties']['PLATFORM_NAME']
+    sdk_version = settings['Version']
+    sdk_version = sdk_version.split('.')
+    return sdk_name, sdk_version
+
+
+_CPU_ARCH_ABI64 = 0x01000000
+
+_CPU_TYPE_NAMES = {
+    -1: "any",
+    1: "vax",
+    6: "mc680x0",
+    7: "x86",
+    _CPU_ARCH_ABI64 | 7: "x86_64",
+    8: "mips",
+    10: "mc98000",
+    11: "hppa",
+    12: "arm",
+    _CPU_ARCH_ABI64 | 12: "arm64",
+    13: "mc88000",
+    14: "sparc",
+    15: "i860",
+    16: "alpha",
+    18: "ppc",
+    _CPU_ARCH_ABI64 | 18: "ppc64",
+}
+
+_CPU_SUBTYPE_NAMES = {
+    'arm':
+        {
+            5: 'v4t',
+            6: 'v6',
+            7: 'v5tej',
+            8: 'xscale',
+            9: 'v7',
+            10: 'v7f',
+            11: 'v7s',
+            12: 'v7k',
+            13: 'v8',
+            14: 'v6m',
+            15: 'v7m',
+            16: 'v7em',
+        },
+    'arm64': {
+        1: 'v8'
+    },
+}
+
+
 def configure(conf):
+    archs = {
+        'ppc': 'ppc',
+        'ppc_7400': 'ppc',
+        'ppc64': 'ppc64',
+        'x86_64': 'amd64',
+        'i386': 'x86',
+        'arm_v6': 'armv6',
+        'armv7': 'armv7a',
+        'arm_v7': 'armv7a',
+        'armv7s': 'armv7s',
+        'arm_v7s': 'armv7s',
+        'armv7k': 'armv7k',
+        'arm_v7k': 'armv7k',
+        'arm64': 'arm64',
+    }
+
+    conf.darwin_sdks = {}
+    sdks = []
+    for p in getattr(conf, 'os_sdk_paths', []):
+        for sdk in os.listdir(p):
+            sdk_path = os.path.join(p, sdk)
+            if os.path.isfile(os.path.join(p.sdk, 'SDKSettings.plist')):
+                sdks.append(sdk_path)
+    for sysroot, _ in conf.env.SYSROOTS:
+        if os.path.isfile(os.path.join(sysroot, 'SDKSettings.plist')):
+            sdks.append(sysroot)
+
+    for sdk_path in sdks:
+        sdk_os, sdk_version = parse_sdk_settings(os.path.join(sdk_path, 'SDKSettings.plist'))
+        sdk_archs = []
+        dylib = os.path.join(sdk_path, 'usr', 'lib', 'libc.dylib')
+        if os.path.isfile(dylib):
+            mach_o = MachO.MachO(dylib)
+            for header in mach_o.headers:
+                arch_name = _CPU_TYPE_NAMES.get(header.header.cputype, 'unknown')
+                arch_name += _CPU_SUBTYPE_NAMES.get(arch_name, {}).get(header.header.cpusubtype, '')
+                sdk_archs.append(arch_name)
+        else:
+            tbd = os.path.join(sdk_path, 'usr', 'lib', 'libc.tbd')
+            if os.path.isfile(tbd):
+                with open(tbd, 'r') as tbd_file:
+                    for line in tbd_file.readlines():
+                        line = line.strip()
+                        if line.startswith('archs:'):
+                            line = line.split()
+                            for a in line[2:-1]:
+                                try:
+                                    sdk_archs.append(archs[a[:-1]] if a[-1] == ',' else archs[a])
+                                except KeyError:
+                                    print('Unknown %s arch: %s in %s' % (sdk_os, a, dylib))
+                            break
+        try:
+            conf.darwin_sdks[sdk_os].append((sdk_version, sdk_archs, sdk_path))
+            conf.darwin_sdks[sdk_os].sort()
+        except KeyError:
+            conf.darwin_sdks[sdk_os] = [(sdk_version, sdk_archs, sdk_path)]
+
+    for sdk_os in conf.darwin_sdks.keys():
+        conf.darwin_sdks[sdk_os] = sorted(conf.darwin_sdks[sdk_os], key=lambda x: (-len(x[1]), x[0]))
+
     conf.platforms.append(MacOS(conf))

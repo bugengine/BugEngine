@@ -107,23 +107,28 @@ def darwin_postlink_task(self, link_task):
     out_node_stripped = out_node.change_ext('.stripped')
     out_node_signed = self.make_bld_node('bin.signed', None, out_node.name)
     self.strip_task = self.create_task('strip', [out_node], [out_node_stripped])
-    self.sign_task = self.create_task('codesign', [out_node_stripped], [out_node_signed])
-    self.link_task = self.sign_task
+    if self.env.CODESIGN:
+        self.sign_task = self.create_task('codesign', [out_node_stripped], [out_node_signed])
+        self.link_task = self.sign_task
+    else:
+        self.link_task = self.strip_task
 
-    dsymtask = getattr(self.bld, 'dsym_task', None)
-    if not dsymtask:
-        infoplist = out_rootnode.make_node('Info.plist')
-        dsymtask = self.bld.dsym_task = self.create_task('dsym', [], [infoplist])
-        self.install_as(os.path.join(self.bld.env.PREFIX, self.bld.optim, infoplist.path_from(bldnode)), infoplist)
+    if self.env.DSYMUTIL:
+        dsymtask = getattr(self.bld, 'dsym_task', None)
+        if not dsymtask:
+            infoplist = out_rootnode.make_node('Info.plist')
+            dsymtask = self.bld.dsym_task = self.create_task('dsym', [], [infoplist])
+            self.install_as(os.path.join(self.bld.env.PREFIX, self.bld.optim, infoplist.path_from(bldnode)), infoplist)
 
-    dsymtask.set_inputs(out_node)
-    dsymtask.set_outputs(out_dsymdir.make_node(out_node.name))
-    self.install_as(
-        os.path.join(
-            self.bld.env.PREFIX, self.bld.optim, appname + '.app.dSYM', 'Contents', 'Resources', 'DWARF', out_node.name
-        ), dsymtask.outputs[-1]
-    )
-    return self.sign_task
+        dsymtask.set_inputs(out_node)
+        dsymtask.set_outputs(out_dsymdir.make_node(out_node.name))
+        self.install_as(
+            os.path.join(
+                self.bld.env.PREFIX, self.bld.optim, appname + '.app.dSYM', 'Contents', 'Resources', 'DWARF',
+                out_node.name
+            ), dsymtask.outputs[-1]
+        )
+    return self.link_task
 
 
 @feature('cshlib', 'cxxshlib', 'cprogram', 'cxxprogram')

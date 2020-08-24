@@ -137,10 +137,10 @@ class Compiler:
         conf.env.cprogram_env = extra_env
         conf.env.cxxprogram_env = extra_env
         conf.env.append_unique('TARGETS', list(self.targets) + [self.target])
-        conf.env.append_unique('CPPFLAGS', self.extra_args.get('c', []))
-        conf.env.append_unique('CFLAGS', self.extra_args.get('c', []))
-        conf.env.append_unique('CXXFLAGS', self.extra_args.get('cxx', []))
-        conf.env.append_unique('LINKFLAGS', self.extra_args.get('link', []))
+        conf.env.append_value('CPPFLAGS', self.extra_args.get('c', []))
+        conf.env.append_value('CFLAGS', self.extra_args.get('c', []))
+        conf.env.append_value('CXXFLAGS', self.extra_args.get('cxx', []))
+        conf.env.append_value('LINKFLAGS', self.extra_args.get('link', []))
         conf.env.TARGET_ARCH = self.arch_name
         self.set_optimisation_options(conf)
         self.set_warning_options(conf)

@@ -6,7 +6,7 @@ class iOS(Configure.ConfigurationContext.Darwin):
     NAME = 'iPhone'
     CERTIFICATE_NAME = 'iPhone Developer'
     PLATFORMS = ['iphone', 'darwin']
-    SDK_NAME = 'iPhoneOS'
+    SDK_NAME = 'iphoneos'
     OS_NAME = 'iphoneos'
 
     def __init__(self, conf, sdk = None):
@@ -26,7 +26,7 @@ class iOS(Configure.ConfigurationContext.Darwin):
 class iOSSimulator(iOS):
     NAME = 'iPhoneSimulator'
     PLATFORMS = ['iphone', 'iphonesimulator']
-    SDK_NAME = 'iPhoneSimulator'
+    SDK_NAME = 'iphonesimulator'
     OS_NAME = 'iphoneos'
 
     def __init__(self, conf, sdk = None):

@@ -304,7 +304,7 @@ class GnuCompiler(Configure.ConfigurationContext.Compiler):
             '-Werror', '-Wno-sign-compare', '-Woverloaded-virtual', '-Wstrict-aliasing'
         ] + v.CXXFLAGS_warnall
 
-    def find_target_program(self, conf, platform, program, mandatory=True, os_paths=[]):
+    def find_target_program(self, conf, platform, program, mandatory=True, os_paths=[], var=''):
         sys_dirs = platform.directories + self.directories
         d, a = os.path.split(self.directories[0])
         while a:
@@ -312,7 +312,7 @@ class GnuCompiler(Configure.ConfigurationContext.Compiler):
             if os.path.isdir(pd):
                 sys_dirs.append(pd)
             d, a = os.path.split(d)
-        var = program.upper()
+        var = var or program.upper()
         for t in list(self.targets) + [self.target]:
             if conf.find_program('%s-%s' % (t, program), var=var, path_list=sys_dirs, mandatory=False):
                 break
