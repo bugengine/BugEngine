@@ -1,0 +1,15 @@
+diff -u -r bullet3-2.87.orig/src/LinearMath/btVector3.h bullet3-2.87/src/LinearMath/btVector3.h
+--- bullet3-2.87.orig/src/LinearMath/btVector3.h	2020-08-25 10:43:19.712206953 +0200
++++ bullet3-2.87/src/LinearMath/btVector3.h	2020-08-25 13:23:48.057258413 +0200
+@@ -1105,6 +1105,11 @@
+ 		mVec128 = vec;
+ 	}
+ 
++	SIMD_FORCE_INLINE btVector4(const btVector4& vec)
++	{
++		mVec128 = vec.mVec128;
++	}
++
+ 	SIMD_FORCE_INLINE btVector4(const btVector3& rhs)
+ 	{
+ 		mVec128 = rhs.mVec128;
