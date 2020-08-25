@@ -189,18 +189,38 @@ class vscode(Build.BuildContext):
             except KeyError:
                 tasks['inputs'] = []
 
+        launch_file = vscode_node.make_node('launch.json')
+        try:
+            launch_config_content = json_minify(Utils.readf(launch_file.abspath(), 'r'))
+        except IOError:
+            launch_configs = {'version': '0.2.0', 'configurations': [], 'inputs': []}
+        else:
+            launch_configs = json.loads(launch_config_content)
+            launch_configs['configurations'] = [
+                c for c in launch_configs['configurations'] if not c['name'].startswith('bugengine:')
+            ]
+            try:
+                launch_configs['inputs'] = [i for i in tasks['inputs'] if not i['id'].startswith('bugengine-')]
+            except KeyError:
+                launch_configs['inputs'] = []
+
         for action, command, is_default in [
-            ('build', 'build:${input:bugengine-Toolchain}:${input:bugengine-Variant}', True),
-            ('clean', 'clean:${input:bugengine-Toolchain}:${input:bugengine-Variant}', False),
-            ('rebuild', 'rebuild:${input:bugengine-Toolchain}:${input:bugengine-Variant}', False),
-            ('reconfigure', 'reconfigure', False), (self.cmd, self.cmd, False)
+            ('build', ['build:${input:bugengine-Toolchain}:${input:bugengine-Variant}'], True),
+            ('clean', ['clean:${input:bugengine-Toolchain}:${input:bugengine-Variant}'], False),
+            (
+                'rebuild', [
+                    'clean:${input:bugengine-Toolchain}:${input:bugengine-Variant}',
+                    'build:${input:bugengine-Toolchain}:${input:bugengine-Variant}'
+                ], False
+            ), ('setup', ['setup:${input:bugengine-Toolchain}'], False), ('reconfigure', ['reconfigure'], False),
+            (self.cmd, [self.cmd], False)
         ]:
             tasks['tasks'].append(
                 {
                     'label': 'bugengine:%s' % action,
                     'type': 'process',
                     'command': [sys.executable],
-                    'args': [sys.argv[0], command] + options,
+                    'args': [sys.argv[0]] + command + options,
                     'options': {
                         'cwd': self.srcnode.abspath()
                     },
@@ -211,6 +231,17 @@ class vscode(Build.BuildContext):
                     } if is_default else 'build'
                 }
             )
+            launch_configs['configurations'].append(
+                {
+                    'name': 'bugengine:waf:%s' % action,
+                    'type': 'python',
+                    'request': 'launch',
+                    'program': sys.argv[0],
+                    'args': command + options,
+                    'cwd': '${workspaceFolder}',
+                }
+            )
+
         for input in ('Toolchain', 'Variant'):
             tasks['inputs'].append(
                 {
@@ -220,20 +251,6 @@ class vscode(Build.BuildContext):
                     'args': input
                 }
             )
-
-        launch_file = vscode_node.make_node('launch.json')
-        try:
-            launch_configs = json.loads(json_minify(Utils.readf(launch_file.abspath(), 'r')))
-        except IOError:
-            launch_configs = {'version': '0.2.0', 'configurations': [], 'inputs': []}
-        else:
-            launch_configs['configurations'] = [
-                c for c in launch_configs['configurations'] if not c['name'].startswith('bugengine:')
-            ]
-            try:
-                launch_configs['inputs'] = [i for i in tasks['inputs'] if not i['id'].startswith('bugengine-')]
-            except KeyError:
-                launch_configs['inputs'] = []
 
         for g in self.groups:
             for tg in g:
@@ -291,6 +308,7 @@ class vscode(Build.BuildContext):
                                 'bugengine:build'
                         }
                     )
+
         for input in (
             'Toolchain', 'Variant', 'Prefix', 'Deploy_RunBinDir', 'Deploy_BinDir', 'Launcher', 'Python', 'DebuggerPath',
             'DebuggerMode'
