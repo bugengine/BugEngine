@@ -55,6 +55,11 @@ TEMPLATE_H = """
 
 TEMPLATE_CLASS_CC = """
 static ref< ::BugEngine::KernelScheduler::Kernel > s_%(Name)sKernel%(KernelName)s = ref< ::BugEngine::KernelScheduler::Kernel >::create(::BugEngine::Arena::task(), s_%(Name)sKernelCode, ::BugEngine::istring("%(kernelName)s"));
+
+%(end_Namespace)s
+// this is important for visual studio 2003
+%(Namespace)s
+
 %(KernelName)s::PluginHook %(KernelName)s::g_kernelHook = %(KernelName)s::PluginHook(%(KernelName)s::ResourceHook(s_%(Name)sKernel%(KernelName)s));
 
 %(KernelName)s::%(KernelName)s(%(argument_params)s)
@@ -149,6 +154,10 @@ class kernel_task(Task.Task):
                 )
             )
             task_params = {
+                'Namespace':
+                    ' { '.join('namespace %s' % n.capitalize() for n in kernel_namespace[:-1]) + '\n{\n',
+                'end_Namespace':
+                    '}' * (len(kernel_namespace) - 1),
                 'Name':
                     kernel_name.capitalize(),
                 'kernel_full_name':
