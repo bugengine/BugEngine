@@ -127,7 +127,7 @@ class Darwin(Configure.ConfigurationContext.Platform):
         conf.env.append_unique(
             'LINKFLAGS', [
                 '-m%s-version-min=%s' % (self.OS_NAME, self.sdk[3]), '-isysroot', self.sdk[1],
-                '-L%s/usr/lib' % self.sdk[1], '-lgcc_s.10.5'
+                '-L%s/usr/lib' % self.sdk[1]
             ] + ['-B%s' % bin_path for bin_path in self.directories]
         )
         if compiler.arch == 'x86':
@@ -332,6 +332,10 @@ class MacOS(Darwin):
     def __init__(self, conf, sdk=None):
         Darwin.__init__(self, conf, sdk)
 
+    def load_in_env(self, conf, compiler):
+        Darwin.load_in_env(self, conf, compiler)
+        conf.env.append_unique('LINKFLAGS', ['-lgcc_s.10.5'])
+
 
 def run_command(cmd, input=None, env=None):
     try:
@@ -357,7 +361,6 @@ def parse_sdk_settings(sdk_settings_path):
     sdk_name = settings['DefaultProperties']['PLATFORM_NAME']
     sdk_version = settings['Version']
     sdk_version = [str(x) for x in sdk_version.split('.')]
-    print(repr(sdk_version))
     return str(sdk_name), sdk_version
 
 
