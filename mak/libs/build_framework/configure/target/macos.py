@@ -269,7 +269,7 @@ class Darwin(Configure.ConfigurationContext.Platform):
 
                 for a in sdk_archs:
                     for c in compilers:
-                        if self.match(c, sdk_path, all_sdks) and c.arch == a:
+                        if self.match(c, sdk_path, all_sdks) and c.arch == c.ARCHS[a]:
                             try:
                                 obj_node.delete()
                             except Exception:

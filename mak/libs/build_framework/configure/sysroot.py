@@ -28,16 +28,16 @@ BIG_ENDIAN = {
 }
 
 ARM_NAMES = {
-    0 : 'Pre-v4',
-    1 : 'v4',
-    2 : 'v4T',
-    3 : 'v5T',
-    4 : 'v5TE',
-    5 : 'v5TEJ',
-    6 : 'v6',
-    7 : 'v6KZ',
-    8 : 'v6T2',
-    9 : 'v6K',
+    0: 'Pre-v4',
+    1: 'v4',
+    2: 'v4T',
+    3: 'v5T',
+    4: 'v5TE',
+    5: 'v5TEJ',
+    6: 'v6',
+    7: 'v6KZ',
+    8: 'v6T2',
+    9: 'v6K',
     10: 'v7',
     11: 'v6-M',
     12: 'v6S-M',
@@ -46,6 +46,83 @@ ARM_NAMES = {
     15: 'v8-R',
     16: 'v8-M.baseline',
     17: 'v8-M.mainline',
+}
+
+MULTILIB_DIRS = {
+    'arm': {
+        'v5': 'armv5',
+        'v6': 'armv6',
+        'v7': 'armv7',
+    },
+    'x86':
+        {
+            '64': 'x86_64',
+            'amd64': 'x86_64',
+            'x86_64': 'x86_64',
+            'i386': 'i386',
+            'i486': 'i486',
+            'i586': 'i586',
+            'i686': 'i686',
+        },
+    'i386': {
+        '64': 'x86_64',
+        'amd64': 'x86_64',
+        'x86_64': 'x86_64',
+        'i486': 'i486',
+        'i586': 'i586',
+        'i686': 'i686',
+    },
+    'i486': {
+        '64': 'x86_64',
+        'amd64': 'x86_64',
+        'x86_64': 'x86_64',
+        'i386': 'i386',
+        'i586': 'i586',
+        'i686': 'i686',
+    },
+    'i586': {
+        '64': 'x86_64',
+        'amd64': 'x86_64',
+        'x86_64': 'x86_64',
+        'i386': 'i386',
+        'i486': 'i486',
+        'i686': 'i686',
+    },
+    'i686': {
+        '64': 'x86_64',
+        'amd64': 'x86_64',
+        'x86_64': 'x86_64',
+        'i386': 'i386',
+        'i486': 'i486',
+        'i586': 'i586',
+    },
+    'x86_64': {
+        '32': 'i386',
+        'i386': 'i386',
+        'i486': 'i486',
+        'i586': 'i586',
+        'i686': 'i686',
+    },
+    'ppc': {
+        '64': 'ppc64',
+        'ppc64': 'ppc64',
+        'powerpc64': 'powerpc64'
+    },
+    'powerpc': {
+        '64': 'powerpc64',
+        'ppc64': 'ppc64',
+        'powerpc64': 'powerpc64'
+    },
+    'ppc64': {
+        '32': 'ppc',
+        'ppc': 'ppc',
+        'powerpc': 'powerpc'
+    },
+    'powerpc64': {
+        '32': 'powerpc',
+        'ppc': 'ppc',
+        'powerpc': 'powerpc'
+    }
 }
 
 
@@ -80,7 +157,7 @@ def configure(configuration_context):
         configuration_context.start_msg('Checking sysroot %s' % sysroot)
         try:
             # try to find GCC triples
-            targets += os.listdir(os.path.join(sysroot, 'usr', 'lib', 'gcc'))
+            gcc_targets = os.listdir(os.path.join(sysroot, 'usr', 'lib', 'gcc'))
         except OSError as e:
             for libpath in get_sysroot_libpaths(sysroot):
                 try:
@@ -132,5 +209,25 @@ def configure(configuration_context):
                                         else:
                                             targets.append('%s-%s' % (arch, platform))
                                     break
+        else:
+            for target in gcc_targets:
+                gcc_target_path = os.path.join(sysroot, 'usr', 'lib', 'gcc', target)
+                target_arch = target.split('-')[0]
+
+                for version in os.listdir(gcc_target_path):
+                    if target not in targets:
+                        targets.append(target)
+                    gcc_target_version_path = os.path.join(gcc_target_path, version)
+                    for multilib in os.listdir(gcc_target_version_path):
+                        if os.path.isfile(os.path.join(gcc_target_version_path, multilib, 'libgcc.a')):
+                            try:
+                                multilib_arch = MULTILIB_DIRS[target_arch][multilib]
+                            except KeyError:
+                                print('unknown multilib: %s/%s' % (arch, multilib))
+                            else:
+                                multilib_target = '-'.join([multilib_arch] + target.split('-')[1:])
+                                if multilib_target not in targets:
+                                    targets.append(multilib_target)
+
         configuration_context.env.append_value('SYSROOTS', [(sysroot, targets)])
         configuration_context.end_msg(', '.join(targets))
