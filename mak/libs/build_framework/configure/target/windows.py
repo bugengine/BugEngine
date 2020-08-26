@@ -175,7 +175,7 @@ class Windows_GCC(Windows):
     def load_in_env(self, conf, compiler):
         Windows.load_in_env(self, conf, compiler)
         env = conf.env
-        env.append_unique('LINKFLAGS', ['-static', '-Wl,--exclude-all-symbols'])
+        env.append_unique('LINKFLAGS', ['-static'])
         env.append_unique('CXXFLAGS_warnall', ['-Wno-unknown-pragmas', '-Wno-comment'])
         env.COMPILER_ABI = 'mingw'
         self.find_winres(conf, compiler)
