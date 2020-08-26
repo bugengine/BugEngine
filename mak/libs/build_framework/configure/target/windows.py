@@ -128,8 +128,6 @@ class Windows_Clang(Windows):
             env.append_unique('LINKFLAGS', ['-static', '-Wl,--enable-auto-import'])
             if compiler.version_number >= (5, ):
                 env.append_unique('LINKFLAGS', ['-pthread'])
-            if compiler.version_number >= (3, 7):
-                env.append_unique('LINKFLAGS', ['-Wl,--exclude-all-symbols'])
             if compiler.version_number < (3, 8):
                 env.append_unique('LINKFLAGS', ['-Wl,--allow-multiple-definition'])
             env.IMPLIB_ST = '-Wl,--out-implib,%s'
