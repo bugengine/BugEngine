@@ -10,7 +10,6 @@ addons:
      - libgl1-mesa-dev
      - libgles2-mesa-dev
      - zlib1g-dev
-     - libminizip-dev
      - libgtk-3-dev
      - libbullet-dev
 
@@ -362,15 +361,15 @@ jobs:
     - os: linux
       dist: xenial
       arch: ppc64le
-      env: COMPILER=gcc_ppc64el COMPILER_VERSION=5.3.1 TARGET_OS=linux_ppc64el FLAVOR=debug
+      env: COMPILER=gcc_ppc64le COMPILER_VERSION=5.4.0 TARGET_OS=linux_gnu_ppc64le FLAVOR=debug
       addons:
         apt:
           packages:
             - *base-packages
-            - &xenial-packages [ python2.7-dev, python3.5-dev, liblua5.3-dev]
+            - &xenial-packages [ python2.7-dev, python3.5-dev, liblua5.3-dev, libminizip-dev]
     - os: linux
       arch: ppc64le
-      env: COMPILER=gcc_ppc64el COMPILER_VERSION=5.3.1 TARGET_OS=linux_ppc64el FLAVOR=profile
+      env: COMPILER=gcc_ppc64le COMPILER_VERSION=5.4.0 TARGET_OS=linux_gnu_ppc64le FLAVOR=profile
       addons:
         apt:
           packages:
@@ -378,7 +377,7 @@ jobs:
             - *xenial-packages
     - os: linux
       arch: ppc64le
-      env: COMPILER=gcc_ppc64el COMPILER_VERSION=5.3.1 TARGET_OS=linux_ppc64el FLAVOR=final
+      env: COMPILER=gcc_ppc64le COMPILER_VERSION=5.4.0 TARGET_OS=linux_gnu_ppc64le FLAVOR=final
       addons:
         apt:
           packages:
@@ -387,7 +386,7 @@ jobs:
     - os: linux
       dist: xenial
       arch: ppc64le
-      env: COMPILER=clang_ppc64el COMPILER_VERSION=3.8.2 TARGET_OS=linux_ppc64el FLAVOR=debug
+      env: COMPILER=clang_ppc64le COMPILER_VERSION=3.8.0 TARGET_OS=linux_gnu_ppc64le FLAVOR=debug
       addons:
         apt:
           packages:
@@ -395,7 +394,7 @@ jobs:
             - *xenial-packages
     - os: linux
       arch: ppc64le
-      env: COMPILER=clang_ppc64el COMPILER_VERSION=3.8.2 TARGET_OS=linux_ppc64el FLAVOR=profile
+      env: COMPILER=clang_ppc64le COMPILER_VERSION=3.8.0 TARGET_OS=linux_gnu_ppc64le FLAVOR=profile
       addons:
         apt:
           packages:
@@ -403,7 +402,7 @@ jobs:
             - *xenial-packages
     - os: linux
       arch: ppc64le
-      env: COMPILER=clang_ppc64el COMPILER_VERSION=3.8.2 TARGET_OS=linux_ppc64el FLAVOR=final
+      env: COMPILER=clang_ppc64le COMPILER_VERSION=3.8.0 TARGET_OS=linux_gnu_ppc64le FLAVOR=final
       addons:
         apt:
           packages:
@@ -411,7 +410,7 @@ jobs:
             - *xenial-packages
     - os: linux
       arch: arm64
-      env: COMPILER=gcc_arm64 COMPILER_VERSION=5.3.1 TARGET_OS=linux_arm64 FLAVOR=debug
+      env: COMPILER=gcc_arm64 COMPILER_VERSION=5.4.0 TARGET_OS=linux_gnu_arm64 FLAVOR=debug
       addons:
         apt:
           packages:
@@ -419,7 +418,7 @@ jobs:
             - *xenial-packages
     - os: linux
       arch: arm64
-      env: COMPILER=gcc_arm64 COMPILER_VERSION=5.3.1 TARGET_OS=linux_arm64 FLAVOR=profile
+      env: COMPILER=gcc_arm64 COMPILER_VERSION=5.4.0 TARGET_OS=linux_gnu_arm64 FLAVOR=profile
       addons:
         apt:
           packages:
@@ -427,7 +426,7 @@ jobs:
             - *xenial-packages
     - os: linux
       arch: arm64
-      env: COMPILER=gcc_arm64 COMPILER_VERSION=5.3.1 TARGET_OS=linux_arm64 FLAVOR=final
+      env: COMPILER=gcc_arm64 COMPILER_VERSION=5.4.0 TARGET_OS=linux_gnu_arm64 FLAVOR=final
       addons:
         apt:
           packages:
@@ -435,7 +434,7 @@ jobs:
             - *xenial-packages
     - os: linux
       arch: arm64
-      env: COMPILER=clang_arm64 COMPILER_VERSION=8.0.0 TARGET_OS=linux_arm64 FLAVOR=debug
+      env: COMPILER=clang_arm64 COMPILER_VERSION=3.8.0 TARGET_OS=linux_gnu_arm64 FLAVOR=debug
       addons:
         apt:
           packages:
@@ -443,7 +442,7 @@ jobs:
             - *xenial-packages
     - os: linux
       arch: arm64
-      env: COMPILER=clang_arm64 COMPILER_VERSION=8.0.0 TARGET_OS=linux_arm64 FLAVOR=profile
+      env: COMPILER=clang_arm64 COMPILER_VERSION=3.8.0 TARGET_OS=linux_gnu_arm64 FLAVOR=profile
       addons:
         apt:
           packages:
@@ -451,7 +450,7 @@ jobs:
             - *xenial-packages
     - os: linux
       arch: arm64
-      env: COMPILER=clang_arm64 COMPILER_VERSION=8.0.0 TARGET_OS=linux_arm64 FLAVOR=final
+      env: COMPILER=clang_arm64 COMPILER_VERSION=3.8.0 TARGET_OS=linux_gnu_arm64 FLAVOR=final
       addons:
         apt:
           packages:
