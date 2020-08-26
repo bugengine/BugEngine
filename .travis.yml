@@ -1,25 +1,21 @@
 language: cpp
-
-sudo: false
+os: linux
+dist: xenial
 
 addons:
   apt:
-    packages:
+    packages: &base-packages
      - ocl-icd-opencl-dev
-     - python2.7-dev
-     - python3.4-dev
      - libfreetype6-dev
      - libgl1-mesa-dev
      - libgles2-mesa-dev
-     - libncurses5-dev
      - zlib1g-dev
-     - libopenal-dev
-     - liblua5.2-dev
+     - libminizip-dev
+     - libgtk-3-dev
      - libbullet-dev
-     - libogg-dev
-     - libvorbis-dev
 
-matrix:
+
+jobs:
   include:
     - os: linux
       dist: trusty
@@ -293,157 +289,174 @@ matrix:
         - unzip -q android-ndk-r19c-linux-x86_64.zip
     - os: linux
       dist: trusty
+      addons:
+        apt:
+          packages:
+            - *base-packages
+            - &trusty-packages [ python2.7-dev, python3.4-dev, liblua5.2-dev]
       env: COMPILER=gcc_amd64 COMPILER_VERSION=4.8.4 TARGET_OS=linux_gnu_amd64 FLAVOR=debug
     - os: linux
       dist: trusty
       env: COMPILER=gcc_amd64 COMPILER_VERSION=4.8.4 TARGET_OS=linux_gnu_amd64 FLAVOR=profile
+      addons:
+        apt:
+          packages:
+            - *base-packages
+            - *trusty-packages
     - os: linux
       dist: trusty
       env: COMPILER=gcc_amd64 COMPILER_VERSION=4.8.4 TARGET_OS=linux_gnu_amd64 FLAVOR=final
+      addons:
+        apt:
+          packages:
+            - *base-packages
+            - *trusty-packages
     - os: linux
       dist: trusty
       env: COMPILER=clang_amd64 COMPILER_VERSION=5.0.0 TARGET_OS=linux_gnu_amd64 FLAVOR=debug
+      addons:
+        apt:
+          packages:
+            - *base-packages
+            - *trusty-packages
     - os: linux
       dist: trusty
       env: COMPILER=clang_amd64 COMPILER_VERSION=5.0.0 TARGET_OS=linux_gnu_amd64 FLAVOR=profile
+      addons:
+        apt:
+          packages:
+            - *base-packages
+            - *trusty-packages
     - os: linux
       dist: trusty
       env: COMPILER=clang_amd64 COMPILER_VERSION=5.0.0 TARGET_OS=linux_gnu_amd64 FLAVOR=final
+      addons:
+        apt:
+          packages:
+            - *base-packages
+            - *trusty-packages
     - os: linux
       dist: trusty
       env: COMPILER=gcc_x86 COMPILER_VERSION=4.2.1 TARGET_OS=mingw_x86 FLAVOR=debug
+      addons:
+        apt:
+          packages:
+            - *base-packages
+            - *trusty-packages
     - os: linux
       dist: trusty
       env: COMPILER=gcc_x86 COMPILER_VERSION=4.2.1 TARGET_OS=mingw_x86 FLAVOR=profile
+      addons:
+        apt:
+          packages:
+            - *base-packages
+            - *trusty-packages
     - os: linux
       dist: trusty
       env: COMPILER=gcc_x86 COMPILER_VERSION=4.2.1 TARGET_OS=mingw_x86 FLAVOR=final
-    - os: linux
-      arch: ppc64el
       addons:
         apt:
           packages:
-           - ocl-icd-opencl-dev
-           - python2.7-dev
-           - python3.6-dev
-           - python3.7-dev
-           - python3.8-dev
-           - libfreetype6-dev
-           - libgl1-mesa-dev
-           - libgles2-mesa-dev
-           - libncurses5-dev
-           - zlib1g-dev
-           - libopenal-dev
-           - liblua5.2-dev
-           - libbullet-dev
-           - libogg-dev
-           - libvorbis-dev
-      env: COMPILER=gcc_ppc64el COMPILER_VERSION=8.2.1 TARGET_OS=linux_ppc64el FLAVOR=debug
+            - *base-packages
+            - *trusty-packages
     - os: linux
-      arch: ppc64el
+      dist: xenial
+      arch: ppc64le
+      env: COMPILER=gcc_ppc64el COMPILER_VERSION=5.3.1 TARGET_OS=linux_ppc64el FLAVOR=debug
       addons:
         apt:
           packages:
-           - ocl-icd-opencl-dev
-           - python2.7-dev
-           - python3.6-dev
-           - python3.7-dev
-           - python3.8-dev
-           - libfreetype6-dev
-           - libgl1-mesa-dev
-           - libgles2-mesa-dev
-           - libncurses5-dev
-           - zlib1g-dev
-           - libopenal-dev
-           - liblua5.2-dev
-           - libbullet-dev
-           - libogg-dev
-           - libvorbis-dev
-      env: COMPILER=gcc_ppc64el COMPILER_VERSION=8.2.1 TARGET_OS=linux_ppc64el FLAVOR=profile
+            - *base-packages
+            - &xenial-packages [ python2.7-dev, python3.5-dev, liblua5.3-dev]
     - os: linux
-      arch: ppc64el
+      arch: ppc64le
+      env: COMPILER=gcc_ppc64el COMPILER_VERSION=5.3.1 TARGET_OS=linux_ppc64el FLAVOR=profile
       addons:
         apt:
           packages:
-           - ocl-icd-opencl-dev
-           - python2.7-dev
-           - python3.6-dev
-           - python3.7-dev
-           - python3.8-dev
-           - libfreetype6-dev
-           - libgl1-mesa-dev
-           - libgles2-mesa-dev
-           - libncurses5-dev
-           - zlib1g-dev
-           - libopenal-dev
-           - liblua5.2-dev
-           - libbullet-dev
-           - libogg-dev
-           - libvorbis-dev
-       env: COMPILER=gcc_ppc64el COMPILER_VERSION=8.2.1 TARGET_OS=linux_ppc64el FLAVOR=final
+            - *base-packages
+            - *xenial-packages
+    - os: linux
+      arch: ppc64le
+      env: COMPILER=gcc_ppc64el COMPILER_VERSION=5.3.1 TARGET_OS=linux_ppc64el FLAVOR=final
+      addons:
+        apt:
+          packages:
+            - *base-packages
+            - *xenial-packages
+    - os: linux
+      dist: xenial
+      arch: ppc64le
+      env: COMPILER=clang_ppc64el COMPILER_VERSION=3.8.2 TARGET_OS=linux_ppc64el FLAVOR=debug
+      addons:
+        apt:
+          packages:
+            - *base-packages
+            - *xenial-packages
+    - os: linux
+      arch: ppc64le
+      env: COMPILER=clang_ppc64el COMPILER_VERSION=3.8.2 TARGET_OS=linux_ppc64el FLAVOR=profile
+      addons:
+        apt:
+          packages:
+            - *base-packages
+            - *xenial-packages
+    - os: linux
+      arch: ppc64le
+      env: COMPILER=clang_ppc64el COMPILER_VERSION=3.8.2 TARGET_OS=linux_ppc64el FLAVOR=final
+      addons:
+        apt:
+          packages:
+            - *base-packages
+            - *xenial-packages
     - os: linux
       arch: arm64
+      env: COMPILER=gcc_arm64 COMPILER_VERSION=5.3.1 TARGET_OS=linux_arm64 FLAVOR=debug
       addons:
         apt:
           packages:
-           - ocl-icd-opencl-dev
-           - python2.7-dev
-           - python3.6-dev
-           - python3.7-dev
-           - python3.8-dev
-           - libfreetype6-dev
-           - libgl1-mesa-dev
-           - libgles2-mesa-dev
-           - libncurses5-dev
-           - zlib1g-dev
-           - libopenal-dev
-           - liblua5.2-dev
-           - libbullet-dev
-           - libogg-dev
-           - libvorbis-dev
-       env: COMPILER=gcc_arm64 COMPILER_VERSION=8.2.1 TARGET_OS=linux_arm64 FLAVOR=debug
+            - *base-packages
+            - *xenial-packages
     - os: linux
       arch: arm64
+      env: COMPILER=gcc_arm64 COMPILER_VERSION=5.3.1 TARGET_OS=linux_arm64 FLAVOR=profile
       addons:
         apt:
           packages:
-           - ocl-icd-opencl-dev
-           - python2.7-dev
-           - python3.6-dev
-           - python3.7-dev
-           - python3.8-dev
-           - libfreetype6-dev
-           - libgl1-mesa-dev
-           - libgles2-mesa-dev
-           - libncurses5-dev
-           - zlib1g-dev
-           - libopenal-dev
-           - liblua5.2-dev
-           - libbullet-dev
-           - libogg-dev
-           - libvorbis-dev
-       env: COMPILER=gcc_arm64 COMPILER_VERSION=8.2.1 TARGET_OS=linux_arm64 FLAVOR=profile
+            - *base-packages
+            - *xenial-packages
     - os: linux
       arch: arm64
+      env: COMPILER=gcc_arm64 COMPILER_VERSION=5.3.1 TARGET_OS=linux_arm64 FLAVOR=final
       addons:
         apt:
           packages:
-           - ocl-icd-opencl-dev
-           - python2.7-dev
-           - python3.6-dev
-           - python3.7-dev
-           - python3.8-dev
-           - libfreetype6-dev
-           - libgl1-mesa-dev
-           - libgles2-mesa-dev
-           - libncurses5-dev
-           - zlib1g-dev
-           - libopenal-dev
-           - liblua5.2-dev
-           - libbullet-dev
-           - libogg-dev
-           - libvorbis-dev
-       env: COMPILER=gcc_arm64 COMPILER_VERSION=8.2.1 TARGET_OS=linux_arm64 FLAVOR=final
+            - *base-packages
+            - *xenial-packages
+    - os: linux
+      arch: arm64
+      env: COMPILER=clang_arm64 COMPILER_VERSION=8.0.0 TARGET_OS=linux_arm64 FLAVOR=debug
+      addons:
+        apt:
+          packages:
+            - *base-packages
+            - *xenial-packages
+    - os: linux
+      arch: arm64
+      env: COMPILER=clang_arm64 COMPILER_VERSION=8.0.0 TARGET_OS=linux_arm64 FLAVOR=profile
+      addons:
+        apt:
+          packages:
+            - *base-packages
+            - *xenial-packages
+    - os: linux
+      arch: arm64
+      env: COMPILER=clang_arm64 COMPILER_VERSION=8.0.0 TARGET_OS=linux_arm64 FLAVOR=final
+      addons:
+        apt:
+          packages:
+            - *base-packages
+            - *xenial-packages
     - os: osx
       env: COMPILER=appleclang COMPILER_VERSION=9.1.0 TARGET_OS=macos10.13 FLAVOR=debug
     - os: osx
