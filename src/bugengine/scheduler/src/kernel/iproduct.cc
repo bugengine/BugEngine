@@ -7,6 +7,10 @@
 
 namespace BugEngine { namespace KernelScheduler {
 
+IProduct::~IProduct()
+{
+}
+
 void IProduct::addOutputHost(weak< IMemoryHost > host)
 {
     for(minitl::vector< HostInformation >::iterator it = m_productOutput.begin();

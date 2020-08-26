@@ -26,9 +26,7 @@ protected:
     {
     }
 
-    ~IProduct()
-    {
-    }
+    virtual ~IProduct();
 
 public:
     weak< Task::ITask > producer() const
