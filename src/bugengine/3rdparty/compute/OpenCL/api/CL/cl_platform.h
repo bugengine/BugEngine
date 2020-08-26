@@ -378,7 +378,7 @@ typedef unsigned int cl_GLenum;
     #else
         #include <xmmintrin.h>
     #endif
-    #if defined( __GNUC__ )
+    #if defined( __GNUC__ ) && !defined( __ICC )
         typedef float __cl_float4   __attribute__((vector_size(16)));
     #else
         typedef __m128 __cl_float4;
@@ -392,7 +392,7 @@ typedef unsigned int cl_GLenum;
     #else
         #include <emmintrin.h>
     #endif
-    #if defined( __GNUC__ )
+    #if defined( __GNUC__ ) && !defined( __ICC )
         typedef cl_uchar    __cl_uchar16    __attribute__((vector_size(16)));
         typedef cl_char     __cl_char16     __attribute__((vector_size(16)));
         typedef cl_ushort   __cl_ushort8    __attribute__((vector_size(16)));
@@ -426,7 +426,7 @@ typedef unsigned int cl_GLenum;
 
 #if defined( __MMX__ )
     #include <mmintrin.h>
-    #if defined( __GNUC__ )
+    #if defined( __GNUC__ ) && !defined( __ICC )
         typedef cl_uchar    __cl_uchar8     __attribute__((vector_size(8)));
         typedef cl_char     __cl_char8      __attribute__((vector_size(8)));
         typedef cl_ushort   __cl_ushort4    __attribute__((vector_size(8)));
@@ -464,7 +464,7 @@ typedef unsigned int cl_GLenum;
     #else
         #include <immintrin.h>
     #endif
-    #if defined( __GNUC__ )
+    #if defined( __GNUC__ ) && !defined( __ICC )
         typedef cl_float    __cl_float8     __attribute__((vector_size(32)));
         typedef cl_double   __cl_double4    __attribute__((vector_size(32)));
     #else
