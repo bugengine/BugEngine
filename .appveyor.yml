@@ -315,7 +315,7 @@ environment:
 
 
 build_script:
-  - set PATH=%COMPILER_PATH%;%PATH%
+  - set PATH=%PATH%;%COMPILER_PATH%
   - set
   - python waf configure --compilers=%COMPILER%
   - python waf build:%TARGET_OS%-%COMPILER%_%COMPILER_TARGET%-%COMPILER_VERSION%:%FLAVOR% --tests
