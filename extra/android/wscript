@@ -52,7 +52,10 @@ def options(option_context):
             try:
                 key = Utils.winreg.OpenKey(Utils.winreg.HKEY_LOCAL_MACHINE, r'SOFTWARE\Wow6432Node\Microsoft\VisualStudio\Android')
             except OSError:
-                key = Utils.winreg.OpenKey(Utils.winreg.HKEY_LOCAL_MACHINE, r'SOFTWARE\Microsoft\VisualStudio\Android')
+                try:
+                    key = Utils.winreg.OpenKey(Utils.winreg.HKEY_LOCAL_MACHINE, r'SOFTWARE\Microsoft\VisualStudio\Android')
+                except OSError:
+                    key = Utils.winreg.OpenKey(Utils.winreg.HKEY_LOCAL_MACHINE, r'SOFTWARE\Microsoft\VisualStudio\Android', access=Utils.winreg.KEY_READ|Utils.winreg.KEY_WOW64_64KEY)
             jdk_path = Utils.winreg.QueryValueEx(key, 'JavaHome')[0]
         except OSError:
             pass
