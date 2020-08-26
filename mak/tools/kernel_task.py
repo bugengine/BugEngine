@@ -126,7 +126,7 @@ class kernel_task(Task.Task):
         kernel_full_name = kernel_namespace[1:]
 
         params = {
-            'header': self.outputs[1].abspath(),
+            'header': self.outputs[1].path_from(self.generator.bld.bldnode),
             'Namespace': ' { '.join('namespace %s' % n.capitalize() for n in kernel_namespace[:-1]) + '\n{\n',
             'end_Namespace': '}' * (len(kernel_namespace) - 1),
             'name': kernel_name,
