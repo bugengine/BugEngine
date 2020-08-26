@@ -5,6 +5,7 @@ import os
 FT_SOURCES = 'https://download.savannah.gnu.org/releases/freetype/freetype-2.10.2.tar.gz'
 FT_BINARIES = 'https://github.com/bugengine/BugEngine/releases/download/prebuilt-%(platform)s-%(abi)s/freetype-2.10.2-%(platform)s-%(arch)s-%(abi)s.tgz'
 
+
 def setup_pkgconfig(conf):
     try:
         conf.pkg_config('freetype2', var='freetype')
@@ -17,7 +18,7 @@ def setup_pkgconfig(conf):
 
 
 def setup_system(conf):
-    if conf.check_lib(
+    if 'windows' not in conf.env.VALID_PLATFORMS and conf.check_lib(
         'freetype',
         var='freetype',
         includes=['ft2build.h', 'freetype/freetype.h', 'freetype/t1tables.h'],

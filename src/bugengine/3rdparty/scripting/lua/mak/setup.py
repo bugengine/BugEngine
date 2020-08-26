@@ -21,18 +21,21 @@ def setup_pkgconfig(conf):
 
 
 def setup_system(conf):
-    for v in '-5.4', '5.4', '-5.3', '5.3', '-5.2', '5.2', '-5.1', '5.1':
-        version = '%s%s' % (v[-3], v[-1])
-        if conf.check_lib('lua%s' % v,
-                          var='lua',
-                          includepath=['=/usr/include/lua%s' % version, '=/usr/local/include/lua%s' % version],
-                          includes_externc=['lua.h'],
-                          functions=['lua_newstate']):
-            conf.env.LUA_BINARY = True
-            conf.end_msg('version %s from system' % v)
-            return True
-    else:
-        return False
+    if 'windows' not in conf.env.VALID_PLATFORMS:
+        for v in '-5.4', '5.4', '-5.3', '5.3', '-5.2', '5.2', '-5.1', '5.1':
+            version = '%s%s' % (v[-3], v[-1])
+            if conf.check_lib(
+                'lua%s' % v,
+                var='lua',
+                includepath=['=/usr/include/lua%s' % version,
+                             '=/usr/local/include/lua%s' % version],
+                includes_externc=['lua.h'],
+                functions=['lua_newstate']
+            ):
+                conf.env.LUA_BINARY = True
+                conf.end_msg('version %s from system' % v)
+                return True
+    return False
 
 
 def setup_prebuilt(conf):

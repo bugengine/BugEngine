@@ -30,7 +30,9 @@ def setup_pkgconfig_minizip(conf):
 
 
 def setup_system_zlib(conf):
-    if conf.check_lib('z', var='zlib', includes=['zlib.h'], functions=['deflate']):
+    if 'windows' not in conf.env.VALID_PLATFORMS and conf.check_lib(
+        'z', var='zlib', includes=['zlib.h'], functions=['deflate']
+    ):
         conf.env.ZLIB_BINARY = True
         conf.end_msg('from system')
         return True
@@ -39,11 +41,13 @@ def setup_system_zlib(conf):
 
 
 def setup_system_minizip(conf):
-    if conf.check_lib('minizip',
-                      var='minizip',
-                      includepath=['=/usr/include/minizip', '=/usr/local/include/minizip'],
-                      includes=['unzip.h'],
-                      functions=['unzClose']):
+    if 'windows' not in conf.env.VALID_PLATFORMS and conf.check_lib(
+        'minizip',
+        var='minizip',
+        includepath=['=/usr/include/minizip', '=/usr/local/include/minizip'],
+        includes=['unzip.h'],
+        functions=['unzClose']
+    ):
         conf.env.MINIZIP_BINARY = True
         conf.end_msg('from system')
         return True
