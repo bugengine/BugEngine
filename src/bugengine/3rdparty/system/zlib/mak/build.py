@@ -130,7 +130,8 @@ def build_zlib_source(bld, name, env, path):
 def build_zlib_binary(bld, name, env, path):
     result = bld.thirdparty(name, source_node=path, env=env)
     if not bld.env.STATIC:
-        result.export_defines.append('ZLIB_DLL')
+        if 'windows' in bld.env.VALID_PLATFORMS and not bld.env.DISABLE_DLLEXPORT:
+            result.export_defines.append('ZLIB_DLL')
     return result
 
 
