@@ -25,10 +25,7 @@ protected:
     {
         owner.push_back(*this);
     }
-    virtual ~IPluginHook()
-    {
-        this->unhook();
-    }
+    virtual ~IPluginHook();
 
 public:
     virtual void onload(const Context& context)                      = 0;
