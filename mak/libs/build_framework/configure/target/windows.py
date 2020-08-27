@@ -126,8 +126,7 @@ class Windows_Clang(Windows):
         if not compiler.target.endswith('-msvc'):
             env.append_value('DEFINES', ['__MSVCRT_VERSION__=0x0700'])
             env.append_unique('LINKFLAGS', ['-static', '-Wl,--enable-auto-import'])
-            if compiler.version_number >= (5, ):
-                env.append_unique('LINKFLAGS', ['-pthread'])
+            env.append_unique('LINKFLAGS_debug', ['-pthread'])
             if compiler.version_number < (3, 8):
                 env.append_unique('LINKFLAGS', ['-Wl,--allow-multiple-definition'])
             env.IMPLIB_ST = '-Wl,--out-implib,%s'
