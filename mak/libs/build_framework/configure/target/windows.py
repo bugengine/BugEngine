@@ -188,7 +188,7 @@ class Windows_GCC(Windows):
         env.implib_PATTERN = 'lib%s.a'
         env.IMPLIB_ST = '-Wl,--out-implib,%s'
         env.DEF_ST = '-Wl,-d,%s'
-        env.append_unique('LIB', ['pthread'])
+        env.append_unique('LINKFLAGS', ['-pthread'])
         for option in ('-fpic', '-fPIC'):
             try:
                 env.CFLAGS_cshlib.remove(option)
