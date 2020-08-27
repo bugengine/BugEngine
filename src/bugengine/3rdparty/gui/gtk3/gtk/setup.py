@@ -2,7 +2,6 @@ from waflib.Errors import WafError
 from waflib import Options
 import os
 
-
 GTK3_SOURCES = 'https://github.com/GNOME/gtk/archive/3.24.22.tar.gz'
 GTK3_BINARIES = 'https://github.com/bugengine/BugEngine/releases/download/prebuilt-gtk3/gtk3-3.24.22-%(platform)s-%(arch)s.tgz'
 
@@ -19,27 +18,34 @@ def setup_pkgconfig(conf):
 
 
 def setup_system(conf):
-    if conf.check_lib(['gtk-3', 'gdk-3', 'pangocairo-1.0',
-                       'pango-1.0', 'atk-1.0', 'cairo-gobject',
-                       'cairo', 'gdk_pixbuf-2.0', 'gobject-2.0',
-                       'glib-2.0', 'intl'], var='gtk3',
-                      includes=['gtk/gtk.h'],
-                      includepath=sum(
-                        [
-                            ['=/usr/include/%s'%lib, '=/usr/local/include/%s'%lib] for lib in [
-                                'gtk-3.0', 'pango-1.0', 'glib-2.0', 'cairo', 'gdk-pixbuf-2.0', 'atk-1.0',
-                            ]
-                        ],
-                        []
-                      ) + ['=/usr/lib/glib-2.0/include', '=/usr/local/lib/glib-2.0/include',
-                           '=/usr/lib64/glib-2.0/include', '=/usr/local/lib64/glib-2.0/include',
-                           '=/usr/lib32/glib-2.0/include', '=/usr/local/lib32/glib-2.0/include'],
-                      functions=['gtk_application_window_new']):
+    if conf.check_lib(
+        [
+            'gtk-3', 'gdk-3', 'pangocairo-1.0', 'pango-1.0', 'atk-1.0', 'cairo-gobject', 'cairo', 'gdk_pixbuf-2.0',
+            'gobject-2.0', 'glib-2.0', 'intl'
+        ],
+        var='gtk3',
+        includes=['gtk/gtk.h'],
+        includepath=sum(
+            [
+                ['=/usr/include/%s' % lib, '=/usr/local/include/%s' % lib] for lib in [
+                    'gtk-3.0',
+                    'pango-1.0',
+                    'glib-2.0',
+                    'cairo',
+                    'gdk-pixbuf-2.0',
+                    'atk-1.0',
+                ]
+            ], []
+        ) + [
+            '=/usr/lib/glib-2.0/include', '=/usr/local/lib/glib-2.0/include', '=/usr/lib64/glib-2.0/include',
+            '=/usr/local/lib64/glib-2.0/include', '=/usr/lib32/glib-2.0/include', '=/usr/local/lib32/glib-2.0/include'
+        ],
+        functions=['gtk_application_window_new']
+    ):
         conf.env.GTK3_BINARY = True
         conf.end_msg('from system')
         return True
     return False
-
 
 
 def setup_prebuilt(conf):
@@ -57,8 +63,10 @@ def setup_prebuilt(conf):
 
 def setup_source(conf):
     try:
+        conf.recurse('../libiconv/setup.py')
         gtk3_node = conf.pkg_unpack('gtk3_src', GTK3_SOURCES, conf.path.parent.ant_glob(['patches/*.*']))
-    except WafError:
+    except WafError as e:
+        print(e)
         return False
     else:
         conf.env.GTK3_SOURCE = gtk3_node.path_from(conf.package_node)

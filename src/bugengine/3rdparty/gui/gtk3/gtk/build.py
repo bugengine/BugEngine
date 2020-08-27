@@ -25,9 +25,7 @@ def deploy_gtk3_package(task_gen):
             task_gen.deploy_as(os.path.join('bld/packages', gtk3_dest, subdir, file.name), file)
 
     if task_gen.env.TOOLCHAIN == task_gen.bld.multiarch_envs[0].TOOLCHAIN:
-        for h in src.ant_glob(
-            ['src/**/*.h']
-        ):
+        for h in src.ant_glob(['src/**/*.h']):
             task_gen.deploy_as(os.path.join('bld', 'packages', gtk3_dest, 'api', h.path_from(src)), h)
     if task_gen.env.STATIC:
         deploy_to(task_gen.link_task.outputs[0], 'lib.%s' % task_gen.env.VALID_ARCHITECTURES[0])
@@ -41,17 +39,9 @@ def deploy_gtk3_package(task_gen):
                 deploy_to(file, 'bin.%s' % task_gen.env.VALID_ARCHITECTURES[0])
 
 
-def build_source(bld, name, env, path):
-    return None
-
-
-def build_binary(bld, name, env, path):
-    return bld.thirdparty(name, var='gtk3', source_node=path, env=env, use=bld.platforms)
-
-
 def build(bld):
     # type: (Build.BuildContext) -> None
-    bld.package('bugengine.3rdparty.gui.gtk3', 'GTK3_BINARY', build_binary, 'GTK3_SOURCE', build_source)
+    bld.recurse('../glib/build.py')
 
 
 if TYPE_CHECKING:

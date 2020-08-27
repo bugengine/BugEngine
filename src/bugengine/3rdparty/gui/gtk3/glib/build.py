@@ -3,7 +3,7 @@ from be_typing import TYPE_CHECKING
 
 def build(bld):
     # type: (Build.BuildContext) -> None
-    pass
+    bld.recurse('../libiconv/build.py')
 
 
 if TYPE_CHECKING:
