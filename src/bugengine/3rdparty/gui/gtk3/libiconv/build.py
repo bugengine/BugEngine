@@ -43,12 +43,22 @@ LIBICONV_SOURCES = []
 
 
 def build_source(bld, name, env, path):
-    defines = ['IN_LIBRARY', 'BUILDING_LIBICONV', 'BUILDING_DLL']
+    defines = ['IN_LIBRARY', 'BUILDING_LIBICONV']
+    if 'windows' in bld.env.VALID_PLATFORMS and not bld.env.DISABLE_DLLEXPORT:
+        dll_defines = ['BUILDING_DLL']
+        dll_features = []
+    elif bld.env.DISABLE_DLLEXPORT:
+        dll_defines = []
+        dll_features = ['bugengine:export_all']
+    else:
+        dll_defines = ['BUILDING_DLL']
+        dll_features = []
     return bld.shared_library(
         name,
         env=env,
+        depends=['bugengine.config'],
         path=path,
-        extra_defines=defines,
+        extra_defines=defines + dll_defines,
         extra_includes=[
             path.make_node('include').path_from(bld.bldnode),
             path.make_node('lib').path_from(bld.bldnode),
@@ -58,7 +68,7 @@ def build_source(bld, name, env, path):
         extra_public_includes=[bld.path.make_node('api').abspath()],
         features=[
             'bugengine:masterfiles:off', 'bugengine:deploy:off', 'bugengine:deploy:libiconv', 'bugengine:warnings:off'
-        ],
+        ] + dll_features,
         source_list=[
             'lib/iconv.c',
             'lib/relocatable.c',

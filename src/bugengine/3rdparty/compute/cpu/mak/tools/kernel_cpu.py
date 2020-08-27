@@ -20,7 +20,7 @@ _BE_REGISTER_METHOD_NAMED(BE_KERNEL_ID, _%(kernelname)s%(static_variant)s, _%(ke
 template = """
 %(pch)s
 
-#include <bugengine/kernel/compilers.hh>
+#include <bugengine/config/config.hh>
 #include <bugengine/kernel/input/input.hh>
 #include <bugengine/kernel/simd.hh>
 #include <bugengine/minitl/array.hh>

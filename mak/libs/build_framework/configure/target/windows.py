@@ -126,7 +126,7 @@ class Windows_Clang(Windows):
         if not compiler.target.endswith('-msvc'):
             env.append_value('DEFINES', ['__MSVCRT_VERSION__=0x0700'])
             env.append_unique('LINKFLAGS', ['-static', '-Wl,--enable-auto-import'])
-            env.append_unique('LINKFLAGS_debug', ['-pthread'])
+            env.append_unique('CXXFLAGS_debug', ['-fno-exceptions'])
             if compiler.version_number < (3, 8):
                 env.append_unique('LINKFLAGS', ['-Wl,--allow-multiple-definition'])
             env.IMPLIB_ST = '-Wl,--out-implib,%s'
@@ -188,7 +188,6 @@ class Windows_GCC(Windows):
         env.implib_PATTERN = 'lib%s.a'
         env.IMPLIB_ST = '-Wl,--out-implib,%s'
         env.DEF_ST = '-Wl,-d,%s'
-        env.append_unique('LINKFLAGS', ['-pthread'])
         for option in ('-fpic', '-fPIC'):
             try:
                 env.CFLAGS_cshlib.remove(option)

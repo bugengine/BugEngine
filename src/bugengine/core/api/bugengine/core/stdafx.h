@@ -25,8 +25,6 @@
 #    define BE_PROJECT BE_STRINGIZE(BE_PROJECTCATEGORY) "." BE_STRINGIZE(BE_PROJECTNAME)
 #    define BE_HERE    BE_FILE ":" BE_LINE "\n\t[ " BE_FUNCTION " ]\t"
 
-#    include <bugengine/core/platforms.hh>
-
 #    if defined(building_core)
 #        define BE_API_CORE BE_EXPORT
 #    elif defined(be_dll_core)
@@ -43,6 +41,29 @@ be_api(CORE) minitl::Allocator& stack();
 be_api(CORE) minitl::Allocator& debug();
 be_api(CORE) minitl::Allocator& general();
 }}  // namespace BugEngine::Arena
+
+namespace BugEngine {
+
+inline u32 bitCount(u32 bitMask)
+{
+    u32 result = 0;
+    for(u32 i = 0; i < 32; ++i, bitMask >>= 1)
+    {
+        result += bitMask & 0x1;
+    }
+    return result;
+}
+
+inline u32 getFirstBit(u32 bitMask)
+{
+    for(u32 i = 0; i < 32; ++i, bitMask >>= 1)
+    {
+        if(bitMask & 0x1) return i;
+    }
+    return (u32)-1;
+}
+
+}  // namespace BugEngine
 
 #    include <bugengine/minitl/assert.hh>
 

@@ -22,13 +22,16 @@
 
 #define _LIBICONV_VERSION 0x0110    /* version number: (major<<8) + minor */
 
-#if 1 && BUILDING_LIBICONV
-#define LIBICONV_DLL_EXPORTED __attribute__((__visibility__("default")))
-#elif defined _MSC_VER && BUILDING_LIBICONV
-#define LIBICONV_DLL_EXPORTED __declspec(dllexport)
+/* bugengine BEGIN */
+#include <bugengine/config/config.hh>
+
+#if BUILDING_LIBICONV
+#define LIBICONV_DLL_EXPORTED BE_EXPORT
 #else
-#define LIBICONV_DLL_EXPORTED
+#define LIBICONV_DLL_EXPORTED BE_IMPORT
 #endif
+/* bugengine END */
+
 extern LIBICONV_DLL_EXPORTED  int _libiconv_version; /* Likewise */
 
 /* We would like to #include any system header file which could define

@@ -5,7 +5,7 @@
 #define BE_KERNEL_STDAFX_H_
 /**************************************************************************************************/
 
-#include <bugengine/kernel/compilers.hh>
+#include <bugengine/config/config.hh>
 
 #define be_forceuse(p) (static_cast< void >(&p))
 

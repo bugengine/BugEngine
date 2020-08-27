@@ -1,10 +1,9 @@
 /* BugEngine <bugengine.devel@gmail.com> / 2008-2014
    see LICENSE for detail */
 
-#ifndef BE_CORE_PLATFORMS_HH_
-#define BE_CORE_PLATFORMS_HH_
+#ifndef BE_CONFIG_PLATFORMS_HH_
+#define BE_CONFIG_PLATFORMS_HH_
 /**************************************************************************************************/
-#include <bugengine/core/stdafx.h>
 
 #ifndef _WIN32
 #    define OutputDebugString(s) printf("%s", s)
@@ -68,10 +67,14 @@
 #    error "Unknown platform: you need to define BE_PLATFORM"
 #else
 // clang-format off
-#    define BE_PLATFORM_INCLUDE_ bugengine/core/platforms/BE_PLATFORM.hh
+#    define BE_PLATFORM_INCLUDE_ bugengine/config/platforms/BE_PLATFORM.hh
 // clang-format on
-#    include BE_STRINGIZE(BE_PLATFORM_INCLUDE_)
-#    undef BEPLATFORM_INCLUDE_
+#    define BE_STRINGIZE__(x)  #x
+#    define BE_STRINGIZE_(x)   BE_STRINGIZE__(x)
+#    include BE_STRINGIZE_(BE_PLATFORM_INCLUDE_)
+#    undef BE_PLATFORM_INCLUDE_
+#    undef BE_STRINGIZE_
+#    undef BE_STRINGIZE__
 #endif
 
 /**************************************************************************************************/

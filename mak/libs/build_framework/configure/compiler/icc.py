@@ -94,10 +94,13 @@ class ICC(Configure.ConfigurationContext.GnuCompiler):
             else:
                 v.append_unique('LINKFLAGS', ['-i-static'])
         if self.version_number >= (11, ):
-            v.append_unique('CFLAGS', ['-fvisibility=hidden'])
-            v.append_unique('CXXFLAGS', ['-fvisibility=hidden'])
-            v.CFLAGS_exportall = ['-fvisibility=default']
-            v.CXXFLAGS_exportall = ['-fvisibility=default']
+            v.append_unique('CFLAGS', ['-fvisibility=hidden', '-DVISIBILITY_EXPORT=__attribute__((visibility("default")))'])
+            v.append_unique('CXXFLAGS', ['-fvisibility=hidden', '-DVISIBILITY_EXPORT=__attribute__((visibility("default")))'])
+            v.CFLAGS_exportall = ['-fvisibility=default', '-DVISIBILITY_EXPORT=']
+            v.CXXFLAGS_exportall = ['-fvisibility=default', '-DVISIBILITY_EXPORT=']
+        else:
+            v.CFLAGS = ['-DVISIBILITY_EXPORT=']
+            v.CXXFLAGS = ['-DVISIBILITY_EXPORT=']
 
     def is_valid(self, conf, extra_flags=[]):
         node = conf.bldnode.make_node('main.cxx')

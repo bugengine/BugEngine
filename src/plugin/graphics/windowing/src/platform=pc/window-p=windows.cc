@@ -10,6 +10,23 @@
 
 namespace BugEngine { namespace Windowing {
 
+#ifdef _MSC_VER
+#    pragma warning(push)
+#    pragma warning(disable : 4505)
+#endif
+static inline void displayError()
+{
+    char* msg;
+    ::FormatMessageA(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM, 0, ::GetLastError(), 0, (char*)&msg,
+                     0, 0);
+    MessageBox(0, msg, "Win32 error", MB_OK);
+    ::LocalFree(msg);
+}
+
+#ifdef _MSC_VER
+#    pragma warning(pop)
+#endif
+
 Window::PlatformWindow::PlatformWindow(weak< const Renderer > renderer, weak< Window > window)
     : m_renderer(renderer)
 {
@@ -28,7 +45,7 @@ Window::PlatformWindow::PlatformWindow(weak< const Renderer > renderer, weak< Wi
     m_window = renderer->m_platformRenderer->createWindowImplementation(f);
     if(!m_window)
     {
-        BE_WIN32_PRINTERROR();
+        displayError();
     }
     SetWindowLongPtr(m_window, GWLP_USERDATA, (LONG_PTR)window.operator->());
     ShowWindow(m_window, SW_SHOW);

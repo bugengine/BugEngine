@@ -1,8 +1,8 @@
 /* BugEngine <bugengine.devel@gmail.com> / 2008-2014
    see LICENSE for detail */
 
-#ifndef BE_KERNEL_COMPILERS_MSVC_HH_
-#define BE_KERNEL_COMPILERS_MSVC_HH_
+#ifndef BE_CONFIG_COMPILERS_MSVC_HH_
+#define BE_CONFIG_COMPILERS_MSVC_HH_
 /**************************************************************************************************/
 
 #if(_MSC_VER >= 1400) && !defined(_ARM) && !defined(_ARM64)
@@ -74,7 +74,11 @@ typedef u8               byte;
 #pragma warning(disable : 4324)  // structure was padded due to alignment specifier
 #define BE_NOINLINE            __declspec(noinline)
 #define BE_ALWAYSINLINE        __forceinline
-#define BE_SUPPORTS_EXCEPTIONS 1
+#ifdef _CPPUNWIND
+#    define BE_SUPPORTS_EXCEPTIONS 1
+#else
+#    define BE_SUPPORTS_EXCEPTIONS 0
+#endif
 
 #ifndef BE_STATIC
 #    define BE_EXPORT __declspec(dllexport)

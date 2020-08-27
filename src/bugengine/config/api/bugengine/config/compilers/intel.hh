@@ -1,8 +1,8 @@
 /* BugEngine <bugengine.devel@gmail.com> / 2008-2014
    see LICENSE for detail */
 
-#ifndef BE_KERNEL_COMPILERS_INTEL_HH_
-#define BE_KERNEL_COMPILERS_INTEL_HH_
+#ifndef BE_CONFIG_COMPILERS_INTEL_HH_
+#define BE_CONFIG_COMPILERS_INTEL_HH_
 /**************************************************************************************************/
 
 #define be_alignof(t) __alignof(t)
@@ -73,7 +73,11 @@ typedef u8               byte;
 #        define BE_EXPORT
 #        define BE_IMPORT
 #    endif
-
+#    ifdef __EXCEPTIONS
+#        define BE_SUPPORTS_EXCEPTIONS 1
+#    else
+#        define BE_SUPPORTS_EXCEPTIONS 0
+#    endif
 #else
 
 typedef signed __int8    i8;
@@ -90,7 +94,11 @@ typedef u8               byte;
 #    define BE_IMPORT              __declspec(dllimport)
 #    define BE_NOINLINE            __declspec(noinline)
 #    define BE_ALWAYSINLINE        inline
-#    define BE_SUPPORTS_EXCEPTIONS 1
+#    ifdef _CPPUNWIND
+#        define BE_SUPPORTS_EXCEPTIONS 1
+#    else
+#        define BE_SUPPORTS_EXCEPTIONS 0
+#    endif
 
 #    pragma warning(disable : 4275)
 #    ifdef NDEBUG

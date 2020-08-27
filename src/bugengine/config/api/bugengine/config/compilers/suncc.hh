@@ -1,8 +1,8 @@
 /* BugEngine <bugengine.devel@gmail.com> / 2008-2014
    see LICENSE for detail */
 
-#ifndef BE_KERNEL_COMPILERS_SUNCC_HH_
-#define BE_KERNEL_COMPILERS_SUNCC_HH_
+#ifndef BE_CONFIG_COMPILERS_SUNCC_HH_
+#define BE_CONFIG_COMPILERS_SUNCC_HH_
 /**************************************************************************************************/
 
 #define be_alignof(t) __alignof__(t)
@@ -28,6 +28,11 @@ typedef u8       byte;
 #ifndef alloca
 #    define alloca(x) __builtin_alloca(x)
 extern "C" void* __builtin_alloca(size_t);
+#endif
+#ifdef __EXCEPTIONS
+#    define BE_SUPPORTS_EXCEPTIONS 1
+#else
+#    define BE_SUPPORTS_EXCEPTIONS 0
 #endif
 
 #undef __REDIRECT

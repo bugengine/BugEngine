@@ -28,7 +28,8 @@ def build_bugengine(bld):
         Declares the main library and entry point
     """
     bld.headers('bugengine.mak', path=bld.bugenginenode.find_node('mak'), features=['Makefile'])
-    bld.headers('bugengine.kernel', [], extra_public_includes=[bld.path.make_node('bugengine/kernel/api.cpu')])
+    bld.headers('bugengine.config', [])
+    bld.headers('bugengine.kernel', ['bugengine.config'], extra_public_includes=[bld.path.make_node('bugengine/kernel/api.cpu')])
     bld.library('bugengine.minitl', bld.platforms + ['bugengine.mak', 'bugengine.kernel'])
     bld.library('bugengine.core', ['bugengine.minitl', 'bugengine.kernel'])
     bld.library('bugengine.network', ['bugengine.core'])

@@ -1,8 +1,8 @@
 /* BugEngine <bugengine.devel@gmail.com> / 2008-2014
    see LICENSE for detail */
 
-#ifndef BE_KERNEL_CL_COMPILERS_HH_
-#define BE_KERNEL_CL_COMPILERS_HH_
+#ifndef BE_CONFIG_CL_COMPILERS_HH_
+#define BE_CONFIG_CL_COMPILERS_HH_
 /**************************************************************************************************/
 
 #define __host
