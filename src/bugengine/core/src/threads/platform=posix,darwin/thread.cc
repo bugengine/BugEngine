@@ -9,6 +9,9 @@
 #include <cerrno>
 #include <pthread.h>
 
+#ifdef BE_PLATFORM_FREEBSD
+#    include <pthread_np.h>
+#endif
 #ifdef BE_PLATFORM_SUN
 #    include <thread.h>
 #endif
