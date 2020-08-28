@@ -25,6 +25,12 @@ typedef uint32_t u32;
 typedef uint64_t u64;
 typedef u8       byte;
 
+#ifndef __cplusplus
+#    define be_restrict restrict
+#else
+#    define be_restrict __restrict
+#endif
+
 #ifndef alloca
 #    define alloca(x) __builtin_alloca(x)
 extern "C" void* __builtin_alloca(size_t);
@@ -36,7 +42,11 @@ extern "C" void* __builtin_alloca(size_t);
 #endif
 
 #undef __REDIRECT
-#include <cerrno>
+#ifdef __Cplusplus
+#    include <cerrno>
+#else
+#    include <errno.h>
+#endif
 
 #define override
 #define BE_NOINLINE

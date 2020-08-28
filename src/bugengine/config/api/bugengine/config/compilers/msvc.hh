@@ -22,6 +22,12 @@
 #    pragma pop_macro("_interlockedbittestandset")
 #endif
 
+#ifndef __cplusplus
+#    define be_restrict restrict
+#else
+#    define be_restrict __restrict
+#endif
+
 #define be_alignof(t) __alignof(t&)
 
 typedef signed __int8    i8;
@@ -72,8 +78,8 @@ typedef u8               byte;
 #pragma warning(                                                                                   \
     disable : 4359)  // Alignment specifier is less than actual alignment (X) and will be ignored
 #pragma warning(disable : 4324)  // structure was padded due to alignment specifier
-#define BE_NOINLINE            __declspec(noinline)
-#define BE_ALWAYSINLINE        __forceinline
+#define BE_NOINLINE     __declspec(noinline)
+#define BE_ALWAYSINLINE __forceinline
 #ifdef _CPPUNWIND
 #    define BE_SUPPORTS_EXCEPTIONS 1
 #else

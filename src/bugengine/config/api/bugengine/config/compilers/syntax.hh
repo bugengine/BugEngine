@@ -22,6 +22,12 @@ typedef unsigned long int size_t;
 typedef unsigned long int ptrdiff_t;
 typedef unsigned long int intptr_t;
 
+#ifndef __cplusplus
+#    define be_restrict restrict
+#else
+#    define be_restrict __restrict
+#endif
+
 #define override
 #define BE_NOINLINE
 #define BE_ALWAYSINLINE        inline

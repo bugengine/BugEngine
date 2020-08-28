@@ -44,12 +44,18 @@ typedef u8       byte;
 #endif
 
 #define override
-#define BE_NOINLINE            __attribute__((noinline))
-#define BE_ALWAYSINLINE        __attribute__((always_inline))
+#define BE_NOINLINE     __attribute__((noinline))
+#define BE_ALWAYSINLINE __attribute__((always_inline))
 #ifdef __EXCEPTIONS
 #    define BE_SUPPORTS_EXCEPTIONS 1
 #else
 #    define BE_SUPPORTS_EXCEPTIONS 0
+#endif
+
+#ifndef __cplusplus
+#    define be_restrict restrict
+#else
+#    define be_restrict __restrict
 #endif
 
 #ifndef BE_STATIC

@@ -30,7 +30,7 @@
                               // dllexport assumed
 #pragma warning disable 1292  // unknown attribute "xxx"
 #pragma warning                                                                                    \
-   disable 654  // overloaded virtual function "X:xxx" is only partially overridden in class "Y"
+    disable 654  // overloaded virtual function "X:xxx" is only partially overridden in class "Y"
 
 #if __ICL >= 1200
 #    pragma warning disable 791   // calling convention specified more than once
@@ -42,10 +42,16 @@
 #    pragma warning disable 864   //  extern inline function "XXX" was referenced but not defined
 #    pragma warning disable 1885  // #pragma region unclosed at end of file
 #    pragma warning                                                                                \
-       disable 3199  // "defined" is always false in a macro expansion in Microsoft mode
+        disable 3199  // "defined" is always false in a macro expansion in Microsoft mode
 #endif
 #ifdef NDEBUG
 #    pragma warning disable 869
+#endif
+
+#ifndef __cplusplus
+#    define be_restrict restrict
+#else
+#    define be_restrict __restrict
 #endif
 
 #ifndef _WIN32
@@ -90,10 +96,10 @@ typedef unsigned __int32 u32;
 typedef unsigned __int64 u64;
 typedef u8               byte;
 
-#    define BE_EXPORT              __declspec(dllexport)
-#    define BE_IMPORT              __declspec(dllimport)
-#    define BE_NOINLINE            __declspec(noinline)
-#    define BE_ALWAYSINLINE        inline
+#    define BE_EXPORT       __declspec(dllexport)
+#    define BE_IMPORT       __declspec(dllimport)
+#    define BE_NOINLINE     __declspec(noinline)
+#    define BE_ALWAYSINLINE inline
 #    ifdef _CPPUNWIND
 #        define BE_SUPPORTS_EXCEPTIONS 1
 #    else
@@ -104,14 +110,14 @@ typedef u8               byte;
 #    ifdef NDEBUG
 #        pragma warning(error : 4541)  // 'dynamic_cast' used on polymorphic type with '/GR-'
 #        pragma warning(                                                                           \
-           disable : 4530)  // C++ exception handler used, but unwind semantics are not enabled
+            disable : 4530)  // C++ exception handler used, but unwind semantics are not enabled
 #        pragma warning(disable : 4100)  // unreferenced formal parameter
 #    endif
 #    pragma warning(disable : 4251)
 #    pragma warning(disable : 4355)  // this used in base member initialization list
 #    pragma warning(                                                                               \
-       disable : 4290)  // C++ exception specification ignored except to indicate a function is not
-                        // __declspec(nothrow)
+        disable : 4290)  // C++ exception specification ignored except to indicate a function is not
+                         // __declspec(nothrow)
 #    pragma warning(disable : 4127)
 
 #    if __ICL < 1000
