@@ -80,11 +80,11 @@ void* Thread::ThreadParams::threadWrapper(void* params)
     ThreadParams* p = reinterpret_cast< ThreadParams* >(params);
     pthread_setspecific(s_data.key, &p->m_name);
 #if BE_PLATFORM_LINUX && !BE_COMPILER_SUNCC
-    pthread_setname_np(pthread_self(), name.c_str());
+    pthread_setname_np(pthread_self(), p->m_name.c_str());
 #elif BE_PLATFORM_FREEBSD
-    pthread_set_name_np(pthread_self(), name.c_str());
+    pthread_set_name_np(pthread_self(), p->m_name.c_str());
 #elif BE_PLATFORM_MACOSX
-    pthread_setname_np(name.c_str());
+    pthread_setname_np(p->m_name.c_str());
 #endif
     be_debug("started thread %s" | p->m_name);
     p->m_result = (*p->m_function)(p->m_param1, p->m_param2);
