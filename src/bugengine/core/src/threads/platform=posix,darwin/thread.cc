@@ -45,8 +45,10 @@ struct ThreadData
     {
         pthread_key_create(&key, 0);
         pthread_setspecific(key, &name);
-#if(BE_PLATFORM_LINUX || BE_PLATFORM_FREEBSD) && !BE_COMPILER_SUNCC
+#if BE_PLATFORM_LINUX && !BE_COMPILER_SUNCC
         pthread_setname_np(pthread_self(), name.c_str());
+#elif BE_PLATFORM_FREEBSD
+        pthread_set_name_np(pthread_self(), name.c_str());
 #elif BE_PLATFORM_MACOSX
         pthread_setname_np(name.c_str());
 #endif
