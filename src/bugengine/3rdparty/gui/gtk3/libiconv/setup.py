@@ -1,7 +1,3 @@
-from waflib.Errors import WafError
-from waflib import Options
-import os
-
 LIBICONV_SOURCES = 'https://ftp.gnu.org/pub/gnu/libiconv/libiconv-1.16.tar.gz'
 #LIBICONV_BINARIES = 'https://github.com/bugengine/BugEngine/releases/download/prebuilt-libiconv/libiconv-1.16-%(platform)s-%(arch)s.tgz'
 

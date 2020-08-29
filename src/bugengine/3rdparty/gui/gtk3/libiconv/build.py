@@ -39,16 +39,13 @@ def deploy_libiconv_package(task_gen):
                 deploy_to(file, 'bin.%s' % task_gen.env.VALID_ARCHITECTURES[0])
 
 
-LIBICONV_SOURCES = []
-
-
 def build_source(bld, name, env, path):
     defines = ['IN_LIBRARY', 'BUILDING_LIBICONV']
     if bld.env.STATIC:
         return bld.static_library(
             name,
             env=env,
-            depends=['bugengine.config'],
+            depends=bld.platforms + ['bugengine.config'],
             path=path,
             extra_defines=defines,
             extra_includes=[
@@ -78,10 +75,10 @@ def build_source(bld, name, env, path):
         else:
             dll_defines = ['BUILDING_DLL']
             dll_features = []
-        return bld.shared_library(
+        result = bld.shared_library(
             name,
             env=env,
-            depends=['bugengine.config'],
+            depends=bld.platforms + ['bugengine.config'],
             path=path,
             extra_defines=defines + dll_defines,
             extra_includes=[
@@ -101,6 +98,8 @@ def build_source(bld, name, env, path):
                 'libcharset/lib/localcharset.c',
             ]
         )
+        result.source.append(bld.path.find_node('src/libiconv.cc'))
+        return result
 
 
 def build(bld):
