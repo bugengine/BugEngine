@@ -121,8 +121,10 @@ def module(
                     includes.append(node.find_node('include%s' % suffix))
                 if node.find_node('api%s' % suffix):
                     api.append(node.find_node('api%s' % suffix))
-    else:
+    elif source_list:
         source_list = source_nodes[0].ant_glob(source_list)
+    else:
+        source_list = []
     if not build_context.env.PROJECTS:
         preprocess = build_context.get_tgen_by_name('%s.preprocess' % name)
     else:

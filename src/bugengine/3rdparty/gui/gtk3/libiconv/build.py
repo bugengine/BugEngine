@@ -82,6 +82,7 @@ def build_source(bld, name, env, path):
             path=path,
             extra_defines=defines + dll_defines,
             extra_includes=[
+                path.abspath(),
                 path.make_node('include').path_from(bld.bldnode),
                 path.make_node('lib').path_from(bld.bldnode),
                 bld.path.make_node('api').abspath(),
@@ -92,11 +93,7 @@ def build_source(bld, name, env, path):
                 'bugengine:masterfiles:off', 'bugengine:deploy:off', 'bugengine:deploy:libiconv',
                 'bugengine:warnings:off'
             ] + dll_features,
-            source_list=[
-                'lib/iconv.c',
-                'lib/relocatable.c',
-                'libcharset/lib/localcharset.c',
-            ]
+            source_list=[]
         )
         result.source.append(bld.path.find_node('src/libiconv.cc'))
         return result
