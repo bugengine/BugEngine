@@ -41,16 +41,22 @@ def deploy_libiconv_package(task_gen):
 
 def build_source(bld, name, env, path):
     defines = ['IN_LIBRARY', 'BUILDING_LIBICONV']
+
+    source_list = [
+        'lib/relocatable.c',
+        'libcharset/lib/localcharset.c',
+    ]
+    if bld.env.CC_NAME != 'msvc':
+        source_list.append('lib/iconv.c')
     if bld.env.STATIC:
-        return bld.static_library(
+        result = bld.static_library(
             name,
             env=env,
             depends=bld.platforms + ['bugengine.config'],
             path=path,
             extra_defines=defines,
             extra_includes=[
-                path.make_node('include').path_from(bld.bldnode),
-                path.make_node('lib').path_from(bld.bldnode),
+                path.make_node('lib').abspath(),
                 bld.path.make_node('api').abspath(),
                 bld.path.make_node('include').abspath()
             ],
@@ -59,12 +65,11 @@ def build_source(bld, name, env, path):
                 'bugengine:masterfiles:off', 'bugengine:deploy:off', 'bugengine:deploy:libiconv',
                 'bugengine:warnings:off'
             ],
-            source_list=[
-                'lib/iconv.c',
-                'lib/relocatable.c',
-                'libcharset/lib/localcharset.c',
-            ]
+            source_list=source_list
         )
+        if bld.env.CC_NAME == 'msvc':
+            result.source.append(bld.path.find_node('src/libiconv.cc'))
+        return result
     else:
         if 'windows' in bld.env.VALID_PLATFORMS and not bld.env.DISABLE_DLLEXPORT:
             dll_defines = ['BUILDING_DLL']
@@ -82,9 +87,7 @@ def build_source(bld, name, env, path):
             path=path,
             extra_defines=defines + dll_defines,
             extra_includes=[
-                path.abspath(),
-                path.make_node('include').path_from(bld.bldnode),
-                path.make_node('lib').path_from(bld.bldnode),
+                path.make_node('lib').abspath(),
                 bld.path.make_node('api').abspath(),
                 bld.path.make_node('include').abspath()
             ],
@@ -93,9 +96,10 @@ def build_source(bld, name, env, path):
                 'bugengine:masterfiles:off', 'bugengine:deploy:off', 'bugengine:deploy:libiconv',
                 'bugengine:warnings:off'
             ] + dll_features,
-            source_list=[]
+            source_list=source_list
         )
-        result.source.append(bld.path.find_node('src/libiconv.cc'))
+        if bld.env.CC_NAME == 'msvc':
+            result.source.append(bld.path.find_node('src/libiconv.cc'))
         return result
 
 

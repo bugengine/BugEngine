@@ -3,6 +3,4 @@
 #   include <cwchar>
 #endif
 
-#include "lib/iconv.c"
-#include "lib/relocatable.c"
-#include "libcharset/lib/localcharset.c"
+#include "iconv.c"
