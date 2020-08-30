@@ -5,8 +5,8 @@
 #define BE_CONFIG_CONFIG_HH_
 /**************************************************************************************************/
 
-#include <bugengine/config/platform.hh>
 #include <bugengine/config/compiler.hh>
+#include <bugengine/config/platform.hh>
 
 /**************************************************************************************************/
 #endif
