@@ -63,7 +63,7 @@ def setup_prebuilt(conf):
 
 def setup_source(conf):
     try:
-        conf.recurse('../libiconv/setup.py')
+        conf.recurse('../glib/setup.py')
         gtk3_node = conf.pkg_unpack('gtk3_src', GTK3_SOURCES, conf.path.parent.ant_glob(['patches/*.*']))
     except WafError as e:
         print(e)
