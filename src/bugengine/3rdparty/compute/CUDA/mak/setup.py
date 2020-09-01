@@ -57,8 +57,7 @@ def check_nvcc(configuration_context, nvcc):
         source_node.write(_CUDA_SNIPPET)
         out, err = run_nvcc(
             nvcc, configuration_context.env.NVCC_CXXFLAGS +
-            ['-v', source_node.abspath(), '-o',
-             dest_node.abspath(), '-arch', 'compute_30']
+            ['-v', source_node.abspath(), '-o', dest_node.abspath()]
         )
         target_includes = None
         target_libs = None
@@ -97,6 +96,9 @@ def setup(configuration_context):
         cuda_available = False
         toolchain = configuration_context.env.TOOLCHAIN
         for version, compiler in configuration_context.env.NVCC_COMPILERS[::-1]:
+            flags = []
+            if version >= (11, ):
+                flags.append('--allow-unsupported-compiler')
             version = '.'.join(str(x) for x in version)
             cuda_toolchain = toolchain + '-cuda{}'.format(version)
             configuration_context.setenv(cuda_toolchain, env=configuration_context.env.detach())
@@ -106,7 +108,7 @@ def setup(configuration_context):
             if v.MSVC_COMPILER:
                 cxx_compiler = configuration_context.find_program('cl',
                                                                   path_list=configuration_context.env.MSVC_PATH)[0]
-            v.append_value('NVCC_CXXFLAGS', ['--compiler-bindir', cxx_compiler])
+            v.append_value('NVCC_CXXFLAGS', ['--compiler-bindir', cxx_compiler] + flags)
             if v.ARCH_LP64:
                 v.append_value('NVCC_CXXFLAGS', ['-m64'])
             else:
