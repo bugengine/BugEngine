@@ -43,6 +43,10 @@ class vscode(Build.BuildContext):
                '      "**/.mypy_cache": true,\n' \
                '      "%(bugenginepath)s/mak/host": true\n' \
                '    },\n' \
+               '    "files.watcherExclude": {\n' \
+               '      "**/.git/*": true,\n' \
+               '      "**/bld/**": true\n' \
+               '    },\n' \
                '    "clangd.arguments": [\n' \
                '      "--header-insertion=never"\n' \
                '    ]\n' \
