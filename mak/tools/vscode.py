@@ -38,7 +38,8 @@ class vscode(Build.BuildContext):
                '      "**/.DS_Store": true,\n' \
                '      "**/__pycache__": true,\n' \
                '      "**/*.pyc": true,\n' \
-               '      "bld/.waf": true,\n' \
+               '      "bld/.waf/*-*-*": true,\n' \
+               '      "bld/.waf/*.*": true,\n' \
                '      "**/.clangd": true,\n' \
                '      "**/.mypy_cache": true,\n' \
                '      "%(bugenginepath)s/mak/host": true\n' \

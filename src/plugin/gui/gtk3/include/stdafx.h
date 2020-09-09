@@ -14,5 +14,12 @@
 #    define BE_API_GTK3
 #endif
 
+#ifdef __GNUC__
+#    pragma GCC diagnostic ignored "-Wparentheses"
+#endif
+
+#include <glib-object.h>
+#include <gtk/gtk.h>
+
 /**************************************************************************************************/
 #endif

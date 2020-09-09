@@ -12,8 +12,6 @@
 #include <bugengine/rtti/engine/helper/method.hh>
 #include <bugengine/rtti/engine/methodinfo.script.hh>
 #include <bugengine/rtti/engine/namespace.hh>
-#include <glib-object.h>
-#include <gtk/gtk.h>
 
 namespace BugEngine { namespace Gtk3 {
 
