@@ -41,3 +41,4 @@ Gtk3Plugin::~Gtk3Plugin()
 }}  // namespace BugEngine::Gtk3
 
 BE_PLUGIN_REGISTER(BugEngine::Gtk3::Gtk3Loader);
+
