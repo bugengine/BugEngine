@@ -169,7 +169,7 @@ class GnuCompiler(Configure.ConfigurationContext.Compiler):
                 extra_args['link'] += self.ARCH_FLAGS.get(arch, [])
             except KeyError:
                 extra_args['link'] = self.ARCH_FLAGS.get(arch, [])
-        result, out, err = self.run([compiler_c] + extra_args.get('c', []) + ['-v', '-dM', '-E', '-'], '\n', env=env)
+        result, out, err = self.run([compiler_c] + extra_args.get('c', []) + ['-v', '-dM', '-E', '-'], input='\n', env=env)
         macros = set([])
         if result != 0:
             raise Exception('Error running %s:\nresult: %d\nstdout: %s\nstderr: %s\n' % (compiler_c, result, out, err))

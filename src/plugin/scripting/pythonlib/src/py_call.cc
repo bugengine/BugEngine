@@ -12,8 +12,6 @@
 
 namespace BugEngine { namespace Python {
 
-namespace {
-
 struct PythonTypeInfo
 {
     PyObject*     arg;
@@ -26,13 +24,13 @@ struct PythonTypeInfo
     PythonTypeInfo(PyObject* object);
 };
 
-static RTTI::ConversionCost calculateConversion(const PythonTypeInfo& typeInfo,
-                                                const RTTI::Type&     other)
+RTTI::ConversionCost calculateConversion(const PythonTypeInfo& typeInfo,
+                                         const RTTI::Type&     other)
 {
     return PyBugObject::distance(typeInfo.arg, other);
 }
 
-static void convert(const PythonTypeInfo& typeInfo, void* buffer, RTTI::Type type)
+void convert(const PythonTypeInfo& typeInfo, void* buffer, RTTI::Type type)
 {
     PyBugObject::unpack(typeInfo.arg, type, buffer);
 }
@@ -68,8 +66,6 @@ PyTypeObject* PythonTypeInfo::getPyTypeFromPyObject(PyObject* object)
         return object->py_type;
     }
 }
-
-}  // namespace
 
 typedef RTTI::ArgInfo< PythonTypeInfo > PythonArgInfo;
 

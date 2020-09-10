@@ -23,6 +23,7 @@ def start_msg_setup(configuration_context, third_party_name=None):
 def setup(configuration_context):
     # type: (Configure.ConfigurationContext) -> None
     "setup step before the build: recursively calls setup on every third party library"
+    configuration_context.recurse('host/host.py')
     extra = configuration_context.bugenginenode.make_node('extra')
     if configuration_context.env.VALID_PLATFORMS:
         extra_dir = os.path.join(extra.abspath(), configuration_context.env.VALID_PLATFORMS[0])

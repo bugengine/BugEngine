@@ -42,7 +42,7 @@ class ICC(Configure.ConfigurationContext.GnuCompiler):
         env = os.environ.copy()
         for env_name, env_value in extra_env.items():
             env[env_name] = env_value
-        result, out, err = self.run([icc] + extra_args.get('c', []) + ['-dM', '-E', '-'], '', env=env)
+        result, out, err = self.run([icc] + extra_args.get('c', []) + ['-dM', '-E', '-'], env=env, input='')
         if result != 0:
             raise Exception('could not run ICC %s (%s)' % (icc, err))
         for l in out.split('\n'):

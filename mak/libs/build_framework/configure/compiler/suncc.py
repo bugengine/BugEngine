@@ -113,7 +113,9 @@ class SunCC(Configure.ConfigurationContext.GnuCompiler):
                         self.add_flags('link', ['-L/usr/lib/%s-linux-gnu' % arch])
 
     def get_version(self, sunCC, extra_args, extra_env):
-        result, out, err = self.run([sunCC] + extra_args.get('cxx', []) + ['-xdumpmacros', '-E', '/dev/null'])
+        env = os.environ.copy()
+        env.update(extra_env)
+        result, out, err = self.run([sunCC] + extra_args.get('cxx', []) + ['-xdumpmacros', '-E', '/dev/null'], env=env)
         if result != 0:
             raise Exception('could not run SunCC %s (%s)' % (sunCC, err))
         for l in out.split('\n') + err.split('\n'):
@@ -169,12 +171,12 @@ class SunCC(Configure.ConfigurationContext.GnuCompiler):
         v = conf.env
         v['CFLAGS_warnnone'] = ['-w', '-errtags=yes', '-erroff=%all']
         v['CXXFLAGS_warnnone'] = ['-w', '-errtags=yes', '-erroff=%all']
-        v['CFLAGS_warnall'] = ['+w2', '-errtags=yes']
+        v['CFLAGS_warnall'] = ['-erroff=%none', '-v', '-errtags=yes']
         v['CXXFLAGS_warnall'] = [
             '+w2', '-errtags=yes', '-erroff=fieldsemicolonw,notused,'
             'unknownpragma,wunreachable,doubunder,wvarhidenmem,wvarhidemem,'
             'reftotemp,truncwarn,badargtype2w,hidef,wemptydecl,notemsource,'
-            'nonewline,inllargeuse'
+            'nonewline,inllargeuse,identexpected'
         ]
 
     def error_flag(self):
@@ -204,9 +206,8 @@ class SunCC(Configure.ConfigurationContext.GnuCompiler):
         Configure.ConfigurationContext.GnuCompiler.load_in_env(self, conf, platform)
         v = conf.env
         v['RPATH_ST'] = '-R%s'
+        v.IDIRAFTER = '-I'
         if platform.NAME == 'Linux':
-            v.IDIRAFTER = '-I'
-            #v.STATIC = 1
             if self.arch == 'x86':
                 v.append_unique('SYSTEM_LIBPATHS', ['=/usr/lib/i386-linux-gnu'])
                 v.CFLAGS += ['-xtarget=opteron', '-I/usr/include/i386-linux-gnu']
@@ -230,6 +231,27 @@ class SunCC(Configure.ConfigurationContext.GnuCompiler):
             v.CXXFLAGS_exportall = ['-xldscope=symbolic']
             v.SHLIB_MARKER = '-Bdynamic'
             v.STLIB_MARKER = '-Bstatic'
+
+        if self.arch == 'x86':
+            v.CXXFLAGS += [
+                os.path.join(conf.bugenginenode.abspath(),
+                             'mak/compiler/suncc/interlocked-a=x86.il'), '-xarch=sse2', '-xchip=generic',
+                '-xcache=64/64/2:1024/64/16'
+            ]
+        elif self.arch == 'amd64':
+            v.CXXFLAGS += [
+                os.path.join(conf.bugenginenode.abspath(),
+                             'mak/compiler/suncc/interlocked-a=amd64.il'), '-xarch=sse2', '-xchip=generic',
+                '-xcache=64/64/2:1024/64/16'
+            ]
+        v.append_unique('CFLAGS', ['-mt', '-xldscope=hidden', '-Kpic', '-DPIC', '-D__PIC__'])
+        v.append_unique('CXXFLAGS', ['-mt', '-xldscope=hidden', '-Kpic', '-DPIC', '-D__PIC__'])
+        v.append_unique('LINKFLAGS', ['-lrt', '-mt', '-znow', '-xldscope=hidden']) #, '-z', 'absexec', '-Kpic'])
+        v.CFLAGS_exportall = ['-xldscope=symbolic']
+        v.CXXFLAGS_exportall = ['-xldscope=symbolic']
+        v.SHLIB_MARKER = '-Bdynamic'
+        v.STLIB_MARKER = '-Bstatic'
+
         v.TARGETS = self.targets
 
     def populate_useful_variables(self, conf, sysroot):

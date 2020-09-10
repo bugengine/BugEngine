@@ -51,8 +51,8 @@ struct LuaPop
     }
 };
 
-static RTTI::ConversionCost calculateConversion(const LuaParameterType& type,
-                                                const RTTI::Type&       target)
+RTTI::ConversionCost calculateConversion(const LuaParameterType& type,
+                                         const RTTI::Type&       target)
 {
     int index;
     if(type.key != -1)
@@ -180,7 +180,7 @@ static RTTI::ConversionCost calculateConversion(const LuaParameterType& type,
         }
 }
 
-static void convert(const LuaParameterType& type, void* buffer, const RTTI::Type& target)
+void convert(const LuaParameterType& type, void* buffer, const RTTI::Type& target)
 {
     int index;
     if(type.key != -1)

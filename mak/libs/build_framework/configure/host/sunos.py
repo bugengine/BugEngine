@@ -2,6 +2,10 @@ import os
 
 
 def configure(conf):
+    os.environ['LD_NOVERSION'] = '1'
+    environ = getattr(conf, 'environ')
+    if environ:
+        environ['LD_NOVERSION'] = '1'
     try:
         for extra in os.listdir('/opt'):
             conf.env.append_unique('EXTRA_PATH', os.path.join('/opt', extra, 'bin'))

@@ -93,7 +93,7 @@ class Compiler:
         return self.ARCHS.get(arch, 'unknown')
 
     @classmethod
-    def run(self, cmd, input=None, env=None):
+    def run(self, cmd, env, input=None):
         try:
             p = Utils.subprocess.Popen(
                 cmd, stdin=Utils.subprocess.PIPE, stdout=Utils.subprocess.PIPE, stderr=Utils.subprocess.PIPE, env=env
@@ -111,11 +111,11 @@ class Compiler:
             return (p.returncode, out, err)
 
     def run_c(self, args, input=None, env=None):
-        return self.run([self.compiler_c] + self.extra_args.get('c', []) + args, input, env or self.env)
+        return self.run([self.compiler_c] + self.extra_args.get('c', []) + args, env or self.env, input)
 
     def run_cxx(self, args, input=None, env=None):
         # print(' '.join([self.compiler_cxx] + self.extra_args.get('cxx', []) + args))
-        return self.run([self.compiler_cxx] + self.extra_args.get('cxx', []) + args, input, env or self.env)
+        return self.run([self.compiler_cxx] + self.extra_args.get('cxx', []) + args, env or self.env, input)
 
     def sort_name(self):
         compiler_name = self.NAMES[0].lower()

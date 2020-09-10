@@ -94,7 +94,7 @@ struct EntityStorage_BugHelper
 
 template < typename STORAGE >
 byte EntityStorage_BugHelper< STORAGE >::s_propertyBuffer
-   [EntityStorage_BugHelper< STORAGE >::PropertyCount * sizeof(RTTI::Property)];
+   [EntityStorage_BugHelper< STORAGE >::PropertyCount * sizeof(RTTI::Property)] = { 0 };
 
 template < typename STORAGE >
 RTTI::Property* EntityStorage_BugHelper< STORAGE >::s_properties

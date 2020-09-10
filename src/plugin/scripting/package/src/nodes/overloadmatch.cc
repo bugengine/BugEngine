@@ -20,13 +20,13 @@ struct ArgumentSort
 
 }  // namespace
 
-static RTTI::ConversionCost calculateConversion(ref< const Parameter > parameter,
+RTTI::ConversionCost calculateConversion(ref< const Parameter > parameter,
                                                 const RTTI::Type&      target)
 {
     return parameter->calculateConversion(target);
 }
 
-static void convert(ref< const Parameter > parameter, void* buffer, const RTTI::Type& target)
+void convert(ref< const Parameter > parameter, void* buffer, const RTTI::Type& target)
 {
     new(buffer) RTTI::Value(parameter->as(target));
 }

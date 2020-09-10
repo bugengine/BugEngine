@@ -4,9 +4,10 @@ import re
 
 
 class Solaris(Configure.ConfigurationContext.Platform):
-    NAME = 'Linux'
+    NAME = 'Solaris'
     SUPPORTED_TARGETS = (
         re.compile('^solaris.*'),
+        re.compile('^sun-solaris.*'),
         re.compile('^sunos.*'),
     )
 
@@ -56,6 +57,9 @@ class Solaris(Configure.ConfigurationContext.Platform):
                 if regexp.match(c.platform):
                     if self.is_valid(configuration_context, c, ['-std=c++98'] if 'Clang' in c.NAMES else []):
                         result.append((c, [], self))
+                        break
+            else:
+                print(c.platform)
         return result
 
     def load_in_env(self, conf, compiler):

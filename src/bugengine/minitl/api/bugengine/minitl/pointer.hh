@@ -63,6 +63,16 @@ public:
 #endif
     }
 
+public:
+    void operator delete(void* memory)
+    {
+        return ::operator delete(memory);
+    }
+    void operator delete(void* memory, void* where)
+    {
+        ::operator delete(memory, where);
+    }
+
 private:
     void  operator&() const;
     void* operator new(size_t size)
@@ -77,16 +87,6 @@ private:
 private:  // entity behavior
     pointer(const pointer& other);
     pointer& operator=(const pointer& other);
-
-protected:
-    void operator delete(void* memory)
-    {
-        return ::operator delete(memory);
-    }
-    void operator delete(void* memory, void* where)
-    {
-        ::operator delete(memory, where);
-    }
 
 protected:
     inline void checked_delete() const

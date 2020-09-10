@@ -177,7 +177,7 @@ struct Partition_BugHelper
 
 template < typename T >
 byte Partition_BugHelper< T >::s_propertyBuffer[Partition_BugHelper< T >::PropertyCount
-                                                * sizeof(RTTI::Property)];
+                                                * sizeof(RTTI::Property)] = { 0 };
 
 template < typename T >
 RTTI::Property* Partition_BugHelper< T >::s_properties

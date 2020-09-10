@@ -80,8 +80,8 @@ void DiskFolder::doRefresh(Folder::ScanPolicy scanPolicy)
         rewinddir((DIR*)m_handle.ptrHandle);
         while(dirent* d = readdir((DIR*)m_handle.ptrHandle))
         {
-            if(d->d_name[0] == '.' && d->d_name[1] == 0) continue;
-            if(d->d_name[0] == '.' && d->d_name[1] == '.' && d->d_name[2] == 0) continue;
+            if(strcmp(d->d_name, ".") == 0) continue;
+            if(strcmp(d->d_name, "..") == 0) continue;
             istring name = d->d_name;
             ipath   p    = m_path;
             p.push_back(name);
@@ -161,8 +161,8 @@ void DiskFolder::onChanged()
         rewinddir((DIR*)m_handle.ptrHandle);
         while(dirent* d = readdir((DIR*)m_handle.ptrHandle))
         {
-            if(d->d_name[0] == '.' && d->d_name[1] == 0) continue;
-            if(d->d_name[0] == '.' && d->d_name[1] == '.' && d->d_name[2] == 0) continue;
+            if(strcmp(d->d_name, ".") == 0) continue;
+            if(strcmp(d->d_name, "..") == 0) continue;
             istring name = d->d_name;
             ipath   p    = m_path;
             p.push_back(name);

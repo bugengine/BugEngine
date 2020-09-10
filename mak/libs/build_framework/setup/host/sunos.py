@@ -1,8 +1,8 @@
 import os
 
 
-def build(build_context):
+def setup(conf):
     os.environ['LD_NOVERSION'] = '1'
-    environ = getattr(build_context, 'environ', None)
+    environ = getattr(conf, 'environ', None)
     if environ:
         environ['LD_NOVERSION'] = '1'
