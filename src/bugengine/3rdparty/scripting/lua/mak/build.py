@@ -84,7 +84,7 @@ def build_source(bld, name, env, path):
             name,
             env=env,
             path=path,
-            extra_defines=['LUA_LIB', 'lua_getlocaledecpoint()=\'.\''],
+            extra_defines=['LUA_LIB', 'lua_getlocaledecpoint()=0x2e'],
             extra_includes=[path.make_node('src')],
             extra_public_includes=[path.make_node('src')],
             features=[
@@ -98,7 +98,7 @@ def build_source(bld, name, env, path):
             name,
             env=env,
             path=path,
-            extra_defines=['LUA_LIB', 'lua_getlocaledecpoint()=\'.\''] + dll_flags,
+            extra_defines=['LUA_LIB', 'lua_getlocaledecpoint()=0x2e'] + dll_flags,
             extra_includes=[path.make_node('src')],
             extra_public_includes=[path.make_node('src')],
             features=[
