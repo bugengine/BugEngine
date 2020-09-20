@@ -75,14 +75,15 @@ def setup(conf):
     if conf.env.PROJECTS:
         return
     found = False
-    conf.start_msg_setup()
-    if not found and Options.options.gtk3_package in ('best', 'pkgconfig'):
-        found = setup_pkgconfig(conf)
-    if not found and Options.options.gtk3_package in ('best', 'system'):
-        found = setup_system(conf)
-    if not found and Options.options.gtk3_package in ('best', 'prebuilt'):
-        found = setup_prebuilt(conf)
-    if not found and Options.options.gtk3_package in ('best', 'source'):
-        found = setup_source(conf)
-    if not found:
-        conf.end_msg('disabled', color='RED')
+    if 'pc' in conf.env.VALID_PLATFORMS:
+        conf.start_msg_setup()
+        if not found and Options.options.gtk3_package in ('best', 'pkgconfig'):
+            found = setup_pkgconfig(conf)
+        if not found and Options.options.gtk3_package in ('best', 'system'):
+            found = setup_system(conf)
+        if not found and Options.options.gtk3_package in ('best', 'prebuilt'):
+            found = setup_prebuilt(conf)
+        if not found and Options.options.gtk3_package in ('best', 'source'):
+            found = setup_source(conf)
+        if not found:
+            conf.end_msg('disabled - editor will not be built', color='RED')
