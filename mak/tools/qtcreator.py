@@ -1324,7 +1324,6 @@ class Qbs(QtCreator):
                     except KeyError:
                         p[c] = {}
                         p = p[c]
-                print(name)
                 p[name[-1]] = task_gen
                 project_list.append(task_gen)
         with open(qbs_project.abspath(), 'w') as pfile:
