@@ -20,16 +20,20 @@ minitl::vector< ref< Platform > > Platform::loadPlatforms()
     minitl::vector< ref< Platform > > result(Arena::task());
     cl_uint                           platformCount = 0;
     checkResult(clGetPlatformIDs(0, 0, &platformCount));
-    result.reserve(platformCount);
-
-    cl_platform_id* platforms = (cl_platform_id*)malloca(sizeof(cl_platform_id) * platformCount);
-    checkResult(clGetPlatformIDs(platformCount, platforms, &platformCount));
-    for(cl_uint i = 0; i < platformCount; ++i)
+    if(platformCount)
     {
-        cl_platform_id p = platforms[i];
-        result.push_back(ref< Platform >::create(Arena::task(), p));
+        result.reserve(platformCount);
+
+        cl_platform_id* platforms
+            = (cl_platform_id*)malloca(sizeof(cl_platform_id) * platformCount);
+        checkResult(clGetPlatformIDs(platformCount, platforms, &platformCount));
+        for(cl_uint i = 0; i < platformCount; ++i)
+        {
+            cl_platform_id p = platforms[i];
+            result.push_back(ref< Platform >::create(Arena::task(), p));
+        }
+        freea(platforms);
     }
-    freea(platforms);
     return result;
 }
 
