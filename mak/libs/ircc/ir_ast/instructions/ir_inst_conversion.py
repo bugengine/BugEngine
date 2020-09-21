@@ -10,6 +10,12 @@ class IrInstCast(IrInstruction):
         self._result_type = result_type
         self._cast_type = cast_type
 
+    def resolve(self, module):
+        # type: (IrModule) -> IrInstruction
+        self._value = self._value.resolve(module)
+        self._result_type = self._result_type.resolve(module)
+        return self
+
 
 if TYPE_CHECKING:
     from typing import List, Tuple
@@ -17,3 +23,4 @@ if TYPE_CHECKING:
     from ..ir_value import IrValue
     from ..ir_metadata import IrMetadataLink
     from ..ir_reference import IrReference
+    from ..ir_module import IrModule

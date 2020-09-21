@@ -31,7 +31,7 @@ def p_ir_opcode_getelementptr(p):
     """
         ir-opcode : ir-instruction-assignment GETELEMENTPTR ir-inbounds-opt ir-type ir-access-list 
     """
-    p[0] = IrInstGetElementPtr(p[1], p[5][0], p[4], p[5][1])
+    p[0] = IrInstGetElementPtr(p[1], p[4], p[5][0], p[5][1])
 
 
 def p_ir_alloca_attachment_list_count(p):

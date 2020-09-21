@@ -1,4 +1,3 @@
-
 from ..ir_code import IrInstruction
 from be_typing import TYPE_CHECKING
 
@@ -8,6 +7,12 @@ class IrInstRet(IrInstruction):
         # type: (Optional[IrValue], List[Tuple[IrMetadataLink, IrMetadataLink]]) -> None
         IrInstruction.__init__(self, 'ret', None, metadata)
         self._return_value = return_value
+
+    def resolve(self, module):
+        # type: (IrModule) -> IrInstruction
+        if self._return_value is not None:
+            self._return_value = self._return_value.resolve(module)
+        return self
 
     def terminal(self):
         # type: () -> bool
@@ -37,6 +42,11 @@ class IrInstConditionalBranch(IrInstruction):
         self._target_true = target_true
         self._target_false = target_false
 
+    def resolve(self, module):
+        # type: (IrModule) -> IrInstruction
+        self._condition = self._condition.resolve(module)
+        return self
+
     def terminal(self):
         # type: () -> bool
         return True
@@ -45,6 +55,7 @@ class IrInstConditionalBranch(IrInstruction):
         # type: () -> List[str]
         return [self._target_true[1:], self._target_false[1:]]
 
+
 class IrInstSwitch(IrInstruction):
     def __init__(self, condition, default_label, targets, metadata):
         # type: (IrValue, str, List[Tuple[IrValue, str]], List[Tuple[IrMetadataLink, IrMetadataLink]]) -> None
@@ -52,6 +63,12 @@ class IrInstSwitch(IrInstruction):
         self._condition = condition
         self._default_label = default_label
         self._targets = targets
+
+    def resolve(self, module):
+        # type: (IrModule) -> IrInstruction
+        self._condition = self._condition.resolve(module)
+        self._targets = [(value.resolve(module), label) for value, label in self._targets]
+        return self
 
     def terminal(self):
         # type: () -> bool
@@ -77,3 +94,4 @@ if TYPE_CHECKING:
     from ..ir_value import IrValue
     from ..ir_metadata import IrMetadataLink
     from ..ir_reference import IrReference
+    from ..ir_module import IrModule

@@ -12,6 +12,9 @@ class IrAttribute:
         # type: (IrModule) -> List[IrAttribute]
         return [self]
 
+    def signature(self):
+        return str(self)
+
     def __str__(self):
         # type: () -> str
         return self._attribute + (
@@ -22,6 +25,10 @@ class IrAttribute:
 class IrAttributeGroup:
     def resolve(self, module):
         # type: (IrModule) -> IrAttributeGroupObject
+        raise NotImplementedError
+
+    def signature(self):
+        # type: () -> str
         raise NotImplementedError
 
 
@@ -39,6 +46,10 @@ class IrAttributeGroupObject(IrAttributeGroup):
         # type: () -> str
         return '; '.join(str(attr) for attr in self._attributes)
 
+    def signature(self):
+        # type: () -> str
+        return '|'.join(attr.signature() for attr in self._attributes)
+
 
 class IrAttributeGroupDeclaration(IrDeclaration):
     def __init__(self, attribute_group):
@@ -48,6 +59,10 @@ class IrAttributeGroupDeclaration(IrDeclaration):
     def collect(self, ir_name):
         # type: (str) -> List[Tuple[str, IrDeclaration]]
         return []
+
+    def signature(self):
+        # type: () -> str
+        return self._attribute_group.signature()
 
     def resolve(self, module):
         # type: (IrModule) -> IrDeclaration

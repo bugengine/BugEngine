@@ -3,6 +3,7 @@ from .ir_declaration import IrDeclaration
 from .ir_type import IrTypePtr
 from .ir_attribute import IrAttributeGroup, IrAttributeGroupObject
 from .ir_code import IrCodeBlock
+from .ir_scope import IrScope
 from be_typing import TYPE_CHECKING
 
 
@@ -11,7 +12,7 @@ class IrMethodParameter(IrObject):
         # type: (IrType, IrReference, IrAttributeGroup) -> None
         IrObject.__init__(self)
         self._type = type
-        self._id = name
+        self._id = name or '_'
         self._attributes = attributes
 
     def resolve(self, module):
@@ -19,6 +20,15 @@ class IrMethodParameter(IrObject):
         self._type = self._type.resolve(module)
         self._attributes = self._attributes.resolve(module)
         return self
+
+    def signature(self):
+        # type: () -> str
+        #return '[%s]%s' % (self._attributes.signature(), self._type.signature())
+        return self._type.signature()
+
+    def instantiate(self, type):
+        # type: (IrType) -> IrMethodParameter
+        return IrMethodParameter(type, self._id, self._attributes)
 
     def flatten(self):
         # type: () -> List[IrMethodParameter]
@@ -50,8 +60,16 @@ class IrMethod(IrObject):
         IrObject.__init__(self)
 
     def resolve(self, module):
-        # type: (IrModule) -> IrMethod
-        return self
+        # type: (IrModule) -> IrMethodObject
+        raise NotImplementedError
+
+    def instantiate(self):
+        # type: () -> None
+        pass
+
+    def find_instance(self, arguments):
+        # type: (List[IrType]) -> IrMethodObject
+        raise NotImplementedError
 
 
 class IrMethodDeclaration(IrDeclaration):
@@ -59,28 +77,36 @@ class IrMethodDeclaration(IrDeclaration):
 
     def __init__(self, method):
         # type: (IrMethodObject) -> None
+        IrDeclaration.__init__(self)
         self._method = method
         self._method._name = 'method_%d' % IrMethodDeclaration.METHOD_INDEX
+        self._method_resolution = None # type: Optional[IrMethodObject]
         IrMethodDeclaration.METHOD_INDEX += 1
 
     def resolve(self, module):
         # type: (IrModule) -> IrDeclaration
-        self._method = self._method.resolve(module)
+        if self._method_resolution is None:
+            self._method_resolution = self._method.resolve(module)
+            self._method_resolution.resolve_definition(module)
         return self
+
+    def instantiate(self):
+        # type: () -> None
+        assert self._method_resolution is not None
+        self._method_resolution.instantiate()
 
     def collect(self, ir_name):
         # type: (str) -> List[Tuple[str, IrDeclaration]]
-        assert self._method is not None
         self._method.on_collect()
-        result = []                                                       # type: List[Tuple[str, IrDeclaration]]
+        result = []                                                                # type: List[Tuple[str, IrDeclaration]]
         result += [(ir_name + '_', IrMethodDeclaration(instance)) for instance in self._method._kernel_instances]
         if len(self._method._instances) > 1:
             result += [
                 (ir_name + '_%d' % index, IrMethodDeclaration(instance))
-                for index, instance in enumerate(self._method._instances)
+                for index, instance in enumerate(self._method._instances.values())
             ]
         else:
-            result += [(ir_name, IrMethodDeclaration(instance)) for instance in self._method._instances]
+            result += [(ir_name, IrMethodDeclaration(instance)) for instance in self._method._instances.values()]
         return result
 
     def visit(self, generator, name):
@@ -90,8 +116,8 @@ class IrMethodDeclaration(IrDeclaration):
         else:
             return_type = generator.type_void()
         parameters = [(p._type.create_generator_type(generator), p._id[1:]) for p in self._method._parameters]
-        generator.begin_method(name[1:], return_type, parameters, self._method._calling_convention)
-        generator.end_method()
+        if generator.begin_method(name[1:], return_type, parameters, self._method._calling_convention):
+            generator.end_method()
 
 
 class IrMethodLink(IrMethod):
@@ -101,11 +127,10 @@ class IrMethodLink(IrMethod):
         self._reference = reference
 
     def resolve(self, module):
-        # type: (IrModule) -> IrMethod
+        # type: (IrModule) -> IrMethodObject
         result = module.get(self._reference, IrMethodDeclaration)
-        assert isinstance(result, IrMethod)
         result.resolve(module)
-        return result
+        return result._method
 
 
 class IrMethodObject(IrMethod):
@@ -118,51 +143,81 @@ class IrMethodObject(IrMethod):
             p._name = 'param_%d' % i
         self._calling_convention = calling_convention
         self._definition = None        # type: Optional[IrMethodBody]
-        self._instances = []           # type: List[IrMethodObject]
+        self._instances = {}           # type: Dict[str, IrMethodObject]
         self._kernel_instances = []    # type: List[IrMethodObject]
 
     def define(self, instruction_list):
         # type: (List[IrInstruction]) -> None
         self._definition = IrMethodBody(instruction_list)
 
-    def on_collect(self):
+    def instantiate(self):
         # type: () -> None
         if self._calling_convention == 'spir_kernel':
             assert self._definition is not None
-            self._definition._instantiate()
+            self.find_instance([p._type for p in self._parameters])
             # create an intermediate kernel entry point
-            self._instances.append(self)
             self._kernel_instances.append(self._create_kernel_wrapper())
+
+    def on_collect(self):
+        # type: () -> None
+        pass
 
     def _create_kernel_wrapper(self):
         # type: () -> IrMethodObject
-        parameters = []
+        parameters = []    # type: List[IrMethodParameter]
         for p in self._parameters:
             parameters += p.flatten()
         result = IrMethodObject(self._return_type, parameters, 'spir_kernel_flat')
-        # todo: code
         return result
 
     def resolve(self, module):
         # type: (IrModule) -> IrMethodObject
-        if self._return_type:
-            self._return_type = self._return_type.resolve(module)
         self._parameters = [p.resolve(module) for p in self._parameters]
         return self
+
+    def resolve_definition(self, module):
+        # type: (IrModule) -> None
+        if self._definition is not None:
+            self._definition = self._definition.resolve(module, self._parameters)
+        elif self._return_type is not None:
+            self._return_type = self._return_type.resolve(module)
+
+    def find_instance(self, arguments):
+        # type: (List[IrType]) -> IrMethodObject
+        signature = ','.join(a.signature() for a in arguments)
+        try:
+            return self._instances[signature]
+        except KeyError:
+            result = self._create_instance(arguments)
+            self._instances[signature] = result
+            return result
+
+    def _create_instance(self, arguments):
+        # type: (List[IrType]) -> IrMethodObject
+        if self._definition:
+            return self    # TODO
+        else:
+            assert False, "TODO"
 
 
 class IrMethodBody:
     def __init__(self, instruction_list):
         # type: (List[IrInstruction]) -> None
+        self._scope = IrScope()
+        for instruction in instruction_list:
+            instruction.declare(self._scope)
         self._code = IrCodeBlock(instruction_list)
 
-    def _instantiate(self):
-        # type: () -> None
-        pass
+    def resolve(self, module, parameters):
+        # type: (IrModule, List[IrMethodParameter]) -> IrMethodBody
+        module.push_scope(self._scope)
+        self._code = self._code.resolve(module)
+        module.pop_scope()
+        return self
 
 
 if TYPE_CHECKING:
-    from typing import List, Optional, Tuple
+    from typing import Dict, List, Optional, Tuple
     from .ir_module import IrModule
     from .ir_reference import IrReference
     from .ir_code import IrInstruction

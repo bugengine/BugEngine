@@ -16,7 +16,7 @@ def p_ir_value_metadata(p):
         ir-value : METADATA ir-value
                  | METADATA ir-metadata-value
     """
-    p[0] = IrValueMetadata(p[1])
+    p[0] = IrValueMetadata(p[2])
 
 
 def p_ir_value_void(p):

@@ -14,6 +14,10 @@ class IrType(IrObject):
         # type: () -> str
         raise NotImplementedError
 
+    def signature(self):
+        # type: () -> str
+        raise NotImplementedError
+
     def _dependency_list(self):
         # type: () -> List[Tuple[str, IrDeclaration]]
         return []
@@ -91,11 +95,20 @@ class IrTypeReference(IrType):
         # type: () -> str
         return str(self._reference)
 
+    def signature(self):
+        # type: () -> str
+        assert self._target is not None
+        return self._target.signature()
+
 
 class IrTypeOpaque(IrType):
     def __str__(self):
         # type: () -> str
         return 'opaque'
+
+    def signature(self):
+        # type: () -> str
+        return '?'
 
     def create_generator_type(self, generator):
         # type: (IrccGenerator) -> IrccType
@@ -105,7 +118,11 @@ class IrTypeOpaque(IrType):
 class IrTypeMetadata(IrType):
     def create_generator_type(self, generator):
         # type: (IrccGenerator) -> IrccType
-        raise NotImplementedError
+        return generator.type_metadata()
+
+    def signature(self):
+        # type: () -> str
+        return '~'
 
 
 class IrTypeBuiltin(IrType):
@@ -117,6 +134,10 @@ class IrTypeBuiltin(IrType):
     def __str__(self):
         # type: () -> str
         return self._builtin
+
+    def signature(self):
+        # type: () -> str
+        return '#%s' % self._builtin
 
     def create_generator_type(self, generator):
         # type: (IrccGenerator) -> IrccType
@@ -139,6 +160,10 @@ class IrTypePtr(IrType):
         # type: () -> str
         addrspaces = ['private', 'constant', 'local', 'global', 'generic']
         return '%s %s*' % (self._pointee, addrspaces[self._address_space])
+
+    def signature(self):
+        # type: () -> str
+        return '*[%d]%s' % (self._address_space, self._pointee.signature())
 
     def create_generator_type(self, generator):
         # type: (IrccGenerator) -> IrccType
@@ -174,9 +199,20 @@ class IrTypeArray(IrType):
         # type: () -> str
         return '%s[%d]' % (self._type, self._count)
 
+    def signature(self):
+        # type: () -> str
+        return '[%d]%s' % (self._count, self._type.signature())
+
     def create_generator_type(self, generator):
         # type: (IrccGenerator) -> IrccType
         return generator.make_array(self._type.create_generator_type(generator), self._count)
+
+    def flatten(self, allow_pointer=True):
+        # type: (bool) -> List[IrType]
+        #if not allow_pointer:
+        #    # todo: source location
+        #    raise Exception('invalid kernel parameter')
+        return [self._type] * self._count
 
 
 class IrTypeVector(IrType):
@@ -199,6 +235,10 @@ class IrTypeVector(IrType):
         # type: () -> str
         return '%s%d' % (self._type, self._count)
 
+    def signature(self):
+        # type: () -> str
+        return '<%d>%s' % (self._count, self._type.signature())
+
     def create_generator_type(self, generator):
         # type: (IrccGenerator) -> IrccType
         raise NotImplementedError
@@ -213,7 +253,7 @@ class IrTypeStruct(IrType):
 
     def _dependency_list(self):
         # type: () -> List[Tuple[str, IrDeclaration]]
-        result = []
+        result = []    # type: List[Tuple[str, IrDeclaration]]
         for t, _ in self._fields:
             result += t._dependency_list()
         return result
@@ -227,13 +267,17 @@ class IrTypeStruct(IrType):
         # type: () -> str
         return '{%s}' % (', '.join(str(x) for x, _ in self._fields))
 
+    def signature(self):
+        # type: () -> str
+        return '{%s}' % (';'.join(x.signature() for x, _ in self._fields))
+
     def create_generator_type(self, generator):
         # type: (IrccGenerator) -> IrccType
         return generator.make_struct([(f.create_generator_type(generator), n) for f, n in self._fields])
 
     def flatten(self, allow_pointer=True):
         # type: (bool) -> List[IrType]
-        result = []
+        result = []    # type: List[IrType]
         for field in self._fields:
             result += field[0].flatten(False)
         return result
@@ -263,6 +307,13 @@ class IrTypeMethod(IrType):
     def __str__(self):
         # type: () -> str
         return '%s(*)(%s)' % (self._return_type, ', '.join(str(x) for x in self._argument_types))
+
+    def signature(self):
+        # type: () -> str
+        return '(%s(%s))' % (
+            self._return_type.signature() if self._return_type is not None else 'void',
+            ';'.join(x.signature() for x in self._argument_types)
+        )
 
     def create_generator_type(self, generator):
         # type: (IrccGenerator) -> IrccType

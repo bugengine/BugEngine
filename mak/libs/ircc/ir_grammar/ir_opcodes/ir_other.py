@@ -1,4 +1,5 @@
 from ...ir_ast.instructions import IrInstCall, IrInstIntegerCompare, IrInstFloatCompare, IrInstPhi, IrInstSelect
+from ...ir_ast import IrReference, IrMethodLink
 from be_typing import TYPE_CHECKING
 
 
@@ -7,7 +8,7 @@ def p_ir_opcode_call(p):
     """
         ir-opcode : ir-instruction-assignment-opt ir-tail-type CALL ir-calling-convention ir-parameter-attribute-list-opt ir-return-type ID LPAREN LPAREN_MARK ir-argument-list RPAREN ir-attribute-list-opt ir-instruction-attachment-list
     """
-    p[0] = IrInstCall(p[1], p[13])
+    p[0] = IrInstCall(p[1], IrMethodLink(IrReference(p[7])), p[10], p[13])
 
 
 def p_ir_opcode_cmp(p):
@@ -15,7 +16,7 @@ def p_ir_opcode_cmp(p):
     """
         ir-opcode : ir-instruction-assignment ICMP ir-cmp-op ir-type ir-expr COMMA ir-expr ir-instruction-attachment-list
     """
-    p[0] = IrInstIntegerCompare(p[1], p[4], p[5], p[6], p[3], p[8])
+    p[0] = IrInstIntegerCompare(p[1], p[4], p[5], p[7], p[3], p[8])
 
 
 def p_ir_opcode_fcmp(p):
@@ -23,7 +24,7 @@ def p_ir_opcode_fcmp(p):
     """
         ir-opcode : ir-instruction-assignment FCMP ir-fcmp-op ir-type ir-expr COMMA ir-expr ir-instruction-attachment-list
     """
-    p[0] = IrInstFloatCompare(p[1], p[4], p[5], p[6], p[3], p[8])
+    p[0] = IrInstFloatCompare(p[1], p[4], p[5], p[7], p[3], p[8])
 
 
 def p_ir_opcode_phi(p):

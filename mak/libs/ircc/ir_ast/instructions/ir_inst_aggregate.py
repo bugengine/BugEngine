@@ -9,6 +9,11 @@ class IrInstExtractValue(IrInstruction):
         self._source = source
         self._indices = indices
 
+    def resolve(self, module):
+        # type: (IrModule) -> IrInstruction
+        self._source = self._source.resolve(module)
+        return self
+
 
 class IrInstInsertValue(IrInstruction):
     def __init__(self, result, source, value, indices, metadata):
@@ -18,9 +23,16 @@ class IrInstInsertValue(IrInstruction):
         self._value = value
         self._indices = indices
 
+    def resolve(self, module):
+        # type: (IrModule) -> IrInstruction
+        self._source = self._source.resolve(module)
+        self._value = self._value.resolve(module)
+        return self
+
 
 if TYPE_CHECKING:
     from typing import List, Tuple
     from ..ir_value import IrValue
     from ..ir_metadata import IrMetadataLink
     from ..ir_reference import IrReference
+    from ..ir_module import IrModule

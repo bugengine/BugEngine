@@ -9,7 +9,7 @@ class IrccCDeclaration(IrccCTypes):
         IrccCTypes.__init__(self, file)
 
     def begin_module(self):
-        # type: () -> None
+        # type: () -> bool
         self._out_file.write(
             '/* generated code; do not edit */\n'
             '#include <stdint.h>\n'
@@ -20,6 +20,7 @@ class IrccCDeclaration(IrccCTypes):
             'typedef void* metadata;\n'
             '\n'
         )
+        return True
 
     def header_specifier(self, name, value):
         # type: (str, str) -> None
@@ -39,13 +40,14 @@ class IrccCDeclaration(IrccCTypes):
             self._out_file.write('/* %s */\ntypedef %s;\n\n' % (ir_name, type.format(['', '', name, ''])))
 
     def begin_method(self, name, return_type, parameters, calling_convention):
-        # type: (str, IrccType, List[Tuple[IrccType, str]], str) -> None
+        # type: (str, IrccType, List[Tuple[IrccType, str]], str) -> bool
         self._out_file.write(
             '%s %s(%s)' % (
                 return_type.format(['', '', '', '']
                                    ), name, ', '.join('%s' % t.format(['', '', n, '']) for t, n in parameters)
             )
         )
+        return True
 
     def end_method(self):
         # type: () -> None

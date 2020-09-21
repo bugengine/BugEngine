@@ -8,6 +8,11 @@ class IrccGenerator:
         self._out_file = file
 
     @abstractmethod
+    def type_metadata(self):
+        # type: () -> IrccType
+        raise NotImplementedError
+
+    @abstractmethod
     def type_void(self):
         # type: () -> IrccType
         raise NotImplementedError
@@ -49,16 +54,16 @@ class IrccGenerator:
         raise NotImplementedError
 
     def begin_module(self):
-        # type: () -> None
-        pass
+        # type: () -> bool
+        return True
 
     def end_module(self):
         # type: () -> None
         pass
 
     def begin_headers(self):
-        # type: () -> None
-        pass
+        # type: () -> bool
+        return True
 
     def header_specifier(self, name, value):
         # type: (str, str) -> None
@@ -69,8 +74,8 @@ class IrccGenerator:
         pass
 
     def begin_declarations(self):
-        # type: () -> None
-        pass
+        # type: () -> bool
+        return True
 
     def end_declarations(self):
         # type: () -> None
@@ -81,8 +86,8 @@ class IrccGenerator:
         pass
 
     def begin_method(self, name, return_type, parameters, calling_convention):
-        # type: (str, IrccType, List[Tuple[IrccType, str]], str) -> None
-        pass
+        # type: (str, IrccType, List[Tuple[IrccType, str]], str) -> bool
+        return True
 
     def end_method(self):
         # type: () -> None

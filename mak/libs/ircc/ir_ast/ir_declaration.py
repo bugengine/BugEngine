@@ -20,6 +20,10 @@ class IrDeclaration:
         # type: (IrccGenerator, str) -> None
         pass
 
+    def instantiate(self):
+        # type: () -> None
+        pass
+
 
 if TYPE_CHECKING:
     from typing import List, Tuple

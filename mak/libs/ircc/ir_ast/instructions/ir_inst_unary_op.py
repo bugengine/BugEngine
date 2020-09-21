@@ -10,6 +10,12 @@ class IrInstFloatUnaryOp(IrInstruction):
         self._operand = operand
         self._operation = operation
 
+    def resolve(self, module):
+        # type: (IrModule) -> IrInstruction
+        self._type = self._type.resolve(module)
+        self._operand = self._operand.resolve(module)
+        return self
+
 
 if TYPE_CHECKING:
     from typing import List, Tuple
@@ -17,3 +23,4 @@ if TYPE_CHECKING:
     from ..ir_expr import IrExpression
     from ..ir_metadata import IrMetadataLink
     from ..ir_reference import IrReference
+    from ..ir_module import IrModule
