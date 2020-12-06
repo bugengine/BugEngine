@@ -59,7 +59,8 @@ class Solaris(Configure.ConfigurationContext.Platform):
                         result.append((c, [], self))
                         break
             else:
-                print(c.platform)
+                pass
+                #print(c.platform)
         return result
 
     def load_in_env(self, conf, compiler):

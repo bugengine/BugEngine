@@ -16,7 +16,7 @@ BE_EXPORT void* s_dummyData = 0;
 
 Environment::Environment()
     : m_homeDirectory(getenv("HOME"))
-    , m_dataDirectory(ipath("share/bugengine"))
+    , m_dataDirectory(ipath("data"))
     , m_game("")
     , m_user(getenv("USER"))
     , m_programPath()
