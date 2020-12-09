@@ -25,6 +25,8 @@
 #        include <bugengine/kernel/gcc/x86/interlocked.inl>
 #    elif defined(_POWERPC)
 #        include <bugengine/kernel/gcc/ppc/interlocked.inl>
+#    elif defined(_ARM64) && defined(_ILP32)
+#        include <bugengine/kernel/gcc/arm64_32/interlocked.inl>
 #    elif defined(_ARM64)
 #        include <bugengine/kernel/gcc/arm64/interlocked.inl>
 #    elif defined(_ARM)

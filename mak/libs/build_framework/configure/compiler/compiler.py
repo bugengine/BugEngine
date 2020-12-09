@@ -24,8 +24,11 @@ class Compiler:
         'armv7k': 'armv7k',
         'armv7l': 'armv7l',
         'arm64': 'arm64',
+        'arm64e': 'arm64e',
         'aarch64': 'arm64',
         'aarch32': 'aarch32',
+        'arm64_32': 'arm64_32',
+        'aarch64_32': 'arm64_32',
         'ppc': 'ppc',
         'powerpc': 'ppc',
         'ppc64': 'ppc64',
@@ -90,7 +93,10 @@ class Compiler:
 
     @classmethod
     def to_target_arch(self, arch):
-        return self.ARCHS.get(arch, 'unknown')
+        try:
+            return self.ARCHS[arch]
+        except KeyError:
+            return 'unknown'
 
     @classmethod
     def run(self, cmd, env, input=None):

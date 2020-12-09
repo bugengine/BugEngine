@@ -38,6 +38,8 @@ class GnuCompiler(Configure.ConfigurationContext.Compiler):
         'armv7k': (('.neon', ['-mfpu=neon']), ),
         'armv7l': (('.neon', ['-mfpu=neon']), ),
         'arm64': (('.neon', []), ),
+        'arm64e': (('.neon', []), ),
+        'aarch32': (('.neon', []), ),
     }
     MULTILIBS = {
         'x86': ((['-m64'], 'amd64'), ),
@@ -79,8 +81,10 @@ class GnuCompiler(Configure.ConfigurationContext.Compiler):
         (('__mips64', '__mips', '_MIPSEL'), 'mips64el'),
         (('__mips', '_MIPSEL'), 'mipsel'),
         (('__mips64', '__mips'), 'mips64'),
-        (('__mips__', ), 'mips'),
-        (('__aarch64__', ), 'aarch64'),
+        (('__mips__',), 'mips'),
+        (('__arm64e__',), 'arm64e'),
+        (('__aarch64__', '__ILP32__'), 'arm64_32'),
+        (('__aarch64__',), 'aarch64'),
         (('__aarch64', ), 'aarch64'),
         (('__aarch32__', ), 'aarch32'),
         (('__arm__', ), 'armv4'),
@@ -90,9 +94,9 @@ class GnuCompiler(Configure.ConfigurationContext.Compiler):
         (('__arm__', '__ARM_ARCH_6Z__'), 'armv6'),
         (('__arm__', '__ARM_ARCH_6KZ__'), 'armv6'),
         (('__arm__', '__ARM_ARCH_6ZK__'), 'armv6'),
-        (('__arm__', '__ARM_ARCH_7A__'), 'armv7a'),
         (('__arm__', '__ARM_ARCH_7A__', '__ARM_ARCH_7K__'), 'armv7k'),
         (('__arm__', '__ARM_ARCH_7S__'), 'armv7s'),
+        (('__arm__', '__ARM_ARCH_7A__'), 'armv7a'),
     )
     ARCHIVER = 'ar'
 

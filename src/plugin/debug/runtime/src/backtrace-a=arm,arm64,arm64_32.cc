@@ -26,6 +26,8 @@ BE_NOINLINE size_t Callstack::backtrace(Address* buffer, size_t count, size_t sk
     void** stackPointer;
 #ifdef BE_COMPILER_MSVC
     stackPointer = 0;
+#elif defined(_ARM64) && defined(_ILP32)
+    __asm__ volatile("mov %w0,w29" : "=r"(stackPointer));
 #elif defined(_ARM64)
     __asm__ volatile("mov %0,x29" : "=r"(stackPointer));
 #else

@@ -33,30 +33,35 @@ def install_plist_darwin(self, node):
 @feature('cshlib', 'cxxshlib')
 @after_method('apply_link')
 @after_method('process_use')
-def set_osx_shlib_name(self):
-    if 'macosx' in self.env.VALID_PLATFORMS:
+def set_darwin_shlib_name(self):
+    if 'darwin' in self.env.VALID_PLATFORMS:
+        bin_path = os.path.join(self.env.PREFIX, self.env.DEPLOY_BINDIR)
+        plugin_path = os.path.join(self.env.PREFIX, self.env.DEPLOY_PLUGINDIR)
+        kernel_path = os.path.join(self.env.PREFIX, self.env.DEPLOY_KERNELDIR)
         if 'bugengine:plugin' in self.features:
+            rel_path = os.path.relpath(plugin_path, bin_path)
             self.env.append_unique(
                 'LINKFLAGS', [
                     '-install_name',
                     os.path.join(
-                        '@executable_path', '..', 'share', 'bugengine', 'plugin', self.link_task.outputs[0].name
+                        '@executable_path', rel_path, self.link_task.outputs[0].name
                     )
                 ]
             )
         elif 'bugengine:kernel' in self.features:
+            rel_path = os.path.relpath(kernel_path, bin_path)
             self.env.append_unique(
                 'LINKFLAGS', [
                     '-install_name',
                     os.path.join(
-                        '@executable_path', '..', 'share', 'bugengine', 'plugin', self.link_task.outputs[0].name
+                        '@executable_path', rel_path, self.link_task.outputs[0].name
                     )
                 ]
             )
         else:
             self.env.append_unique(
                 'LINKFLAGS',
-                ['-install_name', os.path.join('@loader_path', self.link_task.outputs[0].name)]
+                ['-install_name', os.path.join('@executable_path', self.link_task.outputs[0].name)]
             )
 
 
@@ -75,6 +80,20 @@ def add_objc_lib(self):
 @after_method('process_use')
 def set_osx_program_name(self):
     pass
+
+
+@feature('cprogram', 'cxxprogram')
+@after_method('apply_link')
+def set_osx_rpath(self):
+    if 'darwin' in self.env.VALID_PLATFORMS:
+        bin_path = os.path.join(self.env.PREFIX, self.env.DEPLOY_BINDIR)
+        plugin_path = os.path.join(self.env.PREFIX, self.env.DEPLOY_PLUGINDIR)
+        kernel_path = os.path.join(self.env.PREFIX, self.env.DEPLOY_KERNELDIR)
+        rel_plugin_path = os.path.relpath(plugin_path, bin_path)
+        self.env.append_unique('RPATH', [os.path.join('@executable_path', rel_plugin_path)])
+        rel_kernel_path = os.path.relpath(kernel_path, bin_path)
+        if rel_kernel_path != rel_plugin_path:
+            self.env.append_unique('RPATH', [os.path.join('@executable_path', rel_kernel_path)])
 
 
 dsym = '${DSYMUTIL} ${DSYMUTILFLAGS} ${SRC} -o ${TGT[0].parent.parent.abspath()}'

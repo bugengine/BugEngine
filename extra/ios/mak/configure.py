@@ -5,7 +5,7 @@ from waflib import Configure
 class iOS(Configure.ConfigurationContext.Darwin):
     NAME = 'iPhone'
     CERTIFICATE_NAME = 'iPhone Developer'
-    PLATFORMS = ['iphone', 'darwin']
+    PLATFORMS = ['ios', 'iphone', 'darwin']
     SDK_NAME = 'iphoneos'
     OS_NAME = 'iphoneos'
 
@@ -25,9 +25,18 @@ class iOS(Configure.ConfigurationContext.Darwin):
 
 class iOSSimulator(iOS):
     NAME = 'iPhoneSimulator'
-    PLATFORMS = ['iphone', 'iphonesimulator']
+    PLATFORMS = ['ios', 'iphonesimulator', 'darwin']
     SDK_NAME = 'iphonesimulator'
     OS_NAME = 'iphoneos'
+
+    def __init__(self, conf, sdk = None):
+        Configure.ConfigurationContext.Darwin.__init__(self, conf, sdk)
+
+class WatchOS(iOS):
+    NAME = 'WatchOS'
+    PLATFORMS = ['ios', 'watchos', 'darwin']
+    SDK_NAME = 'watchos'
+    OS_NAME = 'watchos'
 
     def __init__(self, conf, sdk = None):
         Configure.ConfigurationContext.Darwin.__init__(self, conf, sdk)
@@ -36,4 +45,5 @@ class iOSSimulator(iOS):
 def configure(conf):
     conf.platforms.append(iOS(conf))
     conf.platforms.append(iOSSimulator(conf))
+    conf.platforms.append(WatchOS(conf))
 

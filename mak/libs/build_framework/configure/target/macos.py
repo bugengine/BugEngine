@@ -105,10 +105,9 @@ class Darwin(Configure.ConfigurationContext.Platform):
         conf.env.DEPLOY_RUNBINDIR = bin_dir
         conf.env.DEPLOY_LIBDIR = 'lib'
         conf.env.DEPLOY_INCLUDEDIR = 'include'
-        share = os.path.join(root_dir, 'share', 'bugengine')
-        conf.env.DEPLOY_DATADIR = share
-        conf.env.DEPLOY_PLUGINDIR = os.path.join(share, 'plugin')
-        conf.env.DEPLOY_KERNELDIR = os.path.join(share, 'kernel')
+        conf.env.DEPLOY_DATADIR = os.path.join(root_dir, 'data')
+        conf.env.DEPLOY_PLUGINDIR = os.path.join(root_dir, 'plugins')
+        conf.env.DEPLOY_KERNELDIR = os.path.join(root_dir, 'kernels')
         conf.env.append_unique('DEFINES', ['_BSD_SOURCE'])
 
         conf.env.MACOSX_SDK = os.path.splitext(os.path.basename(self.sdk[1]))[0]
@@ -116,19 +115,19 @@ class Darwin(Configure.ConfigurationContext.Platform):
         conf.env.SYSROOT = self.sdk[1]
         conf.env.MACOSX_SDK_MIN = self.sdk[3]
         conf.env.append_unique(
-            'CPPFLAGS', ['-m%s-version-min=%s' % (self.OS_NAME, self.sdk[3]), '-isysroot', self.sdk[1]]
+            'CPPFLAGS', ['-isysroot', self.sdk[1]]
         )
         conf.env.append_unique(
-            'CFLAGS', ['-m%s-version-min=%s' % (self.OS_NAME, self.sdk[3]), '-isysroot', self.sdk[1]]
+            'CFLAGS', ['-isysroot', self.sdk[1]] + self.sdk[4][0]
         )
         conf.env.append_unique(
-            'CXXFLAGS', ['-m%s-version-min=%s' % (self.OS_NAME, self.sdk[3]), '-isysroot', self.sdk[1]]
+            'CXXFLAGS', ['-isysroot', self.sdk[1]] + self.sdk[4][1]
         )
         conf.env.append_unique(
             'LINKFLAGS', [
-                '-m%s-version-min=%s' % (self.OS_NAME, self.sdk[3]), '-isysroot', self.sdk[1],
+                '-isysroot', self.sdk[1],
                 '-L%s/usr/lib' % self.sdk[1]
-            ] + ['-B%s' % bin_path for bin_path in self.directories]
+            ] + self.sdk[4][2] + ['-B%s' % bin_path for bin_path in self.directories]
         )
         if compiler.arch == 'x86':
             conf.env.append_unique('CFLAGS', ['-msse2'])
@@ -235,11 +234,12 @@ class Darwin(Configure.ConfigurationContext.Platform):
         except KeyError:
             raise Errors.WafError('No SDK detected for platform %s' % self.SDK_NAME)
         else:
-            best_sdk = (None, None, [], [])
+            best_sdk = (None, None, [], [], [])
             for sdk_version, sdk_archs, sdk_path in all_sdks:
                 if len(best_sdk[2]) >= len(sdk_archs):
                     break
                 os_version_min = getattr(self, 'OS_VERSION_MIN', sdk_version)
+                os_version_min_libcpp = getattr(self, 'OS_VERSION_MIN_LIBCPP', sdk_version)
                 sdk_option = '-m%s-version-min=%s' % (self.OS_NAME, '.'.join(os_version_min))
                 if sdk_number_max and sdk_version > sdk_number_max:
                     continue
@@ -267,6 +267,20 @@ class Darwin(Configure.ConfigurationContext.Platform):
                     if otool is not None:
                         strip = self.conf.detect_executable('strip', path_list=os.path.dirname(otool))
 
+                cflags = []
+                cxxflags = []
+                ldflags = []
+                for libcpp in ('libstdc++-static.a', 'libstdc++.6.dylib',  'libstdc++.tbd'):
+                    if os.path.isfile(os.path.join(sdk_path, 'usr', 'lib', libcpp)):
+                        break
+                else:
+                    sdk_option = '-m%s-version-min=%s' % (self.OS_NAME, '.'.join(os_version_min_libcpp))
+                    cxxflags.append('-stdlib=libc++')
+                    ldflags.append('-stdlib=libc++')
+                cflags.append(sdk_option)
+                cxxflags.append(sdk_option)
+                ldflags.append(sdk_option)
+
                 for a in sdk_archs:
                     for c in compilers:
                         if self.match(c, sdk_path, all_sdks) and c.arch == c.ARCHS[a]:
@@ -286,7 +300,7 @@ class Darwin(Configure.ConfigurationContext.Platform):
                                     obj_node.abspath(), '-isysroot', sdk_path,
                                     src_node.abspath(),
                                     '-B%s' % os.path.dirname(strip)
-                                ],
+                                ] + cxxflags,
                                 env=env
                             )
                             if r == 0:
@@ -300,7 +314,7 @@ class Darwin(Configure.ConfigurationContext.Platform):
                                             '-L%s' % os.path.join(sdk_path, 'usr', 'lib'), '-isysroot', sdk_path,
                                             obj_node.abspath(), '-lobjc',
                                             '-B%s' % os.path.dirname(strip)
-                                        ],
+                                        ] + cxxflags,
                                         env=env
                                     )
                                     if r == 0:
@@ -310,10 +324,10 @@ class Darwin(Configure.ConfigurationContext.Platform):
                                             break
                 if len(sdk_compilers) > len(best_sdk[2]):
                     best_sdk = (
-                        '.'.join(sdk_version), sdk_path, sdk_compilers, [os.path.dirname(strip)] + sdk_bin_paths
+                        '.'.join(sdk_version), sdk_path, sdk_compilers, [os.path.dirname(strip)] + sdk_bin_paths, (cflags, cxxflags, ldflags)
                     )
             if best_sdk[2]:
-                return best_sdk[2], (best_sdk[0], best_sdk[1], best_sdk[3], '.'.join(os_version_min))
+                return best_sdk[2], (best_sdk[0], best_sdk[1], best_sdk[3], '.'.join(os_version_min), best_sdk[4])
             else:
                 raise Errors.WafError('No SDK for compiler %s' % compilers[0].compiler_c)
 
@@ -328,13 +342,16 @@ class MacOS(Darwin):
     SDK_NAME = 'macosx'
     OS_NAME = 'macosx'
     OS_VERSION_MIN = ('10', '5')
+    OS_VERSION_MIN_LIBCPP = ('10', '7')
 
     def __init__(self, conf, sdk=None):
         Darwin.__init__(self, conf, sdk)
 
     def load_in_env(self, conf, compiler):
         Darwin.load_in_env(self, conf, compiler)
-        conf.env.append_unique('LINKFLAGS', ['-lgcc_s.10.5'])
+        sdk_path = self.sdk[1]
+        if os.path.isfile(os.path.join(sdk_path, 'usr', 'lib', 'libgcc_s.10.5.dylib')):
+            conf.env.append_unique('LINKFLAGS', ['-lgcc_s.10.5'])
 
 
 def run_command(cmd, input=None, env=None):
@@ -422,6 +439,8 @@ def configure(conf):
         'armv7k': 'armv7k',
         'arm_v7k': 'armv7k',
         'arm64': 'arm64',
+        'arm64e': 'arm64e',
+        'arm64_32': 'arm64_32',
     }
 
     conf.darwin_sdks = {}
@@ -455,9 +474,17 @@ def configure(conf):
                             line = line.split()
                             for a in line[2:-1]:
                                 try:
-                                    sdk_archs.append(archs[a[:-1]] if a[-1] == ',' else archs[a])
+                                    sdk_archs.append(archs[a.split(',')[0]])
                                 except KeyError:
                                     print('Unknown %s arch: %s in %s' % (sdk_os, a, dylib))
+                            break
+                        elif line.startswith('targets:'):
+                            line = line.split()
+                            for t in line[2:-1]:
+                                try:
+                                    sdk_archs.append(archs[t.split('-')[0]])
+                                except KeyError:
+                                    print('Unknown %s target: %s in %s' % (sdk_os, t, dylib))
                             break
         try:
             conf.darwin_sdks[sdk_os].append((sdk_version, sdk_archs, sdk_path))
