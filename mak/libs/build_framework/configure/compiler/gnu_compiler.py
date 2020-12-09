@@ -111,6 +111,11 @@ class GnuCompiler(Configure.ConfigurationContext.Compiler):
             target_dir = os.path.normpath(os.path.join(self.directories[0], '..', t, 'bin'))
             if os.path.isdir(target_dir):
                 self.directories.append(target_dir)
+            if os.path.isdir('/usr/lib/%s' % t):
+                try:
+                    self.extra_args['link'].append('-L/usr/lib/%s' % t)
+                except KeyError:
+                    self.extra_args['link'] = ['-L/usr/lib/%s' % t]
 
     def get_actual_targets(self, target, args, multilibs):
         target = target.split('-')
