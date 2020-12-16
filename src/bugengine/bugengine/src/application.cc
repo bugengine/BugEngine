@@ -47,10 +47,10 @@ Application::Application(ref< Folder >                     dataFolder,
     , m_resourceManager(resourceManager)
     , m_pluginContext(resourceManager, m_dataFolder, m_scheduler)
     , m_cpuKernelScheduler("plugin.compute.cpu", m_pluginContext)
-    , m_updateTask(
-         ref< Task::TaskGroup >::create(Arena::task(), "applicationUpdate", Colors::Yellow::Yellow))
+    , m_updateTask(ref< Task::TaskGroup >::create(Arena::task(), "applicationUpdate",
+                                                  Colors::Yellow::Yellow))
     , m_worldTask(
-         ref< Task::TaskGroup >::create(Arena::task(), "worldUpdate", Colors::Yellow::Yellow))
+          ref< Task::TaskGroup >::create(Arena::task(), "worldUpdate", Colors::Yellow::Yellow))
     , m_tasks(Arena::task())
     , m_updateLoop(m_updateTask, m_worldTask->startCallback())
     , m_forceContinue()
@@ -61,12 +61,12 @@ Application::Application(ref< Folder >                     dataFolder,
 {
     m_resourceManager->attach< World::World >(this);
     addTask(ref< Task::Task< Task::MethodCaller< Application, &Application::updateResources > > >::
-               create(Arena::task(), "resource", Colors::Green::Green,
-                      Task::MethodCaller< Application, &Application::updateResources >(this)));
+                create(Arena::task(), "resource", Colors::Green::Green,
+                       Task::MethodCaller< Application, &Application::updateResources >(this)));
     addTask(
-       ref< Task::Task< Task::MethodCaller< Application, &Application::frameUpdate > > >::create(
-          Arena::task(), "update", Colors::Green::Green,
-          Task::MethodCaller< Application, &Application::frameUpdate >(this)));
+        ref< Task::Task< Task::MethodCaller< Application, &Application::frameUpdate > > >::create(
+            Arena::task(), "update", Colors::Green::Green,
+            Task::MethodCaller< Application, &Application::frameUpdate >(this)));
     registerInterruptions();
 }
 
@@ -112,7 +112,7 @@ void Application::load(weak< const Resource::Description > world, Resource::Reso
     }
     m_worldCount++;
     resource.setRefHandle(ref< WorldResource >::create(
-       Arena::resource(), be_checked_cast< const World::World >(world), m_worldTask));
+        Arena::resource(), be_checked_cast< const World::World >(world), m_worldTask));
 }
 
 void Application::reload(weak< const Resource::Description > /*oldWorld*/,
@@ -143,7 +143,7 @@ void Application::updateResources()
     else if(resourceCount != 0 && m_resourceLoadingCount == 0)
     {
         m_forceContinue
-           = Task::ITask::CallbackConnection(m_worldTask, m_updateTask->startCallback());
+            = Task::ITask::CallbackConnection(m_worldTask, m_updateTask->startCallback());
     }
     m_resourceLoadingCount = resourceCount;
     if(!m_runLoop)
@@ -163,7 +163,7 @@ void Application::frameUpdate()
         float t    = (time - now) / float(frameCount);
         if(t > 10.0f)
         {
-            be_info("Average frame time: %d milliseconds" | (int)t);
+            be_info("Average frame time (%d frames): %d milliseconds" | frameCount | (int)t);
             frameCount = 20;
         }
         else
@@ -171,13 +171,14 @@ void Application::frameUpdate()
             t = 1000.0f * t;
             if(t > 10.0f)
             {
-                be_info("Average frame time: %d microseconds" | (int)t);
+                be_info("Average frame time (%d frames): %d microseconds" | frameCount | (int)t);
                 frameCount = 5000;
             }
             else
             {
-                be_info("Average frame time: %d nanoseconds" | (int)(t * 1000.0f));
-                frameCount = 100000;
+                be_info("Average frame time (%d frames): %d nanoseconds" | frameCount
+                        | (int)(t * 1000.0f));
+                frameCount = 200000;
             }
         }
         now = time;

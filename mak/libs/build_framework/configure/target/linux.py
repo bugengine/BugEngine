@@ -64,13 +64,6 @@ class Linux(Configure.ConfigurationContext.Platform):
         else:
             env.COMPILER_ABI = 'sun'
         env.append_unique('DEFINES', ['_GNU_SOURCE'])
-        env.RPATH = [
-            ':'.join(
-                ['$ORIGIN', '$ORIGIN/../lib/', '$ORIGIN/../lib/bugengine/'] +
-                ['$ORIGIN/../lib/%s' % target for target in compiler.targets] +
-                ['$ORIGIN/../lib/%s/bugengine' % target for target in compiler.targets]
-            )
-        ]
         env.append_unique('LDFLAGS', ['-ldl', '-lrt', '-lpthread', '-lm', '-lc'])
         env.append_unique('LINKFLAGS_dynamic', ['-Wl,--export-dynamic', '-Wl,-E', '-Wl,-z,origin'])
 

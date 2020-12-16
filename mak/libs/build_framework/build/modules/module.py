@@ -42,15 +42,16 @@ def get_source_nodes(build_context, path, name):
 
 @conf
 def preprocess(build_context, name, path, root_namespace, plugin_name, extra_features=[]):
-    if build_context.env.PROJECTS:
-        return None
     source_nodes = get_source_nodes(build_context, path, name)
 
     pp_env = build_context.common_env.derive()
     pp_env.PLUGIN = plugin_name.replace('.', '_')
 
     preprocess_sources = []
-    globs = ['src/**/*.yy', 'src/**/*.ll', 'src/**/*.plist', 'api/**/*.script.hh', 'include/**/*.script.hh']
+    if build_context.env.PROJECTS:
+        globs = ['nothing']
+    else:
+        globs = ['src/**/*.yy', 'src/**/*.ll', 'src/**/*.plist', 'api/**/*.script.hh', 'include/**/*.script.hh']
     for source_node in source_nodes:
         preprocess_sources += source_node.ant_glob(globs)
 

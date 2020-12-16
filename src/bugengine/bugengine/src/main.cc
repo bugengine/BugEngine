@@ -19,6 +19,7 @@
 #include <unistd.h>
 
 namespace {
+
 class FileLogListener : public BugEngine::ILogListener
 {
 private:
@@ -33,14 +34,16 @@ public:
     }
 
 protected:
-    virtual bool log(const BugEngine::istring& logname, BugEngine::LogLevel level, const char* filename, int line,
-                     const char* thread, const char* msg) const
+    virtual bool log(const BugEngine::istring& logname, BugEngine::LogLevel level,
+                     const char* filename, int line, const char* thread, const char* msg) const
     {
         if(BugEngine::MainSettings::Log::get().enableFileLog)
         {
-            const minitl::format< 1024u >& message = minitl::format< 1024u >("%s:%d (%s)\t(%s:%s) %s\n") | filename
-                                                     | line | logname.c_str() | getLogLevelName(level) | thread | msg;
-            m_logFile->beginWrite(message.c_str(), be_checked_numcast< u32 >(strlen(message.c_str())));
+            const minitl::format< 1024u >& message
+                = minitl::format< 1024u >("%s:%d (%s)\t(%s:%s) %s\n") | filename | line
+                  | logname.c_str() | getLogLevelName(level) | thread | msg;
+            m_logFile->beginWrite(message.c_str(),
+                                  be_checked_numcast< u32 >(strlen(message.c_str())));
         }
         return true;
     }
@@ -57,24 +60,26 @@ public:
     }
 
 protected:
-    virtual bool log(const BugEngine::istring& logname, BugEngine::LogLevel level, const char* filename, int line,
-                     const char* thread, const char* msg) const
+    virtual bool log(const BugEngine::istring& logname, BugEngine::LogLevel level,
+                     const char* filename, int line, const char* thread, const char* msg) const
     {
         if(BugEngine::MainSettings::Log::get().enableConsoleLog)
         {
             using namespace BugEngine;
 #ifdef BE_PLATFORM_WIN32
-            minitl::format< 1024u > message = minitl::format< 1024u >("%s(%d): %s\t(%s) %s%s") | filename | line
-                                              | logname.c_str() | getLogLevelName(level) | msg
+            minitl::format< 1024u > message = minitl::format< 1024u >("%s(%d): %s\t(%s) %s%s")
+                                              | filename | line | logname.c_str()
+                                              | getLogLevelName(level) | msg
                                               | (msg[strlen(msg) - 1] == '\n' ? "" : "\n");
             OutputDebugString(message);
 #    define isatty(x) 1
 #endif
-            static const char* term     = Environment::getEnvironment().getEnvironmentVariable("TERM");
-            static const char* colors[] = {isatty(1) && term ? "\x1b[0m" : "",   isatty(1) && term ? "\x1b[01;1m" : "",
-                                           isatty(1) && term ? "\x1b[36m" : "",  isatty(1) && term ? "\x1b[32m" : "",
-                                           isatty(1) && term ? "\x1b[33m" : "",  isatty(1) && term ? "\x1b[31m" : "",
-                                           isatty(1) && term ? "\x1b[1;31m" : ""};
+            static const char* term = Environment::getEnvironment().getEnvironmentVariable("TERM");
+            static const char* colors[]
+                = {isatty(1) && term ? "\x1b[0m" : "",   isatty(1) && term ? "\x1b[01;1m" : "",
+                   isatty(1) && term ? "\x1b[36m" : "",  isatty(1) && term ? "\x1b[32m" : "",
+                   isatty(1) && term ? "\x1b[33m" : "",  isatty(1) && term ? "\x1b[31m" : "",
+                   isatty(1) && term ? "\x1b[1;31m" : ""};
 #ifdef BE_PLATFORM_WIN32
 #    undef isatty
 #endif
@@ -91,8 +96,8 @@ protected:
             }
 
             const char* normal = colors[0];
-            fprintf(stdout, "[%s%s%s] %s%s(%s)%s %s(%d): %s", color, getLogLevelName(level), normal, colors[1],
-                    logname.c_str(), thread, normal, filename, line, msg);
+            fprintf(stdout, "[%s%s%s] %s%s(%s)%s %s(%d): %s", color, getLogLevelName(level), normal,
+                    colors[1], logname.c_str(), thread, normal, filename, line, msg);
             fflush(stdout);
             be_forceuse(filename);
             be_forceuse(line);
@@ -111,20 +116,23 @@ int beMain(int argc, const char* argv[])
     try
 #endif
     {
-        ref< DiskFolder > root
-           = ref< DiskFolder >::create(Arena::general(), Environment::getEnvironment().getHomeDirectory(),
-                                       DiskFolder::ScanRecursive, DiskFolder::CreateOne);
+        ref< DiskFolder > root = ref< DiskFolder >::create(
+            Arena::general(), Environment::getEnvironment().getHomeDirectory(),
+            DiskFolder::ScanRecursive, DiskFolder::CreateOne);
         ScopedLogListener console(scoped< ConsoleLogListener >::create(Arena::debug()));
-        ref< DiskFolder > home
-           = ref< DiskFolder >::create(Arena::general(), Environment::getEnvironment().getGameHomeDirectory(),
-                                       DiskFolder::ScanRecursive, DiskFolder::CreateOne);
+        ref< DiskFolder > home = ref< DiskFolder >::create(
+            Arena::general(), Environment::getEnvironment().getGameHomeDirectory(),
+            DiskFolder::ScanRecursive, DiskFolder::CreateOne);
         Settings::CommandLineSettingsProvider settings(argc, argv, home);
         Plugin::Plugin< minitl::pointer >     platformAssert(
-           inamespace("plugin.debug.assert"),
-           Plugin::Context(weak< Resource::ResourceManager >(), ref< Folder >(), weak< Scheduler >()));
-        ScopedLogListener   file(scoped< FileLogListener >::create(Arena::debug(), home->createFile("log")));
-        scoped< Scheduler > scheduler               = scoped< Scheduler >::create(Arena::task());
-        scoped< Resource::ResourceManager > manager = scoped< Resource::ResourceManager >::create(Arena::resource());
+            inamespace("plugin.debug.assert"),
+            Plugin::Context(weak< Resource::ResourceManager >(), ref< Folder >(),
+                            weak< Scheduler >()));
+        ScopedLogListener file(
+            scoped< FileLogListener >::create(Arena::debug(), home->createFile("log")));
+        scoped< Scheduler >                 scheduler = scoped< Scheduler >::create(Arena::task());
+        scoped< Resource::ResourceManager > manager
+            = scoped< Resource::ResourceManager >::create(Arena::resource());
         ;
         Plugin::Plugin< Application > app(inamespace(Environment::getEnvironment().getGame()),
                                           Plugin::Context(manager, home, scheduler));
@@ -135,7 +143,8 @@ int beMain(int argc, const char* argv[])
         }
         else
         {
-            be_error("Failed to load main module \"%s\", exiting" | Environment::getEnvironment().getGame());
+            be_error("Failed to load main module \"%s\", exiting"
+                     | Environment::getEnvironment().getGame());
             return EXIT_FAILURE;
         }
     }

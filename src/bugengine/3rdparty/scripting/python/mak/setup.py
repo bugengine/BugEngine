@@ -47,11 +47,14 @@ def python_config(conf, version, var=''):
     if not var: var = 'python%s' % (version_number)
     if 'posix' in conf.env.VALID_PLATFORMS:
         try:
-            cflags, libs, ldflags = conf.run_pkg_config('python-%s' % version)
-        except Errors.WafError as error:
-            cflags = ['-I/usr/include/python%s' % version]
-            ldflags = []
-            libs = ['python%s' % version]
+            cflags, libs, ldflags = conf.run_pkg_config('python-%s-embed' % version)
+        except Errors.WafError:
+            try:
+                cflags, libs, ldflags = conf.run_pkg_config('python-%s' % version)
+            except Errors.WafError as error:
+                cflags = ['-I/usr/include/python%s' % version]
+                ldflags = []
+                libs = ['python%s' % version]
         conf.check(
             compile_filename=[],
             features='check_python',
@@ -62,7 +65,7 @@ def python_config(conf, version, var=''):
             use=[var],
             code="""
                 #include <Python.h>
-                int main() { Py_Initialize(); return 0; }
+                int main() { Py_InitializeEx(0); return 0; }
             """
         )
         conf.env['check_%s' % var] = True

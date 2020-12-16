@@ -1,4 +1,5 @@
 from waflib import Context, Build, TaskGen, Options, Utils
+from waflib.TaskGen import feature
 import os
 import sys
 import json
@@ -162,23 +163,22 @@ class vscode(Build.BuildContext):
                     for tg in g:
                         if not isinstance(tg, TaskGen.task_gen):
                             continue
-                        if 'bugengine:kernel' not in tg.features:
-                            tg.post()
-                            for task in tg.tasks:
-                                if task.__class__.__name__ in ('cxx', 'c', 'objc', 'objcxx'):
-                                    commands.append(
-                                        {
-                                            'directory':
-                                                task.get_cwd().path_from(self.path),
-                                            'arguments':
-                                                ['-I"%s"' % i for i in env.INCLUDES + task.env.INCPATHS] +
-                                                ['-D%s' % d for d in task.env.DEFINES + env.DEFINES],
-                                            'file':
-                                                task.inputs[0].path_from(self.path),
-                                            'output':
-                                                task.outputs[0].path_from(task.get_cwd())
-                                        }
-                                    )
+                        tg.post()
+                        for task in tg.tasks:
+                            if task.__class__.__name__ in ('cxx', 'c', 'objc', 'objcxx'):
+                                commands.append(
+                                    {
+                                        'directory':
+                                            task.get_cwd().path_from(self.path),
+                                        'arguments':
+                                            env.CXX + ['-I"%s"' % i for i in env.INCLUDES + task.env.INCPATHS] +
+                                            ['-D%s' % d for d in task.env.DEFINES + env.DEFINES],
+                                        'file':
+                                            task.inputs[0].path_from(self.path),
+                                        'output':
+                                            task.outputs[0].path_from(task.get_cwd())
+                                    }
+                                )
                 with open(variant_node.make_node('compile_commands.json').abspath(), 'w') as compile_commands:
                     json.dump(commands, compile_commands, indent=2)
 
@@ -333,3 +333,40 @@ class vscode(Build.BuildContext):
             json.dump(tasks, document, indent=2)
         with open(launch_file.abspath(), 'w') as document:
             json.dump(launch_configs, document, indent=2)
+
+
+@feature('bugengine:preprocess')
+def create_vscode_kernels(task_gen):
+    if 'vscode' in task_gen.env.PROJECTS:
+        for kernel, kernel_source, kernel_ast in task_gen.kernels:
+            kernel_type = 'parse'
+            env = task_gen.env
+            kernel_env = env
+            tgen = task_gen.bld.get_tgen_by_name(env.ENV_PREFIX % task_gen.parent)
+            target_suffix = kernel_type
+            kernel_target = task_gen.parent + '.' + '.'.join(kernel) + '.' + target_suffix
+            kernel_task_gen = task_gen.bld(
+                env=kernel_env.derive(),
+                bld_env=env,
+                target=env.ENV_PREFIX % kernel_target,
+                target_name=env.ENV_PREFIX % task_gen.parent,
+                kernel=kernel,
+                features=[
+                    'cxx', task_gen.bld.env.STATIC and 'cxxobjects' or 'cxxshlib', 'bugengine:cxx', 'bugengine:kernel',
+                    'bugengine:cpu:kernel_create'
+                ],
+                pchstop=tgen.preprocess.pchstop if tgen.preprocess is not None else None,
+                defines=tgen.defines + [
+                    'BE_KERNEL_ID=%s_%s' % (task_gen.parent.replace('.', '_'), kernel_target.replace('.', '_')),
+                    'BE_KERNEL_NAME=%s' % (kernel_target),
+                    'BE_KERNEL_TARGET=%s' % kernel_type
+                ],
+                variant_name='',
+                includes=tgen.includes,
+                kernel_source=kernel_ast,
+                source=[kernel_source],
+                source_nodes=tgen.source_nodes,
+                use=tgen.use + [env.ENV_PREFIX % 'plugin.compute.cpu'],
+                uselib=tgen.uselib,
+            )
+            kernel_task_gen.env.PLUGIN = task_gen.env.plugin_name
