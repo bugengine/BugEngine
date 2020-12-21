@@ -26,6 +26,10 @@ class IrType(IrObject):
         # type: (bool) -> List[IrType]
         return [self]
 
+    def is_defined(self):
+        # type: () -> bool
+        return True
+
     @abstractmethod
     def create_generator_type(self, generator):
         # type: (IrccGenerator) -> IrccType
@@ -99,6 +103,11 @@ class IrTypeReference(IrType):
         # type: () -> str
         assert self._target is not None
         return self._target.signature()
+
+    def is_defined(self):
+        # type: () -> bool
+        assert self._target is not None
+        return self._target.is_defined()
 
 
 class IrTypeOpaque(IrType):
@@ -178,6 +187,10 @@ class IrTypePtr(IrType):
         #    raise Exception('invalid kernel parameter')
         return [self]
 
+    def is_defined(self):
+        # type: () -> bool
+        return self._address_space != 4 and self._pointee.is_defined()
+
 
 class IrTypeArray(IrType):
     def __init__(self, type, count):
@@ -214,6 +227,10 @@ class IrTypeArray(IrType):
         #    raise Exception('invalid kernel parameter')
         return [self._type] * self._count
 
+    def is_defined(self):
+        # type: () -> bool
+        return self._type.is_defined()
+
 
 class IrTypeVector(IrType):
     def __init__(self, type, count):
@@ -242,6 +259,10 @@ class IrTypeVector(IrType):
     def create_generator_type(self, generator):
         # type: (IrccGenerator) -> IrccType
         raise NotImplementedError
+
+    def is_defined(self):
+        # type: () -> bool
+        return self._type.is_defined()
 
 
 class IrTypeStruct(IrType):
@@ -282,6 +303,13 @@ class IrTypeStruct(IrType):
             result += field[0].flatten(False)
         return result
 
+    def is_defined(self):
+        # type: () -> bool
+        result = True
+        for t, _ in self._fields:
+            result &= t.is_defined()
+        return result
+
 
 class IrTypeMethod(IrType):
     def __init__(self, return_type, argument_types):
@@ -318,6 +346,15 @@ class IrTypeMethod(IrType):
     def create_generator_type(self, generator):
         # type: (IrccGenerator) -> IrccType
         raise NotImplementedError
+
+    def is_defined(self):
+        # type: () -> bool
+        result = True
+        if self._return_type is not None:
+            result &= self._return_type.is_defined()
+        for t in self._argument_types:
+            result &= t.is_defined()
+        return result
 
 
 if TYPE_CHECKING:

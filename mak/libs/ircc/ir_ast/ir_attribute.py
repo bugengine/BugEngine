@@ -13,6 +13,7 @@ class IrAttribute:
         return [self]
 
     def signature(self):
+        # type: () -> str
         return str(self)
 
     def __str__(self):

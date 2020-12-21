@@ -1,4 +1,5 @@
 from ..ir_code import IrInstruction
+from ..ir_type import IrTypeVector
 from be_typing import TYPE_CHECKING
 
 
@@ -54,3 +55,4 @@ if TYPE_CHECKING:
     from ..ir_metadata import IrMetadataLink
     from ..ir_reference import IrReference
     from ..ir_module import IrModule
+    from ..ir_type import IrType

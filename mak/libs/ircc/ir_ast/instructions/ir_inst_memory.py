@@ -1,4 +1,7 @@
 from ..ir_code import IrInstruction
+from ..ir_type import IrTypePtr, IrTypeStruct, IrTypePtr, IrTypeArray, IrTypeVector
+from ..ir_value import IrValueExpr
+from ..ir_expr import IrExpressionConstant
 from be_typing import TYPE_CHECKING
 
 
@@ -16,6 +19,11 @@ class IrInstAlloca(IrInstruction):
             self._count = self._count.resolve(module)
         return self
 
+    def _get_type(self, signature):
+        # type: (str) -> Optional[IrType]
+        assert self._type.is_defined()
+        return self._type  #TODO: alloca always __private?
+
 
 class IrInstLoad(IrInstruction):
     def __init__(self, result, source, type, metadata):
@@ -29,6 +37,12 @@ class IrInstLoad(IrInstruction):
         self._source = self._source.resolve(module)
         self._type = self._type.resolve(module)
         return self
+
+    def _get_type(self, signature):
+        # type: (str) -> Optional[IrType]
+        t = self._source.get_type(signature)
+        assert isinstance(t, IrTypePtr)
+        return t._pointee
 
 
 class IrInstStore(IrInstruction):

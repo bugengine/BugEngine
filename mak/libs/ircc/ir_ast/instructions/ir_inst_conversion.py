@@ -18,7 +18,7 @@ class IrInstCast(IrInstruction):
 
 
 if TYPE_CHECKING:
-    from typing import List, Tuple
+    from typing import List, Optional, Tuple
     from ..ir_type import IrType
     from ..ir_value import IrValue
     from ..ir_metadata import IrMetadataLink

@@ -18,6 +18,13 @@ class IrInstRet(IrInstruction):
         # type: () -> bool
         return True
 
+    def _get_type(self, signature):
+        # type: (str) -> Optional[IrType]
+        if self._return_value is not None:
+            return self._return_value.get_type(signature)
+        else:
+            return None
+
 
 class IrInstBranch(IrInstruction):
     def __init__(self, target, metadata):
@@ -32,6 +39,10 @@ class IrInstBranch(IrInstruction):
     def labels(self):
         # type: () -> List[str]
         return [self._target[1:]]
+
+    def _get_type(self, signature):
+        # type: (str) -> Optional[IrType]
+        return None
 
 
 class IrInstConditionalBranch(IrInstruction):
@@ -54,6 +65,10 @@ class IrInstConditionalBranch(IrInstruction):
     def labels(self):
         # type: () -> List[str]
         return [self._target_true[1:], self._target_false[1:]]
+
+    def _get_type(self, signature):
+        # type: (str) -> Optional[IrType]
+        return None
 
 
 class IrInstSwitch(IrInstruction):
@@ -95,3 +110,4 @@ if TYPE_CHECKING:
     from ..ir_metadata import IrMetadataLink
     from ..ir_reference import IrReference
     from ..ir_module import IrModule
+    from ..ir_type import IrType

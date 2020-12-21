@@ -29,5 +29,11 @@ __kernel void copyB(u32 index, u32 total,
                     Kernel::segments< BugEngine::Test::Compute::Copy::IntermediateComponent > in,
                     Kernel::segments< BugEngine::Test::Compute::Copy::TargetComponent >       out)
 {
+    static __global u32 v1 = 0;
+    (void)v1;
+    __local u32 v2;
+    static u32  v3;
+    (void)v3;
+    (void)v2;
     copy(index, total, in, out);
 }

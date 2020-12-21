@@ -1,15 +1,37 @@
 from .ir_object import IrObject
+from .ir_declaration import IrDeclaration
 from be_typing import TYPE_CHECKING
 
 
 class IrExpression(IrObject):
+    def __init__(self):
+        # type: () -> None
+        IrObject.__init__(self)
+        self._type_cache = {}  # type: Dict[str, Optional[IrType]]
+
     def resolve(self, module):
         # type: (IrModule) -> IrExpression
         return self
 
+    def get_type(self):
+        # type: () -> Optional[IrType]
+        raise NotImplementedError
+
     def __str__(self):
         # type: () -> str
         raise NotImplementedError
+
+
+class IrExpressionDeclaration(IrDeclaration):
+    def __init__(self, expression):
+        # type: (IrExpression) -> None
+        IrDeclaration.__init__(self)
+        self._expression = expression
+
+    def resolve(self, module):
+        # type: (IrModule) -> IrExpressionDeclaration
+        self._expression.resolve(module)
+        return self
 
 
 class IrExpressionConstant(IrExpression):
@@ -17,6 +39,16 @@ class IrExpressionConstant(IrExpression):
         # type: (Union[int, str, bool, None]) -> None
         IrExpression.__init__(self)
         self._value = value
+
+    def get_type(self):
+        # type: () -> IrType
+        if isinstance(self._value, int):
+            return IrTypeBuiltin('i64')
+        if isinstance(self._value, bool):
+            return IrTypeBuiltin('i1')
+        if isinstance(self._value, str):
+            raise NotImplementedError
+        raise NotImplementedError
 
     def __str__(self):
         # type: () -> str
@@ -70,11 +102,19 @@ class IrExpressionReference(IrExpression):
         # type: (IrReference) -> None
         IrExpression.__init__(self)
         self._reference = reference
+        self._expression = None    # type: Optional[IrExpression]
 
     def resolve(self, module):
         # type: (IrModule) -> IrExpression
-        # TODO
+        declaration = module.get(self._reference, IrExpressionDeclaration)
+        declaration = declaration.resolve(module)
+        self._expression = declaration._expression
         return self
+
+    def get_type(self):
+        # type: () -> Optional[IrType]
+        assert self._expression is not None
+        return self._expression.get_type()
 
     def __str__(self):
         # type: () -> str
@@ -89,14 +129,19 @@ class IrExpressionCast(IrExpression):
         self._value = value
         self._cast_type = cast_type
 
+    def get_type(self):
+        # type: () -> IrType
+        assert self._result_type.is_defined()
+        return self._result_type
+
     def __str__(self):
         # type: () -> str
         return '%s_cast<%s>(%s)' % (self._cast_type, self._result_type, self._value)
 
 
 if TYPE_CHECKING:
-    from typing import List, Union
-    from .ir_type import IrType
+    from typing import Dict, List, Optional, Union
+    from .ir_type import IrType, IrTypeBuiltin
     from .ir_module import IrModule
     from .ir_value import IrValue
     from .ir_reference import IrReference

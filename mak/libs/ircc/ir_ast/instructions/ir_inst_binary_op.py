@@ -37,7 +37,7 @@ class IrInstFloatBinaryOp(IrInstruction):
 
 
 if TYPE_CHECKING:
-    from typing import List, Tuple
+    from typing import List, Optional, Tuple
     from ..ir_type import IrType
     from ..ir_expr import IrExpression
     from ..ir_metadata import IrMetadataLink

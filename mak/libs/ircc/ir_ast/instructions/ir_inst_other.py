@@ -1,4 +1,5 @@
 from ..ir_code import IrInstruction
+from ..ir_type import IrTypeBuiltin, IrTypeVector
 from be_typing import TYPE_CHECKING
 
 
@@ -14,10 +15,6 @@ class IrInstCall(IrInstruction):
         self._method = self._method.resolve(module)
         self._arguments = [a.resolve(module) for a in self._arguments]
         return self
-
-    def _instantiate(self):
-        # type: () -> None
-        self._method = self._method.find_instance([a._type for a in self._arguments])
 
 
 class IrInstIntegerCompare(IrInstruction):

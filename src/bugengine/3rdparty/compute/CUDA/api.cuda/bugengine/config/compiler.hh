@@ -29,5 +29,11 @@ typedef u8                  byte;
 
 #define be_alignof(t)           __alignof__(t)
 
+#define __global     __device
+#define __local      
+#define __private    
+#define __constant   __device const
+#define __generic     
+
 /**************************************************************************************************/
 #endif

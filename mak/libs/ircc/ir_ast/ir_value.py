@@ -5,13 +5,14 @@ from be_typing import TYPE_CHECKING
 
 class IrValue(IrObject):
     def __init__(self, type):
-        # type: (IrType) -> None
+        # type: (Optional[IrType]) -> None
         IrObject.__init__(self)
         self._type = type
 
     def resolve(self, module):
         # type: (IrModule) -> IrValue
-        self._type = self._type.resolve(module)
+        if self._type is not None:
+            self._type = self._type.resolve(module)
         return self
 
     def __str__(self):
@@ -38,7 +39,7 @@ class IrValueExpr(IrValue):
 class IrValueVoid(IrValue):
     def __init__(self):
         # type: () -> None
-        IrValue.__init__(self, IrTypeBuiltin('void'))
+        IrValue.__init__(self, None)
 
     def __str__(self):
         # type: () -> str
@@ -62,6 +63,7 @@ class IrValueMetadata(IrValue):
 
 
 if TYPE_CHECKING:
+    from typing import Optional
     from .ir_type import IrType
     from .ir_expr import IrExpression
     from .ir_module import IrModule

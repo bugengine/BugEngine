@@ -43,5 +43,11 @@
 #endif
 #define __kernel inline
 
+#define __constant const
+#define __global
+#define __local
+#define __private
+#define __generic
+
 /**************************************************************************************************/
 #endif

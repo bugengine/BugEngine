@@ -43,7 +43,7 @@ def p_ir_instruction_assignment(p):
     """
         ir-instruction-assignment : ID EQUAL 
     """
-    p[0] = IrReference(p[0])
+    p[0] = IrReference(p[1])
 
 
 def p_ir_instruction_assignment_opt(p):
