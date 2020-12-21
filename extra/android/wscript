@@ -13,6 +13,8 @@ def options(option_context):
     sdk_path = ''
     ndk_paths = []
     path_list = os.environ.get('PATH', '').split(os.pathsep)
+    if os.path.isdir('/usr/lib/android-sdk'):
+        path_list.append('/usr/lib/android-sdk/tools/bin')
     for vstudio_root_path in (r'C:\Microsoft\AndroidSDK', r'C:\ProgramData\Microsoft\AndroidSDK'):
         try:
             for p in os.listdir(vstudio_root_path):
@@ -28,22 +30,25 @@ def options(option_context):
             pass
     for path in path_list:
         for ext in ['.exe', '.cmd', '.sh', '.bat', '']:
-            p = os.path.join(path, 'adb'+ext)
+            p = os.path.realpath(os.path.join(path, 'adb'+ext))
             if os.path.isfile(p):
                 sdk_path = os.path.dirname(os.path.dirname(p))
-            p = os.path.join(path, 'sdkmanager'+ext)
+                ndk_path = os.path.join(sdk_path, 'ndk-bundle')
+                if os.path.isdir(ndk_path) and ndk_path not in ndk_paths:
+                    ndk_paths.append(ndk_path)
+            p = os.path.realpath(os.path.join(path, 'sdkmanager'+ext))
             if os.path.isfile(p):
                 sdk_path = os.path.dirname(os.path.dirname(os.path.dirname(p)))
                 ndk_path = os.path.join(sdk_path, 'ndk-bundle')
                 if os.path.isdir(ndk_path) and ndk_path not in ndk_paths:
                     ndk_paths.append(ndk_path)
-            p = os.path.join(path, 'android'+ext)
+            p = os.path.realpath(os.path.join(path, 'android'+ext))
             if os.path.isfile(p):
                 sdk_path = os.path.dirname(os.path.dirname(p))
                 ndk_path = os.path.join(sdk_path, 'ndk-bundle')
                 if os.path.isdir(ndk_path) and ndk_path not in ndk_paths:
                     ndk_paths.append(ndk_path)
-            p = os.path.join(path, 'ndk-build'+ext)
+            p = os.path.realpath(os.path.join(path, 'ndk-build'+ext))
             if os.path.isfile(p):
                 ndk_paths.append(path)
     jdk_path = ''
