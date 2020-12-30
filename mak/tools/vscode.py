@@ -43,7 +43,6 @@ class vscode(Build.BuildContext):
                '      "bld/.waf/*.*": true,\n' \
                '      "**/.clangd": true,\n' \
                '      "**/.mypy_cache": true,\n' \
-               '      "%(bugenginepath)s/mak/host": true\n' \
                '    },\n' \
                '    "files.watcherExclude": {\n' \
                '      "**/.git/*": true,\n' \
@@ -102,6 +101,12 @@ class vscode(Build.BuildContext):
                 '  ],\n' % appname
             )
             workspace.write(
+                '  "extensions": {\n'
+                '    "recommendations": [\n'
+                '      "ms-vscode.cpptools",\n'
+                '      "ms-python.python"\n'
+                '    ]\n'
+                '  },\n'
                 '  "settings": %s\n'
                 '}\n' % (self.SETTINGS % {
                     'bugenginepath': self.bugenginenode.path_from(self.path)
