@@ -187,10 +187,9 @@ class IrMethodObject(IrMethod):
         # type: (IrModule) -> None
         module.push_scope(self._scope)
         try:
+            self._return_type = self._return_type.resolve(module)
             if self._definition is not None:
                 self._definition = self._definition.resolve(module, self._parameters, self._return_type)
-            elif self._return_type is not None:
-                self._return_type = self._return_type.resolve(module)
         finally:
             module.pop_scope()
 

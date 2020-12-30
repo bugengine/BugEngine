@@ -64,6 +64,17 @@ class IrInstGetElementPtr(IrInstruction):
         self._type = self._type.resolve(module)
         self._access = [access.resolve(module) for access in self._access]
         result_type, address_space = self._access[0].get_type()
+        for value in self._access[1:]:
+            result_type = result_type._get_target_type()
+            if isinstance(result_type, IrTypeStruct):
+                assert isinstance(value, IrValueExpr)
+                assert isinstance(value._expression, IrExpressionConstant)
+                assert isinstance(value._expression._value, int)
+                result_type = result_type.extract(value._expression._value)
+            elif isinstance(result_type, IrTypePtr):
+                result_type = result_type._pointee
+            elif isinstance(result_type, IrTypeArray):
+                result_type = result_type._type
         self._value_type = IrTypePtr(result_type, int(address_space))
         return self
 
