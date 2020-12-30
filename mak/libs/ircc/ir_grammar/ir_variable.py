@@ -8,7 +8,7 @@
                    [, align <Alignment>] (, !name !N)*
 """
 
-from ..ir_ast import IrReference, IrVariableDeclaration, IrVariable
+from ..ir_ast import IrReference, IrVariable, IrExpressionDeclaration
 from be_typing import TYPE_CHECKING
 
 
@@ -18,7 +18,7 @@ def p_ir_variable(p):
         ir-variable : ID EQUAL ir-linkage ir-preemption-specifier ir-visibility ir-dll-storage-opt ir-method-addr-opt ir-addrspace-opt ir-variable-global-constant-opt ir-type ir-expr ir-variable-footer
                     | ID EQUAL EXTERNAL   ir-preemption-specifier ir-visibility ir-dll-storage-opt ir-method-addr-opt ir-addrspace-opt ir-variable-global-constant-opt ir-type ir-variable-footer
     """
-    p[0] = (IrReference(p[1]), IrVariableDeclaration(IrVariable(p[10], p[11])))
+    p[0] = (IrReference(p[1]), IrExpressionDeclaration(IrVariable(p[10], p[11], p[8])))
 
 
 def p_ir_variable_footer(p):
@@ -44,12 +44,14 @@ def p_ir_variable_align(p):
                           | ir-variable-metadata
     """
 
+
 def p_ir_variable_metadata(p):
     # type: (YaccProduction) -> None
     """
         ir-variable-metadata : COMMA METADATA_NAME METADATA_REF ir-variable-metadata
                              | empty
     """
+
 
 def p_ir_variable_global_constant_opt(p):
     # type: (YaccProduction) -> None

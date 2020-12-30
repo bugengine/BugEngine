@@ -1,11 +1,11 @@
 from .ir_object import IrObject
-from .ir_type import IrTypeMetadata, IrTypeBuiltin
+from .ir_type import IrTypeMetadata, IrTypeBuiltin, IrTypeVoid, IrAddressSpace
 from be_typing import TYPE_CHECKING
 
 
 class IrValue(IrObject):
     def __init__(self, type):
-        # type: (Optional[IrType]) -> None
+        # type: (IrType) -> None
         IrObject.__init__(self)
         self._type = type
 
@@ -14,6 +14,10 @@ class IrValue(IrObject):
         if self._type is not None:
             self._type = self._type.resolve(module)
         return self
+
+    def get_type(self):
+        # type: () -> Tuple[IrType, IrAddressSpace]
+        raise NotImplementedError
 
     def __str__(self):
         # type: () -> str
@@ -31,6 +35,10 @@ class IrValueExpr(IrValue):
         self._expression = self._expression.resolve(module)
         return IrValue.resolve(self, module)
 
+    def get_type(self):
+        # type: () -> Tuple[IrType, IrAddressSpace]
+        return self._expression.get_type()
+
     def __str__(self):
         # type: () -> str
         return '%s %s' % (self._type, self._expression)
@@ -39,7 +47,11 @@ class IrValueExpr(IrValue):
 class IrValueVoid(IrValue):
     def __init__(self):
         # type: () -> None
-        IrValue.__init__(self, None)
+        IrValue.__init__(self, IrTypeVoid())
+
+    def get_type(self):
+        # type: () -> Tuple[IrType, IrAddressSpace]
+        return IrTypeVoid(), IrAddressSpace(0)
 
     def __str__(self):
         # type: () -> str
@@ -63,7 +75,7 @@ class IrValueMetadata(IrValue):
 
 
 if TYPE_CHECKING:
-    from typing import Optional
+    from typing import Tuple
     from .ir_type import IrType
     from .ir_expr import IrExpression
     from .ir_module import IrModule

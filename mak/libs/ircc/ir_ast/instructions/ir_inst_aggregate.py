@@ -12,6 +12,10 @@ class IrInstExtractValue(IrInstruction):
     def resolve(self, module):
         # type: (IrModule) -> IrInstruction
         self._source = self._source.resolve(module)
+        value_type = self._source.get_type()[0]
+        for i in self._indices:
+            value_type = value_type.extract(i)
+        self._value_type = value_type
         return self
 
 
@@ -27,6 +31,7 @@ class IrInstInsertValue(IrInstruction):
         # type: (IrModule) -> IrInstruction
         self._source = self._source.resolve(module)
         self._value = self._value.resolve(module)
+        self._value_type = self._source.get_type()[0]
         return self
 
 
@@ -36,3 +41,4 @@ if TYPE_CHECKING:
     from ..ir_metadata import IrMetadataLink
     from ..ir_reference import IrReference
     from ..ir_module import IrModule
+    from ..ir_type import IrType, IrAddressSpace, IrAddressSpaceInference

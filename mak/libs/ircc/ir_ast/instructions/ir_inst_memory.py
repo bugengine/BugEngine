@@ -17,12 +17,8 @@ class IrInstAlloca(IrInstruction):
         self._type = self._type.resolve(module)
         if self._count is not None:
             self._count = self._count.resolve(module)
+        self._value_type = IrTypePtr(self._type.uniquify(), 0)
         return self
-
-    def _get_type(self, signature):
-        # type: (str) -> Optional[IrType]
-        assert self._type.is_defined()
-        return self._type  #TODO: alloca always __private?
 
 
 class IrInstLoad(IrInstruction):
@@ -36,13 +32,10 @@ class IrInstLoad(IrInstruction):
         # type: (IrModule) -> IrInstruction
         self._source = self._source.resolve(module)
         self._type = self._type.resolve(module)
+        value_type = self._source.get_type()[0]
+        assert isinstance(value_type, IrTypePtr)
+        self._value_type = value_type._pointee
         return self
-
-    def _get_type(self, signature):
-        # type: (str) -> Optional[IrType]
-        t = self._source.get_type(signature)
-        assert isinstance(t, IrTypePtr)
-        return t._pointee
 
 
 class IrInstStore(IrInstruction):
@@ -70,13 +63,15 @@ class IrInstGetElementPtr(IrInstruction):
         # type: (IrModule) -> IrInstruction
         self._type = self._type.resolve(module)
         self._access = [access.resolve(module) for access in self._access]
+        result_type, address_space = self._access[0].get_type()
+        self._value_type = IrTypePtr(result_type, int(address_space))
         return self
 
 
 if TYPE_CHECKING:
     from typing import List, Optional, Tuple
-    from ..ir_type import IrType
     from ..ir_value import IrValue
     from ..ir_metadata import IrMetadataLink
     from ..ir_reference import IrReference
     from ..ir_module import IrModule
+    from ..ir_type import IrType, IrAddressSpace, IrAddressSpaceInference

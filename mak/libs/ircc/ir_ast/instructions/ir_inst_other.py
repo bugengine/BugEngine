@@ -14,6 +14,7 @@ class IrInstCall(IrInstruction):
         # type: (IrModule) -> IrInstCall
         self._method = self._method.resolve(module)
         self._arguments = [a.resolve(module) for a in self._arguments]
+        self._value_type = self._method._return_type
         return self
 
 
@@ -31,6 +32,7 @@ class IrInstIntegerCompare(IrInstruction):
         self._type = self._type.resolve(module)
         self._left_operand = self._left_operand.resolve(module)
         self._right_operand = self._right_operand.resolve(module)
+        self._value_type = IrTypeBuiltin('i1')
         return self
 
 
@@ -48,6 +50,7 @@ class IrInstFloatCompare(IrInstruction):
         self._type = self._type.resolve(module)
         self._left_operand = self._left_operand.resolve(module)
         self._right_operand = self._right_operand.resolve(module)
+        self._value_type = IrTypeBuiltin('i1')
         return self
 
 
@@ -62,6 +65,7 @@ class IrInstPhi(IrInstruction):
         # type: (IrModule) -> IrInstruction
         self._type = self._type.resolve(module)
         self._origins = [(expr.resolve(module), label) for expr, label in self._origins]
+        self._value_type = self._origins[0][0].get_type()[0]
         return self
 
 
@@ -78,16 +82,17 @@ class IrInstSelect(IrInstruction):
         self._condition = self._condition.resolve(module)
         self._value_true = self._value_true.resolve(module)
         self._value_false = self._value_false.resolve(module)
+        self._value_type = self._value_true.get_type()[0]
         return self
 
 
 if TYPE_CHECKING:
     from typing import List, Optional, Tuple
     from ..ir_module import IrModule
-    from ..ir_type import IrType
     from ..ir_expr import IrExpression
     from ..ir_value import IrValue
     from ..ir_reference import IrReference
     from ..ir_method import IrMethod
     from ..ir_metadata import IrMetadataLink
     from ..ir_module import IrModule
+    from ..ir_type import IrType, IrAddressSpace, IrAddressSpaceInference

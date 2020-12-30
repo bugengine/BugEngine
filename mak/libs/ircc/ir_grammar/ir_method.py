@@ -7,7 +7,7 @@ define [linkage] [PreemptionSpecifier] [visibility] [DLLStorageClass]
        [prologue Constant] [personality Constant] (!name !N)* { ... }
 """
 
-from ..ir_ast import IrReference, IrMethodObject, IrMethodParameter, IrMethodMetadataParameter, IrMethodDeclaration, IrTypeMetadata
+from ..ir_ast import IrTypeVoid, IrReference, IrMethodObject, IrMethodParameter, IrMethodMetadataParameter, IrMethodDeclaration, IrTypeMetadata
 from be_typing import TYPE_CHECKING
 
 
@@ -75,7 +75,7 @@ def p_ir_return_type_void(p):
     """
         ir-return-type : VOID
     """
-    p[0] = None
+    p[0] = IrTypeVoid()
 
 
 def p_ir_linkage(p):

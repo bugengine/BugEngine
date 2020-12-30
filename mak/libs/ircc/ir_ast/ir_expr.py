@@ -1,4 +1,5 @@
 from .ir_object import IrObject
+from .ir_type import IrAddressSpace
 from .ir_declaration import IrDeclaration
 from be_typing import TYPE_CHECKING
 
@@ -7,14 +8,13 @@ class IrExpression(IrObject):
     def __init__(self):
         # type: () -> None
         IrObject.__init__(self)
-        self._type_cache = {}  # type: Dict[str, Optional[IrType]]
 
     def resolve(self, module):
         # type: (IrModule) -> IrExpression
         return self
 
     def get_type(self):
-        # type: () -> Optional[IrType]
+        # type: () -> Tuple[IrType, IrAddressSpace]
         raise NotImplementedError
 
     def __str__(self):
@@ -41,11 +41,11 @@ class IrExpressionConstant(IrExpression):
         self._value = value
 
     def get_type(self):
-        # type: () -> IrType
+        # type: () -> Tuple[IrType, IrAddressSpace]
         if isinstance(self._value, int):
-            return IrTypeBuiltin('i64')
+            return (IrTypeBuiltin('i64'), IrAddressSpace(0))
         if isinstance(self._value, bool):
-            return IrTypeBuiltin('i1')
+            return (IrTypeBuiltin('i1'), IrAddressSpace(0))
         if isinstance(self._value, str):
             raise NotImplementedError
         raise NotImplementedError
@@ -107,12 +107,12 @@ class IrExpressionReference(IrExpression):
     def resolve(self, module):
         # type: (IrModule) -> IrExpression
         declaration = module.get(self._reference, IrExpressionDeclaration)
-        declaration = declaration.resolve(module)
+        #declaration = declaration.resolve(module)
         self._expression = declaration._expression
         return self
 
     def get_type(self):
-        # type: () -> Optional[IrType]
+        # type: () -> Tuple[IrType, IrAddressSpace]
         assert self._expression is not None
         return self._expression.get_type()
 
@@ -130,9 +130,9 @@ class IrExpressionCast(IrExpression):
         self._cast_type = cast_type
 
     def get_type(self):
-        # type: () -> IrType
+        # type: () -> Tuple[IrType, IrAddressSpace]
         assert self._result_type.is_defined()
-        return self._result_type
+        return self._result_type, self._value.get_type()[1]
 
     def __str__(self):
         # type: () -> str
@@ -140,7 +140,7 @@ class IrExpressionCast(IrExpression):
 
 
 if TYPE_CHECKING:
-    from typing import Dict, List, Optional, Union
+    from typing import Dict, List, Optional, Tuple, Union
     from .ir_type import IrType, IrTypeBuiltin
     from .ir_module import IrModule
     from .ir_value import IrValue

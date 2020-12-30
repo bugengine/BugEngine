@@ -14,6 +14,9 @@ class IrInstExtractElement(IrInstruction):
         # type: (IrModule) -> IrInstruction
         self._value = self._value.resolve(module)
         self._index = self._index.resolve(module)
+        vector_type = self._value.get_type()[0]
+        assert isinstance(vector_type, IrTypeVector)
+        self._value_type = vector_type._type
         return self
 
 
@@ -30,6 +33,7 @@ class IrInstInsertElement(IrInstruction):
         self._value = self._value.resolve(module)
         self._element = self._element.resolve(module)
         self._index = self._index.resolve(module)
+        self._value_type = self._value.get_type()[0]
         return self
 
 
@@ -46,6 +50,7 @@ class IrInstShuffleVector(IrInstruction):
         self._vector_1 = self._vector_1.resolve(module)
         self._vector_2 = self._vector_2.resolve(module)
         self._mask = self._mask.resolve(module)
+        self._value_type = self._vector_1.get_type()[0]
         return self
 
 
@@ -55,4 +60,4 @@ if TYPE_CHECKING:
     from ..ir_metadata import IrMetadataLink
     from ..ir_reference import IrReference
     from ..ir_module import IrModule
-    from ..ir_type import IrType
+    from ..ir_type import IrType, IrAddressSpace, IrAddressSpaceInference

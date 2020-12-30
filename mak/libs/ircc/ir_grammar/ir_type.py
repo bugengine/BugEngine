@@ -1,4 +1,4 @@
-from ..ir_ast import IrTypeBuiltin, IrTypePtr, IrTypeArray, IrTypeVector, IrTypeStruct, IrTypeReference, IrTypeOpaque, IrTypeMethod, IrReference, IrTypeDeclaration
+from ..ir_ast import IrTypeBuiltin, IrTypePtr, IrTypeVoid, IrTypeArray, IrTypeVector, IrTypeStruct, IrTypeReference, IrTypeOpaque, IrTypeMethod, IrReference, IrTypeDeclaration
 from ply.lex import LexToken
 from be_typing import TYPE_CHECKING
 
@@ -106,7 +106,7 @@ def p_ir_type_void_ptr(p):
     """
         ir-type-ptr : VOID ir-addrspace-opt STAR
     """
-    p[0] = IrTypePtr(IrTypeBuiltin(p[1]), p[2])
+    p[0] = IrTypePtr(IrTypeVoid(), p[2])
 
 
 def p_ir_addrspace_opt(p):

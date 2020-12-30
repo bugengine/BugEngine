@@ -15,11 +15,6 @@ class IrMethodParameter(IrExpression):
         self._type = type
         self._id = name or '_'
         self._attributes = attributes
-        self._instanced_types = {}     # type: Dict[str, IrType]
-
-    def create_instance(self, signature, type):
-        # type: (str, IrType) -> None
-        self._instanced_types[signature] = type
 
     def resolve(self, module):
         # type: (IrModule) -> IrMethodParameter
@@ -138,7 +133,7 @@ class IrMethodLink(IrMethod):
 
 class IrMethodObject(IrMethod):
     def __init__(self, return_type, parameters, calling_convention):
-        # type: (Optional[IrType], List[IrMethodParameter], str) -> None
+        # type: (IrType, List[IrMethodParameter], str) -> None
         IrMethod.__init__(self)
         self._return_type = return_type
         self._parameters = parameters
@@ -193,7 +188,7 @@ class IrMethodObject(IrMethod):
         module.push_scope(self._scope)
         try:
             if self._definition is not None:
-                self._definition = self._definition.resolve(module, self._parameters)
+                self._definition = self._definition.resolve(module, self._parameters, self._return_type)
             elif self._return_type is not None:
                 self._return_type = self._return_type.resolve(module)
         finally:
@@ -213,8 +208,6 @@ class IrMethodObject(IrMethod):
         # type: (List[IrType], str) -> IrMethodObject
         if self._definition:
             assert len(self._declarations) == len(arguments)
-            for p, a in zip(self._parameters, arguments):
-                p.create_instance(signature, a)
             return self
         else:
             # TODO
@@ -233,11 +226,11 @@ class IrMethodBody:
             instruction.declare(self._scope)
         self._code = IrCodeBlock(instruction_list)
 
-    def resolve(self, module, parameters):
-        # type: (IrModule, List[IrMethodParameter]) -> IrMethodBody
+    def resolve(self, module, parameters, return_type):
+        # type: (IrModule, List[IrMethodParameter], IrType) -> IrMethodBody
         module.push_scope(self._scope)
         try:
-            self._code = self._code.resolve(module)
+            self._code = self._code.resolve(module, return_type)
         finally:
             module.pop_scope()
         return self

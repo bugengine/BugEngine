@@ -12,18 +12,21 @@ class IrInstRet(IrInstruction):
         # type: (IrModule) -> IrInstruction
         if self._return_value is not None:
             self._return_value = self._return_value.resolve(module)
+            self._value_type = self._return_value.get_type()[0]
         return self
 
     def terminal(self):
         # type: () -> bool
         return True
 
-    def _get_type(self, signature):
-        # type: (str) -> Optional[IrType]
-        if self._return_value is not None:
-            return self._return_value.get_type(signature)
-        else:
-            return None
+    def resolve_type(self, equivalence, return_type):
+        # type: (IrAddressSpaceInference, Optional[IrType]) -> None
+        if self._return_value:
+            return_value_type = self._return_value.get_type()
+            assert return_value_type is not None
+            assert return_type is not None
+            return_type.add_equivalence(equivalence, return_value_type[0], return_value_type[1])
+        return
 
 
 class IrInstBranch(IrInstruction):
@@ -39,10 +42,6 @@ class IrInstBranch(IrInstruction):
     def labels(self):
         # type: () -> List[str]
         return [self._target[1:]]
-
-    def _get_type(self, signature):
-        # type: (str) -> Optional[IrType]
-        return None
 
 
 class IrInstConditionalBranch(IrInstruction):
@@ -65,10 +64,6 @@ class IrInstConditionalBranch(IrInstruction):
     def labels(self):
         # type: () -> List[str]
         return [self._target_true[1:], self._target_false[1:]]
-
-    def _get_type(self, signature):
-        # type: (str) -> Optional[IrType]
-        return None
 
 
 class IrInstSwitch(IrInstruction):
@@ -110,4 +105,4 @@ if TYPE_CHECKING:
     from ..ir_metadata import IrMetadataLink
     from ..ir_reference import IrReference
     from ..ir_module import IrModule
-    from ..ir_type import IrType
+    from ..ir_type import IrType, IrAddressSpace, IrAddressSpaceInference

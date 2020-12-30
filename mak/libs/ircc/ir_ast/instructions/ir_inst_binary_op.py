@@ -16,6 +16,7 @@ class IrInstBinaryOp(IrInstruction):
         self._type = self._type.resolve(module)
         self._left_operand = self._left_operand.resolve(module)
         self._right_operand = self._right_operand.resolve(module)
+        self._value_type = self._left_operand.get_type()[0]
         return self
 
 
@@ -33,13 +34,14 @@ class IrInstFloatBinaryOp(IrInstruction):
         self._type = self._type.resolve(module)
         self._left_operand = self._left_operand.resolve(module)
         self._right_operand = self._right_operand.resolve(module)
+        self._value_type = self._left_operand.get_type()[0]
         return self
 
 
 if TYPE_CHECKING:
     from typing import List, Optional, Tuple
-    from ..ir_type import IrType
     from ..ir_expr import IrExpression
     from ..ir_metadata import IrMetadataLink
     from ..ir_reference import IrReference
     from ..ir_module import IrModule
+    from ..ir_type import IrType, IrAddressSpace, IrAddressSpaceInference

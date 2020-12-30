@@ -14,13 +14,14 @@ class IrInstCast(IrInstruction):
         # type: (IrModule) -> IrInstruction
         self._value = self._value.resolve(module)
         self._result_type = self._result_type.resolve(module)
+        self._value_type = self._result_type.uniquify()
         return self
 
 
 if TYPE_CHECKING:
     from typing import List, Optional, Tuple
-    from ..ir_type import IrType
     from ..ir_value import IrValue
     from ..ir_metadata import IrMetadataLink
     from ..ir_reference import IrReference
     from ..ir_module import IrModule
+    from ..ir_type import IrType, IrAddressSpace, IrAddressSpaceInference

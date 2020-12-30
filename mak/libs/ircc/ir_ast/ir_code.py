@@ -1,12 +1,7 @@
 from be_typing import TYPE_CHECKING
+from .ir_type import IrAddressSpace, IrAddressSpaceInference, IrTypeVoid
 from .ir_expr import IrExpression, IrExpressionDeclaration
 from abc import abstractmethod
-
-
-class IrTypeInference:
-    def __init__(self):
-        # type: () -> None
-        self.address_spaces = {}   # type: Dict[int, Set[IrType]]
 
 
 class IrInstruction(IrExpression):
@@ -19,8 +14,12 @@ class IrInstruction(IrExpression):
         self._value_type = None    # type: Optional[IrType]
 
     def get_type(self):
-        # type: () -> Optional[IrType]
-        return self._value_type
+        # type: () -> Tuple[IrType, IrAddressSpace]
+        if self._result is not None:
+            assert self._value_type is not None
+            return self._value_type, IrAddressSpace(0)
+        else:
+            return IrTypeVoid(), IrAddressSpace(0)
 
     def terminal(self):
         # type: () -> bool
@@ -39,8 +38,8 @@ class IrInstruction(IrExpression):
         # type: (IrModule) -> IrInstruction
         return self
 
-    def resolve_type(self, equivalence):
-        # type: (IrTypeInference) -> None
+    def resolve_type(self, equivalence, return_type):
+        # type: (IrAddressSpaceInference, IrType) -> None
         return
 
 
@@ -51,11 +50,11 @@ class IrCodeSegment:
         self._instructions = instructions
         self._nexts = []   # type: List[IrCodeSegment]
 
-    def resolve(self, module, equivalence):
-        # type: (IrModule, IrTypeInference) -> IrCodeSegment
+    def resolve(self, module, equivalence, return_type):
+        # type: (IrModule, IrAddressSpaceInference, IrType) -> IrCodeSegment
         self._instructions = [i.resolve(module) for i in self._instructions]
         for i in self._instructions:
-            i.resolve_type(equivalence)
+            i.resolve_type(equivalence, return_type)
         return self
 
 
@@ -63,7 +62,7 @@ class IrCodeBlock:
     def __init__(self, instructions):
         # type: (List[IrInstruction]) -> None
         self._segments = []
-        self._equivalence = IrTypeInference()
+        self._equivalence = IrAddressSpaceInference()
         label = 'start'
         stream = []    # type: List[IrInstruction]
         for instruction in instructions:
@@ -90,8 +89,8 @@ class IrCodeBlock:
         else:
             raise NotImplementedError
 
-    def resolve(self, module):
-        # type: (IrModule) -> IrCodeBlock
+    def resolve(self, module, return_type):
+        # type: (IrModule, IrType) -> IrCodeBlock
         """
             Resolving a method also resolves generic address spaces.
             The resolution step will bucket together types that are constrained into the same generic address space.
@@ -100,7 +99,7 @@ class IrCodeBlock:
             allow to infer the correct address space of all types. Any type whose generic address space can't be
             deduced at compile time will trigger a compile error.
         """
-        self._segments = [s.resolve(module, self._equivalence) for s in self._segments]
+        self._segments = [s.resolve(module, self._equivalence, return_type) for s in self._segments]
         return self
 
 
