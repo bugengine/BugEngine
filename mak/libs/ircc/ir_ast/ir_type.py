@@ -280,7 +280,6 @@ class IrTypePtr(IrType):
 
     def __str__(self):
         # type: () -> str
-        addrspaces = ['private', 'constant', 'local', 'global', 'generic']
         return '%s %s*' % (self._pointee, self._address_space)
 
     def signature(self):
