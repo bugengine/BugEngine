@@ -1,14 +1,23 @@
 from ircc.ir_position import IrPosition
+from cpprtti.cpp_position import CppPosition
 from typing import Any, List, Optional, Tuple, Union, TYPE_CHECKING
+from typing_extensions import Protocol
 from .lex import LexToken
+
+
+class Lexer(Protocol):
+    def token(self) -> Optional[LexToken]:
+        ...
 
 
 class YaccSymbol:
     position: IrPosition
+    cpp_position: CppPosition
 
 
 class YaccProduction:
     lexer: 'ir_lexer.IrLexer'
+    cpp_lexer: 'cpp_lexer.CppLexer'
     parser: 'Parser'
     slice: List[Union[YaccSymbol, LexToken]]
     stack: List[Union[YaccSymbol, LexToken]]
@@ -40,6 +49,7 @@ class YaccProduction:
 
 class Parser:
     ir_parser: 'ir_parser.IrParser'
+    cpp_parser: 'cpp_parser.CppParser'
 
     def errok(self) -> None:
         ...
@@ -47,7 +57,7 @@ class Parser:
     def parse(
         self,
         input: Optional[str] = ...,
-        lexer: Optional[ir_lexer.IrLexer] = ...,
+        lexer: Optional[Lexer] = ...,
         debug: bool = ...,
         tracking: bool = ...,
         tokenfunc: Optional[Any] = ...
@@ -75,3 +85,4 @@ def yacc(
 
 if TYPE_CHECKING:
     from ircc import ir_lexer, ir_parser
+    from cpprtti import cpp_lexer, cpp_parser
