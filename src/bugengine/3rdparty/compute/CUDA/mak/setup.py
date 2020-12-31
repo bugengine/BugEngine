@@ -9,9 +9,12 @@ ARCHS = [
     (3, 7),
     (5, 0),
     (5, 2),
+    (5, 3),
     (6, 0),
     (6, 1),
+    (6, 2),
     (7, 0),
+    (7, 2),
     (7, 5),
     (8, 0),
 ]
@@ -99,6 +102,7 @@ def setup(configuration_context):
             flags = []
             if version >= (11, ):
                 flags.append('--allow-unsupported-compiler')
+                flags.append('-Wno-deprecated-gpu-targets')
             version = '.'.join(str(x) for x in version)
             cuda_toolchain = toolchain + '-cuda{}'.format(version)
             configuration_context.setenv(cuda_toolchain, env=configuration_context.env.detach())
