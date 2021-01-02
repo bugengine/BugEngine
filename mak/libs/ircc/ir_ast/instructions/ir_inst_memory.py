@@ -6,18 +6,20 @@ from be_typing import TYPE_CHECKING
 
 
 class IrInstAlloca(IrInstruction):
-    def __init__(self, result, type, count, alignment, metadata):
-        # type: (IrReference, IrType, Optional[IrValue], Optional[int], List[Tuple[IrMetadataLink, IrMetadataLink]]) -> None
+    def __init__(self, result, type, count, alignment, address_space, metadata):
+        # type: (IrReference, IrType, Optional[IrValue], Optional[int], int, List[Tuple[IrMetadataLink, IrMetadataLink]]) -> None
         IrInstruction.__init__(self, 'alloca', result, metadata)
         self._type = type
         self._count = count
+        self._alignment = alignment
+        self._address_space = address_space
 
     def resolve(self, module):
         # type: (IrModule) -> IrInstruction
         self._type = self._type.resolve(module)
         if self._count is not None:
             self._count = self._count.resolve(module)
-        self._value_type = IrTypePtr(self._type.uniquify(), 0)
+        self._value_type = IrTypePtr(self._type.uniquify(), self._address_space)
         return self
 
 

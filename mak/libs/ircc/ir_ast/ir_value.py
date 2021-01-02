@@ -76,6 +76,10 @@ class IrValueMetadata(IrValue):
         # type: () -> str
         return 'metadata %s' % str(self._metadata)
 
+    def get_type(self):
+        # type: () -> IrType
+        return self._type
+
 
 if TYPE_CHECKING:
     from .ir_type import IrType

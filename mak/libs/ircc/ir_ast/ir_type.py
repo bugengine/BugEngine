@@ -39,22 +39,30 @@ class IrAddressSpaceInference:
 
     def __init__(self):
         # type: () -> None
-        self.address_spaces = {}   # type: Dict[int, List[IrAddressSpaceInference.Equivalence]]
+        self._address_spaces = {}  # type: Dict[int, List[IrAddressSpaceInference.Equivalence]]
 
     def add(self, address_space, equivalent):
         # type: (IrAddressSpace, IrAddressSpace) -> None
         if address_space._address_space > 3:
             eq = IrAddressSpaceInference.Equivalence(equivalent._address_space, None)
             try:
-                self.address_spaces[address_space._address_space].append(eq)
+                self._address_spaces[address_space._address_space].append(eq)
             except KeyError:
-                self.address_spaces[address_space._address_space] = [eq]
+                self._address_spaces[address_space._address_space] = [eq]
         if equivalent._address_space > 3:
             eq = IrAddressSpaceInference.Equivalence(address_space._address_space, None)
             try:
-                self.address_spaces[equivalent._address_space].append(eq)
+                self._address_spaces[equivalent._address_space].append(eq)
             except KeyError:
-                self.address_spaces[equivalent._address_space] = [eq]
+                self._address_spaces[equivalent._address_space] = [eq]
+
+    def merge(self, other):
+        # type: (IrAddressSpaceInference) -> None
+        for address_space, equivalence_list in other._address_spaces.items():
+            try:
+                self._address_spaces[address_space] += equivalence_list
+            except KeyError:
+                self._address_spaces[address_space] = equivalence_list[:]
 
 
 class IrType(IrObject):

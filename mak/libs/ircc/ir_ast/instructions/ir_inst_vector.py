@@ -53,6 +53,10 @@ class IrInstShuffleVector(IrInstruction):
         self._value_type = self._vector_1.get_type()
         return self
 
+    def resolve_type(self, equivalence, return_type):
+        # type: (IrAddressSpaceInference, IrType) -> None
+        self._vector_1.get_type().add_equivalence(equivalence, self._vector_2.get_type())
+
 
 if TYPE_CHECKING:
     from typing import List, Tuple

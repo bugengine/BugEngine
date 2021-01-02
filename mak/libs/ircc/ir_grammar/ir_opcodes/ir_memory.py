@@ -7,7 +7,7 @@ def p_ir_opcode_alloca(p):
     """
         ir-opcode : ir-instruction-assignment ALLOCA ir-inalloca-opt ir-type ir-alloca-attachment-list
     """
-    p[0] = IrInstAlloca(p[1], p[4], p[5][0], p[5][1], p[5][3])
+    p[0] = IrInstAlloca(p[1], p[4], p[5][0], p[5][1], p[5][2], p[5][3])
 
 
 def p_ir_opcode_load(p):
@@ -79,7 +79,7 @@ def p_ir_alloca_no_addrspace(p):
     """
         ir-alloca-addrspace-attachment : ir-instruction-attachment-list
     """
-    p[0] = [None, p[1]]
+    p[0] = [0, p[1]]
 
 
 def p_ir_loadstore_align(p):

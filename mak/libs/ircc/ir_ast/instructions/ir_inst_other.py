@@ -17,6 +17,14 @@ class IrInstCall(IrInstruction):
         self._value_type = self._method._return_type
         return self
 
+    def resolve_type(self, equivalence, return_type):
+        # type: (IrAddressSpaceInference, IrType) -> None
+        equivalence.merge(self._method.equivalence())
+        parameters = self._method.parameters()
+        assert len(parameters) == len(self._arguments)
+        for argument, parameter in zip(self._arguments, parameters):
+            argument.get_type().add_equivalence(equivalence, parameter.get_type())
+
 
 class IrInstIntegerCompare(IrInstruction):
     def __init__(self, result, type, left_operand, right_operand, operation, metadata):
@@ -68,6 +76,12 @@ class IrInstPhi(IrInstruction):
         self._value_type = self._origins[0][0].get_type()
         return self
 
+    def resolve_type(self, equivalence, return_type):
+        # type: (IrAddressSpaceInference, IrType) -> None
+        assert self._value_type is not None
+        for o in self._origins[1:]:
+            self._value_type.add_equivalence(equivalence, o[0].get_type())
+
 
 class IrInstSelect(IrInstruction):
     def __init__(self, result, condition, value_true, value_false, metadata):
@@ -84,6 +98,10 @@ class IrInstSelect(IrInstruction):
         self._value_false = self._value_false.resolve(module)
         self._value_type = self._value_true.get_type()
         return self
+
+    def resolve_type(self, equivalence, return_type):
+        # type: (IrAddressSpaceInference, IrType) -> None
+        self._value_true.get_type().add_equivalence(equivalence, self._value_false.get_type())
 
 
 if TYPE_CHECKING:

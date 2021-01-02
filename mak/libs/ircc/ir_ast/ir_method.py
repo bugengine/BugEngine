@@ -1,7 +1,7 @@
 from .ir_object import IrObject
 from .ir_expr import IrExpression, IrExpressionDeclaration
 from .ir_declaration import IrDeclaration
-from .ir_type import IrTypePtr
+from .ir_type import IrTypePtr, IrAddressSpaceInference
 from .ir_attribute import IrAttributeGroup, IrAttributeGroupObject
 from .ir_code import IrCodeBlock
 from .ir_scope import IrScope
@@ -66,6 +66,14 @@ class IrMethod(IrObject):
 
     def find_instance(self, arguments):
         # type: (List[IrType]) -> IrMethodObject
+        raise NotImplementedError
+
+    def equivalence(self):
+        # type: () -> IrAddressSpaceInference
+        raise NotImplementedError
+
+    def parameters(self):
+        # type: () -> List[IrMethodParameter]
         raise NotImplementedError
 
 
@@ -153,6 +161,17 @@ class IrMethodObject(IrMethod):
             pdecl = IrExpressionDeclaration(p)
             self._scope.declare(p._id, pdecl)
             self._declarations.append(pdecl)
+
+    def equivalence(self):
+        # type: () -> IrAddressSpaceInference
+        if self._definition:
+            return self._definition._code._equivalence
+        else:
+            return IrAddressSpaceInference()
+
+    def parameters(self):
+        # type: () -> List[IrMethodParameter]
+        return self._parameters
 
     def define(self, instruction_list):
         # type: (List[IrInstruction]) -> None
