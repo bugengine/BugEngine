@@ -9,6 +9,8 @@ from waflib.Tools import ccroot, c, cxx, winres, c_osx
 Build.PROTOCOL = 2
 old_log_display = Task.Task.log_display
 
+ccroot.USELIB_VARS['cxx'].add('CLC_CXXFLAGS')
+
 
 def to_string(self):
     if self.outputs:

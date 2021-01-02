@@ -65,10 +65,10 @@ def configure(configuration_context):
                 # Apple still has to release a clang10-based AppleClang compiler
                 pass
     if v.CLC_CXX:
-        v.CLC_CXXFLAGS_debug = ['-D_DEBUG']
-        v.CLC_CXXFLAGS_profile = ['-DNDEBUG']
-        v.CLC_CXXFLAGS_final = ['-DNDEBUG']
-        v.CLC_CXXFLAGS = ['-O0', '-std=clc++', '-g', '-fno-rtti', '-fno-exceptions', '-fno-discard-value-names']
+        v.CLC_CXXFLAGS = ['-std=clc++', '-g', '-fno-rtti', '-fno-exceptions', '-fno-discard-value-names']
+        v.CLC_CXXFLAGS_debug = ['-D_DEBUG', '-O0']
+        v.CLC_CXXFLAGS_profile = ['-DNDEBUG', '-O2']
+        v.CLC_CXXFLAGS_final = ['-DNDEBUG', '-O2']
         v.CLC_CXX_SRC_F = ''
         v.CLC_CXX_TGT_F = ['-o']
         v.CLC_ARCH_ST = ['-arch']
