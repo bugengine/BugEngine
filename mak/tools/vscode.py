@@ -252,6 +252,20 @@ class vscode(Build.BuildContext):
                 }
             )
 
+        tasks['tasks'].append(
+            {
+                'label': 'bugengine:mypy',
+                'type': 'process',
+                'command': [sys.executable],
+                'args': ['-m', 'mypy', '--show-column-numbers', '-p', 'mypy_root'],
+                'options': {
+                    'cwd': self.srcnode.abspath()
+                },
+                'problemMatcher': ['$gcc', '$msCompile'],
+                'group': 'build'
+            }
+        )
+
         for input in ('Toolchain', 'Variant'):
             tasks['inputs'].append(
                 {

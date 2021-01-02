@@ -2,7 +2,7 @@ import os
 import re
 from waflib import Errors
 from waflib.Configure import conf
-from waflib.TaskGen import feature, before_method
+from waflib.TaskGen import feature, before_method, extension
 
 COMPILE_EXTENSIONS = ['cxx', 'cpp', 'cc', 'c', 'rc', 'm', 'mm', 'def', 'masm']
 
@@ -181,6 +181,11 @@ def multiarch(build_context, name, arch_modules):
         return task_gen
     else:
         return None
+
+
+@extension('.cl')
+def handle_cl(self, cl_file):
+    pass
 
 
 def build(build_context):
