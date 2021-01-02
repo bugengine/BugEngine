@@ -19,7 +19,7 @@ class IrInstCast(IrInstruction):
 
     def resolve_type(self, equivalence, return_type):
         # type: (IrAddressSpaceInference, IrType) -> None
-        if self._cast_type not in ('bitcast', 'inttoptr'):
+        if self._cast_type not in ('bitcast', 'inttoptr', 'zext'):
             assert self._value_type is not None
             value_type = self._value.get_type()
             self._value_type.add_equivalence(equivalence, value_type)

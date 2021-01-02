@@ -306,7 +306,7 @@ class IrTypeBuiltin(IrType):
         # type: (IrAddressSpaceInference, IrType) -> None
         other_type = other_type._get_target_type()
         assert isinstance(other_type, IrTypeBuiltin)
-        # TODO assert self._builtin == other_type._builtin
+        assert self._builtin == other_type._builtin
 
 
 class IrTypePtr(IrType):
