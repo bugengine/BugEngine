@@ -1,5 +1,5 @@
 from .ir_object import IrObject
-from .ir_type import IrTypeBuiltin
+from .ir_type import IrTypeBuiltin, IrTypeUndef, IrTypeZero
 from .ir_declaration import IrDeclaration
 from be_typing import TYPE_CHECKING
 
@@ -21,6 +21,10 @@ class IrExpression(IrObject):
         # type: () -> str
         raise NotImplementedError
 
+    def is_typed(self):
+        # type: () -> bool
+        return True
+
 
 class IrExpressionDeclaration(IrDeclaration):
     def __init__(self, expression):
@@ -32,6 +36,24 @@ class IrExpressionDeclaration(IrDeclaration):
         # type: (IrModule) -> IrExpressionDeclaration
         self._expression.resolve(module)
         return self
+
+
+class IrExpressionZero(IrExpression):
+    def __init__(self):
+        # type: () -> None
+        IrExpression.__init__(self)
+
+    def get_type(self):
+        # type: () -> IrType
+        return IrTypeZero()
+
+    def __str__(self):
+        # type: () -> str
+        return 'zero'
+
+    def is_typed(self):
+        # type: () -> bool
+        return False
 
 
 class IrExpressionConstant(IrExpression):
@@ -54,15 +76,27 @@ class IrExpressionConstant(IrExpression):
         # type: () -> str
         return str(self._value)
 
+    def is_typed(self):
+        # type: () -> bool
+        return False
+
 
 class IrExpressionUndef(IrExpression):
     def __init__(self):
         # type: () -> None
         IrExpression.__init__(self)
 
+    def get_type(self):
+        # type: () -> IrType
+        return IrTypeUndef()
+
     def __str__(self):
         # type: () -> str
         return 'undefined'
+
+    def is_typed(self):
+        # type: () -> bool
+        return False
 
 
 class IrExpressionArray(IrExpression):

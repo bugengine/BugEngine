@@ -234,6 +234,42 @@ class IrTypeVoid(IrType):
         assert isinstance(other_type._get_target_type(), IrTypeVoid)
 
 
+class IrTypeUndef(IrType):
+    def __str__(self):
+        # type: () -> str
+        return 'undef'
+
+    def signature(self):
+        # type: () -> str
+        return '!'
+
+    def create_generator_type(self, generator):
+        # type: (IrccGenerator) -> IrccType
+        return generator.type_undef()
+
+    def add_equivalence(self, equivalence, other_type):
+        # type: (IrAddressSpaceInference, IrType) -> None
+        assert isinstance(other_type._get_target_type(), IrTypeUndef)
+
+
+class IrTypeZero(IrType):
+    def __str__(self):
+        # type: () -> str
+        return 'zero'
+
+    def signature(self):
+        # type: () -> str
+        return '0'
+
+    def create_generator_type(self, generator):
+        # type: (IrccGenerator) -> IrccType
+        return generator.type_zero()
+
+    def add_equivalence(self, equivalence, other_type):
+        # type: (IrAddressSpaceInference, IrType) -> None
+        assert isinstance(other_type._get_target_type(), IrTypeZero)
+
+
 class IrTypeMetadata(IrType):
     def create_generator_type(self, generator):
         # type: (IrccGenerator) -> IrccType

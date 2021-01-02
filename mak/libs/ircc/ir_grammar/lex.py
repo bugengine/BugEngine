@@ -44,6 +44,7 @@ keywords = (
     'undef',
     'true',
     'false',
+    'zeroinitializer',
 
     # methods
     'declare',

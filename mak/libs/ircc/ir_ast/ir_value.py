@@ -37,7 +37,10 @@ class IrValueExpr(IrValue):
 
     def get_type(self):
         # type: () -> IrType
-        return self._expression.get_type()
+        if self._expression.is_typed():
+            return self._expression.get_type()
+        else:
+            return self._type
 
     def __str__(self):
         # type: () -> str

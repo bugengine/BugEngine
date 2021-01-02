@@ -18,6 +18,16 @@ class IrccGenerator:
         raise NotImplementedError
 
     @abstractmethod
+    def type_undef(self):
+        # type: () -> IrccType
+        raise NotImplementedError
+
+    @abstractmethod
+    def type_zero(self):
+        # type: () -> IrccType
+        raise NotImplementedError
+
+    @abstractmethod
     def type_builtin(self, builtin):
         # type: (str) -> IrccType
         raise NotImplementedError

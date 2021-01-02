@@ -1,4 +1,4 @@
-from ..ir_ast import IrExpressionCast, IrExpressionConstant, IrExpressionReference, IrExpressionArray, IrExpressionAggregate, IrExpressionUndef, IrReference
+from ..ir_ast import IrExpressionCast, IrExpressionConstant, IrExpressionReference, IrExpressionArray, IrExpressionAggregate, IrExpressionUndef, IrReference, IrExpressionZero
 from be_typing import TYPE_CHECKING
 
 
@@ -6,6 +6,7 @@ def p_ir_expr(p):
     # type: (YaccProduction) -> None
     """
         ir-expr : ir-expr-constant
+                | ir-expr-zeroinitializer
                 | ir-expr-undef
                 | ir-expr-reference
                 | ir-expr-cast
@@ -38,6 +39,14 @@ def p_ir_expr_constant_bool(p):
                          | FALSE
     """
     p[0] = IrExpressionConstant(p[1] == 'true')
+
+
+def p_ir_expr_zeroinitializer(p):
+    # type: (YaccProduction) -> None
+    """
+        ir-expr-zeroinitializer : ZEROINITIALIZER
+    """
+    p[0] = IrExpressionZero()
 
 
 def p_ir_expr_undef(p):
