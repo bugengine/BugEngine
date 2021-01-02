@@ -1,5 +1,5 @@
 from be_typing import TYPE_CHECKING
-from .ir_type import IrAddressSpace, IrAddressSpaceInference, IrTypeVoid
+from .ir_type import IrAddressSpaceInference, IrTypeVoid
 from .ir_expr import IrExpression, IrExpressionDeclaration
 from abc import abstractmethod
 
@@ -14,12 +14,12 @@ class IrInstruction(IrExpression):
         self._value_type = None    # type: Optional[IrType]
 
     def get_type(self):
-        # type: () -> Tuple[IrType, IrAddressSpace]
+        # type: () -> IrType
         if self._result is not None:
             assert self._value_type is not None
-            return self._value_type, IrAddressSpace(0)
+            return self._value_type
         else:
-            return IrTypeVoid(), IrAddressSpace(0)
+            return IrTypeVoid()
 
     def terminal(self):
         # type: () -> bool

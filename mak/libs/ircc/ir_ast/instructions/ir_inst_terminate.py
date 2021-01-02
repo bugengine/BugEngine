@@ -12,7 +12,7 @@ class IrInstRet(IrInstruction):
         # type: (IrModule) -> IrInstruction
         if self._return_value is not None:
             self._return_value = self._return_value.resolve(module)
-            self._value_type = self._return_value.get_type()[0]
+            self._value_type = self._return_value.get_type()
         return self
 
     def terminal(self):
@@ -20,13 +20,12 @@ class IrInstRet(IrInstruction):
         return True
 
     def resolve_type(self, equivalence, return_type):
-        # type: (IrAddressSpaceInference, Optional[IrType]) -> None
-        if self._return_value:
+        # type: (IrAddressSpaceInference, IrType) -> None
+        if self._return_value is not None:
             return_value_type = self._return_value.get_type()
             assert return_value_type is not None
             assert return_type is not None
-            return_type.add_equivalence(equivalence, return_value_type[0], return_value_type[1])
-        return
+            return_type.add_equivalence(equivalence, return_value_type)
 
 
 class IrInstBranch(IrInstruction):

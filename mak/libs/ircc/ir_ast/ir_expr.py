@@ -1,5 +1,5 @@
 from .ir_object import IrObject
-from .ir_type import IrAddressSpace
+from .ir_type import IrTypeBuiltin
 from .ir_declaration import IrDeclaration
 from be_typing import TYPE_CHECKING
 
@@ -14,7 +14,7 @@ class IrExpression(IrObject):
         return self
 
     def get_type(self):
-        # type: () -> Tuple[IrType, IrAddressSpace]
+        # type: () -> IrType
         raise NotImplementedError
 
     def __str__(self):
@@ -41,11 +41,11 @@ class IrExpressionConstant(IrExpression):
         self._value = value
 
     def get_type(self):
-        # type: () -> Tuple[IrType, IrAddressSpace]
+        # type: () -> IrType
         if isinstance(self._value, int):
-            return (IrTypeBuiltin('i64'), IrAddressSpace(0))
+            return IrTypeBuiltin('i64')
         if isinstance(self._value, bool):
-            return (IrTypeBuiltin('i1'), IrAddressSpace(0))
+            return IrTypeBuiltin('i1')
         if isinstance(self._value, str):
             raise NotImplementedError
         raise NotImplementedError
@@ -112,7 +112,7 @@ class IrExpressionReference(IrExpression):
         return self
 
     def get_type(self):
-        # type: () -> Tuple[IrType, IrAddressSpace]
+        # type: () -> IrType
         assert self._expression is not None
         return self._expression.get_type()
 
@@ -130,9 +130,9 @@ class IrExpressionCast(IrExpression):
         self._cast_type = cast_type
 
     def get_type(self):
-        # type: () -> Tuple[IrType, IrAddressSpace]
+        # type: () -> IrType
         assert self._result_type.is_defined()
-        return self._result_type, self._value.get_type()[1]
+        return self._result_type
 
     def __str__(self):
         # type: () -> str
@@ -140,8 +140,8 @@ class IrExpressionCast(IrExpression):
 
 
 if TYPE_CHECKING:
-    from typing import Dict, List, Optional, Tuple, Union
-    from .ir_type import IrType, IrTypeBuiltin
+    from typing import Dict, List, Optional, Union
+    from .ir_type import IrType
     from .ir_module import IrModule
     from .ir_value import IrValue
     from .ir_reference import IrReference

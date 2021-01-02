@@ -14,7 +14,7 @@ class IrInstFloatUnaryOp(IrInstruction):
         # type: (IrModule) -> IrInstruction
         self._type = self._type.resolve(module)
         self._operand = self._operand.resolve(module)
-        self._value_type = self._operand.get_type()[0]
+        self._value_type = self._operand.get_type()
         return self
 
 

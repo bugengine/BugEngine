@@ -23,7 +23,7 @@ def p_ir_opcode_store(p):
     """
         ir-opcode : STORE ir-volatile-opt ir-value COMMA ir-value ir-loadstore-attachment-list 
     """
-    p[0] = IrInstStore(p[3], p[5], p[6][1])
+    p[0] = IrInstStore(p[5], p[3], p[6][1])
 
 
 def p_ir_opcode_getelementptr(p):

@@ -12,11 +12,16 @@ class IrInstExtractValue(IrInstruction):
     def resolve(self, module):
         # type: (IrModule) -> IrInstruction
         self._source = self._source.resolve(module)
-        value_type = self._source.get_type()[0]
+        value_type = self._source.get_type()
         for i in self._indices:
             value_type = value_type.extract(i)
         self._value_type = value_type
         return self
+
+    def resolve_type(self, equivalence, return_type):
+        # type: (IrAddressSpaceInference, IrType) -> None
+        # since value_type is deduced from the target type, no equivalence is needed
+        return
 
 
 class IrInstInsertValue(IrInstruction):
@@ -31,8 +36,17 @@ class IrInstInsertValue(IrInstruction):
         # type: (IrModule) -> IrInstruction
         self._source = self._source.resolve(module)
         self._value = self._value.resolve(module)
-        self._value_type = self._source.get_type()[0]
+        self._value_type = self._source.get_type()
         return self
+
+    def resolve_type(self, equivalence, return_type):
+        # type: (IrAddressSpaceInference, IrType) -> None
+        assert self._value_type is not None
+        subfield_type = self._value_type
+        for i in self._indices:
+            subfield_type = subfield_type.extract(i)
+        insert_type = self._value.get_type()
+        subfield_type.add_equivalence(equivalence, insert_type)
 
 
 if TYPE_CHECKING:

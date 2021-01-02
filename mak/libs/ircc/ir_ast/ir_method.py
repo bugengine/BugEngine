@@ -18,7 +18,7 @@ class IrMethodParameter(IrExpression):
 
     def resolve(self, module):
         # type: (IrModule) -> IrMethodParameter
-        self._type = self._type.resolve(module)
+        self._type = self._type.resolve(module).uniquify()
         self._attributes = self._attributes.resolve(module)
         return self
 
@@ -45,6 +45,10 @@ class IrMethodParameter(IrExpression):
         else:
             result.append(IrMethodParameter(types[0], self._id, IrAttributeGroupObject([])))
         return result
+
+    def get_type(self):
+        # type: () -> IrType
+        return self._type
 
 
 class IrMethodMetadataParameter(IrMethodParameter):

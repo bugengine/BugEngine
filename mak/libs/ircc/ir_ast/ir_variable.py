@@ -20,12 +20,12 @@ class IrVariable(IrExpression):
         return cast('IrVariable', IrExpression.resolve(self, module))
 
     def get_type(self):
-        # type: () -> Tuple[IrType, IrAddressSpace]
-        return IrTypePtr(self._type, int(self._address_space)), IrAddressSpace(0)
+        # type: () -> IrType
+        return IrTypePtr(self._type, int(self._address_space))
 
 
 if TYPE_CHECKING:
-    from typing import List, Optional, Tuple
+    from typing import List, Optional
     from .ir_type import IrType
     from .ir_value import IrValue
     from .ir_module import IrModule

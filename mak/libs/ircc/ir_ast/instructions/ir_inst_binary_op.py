@@ -16,7 +16,7 @@ class IrInstBinaryOp(IrInstruction):
         self._type = self._type.resolve(module)
         self._left_operand = self._left_operand.resolve(module)
         self._right_operand = self._right_operand.resolve(module)
-        self._value_type = self._left_operand.get_type()[0]
+        self._value_type = self._left_operand.get_type()
         return self
 
 
@@ -34,7 +34,7 @@ class IrInstFloatBinaryOp(IrInstruction):
         self._type = self._type.resolve(module)
         self._left_operand = self._left_operand.resolve(module)
         self._right_operand = self._right_operand.resolve(module)
-        self._value_type = self._left_operand.get_type()[0]
+        self._value_type = self._left_operand.get_type()
         return self
 
 

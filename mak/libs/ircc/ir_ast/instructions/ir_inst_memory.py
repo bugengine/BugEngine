@@ -1,5 +1,5 @@
 from ..ir_code import IrInstruction
-from ..ir_type import IrTypePtr, IrTypeStruct, IrTypePtr, IrTypeArray, IrTypeVector
+from ..ir_type import IrTypePtr, IrTypeStruct, IrTypePtr, IrTypeArray, IrTypeVector, IrAddressSpace
 from ..ir_value import IrValueExpr
 from ..ir_expr import IrExpressionConstant
 from be_typing import TYPE_CHECKING
@@ -32,7 +32,7 @@ class IrInstLoad(IrInstruction):
         # type: (IrModule) -> IrInstruction
         self._source = self._source.resolve(module)
         self._type = self._type.resolve(module)
-        value_type = self._source.get_type()[0]
+        value_type = self._source.get_type()
         assert isinstance(value_type, IrTypePtr)
         self._value_type = value_type._pointee
         return self
@@ -51,6 +51,14 @@ class IrInstStore(IrInstruction):
         self._value = self._value.resolve(module)
         return self
 
+    def resolve_type(self, equivalence, return_type):
+        # type: (IrAddressSpaceInference, IrType) -> None
+        target_type = self._target.get_type()
+        assert isinstance(target_type, IrTypePtr)
+        target_type = target_type._pointee
+        value_type = self._value.get_type()
+        target_type.add_equivalence(equivalence, value_type)
+
 
 class IrInstGetElementPtr(IrInstruction):
     def __init__(self, result, type, access, metadata):
@@ -63,7 +71,8 @@ class IrInstGetElementPtr(IrInstruction):
         # type: (IrModule) -> IrInstruction
         self._type = self._type.resolve(module)
         self._access = [access.resolve(module) for access in self._access]
-        result_type, address_space = self._access[0].get_type()
+        result_type = self._access[0].get_type()
+        address_space = IrAddressSpace(0)
         for value in self._access[1:]:
             result_type = result_type._get_target_type()
             if isinstance(result_type, IrTypeStruct):
@@ -72,10 +81,11 @@ class IrInstGetElementPtr(IrInstruction):
                 assert isinstance(value._expression._value, int)
                 result_type = result_type.extract(value._expression._value)
             elif isinstance(result_type, IrTypePtr):
+                address_space = result_type._address_space
                 result_type = result_type._pointee
             elif isinstance(result_type, IrTypeArray):
                 result_type = result_type._type
-        self._value_type = IrTypePtr(result_type, int(address_space))
+        self._value_type = IrTypePtr(result_type, address_space._address_space)
         return self
 
 

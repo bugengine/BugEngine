@@ -97,8 +97,8 @@ class IrType(IrObject):
         raise NotImplementedError
 
     @abstractmethod
-    def add_equivalence(self, equivalence, other_type, address_space):
-        # type: (IrAddressSpaceInference, IrType, IrAddressSpace) -> None
+    def add_equivalence(self, equivalence, other_type):
+        # type: (IrAddressSpaceInference, IrType) -> None
         raise NotImplementedError
 
 
@@ -185,10 +185,10 @@ class IrTypeReference(IrType):
         assert self._target is not None
         return self._target.is_defined()
 
-    def add_equivalence(self, equivalence, other_type, address_space):
-        # type: (IrAddressSpaceInference, IrType, IrAddressSpace) -> None
+    def add_equivalence(self, equivalence, other_type):
+        # type: (IrAddressSpaceInference, IrType) -> None
         assert self._target is not None
-        return self._target.add_equivalence(equivalence, other_type, address_space)
+        return self._target.add_equivalence(equivalence, other_type)
 
 
 class IrTypeOpaque(IrType):
@@ -204,8 +204,8 @@ class IrTypeOpaque(IrType):
         # type: (IrccGenerator) -> IrccType
         return generator.type_void()
 
-    def add_equivalence(self, equivalence, other_type, address_space):
-        # type: (IrAddressSpaceInference, IrType, IrAddressSpace) -> None
+    def add_equivalence(self, equivalence, other_type):
+        # type: (IrAddressSpaceInference, IrType) -> None
         assert isinstance(other_type._get_target_type(), IrTypeOpaque)
 
 
@@ -222,8 +222,8 @@ class IrTypeVoid(IrType):
         # type: (IrccGenerator) -> IrccType
         return generator.type_void()
 
-    def add_equivalence(self, equivalence, other_type, address_space):
-        # type: (IrAddressSpaceInference, IrType, IrAddressSpace) -> None
+    def add_equivalence(self, equivalence, other_type):
+        # type: (IrAddressSpaceInference, IrType) -> None
         assert isinstance(other_type._get_target_type(), IrTypeVoid)
 
 
@@ -236,8 +236,8 @@ class IrTypeMetadata(IrType):
         # type: () -> str
         return '~'
 
-    def add_equivalence(self, equivalence, other_type, address_space):
-        # type: (IrAddressSpaceInference, IrType, IrAddressSpace) -> None
+    def add_equivalence(self, equivalence, other_type):
+        # type: (IrAddressSpaceInference, IrType) -> None
         assert isinstance(other_type._get_target_type(), IrTypeMetadata)
 
 
@@ -259,11 +259,11 @@ class IrTypeBuiltin(IrType):
         # type: (IrccGenerator) -> IrccType
         return generator.type_builtin(self._builtin)
 
-    def add_equivalence(self, equivalence, other_type, address_space):
-        # type: (IrAddressSpaceInference, IrType, IrAddressSpace) -> None
+    def add_equivalence(self, equivalence, other_type):
+        # type: (IrAddressSpaceInference, IrType) -> None
         other_type = other_type._get_target_type()
         assert isinstance(other_type, IrTypeBuiltin)
-        assert self._builtin == other_type._builtin
+        # TODO assert self._builtin == other_type._builtin
 
 
 class IrTypePtr(IrType):
@@ -303,12 +303,12 @@ class IrTypePtr(IrType):
         # type: () -> bool
         return self._address_space != 4 and self._pointee.is_defined()
 
-    def add_equivalence(self, equivalence, other_type, address_space):
-        # type: (IrAddressSpaceInference, IrType, IrAddressSpace) -> None
+    def add_equivalence(self, equivalence, other_type):
+        # type: (IrAddressSpaceInference, IrType) -> None
         other_type = other_type._get_target_type()
         assert isinstance(other_type, IrTypePtr)
         equivalence.add(self._address_space, other_type._address_space)
-        self._pointee.add_equivalence(equivalence, other_type._pointee, self._address_space)
+        self._pointee.add_equivalence(equivalence, other_type._pointee)
 
 
 class IrTypeArray(IrType):
@@ -350,12 +350,12 @@ class IrTypeArray(IrType):
         # type: () -> bool
         return self._type.is_defined()
 
-    def add_equivalence(self, equivalence, other_type, address_space):
-        # type: (IrAddressSpaceInference, IrType, IrAddressSpace) -> None
+    def add_equivalence(self, equivalence, other_type):
+        # type: (IrAddressSpaceInference, IrType) -> None
         other_type = other_type._get_target_type()
         assert isinstance(other_type, IrTypeArray)
         assert self._count == other_type._count
-        self._type.add_equivalence(equivalence, other_type._type, address_space)
+        self._type.add_equivalence(equivalence, other_type._type)
 
 
 class IrTypeVector(IrType):
@@ -390,12 +390,12 @@ class IrTypeVector(IrType):
         # type: () -> bool
         return self._type.is_defined()
 
-    def add_equivalence(self, equivalence, other_type, address_space):
-        # type: (IrAddressSpaceInference, IrType, IrAddressSpace) -> None
+    def add_equivalence(self, equivalence, other_type):
+        # type: (IrAddressSpaceInference, IrType) -> None
         other_type = other_type._get_target_type()
         assert isinstance(other_type, IrTypeVector)
         assert self._count == other_type._count
-        self._type.add_equivalence(equivalence, other_type._type, address_space)
+        self._type.add_equivalence(equivalence, other_type._type)
 
 
 class IrTypeStruct(IrType):
@@ -443,14 +443,14 @@ class IrTypeStruct(IrType):
             result &= t.is_defined()
         return result
 
-    def add_equivalence(self, equivalence, other_type, address_space):
-        # type: (IrAddressSpaceInference, IrType, IrAddressSpace) -> None
+    def add_equivalence(self, equivalence, other_type):
+        # type: (IrAddressSpaceInference, IrType) -> None
         other_type = other_type._get_target_type()
         assert isinstance(other_type, IrTypeStruct)
         assert len(self._fields) == len(other_type._fields)
         for (t1, n1), (t2, n2) in zip(self._fields, other_type._fields):
             assert n1 == n2
-            t1.add_equivalence(equivalence, t2, address_space)
+            t1.add_equivalence(equivalence, t2)
 
     def extract(self, index):
         # type: (int) -> IrType
@@ -497,14 +497,14 @@ class IrTypeMethod(IrType):
             result &= t.is_defined()
         return result
 
-    def add_equivalence(self, equivalence, other_type, address_space):
-        # type: (IrAddressSpaceInference, IrType, IrAddressSpace) -> None
+    def add_equivalence(self, equivalence, other_type):
+        # type: (IrAddressSpaceInference, IrType) -> None
         other_type = other_type._get_target_type()
         assert isinstance(other_type, IrTypeMethod)
         assert len(self._argument_types) == len(other_type._argument_types)
-        self._return_type.add_equivalence(equivalence, other_type._return_type, address_space)
+        self._return_type.add_equivalence(equivalence, other_type._return_type)
         for t1, t2 in zip(self._argument_types, other_type._argument_types):
-            t1.add_equivalence(equivalence, t2, address_space)
+            t1.add_equivalence(equivalence, t2)
 
 
 if TYPE_CHECKING:

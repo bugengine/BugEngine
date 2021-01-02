@@ -65,7 +65,7 @@ class IrInstPhi(IrInstruction):
         # type: (IrModule) -> IrInstruction
         self._type = self._type.resolve(module)
         self._origins = [(expr.resolve(module), label) for expr, label in self._origins]
-        self._value_type = self._origins[0][0].get_type()[0]
+        self._value_type = self._origins[0][0].get_type()
         return self
 
 
@@ -82,7 +82,7 @@ class IrInstSelect(IrInstruction):
         self._condition = self._condition.resolve(module)
         self._value_true = self._value_true.resolve(module)
         self._value_false = self._value_false.resolve(module)
-        self._value_type = self._value_true.get_type()[0]
+        self._value_type = self._value_true.get_type()
         return self
 
 

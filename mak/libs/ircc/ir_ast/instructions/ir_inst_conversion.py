@@ -17,6 +17,13 @@ class IrInstCast(IrInstruction):
         self._value_type = self._result_type.uniquify()
         return self
 
+    def resolve_type(self, equivalence, return_type):
+        # type: (IrAddressSpaceInference, IrType) -> None
+        if self._cast_type not in ('bitcast', 'inttoptr'):
+            assert self._value_type is not None
+            value_type = self._value.get_type()
+            self._value_type.add_equivalence(equivalence, value_type)
+
 
 if TYPE_CHECKING:
     from typing import List, Optional, Tuple

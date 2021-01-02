@@ -1,5 +1,5 @@
 from .ir_object import IrObject
-from .ir_type import IrTypeMetadata, IrTypeBuiltin, IrTypeVoid, IrAddressSpace
+from .ir_type import IrTypeMetadata, IrTypeBuiltin, IrTypeVoid
 from be_typing import TYPE_CHECKING
 
 
@@ -16,7 +16,7 @@ class IrValue(IrObject):
         return self
 
     def get_type(self):
-        # type: () -> Tuple[IrType, IrAddressSpace]
+        # type: () -> IrType
         raise NotImplementedError
 
     def __str__(self):
@@ -36,7 +36,7 @@ class IrValueExpr(IrValue):
         return IrValue.resolve(self, module)
 
     def get_type(self):
-        # type: () -> Tuple[IrType, IrAddressSpace]
+        # type: () -> IrType
         return self._expression.get_type()
 
     def __str__(self):
@@ -50,8 +50,8 @@ class IrValueVoid(IrValue):
         IrValue.__init__(self, IrTypeVoid())
 
     def get_type(self):
-        # type: () -> Tuple[IrType, IrAddressSpace]
-        return IrTypeVoid(), IrAddressSpace(0)
+        # type: () -> IrType
+        return IrTypeVoid()
 
     def __str__(self):
         # type: () -> str
@@ -75,7 +75,6 @@ class IrValueMetadata(IrValue):
 
 
 if TYPE_CHECKING:
-    from typing import Tuple
     from .ir_type import IrType
     from .ir_expr import IrExpression
     from .ir_module import IrModule
