@@ -5,9 +5,9 @@ from be_typing import TYPE_CHECKING, cast
 
 
 class IrVariable(IrExpression):
-    def __init__(self, type, initital_value, address_space):
-        # type: (IrType, Optional[IrValue], int) -> None
-        IrExpression.__init__(self)
+    def __init__(self, type, initital_value, address_space, metadata):
+        # type: (IrType, Optional[IrValue], int, List[Tuple[IrMetadataLink, IrMetadataLink]]) -> None
+        IrExpression.__init__(self, metadata)
         self._type = type
         self._initial_value = initital_value
         self._address_space = IrAddressSpace(address_space)
@@ -25,8 +25,9 @@ class IrVariable(IrExpression):
 
 
 if TYPE_CHECKING:
-    from typing import List, Optional
+    from typing import List, Optional, Tuple
     from .ir_type import IrType
     from .ir_value import IrValue
     from .ir_module import IrModule
     from .ir_reference import IrReference
+    from .ir_metadata import IrMetadataLink

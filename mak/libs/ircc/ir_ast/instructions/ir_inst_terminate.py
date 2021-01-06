@@ -4,28 +4,31 @@ from be_typing import TYPE_CHECKING
 
 class IrInstRet(IrInstruction):
     def __init__(self, return_value, metadata):
-        # type: (Optional[IrValue], List[Tuple[IrMetadataLink, IrMetadataLink]]) -> None
+        # type: (IrValue, List[Tuple[IrMetadataLink, IrMetadataLink]]) -> None
         IrInstruction.__init__(self, 'ret', None, metadata)
         self._return_value = return_value
 
     def resolve(self, module):
         # type: (IrModule) -> IrInstruction
-        if self._return_value is not None:
-            self._return_value = self._return_value.resolve(module)
-            self._value_type = self._return_value.get_type()
-        return self
+        self._return_value = self._return_value.resolve(module)
+        return IrInstruction.resolve(self, module)
+
+    def get_type(self):
+        # type: () -> IrType
+        return self._return_value.get_type()
 
     def terminal(self):
         # type: () -> bool
         return True
 
-    def resolve_type(self, equivalence, return_type):
-        # type: (IrAddressSpaceInference, IrType) -> None
+    def resolve_type(self, equivalence, return_type, return_position):
+        # type: (IrAddressSpaceInference, IrType, IrPosition) -> None
         if self._return_value is not None:
+            self._return_value.resolve_type(equivalence, return_type, return_position)
             return_value_type = self._return_value.get_type()
             assert return_value_type is not None
             assert return_type is not None
-            return_type.add_equivalence(equivalence, return_value_type)
+            return_type.add_equivalence(equivalence, return_position, return_value_type, self.get_position())
 
 
 class IrInstBranch(IrInstruction):
@@ -54,7 +57,11 @@ class IrInstConditionalBranch(IrInstruction):
     def resolve(self, module):
         # type: (IrModule) -> IrInstruction
         self._condition = self._condition.resolve(module)
-        return self
+        return IrInstruction.resolve(self, module)
+
+    def resolve_type(self, equivalence, return_type, return_position):
+        # type: (IrAddressSpaceInference, IrType, IrPosition) -> None
+        self._condition.resolve_type(equivalence, return_type, return_position)
 
     def terminal(self):
         # type: () -> bool
@@ -77,7 +84,13 @@ class IrInstSwitch(IrInstruction):
         # type: (IrModule) -> IrInstruction
         self._condition = self._condition.resolve(module)
         self._targets = [(value.resolve(module), label) for value, label in self._targets]
-        return self
+        return IrInstruction.resolve(self, module)
+
+    def resolve_type(self, equivalence, return_type, return_position):
+        # type: (IrAddressSpaceInference, IrType, IrPosition) -> None
+        self._condition.resolve_type(equivalence, return_type, return_position)
+        for value, label in self._targets:
+            value.resolve_type(equivalence, return_type, return_position)
 
     def terminal(self):
         # type: () -> bool
@@ -105,3 +118,4 @@ if TYPE_CHECKING:
     from ..ir_reference import IrReference
     from ..ir_module import IrModule
     from ..ir_type import IrType, IrAddressSpace, IrAddressSpaceInference
+    from ...ir_position import IrPosition

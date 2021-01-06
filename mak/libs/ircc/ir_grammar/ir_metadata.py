@@ -6,8 +6,16 @@ def p_ir_metadata_list_opt(p):
     # type: (YaccProduction) -> None
     """
         ir-metadata-list-opt : METADATA_NAME METADATA_REF ir-metadata-list-opt
-                             | empty
     """
+    p[0] = [IrMetadataLink(p[1]), IrMetadataLink(p[2])] + p[3]
+
+
+def p_ir_metadata_list_opt_empty(p):
+    # type: (YaccProduction) -> None
+    """
+        ir-metadata-list-opt :
+    """
+    p[0] = []
 
 
 def p_ir_metadata(p):
@@ -182,7 +190,7 @@ def p_ir_metadata_debug_attribute_none(p):
     """
         ir-metadata-debug-attribute : NONE
     """
-    p[0] = None #IrMetadataInteger(getattr(p.slice[1], 'parsed_value'))
+    p[0] = None    #IrMetadataInteger(getattr(p.slice[1], 'parsed_value'))
 
 
 def p_ir_metadata_debug_attribute_error(p):

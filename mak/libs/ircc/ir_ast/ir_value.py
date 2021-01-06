@@ -1,5 +1,6 @@
 from .ir_object import IrObject
 from .ir_type import IrTypeMetadata, IrTypeBuiltin, IrTypeVoid
+from ..ir_position import IrPosition
 from be_typing import TYPE_CHECKING
 
 
@@ -19,9 +20,17 @@ class IrValue(IrObject):
         # type: () -> IrType
         raise NotImplementedError
 
+    def get_position(self):
+        # type: () -> IrPosition
+        raise NotImplementedError
+
     def __str__(self):
         # type: () -> str
         raise NotImplementedError
+
+    def resolve_type(self, equivalence, return_type, return_position):
+        # type: (IrAddressSpaceInference, IrType, IrPosition) -> None
+        return
 
 
 class IrValueExpr(IrValue):
@@ -41,6 +50,14 @@ class IrValueExpr(IrValue):
             return self._expression.get_type()
         else:
             return self._type
+
+    def get_position(self):
+        # type: () -> IrPosition
+        return self._expression.get_position()
+
+    def resolve_type(self, equivalence, return_type, return_position):
+        # type: (IrAddressSpaceInference, IrType, IrPosition) -> None
+        self._expression.resolve_type(equivalence, return_type, return_position)
 
     def __str__(self):
         # type: () -> str
@@ -80,9 +97,13 @@ class IrValueMetadata(IrValue):
         # type: () -> IrType
         return self._type
 
+    def get_position(self):
+        # type: () -> IrPosition
+        return IrPosition('', 0, 0, 0, '')
+
 
 if TYPE_CHECKING:
-    from .ir_type import IrType
+    from .ir_type import IrType, IrAddressSpaceInference
     from .ir_expr import IrExpression
     from .ir_module import IrModule
     from .ir_metadata import IrMetadata

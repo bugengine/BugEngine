@@ -14,8 +14,15 @@ class IrInstFloatUnaryOp(IrInstruction):
         # type: (IrModule) -> IrInstruction
         self._type = self._type.resolve(module)
         self._operand = self._operand.resolve(module)
-        self._value_type = self._operand.get_type()
         return self
+
+    def get_type(self):
+        # type: () -> IrType
+        return self._operand.get_type()
+
+    def resolve_type(self, equivalence, return_type, return_position):
+        # type: (IrAddressSpaceInference, IrType, IrPosition) -> None
+        self._operand.resolve_type(equivalence, return_type, return_position)
 
 
 if TYPE_CHECKING:
@@ -25,3 +32,4 @@ if TYPE_CHECKING:
     from ..ir_reference import IrReference
     from ..ir_module import IrModule
     from ..ir_type import IrType, IrAddressSpace, IrAddressSpaceInference
+    from ...ir_position import IrPosition

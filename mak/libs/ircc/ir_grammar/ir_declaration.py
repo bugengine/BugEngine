@@ -12,7 +12,7 @@ def p_ir_declaration_list(p):
 def p_ir_declaration_list_end(p):
     # type: (YaccProduction) -> None
     """
-        ir-declaration-list : empty
+        ir-declaration-list :
     """
     p[0] = []
 

@@ -23,9 +23,9 @@ public:
     __device segment(const segments_part< T >& s) : m_segment(s), m_current(0)
     {
     }
-    __device operator void*() const
+    __device operator __global void *() const
     {
-        return reinterpret_cast< void* >(m_segment.m_count - m_current);
+        return reinterpret_cast< __global void* >(m_segment.m_count - m_current);
     }
     __device bool operator!() const
     {

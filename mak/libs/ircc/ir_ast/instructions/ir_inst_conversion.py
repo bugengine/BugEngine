@@ -14,15 +14,23 @@ class IrInstCast(IrInstruction):
         # type: (IrModule) -> IrInstruction
         self._value = self._value.resolve(module)
         self._result_type = self._result_type.resolve(module)
-        self._value_type = self._result_type.uniquify()
-        return self
+        self._result_type = self._result_type.uniquify()
+        return IrInstruction.resolve(self, module)
 
-    def resolve_type(self, equivalence, return_type):
-        # type: (IrAddressSpaceInference, IrType) -> None
+    def get_type(self):
+        # type: () -> IrType
+        return self._result_type
+
+    def resolve_type(self, equivalence, return_type, return_position):
+        # type: (IrAddressSpaceInference, IrType, IrPosition) -> None
+        value_type = self._value.get_type()
         if self._cast_type not in ('bitcast', 'inttoptr', 'zext'):
-            assert self._value_type is not None
-            value_type = self._value.get_type()
-            self._value_type.add_equivalence(equivalence, value_type)
+            self._result_type.add_equivalence(equivalence, self.get_position(), value_type, self._value.get_position())
+        elif self._cast_type == 'bitcast':
+            value_type.add_equivalence_nonrecursive(
+                equivalence, self._value.get_position(), self._result_type, self.get_position()
+            )
+        self._value.resolve_type(equivalence, return_type, return_position)
 
 
 if TYPE_CHECKING:
@@ -32,3 +40,4 @@ if TYPE_CHECKING:
     from ..ir_reference import IrReference
     from ..ir_module import IrModule
     from ..ir_type import IrType, IrAddressSpace, IrAddressSpaceInference
+    from ...ir_position import IrPosition

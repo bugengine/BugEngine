@@ -1,5 +1,6 @@
 from ..ir_ast import IrReference
 from ..ir_ast.instructions import IrInstLabel
+from ..ir_ast import IrMetadataLink
 from be_typing import TYPE_CHECKING
 
 
@@ -59,7 +60,14 @@ def p_ir_instruction_metadata(p):
     # type: (YaccProduction) -> None
     """
         ir-instruction-attachment-list : COMMA METADATA_NAME METADATA_REF ir-instruction-attachment-list
-                                       | empty
+    """
+    p[0] = [(IrMetadataLink(p[2]), IrMetadataLink(p[3]))] + p[4]
+
+
+def p_ir_instruction_metadata_empty(p):
+    # type: (YaccProduction) -> None
+    """
+        ir-instruction-attachment-list : empty
     """
     p[0] = []
 

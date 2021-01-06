@@ -5,13 +5,18 @@ DeclType = TypeVar('DeclType', bound='IrDeclaration')
 
 
 class IrModule:
-    def __init__(self, headers, decls):
-        # type: (List[IrHeader], List[Tuple[IrReference, IrDeclaration]]) -> None
+    def __init__(self, logger, headers, decls):
+        # type: (Logger, List[IrHeader], List[Tuple[IrReference, IrDeclaration]]) -> None
+        self._logger = logger
         self._headers = headers
         self._scopes = [IrScope()]
         for name, decl in decls:
             self.declare(name, decl)
         self._root_declarations = decls
+
+    def logger(self):
+        # type: () -> Logger
+        return self._logger
 
     def declare(self, name, declaration):
         # type: (IrReference, IrDeclaration) -> None
@@ -25,12 +30,12 @@ class IrModule:
         # type: () -> None
         self._scopes.pop(-1)
 
-    def resolve(self):
-        # type: () -> None
+    def resolve(self, logger):
+        # type: (Logger) -> None
         for _, decl in self._root_declarations:
             decl.resolve(self)
         for _, decl in self._root_declarations:
-            decl.instantiate()
+            decl.instantiate(self)
 
     def get(self, reference, desired_type):
         # type: (IrReference, Type[DeclType]) -> DeclType
@@ -66,6 +71,7 @@ class IrModule:
 if TYPE_CHECKING:
     from typing import Generator, List, Optional, Set, Tuple, Type
     from ..ir_codegen import IrccGenerator
+    from ..ir_messages import Logger
     from .ir_header import IrHeader
     from .ir_reference import IrReference
     from .ir_declaration import IrDeclaration

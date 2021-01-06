@@ -1,6 +1,7 @@
 from .ir_declaration import IrDeclaration
 from .ir_value import IrValue
 from .ir_type import IrTypeMetadata
+from ..ir_position import IrPosition
 from be_typing import TYPE_CHECKING
 
 
@@ -15,6 +16,18 @@ class IrMetadata(IrValue):
 
     def __str__(self):
         # type: () -> str
+        raise NotImplementedError
+
+    def get_position(self):
+        # type: () -> IrPosition
+        return IrPosition('', 0, 0, 0, '')
+
+    def to_string(self):
+        # type: () -> str
+        raise NotImplementedError
+
+    def to_int(self):
+        # type: () -> int
         raise NotImplementedError
 
 
@@ -33,11 +46,28 @@ class IrMetadataLink(IrMetadata):
     def __init__(self, reference):
         # type: (IrReference) -> None
         self._reference = reference
+        self._metadata = None  # type: Optional[IrMetadata]
 
     def resolve(self, module):
         # type: (IrModule) -> IrMetadata
-        decl = module.get(self._reference, IrMetadataDeclaration)
-        return decl._metadata
+        if self._metadata is None:
+            self._metadata = module.get(self._reference, IrMetadataDeclaration)._metadata
+        return self
+
+    def get_position(self):
+        # type: () -> IrPosition
+        assert self._metadata is not None
+        return self._metadata.get_position()
+
+    def to_string(self):
+        # type: () -> str
+        assert self._metadata is not None
+        return self._metadata.to_string()
+
+    def to_int(self):
+        # type: () -> int
+        assert self._metadata is not None
+        return self._metadata.to_int()
 
 
 class IrMetadataValue(IrMetadata):
@@ -53,6 +83,10 @@ class IrMetadataString(IrMetadataValue):
         # type: () -> str
         return '!"%s"' % (self._value)
 
+    def to_string(self):
+        # type: () -> str
+        return self._value
+
 
 class IrMetadataInteger(IrMetadataValue):
     def __init__(self, value):
@@ -62,6 +96,10 @@ class IrMetadataInteger(IrMetadataValue):
     def __str__(self):
         # type: () -> str
         return '!%d' % (self._value)
+
+    def to_int(self):
+        # type: () -> int
+        return self._value
 
 
 class IrMetadataNode(IrMetadataValue):
@@ -99,11 +137,38 @@ class IrSpecializedMetadata(IrMetadataValue):
         # type: () -> str
         return '!%s(%s)' % (self._specialized_class, ', '.join('%s: %s' % (k, str(v)) for k, v in self._values.items()))
 
+    def get_position(self):
+        # type: () -> IrPosition
+        try:
+            result = self._values['scope'].get_position()
+        except KeyError:
+            try:
+                result = self._values['file'].get_position()
+            except KeyError:
+                result = IrPosition('', 0, 0, 0, '')
+        try:
+            result.filename = self._values['filename'].to_string()
+        except KeyError:
+            pass
+        try:
+            result.line_number = self._values['line'].to_int()
+        except KeyError:
+            pass
+        return result
+
 
 class IrMetadataNull(IrMetadata):
     def __str__(self):
         # type: () -> str
         return '!null'
+
+    def to_string(self):
+        # type: () -> str
+        return ''
+
+    def to_int(self):
+        # type: () -> int
+        return 0
 
 
 class IrMetadataFlagList(IrMetadata):
@@ -121,6 +186,6 @@ class IrMetadataFlagList(IrMetadata):
 
 
 if TYPE_CHECKING:
-    from typing import List, Tuple
+    from typing import List, Optional, Tuple
     from .ir_module import IrModule
     from .ir_reference import IrReference

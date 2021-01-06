@@ -15,5 +15,16 @@ def load_arguments(argument_context):
     return logger
 
 
+class IrAddressSpaceResolutionError(Exception):
+    def __init__(self, position, type, message, parent=None):
+        # type: (IrPosition, str, str, Optional[IrAddressSpaceResolutionError]) -> None
+        Exception.__init__(self, message)
+        self.position = position
+        self.type = type
+        self.parent = parent
+
+
 if TYPE_CHECKING:
+    from be_typing import Optional
     from argparse import ArgumentParser, Namespace
+    from ..ir_position import IrPosition

@@ -252,6 +252,19 @@ class Logger:
         """unsupported calling convention {calling_convention}"""
         return locals()
 
+    @error
+    def C0100(self, position, type, message):
+        # type: (IrPosition, str, str) -> Dict[str, Any]
+        """could not deduce address space of type {type}: {message}"""
+        return locals()
+
+    @diagnostic
+    def C0101(self, position, address_space):
+        # type: (IrPosition, str) -> Dict[str, Any]
+        """location of deduction as '{address_space}'"""
+        return locals()
+
+
 logger = None
 
 from be_typing import TYPE_CHECKING

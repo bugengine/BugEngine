@@ -7,7 +7,7 @@ def p_translation_unit(p):
     """
         translation-unit : ir-header ir-declaration-list
     """
-    p[0] = IrModule(p[1], p[2])
+    p[0] = IrModule(p.lexer.logger, p[1], p[2])
 
 
 if TYPE_CHECKING:

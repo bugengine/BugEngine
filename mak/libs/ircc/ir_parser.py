@@ -60,7 +60,7 @@ class IrParser:
         if result:
             # result.debug_dump()
             result.error_count = logger._error_count
-        result.resolve()
+        result.resolve(logger)
         return result
 
 

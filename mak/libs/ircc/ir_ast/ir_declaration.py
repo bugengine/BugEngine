@@ -20,8 +20,8 @@ class IrDeclaration:
         # type: (IrccGenerator, str) -> None
         pass
 
-    def instantiate(self):
-        # type: () -> None
+    def instantiate(self, module):
+        # type: (IrModule) -> None
         pass
 
 

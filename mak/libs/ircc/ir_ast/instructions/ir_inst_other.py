@@ -11,19 +11,26 @@ class IrInstCall(IrInstruction):
         self._arguments = arguments
 
     def resolve(self, module):
-        # type: (IrModule) -> IrInstCall
+        # type: (IrModule) -> IrInstruction
         self._method = self._method.resolve(module)
         self._arguments = [a.resolve(module) for a in self._arguments]
-        self._value_type = self._method._return_type
-        return self
+        return IrInstruction.resolve(self, module)
 
-    def resolve_type(self, equivalence, return_type):
-        # type: (IrAddressSpaceInference, IrType) -> None
+    def get_type(self):
+        # type: () -> IrType
+        return self._method.return_type()
+
+    def resolve_type(self, equivalence, return_type, return_position):
+        # type: (IrAddressSpaceInference, IrType, IrPosition) -> None
+        for a in self._arguments:
+            a.resolve_type(equivalence, return_type, return_position)
         equivalence.merge(self._method.equivalence())
         parameters = self._method.parameters()
         assert len(parameters) == len(self._arguments)
         for argument, parameter in zip(self._arguments, parameters):
-            argument.get_type().add_equivalence(equivalence, parameter.get_type())
+            argument.get_type().add_equivalence(
+                equivalence, argument.get_position(), parameter.get_type(), parameter.get_position()
+            )
 
 
 class IrInstIntegerCompare(IrInstruction):
@@ -34,14 +41,23 @@ class IrInstIntegerCompare(IrInstruction):
         self._left_operand = left_operand
         self._right_operand = right_operand
         self._operation = operation
+        self._value_type = IrTypeBuiltin('i1')
 
     def resolve(self, module):
         # type: (IrModule) -> IrInstruction
         self._type = self._type.resolve(module)
         self._left_operand = self._left_operand.resolve(module)
         self._right_operand = self._right_operand.resolve(module)
-        self._value_type = IrTypeBuiltin('i1')
-        return self
+        return IrInstruction.resolve(self, module)
+
+    def resolve_type(self, equivalence, return_type, return_position):
+        # type: (IrAddressSpaceInference, IrType, IrPosition) -> None
+        self._left_operand.resolve_type(equivalence, return_type, return_position)
+        self._right_operand.resolve_type(equivalence, return_type, return_position)
+
+    def get_type(self):
+        # type: () -> IrType
+        return self._value_type
 
 
 class IrInstFloatCompare(IrInstruction):
@@ -52,14 +68,23 @@ class IrInstFloatCompare(IrInstruction):
         self._left_operand = left_operand
         self._right_operand = right_operand
         self._operation = operation
+        self._value_type = IrTypeBuiltin('i1')
 
     def resolve(self, module):
         # type: (IrModule) -> IrInstruction
         self._type = self._type.resolve(module)
         self._left_operand = self._left_operand.resolve(module)
         self._right_operand = self._right_operand.resolve(module)
-        self._value_type = IrTypeBuiltin('i1')
-        return self
+        return IrInstruction.resolve(self, module)
+
+    def resolve_type(self, equivalence, return_type, return_position):
+        # type: (IrAddressSpaceInference, IrType, IrPosition) -> None
+        self._left_operand.resolve_type(equivalence, return_type, return_position)
+        self._right_operand.resolve_type(equivalence, return_type, return_position)
+
+    def get_type(self):
+        # type: () -> IrType
+        return self._value_type
 
 
 class IrInstPhi(IrInstruction):
@@ -73,14 +98,19 @@ class IrInstPhi(IrInstruction):
         # type: (IrModule) -> IrInstruction
         self._type = self._type.resolve(module)
         self._origins = [(expr.resolve(module), label) for expr, label in self._origins]
-        self._value_type = self._origins[0][0].get_type()
-        return self
+        return IrInstruction.resolve(self, module)
 
-    def resolve_type(self, equivalence, return_type):
-        # type: (IrAddressSpaceInference, IrType) -> None
-        assert self._value_type is not None
-        for o in self._origins[1:]:
-            self._value_type.add_equivalence(equivalence, o[0].get_type())
+    def resolve_type(self, equivalence, return_type, return_position):
+        # type: (IrAddressSpaceInference, IrType, IrPosition) -> None
+        for o in self._origins:
+            o[0].resolve_type(equivalence, return_type, return_position)
+            self._type.add_equivalence(
+                equivalence, self._origins[0][0].get_position(), o[0].get_type(), o[0].get_position()
+            )
+
+    def get_type(self):
+        # type: () -> IrType
+        return self._type
 
 
 class IrInstSelect(IrInstruction):
@@ -96,12 +126,20 @@ class IrInstSelect(IrInstruction):
         self._condition = self._condition.resolve(module)
         self._value_true = self._value_true.resolve(module)
         self._value_false = self._value_false.resolve(module)
-        self._value_type = self._value_true.get_type()
-        return self
+        return IrInstruction.resolve(self, module)
 
-    def resolve_type(self, equivalence, return_type):
-        # type: (IrAddressSpaceInference, IrType) -> None
-        self._value_true.get_type().add_equivalence(equivalence, self._value_false.get_type())
+    def get_type(self):
+        # type: () -> IrType
+        return self._value_true.get_type()
+
+    def resolve_type(self, equivalence, return_type, return_position):
+        # type: (IrAddressSpaceInference, IrType, IrPosition) -> None
+        self._condition.resolve_type(equivalence, return_type, return_position)
+        self._value_true.resolve_type(equivalence, return_type, return_position)
+        self._value_false.resolve_type(equivalence, return_type, return_position)
+        self._value_true.get_type().add_equivalence(
+            equivalence, self._value_true.get_position(), self._value_false.get_type(), self._value_false.get_position()
+        )
 
 
 if TYPE_CHECKING:
@@ -114,3 +152,4 @@ if TYPE_CHECKING:
     from ..ir_metadata import IrMetadataLink
     from ..ir_module import IrModule
     from ..ir_type import IrType, IrAddressSpace, IrAddressSpaceInference
+    from ...ir_position import IrPosition

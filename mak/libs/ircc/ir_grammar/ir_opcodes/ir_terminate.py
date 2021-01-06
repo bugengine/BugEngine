@@ -15,7 +15,7 @@ def p_ir_opcode_br(p):
     """
         ir-opcode : BR LABEL ID ir-instruction-attachment-list
     """
-    p[0] = IrInstBranch(p[3], p[3])
+    p[0] = IrInstBranch(p[3], p[4])
 
 
 def p_ir_opcode_br_conditional(p):

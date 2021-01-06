@@ -14,10 +14,18 @@ class IrInstExtractElement(IrInstruction):
         # type: (IrModule) -> IrInstruction
         self._value = self._value.resolve(module)
         self._index = self._index.resolve(module)
+        return self
+
+    def resolve_type(self, equivalence, return_type, return_position):
+        # type: (IrAddressSpaceInference, IrType, IrPosition) -> None
+        self._value.resolve_type(equivalence, return_type, return_position)
+        self._index.resolve_type(equivalence, return_type, return_position)
+
+    def get_type(self):
+        # type: () -> IrType
         vector_type = self._value.get_type()
         assert isinstance(vector_type, IrTypeVector)
-        self._value_type = vector_type._type
-        return self
+        return vector_type._type
 
 
 class IrInstInsertElement(IrInstruction):
@@ -33,8 +41,17 @@ class IrInstInsertElement(IrInstruction):
         self._value = self._value.resolve(module)
         self._element = self._element.resolve(module)
         self._index = self._index.resolve(module)
-        self._value_type = self._value.get_type()
         return self
+
+    def resolve_type(self, equivalence, return_type, return_position):
+        # type: (IrAddressSpaceInference, IrType, IrPosition) -> None
+        self._value.resolve_type(equivalence, return_type, return_position)
+        self._element.resolve_type(equivalence, return_type, return_position)
+        self._index.resolve_type(equivalence, return_type, return_position)
+
+    def get_type(self):
+        # type: () -> IrType
+        return self._value.get_type()
 
 
 class IrInstShuffleVector(IrInstruction):
@@ -50,12 +67,20 @@ class IrInstShuffleVector(IrInstruction):
         self._vector_1 = self._vector_1.resolve(module)
         self._vector_2 = self._vector_2.resolve(module)
         self._mask = self._mask.resolve(module)
-        self._value_type = self._vector_1.get_type()
-        return self
+        return IrInstruction.resolve(self, module)
 
-    def resolve_type(self, equivalence, return_type):
-        # type: (IrAddressSpaceInference, IrType) -> None
-        self._vector_1.get_type().add_equivalence(equivalence, self._vector_2.get_type())
+    def resolve_type(self, equivalence, return_type, return_position):
+        # type: (IrAddressSpaceInference, IrType, IrPosition) -> None
+        self._vector_1.resolve_type(equivalence, return_type, return_position)
+        self._vector_2.resolve_type(equivalence, return_type, return_position)
+        self._mask.resolve_type(equivalence, return_type, return_position)
+        self._vector_1.get_type().add_equivalence(
+            equivalence, self._vector_1.get_position(), self._vector_2.get_type(), self._vector_2.get_position()
+        )
+
+    def get_type(self):
+        # type: () -> IrType
+        return self._vector_1.get_type()
 
 
 if TYPE_CHECKING:
@@ -65,3 +90,4 @@ if TYPE_CHECKING:
     from ..ir_reference import IrReference
     from ..ir_module import IrModule
     from ..ir_type import IrType, IrAddressSpace, IrAddressSpaceInference
+    from ...ir_position import IrPosition
