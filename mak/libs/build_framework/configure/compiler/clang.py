@@ -277,24 +277,30 @@ def detect_clang(conf):
                             libdirs.append(b)
 
     seen = {}
-    for path in libdirs + bindirs:
-        clang = conf.detect_executable('clang', path_list=[path])
-        clangxx = conf.detect_executable('clang++', path_list=[path])
-        if clang and clangxx:
-            clang = os.path.normpath(clang)
-            clangxx = os.path.normpath(clangxx)
-            try:
-                c = Clang(clang, clangxx)
-            except Exception as e:
-                #print(e)
-                pass
-            else:
-                if not c.is_valid(conf):
-                    continue
+    versions = []
+    for libdir in conf.get_sysroot_libpaths('/'):
+        clang_dir = os.path.join(libdir, 'clang')
+        if os.path.isdir(clang_dir):
+            versions += os.listdir(clang_dir)
+    for version in [''] + ['-%s' % v for v in versions]:
+        for path in libdirs + bindirs:
+            clang = conf.detect_executable('clang' + version, path_list=[path])
+            clangxx = conf.detect_executable('clang++' + version, path_list=[path])
+            if clang and clangxx:
+                clang = os.path.normpath(clang)
+                clangxx = os.path.normpath(clangxx)
                 try:
-                    seen[c.name()].add_sibling(c)
-                except KeyError:
-                    clangs.append(c)
+                    c = Clang(clang, clangxx)
+                except Exception as e:
+                    #print(e)
+                    pass
+                else:
+                    if not c.is_valid(conf):
+                        continue
+                    try:
+                        seen[c.name()].add_sibling(c)
+                    except KeyError:
+                        clangs.append(c)
     msvc_versions = get_msvc_build_tools(conf)
     for c in clangs:
         for multilib_compiler in c.get_multilib_compilers(msvc_versions, conf.env.SYSROOTS):

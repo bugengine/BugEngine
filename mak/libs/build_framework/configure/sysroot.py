@@ -2,6 +2,7 @@ from waflib import Options
 import os
 from elftools.elf.elffile import ELFFile
 from elftools.common.exceptions import ELFError
+from waflib.Configure import conf
 
 PLATFORMS = {
     'ELFOSABI_LINUX': 'linux',
@@ -126,13 +127,19 @@ MULTILIB_DIRS = {
 }
 
 
-def get_sysroot_libpaths(sysroot):
+@conf
+def get_sysroot_libpaths(configuration_context, sysroot):
     try:
-        confs = os.listdir(os.path.join(sysroot, 'etc', 'ld.so.conf.d'))
+        confs = [os.path.join(sysroot, 'etc', 'ld.so.conf')] + os.listdir(os.path.join(sysroot, 'etc', 'ld.so.conf.d'))
     except OSError:
         return [os.path.join(sysroot, 'usr', x) for x in ('lib32', 'lib64', 'libx32', 'lib')]
     else:
-        libpaths = []
+        libpaths = [
+            os.path.join(sysroot, 'lib'),
+            os.path.join(sysroot, 'lib64'),
+            os.path.join(sysroot, 'usr/lib'),
+            os.path.join(sysroot, 'usr/lib64')
+        ]
         for conf in confs:
             try:
                 f = open(os.path.join(sysroot, 'etc', 'ld.so.conf.d', conf), 'r')
@@ -159,7 +166,7 @@ def configure(configuration_context):
             # try to find GCC triples
             gcc_targets = os.listdir(os.path.join(sysroot, 'usr', 'lib', 'gcc'))
         except OSError as e:
-            for libpath in get_sysroot_libpaths(sysroot):
+            for libpath in configuration_context.get_sysroot_libpaths(sysroot):
                 try:
                     content = os.listdir(libpath)
                 except OSError:
