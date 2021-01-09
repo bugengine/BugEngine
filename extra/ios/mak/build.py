@@ -5,9 +5,7 @@ import os
 
 def build(build_context):
     build_context.recurse(
-        os.path.join(
-            build_context.bugenginenode.abspath(), 'mak', 'libs', 'build_framework', 'build', 'target', 'macos.py'
-        )
+        os.path.join(build_context.bugenginenode.abspath(), 'mak', 'build_framework', 'build', 'target', 'macos.py')
     )
 
 

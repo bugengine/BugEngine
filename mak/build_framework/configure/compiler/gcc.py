@@ -85,10 +85,20 @@ def detect_gcc_version(conf, bindir, version, target, seen):
             cc = conf.detect_executable('%s-gcc%s' % (gcc_name_prefix, v), path_list=[bindir])
             if cc:
                 break
+        if cc is None:
+            for v in versions:
+                cc = conf.detect_executable('gcc%s' % (v), path_list=[bindir])
+                if cc:
+                    break
         for v in versions:
             cxx = conf.detect_executable('%s-g++%s' % (gcc_name_prefix, v), path_list=[bindir])
             if cxx:
                 break
+        if cxx is None:
+            for v in versions:
+                cxx = conf.detect_executable('g++%s' % (v), path_list=[bindir])
+                if cxx:
+                    break
         if cc and cxx:
             try:
                 c = cls(cc, cxx)
@@ -119,7 +129,10 @@ def detect_gcc_version(conf, bindir, version, target, seen):
 
 def detect_gcc_from_path(conf, path, seen):
     gcc_compilers = []
-    for subdir, relative in [('', '../..'), ('lib/gcc', '../../../..'), ('gcc', '../../..'), ('llvm', '../../..')]:
+    for subdir, relative in [
+        ('', '../..'), ('lib/gcc', '../../../..'), ('lib64/gcc', '../../../..'), ('gcc', '../../..'),
+        ('llvm', '../../..')
+    ]:
         libdir = os.path.join(path, subdir)
         if not os.path.isdir(libdir):
             continue
@@ -213,12 +226,17 @@ def detect_gcc(conf):
             for f in os.listdir(os.path.join(bindir, '..')):
                 if os.path.isdir(os.path.join(bindir, '..', f, 'lib')):
                     paths.add(os.path.normpath(os.path.join(bindir, '..', f, 'lib')))
+                if os.path.isdir(os.path.join(bindir, '..', f, 'lib64')):
+                    paths.add(os.path.normpath(os.path.join(bindir, '..', f, 'lib64')))
         except OSError:
             pass
         try:
             for f in os.listdir(os.path.join(bindir, '..', 'lib', 'llvm')):
                 if os.path.isdir(os.path.join(bindir, '..', 'lib', 'llvm', f, 'lib')):
                     paths.add(os.path.normpath(os.path.join(bindir, '..', 'lib', 'llvm', f, 'lib')))
+            for f in os.listdir(os.path.join(bindir, '..', 'lib64', 'llvm')):
+                if os.path.isdir(os.path.join(bindir, '..', 'lib64', 'llvm', f, 'lib')):
+                    paths.add(os.path.normpath(os.path.join(bindir, '..', 'lib64', 'llvm', f, 'lib')))
         except OSError:
             pass
     paths = paths.union(conf.env.ALL_ARCH_LIBPATHS)
@@ -232,7 +250,9 @@ def detect_gcc(conf):
                     gcc_compilers += detect_gcc_from_path(conf, gcc_lib_path, seen)
                     for version in os.listdir(gcc_lib_path):
                         if os.path.isdir(os.path.join(gcc_lib_path, version, 'gcc')):
-                            gcc_compilers += detect_gcc_from_path(conf, os.path.join(gcc_lib_path, version, 'gcc'), seen)
+                            gcc_compilers += detect_gcc_from_path(
+                                conf, os.path.join(gcc_lib_path, version, 'gcc'), seen
+                            )
         except OSError:
             pass
     detect_multilib_compilers(conf, gcc_compilers, seen)
