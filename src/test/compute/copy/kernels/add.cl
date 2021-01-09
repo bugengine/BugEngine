@@ -1,7 +1,7 @@
 #include <bugengine/minitl/stdafx.h>
 #include <bugengine/kernel/input/segments.hh>
 
-__global int x;
+static __global int x;
 
 __device int* findMin(int* x1, int* /*x2*/)
 {

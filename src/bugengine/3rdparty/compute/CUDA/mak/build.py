@@ -28,9 +28,10 @@ template_cpp = """
 
 using namespace Kernel;
 
+_BE_REGISTER_PLUGIN(BE_KERNEL_ID, BE_KERNEL_NAME);
+
 %(kernels)s
 
-_BE_REGISTER_PLUGIN(BE_KERNEL_ID, BE_KERNEL_NAME);
 """
 
 
@@ -103,7 +104,7 @@ def build_cuda_kernels(task_gen):
     cuda_bin = task_gen.make_bld_node('obj', cuda_source.parent, cuda_source.name[:-2] + 'fatbin')
     cuda_cc = task_gen.make_bld_node('src', cuda_source.parent, cuda_source.name[:-2] + 'cc')
     task_gen.create_task('nvcc', [cuda_source], [cuda_bin])
-    task_gen.create_task('bin2c', [cuda_bin], [cuda_cc], var='cudaKernel')
+    task_gen.create_task('bin2c', [cuda_bin], [cuda_cc], var='%s_cudaKernel' % '_'.join(task_gen.kernel))
     task_gen.source.append(cuda_cc)
 
 

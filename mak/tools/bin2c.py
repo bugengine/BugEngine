@@ -2,6 +2,9 @@ from waflib import Task
 
 
 class bin2c(Task.Task):
+    def sig_vars(self):
+        self.m.update(self.var.encode('utf-8'))
+
     def run(self):
         input_lines = []
         with open(self.inputs[0].abspath(), 'rb') as input_file:

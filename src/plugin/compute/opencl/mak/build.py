@@ -16,15 +16,15 @@ template_cc = """
 #include    <bugengine/kernel/input/input.hh>
 #include    <bugengine/plugin/dynobjectlist.hh>
 
-extern const unsigned char s_cldata32[];
-extern const unsigned long s_cldata32_size;
-extern const unsigned char s_cldata64[];
-extern const unsigned long s_cldata64_size;
+extern const unsigned char s_%(kernel_name)scldata32[];
+extern const unsigned long s_%(kernel_name)scldata32_size;
+extern const unsigned char s_%(kernel_name)scldata64[];
+extern const unsigned long s_%(kernel_name)scldata64_size;
 
-_BE_PLUGIN_EXPORT_VAR(const unsigned char* s_clKernel32, s_cldata32);
-_BE_PLUGIN_EXPORT_VAR(const u64 s_clKernel32Size, s_cldata32_size);
-_BE_PLUGIN_EXPORT_VAR(const unsigned char* s_clKernel64, s_cldata64);
-_BE_PLUGIN_EXPORT_VAR(const u64 s_clKernel64Size, s_cldata64_size);
+_BE_PLUGIN_EXPORT_VAR(const unsigned char* s_clKernel32, s_%(kernel_name)scldata32);
+_BE_PLUGIN_EXPORT_VAR(const u64 s_clKernel32Size, s_%(kernel_name)scldata32_size);
+_BE_PLUGIN_EXPORT_VAR(const unsigned char* s_clKernel64, s_%(kernel_name)scldata64);
+_BE_PLUGIN_EXPORT_VAR(const u64 s_clKernel64Size, s_%(kernel_name)scldata64_size);
 
 _BE_REGISTER_PLUGIN(BE_KERNEL_ID, BE_KERNEL_NAME);
 _BE_REGISTER_METHOD(BE_KERNEL_ID, s_clKernel32);
@@ -43,7 +43,12 @@ class embed_cl(Task.Task):
         self.m.update((self.generator.pchstop if self.generator.pchstop else '').encode('utf-8'))
 
     def run(self):
-        params = {'pch': '#include <%s>\n' % self.generator.pchstop if self.generator.pchstop else ''}
+        with open(self.inputs[0].abspath(), 'rb') as input_file:
+            kernel_name, includes, source, kernel_methods = pickle.load(input_file)
+        params = {
+            'pch': '#include <%s>\n' % self.generator.pchstop if self.generator.pchstop else '',
+            'kernel_name': kernel_name.replace('.', '_')
+        }
         with open(self.outputs[0].abspath(), 'w') as out:
             out.write(template_cc % params)
 
@@ -105,7 +110,11 @@ def cl_kernel_compile(task_gen, source):
         cl_cc = task_gen.make_bld_node('src', source.parent, source.name[:source.name.rfind('.')] + '.embedded.cc')
 
         task_gen.create_task('ircc', [source], [cl_source], ircc_target=task_gen.env.IRCC_CL_TARGET)
-        task_gen.create_task('bin2c', [cl_source], [cl_cc], var='cldata%s' % ptr_size, zero_terminate=True)
+        task_gen.create_task(
+            'bin2c', [cl_source], [cl_cc],
+            var='%scldata%s' % ('_'.join(task_gen.kernel), ptr_size),
+            zero_terminate=True
+        )
         task_gen.source += [cl_cc]
 
 
