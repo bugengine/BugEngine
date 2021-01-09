@@ -9,8 +9,12 @@ class IrDeclaration:
 
     @abstractmethod
     def resolve(self, module):
-        # type: (IrModule) -> IrDeclaration
+        # type: (IrModule) -> None
         raise NotImplementedError
+
+    def resolve_content(self, module):
+        # type: (IrModule) -> None
+        pass
 
     def collect(self, ir_name):
         # type: (str) -> List[Tuple[str, IrDeclaration]]

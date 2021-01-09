@@ -10,11 +10,13 @@ class IrInstCall(IrInstruction):
         self._method = method
         self._arguments = arguments
 
-    def resolve(self, module):
-        # type: (IrModule) -> IrInstruction
-        self._method = self._method.resolve(module)
-        self._arguments = [a.resolve(module) for a in self._arguments]
-        return IrInstruction.resolve(self, module)
+    def resolve(self, module, position):
+        # type: (IrModule, IrPosition) -> IrPosition
+        position = IrInstruction.resolve(self, module, position)
+        self._method.resolve(module)
+        for a in self._arguments:
+            a.resolve(module, position)
+        return position
 
     def get_type(self):
         # type: () -> IrType
@@ -43,12 +45,13 @@ class IrInstIntegerCompare(IrInstruction):
         self._operation = operation
         self._value_type = IrTypeBuiltin('i1')
 
-    def resolve(self, module):
-        # type: (IrModule) -> IrInstruction
-        self._type = self._type.resolve(module)
-        self._left_operand = self._left_operand.resolve(module)
-        self._right_operand = self._right_operand.resolve(module)
-        return IrInstruction.resolve(self, module)
+    def resolve(self, module, position):
+        # type: (IrModule, IrPosition) -> IrPosition
+        position = IrInstruction.resolve(self, module, position)
+        self._type.resolve(module)
+        self._left_operand.resolve(module, position)
+        self._right_operand.resolve(module, position)
+        return position
 
     def resolve_type(self, equivalence, return_type, return_position):
         # type: (IrAddressSpaceInference, IrType, IrPosition) -> None
@@ -70,12 +73,13 @@ class IrInstFloatCompare(IrInstruction):
         self._operation = operation
         self._value_type = IrTypeBuiltin('i1')
 
-    def resolve(self, module):
-        # type: (IrModule) -> IrInstruction
-        self._type = self._type.resolve(module)
-        self._left_operand = self._left_operand.resolve(module)
-        self._right_operand = self._right_operand.resolve(module)
-        return IrInstruction.resolve(self, module)
+    def resolve(self, module, position):
+        # type: (IrModule, IrPosition) -> IrPosition
+        position = IrInstruction.resolve(self, module, position)
+        self._type.resolve(module)
+        self._left_operand.resolve(module, position)
+        self._right_operand.resolve(module, position)
+        return position
 
     def resolve_type(self, equivalence, return_type, return_position):
         # type: (IrAddressSpaceInference, IrType, IrPosition) -> None
@@ -94,11 +98,13 @@ class IrInstPhi(IrInstruction):
         self._type = type
         self._origins = origins
 
-    def resolve(self, module):
-        # type: (IrModule) -> IrInstruction
-        self._type = self._type.resolve(module)
-        self._origins = [(expr.resolve(module), label) for expr, label in self._origins]
-        return IrInstruction.resolve(self, module)
+    def resolve(self, module, position):
+        # type: (IrModule, IrPosition) -> IrPosition
+        position = IrInstruction.resolve(self, module, position)
+        self._type.resolve(module)
+        for expr, label in self._origins:
+            expr.resolve(module, position)
+        return position
 
     def resolve_type(self, equivalence, return_type, return_position):
         # type: (IrAddressSpaceInference, IrType, IrPosition) -> None
@@ -121,12 +127,13 @@ class IrInstSelect(IrInstruction):
         self._value_true = value_true
         self._value_false = value_false
 
-    def resolve(self, module):
-        # type: (IrModule) -> IrInstruction
-        self._condition = self._condition.resolve(module)
-        self._value_true = self._value_true.resolve(module)
-        self._value_false = self._value_false.resolve(module)
-        return IrInstruction.resolve(self, module)
+    def resolve(self, module, position):
+        # type: (IrModule, IrPosition) -> IrPosition
+        position = IrInstruction.resolve(self, module, position)
+        self._condition.resolve(module, position)
+        self._value_true.resolve(module, position)
+        self._value_false.resolve(module, position)
+        return position
 
     def get_type(self):
         # type: () -> IrType

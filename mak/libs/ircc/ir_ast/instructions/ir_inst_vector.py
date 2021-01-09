@@ -10,11 +10,12 @@ class IrInstExtractElement(IrInstruction):
         self._value = value
         self._index = index
 
-    def resolve(self, module):
-        # type: (IrModule) -> IrInstruction
-        self._value = self._value.resolve(module)
-        self._index = self._index.resolve(module)
-        return self
+    def resolve(self, module, position):
+        # type: (IrModule, IrPosition) -> IrPosition
+        position = IrInstruction.resolve(self, module, position)
+        self._value.resolve(module, position)
+        self._index.resolve(module, position)
+        return position
 
     def resolve_type(self, equivalence, return_type, return_position):
         # type: (IrAddressSpaceInference, IrType, IrPosition) -> None
@@ -36,12 +37,13 @@ class IrInstInsertElement(IrInstruction):
         self._element = element
         self._index = index
 
-    def resolve(self, module):
-        # type: (IrModule) -> IrInstruction
-        self._value = self._value.resolve(module)
-        self._element = self._element.resolve(module)
-        self._index = self._index.resolve(module)
-        return self
+    def resolve(self, module, position):
+        # type: (IrModule, IrPosition) -> IrPosition
+        position = IrInstruction.resolve(self, module, position)
+        self._value.resolve(module, position)
+        self._element.resolve(module, position)
+        self._index.resolve(module, position)
+        return position
 
     def resolve_type(self, equivalence, return_type, return_position):
         # type: (IrAddressSpaceInference, IrType, IrPosition) -> None
@@ -62,12 +64,13 @@ class IrInstShuffleVector(IrInstruction):
         self._vector_2 = vector_2
         self._mask = mask
 
-    def resolve(self, module):
-        # type: (IrModule) -> IrInstruction
-        self._vector_1 = self._vector_1.resolve(module)
-        self._vector_2 = self._vector_2.resolve(module)
-        self._mask = self._mask.resolve(module)
-        return IrInstruction.resolve(self, module)
+    def resolve(self, module, position):
+        # type: (IrModule, IrPosition) -> IrPosition
+        position = IrInstruction.resolve(self, module, position)
+        self._vector_1.resolve(module, position)
+        self._vector_2.resolve(module, position)
+        self._mask.resolve(module, position)
+        return position
 
     def resolve_type(self, equivalence, return_type, return_position):
         # type: (IrAddressSpaceInference, IrType, IrPosition) -> None

@@ -10,10 +10,11 @@ class IrInstExtractValue(IrInstruction):
         self._indices = indices
         self._value_type = None    # type: Optional[IrType]
 
-    def resolve(self, module):
-        # type: (IrModule) -> IrInstruction
-        self._source = self._source.resolve(module)
-        return IrInstruction.resolve(self, module)
+    def resolve(self, module, position):
+        # type: (IrModule, IrPosition) -> IrPosition
+        position = IrInstruction.resolve(self, module, position)
+        self._source.resolve(module, position)
+        return position
 
     def get_type(self):
         # type: () -> IrType
@@ -39,11 +40,12 @@ class IrInstInsertValue(IrInstruction):
         self._indices = indices
         self._value_type = None    # type: Optional[IrType]
 
-    def resolve(self, module):
-        # type: (IrModule) -> IrInstruction
-        self._source = self._source.resolve(module)
-        self._value = self._value.resolve(module)
-        return IrInstruction.resolve(self, module)
+    def resolve(self, module, position):
+        # type: (IrModule, IrPosition) -> IrPosition
+        position = IrInstruction.resolve(self, module, position)
+        self._source.resolve(module, position)
+        self._value.resolve(module, position)
+        return position
 
     def get_type(self):
         # type: () -> IrType

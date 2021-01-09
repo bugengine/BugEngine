@@ -11,12 +11,13 @@ class IrInstBinaryOp(IrInstruction):
         self._right_operand = right_operand
         self._operation = operation
 
-    def resolve(self, module):
-        # type: (IrModule) -> IrInstruction
-        self._type = self._type.resolve(module)
-        self._left_operand = self._left_operand.resolve(module)
-        self._right_operand = self._right_operand.resolve(module)
-        return IrInstruction.resolve(self, module)
+    def resolve(self, module, position):
+        # type: (IrModule, IrPosition) -> IrPosition
+        position = IrInstruction.resolve(self, module, position)
+        self._type.resolve(module)
+        self._left_operand.resolve(module, position)
+        self._right_operand.resolve(module, position)
+        return position
 
     def get_type(self):
         # type: () -> IrType
@@ -37,12 +38,13 @@ class IrInstFloatBinaryOp(IrInstruction):
         self._right_operand = right_operand
         self._operation = operation
 
-    def resolve(self, module):
-        # type: (IrModule) -> IrInstruction
-        self._type = self._type.resolve(module)
-        self._left_operand = self._left_operand.resolve(module)
-        self._right_operand = self._right_operand.resolve(module)
-        return IrInstruction.resolve(self, module)
+    def resolve(self, module, position):
+        # type: (IrModule, IrPosition) -> IrPosition
+        position = IrInstruction.resolve(self, module, position)
+        self._type.resolve(module)
+        self._left_operand.resolve(module, position)
+        self._right_operand.resolve(module, position)
+        return position
 
     def get_type(self):
         # type: () -> IrType

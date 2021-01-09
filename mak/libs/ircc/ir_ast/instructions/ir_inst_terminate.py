@@ -8,10 +8,11 @@ class IrInstRet(IrInstruction):
         IrInstruction.__init__(self, 'ret', None, metadata)
         self._return_value = return_value
 
-    def resolve(self, module):
-        # type: (IrModule) -> IrInstruction
-        self._return_value = self._return_value.resolve(module)
-        return IrInstruction.resolve(self, module)
+    def resolve(self, module, position):
+        # type: (IrModule, IrPosition) -> IrPosition
+        position = IrInstruction.resolve(self, module, position)
+        self._return_value.resolve(module, position)
+        return position
 
     def get_type(self):
         # type: () -> IrType
@@ -54,10 +55,11 @@ class IrInstConditionalBranch(IrInstruction):
         self._target_true = target_true
         self._target_false = target_false
 
-    def resolve(self, module):
-        # type: (IrModule) -> IrInstruction
-        self._condition = self._condition.resolve(module)
-        return IrInstruction.resolve(self, module)
+    def resolve(self, module, position):
+        # type: (IrModule, IrPosition) -> IrPosition
+        position = IrInstruction.resolve(self, module, position)
+        self._condition.resolve(module, position)
+        return position
 
     def resolve_type(self, equivalence, return_type, return_position):
         # type: (IrAddressSpaceInference, IrType, IrPosition) -> None
@@ -80,11 +82,13 @@ class IrInstSwitch(IrInstruction):
         self._default_label = default_label
         self._targets = targets
 
-    def resolve(self, module):
-        # type: (IrModule) -> IrInstruction
-        self._condition = self._condition.resolve(module)
-        self._targets = [(value.resolve(module), label) for value, label in self._targets]
-        return IrInstruction.resolve(self, module)
+    def resolve(self, module, position):
+        # type: (IrModule, IrPosition) -> IrPosition
+        position = IrInstruction.resolve(self, module, position)
+        self._condition.resolve(module, position)
+        for value, label in self._targets:
+            value.resolve(module, position)
+        return position
 
     def resolve_type(self, equivalence, return_type, return_position):
         # type: (IrAddressSpaceInference, IrType, IrPosition) -> None

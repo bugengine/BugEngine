@@ -11,12 +11,19 @@ class IrExpression(IrObject):
         IrObject.__init__(self)
         self._metadata = metadata
         self._metadata_values = {}     # type: Dict[str, IrMetadata]
+        self._position = IrPosition('', 0, 0, 0, '')
 
-    def resolve(self, module):
-        # type: (IrModule) -> IrExpression
+    def resolve(self, module, position):
+        # type: (IrModule, IrPosition) -> IrPosition
         for name, value in self._metadata:
-            self._metadata_values[name._reference] = value.resolve(module)
-        return self
+            value.resolve(module, position)
+        for name, value in self._metadata:
+            if name._reference == '!dbg':
+                self._position = value.get_position()
+                break
+        else:
+            self._position = position
+        return self._position
 
     def get_type(self):
         # type: () -> IrType
@@ -32,11 +39,7 @@ class IrExpression(IrObject):
 
     def get_position(self):
         # type: () -> IrPosition
-        try:
-            pos = self._metadata_values['!dbg'].get_position()
-            return pos
-        except KeyError:
-            return IrPosition('', 0, 0, 0, '')
+        return self._position
 
     def resolve_type(self, equivalence, return_type, return_position):
         # type: (IrAddressSpaceInference, IrType, IrPosition) -> None
@@ -50,9 +53,8 @@ class IrExpressionDeclaration(IrDeclaration):
         self._expression = expression
 
     def resolve(self, module):
-        # type: (IrModule) -> IrExpressionDeclaration
-        self._expression.resolve(module)
-        return self
+        # type: (IrModule) -> None
+        self._expression.resolve(module, IrPosition('', 0, 0, 0, ''))
 
 
 class IrExpressionZero(IrExpression):
@@ -122,10 +124,11 @@ class IrExpressionArray(IrExpression):
         IrExpression.__init__(self)
         self._values = values
 
-    def resolve(self, module):
-        # type: (IrModule) -> IrExpression
-        self._values = [v.resolve(module) for v in self._values]
-        return self
+    def resolve(self, module, position):
+        # type: (IrModule, IrPosition) -> IrPosition
+        for v in self._values:
+            v.resolve(module, position)
+        return IrExpression.resolve(self, module, position)
 
     def __str__(self):
         # type: () -> str
@@ -138,10 +141,11 @@ class IrExpressionAggregate(IrExpression):
         IrExpression.__init__(self)
         self._values = values
 
-    def resolve(self, module):
-        # type: (IrModule) -> IrExpression
-        self._values = [v.resolve(module) for v in self._values]
-        return self
+    def resolve(self, module, position):
+        # type: (IrModule, IrPosition) -> IrPosition
+        for v in self._values:
+            v.resolve(module, position)
+        return IrExpression.resolve(self, module, position)
 
     def __str__(self):
         # type: () -> str
@@ -155,13 +159,18 @@ class IrExpressionReference(IrExpression):
         self._reference = reference
         self._expression = None    # type: Optional[IrExpression]
 
-    def resolve(self, module):
-        # type: (IrModule) -> IrExpression
+    def resolve(self, module, position):
+        # type: (IrModule, IrPosition) -> IrPosition
         if self._expression is None:
             declaration = module.get(self._reference, IrExpressionDeclaration)
             #declaration = declaration.resolve(module)
             self._expression = declaration._expression
-        return self
+        return IrExpression.resolve(self, module, position)
+
+    def get_position(self):
+        # type: () -> IrPosition
+        assert self._expression is not None
+        return self._expression.get_position()
 
     def get_type(self):
         # type: () -> IrType
@@ -186,11 +195,11 @@ class IrExpressionCast(IrExpression):
         assert self._result_type.is_defined()
         return self._result_type
 
-    def resolve(self, module):
-        # type: (IrModule) -> IrExpression
+    def resolve(self, module, position):
+        # type: (IrModule, IrPosition) -> IrPosition
         self._result_type.resolve(module)
-        self._value.resolve(module)
-        return IrExpression.resolve(self, module)
+        self._value.resolve(module, position)
+        return IrExpression.resolve(self, module, position)
 
     def resolve_type(self, equivalence, return_type, return_position):
         # type: (IrAddressSpaceInference, IrType, IrPosition) -> None

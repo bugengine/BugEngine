@@ -15,13 +15,14 @@ class IrInstAlloca(IrInstruction):
         self._address_space = address_space
         self._value_type = None    # type: Optional[IrType]
 
-    def resolve(self, module):
-        # type: (IrModule) -> IrInstruction
-        self._type = self._type.resolve(module)
+    def resolve(self, module, position):
+        # type: (IrModule, IrPosition) -> IrPosition
+        position = IrInstruction.resolve(self, module, position)
+        self._type.resolve(module)
         if self._count is not None:
-            self._count = self._count.resolve(module)
+            self._count.resolve(module, position)
         self._value_type = IrTypePtr(self._type.uniquify(), self._address_space)
-        return self
+        return position
 
     def get_type(self):
         # type: () -> IrType
@@ -37,11 +38,12 @@ class IrInstLoad(IrInstruction):
         self._type = type
         self._value_type = None    # type: Optional[IrType]
 
-    def resolve(self, module):
-        # type: (IrModule) -> IrInstruction
-        self._source = self._source.resolve(module)
-        self._type = self._type.resolve(module)
-        return IrInstruction.resolve(self, module)
+    def resolve(self, module, position):
+        # type: (IrModule, IrPosition) -> IrPosition
+        position = IrInstruction.resolve(self, module, position)
+        self._source.resolve(module, position)
+        self._type.resolve(module)
+        return position
 
     def get_type(self):
         # type: () -> IrType
@@ -61,11 +63,12 @@ class IrInstStore(IrInstruction):
         self._target = target
         self._value = value
 
-    def resolve(self, module):
-        # type: (IrModule) -> IrInstruction
-        self._target = self._target.resolve(module)
-        self._value = self._value.resolve(module)
-        return IrInstruction.resolve(self, module)
+    def resolve(self, module, position):
+        # type: (IrModule, IrPosition) -> IrPosition
+        position = IrInstruction.resolve(self, module, position)
+        self._target.resolve(module, position)
+        self._value.resolve(module, position)
+        return position
 
     def resolve_type(self, equivalence, return_type, return_position):
         # type: (IrAddressSpaceInference, IrType, IrPosition) -> None
@@ -86,11 +89,13 @@ class IrInstGetElementPtr(IrInstruction):
         self._access = access
         self._value_type = None    # type: Optional[IrType]
 
-    def resolve(self, module):
-        # type: (IrModule) -> IrInstruction
-        self._type = self._type.resolve(module)
-        self._access = [access.resolve(module) for access in self._access]
-        return IrInstruction.resolve(self, module)
+    def resolve(self, module, position):
+        # type: (IrModule, IrPosition) -> IrPosition
+        position = IrInstruction.resolve(self, module, position)
+        self._type.resolve(module)
+        for access in self._access:
+            access.resolve(module, position)
+        return position
 
     def resolve_type(self, equivalence, return_type, return_position):
         # type: (IrAddressSpaceInference, IrType, IrPosition) -> None

@@ -12,12 +12,12 @@ class IrVariable(IrExpression):
         self._initial_value = initital_value
         self._address_space = IrAddressSpace(address_space)
 
-    def resolve(self, module):
-        # type: (IrModule) -> IrVariable
+    def resolve(self, module, position):
+        # type: (IrModule, IrPosition) -> IrPosition
         self._type.resolve(module)
         if self._initial_value is not None:
-            self._initial_value = self._initial_value.resolve(module)
-        return cast('IrVariable', IrExpression.resolve(self, module))
+            self._initial_value.resolve(module, position)
+        return IrExpression.resolve(self, module, position)
 
     def get_type(self):
         # type: () -> IrType
@@ -31,3 +31,4 @@ if TYPE_CHECKING:
     from .ir_module import IrModule
     from .ir_reference import IrReference
     from .ir_metadata import IrMetadataLink
+    from ..ir_position import IrPosition

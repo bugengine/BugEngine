@@ -35,6 +35,8 @@ class IrModule:
         for _, decl in self._root_declarations:
             decl.resolve(self)
         for _, decl in self._root_declarations:
+            decl.resolve_content(self)
+        for _, decl in self._root_declarations:
             decl.instantiate(self)
 
     def get(self, reference, desired_type):

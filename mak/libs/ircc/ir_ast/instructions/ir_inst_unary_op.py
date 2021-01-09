@@ -10,11 +10,12 @@ class IrInstFloatUnaryOp(IrInstruction):
         self._operand = operand
         self._operation = operation
 
-    def resolve(self, module):
-        # type: (IrModule) -> IrInstruction
-        self._type = self._type.resolve(module)
-        self._operand = self._operand.resolve(module)
-        return self
+    def resolve(self, module, position):
+        # type: (IrModule, IrPosition) -> IrPosition
+        position = IrInstruction.resolve(self, module, position)
+        self._type.resolve(module)
+        self._operand.resolve(module, position)
+        return position
 
     def get_type(self):
         # type: () -> IrType

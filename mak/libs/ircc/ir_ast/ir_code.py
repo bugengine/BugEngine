@@ -28,9 +28,13 @@ class IrInstruction(IrExpression):
         if self._result:
             scope.declare(self._result, IrExpressionDeclaration(self))
 
-    def resolve(self, module):
-        # type: (IrModule) -> IrInstruction
-        return cast(IrInstruction, IrExpression.resolve(self, module))
+    def resolve(self, module, position):
+        # type: (IrModule, IrPosition) -> IrPosition
+        return IrExpression.resolve(self, module, position)
+
+    def create_instance(self, equivalence):
+        # type: (Dict[int, int]) -> None
+        pass
 
 
 class IrCodeSegment:
@@ -40,21 +44,27 @@ class IrCodeSegment:
         self._instructions = instructions
         self._nexts = []   # type: List[IrCodeSegment]
 
-    def resolve(self, module, equivalence, return_type, return_position):
-        # type: (IrModule, IrAddressSpaceInference, IrType, IrPosition) -> IrCodeSegment
-        self._instructions = [i.resolve(module) for i in self._instructions]
+    def resolve(self, module, position, equivalence, return_type, return_position):
+        # type: (IrModule, IrPosition, IrAddressSpaceInference, IrType, IrPosition) -> IrPosition
+        for i in self._instructions:
+            position = i.resolve(module, position)
         for i in self._instructions:
             i.resolve_type(equivalence, return_type, return_position)
-        return self
+        return position
+
+    def _create_instance(self, equivalence):
+        # type: (Dict[int, int]) -> None
+        for i in self._instructions:
+            i.create_instance(equivalence)
 
 
 class IrCodeBlock:
     def __init__(self, instructions):
         # type: (List[IrInstruction]) -> None
-        self._segments = []
+        self._segments = []    # type: List[IrCodeSegment]
         self._equivalence = IrAddressSpaceInference()
         label = 'start'
-        stream = []    # type: List[IrInstruction]
+        stream = []            # type: List[IrInstruction]
         for instruction in instructions:
             if instruction._opcode == 'label':
                 assert len(stream) == 0
@@ -79,8 +89,8 @@ class IrCodeBlock:
         else:
             raise NotImplementedError
 
-    def resolve(self, module, return_type, return_position):
-        # type: (IrModule, IrType, IrPosition) -> IrCodeBlock
+    def resolve(self, module, position, return_type, return_position):
+        # type: (IrModule, IrPosition, IrType, IrPosition) -> IrCodeBlock
         """
             Resolving a method also resolves generic address spaces.
             The resolution step will bucket together types that are constrained into the same generic address space.
@@ -89,13 +99,14 @@ class IrCodeBlock:
             allow to infer the correct address space of all types. Any type whose generic address space can't be
             deduced at compile time will trigger a compile error.
         """
-        self._segments = [s.resolve(module, self._equivalence, return_type, return_position) for s in self._segments]
+        for s in self._segments:
+            position = s.resolve(module, position, self._equivalence, return_type, return_position)
         return self
 
     def _create_instance(self, equivalence):
-        # type: (IrAddressSpaceInference) -> Dict[int, int]
-        equivalence.merge(self._equivalence)
-        return equivalence.create_direct_map()
+        # type: (Dict[int, int]) -> None
+        for s in self._segments:
+            s._create_instance(equivalence)
 
 
 from . import instructions as ir_instructions

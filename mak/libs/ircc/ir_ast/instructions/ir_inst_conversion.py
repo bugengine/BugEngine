@@ -10,12 +10,13 @@ class IrInstCast(IrInstruction):
         self._result_type = result_type
         self._cast_type = cast_type
 
-    def resolve(self, module):
-        # type: (IrModule) -> IrInstruction
-        self._value = self._value.resolve(module)
-        self._result_type = self._result_type.resolve(module)
+    def resolve(self, module, position):
+        # type: (IrModule, IrPosition) -> IrPosition
+        position = IrInstruction.resolve(self, module, position)
+        self._value.resolve(module, position)
+        self._result_type.resolve(module)
         self._result_type = self._result_type.uniquify()
-        return IrInstruction.resolve(self, module)
+        return position
 
     def get_type(self):
         # type: () -> IrType

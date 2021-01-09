@@ -55,6 +55,7 @@ class IrAddressSpaceInference:
 
     def __init__(self):
         # type: () -> None
+        self._calls = []           # type: List[IrAddressSpaceInference]
         self._address_spaces = {
         }                          # type: Dict[IrAddressSpaceInference.AddressSpaceInformation, List[IrAddressSpaceInference.AddressSpaceInformation]]
 
@@ -81,29 +82,40 @@ class IrAddressSpaceInference:
 
     def merge(self, other):
         # type: (IrAddressSpaceInference) -> None
-        for address_space, equivalence_list in other._address_spaces.items():
-            try:
-                self._address_spaces[address_space] += equivalence_list
-            except KeyError:
-                self._address_spaces[address_space] = equivalence_list[:]
+        self._calls.append(other)
 
     def create_direct_map(self):
         # type: () -> Dict[int, int]
         result = {0: 0, 1: 1, 2: 2, 3: 3}
+        calls_seen = set([])
+        process = [self]
 
-        def _fill_bag(address_space, equivalence_bag):
-            # type: (IrAddressSpaceInference.AddressSpaceInformation, Dict[int, IrAddressSpaceInference.AddressSpaceInformation]) -> None
-            for eq in self._address_spaces[address_space]:
+        inference = IrAddressSpaceInference()
+        while process:
+            call = process.pop(0)
+            if call in calls_seen:
+                continue
+            calls_seen.add(call)
+            for addr, eq_list in call._address_spaces.items():
+                try:
+                    inference._address_spaces[addr] += eq_list
+                except KeyError:
+                    inference._address_spaces[addr] = eq_list
+            process += call._calls
+
+        def _fill_bag(inference, address_space, equivalence_bag):
+            # type: (IrAddressSpaceInference, IrAddressSpaceInference.AddressSpaceInformation, Dict[int, IrAddressSpaceInference.AddressSpaceInformation]) -> None
+            for eq in inference._address_spaces[address_space]:
                 if eq._address_space not in equivalence_bag:
                     eq._deduced_from = address_space
                     equivalence_bag[eq._address_space] = eq
                     if eq._address_space > 3:
-                        _fill_bag(eq, equivalence_bag)
+                        _fill_bag(inference, eq, equivalence_bag)
 
-        for address_space in self._address_spaces.keys():
+        for address_space in inference._address_spaces.keys():
             if address_space._address_space not in result:
                 equivalence_bag = {address_space._address_space: address_space}
-                _fill_bag(address_space, equivalence_bag)
+                _fill_bag(inference, address_space, equivalence_bag)
 
                 items = sorted(equivalence_bag.items())
                 best_addr_space, best_info = items[0]
@@ -197,9 +209,8 @@ class IrTypeDeclaration(IrDeclaration):
         IrTypeDeclaration.TYPE_INDEX += 1
 
     def resolve(self, module):
-        # type: (IrModule) -> IrDeclaration
+        # type: (IrModule) -> None
         self._type = self._type.resolve(module)
-        return self
 
     def collect(self, ir_name):
         # type: (str) -> List[Tuple[str, IrDeclaration]]

@@ -3,6 +3,7 @@ from .ir_value import IrValue
 from .ir_type import IrTypeMetadata
 from ..ir_position import IrPosition
 from be_typing import TYPE_CHECKING
+import os
 
 
 class IrMetadata(IrValue):
@@ -10,9 +11,9 @@ class IrMetadata(IrValue):
         # type: () -> None
         IrValue.__init__(self, IrTypeMetadata())
 
-    def resolve(self, module):
-        # type: (IrModule) -> IrMetadata
-        return self
+    def resolve(self, module, position):
+        # type: (IrModule, IrPosition) -> None
+        IrValue.resolve(self, module, position)
 
     def __str__(self):
         # type: () -> str
@@ -37,22 +38,23 @@ class IrMetadataDeclaration(IrDeclaration):
         self._metadata = metadata_value
 
     def resolve(self, module):
-        # type: (IrModule) -> IrMetadataDeclaration
-        self._metadata = self._metadata.resolve(module)
-        return self
+        # type: (IrModule) -> None
+        self._metadata.resolve(module, IrPosition('', 0, 0, 0, ''))
 
 
 class IrMetadataLink(IrMetadata):
     def __init__(self, reference):
         # type: (IrReference) -> None
+        IrMetadata.__init__(self)
         self._reference = reference
         self._metadata = None  # type: Optional[IrMetadata]
 
-    def resolve(self, module):
-        # type: (IrModule) -> IrMetadata
+    def resolve(self, module, position):
+        # type: (IrModule, IrPosition) -> None
         if self._metadata is None:
             self._metadata = module.get(self._reference, IrMetadataDeclaration)._metadata
-        return self
+            self._metadata.resolve(module, position)
+        IrMetadata.resolve(self, module, position)
 
     def get_position(self):
         # type: () -> IrPosition
@@ -77,6 +79,7 @@ class IrMetadataValue(IrMetadata):
 class IrMetadataString(IrMetadataValue):
     def __init__(self, value):
         # type: (str) -> None
+        IrMetadata.__init__(self)
         self._value = value
 
     def __str__(self):
@@ -91,6 +94,7 @@ class IrMetadataString(IrMetadataValue):
 class IrMetadataInteger(IrMetadataValue):
     def __init__(self, value):
         # type: (int) -> None
+        IrMetadata.__init__(self)
         self._value = value
 
     def __str__(self):
@@ -105,12 +109,14 @@ class IrMetadataInteger(IrMetadataValue):
 class IrMetadataNode(IrMetadataValue):
     def __init__(self, values):
         # type: (List[IrValue]) -> None
+        IrMetadata.__init__(self)
         self._values = values
 
-    def resolve(self, module):
-        # type: (IrModule) -> IrMetadata
-        self._values = [v.resolve(module) for v in self._values]
-        return self
+    def resolve(self, module, position):
+        # type: (IrModule, IrPosition) -> None
+        for v in self._values:
+            v.resolve(module, position)
+        IrMetadataValue.resolve(self, module, position)
 
     def __str__(self):
         # type: () -> str
@@ -120,18 +126,27 @@ class IrMetadataNode(IrMetadataValue):
 class IrSpecializedMetadata(IrMetadataValue):
     def __init__(self, specialized_class, properties):
         # type: (str, List[Tuple[str, IrMetadata]]) -> None
+        IrMetadata.__init__(self)
         self._specialized_class = specialized_class
         self._values = {}
+        self._lines = []   # type: List[int]
+        self._data = ''
         for property_name, property_value in properties:
             self._values[property_name] = property_value
 
-    def resolve(self, module):
-        # type: (IrModule) -> IrMetadata
-        v = {}
+    def resolve(self, module, position):
+        # type: (IrModule, IrPosition) -> None
         for property_name, property_value in self._values.items():
-            v[property_name] = property_value.resolve(module)
-        self._values = v
-        return self
+            property_value.resolve(module, position)
+        if self._specialized_class == 'DIFile':
+            filename = self._values['filename'].to_string()
+            directory = self._values['directory'].to_string()
+            with open(os.path.join(directory, filename), 'r') as data:
+                self._data = data.read()
+                pos = 0
+                for line in self._data.split('\n'):
+                    self._lines.append(pos)
+                    pos += len(line) + 1
 
     def __str__(self):
         # type: () -> str
@@ -142,16 +157,24 @@ class IrSpecializedMetadata(IrMetadataValue):
         try:
             result = self._values['scope'].get_position()
         except KeyError:
-            try:
-                result = self._values['file'].get_position()
-            except KeyError:
-                result = IrPosition('', 0, 0, 0, '')
+            result = IrPosition('', 0, 0, 0, '')
+        if self._lines:
+            result.lines = self._lines
+        if self._data:
+            result.lexdata = self._data
+        try:
+            result.filename = self._values['file'].get_position().filename
+        except KeyError:
+            pass
         try:
             result.filename = self._values['filename'].to_string()
         except KeyError:
             pass
         try:
             result.line_number = self._values['line'].to_int()
+            if result.lines:
+                result.start_position = result.lines[result.line_number - 1]
+            result.start_position += self._values['column'].to_int() - 1
         except KeyError:
             pass
         return result
@@ -174,6 +197,7 @@ class IrMetadataNull(IrMetadata):
 class IrMetadataFlagList(IrMetadata):
     def __init__(self, flag):
         # type: (str) -> None
+        IrMetadata.__init__(self)
         self._flags = [flag]
 
     def add_flag(self, flag):

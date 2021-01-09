@@ -10,11 +10,9 @@ class IrValue(IrObject):
         IrObject.__init__(self)
         self._type = type
 
-    def resolve(self, module):
-        # type: (IrModule) -> IrValue
-        if self._type is not None:
-            self._type = self._type.resolve(module)
-        return self
+    def resolve(self, module, position):
+        # type: (IrModule, IrPosition) -> None
+        self._type = self._type.resolve(module)
 
     def get_type(self):
         # type: () -> IrType
@@ -39,10 +37,10 @@ class IrValueExpr(IrValue):
         IrValue.__init__(self, type)
         self._expression = expr
 
-    def resolve(self, module):
-        # type: (IrModule) -> IrValue
-        self._expression = self._expression.resolve(module)
-        return IrValue.resolve(self, module)
+    def resolve(self, module, position):
+        # type: (IrModule, IrPosition) -> None
+        self._expression.resolve(module, position)
+        IrValue.resolve(self, module, position)
 
     def get_type(self):
         # type: () -> IrType
@@ -84,10 +82,10 @@ class IrValueMetadata(IrValue):
         IrValue.__init__(self, IrTypeMetadata())
         self._metadata = metadata
 
-    def resolve(self, module):
-        # type: (IrModule) -> IrValue
-        self._metadata = self._metadata.resolve(module)
-        return IrValue.resolve(self, module)
+    def resolve(self, module, position):
+        # type: (IrModule, IrPosition) -> None
+        self._metadata.resolve(module, position)
+        IrValue.resolve(self, module, position)
 
     def __str__(self):
         # type: () -> str

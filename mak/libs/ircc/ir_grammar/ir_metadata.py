@@ -7,7 +7,7 @@ def p_ir_metadata_list_opt(p):
     """
         ir-metadata-list-opt : METADATA_NAME METADATA_REF ir-metadata-list-opt
     """
-    p[0] = [IrMetadataLink(p[1]), IrMetadataLink(p[2])] + p[3]
+    p[0] = [(IrMetadataLink(p[1]), IrMetadataLink(p[2]))] + p[3]
 
 
 def p_ir_metadata_list_opt_empty(p):

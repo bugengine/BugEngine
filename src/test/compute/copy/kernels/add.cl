@@ -5,10 +5,11 @@ __global int x;
 
 __device int* findMin(int* x1, int* /*x2*/)
 {
-    // if(*x1 < *x2)
+    /*if(*x1 < *x2)
+        return x1;
+    else
+        return x2;*/
     return x1;
-    // else
-    //    return x2;
 }
 
 __kernel void add(u32 index, u32 total, Kernel::segments< u32 > p)

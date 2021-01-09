@@ -66,9 +66,8 @@ class IrAttributeGroupDeclaration(IrDeclaration):
         return self._attribute_group.signature()
 
     def resolve(self, module):
-        # type: (IrModule) -> IrDeclaration
+        # type: (IrModule) -> None
         self._attribute_group = self._attribute_group.resolve(module)
-        return self
 
 
 class IrAttributeGroupLink(IrAttributeGroup):
