@@ -114,20 +114,12 @@ class Darwin(Configure.ConfigurationContext.Platform):
         conf.env.XCODE_SDK_PATH = self.sdk[1]
         conf.env.SYSROOT = self.sdk[1]
         conf.env.MACOSX_SDK_MIN = self.sdk[3]
+        conf.env.append_unique('CPPFLAGS', ['-isysroot', self.sdk[1]])
+        conf.env.append_unique('CFLAGS', ['-isysroot', self.sdk[1]] + self.sdk[4][0])
+        conf.env.append_unique('CXXFLAGS', ['-isysroot', self.sdk[1]] + self.sdk[4][1])
         conf.env.append_unique(
-            'CPPFLAGS', ['-isysroot', self.sdk[1]]
-        )
-        conf.env.append_unique(
-            'CFLAGS', ['-isysroot', self.sdk[1]] + self.sdk[4][0]
-        )
-        conf.env.append_unique(
-            'CXXFLAGS', ['-isysroot', self.sdk[1]] + self.sdk[4][1]
-        )
-        conf.env.append_unique(
-            'LINKFLAGS', [
-                '-isysroot', self.sdk[1],
-                '-L%s/usr/lib' % self.sdk[1]
-            ] + self.sdk[4][2] + ['-B%s' % bin_path for bin_path in self.directories]
+            'LINKFLAGS', ['-isysroot', self.sdk[1], '-L%s/usr/lib' % self.sdk[1]] + self.sdk[4][2] +
+            ['-B%s' % bin_path for bin_path in self.directories]
         )
         if compiler.arch == 'x86':
             conf.env.append_unique('CFLAGS', ['-msse2'])
@@ -270,7 +262,7 @@ class Darwin(Configure.ConfigurationContext.Platform):
                 cflags = []
                 cxxflags = []
                 ldflags = []
-                for libcpp in ('libstdc++-static.a', 'libstdc++.6.dylib',  'libstdc++.tbd'):
+                for libcpp in ('libstdc++-static.a', 'libstdc++.6.dylib', 'libstdc++.tbd'):
                     if os.path.isfile(os.path.join(sdk_path, 'usr', 'lib', libcpp)):
                         break
                 else:
@@ -313,7 +305,7 @@ class Darwin(Configure.ConfigurationContext.Platform):
                                             exe_node.abspath(),
                                             '-L%s' % os.path.join(sdk_path, 'usr', 'lib'), '-isysroot', sdk_path,
                                             obj_node.abspath(), '-lobjc',
-                                            '-B%s' % os.path.dirname(strip)
+                                            '-B%s' % os.path.dirname(strip), '-Wl,-rpath,rpath_test'
                                         ] + cxxflags,
                                         env=env
                                     )
@@ -324,7 +316,8 @@ class Darwin(Configure.ConfigurationContext.Platform):
                                             break
                 if len(sdk_compilers) > len(best_sdk[2]):
                     best_sdk = (
-                        '.'.join(sdk_version), sdk_path, sdk_compilers, [os.path.dirname(strip)] + sdk_bin_paths, (cflags, cxxflags, ldflags)
+                        '.'.join(sdk_version), sdk_path, sdk_compilers, [os.path.dirname(strip)] + sdk_bin_paths,
+                        (cflags, cxxflags, ldflags)
                     )
             if best_sdk[2]:
                 return best_sdk[2], (best_sdk[0], best_sdk[1], best_sdk[3], '.'.join(os_version_min), best_sdk[4])
