@@ -16,6 +16,7 @@ class IrInstCall(IrInstruction):
         self._method.resolve(module)
         for a in self._arguments:
             a.resolve(module, position)
+            a.used_by(self)
         return position
 
     def get_type(self):
@@ -34,6 +35,10 @@ class IrInstCall(IrInstruction):
                 equivalence, argument.get_position(), parameter.get_type(), parameter.get_position()
             )
 
+    def create_instance(self, equivalence):
+        # type: (Dict[int, int]) -> None
+        self._method.find_instance([argument.get_type() for argument in self._arguments], equivalence)
+
 
 class IrInstIntegerCompare(IrInstruction):
     def __init__(self, result, type, left_operand, right_operand, operation, metadata):
@@ -51,6 +56,8 @@ class IrInstIntegerCompare(IrInstruction):
         self._type.resolve(module)
         self._left_operand.resolve(module, position)
         self._right_operand.resolve(module, position)
+        self._left_operand.used_by(self)
+        self._right_operand.used_by(self)
         return position
 
     def resolve_type(self, equivalence, return_type, return_position):
@@ -61,6 +68,10 @@ class IrInstIntegerCompare(IrInstruction):
     def get_type(self):
         # type: () -> IrType
         return self._value_type
+
+    def is_inline(self):
+        # type: () -> bool
+        return True
 
 
 class IrInstFloatCompare(IrInstruction):
@@ -79,6 +90,8 @@ class IrInstFloatCompare(IrInstruction):
         self._type.resolve(module)
         self._left_operand.resolve(module, position)
         self._right_operand.resolve(module, position)
+        self._left_operand.used_by(self)
+        self._right_operand.used_by(self)
         return position
 
     def resolve_type(self, equivalence, return_type, return_position):
@@ -89,6 +102,10 @@ class IrInstFloatCompare(IrInstruction):
     def get_type(self):
         # type: () -> IrType
         return self._value_type
+
+    def is_inline(self):
+        # type: () -> bool
+        return True
 
 
 class IrInstPhi(IrInstruction):
@@ -104,6 +121,7 @@ class IrInstPhi(IrInstruction):
         self._type.resolve(module)
         for expr, label in self._origins:
             expr.resolve(module, position)
+            expr.used_by(self)
         return position
 
     def resolve_type(self, equivalence, return_type, return_position):
@@ -133,6 +151,7 @@ class IrInstSelect(IrInstruction):
         self._condition.resolve(module, position)
         self._value_true.resolve(module, position)
         self._value_false.resolve(module, position)
+
         return position
 
     def get_type(self):
@@ -150,7 +169,7 @@ class IrInstSelect(IrInstruction):
 
 
 if TYPE_CHECKING:
-    from typing import List, Optional, Tuple
+    from typing import Dict, List, Optional, Tuple
     from ..ir_module import IrModule
     from ..ir_expr import IrExpression
     from ..ir_value import IrValue

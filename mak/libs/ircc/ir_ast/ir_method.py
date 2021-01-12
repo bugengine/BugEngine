@@ -21,14 +21,14 @@ class IrMethodParameter(IrExpression):
     def resolve(self, module, position):
         # type: (IrModule, IrPosition) -> IrPosition
         position = IrExpression.resolve(self, module, position)
-        self._type.resolve(module).uniquify()
+        self._type.resolve(module)
         self._attributes = self._attributes.resolve(module)
         return position
 
-    def signature(self):
-        # type: () -> str
+    def signature(self, resolved_addressspaces):
+        # type: (Dict[int, int]) -> str
         #return '[%s]%s' % (self._attributes.signature(), self._type.signature())
-        return self._type.signature()
+        return self._type.signature(resolved_addressspaces)
 
     def flatten(self):
         # type: () -> List[IrMethodParameter]
@@ -67,8 +67,8 @@ class IrMethod(IrObject):
         # type: (IrModule) -> None
         raise NotImplementedError
 
-    def find_instance(self, module, arguments, resolved_addressspaces):
-        # type: (IrModule, List[Tuple[IrType, IrPosition]], Dict[int, int]) -> IrMethodObject
+    def find_instance(self, arguments, resolved_addressspaces):
+        # type: (List[IrType], Dict[int, int]) -> IrMethodObject
         raise NotImplementedError
 
     def equivalence(self):
@@ -87,12 +87,13 @@ class IrMethod(IrObject):
 class IrMethodDeclaration(IrDeclaration):
     METHOD_INDEX = 0
 
-    def __init__(self, method, signature=None):
-        # type: (IrMethodObject, Optional[str]) -> None
+    def __init__(self, method, signature=None, equivalence={}):
+        # type: (IrMethodObject, Optional[str], Dict[int, int]) -> None
         IrDeclaration.__init__(self)
         self._method = method
         self._method._name = 'method_%d' % IrMethodDeclaration.METHOD_INDEX
         self._signature = signature
+        self._equivalence = equivalence
         IrMethodDeclaration.METHOD_INDEX += 1
 
     def resolve(self, module):
@@ -110,26 +111,31 @@ class IrMethodDeclaration(IrDeclaration):
     def collect(self, ir_name):
         # type: (str) -> List[Tuple[str, IrDeclaration]]
         self._method.on_collect()
-        result = []                                                                            # type: List[Tuple[str, IrDeclaration]]
+        result = []                                                                                           # type: List[Tuple[str, IrDeclaration]]
         result += [(ir_name + '_spir', IrMethodDeclaration(instance)) for instance in self._method._kernel_instances]
         if len(self._method._instances) > 1:
             result += [
-                (ir_name + '_%d' % index, IrMethodDeclaration(instance[0], signature))
-                for index, (signature, instance) in enumerate(self._method._instances.items())
+                (ir_name + '_%d' % index, IrMethodDeclaration(instance, signature, equivalence))
+                for index, (signature, (instance, equivalence)) in enumerate(self._method._instances.items())
             ]
         else:
             result += [
-                (ir_name, IrMethodDeclaration(instance[0], signature))
-                for signature, instance in self._method._instances.items()
+                (ir_name, IrMethodDeclaration(instance, signature, equivalence))
+                for signature, (instance, equivalence) in self._method._instances.items()
             ]
         return result
 
     def visit(self, generator, name):
         # type: (IrccGenerator, str) -> None
-        return_type = self._method._return_type.create_generator_type(generator)
-        parameters = [(p._type.create_generator_type(generator), p._id[1:]) for p in self._method._parameters]
-        if generator.begin_method(name[1:], return_type, parameters, self._method._calling_convention):
-            self._method.visit(generator, self._signature)
+        return_type = self._method._return_type.create_generator_type(generator, self._equivalence)
+        parameters = [
+            (p._type.create_generator_type(generator, self._equivalence), '_%s' % p._id[1:].replace('.', '_'))
+            for p in self._method._parameters
+        ]
+        if generator.begin_method(
+            name[1:], return_type, parameters, self._method._calling_convention, self._method._definition is not None
+        ):
+            self._method.visit(generator, self._equivalence)
             generator.end_method()
 
 
@@ -145,10 +151,10 @@ class IrMethodLink(IrMethod):
         result = module.get(self._reference, IrMethodDeclaration)
         self._method = result._method
 
-    def find_instance(self, module, arguments, resolved_addressspaces):
-        # type: (IrModule, List[Tuple[IrType, IrPosition]], Dict[int, int]) -> IrMethodObject
+    def find_instance(self, arguments, resolved_addressspaces):
+        # type: (List[IrType], Dict[int, int]) -> IrMethodObject
         assert self._method is not None
-        return self._method.find_instance(module, arguments, resolved_addressspaces)
+        return self._method.find_instance(arguments, resolved_addressspaces)
 
     def equivalence(self):
         # type: () -> IrAddressSpaceInference
@@ -218,7 +224,7 @@ class IrMethodObject(IrMethod):
                     e = e.parent
                     module.logger().C0101(e.position, str(e))
             else:
-                self.find_instance(module, [(p._type, p.get_position()) for p in self._parameters], resolved_params)
+                self.find_instance([p._type for p in self._parameters], resolved_params)
                 # create an intermediate kernel entry point
                 self._kernel_instances.append(self._create_kernel_wrapper())
 
@@ -259,9 +265,9 @@ class IrMethodObject(IrMethod):
         finally:
             module.pop_scope()
 
-    def find_instance(self, module, arguments, resolved_addressspaces):
-        # type: (IrModule, List[Tuple[IrType, IrPosition]], Dict[int, int]) -> IrMethodObject
-        signature = ','.join(a[0].signature() for a in arguments)
+    def find_instance(self, arguments, resolved_addressspaces):
+        # type: (List[IrType], Dict[int, int]) -> IrMethodObject
+        signature = ','.join(a.signature(resolved_addressspaces) for a in arguments)
         try:
             return self._instances[signature][0]
         except KeyError:
@@ -270,7 +276,9 @@ class IrMethodObject(IrMethod):
             return result
 
     def _create_instance(self, arguments, signature, resolved_addressspaces):
-        # type: (List[Tuple[IrType, IrPosition]], str, Dict[int, int]) -> IrMethodObject
+        # type: (List[IrType], str, Dict[int, int]) -> IrMethodObject
+        for parameter in self._parameters:
+            parameter._type.create_instance(resolved_addressspaces)
         if self._definition is not None:
             assert len(self._declarations) == len(arguments)
             self._definition._create_instance(resolved_addressspaces)
@@ -279,9 +287,10 @@ class IrMethodObject(IrMethod):
             # TODO
             return self
 
-    def visit(self, generator, signature):
-        # type: (IrccGenerator, Optional[str]) -> None
-        pass
+    def visit(self, generator, equivalence):
+        # type: (IrccGenerator, Dict[int, int]) -> None
+        if self._definition is not None:
+            self._definition.visit(generator, equivalence)
 
     def get_position(self):
         # type: () -> IrPosition
@@ -304,6 +313,10 @@ class IrMethodBody:
         finally:
             module.pop_scope()
         return self
+
+    def visit(self, generator, equivalence):
+        # type: (IrccGenerator, Dict[int, int]) -> None
+        self._code.visit(generator, equivalence)
 
     def _create_instance(self, equivalence):
         # type: (Dict[int, int]) -> None

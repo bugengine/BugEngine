@@ -35,14 +35,16 @@ class ClDeclaration(IrccCDeclaration):
         # type: () -> None
         self._out_file.write('\n')
 
-    def begin_method(self, name, return_type, parameters, calling_convention):
-        # type: (str, IrccType, List[Tuple[IrccType, str]], str) -> bool
+    def begin_method(self, name, return_type, parameters, calling_convention, has_implementation):
+        # type: (str, IrccType, List[Tuple[IrccType, str]], str, bool) -> bool
         if name.startswith('llvm.'):
             # intrinsic
             return False
         if calling_convention == 'spir_kernel_flat':
             self._out_file.write('__kernel\n')
-        return IrccCDeclaration.begin_method(self, name, return_type, parameters, calling_convention)
+        return IrccCDeclaration.begin_method(
+            self, name, return_type, parameters, calling_convention, has_implementation
+        )
 
 
 class ClDefinition(IrccCDefinition):
@@ -59,14 +61,13 @@ class ClDefinition(IrccCDefinition):
         # type: (IrccType, int) -> IrccType
         return IrccType(['', self._address_spaces[address_space], ''], type)
 
-    def begin_method(self, name, return_type, parameters, calling_convention):
-        # type: (str, IrccType, List[Tuple[IrccType, str]], str) -> bool
-        if name.startswith('llvm.'):
-            # intrinsic
+    def begin_method(self, name, return_type, parameters, calling_convention, has_implementation):
+        # type: (str, IrccType, List[Tuple[IrccType, str]], str, bool) -> bool
+        if not has_implementation:
             return False
         if calling_convention == 'spir_kernel_flat':
             self._out_file.write('__kernel\n')
-        return IrccCDefinition.begin_method(self, name, return_type, parameters, calling_convention)
+        return IrccCDefinition.begin_method(self, name, return_type, parameters, calling_convention, has_implementation)
 
 
 if TYPE_CHECKING:

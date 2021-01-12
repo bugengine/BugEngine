@@ -13,7 +13,6 @@ class IrInstAlloca(IrInstruction):
         self._count = count
         self._alignment = alignment
         self._address_space = address_space
-        self._value_type = None    # type: Optional[IrType]
 
     def resolve(self, module, position):
         # type: (IrModule, IrPosition) -> IrPosition
@@ -21,13 +20,17 @@ class IrInstAlloca(IrInstruction):
         self._type.resolve(module)
         if self._count is not None:
             self._count.resolve(module, position)
-        self._value_type = IrTypePtr(self._type.uniquify(), self._address_space)
+            self._count.used_by(self)
+        self._type = IrTypePtr(self._type, self._address_space)
         return position
 
     def get_type(self):
         # type: () -> IrType
-        assert self._value_type is not None
-        return self._value_type
+        return self._type
+
+    def create_instance(self, equivalence):
+        # type: (Dict[int, int]) -> None
+        self._type.create_instance(equivalence)
 
 
 class IrInstLoad(IrInstruction):
@@ -43,6 +46,7 @@ class IrInstLoad(IrInstruction):
         position = IrInstruction.resolve(self, module, position)
         self._source.resolve(module, position)
         self._type.resolve(module)
+        self._source.used_by(self)
         return position
 
     def get_type(self):
@@ -68,6 +72,8 @@ class IrInstStore(IrInstruction):
         position = IrInstruction.resolve(self, module, position)
         self._target.resolve(module, position)
         self._value.resolve(module, position)
+        self._target.used_by(self)
+        self._value.used_by(self)
         return position
 
     def resolve_type(self, equivalence, return_type, return_position):
@@ -95,6 +101,7 @@ class IrInstGetElementPtr(IrInstruction):
         self._type.resolve(module)
         for access in self._access:
             access.resolve(module, position)
+            access.used_by(self)
         return position
 
     def resolve_type(self, equivalence, return_type, return_position):
@@ -124,7 +131,7 @@ class IrInstGetElementPtr(IrInstruction):
 
 
 if TYPE_CHECKING:
-    from typing import List, Optional, Tuple
+    from typing import Dict, List, Optional, Tuple
     from ..ir_value import IrValue
     from ..ir_metadata import IrMetadataLink
     from ..ir_reference import IrReference

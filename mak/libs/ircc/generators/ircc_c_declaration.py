@@ -39,8 +39,8 @@ class IrccCDeclaration(IrccCTypes):
         else:
             self._out_file.write('/* %s */\ntypedef %s;\n\n' % (ir_name, type.format(['', '', name, ''])))
 
-    def begin_method(self, name, return_type, parameters, calling_convention):
-        # type: (str, IrccType, List[Tuple[IrccType, str]], str) -> bool
+    def begin_method(self, name, return_type, parameters, calling_convention, has_body):
+        # type: (str, IrccType, List[Tuple[IrccType, str]], str, bool) -> bool
         self._out_file.write(
             '%s %s(%s)' % (
                 return_type.format(['', '', '', '']

@@ -95,8 +95,8 @@ class IrccGenerator:
         # type: (IrccType, str, str) -> None
         pass
 
-    def begin_method(self, name, return_type, parameters, calling_convention):
-        # type: (str, IrccType, List[Tuple[IrccType, str]], str) -> bool
+    def begin_method(self, name, return_type, parameters, calling_convention, has_implementation):
+        # type: (str, IrccType, List[Tuple[IrccType, str]], str, bool) -> bool
         return True
 
     def end_method(self):

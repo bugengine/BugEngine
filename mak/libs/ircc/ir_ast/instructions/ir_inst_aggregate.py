@@ -14,6 +14,7 @@ class IrInstExtractValue(IrInstruction):
         # type: (IrModule, IrPosition) -> IrPosition
         position = IrInstruction.resolve(self, module, position)
         self._source.resolve(module, position)
+        self._source.used_by(self)
         return position
 
     def get_type(self):
@@ -45,6 +46,8 @@ class IrInstInsertValue(IrInstruction):
         position = IrInstruction.resolve(self, module, position)
         self._source.resolve(module, position)
         self._value.resolve(module, position)
+        self._source.used_by(self)
+        self._value.used_by(self)
         return position
 
     def get_type(self):

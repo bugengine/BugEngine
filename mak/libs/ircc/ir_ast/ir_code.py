@@ -4,6 +4,12 @@ from .ir_expr import IrExpression, IrExpressionDeclaration
 from abc import abstractmethod
 
 
+class IrCodeGenContext:
+    def __init__(self, equivalence):
+        # type: (Dict[int, int]) -> None
+        self._equivalence = equivalence
+
+
 class IrInstruction(IrExpression):
     def __init__(self, opcode, result, metadata):
         # type: (str, Optional[IrReference], List[Tuple[IrMetadataLink, IrMetadataLink]]) -> None
@@ -36,6 +42,15 @@ class IrInstruction(IrExpression):
         # type: (Dict[int, int]) -> None
         pass
 
+    def register_stack_data(self, generator, context):
+        # type: (IrccGenerator, IrCodeGenContext) -> None
+        pass
+
+    def is_inline(self):
+        # type: () -> bool
+        assert len(self._usage) != 0
+        return len(self._usage) == 1
+
 
 class IrCodeSegment:
     def __init__(self, label, instructions):
@@ -56,6 +71,11 @@ class IrCodeSegment:
         # type: (Dict[int, int]) -> None
         for i in self._instructions:
             i.create_instance(equivalence)
+
+    def visit(self, generator, context):
+        # type: (IrccGenerator, IrCodeGenContext) -> None
+        for instruction in self._instructions:
+            instruction.register_stack_data(generator, context)
 
 
 class IrCodeBlock:
@@ -108,6 +128,12 @@ class IrCodeBlock:
         for s in self._segments:
             s._create_instance(equivalence)
 
+    def visit(self, generator, equivalence):
+        # type: (IrccGenerator, Dict[int, int]) -> None
+        context = IrCodeGenContext(equivalence)
+        for s in self._segments:
+            s.visit(generator, context)
+
 
 from . import instructions as ir_instructions
 if TYPE_CHECKING:
@@ -120,4 +146,5 @@ if TYPE_CHECKING:
     from .ir_reference import IrReference
     from .ir_method import IrMethodParameter
     from .ir_scope import IrScope
+    from ..ir_codegen import IrccGenerator
     from ..ir_position import IrPosition

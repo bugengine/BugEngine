@@ -30,6 +30,10 @@ class IrValue(IrObject):
         # type: (IrAddressSpaceInference, IrType, IrPosition) -> None
         return
 
+    def used_by(self, expression):
+        # type: (IrExpression) -> None
+        pass
+
 
 class IrValueExpr(IrValue):
     def __init__(self, type, expr):
@@ -60,6 +64,10 @@ class IrValueExpr(IrValue):
     def __str__(self):
         # type: () -> str
         return '%s %s' % (self._type, self._expression)
+
+    def used_by(self, expression):
+        # type: (IrExpression) -> None
+        self._expression.used_by(expression)
 
 
 class IrValueVoid(IrValue):

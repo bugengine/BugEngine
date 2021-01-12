@@ -21,7 +21,7 @@ class IrVariable(IrExpression):
 
     def get_type(self):
         # type: () -> IrType
-        return IrTypePtr(self._type, int(self._address_space))
+        return IrTypePtr(self._type, self._address_space._address_space)
 
 
 if TYPE_CHECKING:

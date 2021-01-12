@@ -26,11 +26,6 @@ class IrAddressSpace:
         except IndexError:
             return 'generic'
 
-    def __int__(self):
-        # type: () -> int
-        assert self._address_space <= 3
-        return self._address_space
-
 
 class IrAddressSpaceInference:
     class AddressSpaceInformation:
@@ -154,8 +149,8 @@ class IrType(IrObject):
         # type: () -> str
         raise NotImplementedError
 
-    def signature(self):
-        # type: () -> str
+    def signature(self, resolved_addressspaces):
+        # type: (Dict[int, int]) -> str
         raise NotImplementedError
 
     def _dependency_list(self):
@@ -178,13 +173,9 @@ class IrType(IrObject):
         # type: (int) -> IrType
         raise NotImplementedError
 
-    def uniquify(self):
-        # type: () -> IrType
-        return self
-
     @abstractmethod
-    def create_generator_type(self, generator):
-        # type: (IrccGenerator) -> IrccType
+    def create_generator_type(self, generator, resolved_addressspaces):
+        # type: (IrccGenerator, Dict[int, int]) -> IrccType
         raise NotImplementedError
 
     @abstractmethod
@@ -194,6 +185,10 @@ class IrType(IrObject):
 
     def add_equivalence_nonrecursive(self, equivalence, location, other_type, other_location):
         # type: (IrAddressSpaceInference, IrPosition, IrType, IrPosition) -> None
+        pass
+
+    def create_instance(self, equivalence):
+        # type: (Dict[int, int]) -> None
         pass
 
 
@@ -206,7 +201,9 @@ class IrTypeDeclaration(IrDeclaration):
         self._type = type
         assert self._type._name is None
         self._type._name = 'type_%d' % IrTypeDeclaration.TYPE_INDEX
+        self._current_index = 0
         IrTypeDeclaration.TYPE_INDEX += 1
+        self._instances = {}   # type: Dict[str, Tuple[int, Dict[int, int]]]
 
     def resolve(self, module):
         # type: (IrModule) -> None
@@ -220,9 +217,24 @@ class IrTypeDeclaration(IrDeclaration):
 
     def visit(self, generator, ir_name):
         # type: (IrccGenerator, str) -> None
-        assert self._type is not None
-        assert self._type._name is not None
-        generator.declare_type(self._type.create_generator_type(generator), self._type._name, ir_name)
+        for signature, (index, equivalence) in self._instances.items():
+            assert self._type._name is not None
+            generator.declare_type(
+                self._type.create_generator_type(generator, equivalence), '%s_%d' % (self._type._name, index), ir_name
+            )
+
+    def get_instance_name(self, equivalence):
+        # type: (Dict[int, int]) -> str
+        signature = self._type.signature(equivalence)
+        return '%s_%d' % (self._type._name, self._instances[signature][0])
+
+    def create_instance(self, equivalence):
+        # type: (Dict[int, int]) -> None
+        signature = self._type.signature(equivalence)
+        if signature not in self._instances:
+            self._instances[signature] = (self._current_index, equivalence)
+            self._current_index += 1
+            self._type.create_instance(equivalence)
 
 
 class IrTypeReference(IrType):
@@ -254,11 +266,10 @@ class IrTypeReference(IrType):
         assert self._declaration is not None
         return self._declaration.collect(self._reference)
 
-    def create_generator_type(self, generator):
-        # type: (IrccGenerator) -> IrccType
-        assert self._target is not None
-        assert self._target._name is not None
-        return generator.type_declared(self._target._name)
+    def create_generator_type(self, generator, resolved_addressspaces):
+        # type: (IrccGenerator, Dict[int, int]) -> IrccType
+        assert self._declaration is not None
+        return generator.type_declared(self._declaration.get_instance_name(resolved_addressspaces))
 
     def flatten(self, allow_pointer=True):
         # type: (bool) -> List[IrType]
@@ -269,10 +280,10 @@ class IrTypeReference(IrType):
         # type: () -> str
         return str(self._reference)
 
-    def signature(self):
-        # type: () -> str
+    def signature(self, resolved_addressspaces):
+        # type: (Dict[int, int]) -> str
         assert self._target is not None
-        return self._target.signature()
+        return self._target.signature(resolved_addressspaces)
 
     def is_defined(self):
         # type: () -> bool
@@ -284,18 +295,23 @@ class IrTypeReference(IrType):
         assert self._target is not None
         return self._target.add_equivalence(equivalence, location, other_type, other_location)
 
+    def create_instance(self, equivalence):
+        # type: (Dict[int, int]) -> None
+        assert self._declaration is not None
+        self._declaration.create_instance(equivalence)
+
 
 class IrTypeOpaque(IrType):
     def __str__(self):
         # type: () -> str
         return 'opaque'
 
-    def signature(self):
-        # type: () -> str
+    def signature(self, resolved_addressspaces):
+        # type: (Dict[int, int]) -> str
         return '?'
 
-    def create_generator_type(self, generator):
-        # type: (IrccGenerator) -> IrccType
+    def create_generator_type(self, generator, resolved_addressspaces):
+        # type: (IrccGenerator, Dict[int, int]) -> IrccType
         return generator.type_void()
 
     def add_equivalence(self, equivalence, location, other_type, other_location):
@@ -308,12 +324,12 @@ class IrTypeVoid(IrType):
         # type: () -> str
         return 'void'
 
-    def signature(self):
-        # type: () -> str
+    def signature(self, resolved_addressspaces):
+        # type: (Dict[int, int]) -> str
         return '%'
 
-    def create_generator_type(self, generator):
-        # type: (IrccGenerator) -> IrccType
+    def create_generator_type(self, generator, resolved_addressspaces):
+        # type: (IrccGenerator, Dict[int, int]) -> IrccType
         return generator.type_void()
 
     def add_equivalence(self, equivalence, location, other_type, other_location):
@@ -326,12 +342,12 @@ class IrTypeUndef(IrType):
         # type: () -> str
         return 'undef'
 
-    def signature(self):
-        # type: () -> str
+    def signature(self, resolved_addressspaces):
+        # type: (Dict[int, int]) -> str
         return '!'
 
-    def create_generator_type(self, generator):
-        # type: (IrccGenerator) -> IrccType
+    def create_generator_type(self, generator, resolved_addressspaces):
+        # type: (IrccGenerator, Dict[int, int]) -> IrccType
         return generator.type_undef()
 
     def add_equivalence(self, equivalence, location, other_type, other_location):
@@ -344,12 +360,12 @@ class IrTypeZero(IrType):
         # type: () -> str
         return 'zero'
 
-    def signature(self):
-        # type: () -> str
+    def signature(self, resolved_addressspaces):
+        # type: (Dict[int, int]) -> str
         return '0'
 
-    def create_generator_type(self, generator):
-        # type: (IrccGenerator) -> IrccType
+    def create_generator_type(self, generator, resolved_addressspaces):
+        # type: (IrccGenerator, Dict[int, int]) -> IrccType
         return generator.type_zero()
 
     def add_equivalence(self, equivalence, location, other_type, other_location):
@@ -358,12 +374,12 @@ class IrTypeZero(IrType):
 
 
 class IrTypeMetadata(IrType):
-    def create_generator_type(self, generator):
-        # type: (IrccGenerator) -> IrccType
+    def create_generator_type(self, generator, resolved_addressspaces):
+        # type: (IrccGenerator, Dict[int, int]) -> IrccType
         return generator.type_metadata()
 
-    def signature(self):
-        # type: () -> str
+    def signature(self, resolved_addressspaces):
+        # type: (Dict[int, int]) -> str
         return '~'
 
     def add_equivalence(self, equivalence, location, other_type, other_location):
@@ -381,12 +397,12 @@ class IrTypeBuiltin(IrType):
         # type: () -> str
         return self._builtin
 
-    def signature(self):
-        # type: () -> str
+    def signature(self, resolved_addressspaces):
+        # type: (Dict[int, int]) -> str
         return '#%s' % self._builtin
 
-    def create_generator_type(self, generator):
-        # type: (IrccGenerator) -> IrccType
+    def create_generator_type(self, generator, resolved_addressspaces):
+        # type: (IrccGenerator, Dict[int, int]) -> IrccType
         return generator.type_builtin(self._builtin)
 
     def add_equivalence(self, equivalence, location, other_type, other_location):
@@ -412,14 +428,21 @@ class IrTypePtr(IrType):
         # type: () -> str
         return '%s %s*' % (self._pointee, self._address_space)
 
-    def signature(self):
-        # type: () -> str
-        return '*[%s]%s' % (self._address_space, self._pointee.signature())
+    def signature(self, resolved_addressspaces):
+        # type: (Dict[int, int]) -> str
+        return '*[%d]%s' % (
+            resolved_addressspaces[self._address_space._address_space], self._pointee.signature(resolved_addressspaces)
+        )
 
-    def create_generator_type(self, generator):
-        # type: (IrccGenerator) -> IrccType
+    def create_generator_type(self, generator, resolved_addressspaces):
+        # type: (IrccGenerator, Dict[int, int]) -> IrccType
+        addr_space = self._address_space._address_space
+        if addr_space > 3:
+            addr_space = resolved_addressspaces[addr_space]
         return generator.make_ptr(
-            generator.make_address_space(self._pointee.create_generator_type(generator), int(self._address_space))
+            generator.make_address_space(
+                self._pointee.create_generator_type(generator, resolved_addressspaces), addr_space
+            )
         )
 
     def flatten(self, allow_pointer=True):
@@ -446,6 +469,10 @@ class IrTypePtr(IrType):
         assert isinstance(other_type, IrTypePtr)
         equivalence.add(self._address_space, location, self, other_type._address_space, other_location, other_type)
 
+    def create_instance(self, equivalence):
+        # type: (Dict[int, int]) -> None
+        self._pointee.create_instance(equivalence)
+
 
 class IrTypeArray(IrType):
     def __init__(self, type, count):
@@ -467,13 +494,13 @@ class IrTypeArray(IrType):
         # type: () -> str
         return '%s[%d]' % (self._type, self._count)
 
-    def signature(self):
-        # type: () -> str
-        return '[%d]%s' % (self._count, self._type.signature())
+    def signature(self, resolved_addressspaces):
+        # type: (Dict[int, int]) -> str
+        return '[%d]%s' % (self._count, self._type.signature(resolved_addressspaces))
 
-    def create_generator_type(self, generator):
-        # type: (IrccGenerator) -> IrccType
-        return generator.make_array(self._type.create_generator_type(generator), self._count)
+    def create_generator_type(self, generator, resolved_addressspaces):
+        # type: (IrccGenerator, Dict[int, int]) -> IrccType
+        return generator.make_array(self._type.create_generator_type(generator, resolved_addressspaces), self._count)
 
     def flatten(self, allow_pointer=True):
         # type: (bool) -> List[IrType]
@@ -492,6 +519,10 @@ class IrTypeArray(IrType):
         assert isinstance(other_type, IrTypeArray)
         assert self._count == other_type._count
         self._type.add_equivalence(equivalence, location, other_type._type, other_location)
+
+    def create_instance(self, equivalence):
+        # type: (Dict[int, int]) -> None
+        self._type.create_instance(equivalence)
 
 
 class IrTypeVector(IrType):
@@ -514,12 +545,12 @@ class IrTypeVector(IrType):
         # type: () -> str
         return '%s%d' % (self._type, self._count)
 
-    def signature(self):
-        # type: () -> str
-        return '<%d>%s' % (self._count, self._type.signature())
+    def signature(self, resolved_addressspaces):
+        # type: (Dict[int, int]) -> str
+        return '<%d>%s' % (self._count, self._type.signature(resolved_addressspaces))
 
-    def create_generator_type(self, generator):
-        # type: (IrccGenerator) -> IrccType
+    def create_generator_type(self, generator, resolved_addressspaces):
+        # type: (IrccGenerator, Dict[int, int]) -> IrccType
         raise NotImplementedError
 
     def is_defined(self):
@@ -532,6 +563,10 @@ class IrTypeVector(IrType):
         assert isinstance(other_type, IrTypeVector)
         assert self._count == other_type._count
         self._type.add_equivalence(equivalence, location, other_type._type, other_location)
+
+    def create_instance(self, equivalence):
+        # type: (Dict[int, int]) -> None
+        self._type.create_instance(equivalence)
 
 
 class IrTypeStruct(IrType):
@@ -557,13 +592,15 @@ class IrTypeStruct(IrType):
         # type: () -> str
         return '{%s}' % (', '.join(str(x) for x, _ in self._fields))
 
-    def signature(self):
-        # type: () -> str
-        return '{%s}' % (';'.join(x.signature() for x, _ in self._fields))
+    def signature(self, resolved_addressspaces):
+        # type: (Dict[int, int]) -> str
+        return '{%s}' % (';'.join(x.signature(resolved_addressspaces) for x, _ in self._fields))
 
-    def create_generator_type(self, generator):
-        # type: (IrccGenerator) -> IrccType
-        return generator.make_struct([(f.create_generator_type(generator), n) for f, n in self._fields])
+    def create_generator_type(self, generator, resolved_addressspaces):
+        # type: (IrccGenerator, Dict[int, int]) -> IrccType
+        return generator.make_struct(
+            [(f.create_generator_type(generator, resolved_addressspaces), n) for f, n in self._fields]
+        )
 
     def flatten(self, allow_pointer=True):
         # type: (bool) -> List[IrType]
@@ -593,6 +630,11 @@ class IrTypeStruct(IrType):
         assert index < len(self._fields)
         return self._fields[index][0]
 
+    def create_instance(self, equivalence):
+        # type: (Dict[int, int]) -> None
+        for type, name in self._fields:
+            type.create_instance(equivalence)
+
 
 class IrTypeMethod(IrType):
     def __init__(self, return_type, argument_types):
@@ -618,12 +660,15 @@ class IrTypeMethod(IrType):
         # type: () -> str
         return '%s(*)(%s)' % (self._return_type, ', '.join(str(x) for x in self._argument_types))
 
-    def signature(self):
-        # type: () -> str
-        return '(%s(%s))' % (self._return_type.signature(), ';'.join(x.signature() for x in self._argument_types))
+    def signature(self, resolved_addressspaces):
+        # type: (Dict[int, int]) -> str
+        return '(%s(%s))' % (
+            self._return_type.signature(resolved_addressspaces),
+            ';'.join(x.signature(resolved_addressspaces) for x in self._argument_types)
+        )
 
-    def create_generator_type(self, generator):
-        # type: (IrccGenerator) -> IrccType
+    def create_generator_type(self, generator, resolved_addressspace):
+        # type: (IrccGenerator, Dict[int, int]) -> IrccType
         raise NotImplementedError
 
     def is_defined(self):
@@ -641,6 +686,12 @@ class IrTypeMethod(IrType):
         self._return_type.add_equivalence(equivalence, location, other_type._return_type, other_location)
         for t1, t2 in zip(self._argument_types, other_type._argument_types):
             t1.add_equivalence(equivalence, location, t2, other_location)
+
+    def create_instance(self, equivalence):
+        # type: (Dict[int, int]) -> None
+        self._return_type.create_instance(equivalence)
+        for type in self._argument_types:
+            type.create_instance(equivalence)
 
 
 if TYPE_CHECKING:

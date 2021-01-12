@@ -12,6 +12,7 @@ class IrExpression(IrObject):
         self._metadata = metadata
         self._metadata_values = {}     # type: Dict[str, IrMetadata]
         self._position = IrPosition('', 0, 0, 0, '')
+        self._usage = []               # type: List[IrExpression]
 
     def resolve(self, module, position):
         # type: (IrModule, IrPosition) -> IrPosition
@@ -44,6 +45,10 @@ class IrExpression(IrObject):
     def resolve_type(self, equivalence, return_type, return_position):
         # type: (IrAddressSpaceInference, IrType, IrPosition) -> None
         return
+
+    def used_by(self, expression):
+        # type: (IrExpression) -> None
+        self._usage.append(expression)
 
 
 class IrExpressionDeclaration(IrDeclaration):

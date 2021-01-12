@@ -17,6 +17,8 @@ class IrInstBinaryOp(IrInstruction):
         self._type.resolve(module)
         self._left_operand.resolve(module, position)
         self._right_operand.resolve(module, position)
+        self._left_operand.used_by(self)
+        self._right_operand.used_by(self)
         return position
 
     def get_type(self):
@@ -44,6 +46,8 @@ class IrInstFloatBinaryOp(IrInstruction):
         self._type.resolve(module)
         self._left_operand.resolve(module, position)
         self._right_operand.resolve(module, position)
+        self._left_operand.used_by(self)
+        self._right_operand.used_by(self)
         return position
 
     def get_type(self):

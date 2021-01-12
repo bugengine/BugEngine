@@ -15,7 +15,7 @@ class IrInstCast(IrInstruction):
         position = IrInstruction.resolve(self, module, position)
         self._value.resolve(module, position)
         self._result_type.resolve(module)
-        self._result_type = self._result_type.uniquify()
+        self._value.used_by(self)
         return position
 
     def get_type(self):

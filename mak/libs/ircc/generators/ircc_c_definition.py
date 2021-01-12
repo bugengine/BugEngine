@@ -13,13 +13,18 @@ class IrccCDefinition(IrccCTypes):
         if type._declaration[0]:
             self._out_file.write('/* %s */\n%s;\n\n' % (ir_name, type.format(['%s_' % name, '', '', ''])))
 
-    def begin_method(self, name, return_type, parameters, calling_convention):
-        # type: (str, IrccType, List[Tuple[IrccType, str]], str) -> bool
-        self._out_file.write(
-            '%s %s(%s)\n{\n' %
-            (return_type.format(['', '', '', '']), name, ', '.join(t.format(['', '', n, '']) for t, n in parameters))
-        )
-        return True
+    def begin_method(self, name, return_type, parameters, calling_convention, has_definition):
+        # type: (str, IrccType, List[Tuple[IrccType, str]], str, bool) -> bool
+        if has_definition:
+            self._out_file.write(
+                '%s %s(%s)\n{\n' % (
+                    return_type.format(['', '', '', '']
+                                       ), name, ', '.join(t.format(['', '', n, '']) for t, n in parameters)
+                )
+            )
+            return True
+        else:
+            return False
 
     def end_method(self):
         # type: () -> None
