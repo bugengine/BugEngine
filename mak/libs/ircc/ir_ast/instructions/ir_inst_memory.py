@@ -32,6 +32,14 @@ class IrInstAlloca(IrInstruction):
         # type: (Dict[int, int]) -> None
         self._type.create_instance(equivalence)
 
+    def register_stack_data(self, generator, context):
+        # type: (IrccGenerator, IrCodeGenContext) -> None
+        assert isinstance(self._type, IrTypePtr)
+        assert self._result_name is not None
+        generator.declare_variable(
+            self._result_name, self._type._pointee.create_generator_type(generator, context._equivalence)
+        )
+
 
 class IrInstLoad(IrInstruction):
     def __init__(self, result, source, type, metadata):
@@ -137,4 +145,6 @@ if TYPE_CHECKING:
     from ..ir_reference import IrReference
     from ..ir_module import IrModule
     from ..ir_type import IrType, IrAddressSpace, IrAddressSpaceInference
+    from ..ir_code import IrCodeGenContext
     from ...ir_position import IrPosition
+    from ...ir_codegen import IrccGenerator

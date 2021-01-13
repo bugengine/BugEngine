@@ -15,6 +15,7 @@ class IrInstFloatUnaryOp(IrInstruction):
         position = IrInstruction.resolve(self, module, position)
         self._type.resolve(module)
         self._operand.resolve(module, position)
+        self._operand.used_by(self)
         return position
 
     def get_type(self, suggested_type):

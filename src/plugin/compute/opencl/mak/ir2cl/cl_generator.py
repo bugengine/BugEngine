@@ -13,6 +13,13 @@ class ClDeclaration(IrccCDeclaration):
         # type: () -> IrccType
         return IrccType(['', '', 'meta', ''])
 
+    def make_vector(self, type, count):
+        # type: (IrccType, int) -> IrccType
+        base_type = type._declaration[2]
+        assert base_type in ['i8', 'i16', 'i32', 'i64', 'float']
+        assert count in [2, 4, 8, 16]
+        return IrccType(['', '', '%s_%d' % (base_type, count), ''])
+
     def make_address_space(self, type, address_space):
         # type: (IrccType, int) -> IrccType
         return IrccType(['', self._address_spaces[address_space], ''], type)
@@ -29,6 +36,15 @@ class ClDeclaration(IrccCDeclaration):
             'typedef void* meta;\n'
             '\n'
         )
+        for vector_size in 2, 4, 8, 16:
+            self._out_file.write(
+                'typedef char%(size)d   i8_%(size)d;\n'
+                'typedef short%(size)d  i16_%(size)d;\n'
+                'typedef int%(size)d    i32_%(size)d;\n'
+                'typedef long%(size)d   i64_%(size)d;\n'
+                'typedef float%(size)d  float_%(size)d;\n'
+                '\n' % {'size': vector_size}
+            )
         return True
 
     def end_module(self):
@@ -52,6 +68,13 @@ class ClDefinition(IrccCDefinition):
         # type: (TextIO) -> None
         IrccCDefinition.__init__(self, file)
         self._address_spaces = {0: '__private', 1: '__global', 2: '__constant', 3: '__local', 4: '__todo'}
+
+    def make_vector(self, type, count):
+        # type: (IrccType, int) -> IrccType
+        base_type = type._declaration[2]
+        assert base_type in ['i8', 'i16', 'i32', 'i64', 'float']
+        assert count in [2, 4, 8, 16]
+        return IrccType(['', '', '%s_%d' % (base_type, count), ''])
 
     def type_metadata(self):
         # type: () -> IrccType

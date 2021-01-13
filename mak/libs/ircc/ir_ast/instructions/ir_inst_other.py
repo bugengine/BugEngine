@@ -132,6 +132,14 @@ class IrInstPhi(IrInstruction):
                 equivalence, self._origins[0][0].get_position(), o[0].get_type(self._type), o[0].get_position()
             )
 
+    def is_inline(self):
+        # type: () -> bool
+        return False
+
+    def collect_phi_exprs(self):
+        # type: () -> List[Tuple[IrExpression, str]]
+        return self._origins
+
     def get_type(self, suggested_type):
         # type: (IrType) -> IrType
         return self._type

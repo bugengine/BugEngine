@@ -164,6 +164,11 @@ class IrExpressionReference(IrExpression):
         # type: () -> str
         return self._reference
 
+    def used_by(self, expression):
+        # type: (IrExpression) -> None
+        assert self._expression is not None
+        self._expression.used_by(expression)
+
 
 class IrExpressionCast(IrExpression):
     def __init__(self, result_type, value, cast_type):
@@ -197,6 +202,10 @@ class IrExpressionCast(IrExpression):
     def __str__(self):
         # type: () -> str
         return '%s_cast<%s>(%s)' % (self._cast_type, self._result_type, self._value)
+
+    def used_by(self, expression):
+        # type: (IrExpression) -> None
+        self._value.used_by(expression)
 
 
 if TYPE_CHECKING:

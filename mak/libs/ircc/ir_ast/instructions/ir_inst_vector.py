@@ -15,6 +15,8 @@ class IrInstExtractElement(IrInstruction):
         position = IrInstruction.resolve(self, module, position)
         self._value.resolve(module, position)
         self._index.resolve(module, position)
+        self._value.used_by(self)
+        self._index.used_by(self)
         return position
 
     def resolve_type(self, equivalence, return_type, return_position):
@@ -43,6 +45,9 @@ class IrInstInsertElement(IrInstruction):
         self._value.resolve(module, position)
         self._element.resolve(module, position)
         self._index.resolve(module, position)
+        self._value.used_by(self)
+        self._element.used_by(self)
+        self._index.used_by(self)
         return position
 
     def resolve_type(self, equivalence, return_type, return_position):
@@ -70,6 +75,9 @@ class IrInstShuffleVector(IrInstruction):
         self._vector_1.resolve(module, position)
         self._vector_2.resolve(module, position)
         self._mask.resolve(module, position)
+        self._vector_1.used_by(self)
+        self._vector_2.used_by(self)
+        self._mask.used_by(self)
         return position
 
     def resolve_type(self, equivalence, return_type, return_position):

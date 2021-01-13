@@ -4,31 +4,6 @@ from .ir_expr import IrExpression, IrExpressionDeclaration
 from abc import abstractmethod
 
 
-class IrDominatorNode:
-    def __init__(self, segment, parent=None):
-        # type: (IrCodeSegment, Optional[IrDominatorNode]) -> None
-        self._segment = segment
-        self._parent = parent
-        self._children = []    # type: List[IrDominatorNode]
-
-    def is_dominated_by(self, node):
-        # type: (IrDominatorNode) -> bool
-        test_node = self._parent
-        while test_node is not None:
-            if test_node == node:
-                return True
-            test_node = test_node._parent
-        return False
-
-    def is_directly_dominated_by(self, node):
-        # type: (IrDominatorNode) -> bool
-        return self._parent == node
-
-    def dominates(self, node):
-        # type: (IrDominatorNode) -> bool
-        return node.is_dominated_by(self)
-
-
 class IrCodeGenContext:
     def __init__(self, equivalence):
         # type: (Dict[int, int]) -> None
@@ -41,7 +16,13 @@ class IrInstruction(IrExpression):
         IrExpression.__init__(self, metadata)
         self._opcode = opcode
         self._result = result
+        self._result_name = None if result is None else 'var_%s' % result[1:].replace('.', '_')
         self._segment = None   # type: Optional[IrCodeSegment]
+        self._phi_nodes = []   # type: List[IrInstruction]
+
+    def collect_phi_exprs(self):
+        # type: () -> List[Tuple[IrExpression, str]]
+        return []
 
     def get_type(self, suggested_type):
         # type: (IrType) -> IrType
@@ -70,12 +51,32 @@ class IrInstruction(IrExpression):
 
     def register_stack_data(self, generator, context):
         # type: (IrccGenerator, IrCodeGenContext) -> None
-        pass
+        if not self.is_inline():
+            assert self._result_name is not None
+            generator.declare_variable(
+                self._result_name,
+                self.get_type(IrTypeVoid()).create_generator_type(generator, context._equivalence)
+            )
 
     def is_inline(self):
         # type: () -> bool
-        assert len(self._usage) != 0
-        return len(self._usage) == 1
+        if self._result_name is not None:
+            assert len(self._usage) != 0
+            return len(self._usage) == 1
+        else:
+            return True
+
+
+class IrAssignInstruction(IrInstruction):
+    def __init__(self, result, type, expr):
+        # type: (IrReference, IrType, IrExpression) -> None
+        IrInstruction.__init__(self, 'phi_assign', None, [])
+        self._type = type
+        self._expression = expr
+
+    def get_type(self, suggested_type):
+        # type: (IrType) -> IrType
+        return self._type
 
 
 class IrCodeSegment:
@@ -83,11 +84,10 @@ class IrCodeSegment:
         # type: (str, List[IrInstruction]) -> None
         self._label = label
         self._instructions = instructions
-        self._nexts = []       # type: List[IrCodeSegment]
-        self._previous = []    # type: List[IrCodeSegment]
+        self._successors = []      # type: List[IrCodeSegment]
+        self._predecessors = []    # type: List[IrCodeSegment]
         for i in self._instructions:
             i._segment = self
-        self._dominance_set = IrDominatorNode(self)
 
     def resolve(self, module, position, equivalence, return_type, return_position):
         # type: (IrModule, IrPosition, IrAddressSpaceInference, IrType, IrPosition) -> IrPosition
@@ -126,15 +126,14 @@ class IrCodeBlock:
                     self._segments.append(IrCodeSegment(label, stream))
                     stream = []
                     label = '!!!'
-        self._dominance_root = self._segments[0]._dominance_set
 
         for s in self._segments:
             terminal = s._instructions[-1]
-            nexts = terminal.labels()
-            s._nexts = [self._find_segment(n) for n in nexts]
-            for n in s._nexts:
-                if s not in n._previous:
-                    n._previous.append(s)
+            successors = terminal.labels()
+            s._successors = [self._find_segment(n) for n in successors]
+            for n in s._successors:
+                if s not in n._predecessors:
+                    n._predecessors.append(s)
 
     def _find_segment(self, name):
         # type: (str) -> IrCodeSegment
@@ -156,26 +155,20 @@ class IrCodeBlock:
         """
         for s in self._segments:
             position = s.resolve(module, position, self._equivalence, return_type, return_position)
-        self._build_dominance_graph()
-        self._run_loop_analysis()
-        self._split_critical_edges()
-        self._eliminate_phi_nodes()
+        self._resolve_phi_nodes()
 
-    def _build_dominance_graph(self):
+    def _resolve_phi_nodes(self):
         # type: () -> None
-        pass
-
-    def _run_loop_analysis(self):
-        # type: () -> None
-        pass
-
-    def _split_critical_edges(self):
-        # type: () -> None
-        pass
-
-    def _eliminate_phi_nodes(self):
-        # type: () -> None
-        pass
+        for s in self._segments:
+            for inst in s._instructions:
+                phi_exprs = inst.collect_phi_exprs()
+                if len(phi_exprs) == 0:
+                    break
+                assert inst._result is not None
+                for expr, label in phi_exprs:
+                    segment = self._find_segment(label[1:])
+                    assert segment in s._predecessors
+                    segment._instructions.append(IrAssignInstruction(inst._result, inst.get_type(IrTypeVoid()), expr))
 
     def _create_instance(self, equivalence):
         # type: (Dict[int, int]) -> None
@@ -191,7 +184,7 @@ class IrCodeBlock:
 
 from . import instructions as ir_instructions
 if TYPE_CHECKING:
-    from typing import Dict, List, Optional, Set, Tuple, Union
+    from typing import Dict, List, Optional, Tuple, Union
     from .ir_module import IrModule
     from .ir_metadata import IrMetadataLink
     from .ir_type import IrType

@@ -12,6 +12,7 @@ class IrInstRet(IrInstruction):
         # type: (IrModule, IrPosition) -> IrPosition
         position = IrInstruction.resolve(self, module, position)
         self._return_value.resolve(module, position)
+        self._return_value.used_by(self)
         return position
 
     def get_type(self, suggested_type):
@@ -59,6 +60,7 @@ class IrInstConditionalBranch(IrInstruction):
         # type: (IrModule, IrPosition) -> IrPosition
         position = IrInstruction.resolve(self, module, position)
         self._condition.resolve(module, position)
+        self._condition.used_by(self)
         return position
 
     def resolve_type(self, equivalence, return_type, return_position):
@@ -86,8 +88,10 @@ class IrInstSwitch(IrInstruction):
         # type: (IrModule, IrPosition) -> IrPosition
         position = IrInstruction.resolve(self, module, position)
         self._condition.resolve(module, position)
+        self._condition.used_by(self)
         for value, label in self._targets:
             value.resolve(module, position)
+            value.used_by(self)
         return position
 
     def resolve_type(self, equivalence, return_type, return_position):

@@ -7,6 +7,7 @@ class IrccCDefinition(IrccCTypes):
     def __init__(self, file):
         # type: (TextIO) -> None
         IrccCTypes.__init__(self, file)
+        self._indent = ''
 
     def declare_type(self, type, name, ir_name):
         # type: (IrccType, str, str) -> None
@@ -22,13 +23,19 @@ class IrccCDefinition(IrccCTypes):
                                        ), name, ', '.join(t.format(['', '', n, '']) for t, n in parameters)
                 )
             )
+            self._indent = '    '
             return True
         else:
             return False
 
     def end_method(self):
         # type: () -> None
+        self._indent = ''
         self._out_file.write('}\n\n')
+
+    def declare_variable(self, name, type):
+        # type: (str, IrccType) -> None
+        self._out_file.write('%s%s;\n' % (self._indent, type.format(['', '', name, ''])))
 
 
 if TYPE_CHECKING:

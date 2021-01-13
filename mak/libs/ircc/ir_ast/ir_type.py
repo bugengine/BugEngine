@@ -551,7 +551,7 @@ class IrTypeVector(IrType):
 
     def create_generator_type(self, generator, resolved_addressspaces):
         # type: (IrccGenerator, Dict[int, int]) -> IrccType
-        raise NotImplementedError
+        return generator.make_vector(self._type.create_generator_type(generator, resolved_addressspaces), self._count)
 
     def is_defined(self):
         # type: () -> bool

@@ -43,6 +43,11 @@ class IrccGenerator:
         raise NotImplementedError
 
     @abstractmethod
+    def make_vector(self, type, size):
+        # type: (IrccType, int) -> IrccType
+        raise NotImplementedError
+
+    @abstractmethod
     def make_ptr(self, type):
         # type: (IrccType) -> IrccType
         raise NotImplementedError
@@ -101,6 +106,10 @@ class IrccGenerator:
 
     def end_method(self):
         # type: () -> None
+        pass
+
+    def declare_variable(self, name, type):
+        # type: (str, IrccType) -> None
         pass
 
 
