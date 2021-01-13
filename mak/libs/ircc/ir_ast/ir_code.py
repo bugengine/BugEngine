@@ -4,6 +4,31 @@ from .ir_expr import IrExpression, IrExpressionDeclaration
 from abc import abstractmethod
 
 
+class IrDominatorNode:
+    def __init__(self, segment, parent=None):
+        # type: (IrCodeSegment, Optional[IrDominatorNode]) -> None
+        self._segment = segment
+        self._parent = parent
+        self._children = []    # type: List[IrDominatorNode]
+
+    def is_dominated_by(self, node):
+        # type: (IrDominatorNode) -> bool
+        test_node = self._parent
+        while test_node is not None:
+            if test_node == node:
+                return True
+            test_node = test_node._parent
+        return False
+
+    def is_directly_dominated_by(self, node):
+        # type: (IrDominatorNode) -> bool
+        return self._parent == node
+
+    def dominates(self, node):
+        # type: (IrDominatorNode) -> bool
+        return node.is_dominated_by(self)
+
+
 class IrCodeGenContext:
     def __init__(self, equivalence):
         # type: (Dict[int, int]) -> None
@@ -16,9 +41,10 @@ class IrInstruction(IrExpression):
         IrExpression.__init__(self, metadata)
         self._opcode = opcode
         self._result = result
+        self._segment = None   # type: Optional[IrCodeSegment]
 
-    def get_type(self):
-        # type: () -> IrType
+    def get_type(self, suggested_type):
+        # type: (IrType) -> IrType
         return IrTypeVoid()
 
     def terminal(self):
@@ -57,7 +83,11 @@ class IrCodeSegment:
         # type: (str, List[IrInstruction]) -> None
         self._label = label
         self._instructions = instructions
-        self._nexts = []   # type: List[IrCodeSegment]
+        self._nexts = []       # type: List[IrCodeSegment]
+        self._previous = []    # type: List[IrCodeSegment]
+        for i in self._instructions:
+            i._segment = self
+        self._dominance_set = IrDominatorNode(self)
 
     def resolve(self, module, position, equivalence, return_type, return_position):
         # type: (IrModule, IrPosition, IrAddressSpaceInference, IrType, IrPosition) -> IrPosition
@@ -96,10 +126,15 @@ class IrCodeBlock:
                     self._segments.append(IrCodeSegment(label, stream))
                     stream = []
                     label = '!!!'
+        self._dominance_root = self._segments[0]._dominance_set
+
         for s in self._segments:
             terminal = s._instructions[-1]
             nexts = terminal.labels()
-            s._nexts = [self._find_segment(n) for n in s._instructions[-1].labels()]
+            s._nexts = [self._find_segment(n) for n in nexts]
+            for n in s._nexts:
+                if s not in n._previous:
+                    n._previous.append(s)
 
     def _find_segment(self, name):
         # type: (str) -> IrCodeSegment
@@ -110,7 +145,7 @@ class IrCodeBlock:
             raise NotImplementedError
 
     def resolve(self, module, position, return_type, return_position):
-        # type: (IrModule, IrPosition, IrType, IrPosition) -> IrCodeBlock
+        # type: (IrModule, IrPosition, IrType, IrPosition) -> None
         """
             Resolving a method also resolves generic address spaces.
             The resolution step will bucket together types that are constrained into the same generic address space.
@@ -121,7 +156,26 @@ class IrCodeBlock:
         """
         for s in self._segments:
             position = s.resolve(module, position, self._equivalence, return_type, return_position)
-        return self
+        self._build_dominance_graph()
+        self._run_loop_analysis()
+        self._split_critical_edges()
+        self._eliminate_phi_nodes()
+
+    def _build_dominance_graph(self):
+        # type: () -> None
+        pass
+
+    def _run_loop_analysis(self):
+        # type: () -> None
+        pass
+
+    def _split_critical_edges(self):
+        # type: () -> None
+        pass
+
+    def _eliminate_phi_nodes(self):
+        # type: () -> None
+        pass
 
     def _create_instance(self, equivalence):
         # type: (Dict[int, int]) -> None

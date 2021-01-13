@@ -22,8 +22,8 @@ class IrInstExtractElement(IrInstruction):
         self._value.resolve_type(equivalence, return_type, return_position)
         self._index.resolve_type(equivalence, return_type, return_position)
 
-    def get_type(self):
-        # type: () -> IrType
+    def get_type(self, suggested_type):
+        # type: (IrType) -> IrType
         vector_type = self._value.get_type()
         assert isinstance(vector_type, IrTypeVector)
         return vector_type._type
@@ -51,8 +51,8 @@ class IrInstInsertElement(IrInstruction):
         self._element.resolve_type(equivalence, return_type, return_position)
         self._index.resolve_type(equivalence, return_type, return_position)
 
-    def get_type(self):
-        # type: () -> IrType
+    def get_type(self, suggested_type):
+        # type: (IrType) -> IrType
         return self._value.get_type()
 
 
@@ -81,8 +81,8 @@ class IrInstShuffleVector(IrInstruction):
             equivalence, self._vector_1.get_position(), self._vector_2.get_type(), self._vector_2.get_position()
         )
 
-    def get_type(self):
-        # type: () -> IrType
+    def get_type(self, suggested_type):
+        # type: (IrType) -> IrType
         return self._vector_1.get_type()
 
 

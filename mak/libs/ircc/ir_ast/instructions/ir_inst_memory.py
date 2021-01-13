@@ -24,8 +24,8 @@ class IrInstAlloca(IrInstruction):
         self._type = IrTypePtr(self._type, self._address_space)
         return position
 
-    def get_type(self):
-        # type: () -> IrType
+    def get_type(self, suggested_type):
+        # type: (IrType) -> IrType
         return self._type
 
     def create_instance(self, equivalence):
@@ -49,8 +49,8 @@ class IrInstLoad(IrInstruction):
         self._source.used_by(self)
         return position
 
-    def get_type(self):
-        # type: () -> IrType
+    def get_type(self, suggested_type):
+        # type: (IrType) -> IrType
         value_type = self._source.get_type()
         assert isinstance(value_type, IrTypePtr)
         return value_type._pointee
@@ -109,8 +109,8 @@ class IrInstGetElementPtr(IrInstruction):
         for value in self._access:
             value.resolve_type(equivalence, return_type, return_position)
 
-    def get_type(self):
-        # type: () -> IrType
+    def get_type(self, suggested_type):
+        # type: (IrType) -> IrType
         if self._value_type is None:
             result_type = self._access[0].get_type()
             address_space = IrAddressSpace(0)

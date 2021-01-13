@@ -48,10 +48,7 @@ class IrValueExpr(IrValue):
 
     def get_type(self):
         # type: () -> IrType
-        if self._expression.is_typed():
-            return self._expression.get_type()
-        else:
-            return self._type
+        return self._expression.get_type(self._type)
 
     def get_position(self):
         # type: () -> IrPosition

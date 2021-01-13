@@ -26,17 +26,13 @@ class IrExpression(IrObject):
             self._position = position
         return self._position
 
-    def get_type(self):
-        # type: () -> IrType
+    def get_type(self, suggested_type):
+        # type: (IrType) -> IrType
         raise NotImplementedError
 
     def __str__(self):
         # type: () -> str
         raise NotImplementedError
-
-    def is_typed(self):
-        # type: () -> bool
-        return True
 
     def get_position(self):
         # type: () -> IrPosition
@@ -67,17 +63,13 @@ class IrExpressionZero(IrExpression):
         # type: () -> None
         IrExpression.__init__(self)
 
-    def get_type(self):
-        # type: () -> IrType
-        return IrTypeZero()
+    def get_type(self, suggested_type):
+        # type: (IrType) -> IrType
+        return suggested_type
 
     def __str__(self):
         # type: () -> str
         return 'zero'
-
-    def is_typed(self):
-        # type: () -> bool
-        return False
 
 
 class IrExpressionConstant(IrExpression):
@@ -86,23 +78,13 @@ class IrExpressionConstant(IrExpression):
         IrExpression.__init__(self)
         self._value = value
 
-    def get_type(self):
-        # type: () -> IrType
-        if isinstance(self._value, int):
-            return IrTypeBuiltin('i64')
-        if isinstance(self._value, bool):
-            return IrTypeBuiltin('i1')
-        if isinstance(self._value, str):
-            raise NotImplementedError
-        raise NotImplementedError
+    def get_type(self, suggested_type):
+        # type: (IrType) -> IrType
+        return suggested_type
 
     def __str__(self):
         # type: () -> str
         return str(self._value)
-
-    def is_typed(self):
-        # type: () -> bool
-        return False
 
 
 class IrExpressionUndef(IrExpression):
@@ -110,17 +92,13 @@ class IrExpressionUndef(IrExpression):
         # type: () -> None
         IrExpression.__init__(self)
 
-    def get_type(self):
-        # type: () -> IrType
-        return IrTypeUndef()
+    def get_type(self, suggested_type):
+        # type: (IrType) -> IrType
+        return suggested_type
 
     def __str__(self):
         # type: () -> str
         return 'undefined'
-
-    def is_typed(self):
-        # type: () -> bool
-        return False
 
 
 class IrExpressionArray(IrExpression):
@@ -177,10 +155,10 @@ class IrExpressionReference(IrExpression):
         assert self._expression is not None
         return self._expression.get_position()
 
-    def get_type(self):
-        # type: () -> IrType
+    def get_type(self, suggested_type):
+        # type: (IrType) -> IrType
         assert self._expression is not None
-        return self._expression.get_type()
+        return self._expression.get_type(suggested_type)
 
     def __str__(self):
         # type: () -> str
@@ -195,8 +173,8 @@ class IrExpressionCast(IrExpression):
         self._value = value
         self._cast_type = cast_type
 
-    def get_type(self):
-        # type: () -> IrType
+    def get_type(self, suggested_type):
+        # type: (IrType) -> IrType
         assert self._result_type.is_defined()
         return self._result_type
 

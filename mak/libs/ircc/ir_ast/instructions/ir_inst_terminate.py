@@ -14,8 +14,8 @@ class IrInstRet(IrInstruction):
         self._return_value.resolve(module, position)
         return position
 
-    def get_type(self):
-        # type: () -> IrType
+    def get_type(self, suggested_type):
+        # type: (IrType) -> IrType
         return self._return_value.get_type()
 
     def terminal(self):

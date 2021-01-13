@@ -21,14 +21,25 @@ class IrInstBinaryOp(IrInstruction):
         self._right_operand.used_by(self)
         return position
 
-    def get_type(self):
-        # type: () -> IrType
-        return self._left_operand.get_type()
+    def get_type(self, suggested_type):
+        # type: (IrType) -> IrType
+        return self._type
 
     def resolve_type(self, equivalence, return_type, return_position):
         # type: (IrAddressSpaceInference, IrType, IrPosition) -> None
+        self._type.add_equivalence(
+            equivalence, self.get_position(), self._left_operand.get_type(self._type), self._left_operand.get_position()
+        )
+        self._type.add_equivalence(
+            equivalence, self.get_position(), self._right_operand.get_type(self._type),
+            self._right_operand.get_position()
+        )
         self._left_operand.resolve_type(equivalence, return_type, return_position)
         self._right_operand.resolve_type(equivalence, return_type, return_position)
+
+    def create_instance(self, equivalence):
+        # type: (Dict[int, int]) -> None
+        self._type.create_instance(equivalence)
 
 
 class IrInstFloatBinaryOp(IrInstruction):
@@ -50,18 +61,29 @@ class IrInstFloatBinaryOp(IrInstruction):
         self._right_operand.used_by(self)
         return position
 
-    def get_type(self):
-        # type: () -> IrType
-        return self._left_operand.get_type()
+    def get_type(self, suggested_type):
+        # type: (IrType) -> IrType
+        return self._type
 
     def resolve_type(self, equivalence, return_type, return_position):
         # type: (IrAddressSpaceInference, IrType, IrPosition) -> None
+        self._type.add_equivalence(
+            equivalence, self.get_position(), self._left_operand.get_type(self._type), self._left_operand.get_position()
+        )
+        self._type.add_equivalence(
+            equivalence, self.get_position(), self._right_operand.get_type(self._type),
+            self._right_operand.get_position()
+        )
         self._left_operand.resolve_type(equivalence, return_type, return_position)
         self._right_operand.resolve_type(equivalence, return_type, return_position)
 
+    def create_instance(self, equivalence):
+        # type: (Dict[int, int]) -> None
+        self._type.create_instance(equivalence)
+
 
 if TYPE_CHECKING:
-    from typing import List, Optional, Tuple
+    from typing import Dict, List, Optional, Tuple
     from ..ir_expr import IrExpression
     from ..ir_metadata import IrMetadataLink
     from ..ir_reference import IrReference

@@ -1,4 +1,5 @@
 from ..ir_code import IrInstruction
+from ..ir_type import IrTypeVoid
 from be_typing import TYPE_CHECKING
 
 
@@ -17,8 +18,8 @@ class IrInstExtractValue(IrInstruction):
         self._source.used_by(self)
         return position
 
-    def get_type(self):
-        # type: () -> IrType
+    def get_type(self, suggested_type):
+        # type: (IrType) -> IrType
         if self._value_type is None:
             value_type = self._source.get_type()
             for i in self._indices:
@@ -50,8 +51,8 @@ class IrInstInsertValue(IrInstruction):
         self._value.used_by(self)
         return position
 
-    def get_type(self):
-        # type: () -> IrType
+    def get_type(self, suggested_type):
+        # type: (IrType) -> IrType
         return self._source.get_type()
 
     def resolve_type(self, equivalence, return_type, return_position):

@@ -49,8 +49,8 @@ class IrMethodParameter(IrExpression):
             result.append(IrMethodParameter(types[0], self._id, IrAttributeGroupObject([])))
         return result
 
-    def get_type(self):
-        # type: () -> IrType
+    def get_type(self, suggested_type):
+        # type: (IrType) -> IrType
         return self._type
 
 
@@ -309,7 +309,7 @@ class IrMethodBody:
         # type: (IrModule, IrPosition, List[IrMethodParameter], IrType, IrPosition) -> IrMethodBody
         module.push_scope(self._scope)
         try:
-            self._code = self._code.resolve(module, position, return_type, return_position)
+            self._code.resolve(module, position, return_type, return_position)
         finally:
             module.pop_scope()
         return self

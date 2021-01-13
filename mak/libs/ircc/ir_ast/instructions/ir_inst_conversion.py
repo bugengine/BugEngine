@@ -18,8 +18,8 @@ class IrInstCast(IrInstruction):
         self._value.used_by(self)
         return position
 
-    def get_type(self):
-        # type: () -> IrType
+    def get_type(self, suggested_type):
+        # type: (IrType) -> IrType
         return self._result_type
 
     def resolve_type(self, equivalence, return_type, return_position):
@@ -33,9 +33,13 @@ class IrInstCast(IrInstruction):
             )
         self._value.resolve_type(equivalence, return_type, return_position)
 
+    def create_instance(self, equivalence):
+        # type: (Dict[int, int]) -> None
+        self._result_type.create_instance(equivalence)
+
 
 if TYPE_CHECKING:
-    from typing import List, Optional, Tuple
+    from typing import Dict, List, Optional, Tuple
     from ..ir_value import IrValue
     from ..ir_metadata import IrMetadataLink
     from ..ir_reference import IrReference

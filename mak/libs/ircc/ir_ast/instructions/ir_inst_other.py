@@ -19,8 +19,8 @@ class IrInstCall(IrInstruction):
             a.used_by(self)
         return position
 
-    def get_type(self):
-        # type: () -> IrType
+    def get_type(self, suggested_type):
+        # type: (IrType) -> IrType
         return self._method.return_type()
 
     def resolve_type(self, equivalence, return_type, return_position):
@@ -32,7 +32,7 @@ class IrInstCall(IrInstruction):
         assert len(parameters) == len(self._arguments)
         for argument, parameter in zip(self._arguments, parameters):
             argument.get_type().add_equivalence(
-                equivalence, argument.get_position(), parameter.get_type(), parameter.get_position()
+                equivalence, argument.get_position(), parameter.get_type(argument.get_type()), parameter.get_position()
             )
 
     def create_instance(self, equivalence):
@@ -65,8 +65,8 @@ class IrInstIntegerCompare(IrInstruction):
         self._left_operand.resolve_type(equivalence, return_type, return_position)
         self._right_operand.resolve_type(equivalence, return_type, return_position)
 
-    def get_type(self):
-        # type: () -> IrType
+    def get_type(self, suggested_type):
+        # type: (IrType) -> IrType
         return self._value_type
 
     def is_inline(self):
@@ -99,8 +99,8 @@ class IrInstFloatCompare(IrInstruction):
         self._left_operand.resolve_type(equivalence, return_type, return_position)
         self._right_operand.resolve_type(equivalence, return_type, return_position)
 
-    def get_type(self):
-        # type: () -> IrType
+    def get_type(self, suggested_type):
+        # type: (IrType) -> IrType
         return self._value_type
 
     def is_inline(self):
@@ -129,12 +129,16 @@ class IrInstPhi(IrInstruction):
         for o in self._origins:
             o[0].resolve_type(equivalence, return_type, return_position)
             self._type.add_equivalence(
-                equivalence, self._origins[0][0].get_position(), o[0].get_type(), o[0].get_position()
+                equivalence, self._origins[0][0].get_position(), o[0].get_type(self._type), o[0].get_position()
             )
 
-    def get_type(self):
-        # type: () -> IrType
+    def get_type(self, suggested_type):
+        # type: (IrType) -> IrType
         return self._type
+
+    def create_instance(self, equivalence):
+        # type: (Dict[int, int]) -> None
+        self._type.create_instance(equivalence)
 
 
 class IrInstSelect(IrInstruction):
@@ -154,8 +158,8 @@ class IrInstSelect(IrInstruction):
 
         return position
 
-    def get_type(self):
-        # type: () -> IrType
+    def get_type(self, suggested_type):
+        # type: (IrType) -> IrType
         return self._value_true.get_type()
 
     def resolve_type(self, equivalence, return_type, return_position):

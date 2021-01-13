@@ -19,8 +19,8 @@ class IrVariable(IrExpression):
             self._initial_value.resolve(module, position)
         return IrExpression.resolve(self, module, position)
 
-    def get_type(self):
-        # type: () -> IrType
+    def get_type(self, suggested_type):
+        # type: (IrType) -> IrType
         return IrTypePtr(self._type, self._address_space._address_space)
 
 

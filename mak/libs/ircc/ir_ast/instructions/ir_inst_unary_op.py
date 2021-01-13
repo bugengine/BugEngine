@@ -17,17 +17,24 @@ class IrInstFloatUnaryOp(IrInstruction):
         self._operand.resolve(module, position)
         return position
 
-    def get_type(self):
-        # type: () -> IrType
-        return self._operand.get_type()
+    def get_type(self, suggested_type):
+        # type: (IrType) -> IrType
+        return self._type
 
     def resolve_type(self, equivalence, return_type, return_position):
         # type: (IrAddressSpaceInference, IrType, IrPosition) -> None
+        self._type.add_equivalence(
+            equivalence, self.get_position(), self._operand.get_type(self._type), self._operand.get_position()
+        )
         self._operand.resolve_type(equivalence, return_type, return_position)
+
+    def create_instance(self, equivalence):
+        # type: (Dict[int, int]) -> None
+        self._type.create_instance(equivalence)
 
 
 if TYPE_CHECKING:
-    from typing import List, Optional, Tuple
+    from typing import Dict, List, Optional, Tuple
     from ..ir_expr import IrExpression
     from ..ir_metadata import IrMetadataLink
     from ..ir_reference import IrReference
