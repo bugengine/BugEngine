@@ -31,6 +31,10 @@ class IrMetadata(IrValue):
         # type: () -> int
         raise NotImplementedError
 
+    def create_generator_value(self, generator, code_context):
+        # type: (IrccGenerator, IrCodeGenContext) -> IrccValue
+        raise NotImplementedError
+
 
 class IrMetadataDeclaration(IrDeclaration):
     def __init__(self, metadata_value):
@@ -213,3 +217,5 @@ if TYPE_CHECKING:
     from typing import List, Optional, Tuple
     from .ir_module import IrModule
     from .ir_reference import IrReference
+    from .ir_code import IrCodeGenContext
+    from ..ir_codegen import IrccGenerator, IrccValue

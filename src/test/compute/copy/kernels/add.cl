@@ -1,7 +1,7 @@
 #include <bugengine/minitl/stdafx.h>
 #include <bugengine/kernel/input/segments.hh>
 
-static __global int x;
+static kernel_global int x;
 
 __device int* findMin(int* x1, int* /*x2*/)
 {
@@ -14,7 +14,7 @@ __device int* findMin(int* x1, int* /*x2*/)
 
 __kernel void add(u32 index, u32 total, Kernel::segments< u32 > p)
 {
-    __local int y;
+    kernel_local int y;
     be_forceuse(index);
     be_forceuse(total);
     while(p)

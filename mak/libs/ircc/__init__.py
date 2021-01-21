@@ -1,6 +1,6 @@
 # LLVM IR/Spir parser
 from . import ir_parser, ir_messages
-from .ir_codegen import IrccGenerator, IrccType
+from .ir_codegen import IrccGenerator, IrccType, IrccValue
 from . import generators
 
 

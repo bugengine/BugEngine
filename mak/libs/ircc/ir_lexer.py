@@ -233,10 +233,33 @@ class IrID(IrState):
         return None
 
 
-class IrDecimal(IrState):
-    def __init__(self):
-        # type: () -> None
+class IrSignedDecimal(IrState):
+    def __init__(self, sign):
+        # type: (bool) -> None
         IrState.__init__(self, 'LITERAL_DECIMAL')
+        self._end = IrDecimal(sign)
+
+    def consume(self, char):
+        # type: (str) -> Optional[IrState]
+        if char == '-':
+            return self
+        elif char == '+':
+            return self
+        elif char in DIGITS:
+            return self._end
+        else:
+            return None
+
+    def token(self, lexer, start, end):
+        # type: (IrLexer, int, int) -> Optional[lex.LexToken]
+        raise NotImplementedError
+
+
+class IrDecimal(IrState):
+    def __init__(self, negative=False):
+        # type: (bool) -> None
+        IrState.__init__(self, 'LITERAL_DECIMAL')
+        self._negative = negative
 
     def consume(self, char):
         # type: (str) -> Optional[IrState]
@@ -247,6 +270,8 @@ class IrDecimal(IrState):
         result = IrState.token(self, lexer, start, end)
         assert (result)
         result.parsed_value = int(result.value)
+        if self._negative:
+            result.parsed_value = -result.parsed_value
         return result
 
 
@@ -338,6 +363,8 @@ class IrLexer:
             '$': IrCOMDAT(),
             '#': IrAttributeGroup(),
             '"': IrString(),
+            '-': IrSignedDecimal(True),
+            '+': IrSignedDecimal(False),
             '=': IrPunctuation('EQUAL'),
             '{': IrPunctuation('LBRACE'),
             '}': IrPunctuation('RBRACE'),
@@ -358,6 +385,7 @@ class IrLexer:
             states[char] = id_state
         for char in DIGITS:
             states[char] = number_state
+        states['-'] = number_state
         self._start_state = IrStart(states)
         self._state = self._start_state       # type: IrState
 

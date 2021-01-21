@@ -1,12 +1,12 @@
-from .ircc_c_types import IrccCTypes
+from .ircc_c_values import IrccCValues
 from .. import IrccType
 from be_typing import TYPE_CHECKING
 
 
-class IrccCDeclaration(IrccCTypes):
+class IrccCDeclaration(IrccCValues):
     def __init__(self, file):
         # type: (TextIO) -> None
-        IrccCTypes.__init__(self, file)
+        IrccCValues.__init__(self, file)
 
     def begin_module(self):
         # type: () -> bool
@@ -42,16 +42,16 @@ class IrccCDeclaration(IrccCTypes):
     def begin_method(self, name, return_type, parameters, calling_convention, has_body):
         # type: (str, IrccType, List[Tuple[IrccType, str]], str, bool) -> bool
         self._out_file.write(
-            '%s %s(%s)' % (
+            '%s %s(%s);\n\n' % (
                 return_type.format(['', '', '', '']
                                    ), name, ', '.join('%s' % t.format(['', '', n, '']) for t, n in parameters)
             )
         )
-        return True
+        return False
 
     def end_method(self):
         # type: () -> None
-        self._out_file.write(';\n\n')
+        raise NotImplementedError
 
 
 if TYPE_CHECKING:

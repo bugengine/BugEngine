@@ -39,6 +39,10 @@ class IrInstCall(IrInstruction):
         # type: (Dict[int, int]) -> None
         self._method.find_instance([argument.get_type() for argument in self._arguments], equivalence)
 
+    def generate(self, generator, context, next_segment):
+        # type: (IrccGenerator, IrCodeGenContext, Optional[IrCodeSegment]) -> Optional[IrccValue]
+        pass
+
 
 class IrInstIntegerCompare(IrInstruction):
     def __init__(self, result, type, left_operand, right_operand, operation, metadata):
@@ -73,6 +77,10 @@ class IrInstIntegerCompare(IrInstruction):
         # type: () -> bool
         return True
 
+    def generate(self, generator, context, next_segment):
+        # type: (IrccGenerator, IrCodeGenContext, Optional[IrCodeSegment]) -> Optional[IrccValue]
+        pass
+
 
 class IrInstFloatCompare(IrInstruction):
     def __init__(self, result, type, left_operand, right_operand, operation, metadata):
@@ -106,6 +114,10 @@ class IrInstFloatCompare(IrInstruction):
     def is_inline(self):
         # type: () -> bool
         return True
+
+    def generate(self, generator, context, next_segment):
+        # type: (IrccGenerator, IrCodeGenContext, Optional[IrCodeSegment]) -> Optional[IrccValue]
+        pass
 
 
 class IrInstPhi(IrInstruction):
@@ -148,6 +160,10 @@ class IrInstPhi(IrInstruction):
         # type: (Dict[int, int]) -> None
         self._type.create_instance(equivalence)
 
+    def generate(self, generator, context, next_segment):
+        # type: (IrccGenerator, IrCodeGenContext, Optional[IrCodeSegment]) -> Optional[IrccValue]
+        pass
+
 
 class IrInstSelect(IrInstruction):
     def __init__(self, result, condition, value_true, value_false, metadata):
@@ -179,6 +195,10 @@ class IrInstSelect(IrInstruction):
             equivalence, self._value_true.get_position(), self._value_false.get_type(), self._value_false.get_position()
         )
 
+    def generate(self, generator, context, next_segment):
+        # type: (IrccGenerator, IrCodeGenContext, Optional[IrCodeSegment]) -> Optional[IrccValue]
+        pass
+
 
 if TYPE_CHECKING:
     from typing import Dict, List, Optional, Tuple
@@ -190,4 +210,6 @@ if TYPE_CHECKING:
     from ..ir_metadata import IrMetadataLink
     from ..ir_module import IrModule
     from ..ir_type import IrType, IrAddressSpace, IrAddressSpaceInference
+    from ..ir_code import IrCodeGenContext, IrCodeSegment
+    from ...ir_codegen import IrccGenerator, IrccValue
     from ...ir_position import IrPosition

@@ -30,6 +30,10 @@ class IrInstExtractElement(IrInstruction):
         assert isinstance(vector_type, IrTypeVector)
         return vector_type._type
 
+    def generate(self, generator, context, next_segment):
+        # type: (IrccGenerator, IrCodeGenContext, Optional[IrCodeSegment]) -> Optional[IrccValue]
+        pass
+
 
 class IrInstInsertElement(IrInstruction):
     def __init__(self, result, value, element, index, metadata):
@@ -59,6 +63,10 @@ class IrInstInsertElement(IrInstruction):
     def get_type(self, suggested_type):
         # type: (IrType) -> IrType
         return self._value.get_type()
+
+    def generate(self, generator, context, next_segment):
+        # type: (IrccGenerator, IrCodeGenContext, Optional[IrCodeSegment]) -> Optional[IrccValue]
+        pass
 
 
 class IrInstShuffleVector(IrInstruction):
@@ -93,12 +101,18 @@ class IrInstShuffleVector(IrInstruction):
         # type: (IrType) -> IrType
         return self._vector_1.get_type()
 
+    def generate(self, generator, context, next_segment):
+        # type: (IrccGenerator, IrCodeGenContext, Optional[IrCodeSegment]) -> Optional[IrccValue]
+        pass
+
 
 if TYPE_CHECKING:
-    from typing import List, Tuple
+    from typing import List, Optional, Tuple
     from ..ir_value import IrValue
     from ..ir_metadata import IrMetadataLink
     from ..ir_reference import IrReference
     from ..ir_module import IrModule
     from ..ir_type import IrType, IrAddressSpace, IrAddressSpaceInference
+    from ..ir_code import IrCodeGenContext, IrCodeSegment
+    from ...ir_codegen import IrccGenerator, IrccValue
     from ...ir_position import IrPosition

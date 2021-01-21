@@ -37,6 +37,10 @@ class IrInstCast(IrInstruction):
         # type: (Dict[int, int]) -> None
         self._result_type.create_instance(equivalence)
 
+    def generate(self, generator, context, next_segment):
+        # type: (IrccGenerator, IrCodeGenContext, Optional[IrCodeSegment]) -> Optional[IrccValue]
+        pass
+
 
 if TYPE_CHECKING:
     from typing import Dict, List, Optional, Tuple
@@ -45,4 +49,6 @@ if TYPE_CHECKING:
     from ..ir_reference import IrReference
     from ..ir_module import IrModule
     from ..ir_type import IrType, IrAddressSpace, IrAddressSpaceInference
+    from ..ir_code import IrCodeGenContext, IrCodeSegment
+    from ...ir_codegen import IrccGenerator, IrccValue
     from ...ir_position import IrPosition

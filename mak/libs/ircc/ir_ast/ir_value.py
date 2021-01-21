@@ -1,6 +1,7 @@
 from .ir_object import IrObject
 from .ir_type import IrTypeMetadata, IrTypeBuiltin, IrTypeVoid
 from ..ir_position import IrPosition
+from abc import abstractmethod
 from be_typing import TYPE_CHECKING
 
 
@@ -34,6 +35,11 @@ class IrValue(IrObject):
         # type: (IrExpression) -> None
         pass
 
+    @abstractmethod
+    def create_generator_value(self, generator, code_context):
+        # type: (IrccGenerator, IrCodeGenContext) -> IrccValue
+        raise NotImplementedError
+
 
 class IrValueExpr(IrValue):
     def __init__(self, type, expr):
@@ -66,6 +72,10 @@ class IrValueExpr(IrValue):
         # type: (IrExpression) -> None
         self._expression.used_by(expression)
 
+    def create_generator_value(self, generator, code_context):
+        # type: (IrccGenerator, IrCodeGenContext) -> IrccValue
+        return self._expression.create_generator_value(self._type, generator, code_context)
+
 
 class IrValueVoid(IrValue):
     def __init__(self):
@@ -79,6 +89,10 @@ class IrValueVoid(IrValue):
     def __str__(self):
         # type: () -> str
         return 'void'
+
+    def create_generator_value(self, generator, code_context):
+        # type: (IrccGenerator, IrCodeGenContext) -> IrccValue
+        return generator.make_value_void()
 
 
 class IrValueMetadata(IrValue):
@@ -104,9 +118,15 @@ class IrValueMetadata(IrValue):
         # type: () -> IrPosition
         return IrPosition('', 0, 0, 0, '')
 
+    def create_generator_value(self, generator, code_context):
+        # type: (IrccGenerator, IrCodeGenContext) -> IrccValue
+        raise NotImplementedError
+
 
 if TYPE_CHECKING:
     from .ir_type import IrType, IrAddressSpaceInference
     from .ir_expr import IrExpression
     from .ir_module import IrModule
     from .ir_metadata import IrMetadata
+    from .ir_code import IrCodeGenContext
+    from ..ir_codegen import IrccGenerator, IrccValue

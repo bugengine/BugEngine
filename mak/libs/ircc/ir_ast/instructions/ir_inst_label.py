@@ -8,7 +8,14 @@ class IrInstLabel(IrInstruction):
         IrInstruction.__init__(self, 'label', None, metadata)
         self._label = label
 
+    def generate(self, generator, context, next_segment):
+        # type: (IrccGenerator, IrCodeGenContext, Optional[IrCodeSegment]) -> Optional[IrccValue]
+        generator.declare_label(self._label[1:])
+        return None
+
 
 if TYPE_CHECKING:
-    from typing import List, Tuple
+    from typing import List, Optional, Tuple
     from ..ir_metadata import IrMetadataLink
+    from ..ir_code import IrCodeGenContext, IrCodeSegment
+    from ...ir_codegen import IrccGenerator, IrccValue

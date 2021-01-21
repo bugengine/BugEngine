@@ -149,7 +149,7 @@ class IrType(IrObject):
         # type: () -> str
         raise NotImplementedError
 
-    def signature(self, resolved_addressspaces):
+    def signature(self, resolved_addressspace):
         # type: (Dict[int, int]) -> str
         raise NotImplementedError
 
@@ -157,8 +157,8 @@ class IrType(IrObject):
         # type: () -> List[Tuple[str, IrDeclaration]]
         return []
 
-    def flatten(self, allow_pointer=True):
-        # type: (bool) -> List[IrType]
+    def flatten(self, equivalence, position, allow_pointer=True):
+        # type: (IrAddressSpaceInference, IrPosition, bool) -> List[IrType]
         return [self]
 
     def is_defined(self):
@@ -174,8 +174,18 @@ class IrType(IrObject):
         raise NotImplementedError
 
     @abstractmethod
-    def create_generator_type(self, generator, resolved_addressspaces):
+    def create_generator_type(self, generator, resolved_addressspace):
         # type: (IrccGenerator, Dict[int, int]) -> IrccType
+        raise NotImplementedError
+
+    @abstractmethod
+    def create_generator_zero(self, generator, resolved_addressspace):
+        # type: (IrccGenerator, Dict[int, int]) -> IrccValue
+        raise NotImplementedError
+
+    @abstractmethod
+    def create_generator_undef(self, generator, resolved_addressspace, force=False):
+        # type: (IrccGenerator, Dict[int, int], bool) -> IrccValue
         raise NotImplementedError
 
     @abstractmethod
@@ -266,24 +276,34 @@ class IrTypeReference(IrType):
         assert self._declaration is not None
         return self._declaration.collect(self._reference)
 
-    def create_generator_type(self, generator, resolved_addressspaces):
+    def create_generator_type(self, generator, resolved_addressspace):
         # type: (IrccGenerator, Dict[int, int]) -> IrccType
         assert self._declaration is not None
-        return generator.type_declared(self._declaration.get_instance_name(resolved_addressspaces))
+        return generator.type_declared(self._declaration.get_instance_name(resolved_addressspace))
 
-    def flatten(self, allow_pointer=True):
-        # type: (bool) -> List[IrType]
+    def create_generator_zero(self, generator, resolved_addressspace):
+        # type: (IrccGenerator, Dict[int, int]) -> IrccValue
         assert self._target is not None
-        return self._target.flatten(allow_pointer)
+        return self._target.create_generator_zero(generator, resolved_addressspace)
+
+    def create_generator_undef(self, generator, resolved_addressspace, force=False):
+        # type: (IrccGenerator, Dict[int, int], bool) -> IrccValue
+        assert self._target is not None
+        return self._target.create_generator_undef(generator, resolved_addressspace, force)
+
+    def flatten(self, equivalence, position, allow_pointer=True):
+        # type: (IrAddressSpaceInference, IrPosition, bool) -> List[IrType]
+        assert self._target is not None
+        return self._target.flatten(equivalence, position, allow_pointer)
 
     def __str__(self):
         # type: () -> str
         return str(self._reference)
 
-    def signature(self, resolved_addressspaces):
+    def signature(self, resolved_addressspace):
         # type: (Dict[int, int]) -> str
         assert self._target is not None
-        return self._target.signature(resolved_addressspaces)
+        return self._target.signature(resolved_addressspace)
 
     def is_defined(self):
         # type: () -> bool
@@ -306,11 +326,11 @@ class IrTypeOpaque(IrType):
         # type: () -> str
         return 'opaque'
 
-    def signature(self, resolved_addressspaces):
+    def signature(self, resolved_addressspace):
         # type: (Dict[int, int]) -> str
         return '?'
 
-    def create_generator_type(self, generator, resolved_addressspaces):
+    def create_generator_type(self, generator, resolved_addressspace):
         # type: (IrccGenerator, Dict[int, int]) -> IrccType
         return generator.type_void()
 
@@ -318,17 +338,25 @@ class IrTypeOpaque(IrType):
         # type: (IrAddressSpaceInference, IrPosition, IrType, IrPosition) -> None
         assert isinstance(other_type._get_target_type(), IrTypeOpaque)
 
+    def create_generator_zero(self, generator, resolved_addressspace):
+        # type: (IrccGenerator, Dict[int, int]) -> IrccValue
+        raise NotImplementedError
+
+    def create_generator_undef(self, generator, resolved_addressspace, force=False):
+        # type: (IrccGenerator, Dict[int, int], bool) -> IrccValue
+        raise NotImplementedError
+
 
 class IrTypeVoid(IrType):
     def __str__(self):
         # type: () -> str
         return 'void'
 
-    def signature(self, resolved_addressspaces):
+    def signature(self, resolved_addressspace):
         # type: (Dict[int, int]) -> str
         return '%'
 
-    def create_generator_type(self, generator, resolved_addressspaces):
+    def create_generator_type(self, generator, resolved_addressspace):
         # type: (IrccGenerator, Dict[int, int]) -> IrccType
         return generator.type_void()
 
@@ -336,17 +364,25 @@ class IrTypeVoid(IrType):
         # type: (IrAddressSpaceInference, IrPosition, IrType, IrPosition) -> None
         assert isinstance(other_type._get_target_type(), IrTypeVoid)
 
+    def create_generator_zero(self, generator, resolved_addressspace):
+        # type: (IrccGenerator, Dict[int, int]) -> IrccValue
+        raise NotImplementedError
+
+    def create_generator_undef(self, generator, resolved_addressspace, force=False):
+        # type: (IrccGenerator, Dict[int, int], bool) -> IrccValue
+        raise NotImplementedError
+
 
 class IrTypeUndef(IrType):
     def __str__(self):
         # type: () -> str
         return 'undef'
 
-    def signature(self, resolved_addressspaces):
+    def signature(self, resolved_addressspace):
         # type: (Dict[int, int]) -> str
         return '!'
 
-    def create_generator_type(self, generator, resolved_addressspaces):
+    def create_generator_type(self, generator, resolved_addressspace):
         # type: (IrccGenerator, Dict[int, int]) -> IrccType
         return generator.type_undef()
 
@@ -354,17 +390,25 @@ class IrTypeUndef(IrType):
         # type: (IrAddressSpaceInference, IrPosition, IrType, IrPosition) -> None
         assert isinstance(other_type._get_target_type(), IrTypeUndef)
 
+    def create_generator_zero(self, generator, resolved_addressspace):
+        # type: (IrccGenerator, Dict[int, int]) -> IrccValue
+        raise NotImplementedError
+
+    def create_generator_undef(self, generator, resolved_addressspace, force=False):
+        # type: (IrccGenerator, Dict[int, int], bool) -> IrccValue
+        raise NotImplementedError
+
 
 class IrTypeZero(IrType):
     def __str__(self):
         # type: () -> str
         return 'zero'
 
-    def signature(self, resolved_addressspaces):
+    def signature(self, resolved_addressspace):
         # type: (Dict[int, int]) -> str
         return '0'
 
-    def create_generator_type(self, generator, resolved_addressspaces):
+    def create_generator_type(self, generator, resolved_addressspace):
         # type: (IrccGenerator, Dict[int, int]) -> IrccType
         return generator.type_zero()
 
@@ -372,19 +416,35 @@ class IrTypeZero(IrType):
         # type: (IrAddressSpaceInference, IrPosition, IrType, IrPosition) -> None
         assert isinstance(other_type._get_target_type(), IrTypeZero)
 
+    def create_generator_zero(self, generator, resolved_addressspace):
+        # type: (IrccGenerator, Dict[int, int]) -> IrccValue
+        raise NotImplementedError
+
+    def create_generator_undef(self, generator, resolved_addressspace, force=False):
+        # type: (IrccGenerator, Dict[int, int], bool) -> IrccValue
+        raise NotImplementedError
+
 
 class IrTypeMetadata(IrType):
-    def create_generator_type(self, generator, resolved_addressspaces):
+    def create_generator_type(self, generator, resolved_addressspace):
         # type: (IrccGenerator, Dict[int, int]) -> IrccType
         return generator.type_metadata()
 
-    def signature(self, resolved_addressspaces):
+    def signature(self, resolved_addressspace):
         # type: (Dict[int, int]) -> str
         return '~'
 
     def add_equivalence(self, equivalence, location, other_type, other_location):
         # type: (IrAddressSpaceInference, IrPosition, IrType, IrPosition) -> None
         assert isinstance(other_type._get_target_type(), IrTypeMetadata)
+
+    def create_generator_zero(self, generator, resolved_addressspace):
+        # type: (IrccGenerator, Dict[int, int]) -> IrccValue
+        raise NotImplementedError
+
+    def create_generator_undef(self, generator, resolved_addressspace, force=False):
+        # type: (IrccGenerator, Dict[int, int], bool) -> IrccValue
+        raise NotImplementedError
 
 
 class IrTypeBuiltin(IrType):
@@ -397,11 +457,11 @@ class IrTypeBuiltin(IrType):
         # type: () -> str
         return self._builtin
 
-    def signature(self, resolved_addressspaces):
+    def signature(self, resolved_addressspace):
         # type: (Dict[int, int]) -> str
         return '#%s' % self._builtin
 
-    def create_generator_type(self, generator, resolved_addressspaces):
+    def create_generator_type(self, generator, resolved_addressspace):
         # type: (IrccGenerator, Dict[int, int]) -> IrccType
         return generator.type_builtin(self._builtin)
 
@@ -410,6 +470,19 @@ class IrTypeBuiltin(IrType):
         other_type = other_type._get_target_type()
         assert isinstance(other_type, IrTypeBuiltin)
         assert self._builtin == other_type._builtin
+
+    def create_generator_zero(self, generator, resolved_addressspace):
+        # type: (IrccGenerator, Dict[int, int]) -> IrccValue
+        return generator.make_value_zero()
+
+    def create_generator_undef(self, generator, resolved_addressspace, force=False):
+        # type: (IrccGenerator, Dict[int, int], bool) -> IrccValue
+        if force:
+            assert self._builtin[0] == 'i'
+            bitsize = min(8, int(self._builtin[1:]))
+            return generator.make_value_undef(bitsize / 8)
+        else:
+            return generator.make_value_void()
 
 
 class IrTypePtr(IrType):
@@ -428,29 +501,31 @@ class IrTypePtr(IrType):
         # type: () -> str
         return '%s %s*' % (self._pointee, self._address_space)
 
-    def signature(self, resolved_addressspaces):
+    def signature(self, resolved_addressspace):
         # type: (Dict[int, int]) -> str
         return '*[%d]%s' % (
-            resolved_addressspaces[self._address_space._address_space], self._pointee.signature(resolved_addressspaces)
+            resolved_addressspace[self._address_space._address_space], self._pointee.signature(resolved_addressspace)
         )
 
-    def create_generator_type(self, generator, resolved_addressspaces):
+    def create_generator_type(self, generator, resolved_addressspace):
         # type: (IrccGenerator, Dict[int, int]) -> IrccType
         addr_space = self._address_space._address_space
         if addr_space > 3:
-            addr_space = resolved_addressspaces[addr_space]
+            addr_space = resolved_addressspace[addr_space]
         return generator.make_ptr(
             generator.make_address_space(
-                self._pointee.create_generator_type(generator, resolved_addressspaces), addr_space
+                self._pointee.create_generator_type(generator, resolved_addressspace), addr_space
             )
         )
 
-    def flatten(self, allow_pointer=True):
-        # type: (bool) -> List[IrType]
-        #if not allow_pointer:
-        #    # todo: source location
-        #    raise Exception('invalid kernel parameter')
-        return [self]
+    def flatten(self, equivalence, position, allow_pointer=True):
+        # type: (IrAddressSpaceInference, IrPosition, bool) -> List[IrType]
+        if not allow_pointer:
+            #    # todo: source location
+            raise Exception('invalid kernel parameter')
+        result = IrTypePtr(self._pointee, 3)
+        result.add_equivalence(equivalence, position, self, position)
+        return [result]
 
     def is_defined(self):
         # type: () -> bool
@@ -473,6 +548,17 @@ class IrTypePtr(IrType):
         # type: (Dict[int, int]) -> None
         self._pointee.create_instance(equivalence)
 
+    def create_generator_zero(self, generator, resolved_addressspace):
+        # type: (IrccGenerator, Dict[int, int]) -> IrccValue
+        return generator.make_value_zero()
+
+    def create_generator_undef(self, generator, resolved_addressspace, force=False):
+        # type: (IrccGenerator, Dict[int, int], bool) -> IrccValue
+        if force:
+            return generator.make_value_undef(4) # TODO
+        else:
+            return generator.make_value_void()
+
 
 class IrTypeArray(IrType):
     def __init__(self, type, count):
@@ -494,16 +580,31 @@ class IrTypeArray(IrType):
         # type: () -> str
         return '%s[%d]' % (self._type, self._count)
 
-    def signature(self, resolved_addressspaces):
+    def signature(self, resolved_addressspace):
         # type: (Dict[int, int]) -> str
-        return '[%d]%s' % (self._count, self._type.signature(resolved_addressspaces))
+        return '[%d]%s' % (self._count, self._type.signature(resolved_addressspace))
 
-    def create_generator_type(self, generator, resolved_addressspaces):
+    def create_generator_type(self, generator, resolved_addressspace):
         # type: (IrccGenerator, Dict[int, int]) -> IrccType
-        return generator.make_array(self._type.create_generator_type(generator, resolved_addressspaces), self._count)
+        return generator.make_array(self._type.create_generator_type(generator, resolved_addressspace), self._count)
 
-    def flatten(self, allow_pointer=True):
-        # type: (bool) -> List[IrType]
+    def create_generator_zero(self, generator, resolved_addressspace):
+        # type: (IrccGenerator, Dict[int, int]) -> IrccValue
+        return generator.make_value_array(
+            [self._type.create_generator_zero(generator, resolved_addressspace)] * self._count
+        )
+
+    def create_generator_undef(self, generator, resolved_addressspace, force=False):
+        # type: (IrccGenerator, Dict[int, int], bool) -> IrccValue
+        if force:
+            return generator.make_value_array(
+                [self._type.create_generator_undef(generator, resolved_addressspace, True)] * self._count
+            )
+        else:
+            return generator.make_value_void()
+
+    def flatten(self, equivalence, position, allow_pointer=True):
+        # type: (IrAddressSpaceInference, IrPosition, bool) -> List[IrType]
         #if not allow_pointer:
         #    # todo: source location
         #    raise Exception('invalid kernel parameter')
@@ -545,13 +646,28 @@ class IrTypeVector(IrType):
         # type: () -> str
         return '%s%d' % (self._type, self._count)
 
-    def signature(self, resolved_addressspaces):
+    def signature(self, resolved_addressspace):
         # type: (Dict[int, int]) -> str
-        return '<%d>%s' % (self._count, self._type.signature(resolved_addressspaces))
+        return '<%d>%s' % (self._count, self._type.signature(resolved_addressspace))
 
-    def create_generator_type(self, generator, resolved_addressspaces):
+    def create_generator_type(self, generator, resolved_addressspace):
         # type: (IrccGenerator, Dict[int, int]) -> IrccType
-        return generator.make_vector(self._type.create_generator_type(generator, resolved_addressspaces), self._count)
+        return generator.make_vector(self._type.create_generator_type(generator, resolved_addressspace), self._count)
+
+    def create_generator_zero(self, generator, resolved_addressspace):
+        # type: (IrccGenerator, Dict[int, int]) -> IrccValue
+        return generator.make_value_vector(
+            [self._type.create_generator_zero(generator, resolved_addressspace)] * self._count
+        )
+
+    def create_generator_undef(self, generator, resolved_addressspace, force=False):
+        # type: (IrccGenerator, Dict[int, int], bool) -> IrccValue
+        if force:
+            return generator.make_value_vector(
+                [self._type.create_generator_undef(generator, resolved_addressspace, True)] * self._count
+            )
+        else:
+            return generator.make_value_void()
 
     def is_defined(self):
         # type: () -> bool
@@ -592,21 +708,36 @@ class IrTypeStruct(IrType):
         # type: () -> str
         return '{%s}' % (', '.join(str(x) for x, _ in self._fields))
 
-    def signature(self, resolved_addressspaces):
+    def signature(self, resolved_addressspace):
         # type: (Dict[int, int]) -> str
-        return '{%s}' % (';'.join(x.signature(resolved_addressspaces) for x, _ in self._fields))
+        return '{%s}' % (';'.join(x.signature(resolved_addressspace) for x, _ in self._fields))
 
-    def create_generator_type(self, generator, resolved_addressspaces):
+    def create_generator_type(self, generator, resolved_addressspace):
         # type: (IrccGenerator, Dict[int, int]) -> IrccType
         return generator.make_struct(
-            [(f.create_generator_type(generator, resolved_addressspaces), n) for f, n in self._fields]
+            [(f.create_generator_type(generator, resolved_addressspace), n) for f, n in self._fields]
         )
 
-    def flatten(self, allow_pointer=True):
-        # type: (bool) -> List[IrType]
+    def create_generator_zero(self, generator, resolved_addressspace):
+        # type: (IrccGenerator, Dict[int, int]) -> IrccValue
+        return generator.make_value_aggregate(
+            [t.create_generator_zero(generator, resolved_addressspace) for t, _ in self._fields]
+        )
+
+    def create_generator_undef(self, generator, resolved_addressspace, force=False):
+        # type: (IrccGenerator, Dict[int, int], bool) -> IrccValue
+        if force:
+            return generator.make_value_aggregate(
+                [t.create_generator_undef(generator, resolved_addressspace, True) for t, _ in self._fields]
+            )
+        else:
+            return generator.make_value_void()
+
+    def flatten(self, equivalence, position, allow_pointer=True):
+        # type: (IrAddressSpaceInference, IrPosition, bool) -> List[IrType]
         result = []    # type: List[IrType]
         for field in self._fields:
-            result += field[0].flatten(False)
+            result += field[0].flatten(equivalence, position, allow_pointer)
         return result
 
     def is_defined(self):
@@ -660,15 +791,23 @@ class IrTypeMethod(IrType):
         # type: () -> str
         return '%s(*)(%s)' % (self._return_type, ', '.join(str(x) for x in self._argument_types))
 
-    def signature(self, resolved_addressspaces):
+    def signature(self, resolved_addressspace):
         # type: (Dict[int, int]) -> str
         return '(%s(%s))' % (
-            self._return_type.signature(resolved_addressspaces),
-            ';'.join(x.signature(resolved_addressspaces) for x in self._argument_types)
+            self._return_type.signature(resolved_addressspace),
+            ';'.join(x.signature(resolved_addressspace) for x in self._argument_types)
         )
 
     def create_generator_type(self, generator, resolved_addressspace):
         # type: (IrccGenerator, Dict[int, int]) -> IrccType
+        raise NotImplementedError
+
+    def create_generator_zero(self, generator, resolved_addressspace):
+        # type: (IrccGenerator, Dict[int, int]) -> IrccValue
+        raise NotImplementedError
+
+    def create_generator_undef(self, generator, resolved_addressspace, force=False):
+        # type: (IrccGenerator, Dict[int, int], bool) -> IrccValue
         raise NotImplementedError
 
     def is_defined(self):
@@ -698,5 +837,5 @@ if TYPE_CHECKING:
     from typing import Dict, List, Optional, Set, Tuple
     from .ir_module import IrModule
     from .ir_reference import IrReference
-    from ..ir_codegen import IrccGenerator, IrccType
+    from ..ir_codegen import IrccGenerator, IrccType, IrccValue
     from ..ir_position import IrPosition

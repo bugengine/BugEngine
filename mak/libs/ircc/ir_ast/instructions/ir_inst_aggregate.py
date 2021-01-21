@@ -32,6 +32,10 @@ class IrInstExtractValue(IrInstruction):
         # since value_type is deduced from the target type, no equivalence is needed
         self._source.resolve_type(equivalence, return_type, return_position)
 
+    def generate(self, generator, context, next_segment):
+        # type: (IrccGenerator, IrCodeGenContext, Optional[IrCodeSegment]) -> Optional[IrccValue]
+        pass
+
 
 class IrInstInsertValue(IrInstruction):
     def __init__(self, result, source, value, indices, metadata):
@@ -66,6 +70,10 @@ class IrInstInsertValue(IrInstruction):
         insert_type = self._value.get_type()
         subfield_type.add_equivalence(equivalence, self.get_position(), insert_type, self._source.get_position())
 
+    def generate(self, generator, context, next_segment):
+        # type: (IrccGenerator, IrCodeGenContext, Optional[IrCodeSegment]) -> Optional[IrccValue]
+        pass
+
 
 if TYPE_CHECKING:
     from typing import List, Optional, Tuple
@@ -74,4 +82,6 @@ if TYPE_CHECKING:
     from ..ir_reference import IrReference
     from ..ir_module import IrModule
     from ..ir_type import IrType, IrAddressSpace, IrAddressSpaceInference
+    from ..ir_code import IrCodeGenContext, IrCodeSegment
+    from ...ir_codegen import IrccGenerator, IrccValue
     from ...ir_position import IrPosition

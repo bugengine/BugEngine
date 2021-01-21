@@ -68,6 +68,51 @@ class IrccGenerator:
         # type: (IrccType, int) -> IrccType
         raise NotImplementedError
 
+    @abstractmethod
+    def make_value_void(self):
+        # type: () -> IrccValue
+        raise NotImplementedError
+
+    @abstractmethod
+    def make_value_zero(self):
+        # type: () -> IrccValue
+        raise NotImplementedError
+
+    @abstractmethod
+    def make_value_undef(self, width):
+        # type: (int) -> IrccValue
+        raise NotImplementedError
+
+    @abstractmethod
+    def make_value_bool(self, value):
+        # type: (bool) -> IrccValue
+        raise NotImplementedError
+
+    @abstractmethod
+    def make_value_int(self, value):
+        # type: (int) -> IrccValue
+        raise NotImplementedError
+
+    @abstractmethod
+    def make_value_aggregate(self, values):
+        # type: (List[IrccValue]) -> IrccValue
+        raise NotImplementedError
+
+    @abstractmethod
+    def make_value_vector(self, values):
+        # type: (List[IrccValue]) -> IrccValue
+        raise NotImplementedError
+
+    @abstractmethod
+    def make_value_array(self, values):
+        # type: (List[IrccValue]) -> IrccValue
+        raise NotImplementedError
+
+    @abstractmethod
+    def make_value_cast(self, value, cast, result_type):
+        # type: (IrccValue, str, IrccType) -> IrccValue
+        raise NotImplementedError
+
     def begin_module(self):
         # type: () -> bool
         return True
@@ -110,9 +155,50 @@ class IrccGenerator:
 
     def declare_variable(self, name, type):
         # type: (str, IrccType) -> None
-        pass
+        raise NotImplementedError
+
+    def declare_label(self, name):
+        # type: (str) -> None
+        raise NotImplementedError
+
+    def begin_loop(self, label):
+        # type: (str) -> None
+        raise NotImplementedError
+
+    def end_loop(self):
+        # type: () -> None
+        raise NotImplementedError
+
+    def begin_if(self):
+        # type: () -> None
+        raise NotImplementedError
+
+    def begin_if_not(self):
+        # type: () -> None
+        raise NotImplementedError
+
+    def begin_else(self):
+        # type: () -> None
+        raise NotImplementedError
+
+    def end_if(self):
+        # type: () -> None
+        raise NotImplementedError
+
+    def instruction_return_value(self, return_value):
+        # type: (IrccValue) -> None
+        raise NotImplementedError
+
+    def instruction_break(self, label):
+        # type: (str) -> None
+        raise NotImplementedError
+
+    def instruction_continue(self, label):
+        # type: (str) -> None
+        raise NotImplementedError
 
 
 if TYPE_CHECKING:
     from typing import List, TextIO, Tuple
     from .ircc_type import IrccType
+    from .ircc_value import IrccValue

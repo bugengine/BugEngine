@@ -40,6 +40,10 @@ class IrInstAlloca(IrInstruction):
             self._result_name, self._type._pointee.create_generator_type(generator, context._equivalence)
         )
 
+    def generate(self, generator, context, next_segment):
+        # type: (IrccGenerator, IrCodeGenContext, Optional[IrCodeSegment]) -> Optional[IrccValue]
+        pass
+
 
 class IrInstLoad(IrInstruction):
     def __init__(self, result, source, type, metadata):
@@ -67,6 +71,10 @@ class IrInstLoad(IrInstruction):
         # type: (IrAddressSpaceInference, IrType, IrPosition) -> None
         self._source.resolve_type(equivalence, return_type, return_position)
 
+    def generate(self, generator, context, next_segment):
+        # type: (IrccGenerator, IrCodeGenContext, Optional[IrCodeSegment]) -> Optional[IrccValue]
+        pass
+
 
 class IrInstStore(IrInstruction):
     def __init__(self, target, value, metadata):
@@ -93,6 +101,10 @@ class IrInstStore(IrInstruction):
         target_type = target_type._pointee
         value_type = self._value.get_type()
         target_type.add_equivalence(equivalence, self._target.get_position(), value_type, self._value.get_position())
+
+    def generate(self, generator, context, next_segment):
+        # type: (IrccGenerator, IrCodeGenContext, Optional[IrCodeSegment]) -> Optional[IrccValue]
+        pass
 
 
 class IrInstGetElementPtr(IrInstruction):
@@ -137,6 +149,10 @@ class IrInstGetElementPtr(IrInstruction):
             self._value_type = IrTypePtr(result_type, address_space._address_space)
         return self._value_type
 
+    def generate(self, generator, context, next_segment):
+        # type: (IrccGenerator, IrCodeGenContext, Optional[IrCodeSegment]) -> Optional[IrccValue]
+        pass
+
 
 if TYPE_CHECKING:
     from typing import Dict, List, Optional, Tuple
@@ -145,6 +161,6 @@ if TYPE_CHECKING:
     from ..ir_reference import IrReference
     from ..ir_module import IrModule
     from ..ir_type import IrType, IrAddressSpace, IrAddressSpaceInference
-    from ..ir_code import IrCodeGenContext
+    from ..ir_code import IrCodeGenContext, IrCodeSegment
+    from ...ir_codegen import IrccGenerator, IrccValue
     from ...ir_position import IrPosition
-    from ...ir_codegen import IrccGenerator

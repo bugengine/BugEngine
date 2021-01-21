@@ -2,6 +2,7 @@ from .ir_object import IrObject
 from .ir_type import IrTypeBuiltin, IrTypeUndef, IrTypeZero
 from .ir_declaration import IrDeclaration
 from ..ir_position import IrPosition
+from abc import abstractmethod
 from be_typing import TYPE_CHECKING
 
 
@@ -46,6 +47,11 @@ class IrExpression(IrObject):
         # type: (IrExpression) -> None
         self._usage.append(expression)
 
+    @abstractmethod
+    def create_generator_value(self, type, generator, code_context):
+        # type: (IrType, IrccGenerator, IrCodeGenContext) -> IrccValue
+        raise NotImplementedError
+
 
 class IrExpressionDeclaration(IrDeclaration):
     def __init__(self, expression):
@@ -70,6 +76,10 @@ class IrExpressionZero(IrExpression):
     def __str__(self):
         # type: () -> str
         return 'zero'
+
+    def create_generator_value(self, type, generator, code_context):
+        # type: (IrType, IrccGenerator, IrCodeGenContext) -> IrccValue
+        return type.create_generator_zero(generator, code_context._equivalence)
 
 
 class IrExpressionConstant(IrExpression):
@@ -100,6 +110,10 @@ class IrExpressionUndef(IrExpression):
         # type: () -> str
         return 'undefined'
 
+    def create_generator_value(self, type, generator, code_context):
+        # type: (IrType, IrccGenerator, IrCodeGenContext) -> IrccValue
+        return type.create_generator_undef(generator, code_context._equivalence)
+
 
 class IrExpressionArray(IrExpression):
     def __init__(self, values):
@@ -117,6 +131,10 @@ class IrExpressionArray(IrExpression):
         # type: () -> str
         return '[%s]' % ', '.join(str(v) for v in self._values)
 
+    def create_generator_value(self, type, generator, code_context):
+        # type: (IrType, IrccGenerator, IrCodeGenContext) -> IrccValue
+        return generator.make_value_array([v.create_generator_value(generator, code_context) for v in self._values])
+
 
 class IrExpressionAggregate(IrExpression):
     def __init__(self, values):
@@ -133,6 +151,10 @@ class IrExpressionAggregate(IrExpression):
     def __str__(self):
         # type: () -> str
         return '{%s}' % ', '.join(str(v) for v in self._values)
+
+    def create_generator_value(self, type, generator, code_context):
+        # type: (IrType, IrccGenerator, IrCodeGenContext) -> IrccValue
+        return generator.make_value_aggregate([v.create_generator_value(generator, code_context) for v in self._values])
 
 
 class IrExpressionReference(IrExpression):
@@ -159,6 +181,11 @@ class IrExpressionReference(IrExpression):
         # type: (IrType) -> IrType
         assert self._expression is not None
         return self._expression.get_type(suggested_type)
+
+    def create_generator_value(self, type, generator, code_context):
+        # type: (IrType, IrccGenerator, IrCodeGenContext) -> IrccValue
+        assert self._expression is not None
+        return self._expression.create_generator_value(type, generator, code_context)
 
     def __str__(self):
         # type: () -> str
@@ -207,6 +234,13 @@ class IrExpressionCast(IrExpression):
         # type: (IrExpression) -> None
         self._value.used_by(expression)
 
+    def create_generator_value(self, type, generator, code_context):
+        # type: (IrType, IrccGenerator, IrCodeGenContext) -> IrccValue
+        return generator.make_value_cast(
+            self._value.create_generator_value(generator, code_context), self._cast_type,
+            self._result_type.create_generator_type(generator, code_context._equivalence)
+        )
+
 
 if TYPE_CHECKING:
     from typing import Dict, List, Optional, Tuple, Union
@@ -215,3 +249,5 @@ if TYPE_CHECKING:
     from .ir_value import IrValue
     from .ir_reference import IrReference
     from .ir_metadata import IrMetadata, IrMetadataLink
+    from .ir_code import IrCodeGenContext
+    from ..ir_codegen import IrccGenerator, IrccValue

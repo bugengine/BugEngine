@@ -143,6 +143,17 @@ def p_ir_metadata_debug_attribute_list(p):
         p[0] += p[7]
 
 
+def p_ir_metadata_debug_attribute_list_unnamed(p):
+    # type: (YaccProduction) -> None
+    """
+        ir-metadata-debug-attribute-list-opt : ir-metadata-debug-attribute COMMA ir-metadata-debug-attribute-list-opt
+                                             | ir-metadata-debug-attribute
+    """
+    p[0] = [(None, p[1])]
+    if len(p) > 2:
+        p[0] += p[3]
+
+
 def p_ir_metadata_debug_attribute_list_end(p):
     # type: (YaccProduction) -> None
     """

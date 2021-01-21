@@ -17,21 +17,22 @@ class IrMethodParameter(IrExpression):
         self._type = type
         self._id = name or '_'
         self._attributes = attributes
+        self._position = IrPosition('', 0, 0, 0, '')
 
     def resolve(self, module, position):
         # type: (IrModule, IrPosition) -> IrPosition
-        position = IrExpression.resolve(self, module, position)
+        self._position = IrExpression.resolve(self, module, position)
         self._type.resolve(module)
         self._attributes = self._attributes.resolve(module)
-        return position
+        return self._position
 
-    def signature(self, resolved_addressspaces):
+    def signature(self, resolved_addressspace):
         # type: (Dict[int, int]) -> str
         #return '[%s]%s' % (self._attributes.signature(), self._type.signature())
-        return self._type.signature(resolved_addressspaces)
+        return self._type.signature(resolved_addressspace)
 
-    def flatten(self):
-        # type: () -> List[IrMethodParameter]
+    def flatten(self, equivalence):
+        # type: (IrAddressSpaceInference) -> List[IrMethodParameter]
         assert isinstance(self._attributes, IrAttributeGroupObject)
         for attr in self._attributes._attributes:
             if attr._attribute == 'byval':
@@ -41,7 +42,7 @@ class IrMethodParameter(IrExpression):
         else:
             t = self._type
         result = []
-        types = t.flatten()
+        types = t.flatten(equivalence, self._position)
         if len(types) > 1:
             for i, t in enumerate(types):
                 result.append(IrMethodParameter(t, '%s_%d' % (self._id, i), IrAttributeGroupObject([])))
@@ -67,7 +68,7 @@ class IrMethod(IrObject):
         # type: (IrModule) -> None
         raise NotImplementedError
 
-    def find_instance(self, arguments, resolved_addressspaces):
+    def find_instance(self, arguments, resolved_addressspace):
         # type: (List[IrType], Dict[int, int]) -> IrMethodObject
         raise NotImplementedError
 
@@ -151,10 +152,10 @@ class IrMethodLink(IrMethod):
         result = module.get(self._reference, IrMethodDeclaration)
         self._method = result._method
 
-    def find_instance(self, arguments, resolved_addressspaces):
+    def find_instance(self, arguments, resolved_addressspace):
         # type: (List[IrType], Dict[int, int]) -> IrMethodObject
         assert self._method is not None
-        return self._method.find_instance(arguments, resolved_addressspaces)
+        return self._method.find_instance(arguments, resolved_addressspace)
 
     def equivalence(self):
         # type: () -> IrAddressSpaceInference
@@ -216,6 +217,8 @@ class IrMethodObject(IrMethod):
         # type: (IrModule) -> None
         if self._calling_convention == 'spir_kernel':
             assert self._definition is not None
+            # create an intermediate kernel entry point
+            method = self._create_kernel_wrapper()
             try:
                 resolved_params = self._definition._code._equivalence.create_direct_map()
             except IrAddressSpaceResolutionError as e:
@@ -225,8 +228,7 @@ class IrMethodObject(IrMethod):
                     module.logger().C0101(e.position, str(e))
             else:
                 self.find_instance([p._type for p in self._parameters], resolved_params)
-                # create an intermediate kernel entry point
-                self._kernel_instances.append(self._create_kernel_wrapper())
+                self._kernel_instances.append(method)
 
     def on_collect(self):
         # type: () -> None
@@ -234,9 +236,10 @@ class IrMethodObject(IrMethod):
 
     def _create_kernel_wrapper(self):
         # type: () -> IrMethodObject
+        assert self._definition is not None
         parameters = []    # type: List[IrMethodParameter]
         for p in self._parameters:
-            parameters += p.flatten()
+            parameters += p.flatten(self._definition._code._equivalence)
         result = IrMethodObject(self._return_type, parameters, 'spir_kernel_flat', self._metadata)
         return result
 
@@ -265,23 +268,23 @@ class IrMethodObject(IrMethod):
         finally:
             module.pop_scope()
 
-    def find_instance(self, arguments, resolved_addressspaces):
+    def find_instance(self, arguments, resolved_addressspace):
         # type: (List[IrType], Dict[int, int]) -> IrMethodObject
-        signature = ','.join(a.signature(resolved_addressspaces) for a in arguments)
+        signature = ','.join(a.signature(resolved_addressspace) for a in arguments)
         try:
             return self._instances[signature][0]
         except KeyError:
-            result = self._create_instance(arguments, signature, resolved_addressspaces)
-            self._instances[signature] = (result, resolved_addressspaces)
+            result = self._create_instance(arguments, signature, resolved_addressspace)
+            self._instances[signature] = (result, resolved_addressspace)
             return result
 
-    def _create_instance(self, arguments, signature, resolved_addressspaces):
+    def _create_instance(self, arguments, signature, resolved_addressspace):
         # type: (List[IrType], str, Dict[int, int]) -> IrMethodObject
         for parameter in self._parameters:
-            parameter._type.create_instance(resolved_addressspaces)
+            parameter._type.create_instance(resolved_addressspace)
         if self._definition is not None:
             assert len(self._declarations) == len(arguments)
-            self._definition._create_instance(resolved_addressspaces)
+            self._definition._create_instance(resolved_addressspace)
             return self
         else:
             # TODO

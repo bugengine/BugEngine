@@ -160,20 +160,22 @@ class Logger:
         offset = position.start_position
         end = position.end_position
 
-        while offset > 0 and position.lexdata[offset - 1] != '\n':
-            offset -= 1
-        while end < len(position.lexdata) and position.lexdata[end] != '\n':
-            end += 1
+        if position.lexdata:
+            while offset > 0 and position.lexdata[offset - 1] != '\n':
+                offset -= 1
+            while end < len(position.lexdata) and position.lexdata[end] != '\n':
+                end += 1
 
         column = position.start_position - offset + 1
         sys.stderr.write(self._diagnostics_format.format(**locals()))
-        sys.stderr.write(position.lexdata[offset:end + 1])
-        sys.stderr.write(
-            '%s%s%s%s\n' % (
-                ' ' * (position.start_position - offset), color_caret, '^' *
-                (position.end_position - position.start_position), color_off
+        if position.lexdata:
+            sys.stderr.write(position.lexdata[offset:end + 1])
+            sys.stderr.write(
+                '%s%s%s%s\n' % (
+                    ' ' * (position.start_position - offset), color_caret, '^' *
+                    (position.end_position - position.start_position), color_off
+                )
             )
-        )
 
     def push_expected_diagnostics(self, diagnostics):
         # type: (List[Callable[..., Dict[str, Any]]]) -> None
