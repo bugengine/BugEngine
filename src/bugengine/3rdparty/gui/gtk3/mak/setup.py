@@ -33,6 +33,7 @@ def setup_system(conf):
                     'cairo',
                     'gdk-pixbuf-2.0',
                     'atk-1.0',
+                    'harfbuzz',
                 ]
             ], []
         ) + [

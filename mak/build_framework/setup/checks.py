@@ -35,6 +35,7 @@ int main(int argc, const char *argv[])
 { return EXIT_SUCCESS; }
 """
 
+
 def extend_path(path, sysroot):
     if path[0] == '=':
         if sysroot:
@@ -318,8 +319,10 @@ def run_pkg_config(conf, name):
         lib_paths.append('=/usr/lib/%s' % t)
         lib_paths.append('=/usr/libdata/%s' % t)
     lib_paths = [extend_path(l, sysroot) for l in lib_paths]
+    lib_paths = [l for l in lib_paths if os.path.isdir(l)]
 
-    seen = set([name])
+    seen = set([])
+
     def _run_pkg_config(name):
         seen.add(name)
         expand = {'pc_sysrootdir': sysroot if sysroot else '/'}

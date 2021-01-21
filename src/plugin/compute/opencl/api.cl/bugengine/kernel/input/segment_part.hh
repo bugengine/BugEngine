@@ -20,11 +20,11 @@ struct segments_part
     friend struct segments< T >;
 
 private:
-    __global T* const m_begin;
-    u32 const         m_count;
+    T* const  m_begin;
+    u32 const m_count;
 
 public:
-    __device segments_part(__global T* begin, __global T* end)
+    __device segments_part(T* begin, T* end)
         : m_begin(begin)
         , m_count(static_cast< u32 >(end - begin))
     {

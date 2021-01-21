@@ -56,16 +56,16 @@ extern "C" void* __builtin_alloca(size_t);
 #define BE_IMPORT
 
 #if __SUNPRO_CC < 0x5130
-#    pragma error_messages (off, wbadinit)
-#    pragma error_messages (off, wbadasg)
+#    pragma error_messages(off, wbadinit)
+#    pragma error_messages(off, wbadasg)
 #elif __SUNPRO_CC < 0x5140
-#    pragma error_messages (off, wbadlkginit)
+#    pragma error_messages(off, wbadlkginit)
 #endif
 #if __SUNPRO_CC >= 0x5130
-#    pragma error_messages (off, arrowrtn2)
+#    pragma error_messages(off, arrowrtn2)
 #endif
 #if __SUNPRO_CC >= 0x5140 && __SUNPRO_CC < 0x5150
-#    pragma error_messages (off, placementdelmatch)
+#    pragma error_messages(off, placementdelmatch)
 #endif
 
 /**************************************************************************************************/

@@ -16,21 +16,21 @@ struct InterlockedType< 4 >
 {
     typedef i32 value_t;
 
-    static inline __host __device value_t fetch_and_add(__global value_t* p, value_t incr);
-    static inline __host __device value_t fetch_and_sub(__global value_t* p, value_t incr);
+    static inline __host __device value_t fetch_and_add(kernel_global value_t* p, value_t incr);
+    static inline __host __device value_t fetch_and_sub(kernel_global value_t* p, value_t incr);
 
-    static inline __host __device value_t set_conditional(__global value_t* p, value_t v,
+    static inline __host __device value_t set_conditional(kernel_global value_t* p, value_t v,
                                                           value_t condition);
-    static inline __host __device value_t set_and_fetch(__global value_t* p, value_t v);
-    static inline __host __device value_t fetch_and_set(__global value_t* p, value_t v);
+    static inline __host __device value_t set_and_fetch(kernel_global value_t* p, value_t v);
+    static inline __host __device value_t fetch_and_set(kernel_global value_t* p, value_t v);
 
-    static inline __host __device value_t fetch_and_add(__local value_t* p, value_t incr);
-    static inline __host __device value_t fetch_and_sub(__local value_t* p, value_t incr);
+    static inline __host __device value_t fetch_and_add(kernel_local value_t* p, value_t incr);
+    static inline __host __device value_t fetch_and_sub(kernel_local value_t* p, value_t incr);
 
-    static inline __host __device value_t set_conditional(__local value_t* p, value_t v,
+    static inline __host __device value_t set_conditional(kernel_local value_t* p, value_t v,
                                                           value_t condition);
-    static inline __host __device value_t set_and_fetch(__local value_t* p, value_t v);
-    static inline __host __device value_t fetch_and_set(__local value_t* p, value_t v);
+    static inline __host __device value_t set_and_fetch(kernel_local value_t* p, value_t v);
+    static inline __host __device value_t fetch_and_set(kernel_local value_t* p, value_t v);
 
     /* not defined, host only */
     struct tagged_t
@@ -58,21 +58,21 @@ struct InterlockedType< 8 >
 {
     typedef u64 value_t;
 
-    static inline __host __device value_t fetch_and_add(__global value_t* p, value_t incr);
-    static inline __host __device value_t fetch_and_sub(__global value_t* p, value_t incr);
+    static inline __host __device value_t fetch_and_add(kernel_global value_t* p, value_t incr);
+    static inline __host __device value_t fetch_and_sub(kernel_global value_t* p, value_t incr);
 
-    static inline __host __device value_t fetch_and_set(__global value_t* p, value_t v);
-    static inline __host __device value_t set_conditional(__global value_t* p, value_t v,
+    static inline __host __device value_t fetch_and_set(kernel_global value_t* p, value_t v);
+    static inline __host __device value_t set_conditional(kernel_global value_t* p, value_t v,
                                                           value_t condition);
-    static inline __host __device value_t set_and_fetch(__global value_t* p, value_t v);
+    static inline __host __device value_t set_and_fetch(kernel_global value_t* p, value_t v);
 
-    static inline __host __device value_t fetch_and_add(__local value_t* p, value_t incr);
-    static inline __host __device value_t fetch_and_sub(__local value_t* p, value_t incr);
+    static inline __host __device value_t fetch_and_add(kernel_local value_t* p, value_t incr);
+    static inline __host __device value_t fetch_and_sub(kernel_local value_t* p, value_t incr);
 
-    static inline __host __device value_t fetch_and_set(__local value_t* p, value_t v);
-    static inline __host __device value_t set_conditional(__local value_t* p, value_t v,
+    static inline __host __device value_t fetch_and_set(kernel_local value_t* p, value_t v);
+    static inline __host __device value_t set_conditional(kernel_local value_t* p, value_t v,
                                                           value_t condition);
-    static inline __host __device value_t set_and_fetch(__local value_t* p, value_t v);
+    static inline __host __device value_t set_and_fetch(kernel_local value_t* p, value_t v);
 
     /* not defined, host only */
     struct tagged_t
@@ -89,125 +89,125 @@ struct InterlockedType< 8 >
 
 namespace _Kernel {
 
-__device InterlockedType< 4 >::value_t InterlockedType< 4 >::fetch_and_add(__global value_t* p,
-                                                                           value_t           incr)
+__device InterlockedType< 4 >::value_t InterlockedType< 4 >::fetch_and_add(kernel_global value_t* p,
+                                                                           value_t incr)
 {
     return atomic_add(p, incr);
 }
 
-__device InterlockedType< 4 >::value_t InterlockedType< 4 >::fetch_and_sub(__global value_t* p,
-                                                                           value_t           incr)
+__device InterlockedType< 4 >::value_t InterlockedType< 4 >::fetch_and_sub(kernel_global value_t* p,
+                                                                           value_t incr)
 {
     return atomic_sub(p, incr);
 }
 
-__device InterlockedType< 4 >::value_t InterlockedType< 4 >::fetch_and_set(__global value_t* p,
-                                                                           value_t           v)
+__device InterlockedType< 4 >::value_t InterlockedType< 4 >::fetch_and_set(kernel_global value_t* p,
+                                                                           value_t                v)
 {
     return atomic_xchg(p, v);
 }
 
 __device InterlockedType< 4 >::value_t
-         InterlockedType< 4 >::set_conditional(__global value_t* p, value_t v, value_t condition)
+InterlockedType< 4 >::set_conditional(kernel_global value_t* p, value_t v, value_t condition)
 {
     return atomic_cmpxchg(p, condition, v);
 }
 
-__device InterlockedType< 4 >::value_t InterlockedType< 4 >::set_and_fetch(__global value_t* p,
-                                                                           value_t           v)
+__device InterlockedType< 4 >::value_t InterlockedType< 4 >::set_and_fetch(kernel_global value_t* p,
+                                                                           value_t                v)
 {
     fetch_and_set(p, v);
     return v;
 }
 
-__device InterlockedType< 4 >::value_t InterlockedType< 4 >::fetch_and_add(__local value_t* p,
-                                                                           value_t          incr)
+__device InterlockedType< 4 >::value_t InterlockedType< 4 >::fetch_and_add(kernel_local value_t* p,
+                                                                           value_t incr)
 {
     return atomic_add(p, incr);
 }
 
-__device InterlockedType< 4 >::value_t InterlockedType< 4 >::fetch_and_sub(__local value_t* p,
-                                                                           value_t          incr)
+__device InterlockedType< 4 >::value_t InterlockedType< 4 >::fetch_and_sub(kernel_local value_t* p,
+                                                                           value_t incr)
 {
     return atomic_sub(p, incr);
 }
 
-__device InterlockedType< 4 >::value_t InterlockedType< 4 >::fetch_and_set(__local value_t* p,
-                                                                           value_t          v)
+__device InterlockedType< 4 >::value_t InterlockedType< 4 >::fetch_and_set(kernel_local value_t* p,
+                                                                           value_t               v)
 {
     return atomic_xchg(p, v);
 }
 
 __device InterlockedType< 4 >::value_t
-         InterlockedType< 4 >::set_conditional(__local value_t* p, value_t v, value_t condition)
+InterlockedType< 4 >::set_conditional(kernel_local value_t* p, value_t v, value_t condition)
 {
     return atomic_cmpxchg(p, condition, v);
 }
 
-__device InterlockedType< 4 >::value_t InterlockedType< 4 >::set_and_fetch(__local value_t* p,
-                                                                           value_t          v)
+__device InterlockedType< 4 >::value_t InterlockedType< 4 >::set_and_fetch(kernel_local value_t* p,
+                                                                           value_t               v)
 {
     fetch_and_set(p, v);
     return v;
 }
 
-__device InterlockedType< 8 >::value_t InterlockedType< 8 >::fetch_and_add(__global value_t* p,
-                                                                           value_t           incr)
+__device InterlockedType< 8 >::value_t InterlockedType< 8 >::fetch_and_add(kernel_global value_t* p,
+                                                                           value_t incr)
 {
     return atom_add(p, incr);
 }
 
-__device InterlockedType< 8 >::value_t InterlockedType< 8 >::fetch_and_sub(__global value_t* p,
-                                                                           value_t           incr)
+__device InterlockedType< 8 >::value_t InterlockedType< 8 >::fetch_and_sub(kernel_global value_t* p,
+                                                                           value_t incr)
 {
     return atom_sub(p, incr);
 }
 
-__device InterlockedType< 8 >::value_t InterlockedType< 8 >::fetch_and_set(__global value_t* p,
-                                                                           value_t           v)
+__device InterlockedType< 8 >::value_t InterlockedType< 8 >::fetch_and_set(kernel_global value_t* p,
+                                                                           value_t                v)
 {
     return atom_xchg(p, v);
 }
 
 __device InterlockedType< 8 >::value_t
-         InterlockedType< 8 >::set_conditional(__global value_t* p, value_t v, value_t condition)
+InterlockedType< 8 >::set_conditional(kernel_global value_t* p, value_t v, value_t condition)
 {
     return atom_cmpxchg(p, condition, v);
 }
 
-__device InterlockedType< 8 >::value_t InterlockedType< 8 >::set_and_fetch(__global value_t* p,
-                                                                           value_t           v)
+__device InterlockedType< 8 >::value_t InterlockedType< 8 >::set_and_fetch(kernel_global value_t* p,
+                                                                           value_t                v)
 {
     fetch_and_set(p, v);
     return v;
 }
 
-__device InterlockedType< 8 >::value_t InterlockedType< 8 >::fetch_and_add(__local value_t* p,
-                                                                           value_t          incr)
+__device InterlockedType< 8 >::value_t InterlockedType< 8 >::fetch_and_add(kernel_local value_t* p,
+                                                                           value_t incr)
 {
     return atom_add(p, incr);
 }
 
-__device InterlockedType< 8 >::value_t InterlockedType< 8 >::fetch_and_sub(__local value_t* p,
-                                                                           value_t          incr)
+__device InterlockedType< 8 >::value_t InterlockedType< 8 >::fetch_and_sub(kernel_local value_t* p,
+                                                                           value_t incr)
 {
     return atom_sub(p, incr);
 }
 
-__device InterlockedType< 8 >::value_t InterlockedType< 8 >::fetch_and_set(__local value_t* p,
-                                                                           value_t          v)
+__device InterlockedType< 8 >::value_t InterlockedType< 8 >::fetch_and_set(kernel_local value_t* p,
+                                                                           value_t               v)
 {
     return atom_xchg(p, v);
 }
 
 __device InterlockedType< 8 >::value_t
-         InterlockedType< 8 >::set_conditional(__local value_t* p, value_t v, value_t condition)
+InterlockedType< 8 >::set_conditional(kernel_local value_t* p, value_t v, value_t condition)
 {
     return atom_cmpxchg(p, condition, v);
 }
 
-__device InterlockedType< 8 >::value_t InterlockedType< 8 >::set_and_fetch(__local value_t* p,
-                                                                           value_t          v)
+__device InterlockedType< 8 >::value_t InterlockedType< 8 >::set_and_fetch(kernel_local value_t* p,
+                                                                           value_t               v)
 {
     fetch_and_set(p, v);
     return v;

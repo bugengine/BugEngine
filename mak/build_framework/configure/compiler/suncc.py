@@ -185,9 +185,7 @@ class SunCC(Configure.ConfigurationContext.GnuCompiler):
     def is_valid(self, conf, extra_flags=[]):
         node = conf.bldnode.make_node('main.cxx')
         tgtnode = node.change_ext('')
-        node.write(
-            '#ifndef _GNU_SOURCE\n# define _GNU_SOURCE\n#endif\n#include <cstdlib>\n#include <iostream>\nint main() {}\n'
-        )
+        node.write('#include <cstdlib>\n#include <iostream>\nint main() {}\n')
         try:
             result, out, err = self.run_cxx([node.abspath(), '-c', '-o', tgtnode.abspath()] + extra_flags)
         except Exception as e:
@@ -209,7 +207,7 @@ class SunCC(Configure.ConfigurationContext.GnuCompiler):
         v.IDIRAFTER = '-I'
         if platform.NAME == 'Linux':
             if self.arch == 'x86':
-                v.append_unique('SYSTEM_LIBPATHS', ['=/usr/lib/i386-linux-gnu'])
+                v.append_unique('SYSTEM_LIBPATHS', ['=/usr/lib', '=/usr/lib/i386-linux-gnu'])
                 v.CFLAGS += ['-xtarget=opteron', '-I/usr/include/i386-linux-gnu']
                 v.CXXFLAGS += [
                     os.path.join(conf.bugenginenode.abspath(),
@@ -217,7 +215,7 @@ class SunCC(Configure.ConfigurationContext.GnuCompiler):
                     '-xcache=64/64/2:1024/64/16', '-I/usr/include/i386-linux-gnu', '-include', 'math.h'
                 ]
             elif self.arch == 'amd64':
-                v.append_unique('SYSTEM_LIBPATHS', ['=/usr/lib/x86_64-linux-gnu'])
+                v.append_unique('SYSTEM_LIBPATHS', ['=/usr/lib64', '=/usr/lib/x86_64-linux-gnu'])
                 v.CFLAGS += ['-xtarget=opteron', '-I/usr/include/x86_64-linux-gnu']
                 v.CXXFLAGS += [
                     os.path.join(conf.bugenginenode.abspath(),
@@ -234,15 +232,13 @@ class SunCC(Configure.ConfigurationContext.GnuCompiler):
 
         if self.arch == 'x86':
             v.CXXFLAGS += [
-                os.path.join(conf.bugenginenode.abspath(),
-                             'mak/compiler/suncc/interlocked-a=x86.il'), '-xarch=sse2', '-xchip=generic',
-                '-xcache=64/64/2:1024/64/16'
+                os.path.join(conf.bugenginenode.abspath(), 'mak/compiler/suncc/interlocked-a=x86.il'), '-xarch=sse2',
+                '-xchip=generic', '-xcache=64/64/2:1024/64/16'
             ]
         elif self.arch == 'amd64':
             v.CXXFLAGS += [
-                os.path.join(conf.bugenginenode.abspath(),
-                             'mak/compiler/suncc/interlocked-a=amd64.il'), '-xarch=sse2', '-xchip=generic',
-                '-xcache=64/64/2:1024/64/16'
+                os.path.join(conf.bugenginenode.abspath(), 'mak/compiler/suncc/interlocked-a=amd64.il'), '-xarch=sse2',
+                '-xchip=generic', '-xcache=64/64/2:1024/64/16'
             ]
         v.append_unique('CFLAGS', ['-mt', '-xldscope=hidden', '-Kpic', '-DPIC', '-D__PIC__'])
         v.append_unique('CXXFLAGS', ['-mt', '-xldscope=hidden', '-Kpic', '-DPIC', '-D__PIC__'])
@@ -271,7 +267,7 @@ def detect_suncc(conf):
             c = SunCC(suncc, sunCC)
             if c.name() in seen:
                 continue
-            if not c.is_valid(conf):
+            if not c.is_valid(conf, ['-D_GNU_SOURCE']):
                 continue
             seen.add(c.name())
             conf.compilers.append(c)

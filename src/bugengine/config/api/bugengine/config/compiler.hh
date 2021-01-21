@@ -43,11 +43,11 @@
 #endif
 #define __kernel inline
 
-#define __constant const
-#define __global
-#define __local
-#define __private
-#define __generic
+#define kernel_constant const
+#define kernel_global
+#define kernel_local
+#define kernel_private
+#define kernel_generic
 
 /**************************************************************************************************/
 #endif

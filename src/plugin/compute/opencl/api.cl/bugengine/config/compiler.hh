@@ -26,6 +26,12 @@ typedef u8             byte;
 #define BE_EXPORT
 #define BE_IMPORT
 
+#define kernel_private  __private
+#define kernel_local    __local
+#define kernel_constant __constant
+#define kernel_global   __global
+#define kernel_generic  __generic
+
 #define be_alignof(t) __alignof__(t)
 
 #pragma OPENCL EXTENSION cl_khr_int64_base_atomics : enable

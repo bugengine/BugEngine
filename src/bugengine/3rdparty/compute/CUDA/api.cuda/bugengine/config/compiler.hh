@@ -29,11 +29,11 @@ typedef u8                  byte;
 
 #define be_alignof(t)           __alignof__(t)
 
-#define __global     __device
-#define __local      __shared__
-#define __private
-#define __constant   __device const
-#define __generic
+#define kernel_private
+#define kernel_local      __shared__
+#define kernel_constant   __device const
+#define kernel_global     __device
+#define kernel_generic
 
 /**************************************************************************************************/
 #endif
