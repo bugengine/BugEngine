@@ -43,6 +43,15 @@ class IrInstCall(IrInstruction):
         # type: (IrccGenerator, IrCodeGenContext, Optional[IrCodeSegment]) -> Optional[IrccValue]
         pass
 
+    def _create_generator_value(self, type, generator, code_context):
+        # type: (IrType, IrccGenerator, IrCodeGenContext) -> IrccValue
+        instance = self._method.find_instance(
+            [argument.get_type() for argument in self._arguments], code_context._equivalence
+        )
+        return generator.make_value_call(
+            instance._name, [v.create_generator_value(generator, code_context) for v in self._arguments]
+        )
+
 
 class IrInstIntegerCompare(IrInstruction):
     def __init__(self, result, type, left_operand, right_operand, operation, metadata):
@@ -81,6 +90,13 @@ class IrInstIntegerCompare(IrInstruction):
         # type: (IrccGenerator, IrCodeGenContext, Optional[IrCodeSegment]) -> Optional[IrccValue]
         pass
 
+    def _create_generator_value(self, type, generator, code_context):
+        # type: (IrType, IrccGenerator, IrCodeGenContext) -> IrccValue
+        return generator.make_value_binary_op(
+            self._operation, self._left_operand.create_generator_value(self._type, generator, code_context),
+            self._right_operand.create_generator_value(self._type, generator, code_context)
+        )
+
 
 class IrInstFloatCompare(IrInstruction):
     def __init__(self, result, type, left_operand, right_operand, operation, metadata):
@@ -118,6 +134,13 @@ class IrInstFloatCompare(IrInstruction):
     def generate(self, generator, context, next_segment):
         # type: (IrccGenerator, IrCodeGenContext, Optional[IrCodeSegment]) -> Optional[IrccValue]
         pass
+
+    def _create_generator_value(self, type, generator, code_context):
+        # type: (IrType, IrccGenerator, IrCodeGenContext) -> IrccValue
+        return generator.make_value_binary_op(
+            self._operation, self._left_operand.create_generator_value(self._type, generator, code_context),
+            self._right_operand.create_generator_value(self._type, generator, code_context)
+        )
 
 
 class IrInstPhi(IrInstruction):

@@ -1,4 +1,8 @@
 from be_typing import TYPE_CHECKING
+try:
+    from itertools import izip_longest as zip_longest
+except ImportError:
+    from itertools import zip_longest  # type: ignore
 
 
 class IrccType:
@@ -11,7 +15,7 @@ class IrccType:
 
     def format(self, names=[]):
         # type: (List[str]) -> str
-        decl = [(a + ' ' + b).strip() for a, b in zip(self._declaration, names)]
+        decl = [(a + ' ' + b).strip() for a, b in zip_longest(self._declaration, names, fillvalue='')]
         return ' '.join(d for d in decl if d)
 
 

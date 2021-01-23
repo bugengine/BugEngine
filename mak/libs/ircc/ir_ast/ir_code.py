@@ -34,14 +34,26 @@ class IrDominatorNode:
 
 
 class IrLoopInfo:
-    def __init__(self, loop_header, loopback):
-        # type: (IrCodeSegment, IrCodeSegment) -> None
+    def __init__(self, loop_header):
+        # type: (IrCodeSegment) -> None
         self._header = loop_header
-        self._body = []                                                # type: List[IrCodeSegment]
-        if loopback._postdominator_node._parent is not None:
-            self._exit = loopback._postdominator_node._parent._segment # type: Optional[IrCodeSegment]
-        else:
-            self._exit = None
+        self._body = []    # type: List[IrCodeSegment]
+        self._exit = None  # type: Optional[IrCodeSegment]
+
+    def add_loopback(self, loopback):
+        # type: (IrCodeSegment) -> None
+        self._body.append(loopback)
+        exits = set(self._header._postdominator_node._dominators)
+        for segment in self._body:
+            exits.intersection_update(segment._postdominator_node._dominators)
+        self._exit = None
+        for e in exits:
+            if e._segment == self._header:
+                continue
+            if self._exit is None:
+                self._exit = e._segment
+            elif self._exit._postdominator_node in e._dominators:
+                self._exit = e._segment
 
 
 class IrInstruction(IrExpression):
@@ -99,6 +111,19 @@ class IrInstruction(IrExpression):
         else:
             return True
 
+    def create_generator_value(self, type, generator, code_context):
+        # type: (IrType, IrccGenerator, IrCodeGenContext) -> IrccValue
+        if self.is_inline():
+            return self._create_generator_value(type, generator, code_context)
+        else:
+            assert self._result_name is not None
+            return generator.make_value_reference(self._result_name)
+
+    @abstractmethod
+    def _create_generator_value(self, type, generator, code_context):
+        # type: (IrType, IrccGenerator, IrCodeGenContext) -> IrccValue
+        raise NotImplementedError
+
     @abstractmethod
     def generate(self, generator, context, next_segment):
         # type: (IrccGenerator, IrCodeGenContext, Optional[IrCodeSegment]) -> Optional[IrccValue]
@@ -108,7 +133,7 @@ class IrInstruction(IrExpression):
 class IrAssignInstruction(IrInstruction):
     def __init__(self, result, type, expr):
         # type: (IrReference, IrType, IrExpression) -> None
-        IrInstruction.__init__(self, 'phi_assign', None, [])
+        IrInstruction.__init__(self, 'phi_assign', result, [])
         self._type = type
         self._expression = expr
 
@@ -118,7 +143,14 @@ class IrAssignInstruction(IrInstruction):
 
     def generate(self, generator, context, next_segment):
         # type: (IrccGenerator, IrCodeGenContext, Optional[IrCodeSegment]) -> Optional[IrccValue]
-        pass
+        assert self._result is not None
+        generator.instuction_assign(
+            self, self._result, self._expression.create_generator_value(self._type, generator, context)
+        )
+
+    def _create_generator_value(self, type, generator, code_context):
+        # type: (IrType, IrccGenerator, IrCodeGenContext) -> IrccValue
+        raise NotImplementedError
 
 
 class IrCodeSegment:
@@ -175,13 +207,14 @@ class IrCodeSegment:
             return
         current_segment = self
         while True:
-            if current_segment._loop_info:
-                generator.begin_loop(current_segment._label)
-                context.push_loop(current_segment._loop_info)
             if context._loops:
                 if current_segment == context._loops[-1]._exit:
                     context.pop_loop(context._loops[-1])
                     generator.end_loop()
+
+            if current_segment._loop_info:
+                generator.begin_loop(current_segment._label)
+                context.push_loop(current_segment._loop_info)
 
             if current_segment._postdominator_node._parent is None:
                 next_segment_children = next_segment
@@ -330,7 +363,8 @@ class IrCodeBlock:
             for successor in s._successors:
                 if successor._dominator_node in s._dominator_node._dominators:
                     if successor._loop_info is None:
-                        successor._loop_info = IrLoopInfo(successor, s)
+                        successor._loop_info = IrLoopInfo(successor)
+                    successor._loop_info.add_loopback(s)
                     predecessors = [s]
                     while predecessors:
                         pred = predecessors.pop(0)
@@ -402,6 +436,10 @@ class IrCodeBlock:
         for s in self._segments:
             s.declare_stack_data(generator, context)
         self._segments[0].visit(generator, context, None)
+        while context._loops:
+            assert context._loops[-1]._exit is None
+            context.pop_loop(context._loops[-1])
+            generator.end_loop()
 
 
 from . import instructions as ir_instructions

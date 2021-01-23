@@ -10,7 +10,7 @@ class IrInstLabel(IrInstruction):
 
     def generate(self, generator, context, next_segment):
         # type: (IrccGenerator, IrCodeGenContext, Optional[IrCodeSegment]) -> Optional[IrccValue]
-        generator.declare_label(self._label[1:])
+        generator.declare_label(self._label)
         return None
 
 

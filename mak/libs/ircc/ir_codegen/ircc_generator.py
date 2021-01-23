@@ -79,18 +79,23 @@ class IrccGenerator:
         raise NotImplementedError
 
     @abstractmethod
+    def make_value_nullptr(self, type):
+        # type: (IrccType) -> IrccValue
+        raise NotImplementedError
+
+    @abstractmethod
     def make_value_undef(self, width):
         # type: (int) -> IrccValue
         raise NotImplementedError
 
     @abstractmethod
-    def make_value_bool(self, value):
-        # type: (bool) -> IrccValue
+    def make_value_bool(self, type, value):
+        # type: (IrccType, bool) -> IrccValue
         raise NotImplementedError
 
     @abstractmethod
-    def make_value_int(self, value):
-        # type: (int) -> IrccValue
+    def make_value_int(self, type, value):
+        # type: (IrccType, int) -> IrccValue
         raise NotImplementedError
 
     @abstractmethod
@@ -111,6 +116,31 @@ class IrccGenerator:
     @abstractmethod
     def make_value_cast(self, value, cast, result_type):
         # type: (IrccValue, str, IrccType) -> IrccValue
+        raise NotImplementedError
+
+    @abstractmethod
+    def make_value_addressof(self, name):
+        # type: (str) -> IrccValue
+        raise NotImplementedError
+
+    @abstractmethod
+    def make_value_reference(self, name):
+        # type: (str) -> IrccValue
+        raise NotImplementedError
+
+    @abstractmethod
+    def make_value_binary_op(self, operation, left_operand, right_operand):
+        # type: (str, IrccValue, IrccValue) -> IrccValue
+        raise NotImplementedError
+
+    @abstractmethod
+    def make_value_load(self, address):
+        # type: (IrccValue) -> IrccValue
+        raise NotImplementedError
+
+    @abstractmethod
+    def make_value_call(self, method_name, arguments):
+        # type: (str, List[IrccValue]) -> IrccValue
         raise NotImplementedError
 
     def begin_module(self):
@@ -169,12 +199,12 @@ class IrccGenerator:
         # type: () -> None
         raise NotImplementedError
 
-    def begin_if(self):
-        # type: () -> None
+    def begin_if(self, condition):
+        # type: (IrccValue) -> None
         raise NotImplementedError
 
-    def begin_if_not(self):
-        # type: () -> None
+    def begin_if_not(self, condition):
+        # type: (IrccValue) -> None
         raise NotImplementedError
 
     def begin_else(self):
@@ -195,6 +225,10 @@ class IrccGenerator:
 
     def instruction_continue(self, label):
         # type: (str) -> None
+        raise NotImplementedError
+
+    def instruction_assign(self, name, value):
+        # type: (str, IrccValue) -> None
         raise NotImplementedError
 
 

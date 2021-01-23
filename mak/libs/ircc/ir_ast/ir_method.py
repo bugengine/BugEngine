@@ -54,6 +54,10 @@ class IrMethodParameter(IrExpression):
         # type: (IrType) -> IrType
         return self._type
 
+    def create_generator_value(self, type, generator, code_context):
+        # type: (IrType, IrccGenerator, IrCodeGenContext) -> IrccValue
+        return generator.make_value_reference(self._id)
+
 
 class IrMethodMetadataParameter(IrMethodParameter):
     pass
@@ -330,7 +334,7 @@ if TYPE_CHECKING:
     from typing import Dict, List, Optional, Tuple
     from .ir_module import IrModule
     from .ir_reference import IrReference
-    from .ir_code import IrInstruction
+    from .ir_code import IrInstruction, IrCodeGenContext
     from .ir_type import IrType
     from .ir_metadata import IrMetadataLink
-    from ..ir_codegen import IrccGenerator
+    from ..ir_codegen import IrccGenerator, IrccValue

@@ -41,6 +41,16 @@ class IrInstCast(IrInstruction):
         # type: (IrccGenerator, IrCodeGenContext, Optional[IrCodeSegment]) -> Optional[IrccValue]
         pass
 
+    def is_inline(self):
+        # type: () -> bool
+        return True
+
+    def create_generator_value(self, type, generator, code_context):
+        # type: (IrType, IrccGenerator, IrCodeGenContext) -> IrccValue
+        value = self._value.create_generator_value(generator, code_context)
+        target_type = self._result_type.create_generator_type(generator, code_context._equivalence)
+        return generator.make_value_cast(target_type, self._cast_type, value)
+
 
 if TYPE_CHECKING:
     from typing import Dict, List, Optional, Tuple

@@ -41,12 +41,12 @@ class IrccCDefinition(IrccCValues):
 
     def declare_label(self, name):
         # type: (str) -> None
-        self._out_file.write('%s/*%s*/\n' % (self._indent, name))
+        self._out_file.write('%s/* %s */\n' % (self._indent, name))
 
     def begin_loop(self, label):
         # type: (str) -> None
         indent = self._indent
-        self._out_file.write('%s/* %s */\n%sfor (;;)\n%s{\n' % (indent, label, indent, indent))
+        self._out_file.write('%s\n%sfor (;;)\n%s{\n' % (indent, indent, indent))
         self._indent += _INDENT
 
     def end_loop(self):
@@ -54,16 +54,16 @@ class IrccCDefinition(IrccCValues):
         self._indent = self._indent[:-len(_INDENT)]
         self._out_file.write('%s}\n' % (self._indent))
 
-    def begin_if(self):
-        # type: () -> None
+    def begin_if(self, condition):
+        # type: (IrccValue) -> None
         indent = self._indent
-        self._out_file.write('%sif ()\n%s{\n' % (indent, indent))
+        self._out_file.write('%sif (%s)\n%s{\n' % (indent, condition._value, indent))
         self._indent += _INDENT
 
-    def begin_if_not(self):
-        # type: () -> None
+    def begin_if_not(self, condition):
+        # type: (IrccValue) -> None
         indent = self._indent
-        self._out_file.write('%sif (!)\n%s{\n' % (indent, indent))
+        self._out_file.write('%sif (!(%s))\n%s{\n' % (indent, condition._value, indent))
         self._indent += _INDENT
 
     def begin_else(self):
@@ -90,6 +90,10 @@ class IrccCDefinition(IrccCValues):
     def instruction_continue(self, label):
         # type: (str) -> None
         self._out_file.write('%scontinue; /* goto %s */\n' % (self._indent, label))
+
+    def instruction_assign(self, name, value):
+        # type: (str, IrccValue) -> None
+        self._out_file.write('%svar_%s = %s;\n' % (self._indent, name.replace('.', '_'), value._value))
 
 
 if TYPE_CHECKING:

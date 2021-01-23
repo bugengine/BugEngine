@@ -44,6 +44,11 @@ class IrInstAlloca(IrInstruction):
         # type: (IrccGenerator, IrCodeGenContext, Optional[IrCodeSegment]) -> Optional[IrccValue]
         pass
 
+    def create_generator_value(self, type, generator, code_context):
+        # type: (IrType, IrccGenerator, IrCodeGenContext) -> IrccValue
+        assert self._result_name is not None
+        return generator.make_value_addressof(self._result_name)
+
 
 class IrInstLoad(IrInstruction):
     def __init__(self, result, source, type, metadata):
@@ -74,6 +79,10 @@ class IrInstLoad(IrInstruction):
     def generate(self, generator, context, next_segment):
         # type: (IrccGenerator, IrCodeGenContext, Optional[IrCodeSegment]) -> Optional[IrccValue]
         pass
+
+    def _create_generator_value(self, type, generator, code_context):
+        # type: (IrType, IrccGenerator, IrCodeGenContext) -> IrccValue
+        return generator.make_value_load(self._source.create_generator_value(generator, code_context))
 
 
 class IrInstStore(IrInstruction):

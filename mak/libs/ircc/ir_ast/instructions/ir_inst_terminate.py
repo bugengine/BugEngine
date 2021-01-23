@@ -96,17 +96,17 @@ class IrInstConditionalBranch(IrInstruction):
         if context._loops:
             if next_segment == context._loops[-1]._exit:
                 next_target = context._loops[-1]._header
-        #value = self._condition.create_generator_value(generator, context)
+        condition = self._condition.create_generator_value(generator, context)
         if segment_true == next_target:
-            generator.begin_if_not()
+            generator.begin_if_not(condition)
             segment_false.visit(generator, context, next_segment)
             generator.end_if()
         elif segment_false == next_target:
-            generator.begin_if()
+            generator.begin_if(condition)
             segment_true.visit(generator, context, next_segment)
             generator.end_if()
         else:
-            generator.begin_if()
+            generator.begin_if(condition)
             segment_true.visit(generator, context, next_segment)
             generator.begin_else()
             segment_false.visit(generator, context, next_segment)

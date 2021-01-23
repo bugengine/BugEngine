@@ -45,6 +45,13 @@ class IrInstBinaryOp(IrInstruction):
         # type: (IrccGenerator, IrCodeGenContext, Optional[IrCodeSegment]) -> Optional[IrccValue]
         pass
 
+    def _create_generator_value(self, type, generator, code_context):
+        # type: (IrType, IrccGenerator, IrCodeGenContext) -> IrccValue
+        return generator.make_value_binary_op(
+            self._operation, self._left_operand.create_generator_value(self._type, generator, code_context),
+            self._right_operand.create_generator_value(self._type, generator, code_context)
+        )
+
 
 class IrInstFloatBinaryOp(IrInstruction):
     def __init__(self, result, type, left_operand, right_operand, operation, metadata):
@@ -88,6 +95,13 @@ class IrInstFloatBinaryOp(IrInstruction):
     def generate(self, generator, context, next_segment):
         # type: (IrccGenerator, IrCodeGenContext, Optional[IrCodeSegment]) -> Optional[IrccValue]
         pass
+
+    def _create_generator_value(self, type, generator, code_context):
+        # type: (IrType, IrccGenerator, IrCodeGenContext) -> IrccValue
+        return generator.make_value_binary_op(
+            self._operation, self._left_operand.create_generator_value(self._type, generator, code_context),
+            self._right_operand.create_generator_value(self._type, generator, code_context)
+        )
 
 
 if TYPE_CHECKING:

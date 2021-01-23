@@ -96,6 +96,21 @@ class IrExpressionConstant(IrExpression):
         # type: () -> str
         return str(self._value)
 
+    def create_generator_value(self, type, generator, code_context):
+        # type: (IrType, IrccGenerator, IrCodeGenContext) -> IrccValue
+        if isinstance(self._value, bool):
+            return generator.make_value_bool(
+                type.create_generator_type(generator, code_context._equivalence), self._value
+            )
+        elif isinstance(self._value, int):
+            return generator.make_value_int(
+                type.create_generator_type(generator, code_context._equivalence), self._value
+            )
+        elif self._value is None:
+            return generator.make_value_nullptr(type.create_generator_type(generator, code_context._equivalence))
+        else:
+            raise NotImplementedError
+
 
 class IrExpressionUndef(IrExpression):
     def __init__(self):
