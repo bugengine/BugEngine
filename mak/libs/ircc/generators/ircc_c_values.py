@@ -48,7 +48,7 @@ class IrccCValues(IrccCTypes):
         return IrccValue('{ %s }' % (', '.join([v._value for v in values])))
 
     def make_value_cast(self, result_type, cast, value):
-        # type: (IrccValue, str, IrccType) -> IrccValue
+        # type: (IrccType, str, IrccValue) -> IrccValue
         return IrccValue('(%s)(%s)' % (result_type.format([]), value._value))
 
     def make_value_addressof(self, name):

@@ -114,8 +114,8 @@ class IrccGenerator:
         raise NotImplementedError
 
     @abstractmethod
-    def make_value_cast(self, value, cast, result_type):
-        # type: (IrccValue, str, IrccType) -> IrccValue
+    def make_value_cast(self, result_type, cast, value):
+        # type: (IrccType, str, IrccValue) -> IrccValue
         raise NotImplementedError
 
     @abstractmethod

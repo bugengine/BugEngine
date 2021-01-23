@@ -94,8 +94,8 @@ class IrInstConditionalBranch(IrInstruction):
         current_segment = context._current_segment
         next_target = next_segment
         if context._loops:
-            if next_segment == context._loops[-1]._exit:
-                next_target = context._loops[-1]._header
+            if next_segment == context._loops[-1][1]._exit:
+                next_target = context._loops[-1][1]._header
         condition = self._condition.create_generator_value(generator, context)
         if segment_true == next_target:
             generator.begin_if_not(condition)

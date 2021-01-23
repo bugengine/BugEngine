@@ -10,16 +10,16 @@ class IrCodeGenContext:
         self._equivalence = equivalence
         self._code = code
         self._current_segment = code._segments[0]
-        self._loops = []   # type: List[IrLoopInfo]
+        self._loops = []   # type: List[Tuple[IrCodeSegment, IrLoopInfo]]
 
-    def push_loop(self, loop):
-        # type: (IrLoopInfo) -> None
+    def push_loop(self, owner, loop):
+        # type: (IrCodeSegment, IrLoopInfo) -> None
         assert loop not in self._loops
-        self._loops.append(loop)
+        self._loops.append((owner, loop))
 
-    def pop_loop(self, loop):
-        # type: (IrLoopInfo) -> None
-        assert self._loops[-1] == loop
+    def pop_loop(self, owner, loop):
+        # type: (IrCodeSegment, IrLoopInfo) -> None
+        assert self._loops[-1][1] == loop
         self._loops.pop(-1)
 
 
@@ -49,6 +49,8 @@ class IrLoopInfo:
         self._exit = None
         for e in exits:
             if e._segment == self._header:
+                continue
+            if e._segment in self._body:
                 continue
             if self._exit is None:
                 self._exit = e._segment
@@ -147,6 +149,7 @@ class IrAssignInstruction(IrInstruction):
         generator.instuction_assign(
             self, self._result, self._expression.create_generator_value(self._type, generator, context)
         )
+        return None
 
     def _create_generator_value(self, type, generator, code_context):
         # type: (IrType, IrccGenerator, IrCodeGenContext) -> IrccValue
@@ -192,14 +195,14 @@ class IrCodeSegment:
     def visit(self, generator, context, next_segment):
         # type: (IrccGenerator, IrCodeGenContext, Optional[IrCodeSegment]) -> None
         if context._loops:
-            if self == context._loops[-1]._header:
-                if next_segment != context._loops[-1]._exit:
+            if self == context._loops[-1][1]._header:
+                if next_segment != context._loops[-1][1]._exit:
                     generator.instruction_continue(self._label)
                     return
                 else:
                     # fallthrough to the loop start
                     return
-            elif self == context._loops[-1]._exit:
+            elif self == context._loops[-1][1]._exit:
                 generator.instruction_break(self._label)
                 return
         if self == next_segment:
@@ -207,25 +210,25 @@ class IrCodeSegment:
             return
         current_segment = self
         while True:
-            if context._loops:
-                if current_segment == context._loops[-1]._exit:
-                    context.pop_loop(context._loops[-1])
-                    generator.end_loop()
-
             if current_segment._loop_info:
                 generator.begin_loop(current_segment._label)
-                context.push_loop(current_segment._loop_info)
+                context.push_loop(self, current_segment._loop_info)
 
             if current_segment._postdominator_node._parent is None:
                 next_segment_children = next_segment
             else:
                 next_segment_children = current_segment._postdominator_node._parent._segment
                 if context._loops:
-                    if next_segment_children == context._loops[-1]._header:
+                    if next_segment_children == context._loops[-1][1]._header:
                         next_segment_children = next_segment
 
             context._current_segment = current_segment
             current_segment._write_instructions(generator, context, next_segment_children)
+
+            if context._loops:
+                if next_segment_children == context._loops[-1][1]._exit and self == context._loops[-1][0]:
+                    context.pop_loop(self, context._loops[-1][1])
+                    generator.end_loop()
 
             if next_segment_children is None:
                 break
@@ -436,10 +439,6 @@ class IrCodeBlock:
         for s in self._segments:
             s.declare_stack_data(generator, context)
         self._segments[0].visit(generator, context, None)
-        while context._loops:
-            assert context._loops[-1]._exit is None
-            context.pop_loop(context._loops[-1])
-            generator.end_loop()
 
 
 from . import instructions as ir_instructions
