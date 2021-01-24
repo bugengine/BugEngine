@@ -119,8 +119,18 @@ class IrccGenerator:
         raise NotImplementedError
 
     @abstractmethod
-    def make_value_addressof(self, name):
-        # type: (str) -> IrccValue
+    def make_value_addressof(self, value):
+        # type: (IrccValue) -> IrccValue
+        raise NotImplementedError
+
+    @abstractmethod
+    def make_value_access(self, value, field_name):
+        # type: (IrccValue, str) -> IrccValue
+        raise NotImplementedError
+
+    @abstractmethod
+    def make_value_index(self, value, index):
+        # type: (IrccValue, IrccValue) -> IrccValue
         raise NotImplementedError
 
     @abstractmethod

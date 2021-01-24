@@ -2,6 +2,8 @@ from .ircc_c_types import IrccCTypes
 from ..ir_codegen import IrccValue
 from be_typing import TYPE_CHECKING
 
+_SNIPPETS = {'int': {}, 'float': {}, 'vector': {}}
+
 
 class IrccCValues(IrccCTypes):
     def __init__(self, file):
@@ -51,9 +53,17 @@ class IrccCValues(IrccCTypes):
         # type: (IrccType, str, IrccValue) -> IrccValue
         return IrccValue('(%s)(%s)' % (result_type.format([]), value._value))
 
-    def make_value_addressof(self, name):
-        # type: (str) -> IrccValue
-        return IrccValue('&%s' % name)
+    def make_value_addressof(self, value):
+        # type: (IrccValue) -> IrccValue
+        return IrccValue('&(%s)' % value._value)
+
+    def make_value_access(self, value, field_name):
+        # type: (IrccValue, str) -> IrccValue
+        return IrccValue('(%s).%s' % (value._value, field_name))
+
+    def make_value_index(self, value, index):
+        # type: (IrccValue, IrccValue) -> IrccValue
+        return IrccValue('(%s)[%s]' % (value._value, index._value))
 
     def make_value_reference(self, name):
         # type: (str) -> IrccValue

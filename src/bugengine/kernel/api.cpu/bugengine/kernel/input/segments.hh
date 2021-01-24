@@ -13,108 +13,128 @@ template < typename T >
 struct segments
 {
 private:
-    u32 const                 m_count;
-    u32 const                 m_segmentCount;
     segments_part< T >* const m_segments;
-    segments_part< T >*       m_currentSegment;
-    u32                       m_currentOffset;
-    u32                       m_totalOffset;
+    u32 const                 m_segmentCount;
+    u32 const                 m_elementCount;
 
 public:
-    segments(u32 count, u32 segmentCount, segments_part< T >* parts)
-        : m_count(count)
+    segments(segments_part< T >* parts, u32 segmentCount, u32 count)
+        : m_segments(parts)
         , m_segmentCount(segmentCount)
-        , m_segments(parts)
-        , m_currentSegment(parts)
-        , m_currentOffset(0)
-        , m_totalOffset(0)
+        , m_elementCount(count)
     {
-    }
-    operator void*() const
-    {
-        return reinterpret_cast< void* >(m_count - m_totalOffset);
     }
 
-    bool operator!() const
+    struct iterator
     {
-        return m_count == m_totalOffset;
-    }
+        friend struct segments;
 
-    segments& operator++()
-    {
-        ++m_totalOffset;
-        if(++m_currentOffset == m_currentSegment->m_count)
+    private:
+        segments_part< T >* m_currentSegment;
+        u32                 m_currentOffset;
+
+    private:
+        iterator(segments_part< T >* segment, u32 offset)
+            : m_currentSegment(segment)
+            , m_currentOffset(offset)
         {
-            m_currentOffset = 0;
-            m_currentSegment++;
         }
-        return *this;
-    }
 
-    segments& operator--()
-    {
-        --m_totalOffset;
-        if(m_currentOffset == 0)
+    public:
+        ~iterator();
+
+    public:
+        bool operator==(const iterator& other)
         {
-            --m_currentSegment;
-            m_currentOffset = m_currentSegment->m_count - 1;
+            return m_currentSegment == other.m_currentSegment
+                   && m_currentOffset == other.m_currentOffset;
         }
-        return *this;
-    }
-
-    segments operator++(int)
-    {
-        segments result = *this;
-        ++m_totalOffset;
-        if(++m_currentOffset == m_currentSegment->m_count)
+        bool operator!=(const iterator& other)
         {
-            m_currentOffset = 0;
-            m_currentSegment++;
+            return m_currentSegment != other.m_currentSegment
+                   || m_currentOffset != other.m_currentOffset;
         }
-        return result;
-    }
-
-    segments operator--(int)
-    {
-        segments result = *this;
-        --m_totalOffset;
-        if(m_currentOffset == 0)
+        iterator& operator++()
         {
-            --m_currentSegment;
-            m_currentOffset = m_currentSegment->m_count - 1;
-        }
-        return result;
-    }
-
-    segments& operator+=(u32 count)
-    {
-        while(count)
-        {
-            if(m_currentOffset + count >= m_currentSegment->m_count)
+            if(++m_currentOffset == m_currentSegment->m_count)
             {
-                u32 progress = m_currentSegment->m_count - m_currentOffset;
-                m_totalOffset += progress;
-                count -= progress;
-                ++m_currentSegment;
                 m_currentOffset = 0;
+                m_currentSegment++;
             }
+            return *this;
         }
-        return *this;
-    }
+
+        iterator& operator--()
+        {
+            if(m_currentOffset == 0)
+            {
+                --m_currentSegment;
+                m_currentOffset = m_currentSegment->m_count - 1;
+            }
+            return *this;
+        }
+
+        iterator operator++(int)
+        {
+            segments result = *this;
+            if(++m_currentOffset == m_currentSegment->m_count)
+            {
+                m_currentOffset = 0;
+                m_currentSegment++;
+            }
+            return result;
+        }
+
+        iterator operator--(int)
+        {
+            segments result = *this;
+            if(m_currentOffset == 0)
+            {
+                --m_currentSegment;
+                m_currentOffset = m_currentSegment->m_count - 1;
+            }
+            return result;
+        }
+
+        iterator& operator+=(u32 count)
+        {
+            while(count)
+            {
+                if(m_currentOffset + count >= m_currentSegment->m_count)
+                {
+                    u32 progress = m_currentSegment->m_count - m_currentOffset;
+                    count -= progress;
+                    ++m_currentSegment;
+                    m_currentOffset = 0;
+                }
+            }
+            return *this;
+        }
+
+        T* operator->() const
+        {
+            return m_currentSegment->m_begin + m_currentOffset;
+        }
+
+        T& operator*() const
+        {
+            return *(m_currentSegment->m_begin + m_currentOffset);
+        }
+    };
 
     u32 size() const
     {
-        return m_count;
+        return m_elementCount;
     }
 
-    T* operator->() const
+    iterator begin() const
     {
-        return m_currentSegment->m_begin + m_currentOffset;
+        return iterator(m_segments, 0);
     }
-
-    T& operator*() const
+    iterator end() const
     {
-        return *(m_currentSegment->m_begin + m_currentOffset);
+        segments_part< T >* last_segment = m_segments + m_segmentCount - 1;
+        return iterator(last_segment, last_segment->m_count);
     }
 };
 

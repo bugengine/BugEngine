@@ -7,7 +7,7 @@ class ClDeclaration(IrccCDeclaration):
     def __init__(self, file):
         # type: (TextIO) -> None
         IrccCDeclaration.__init__(self, file)
-        self._address_spaces = {0: '__private', 1: '__global', 2: '__constant', 3: '__local', 4: '__todo'}
+        self._address_spaces = {0: '__private', 1: '__global', 2: '__constant', 3: '__local'}
 
     def type_metadata(self):
         # type: () -> IrccType
@@ -15,17 +15,23 @@ class ClDeclaration(IrccCDeclaration):
 
     def make_address_space(self, type, address_space):
         # type: (IrccType, int) -> IrccType
-        return IrccType(['', self._address_spaces[address_space], ''], type)
+        return IrccType(
+            ['', self._address_spaces[address_space], ''], ['', self._address_spaces[address_space], ''], type
+        )
 
     def begin_module(self):
         # type: () -> bool
         self._out_file.write(
             '/* generated code; do not edit */\n'
-            'typedef bool         i1;\n'
-            'typedef signed char  i8;\n'
-            'typedef signed short i16;\n'
-            'typedef signed int   i32;\n'
-            'typedef signed long  i64;\n'
+            'typedef bool           i1;\n'
+            'typedef signed char    i8;\n'
+            'typedef signed short   i16;\n'
+            'typedef signed int     i32;\n'
+            'typedef signed long    i64;\n'
+            'typedef unsigned char  u8;\n'
+            'typedef unsigned short u16;\n'
+            'typedef unsigned int   u32;\n'
+            'typedef unsigned long  u64;\n'
             'typedef void* meta;\n'
             '\n'
         )
@@ -35,6 +41,10 @@ class ClDeclaration(IrccCDeclaration):
                 'typedef short%(size)d  i16_%(size)d;\n'
                 'typedef int%(size)d    i32_%(size)d;\n'
                 'typedef long%(size)d   i64_%(size)d;\n'
+                'typedef uchar%(size)d  u8_%(size)d;\n'
+                'typedef ushort%(size)d u16_%(size)d;\n'
+                'typedef uint%(size)d   u32_%(size)d;\n'
+                'typedef ulong%(size)d  u64_%(size)d;\n'
                 'typedef float%(size)d  float_%(size)d;\n'
                 '\n' % {'size': vector_size}
             )
@@ -60,7 +70,7 @@ class ClDefinition(IrccCDefinition):
     def __init__(self, file):
         # type: (TextIO) -> None
         IrccCDefinition.__init__(self, file)
-        self._address_spaces = {0: '__private', 1: '__global', 2: '__constant', 3: '__local', 4: '__todo'}
+        self._address_spaces = {0: '__private', 1: '__global', 2: '__constant', 3: '__local'}
 
     def type_metadata(self):
         # type: () -> IrccType
@@ -68,7 +78,9 @@ class ClDefinition(IrccCDefinition):
 
     def make_address_space(self, type, address_space):
         # type: (IrccType, int) -> IrccType
-        return IrccType(['', self._address_spaces[address_space], ''], type)
+        return IrccType(
+            ['', self._address_spaces[address_space], ''], ['', self._address_spaces[address_space], ''], type
+        )
 
     def begin_method(self, name, return_type, parameters, calling_convention, has_implementation):
         # type: (str, IrccType, List[Tuple[IrccType, str]], str, bool) -> bool

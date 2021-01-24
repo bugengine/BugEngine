@@ -7,7 +7,7 @@ __kernel void for_loop_1(u32 index, u32 total, Kernel::segments< i32 > out1,
     {
         for(u32 j = i; j < total; ++j)
         {
-            *out2 = *out2 + *out1;
+            *out2.begin() = *out2.begin() + *out1.begin();
         }
     }
 }

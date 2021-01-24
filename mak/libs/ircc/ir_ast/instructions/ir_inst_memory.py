@@ -47,7 +47,7 @@ class IrInstAlloca(IrInstruction):
     def create_generator_value(self, type, generator, code_context):
         # type: (IrType, IrccGenerator, IrCodeGenContext) -> IrccValue
         assert self._result_name is not None
-        return generator.make_value_addressof(self._result_name)
+        return generator.make_value_addressof(generator.make_value_reference(self._result_name))
 
 
 class IrInstLoad(IrInstruction):
@@ -155,8 +155,32 @@ class IrInstGetElementPtr(IrInstruction):
                     result_type = result_type._pointee
                 elif isinstance(result_type, IrTypeArray):
                     result_type = result_type._type
+                else:
+                    raise NotImplementedError
             self._value_type = IrTypePtr(result_type, address_space._address_space)
         return self._value_type
+
+    def _create_generator_value(self, type, generator, code_context):
+        # type: (IrType, IrccGenerator, IrCodeGenContext) -> IrccValue
+        value = self._access[0].create_generator_value(generator, code_context)
+        result_type = self._access[0].get_type()
+        for index in self._access[1:]:
+            result_type = result_type._get_target_type()
+            if isinstance(result_type, IrTypeStruct):
+                assert isinstance(value, IrValueExpr)
+                assert isinstance(value._expression, IrExpressionConstant)
+                assert isinstance(value._expression._value, int)
+                result_type, field_name = result_type._fields[value._expression._value]
+                value = generator.make_value_access(value, field_name)
+            elif isinstance(result_type, IrTypePtr):
+                result_type = result_type._pointee
+                value = generator.make_value_index(value, index.create_generator_value(generator, code_context))
+            elif isinstance(result_type, IrTypeArray):
+                result_type = result_type._type
+                value = generator.make_value_index(value, index.create_generator_value(generator, code_context))
+            else:
+                raise NotImplementedError
+        return generator.make_value_addressof(value)
 
     def generate(self, generator, context, next_segment):
         # type: (IrccGenerator, IrCodeGenContext, Optional[IrCodeSegment]) -> Optional[IrccValue]

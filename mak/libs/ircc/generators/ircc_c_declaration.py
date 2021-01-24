@@ -17,6 +17,10 @@ class IrccCDeclaration(IrccCValues):
             'typedef int16_t i16;\n'
             'typedef int32_t i32;\n'
             'typedef int64_t i64;\n'
+            'typedef uint8_t  i8;\n'
+            'typedef uint16_t i16;\n'
+            'typedef uint32_t i32;\n'
+            'typedef uint64_t i64;\n'
             'typedef void* metadata;\n'
             '\n'
         )

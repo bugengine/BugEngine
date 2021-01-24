@@ -5,7 +5,7 @@ from ..ir_messages import IrAddressSpaceResolutionError
 from be_typing import TYPE_CHECKING
 from abc import abstractmethod
 
-_ADDRESS_SPACE_NAMES = ['private', 'local', 'constant', 'global']
+_ADDRESS_SPACE_NAMES = ['private', 'global', 'constant', 'local']
 
 
 class IrAddressSpace:
@@ -523,7 +523,7 @@ class IrTypePtr(IrType):
         if not allow_pointer:
             #    # todo: source location
             raise Exception('invalid kernel parameter')
-        result = IrTypePtr(self._pointee, 3)
+        result = IrTypePtr(self._pointee, 1)
         result.add_equivalence(equivalence, position, self, position)
         return [result]
 

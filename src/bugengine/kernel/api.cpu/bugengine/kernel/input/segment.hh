@@ -14,63 +14,29 @@ struct segment
 {
 private:
     segments_part< T > m_segment;
-    u32                m_current;
 
 public:
-    segment(T* begin, T* end) : m_segment(begin, end), m_current(0)
+    segment(T* begin, T* end) : m_segment(begin, end)
     {
     }
-    segment(const segments_part< T >& s) : m_segment(s), m_current(0)
+    segment(const segments_part< T >& s) : m_segment(s)
     {
     }
-    operator void*() const
-    {
-        return reinterpret_cast< void* >(m_segment.m_count - m_current);
-    }
-    bool operator!() const
-    {
-        return m_current == m_segment.m_count;
-    }
-    segment& operator++()
-    {
-        m_current++;
-        return *this;
-    }
-    segment& operator--()
-    {
-        m_current--;
-        return *this;
-    }
-    segment operator++(int)
-    {
-        segment result = *this;
-        m_current++;
-        return result;
-    }
-    segment operator--(int)
-    {
-        segment result = *this;
-        m_current--;
-        return result;
-    }
-    segment& operator+=(u32 count)
-    {
-        m_current += count;
-        return *this;
-    }
+
+    typedef T* iterator;
 
     u32 size() const
     {
         return m_segment.m_count;
     }
 
-    T* operator->() const
+    iterator begin() const
     {
-        return m_segment.m_begin + m_current;
+        return m_segment.m_begin;
     }
-    T& operator*() const
+    iterator end() const
     {
-        return *(m_segment.m_begin + m_current);
+        return m_segment.m_begin + m_segment.m_count;
     }
 };
 

@@ -17,9 +17,8 @@ __kernel void add(u32 index, u32 total, Kernel::segments< u32 > p)
     kernel_local int y;
     be_forceuse(index);
     be_forceuse(total);
-    while(p)
+    for(Kernel::segments< u32 >::iterator it = p.begin(); it != p.end(); ++it)
     {
-        *p = *findMin(&x, &y);
-        p++;
+        *it = *findMin(&x, &y);
     }
 }

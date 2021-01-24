@@ -4,8 +4,8 @@ __kernel void phi_swap(u32 index, u32 total, Kernel::segments< i32 > out1,
                        Kernel::segments< i32 > out2)
 {
     be_forceuse(total);
-    i32 x1 = *out1;
-    i32 x2 = *out2;
+    i32 x1 = *out1.begin();
+    i32 x2 = *out2.begin();
     for(u32 i = 0; i < index; ++i)
     {
         /* this code generates the following IR:
@@ -21,6 +21,6 @@ __kernel void phi_swap(u32 index, u32 total, Kernel::segments< i32 > out1,
         x2    = x1;
         x1    = t;
     }
-    *out1 = x1;
-    *out2 = x2;
+    *out1.begin() = x1;
+    *out2.begin() = x2;
 }

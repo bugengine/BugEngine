@@ -20,8 +20,8 @@ __kernel void phi_lost_copy(u32 index, u32 total, Kernel::segments< i32 > out1,
         i += 1;
         if(i == 5) goto end;
     }
-    *out2 = y + *out1;
+    *out2.begin() = y + *out1.begin();
 
 end:
-    *out1 = *out2;
+    *out1.begin() = *out2.begin();
 }
