@@ -5,7 +5,6 @@
 #define BE_KERNEL_CL_INPUT_SEGMENT_HH_
 /**************************************************************************************************/
 #include <bugengine/kernel/stdafx.h>
-#include <bugengine/kernel/input/segment_part.hh>
 
 namespace Kernel {
 
@@ -13,13 +12,11 @@ template < typename T >
 struct segment
 {
 private:
-    segments_part< T > m_segment;
+    T* const  m_begin;
+    u32 const m_count;
 
 public:
-    __device segment(T* begin, T* end) : m_segment(begin, end)
-    {
-    }
-    __device segment(const segments_part< T >& s) : m_segment(s)
+    __device segment(T* begin, T* end) : m_begin(begin), m_count(static_cast< u32 >(end - begin))
     {
     }
 
@@ -27,16 +24,16 @@ public:
 
     __device u32 size() const
     {
-        return m_segment.m_count;
+        return m_count;
     }
 
     __device iterator begin() const
     {
-        return m_segment.m_begin;
+        return m_begin;
     }
     __device iterator end() const
     {
-        return m_segment.m_begin + m_segment.m_count;
+        return m_begin + m_count;
     }
 };
 

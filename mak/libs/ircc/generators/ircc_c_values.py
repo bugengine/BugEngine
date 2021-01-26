@@ -51,7 +51,10 @@ class IrccCValues(IrccCTypes):
 
     def make_value_cast(self, result_type, cast, value):
         # type: (IrccType, str, IrccValue) -> IrccValue
-        return IrccValue('(%s)(%s)' % (result_type.format([]), value._value))
+        if cast != 'addrspacecast':
+            return IrccValue('(%s)(%s)' % (result_type.format([]), value._value))
+        else:
+            return value
 
     def make_value_addressof(self, value):
         # type: (IrccValue) -> IrccValue

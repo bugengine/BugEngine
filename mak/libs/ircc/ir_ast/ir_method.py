@@ -1,7 +1,7 @@
 from .ir_object import IrObject
 from .ir_expr import IrExpression, IrExpressionDeclaration
 from .ir_declaration import IrDeclaration
-from .ir_type import IrTypePtr, IrAddressSpaceInference
+from .ir_type import IrTypePtr, IrAddressSpace, IrAddressSpaceInference
 from .ir_attribute import IrAttributeGroup, IrAttributeGroupObject
 from .ir_code import IrCodeBlock
 from .ir_scope import IrScope
@@ -42,7 +42,10 @@ class IrMethodParameter(IrExpression):
         else:
             t = self._type
         result = []
-        types = t.flatten(equivalence, self._position)
+        types = t.flatten()
+        for t in types:
+            if isinstance(t, IrTypePtr):
+                equivalence.add(t._address_space, self._position, t, IrAddressSpace(1), self._position, t)
         if len(types) > 1:
             for i, t in enumerate(types):
                 result.append(IrMethodParameter(t, '%s_%d' % (self._id, i), IrAttributeGroupObject([])))
@@ -115,9 +118,13 @@ class IrMethodDeclaration(IrDeclaration):
     def collect(self, ir_name):
         # type: (str) -> List[Tuple[str, IrDeclaration]]
         self._method.on_collect()
-        result = []                                                                                               # type: List[Tuple[str, IrDeclaration]]
+        result = []    # type: List[Tuple[str, IrDeclaration]]
+
         result += [
-            (instance._method_name, IrMethodDeclaration(instance)) for instance in self._method._kernel_instances
+            (
+                instance._method_name,
+                IrMethodDeclaration(instance, equivalence=self._method.equivalence().create_direct_map())
+            ) for instance in self._method._kernel_instances
         ]
         result += [
             (name, IrMethodDeclaration(self._method, signature, equivalence))

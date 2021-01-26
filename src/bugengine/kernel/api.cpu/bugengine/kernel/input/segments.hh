@@ -5,7 +5,7 @@
 #define BE_KERNEL_INPUT_SEGMENTS_HH_
 /**************************************************************************************************/
 #include <bugengine/kernel/stdafx.h>
-#include <bugengine/kernel/input/segment_part.hh>
+#include <bugengine/kernel/input/segment.hh>
 
 namespace Kernel {
 
@@ -13,12 +13,12 @@ template < typename T >
 struct segments
 {
 private:
-    segments_part< T >* const m_segments;
-    u32 const                 m_segmentCount;
-    u32 const                 m_elementCount;
+    segment< T >* const m_segments;
+    u32 const           m_segmentCount;
+    u32 const           m_elementCount;
 
 public:
-    segments(segments_part< T >* parts, u32 segmentCount, u32 count)
+    segments(segment< T >* parts, u32 segmentCount, u32 count)
         : m_segments(parts)
         , m_segmentCount(segmentCount)
         , m_elementCount(count)
@@ -30,18 +30,13 @@ public:
         friend struct segments;
 
     private:
-        segments_part< T >* m_currentSegment;
-        u32                 m_currentOffset;
+        segment< T >* m_currentSegment;
+        u32           m_currentOffset;
 
     private:
-        iterator(segments_part< T >* segment, u32 offset)
+        iterator(segment< T >* segment, u32 offset)
             : m_currentSegment(segment)
             , m_currentOffset(offset)
-        {
-        }
-
-    public:
-        ~iterator()
         {
         }
 
@@ -58,7 +53,7 @@ public:
         }
         iterator& operator++()
         {
-            if(++m_currentOffset == m_currentSegment->m_count)
+            if(++m_currentOffset == m_currentSegment->size())
             {
                 m_currentOffset = 0;
                 m_currentSegment++;
@@ -71,7 +66,7 @@ public:
             if(m_currentOffset == 0)
             {
                 --m_currentSegment;
-                m_currentOffset = m_currentSegment->m_count - 1;
+                m_currentOffset = m_currentSegment->size() - 1;
             }
             return *this;
         }
@@ -79,7 +74,8 @@ public:
         iterator operator++(int)
         {
             segments result = *this;
-            if(++m_currentOffset == m_currentSegment->m_count)
+            ++m_currentOffset;
+            while(m_currentOffset == m_currentSegment->size())
             {
                 m_currentOffset = 0;
                 m_currentSegment++;
@@ -90,10 +86,10 @@ public:
         iterator operator--(int)
         {
             segments result = *this;
-            if(m_currentOffset == 0)
+            --m_currentSegment;
+            while(m_currentOffset == (u32)-1)
             {
-                --m_currentSegment;
-                m_currentOffset = m_currentSegment->m_count - 1;
+                m_currentOffset = m_currentSegment->size() - 1;
             }
             return result;
         }
@@ -102,9 +98,9 @@ public:
         {
             while(count)
             {
-                if(m_currentOffset + count >= m_currentSegment->m_count)
+                if(m_currentOffset + count >= m_currentSegment->size())
                 {
-                    u32 progress = m_currentSegment->m_count - m_currentOffset;
+                    u32 progress = m_currentSegment->size() - m_currentOffset;
                     count -= progress;
                     ++m_currentSegment;
                     m_currentOffset = 0;
@@ -115,12 +111,12 @@ public:
 
         T* operator->() const
         {
-            return m_currentSegment->m_begin + m_currentOffset;
+            return m_currentSegment->begin() + m_currentOffset;
         }
 
         T& operator*() const
         {
-            return *(m_currentSegment->m_begin + m_currentOffset);
+            return *(m_currentSegment->begin() + m_currentOffset);
         }
     };
 
@@ -135,8 +131,8 @@ public:
     }
     iterator end() const
     {
-        segments_part< T >* last_segment = m_segments + m_segmentCount - 1;
-        return iterator(last_segment, last_segment->m_count);
+        segment< T >* last_segment = m_segments + m_segmentCount;
+        return iterator(last_segment, 0);
     }
 };
 

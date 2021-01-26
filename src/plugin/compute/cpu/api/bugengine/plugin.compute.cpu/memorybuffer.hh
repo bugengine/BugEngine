@@ -5,7 +5,6 @@
 #define BE_COMPUTE_CPU_MEMORYBUFFER_HH_
 /**************************************************************************************************/
 #include <bugengine/plugin.compute.cpu/stdafx.h>
-#include <bugengine/kernel/input/segment_part.hh>
 #include <bugengine/scheduler/kernel/imemorybuffer.hh>
 
 namespace BugEngine { namespace KernelScheduler { namespace CPU {

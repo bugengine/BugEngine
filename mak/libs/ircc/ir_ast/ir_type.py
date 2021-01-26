@@ -157,8 +157,8 @@ class IrType(IrObject):
         # type: () -> List[Tuple[str, IrDeclaration]]
         return []
 
-    def flatten(self, equivalence, position, allow_pointer=True):
-        # type: (IrAddressSpaceInference, IrPosition, bool) -> List[IrType]
+    def flatten(self):
+        # type: () -> List[IrType]
         return [self]
 
     def is_defined(self):
@@ -291,10 +291,10 @@ class IrTypeReference(IrType):
         assert self._target is not None
         return self._target.create_generator_undef(generator, resolved_addressspace, force)
 
-    def flatten(self, equivalence, position, allow_pointer=True):
-        # type: (IrAddressSpaceInference, IrPosition, bool) -> List[IrType]
+    def flatten(self):
+        # type: () -> List[IrType]
         assert self._target is not None
-        return self._target.flatten(equivalence, position, allow_pointer)
+        return self._target.flatten()
 
     def __str__(self):
         # type: () -> str
@@ -518,14 +518,9 @@ class IrTypePtr(IrType):
             )
         )
 
-    def flatten(self, equivalence, position, allow_pointer=True):
-        # type: (IrAddressSpaceInference, IrPosition, bool) -> List[IrType]
-        if not allow_pointer:
-            #    # todo: source location
-            raise Exception('invalid kernel parameter')
-        result = IrTypePtr(self._pointee, 1)
-        result.add_equivalence(equivalence, position, self, position)
-        return [result]
+    def flatten(self):
+        # type: () -> List[IrType]
+        return [self]
 
     def is_defined(self):
         # type: () -> bool
@@ -543,6 +538,10 @@ class IrTypePtr(IrType):
         other_type = other_type._get_target_type()
         assert isinstance(other_type, IrTypePtr)
         equivalence.add(self._address_space, location, self, other_type._address_space, other_location, other_type)
+        types = self._pointee.flatten()
+        other_types = other_type._pointee.flatten()
+        for t1, t2 in zip(types, other_types):
+            t1.add_equivalence_nonrecursive(equivalence, location, t2, other_location)
 
     def create_instance(self, equivalence):
         # type: (Dict[int, int]) -> None
@@ -603,11 +602,8 @@ class IrTypeArray(IrType):
         else:
             return generator.make_value_void()
 
-    def flatten(self, equivalence, position, allow_pointer=True):
-        # type: (IrAddressSpaceInference, IrPosition, bool) -> List[IrType]
-        #if not allow_pointer:
-        #    # todo: source location
-        #    raise Exception('invalid kernel parameter')
+    def flatten(self):
+        # type: () -> List[IrType]
         return [self._type] * self._count
 
     def is_defined(self):
@@ -733,11 +729,11 @@ class IrTypeStruct(IrType):
         else:
             return generator.make_value_void()
 
-    def flatten(self, equivalence, position, allow_pointer=True):
-        # type: (IrAddressSpaceInference, IrPosition, bool) -> List[IrType]
+    def flatten(self):
+        # type: () -> List[IrType]
         result = []    # type: List[IrType]
         for field in self._fields:
-            result += field[0].flatten(equivalence, position, allow_pointer)
+            result += field[0].flatten()
         return result
 
     def is_defined(self):
