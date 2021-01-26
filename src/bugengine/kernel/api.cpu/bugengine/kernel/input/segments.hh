@@ -41,7 +41,9 @@ public:
         }
 
     public:
-        ~iterator();
+        ~iterator()
+        {
+        }
 
     public:
         bool operator==(const iterator& other)
