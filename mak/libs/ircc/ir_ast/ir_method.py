@@ -73,7 +73,7 @@ class IrMethod(IrObject):
         raise NotImplementedError
 
     def find_instance(self, arguments, resolved_addressspace):
-        # type: (List[IrType], Dict[int, int]) -> IrMethodObject
+        # type: (List[IrType], Dict[int, int]) -> str
         raise NotImplementedError
 
     def equivalence(self):
@@ -96,7 +96,6 @@ class IrMethodDeclaration(IrDeclaration):
         # type: (IrMethodObject, Optional[str], Dict[int, int]) -> None
         IrDeclaration.__init__(self)
         self._method = method
-        self._method._name = 'method_%d' % IrMethodDeclaration.METHOD_INDEX
         self._signature = signature
         self._equivalence = equivalence
         IrMethodDeclaration.METHOD_INDEX += 1
@@ -116,18 +115,14 @@ class IrMethodDeclaration(IrDeclaration):
     def collect(self, ir_name):
         # type: (str) -> List[Tuple[str, IrDeclaration]]
         self._method.on_collect()
-        result = []                                                                                           # type: List[Tuple[str, IrDeclaration]]
-        result += [(ir_name + '_spir', IrMethodDeclaration(instance)) for instance in self._method._kernel_instances]
-        if len(self._method._instances) > 1:
-            result += [
-                (ir_name + '_%d' % index, IrMethodDeclaration(instance, signature, equivalence))
-                for index, (signature, (instance, equivalence)) in enumerate(self._method._instances.items())
-            ]
-        else:
-            result += [
-                (ir_name, IrMethodDeclaration(instance, signature, equivalence))
-                for signature, (instance, equivalence) in self._method._instances.items()
-            ]
+        result = []                                                                                               # type: List[Tuple[str, IrDeclaration]]
+        result += [
+            (instance._method_name, IrMethodDeclaration(instance)) for instance in self._method._kernel_instances
+        ]
+        result += [
+            (name, IrMethodDeclaration(self._method, signature, equivalence))
+            for index, (signature, (name, equivalence)) in enumerate(self._method._instances.items())
+        ]
         return result
 
     def visit(self, generator, name):
@@ -157,7 +152,7 @@ class IrMethodLink(IrMethod):
         self._method = result._method
 
     def find_instance(self, arguments, resolved_addressspace):
-        # type: (List[IrType], Dict[int, int]) -> IrMethodObject
+        # type: (List[IrType], Dict[int, int]) -> str
         assert self._method is not None
         return self._method.find_instance(arguments, resolved_addressspace)
 
@@ -178,16 +173,15 @@ class IrMethodLink(IrMethod):
 
 
 class IrMethodObject(IrMethod):
-    def __init__(self, return_type, parameters, calling_convention, metadata):
-        # type: (IrType, List[IrMethodParameter], str, List[Tuple[IrMetadataLink, IrMetadataLink]]) -> None
+    def __init__(self, name, return_type, parameters, calling_convention, metadata):
+        # type: (str, IrType, List[IrMethodParameter], str, List[Tuple[IrMetadataLink, IrMetadataLink]]) -> None
         IrMethod.__init__(self)
+        self._method_name = name
         self._return_type = return_type
         self._parameters = parameters
-        for i, p in enumerate(self._parameters):
-            p._name = 'param_%d' % i
         self._calling_convention = calling_convention
         self._definition = None        # type: Optional[IrMethodBody]
-        self._instances = {}           # type: Dict[str, Tuple[IrMethodObject, Dict[int, int]]]
+        self._instances = {}           # type: Dict[str, Tuple[str, Dict[int, int]]]
         self._kernel_instances = []    # type: List[IrMethodObject]
         self._declarations = []
         self._scope = IrScope()
@@ -241,10 +235,12 @@ class IrMethodObject(IrMethod):
     def _create_kernel_wrapper(self):
         # type: () -> IrMethodObject
         assert self._definition is not None
-        parameters = []    # type: List[IrMethodParameter]
+        parameters = []                                                                                    # type: List[IrMethodParameter]
         for p in self._parameters:
             parameters += p.flatten(self._definition._code._equivalence)
-        result = IrMethodObject(self._return_type, parameters, 'spir_kernel_flat', self._metadata)
+        result = IrMethodObject(
+            self._method_name + '_spir', self._return_type, parameters, 'spir_kernel_flat', self._metadata
+        )
         return result
 
     def resolve(self, module):
@@ -273,7 +269,7 @@ class IrMethodObject(IrMethod):
             module.pop_scope()
 
     def find_instance(self, arguments, resolved_addressspace):
-        # type: (List[IrType], Dict[int, int]) -> IrMethodObject
+        # type: (List[IrType], Dict[int, int]) -> str
         signature = ','.join(a.signature(resolved_addressspace) for a in arguments)
         try:
             return self._instances[signature][0]
@@ -283,16 +279,16 @@ class IrMethodObject(IrMethod):
             return result
 
     def _create_instance(self, arguments, signature, resolved_addressspace):
-        # type: (List[IrType], str, Dict[int, int]) -> IrMethodObject
+        # type: (List[IrType], str, Dict[int, int]) -> str
         for parameter in self._parameters:
             parameter._type.create_instance(resolved_addressspace)
         if self._definition is not None:
             assert len(self._declarations) == len(arguments)
             self._definition._create_instance(resolved_addressspace)
-            return self
+            return '%s_%d' % (self._method_name, len(self._instances))
         else:
             # TODO
-            return self
+            return self._method_name
 
     def visit(self, generator, equivalence):
         # type: (IrccGenerator, Dict[int, int]) -> None

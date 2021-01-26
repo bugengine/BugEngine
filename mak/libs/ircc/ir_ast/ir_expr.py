@@ -252,8 +252,8 @@ class IrExpressionCast(IrExpression):
     def create_generator_value(self, type, generator, code_context):
         # type: (IrType, IrccGenerator, IrCodeGenContext) -> IrccValue
         return generator.make_value_cast(
-            self._value.create_generator_value(generator, code_context), self._cast_type,
-            self._result_type.create_generator_type(generator, code_context._equivalence)
+            self._result_type.create_generator_type(generator, code_context._equivalence), self._cast_type,
+            self._value.create_generator_value(generator, code_context)
         )
 
 

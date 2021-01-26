@@ -75,7 +75,10 @@ class IrccCValues(IrccCTypes):
 
     def make_value_load(self, address):
         # type: (IrccValue) -> IrccValue
-        return IrccValue('*(%s)' % (address._value))
+        if address._value[0] == '&':
+            return IrccValue(address._value[2:-1])
+        else:
+            return IrccValue('*(%s)' % (address._value))
 
     def make_value_call(self, method_name, arguments):
         # type: (str, List[IrccValue]) -> IrccValue

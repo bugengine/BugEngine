@@ -25,7 +25,7 @@ def p_ir_method_declaration(p):
     """
         ir-method-declaration : DECLARE ir-method-prototype
     """
-    p[0] = (IrReference(p[2][0]), IrMethodDeclaration(IrMethodObject(p[2][1], p[2][2], p[2][3], [])))
+    p[0] = (IrReference(p[2][0]), IrMethodDeclaration(IrMethodObject(p[2][0], p[2][1], p[2][2], p[2][3], [])))
 
 
 def p_ir_method_definition(p):
@@ -33,7 +33,7 @@ def p_ir_method_definition(p):
     """
         ir-method-definition : DEFINE ir-method-prototype ir-metadata-list-opt LBRACE ir-instruction-list RBRACE
     """
-    method = IrMethodObject(p[2][1], p[2][2], p[2][3], p[3])
+    method = IrMethodObject(p[2][0], p[2][1], p[2][2], p[2][3], p[3])
     method.define(p[5])
     p[0] = (IrReference(p[2][0]), IrMethodDeclaration(method))
 

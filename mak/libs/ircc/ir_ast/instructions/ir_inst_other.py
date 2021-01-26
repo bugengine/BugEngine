@@ -45,11 +45,11 @@ class IrInstCall(IrInstruction):
 
     def _create_generator_value(self, type, generator, code_context):
         # type: (IrType, IrccGenerator, IrCodeGenContext) -> IrccValue
-        instance = self._method.find_instance(
+        method_name = self._method.find_instance(
             [argument.get_type() for argument in self._arguments], code_context._equivalence
         )
         return generator.make_value_call(
-            instance._name, [v.create_generator_value(generator, code_context) for v in self._arguments]
+            method_name[1:], [v.create_generator_value(generator, code_context) for v in self._arguments]
         )
 
 

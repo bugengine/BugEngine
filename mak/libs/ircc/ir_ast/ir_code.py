@@ -146,8 +146,8 @@ class IrAssignInstruction(IrInstruction):
     def generate(self, generator, context, next_segment):
         # type: (IrccGenerator, IrCodeGenContext, Optional[IrCodeSegment]) -> Optional[IrccValue]
         assert self._result is not None
-        generator.instuction_assign(
-            self, self._result, self._expression.create_generator_value(self._type, generator, context)
+        generator.instruction_assign(
+            self._result, self._expression.create_generator_value(self._type, generator, context)
         )
         return None
 
