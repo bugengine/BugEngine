@@ -167,10 +167,10 @@ class IrInstGetElementPtr(IrInstruction):
         for index in self._access[1:]:
             result_type = result_type._get_target_type()
             if isinstance(result_type, IrTypeStruct):
-                assert isinstance(value, IrValueExpr)
-                assert isinstance(value._expression, IrExpressionConstant)
-                assert isinstance(value._expression._value, int)
-                result_type, field_name = result_type._fields[value._expression._value]
+                assert isinstance(index, IrValueExpr)
+                assert isinstance(index._expression, IrExpressionConstant)
+                assert isinstance(index._expression._value, int)
+                result_type, field_name = result_type._fields[index._expression._value]
                 value = generator.make_value_access(value, field_name)
             elif isinstance(result_type, IrTypePtr):
                 result_type = result_type._pointee
