@@ -85,6 +85,13 @@ class ClDefinition(IrccCDefinition):
     def begin_method(self, name, return_type, parameters, calling_convention, has_implementation):
         # type: (str, IrccType, List[Tuple[IrccType, str]], str, bool) -> bool
         if not has_implementation:
+            if calling_convention == 'spir_kernel_flat':
+                self._out_file.write(
+                    '__kernel %s %s(%s)\n{\n}\n\n' % (
+                        return_type.format(['', '', '', '']
+                                           ), name, ', '.join('%s' % t.format(['', '', n, '']) for t, n in parameters)
+                    )
+                )
             return False
         if calling_convention == 'spir_kernel_flat':
             self._out_file.write('__kernel\n')

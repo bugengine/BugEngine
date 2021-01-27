@@ -37,7 +37,7 @@ class IrValue(IrObject):
 
     @abstractmethod
     def create_generator_value(self, generator, code_context):
-        # type: (IrccGenerator, IrCodeGenContext) -> IrccValue
+        # type: (IrccGenerator, IrCodeGenContext) -> IrccExpression
         raise NotImplementedError
 
 
@@ -73,7 +73,7 @@ class IrValueExpr(IrValue):
         self._expression.used_by(expression)
 
     def create_generator_value(self, generator, code_context):
-        # type: (IrccGenerator, IrCodeGenContext) -> IrccValue
+        # type: (IrccGenerator, IrCodeGenContext) -> IrccExpression
         return self._expression.create_generator_value(self._type, generator, code_context)
 
 
@@ -91,8 +91,8 @@ class IrValueVoid(IrValue):
         return 'void'
 
     def create_generator_value(self, generator, code_context):
-        # type: (IrccGenerator, IrCodeGenContext) -> IrccValue
-        return generator.make_value_void()
+        # type: (IrccGenerator, IrCodeGenContext) -> IrccExpression
+        return generator.make_expression_constant_void()
 
 
 class IrValueMetadata(IrValue):
@@ -119,7 +119,7 @@ class IrValueMetadata(IrValue):
         return IrPosition('', 0, 0, 0, '')
 
     def create_generator_value(self, generator, code_context):
-        # type: (IrccGenerator, IrCodeGenContext) -> IrccValue
+        # type: (IrccGenerator, IrCodeGenContext) -> IrccExpression
         raise NotImplementedError
 
 
@@ -129,4 +129,4 @@ if TYPE_CHECKING:
     from .ir_module import IrModule
     from .ir_metadata import IrMetadata
     from .ir_code import IrCodeGenContext
-    from ..ir_codegen import IrccGenerator, IrccValue
+    from ..ir_codegen import IrccGenerator, IrccExpression

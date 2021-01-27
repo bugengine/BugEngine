@@ -1,14 +1,14 @@
-from .ircc_c_values import IrccCValues
+from .ircc_c_expressions import IrccCExpressions
 from .. import IrccType
 from be_typing import TYPE_CHECKING
 
 _INDENT = '    '
 
 
-class IrccCDefinition(IrccCValues):
+class IrccCDefinition(IrccCExpressions):
     def __init__(self, file):
         # type: (TextIO) -> None
-        IrccCValues.__init__(self, file)
+        IrccCExpressions.__init__(self, file)
         self._indent = ''
 
     def declare_type(self, type, name, ir_name):
@@ -55,15 +55,15 @@ class IrccCDefinition(IrccCValues):
         self._out_file.write('%s}\n' % (self._indent))
 
     def begin_if(self, condition):
-        # type: (IrccValue) -> None
+        # type: (IrccExpression) -> None
         indent = self._indent
-        self._out_file.write('%sif (%s)\n%s{\n' % (indent, condition._value, indent))
+        self._out_file.write('%sif (%s)\n%s{\n' % (indent, condition, indent))
         self._indent += _INDENT
 
     def begin_if_not(self, condition):
-        # type: (IrccValue) -> None
+        # type: (IrccExpression) -> None
         indent = self._indent
-        self._out_file.write('%sif (!(%s))\n%s{\n' % (indent, condition._value, indent))
+        self._out_file.write('%sif (!(%s))\n%s{\n' % (indent, condition, indent))
         self._indent += _INDENT
 
     def begin_else(self):
@@ -77,11 +77,8 @@ class IrccCDefinition(IrccCValues):
         self._out_file.write('%s}\n' % (self._indent))
 
     def instruction_return_value(self, return_value):
-        # type: (IrccValue) -> None
-        if return_value._value != '':
-            self._out_file.write('%sreturn %s;\n' % (self._indent, return_value._value))
-        else:
-            self._out_file.write('%sreturn;\n' % (self._indent))
+        # type: (IrccExpression) -> None
+        self._out_file.write('%sreturn %s;\n' % (self._indent, return_value))
 
     def instruction_break(self, label):
         # type: (str) -> None
@@ -92,10 +89,10 @@ class IrccCDefinition(IrccCValues):
         self._out_file.write('%scontinue; /* goto %s */\n' % (self._indent, label))
 
     def instruction_assign(self, name, value):
-        # type: (str, IrccValue) -> None
-        self._out_file.write('%svar_%s = %s;\n' % (self._indent, name.replace('.', '_'), value._value))
+        # type: (str, IrccExpression) -> None
+        self._out_file.write('%svar_%s = %s;\n' % (self._indent, name.replace('.', '_'), value))
 
 
 if TYPE_CHECKING:
     from typing import List, TextIO, Tuple
-    from .. import IrccType, IrccValue
+    from .. import IrccType, IrccExpression

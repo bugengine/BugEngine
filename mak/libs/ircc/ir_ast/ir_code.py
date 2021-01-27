@@ -114,21 +114,21 @@ class IrInstruction(IrExpression):
             return True
 
     def create_generator_value(self, type, generator, code_context):
-        # type: (IrType, IrccGenerator, IrCodeGenContext) -> IrccValue
+        # type: (IrType, IrccGenerator, IrCodeGenContext) -> IrccExpression
         if self.is_inline():
             return self._create_generator_value(type, generator, code_context)
         else:
             assert self._result_name is not None
-            return generator.make_value_reference(self._result_name)
+            return generator.make_expression_variable_reference(self._result_name)
 
     @abstractmethod
     def _create_generator_value(self, type, generator, code_context):
-        # type: (IrType, IrccGenerator, IrCodeGenContext) -> IrccValue
+        # type: (IrType, IrccGenerator, IrCodeGenContext) -> IrccExpression
         raise NotImplementedError
 
     @abstractmethod
     def generate(self, generator, context, next_segment):
-        # type: (IrccGenerator, IrCodeGenContext, Optional[IrCodeSegment]) -> Optional[IrccValue]
+        # type: (IrccGenerator, IrCodeGenContext, Optional[IrCodeSegment]) -> Optional[IrccExpression]
         raise NotImplementedError
 
 
@@ -144,7 +144,7 @@ class IrAssignInstruction(IrInstruction):
         return self._type
 
     def generate(self, generator, context, next_segment):
-        # type: (IrccGenerator, IrCodeGenContext, Optional[IrCodeSegment]) -> Optional[IrccValue]
+        # type: (IrccGenerator, IrCodeGenContext, Optional[IrCodeSegment]) -> Optional[IrccExpression]
         assert self._result is not None
         generator.instruction_assign(
             self._result, self._expression.create_generator_value(self._type, generator, context)
@@ -152,7 +152,7 @@ class IrAssignInstruction(IrInstruction):
         return None
 
     def _create_generator_value(self, type, generator, code_context):
-        # type: (IrType, IrccGenerator, IrCodeGenContext) -> IrccValue
+        # type: (IrType, IrccGenerator, IrCodeGenContext) -> IrccExpression
         raise NotImplementedError
 
 
@@ -452,5 +452,5 @@ if TYPE_CHECKING:
     from .ir_reference import IrReference
     from .ir_method import IrMethodParameter
     from .ir_scope import IrScope
-    from ..ir_codegen import IrccGenerator, IrccValue
+    from ..ir_codegen import IrccGenerator, IrccExpression
     from ..ir_position import IrPosition

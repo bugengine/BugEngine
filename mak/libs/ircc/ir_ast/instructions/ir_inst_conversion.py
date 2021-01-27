@@ -38,7 +38,7 @@ class IrInstCast(IrInstruction):
         self._result_type.create_instance(equivalence)
 
     def generate(self, generator, context, next_segment):
-        # type: (IrccGenerator, IrCodeGenContext, Optional[IrCodeSegment]) -> Optional[IrccValue]
+        # type: (IrccGenerator, IrCodeGenContext, Optional[IrCodeSegment]) -> Optional[IrccExpression]
         pass
 
     def is_inline(self):
@@ -46,10 +46,10 @@ class IrInstCast(IrInstruction):
         return True
 
     def create_generator_value(self, type, generator, code_context):
-        # type: (IrType, IrccGenerator, IrCodeGenContext) -> IrccValue
+        # type: (IrType, IrccGenerator, IrCodeGenContext) -> IrccExpression
         value = self._value.create_generator_value(generator, code_context)
         target_type = self._result_type.create_generator_type(generator, code_context._equivalence)
-        return generator.make_value_cast(target_type, self._cast_type, value)
+        return generator.make_expression_cast(target_type, self._cast_type, value)
 
 
 if TYPE_CHECKING:
@@ -60,5 +60,5 @@ if TYPE_CHECKING:
     from ..ir_module import IrModule
     from ..ir_type import IrType, IrAddressSpace, IrAddressSpaceInference
     from ..ir_code import IrCodeGenContext, IrCodeSegment
-    from ...ir_codegen import IrccGenerator, IrccValue
+    from ...ir_codegen import IrccGenerator, IrccExpression
     from ...ir_position import IrPosition

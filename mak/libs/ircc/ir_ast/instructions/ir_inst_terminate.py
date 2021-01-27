@@ -33,8 +33,8 @@ class IrInstRet(IrInstruction):
             return_type.add_equivalence(equivalence, return_position, return_value_type, self.get_position())
 
     def generate(self, generator, context, next_segment):
-        # type: (IrccGenerator, IrCodeGenContext, Optional[IrCodeSegment]) -> Optional[IrccValue]
-        generator.instruction_return_value(generator.make_value_void())
+        # type: (IrccGenerator, IrCodeGenContext, Optional[IrCodeSegment]) -> Optional[IrccExpression]
+        generator.instruction_return_value(generator.make_expression_constant_void())
         #generator.instruction_return_value(self._return_value.create_generator_value(generator, context))
         return None
 
@@ -54,7 +54,7 @@ class IrInstBranch(IrInstruction):
         return [self._target[1:]]
 
     def generate(self, generator, context, next_segment):
-        # type: (IrccGenerator, IrCodeGenContext, Optional[IrCodeSegment]) -> Optional[IrccValue]
+        # type: (IrccGenerator, IrCodeGenContext, Optional[IrCodeSegment]) -> Optional[IrccExpression]
         segment = context._code._find_segment(self._target[1:])
         segment.visit(generator, context, next_segment)
         return None
@@ -88,7 +88,7 @@ class IrInstConditionalBranch(IrInstruction):
         return [self._target_true[1:], self._target_false[1:]]
 
     def generate(self, generator, context, next_segment):
-        # type: (IrccGenerator, IrCodeGenContext, Optional[IrCodeSegment]) -> Optional[IrccValue]
+        # type: (IrccGenerator, IrCodeGenContext, Optional[IrCodeSegment]) -> Optional[IrccExpression]
         segment_true = context._code._find_segment(self._target_true[1:])
         segment_false = context._code._find_segment(self._target_false[1:])
         current_segment = context._current_segment
@@ -147,7 +147,7 @@ class IrInstSwitch(IrInstruction):
         return [self._default_label[1:]] + [t[1:] for _, t in self._targets]
 
     def generate(self, generator, context, next_segment):
-        # type: (IrccGenerator, IrCodeGenContext, Optional[IrCodeSegment]) -> Optional[IrccValue]
+        # type: (IrccGenerator, IrCodeGenContext, Optional[IrCodeSegment]) -> Optional[IrccExpression]
         pass
 
 
@@ -161,7 +161,7 @@ class IrInstUnreachable(IrInstruction):
         return True
 
     def generate(self, generator, context, next_segment):
-        # type: (IrccGenerator, IrCodeGenContext, Optional[IrCodeSegment]) -> Optional[IrccValue]
+        # type: (IrccGenerator, IrCodeGenContext, Optional[IrCodeSegment]) -> Optional[IrccExpression]
         pass
 
 
@@ -173,5 +173,5 @@ if TYPE_CHECKING:
     from ..ir_module import IrModule
     from ..ir_type import IrType, IrAddressSpace, IrAddressSpaceInference
     from ..ir_code import IrCodeGenContext, IrCodeSegment
-    from ...ir_codegen import IrccGenerator, IrccValue
+    from ...ir_codegen import IrccGenerator, IrccExpression
     from ...ir_position import IrPosition

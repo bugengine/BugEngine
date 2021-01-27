@@ -58,8 +58,8 @@ class IrMethodParameter(IrExpression):
         return self._type
 
     def create_generator_value(self, type, generator, code_context):
-        # type: (IrType, IrccGenerator, IrCodeGenContext) -> IrccValue
-        return generator.make_value_reference(self._id)
+        # type: (IrType, IrccGenerator, IrCodeGenContext) -> IrccExpression
+        return generator.make_expression_variable_reference('param_%s' % self._id[1:].replace('.', '_'))
 
 
 class IrMethodMetadataParameter(IrMethodParameter):
@@ -136,7 +136,7 @@ class IrMethodDeclaration(IrDeclaration):
         # type: (IrccGenerator, str) -> None
         return_type = self._method._return_type.create_generator_type(generator, self._equivalence)
         parameters = [
-            (p._type.create_generator_type(generator, self._equivalence), '_%s' % p._id[1:].replace('.', '_'))
+            (p._type.create_generator_type(generator, self._equivalence), 'param_%s' % p._id[1:].replace('.', '_'))
             for p in self._method._parameters
         ]
         if generator.begin_method(
@@ -340,4 +340,4 @@ if TYPE_CHECKING:
     from .ir_code import IrInstruction, IrCodeGenContext
     from .ir_type import IrType
     from .ir_metadata import IrMetadataLink
-    from ..ir_codegen import IrccGenerator, IrccValue
+    from ..ir_codegen import IrccGenerator, IrccExpression

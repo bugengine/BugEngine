@@ -69,88 +69,93 @@ class IrccGenerator:
         raise NotImplementedError
 
     @abstractmethod
-    def make_value_void(self):
-        # type: () -> IrccValue
+    def make_expression_constant_void(self):
+        # type: () -> IrccExpression
         raise NotImplementedError
 
     @abstractmethod
-    def make_value_zero(self):
-        # type: () -> IrccValue
+    def make_expression_constant_zero(self):
+        # type: () -> IrccExpression
         raise NotImplementedError
 
     @abstractmethod
-    def make_value_nullptr(self, type):
-        # type: (IrccType) -> IrccValue
+    def make_expression_constant_nullptr(self, type):
+        # type: (IrccType) -> IrccExpression
         raise NotImplementedError
 
     @abstractmethod
-    def make_value_undef(self, width):
-        # type: (int) -> IrccValue
+    def make_expression_constant_undef(self, width):
+        # type: (int) -> IrccExpression
         raise NotImplementedError
 
     @abstractmethod
-    def make_value_bool(self, type, value):
-        # type: (IrccType, bool) -> IrccValue
+    def make_expression_constant_bool(self, type, value):
+        # type: (IrccType, bool) -> IrccExpression
         raise NotImplementedError
 
     @abstractmethod
-    def make_value_int(self, type, value):
-        # type: (IrccType, int) -> IrccValue
+    def make_expression_constant_int(self, type, value):
+        # type: (IrccType, int) -> IrccExpression
         raise NotImplementedError
 
     @abstractmethod
-    def make_value_aggregate(self, values):
-        # type: (List[IrccValue]) -> IrccValue
+    def make_expression_aggregate_value(self, values):
+        # type: (List[IrccExpression]) -> IrccExpression
         raise NotImplementedError
 
     @abstractmethod
-    def make_value_vector(self, values):
-        # type: (List[IrccValue]) -> IrccValue
+    def make_expression_vector_value(self, values):
+        # type: (List[IrccExpression]) -> IrccExpression
         raise NotImplementedError
 
     @abstractmethod
-    def make_value_array(self, values):
-        # type: (List[IrccValue]) -> IrccValue
+    def make_expression_array_value(self, values):
+        # type: (List[IrccExpression]) -> IrccExpression
         raise NotImplementedError
 
     @abstractmethod
-    def make_value_cast(self, result_type, cast, value):
-        # type: (IrccType, str, IrccValue) -> IrccValue
+    def make_expression_cast(self, result_type, cast, value):
+        # type: (IrccType, str, IrccExpression) -> IrccExpression
         raise NotImplementedError
 
     @abstractmethod
-    def make_value_addressof(self, value):
-        # type: (IrccValue) -> IrccValue
+    def make_expression_address(self, value):
+        # type: (IrccExpression) -> IrccExpression
         raise NotImplementedError
 
     @abstractmethod
-    def make_value_access(self, value, field_name):
-        # type: (IrccValue, str) -> IrccValue
+    def make_expression_access(self, value, field_name):
+        # type: (IrccExpression, str) -> IrccExpression
         raise NotImplementedError
 
     @abstractmethod
-    def make_value_index(self, value, index):
-        # type: (IrccValue, IrccValue) -> IrccValue
+    def make_expression_subscript(self, value, index):
+        # type: (IrccExpression, IrccExpression) -> IrccExpression
         raise NotImplementedError
 
     @abstractmethod
-    def make_value_reference(self, name):
-        # type: (str) -> IrccValue
+    def make_expression_variable_reference(self, name):
+        # type: (str) -> IrccExpression
         raise NotImplementedError
 
     @abstractmethod
-    def make_value_binary_op(self, operation, left_operand, right_operand):
-        # type: (str, IrccValue, IrccValue) -> IrccValue
+    def make_expression_integer_binary_op(self, operation, type, left_operand, right_operand):
+        # type: (str, IrccType, IrccExpression, IrccExpression) -> IrccExpression
+        raise NotImplementedError
+
+    @abstractmethod
+    def make_expression_float_binary_op(self, operation, type, left_operand, right_operand):
+        # type: (str, IrccType, IrccExpression, IrccExpression) -> IrccExpression
         raise NotImplementedError
 
     @abstractmethod
     def make_value_load(self, address):
-        # type: (IrccValue) -> IrccValue
+        # type: (IrccExpression) -> IrccExpression
         raise NotImplementedError
 
     @abstractmethod
     def make_value_call(self, method_name, arguments):
-        # type: (str, List[IrccValue]) -> IrccValue
+        # type: (str, List[IrccExpression]) -> IrccExpression
         raise NotImplementedError
 
     def begin_module(self):
@@ -210,11 +215,11 @@ class IrccGenerator:
         raise NotImplementedError
 
     def begin_if(self, condition):
-        # type: (IrccValue) -> None
+        # type: (IrccExpression) -> None
         raise NotImplementedError
 
     def begin_if_not(self, condition):
-        # type: (IrccValue) -> None
+        # type: (IrccExpression) -> None
         raise NotImplementedError
 
     def begin_else(self):
@@ -226,7 +231,7 @@ class IrccGenerator:
         raise NotImplementedError
 
     def instruction_return_value(self, return_value):
-        # type: (IrccValue) -> None
+        # type: (IrccExpression) -> None
         raise NotImplementedError
 
     def instruction_break(self, label):
@@ -238,11 +243,11 @@ class IrccGenerator:
         raise NotImplementedError
 
     def instruction_assign(self, name, value):
-        # type: (str, IrccValue) -> None
+        # type: (str, IrccExpression) -> None
         raise NotImplementedError
 
 
 if TYPE_CHECKING:
     from typing import List, TextIO, Tuple
     from .ircc_type import IrccType
-    from .ircc_value import IrccValue
+    from .ircc_expression import IrccExpression

@@ -32,7 +32,7 @@ class IrMetadata(IrValue):
         raise NotImplementedError
 
     def create_generator_value(self, generator, code_context):
-        # type: (IrccGenerator, IrCodeGenContext) -> IrccValue
+        # type: (IrccGenerator, IrCodeGenContext) -> IrccExpression
         raise NotImplementedError
 
 
@@ -218,4 +218,4 @@ if TYPE_CHECKING:
     from .ir_module import IrModule
     from .ir_reference import IrReference
     from .ir_code import IrCodeGenContext
-    from ..ir_codegen import IrccGenerator, IrccValue
+    from ..ir_codegen import IrccGenerator, IrccExpression

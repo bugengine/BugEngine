@@ -33,7 +33,7 @@ class IrInstExtractValue(IrInstruction):
         self._source.resolve_type(equivalence, return_type, return_position)
 
     def generate(self, generator, context, next_segment):
-        # type: (IrccGenerator, IrCodeGenContext, Optional[IrCodeSegment]) -> Optional[IrccValue]
+        # type: (IrccGenerator, IrCodeGenContext, Optional[IrCodeSegment]) -> Optional[IrccExpression]
         pass
 
 
@@ -71,7 +71,7 @@ class IrInstInsertValue(IrInstruction):
         subfield_type.add_equivalence(equivalence, self.get_position(), insert_type, self._source.get_position())
 
     def generate(self, generator, context, next_segment):
-        # type: (IrccGenerator, IrCodeGenContext, Optional[IrCodeSegment]) -> Optional[IrccValue]
+        # type: (IrccGenerator, IrCodeGenContext, Optional[IrCodeSegment]) -> Optional[IrccExpression]
         pass
 
 
@@ -83,5 +83,5 @@ if TYPE_CHECKING:
     from ..ir_module import IrModule
     from ..ir_type import IrType, IrAddressSpace, IrAddressSpaceInference
     from ..ir_code import IrCodeGenContext, IrCodeSegment
-    from ...ir_codegen import IrccGenerator, IrccValue
+    from ...ir_codegen import IrccGenerator, IrccExpression
     from ...ir_position import IrPosition

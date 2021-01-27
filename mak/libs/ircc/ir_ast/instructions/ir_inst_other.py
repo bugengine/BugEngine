@@ -40,11 +40,11 @@ class IrInstCall(IrInstruction):
         self._method.find_instance([argument.get_type() for argument in self._arguments], equivalence)
 
     def generate(self, generator, context, next_segment):
-        # type: (IrccGenerator, IrCodeGenContext, Optional[IrCodeSegment]) -> Optional[IrccValue]
+        # type: (IrccGenerator, IrCodeGenContext, Optional[IrCodeSegment]) -> Optional[IrccExpression]
         pass
 
     def _create_generator_value(self, type, generator, code_context):
-        # type: (IrType, IrccGenerator, IrCodeGenContext) -> IrccValue
+        # type: (IrType, IrccGenerator, IrCodeGenContext) -> IrccExpression
         method_name = self._method.find_instance(
             [argument.get_type() for argument in self._arguments], code_context._equivalence
         )
@@ -75,6 +75,13 @@ class IrInstIntegerCompare(IrInstruction):
 
     def resolve_type(self, equivalence, return_type, return_position):
         # type: (IrAddressSpaceInference, IrType, IrPosition) -> None
+        self._type.add_equivalence(
+            equivalence, self.get_position(), self._left_operand.get_type(self._type), self._left_operand.get_position()
+        )
+        self._type.add_equivalence(
+            equivalence, self.get_position(), self._right_operand.get_type(self._type),
+            self._right_operand.get_position()
+        )
         self._left_operand.resolve_type(equivalence, return_type, return_position)
         self._right_operand.resolve_type(equivalence, return_type, return_position)
 
@@ -87,13 +94,14 @@ class IrInstIntegerCompare(IrInstruction):
         return True
 
     def generate(self, generator, context, next_segment):
-        # type: (IrccGenerator, IrCodeGenContext, Optional[IrCodeSegment]) -> Optional[IrccValue]
+        # type: (IrccGenerator, IrCodeGenContext, Optional[IrCodeSegment]) -> Optional[IrccExpression]
         pass
 
     def _create_generator_value(self, type, generator, code_context):
-        # type: (IrType, IrccGenerator, IrCodeGenContext) -> IrccValue
-        return generator.make_value_binary_op(
-            self._operation, self._left_operand.create_generator_value(self._type, generator, code_context),
+        # type: (IrType, IrccGenerator, IrCodeGenContext) -> IrccExpression
+        return generator.make_expression_integer_binary_op(
+            self._operation, self._type.create_generator_type(generator, code_context._equivalence),
+            self._left_operand.create_generator_value(self._type, generator, code_context),
             self._right_operand.create_generator_value(self._type, generator, code_context)
         )
 
@@ -120,6 +128,13 @@ class IrInstFloatCompare(IrInstruction):
 
     def resolve_type(self, equivalence, return_type, return_position):
         # type: (IrAddressSpaceInference, IrType, IrPosition) -> None
+        self._type.add_equivalence(
+            equivalence, self.get_position(), self._left_operand.get_type(self._type), self._left_operand.get_position()
+        )
+        self._type.add_equivalence(
+            equivalence, self.get_position(), self._right_operand.get_type(self._type),
+            self._right_operand.get_position()
+        )
         self._left_operand.resolve_type(equivalence, return_type, return_position)
         self._right_operand.resolve_type(equivalence, return_type, return_position)
 
@@ -132,13 +147,14 @@ class IrInstFloatCompare(IrInstruction):
         return True
 
     def generate(self, generator, context, next_segment):
-        # type: (IrccGenerator, IrCodeGenContext, Optional[IrCodeSegment]) -> Optional[IrccValue]
+        # type: (IrccGenerator, IrCodeGenContext, Optional[IrCodeSegment]) -> Optional[IrccExpression]
         pass
 
     def _create_generator_value(self, type, generator, code_context):
-        # type: (IrType, IrccGenerator, IrCodeGenContext) -> IrccValue
-        return generator.make_value_binary_op(
-            self._operation, self._left_operand.create_generator_value(self._type, generator, code_context),
+        # type: (IrType, IrccGenerator, IrCodeGenContext) -> IrccExpression
+        return generator.make_expression_float_binary_op(
+            self._operation, self._type.create_generator_type(generator, code_context._equivalence),
+            self._left_operand.create_generator_value(self._type, generator, code_context),
             self._right_operand.create_generator_value(self._type, generator, code_context)
         )
 
@@ -184,7 +200,7 @@ class IrInstPhi(IrInstruction):
         self._type.create_instance(equivalence)
 
     def generate(self, generator, context, next_segment):
-        # type: (IrccGenerator, IrCodeGenContext, Optional[IrCodeSegment]) -> Optional[IrccValue]
+        # type: (IrccGenerator, IrCodeGenContext, Optional[IrCodeSegment]) -> Optional[IrccExpression]
         pass
 
 
@@ -219,7 +235,7 @@ class IrInstSelect(IrInstruction):
         )
 
     def generate(self, generator, context, next_segment):
-        # type: (IrccGenerator, IrCodeGenContext, Optional[IrCodeSegment]) -> Optional[IrccValue]
+        # type: (IrccGenerator, IrCodeGenContext, Optional[IrCodeSegment]) -> Optional[IrccExpression]
         pass
 
 
@@ -234,5 +250,5 @@ if TYPE_CHECKING:
     from ..ir_module import IrModule
     from ..ir_type import IrType, IrAddressSpace, IrAddressSpaceInference
     from ..ir_code import IrCodeGenContext, IrCodeSegment
-    from ...ir_codegen import IrccGenerator, IrccValue
+    from ...ir_codegen import IrccGenerator, IrccExpression
     from ...ir_position import IrPosition

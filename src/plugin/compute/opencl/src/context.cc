@@ -65,7 +65,7 @@ cl_program Context::buildProgram(const u64 size, const char* code) const
     size_t                len = 0;
     clGetProgramBuildInfo(program, m_device, CL_PROGRAM_BUILD_STATUS, sizeof(info), &info, &len);
     clGetProgramBuildInfo(program, m_device, CL_PROGRAM_BUILD_LOG, 0, 0, &len);
-    if(len > 1)
+    if(len > 2)
     {
         minitl::Allocator::Block< char > buffer(Arena::temporary(), len + 1);
         clGetProgramBuildInfo(program, m_device, CL_PROGRAM_BUILD_LOG, (len + 1), buffer.data(),
@@ -82,7 +82,7 @@ cl_program Context::buildProgram(const u64 size, const char* code) const
         checkResult(clGetProgramInfo(program, CL_PROGRAM_KERNEL_NAMES, 0, 0, &len));
         minitl::Allocator::Block< char > buffer(Arena::temporary(), len + 1);
         clGetProgramInfo(program, CL_PROGRAM_KERNEL_NAMES, (len + 1), buffer.data(), &len);
-        be_info("list of kernels:\n%s" | buffer.data());
+        be_info("list of kernels: %s" | buffer.data());
         freea(buffer);
     }
 #endif

@@ -41,13 +41,13 @@ class IrInstAlloca(IrInstruction):
         )
 
     def generate(self, generator, context, next_segment):
-        # type: (IrccGenerator, IrCodeGenContext, Optional[IrCodeSegment]) -> Optional[IrccValue]
+        # type: (IrccGenerator, IrCodeGenContext, Optional[IrCodeSegment]) -> Optional[IrccExpression]
         pass
 
     def create_generator_value(self, type, generator, code_context):
-        # type: (IrType, IrccGenerator, IrCodeGenContext) -> IrccValue
+        # type: (IrType, IrccGenerator, IrCodeGenContext) -> IrccExpression
         assert self._result_name is not None
-        return generator.make_value_addressof(generator.make_value_reference(self._result_name))
+        return generator.make_expression_address(generator.make_expression_variable_reference(self._result_name))
 
 
 class IrInstLoad(IrInstruction):
@@ -77,11 +77,11 @@ class IrInstLoad(IrInstruction):
         self._source.resolve_type(equivalence, return_type, return_position)
 
     def generate(self, generator, context, next_segment):
-        # type: (IrccGenerator, IrCodeGenContext, Optional[IrCodeSegment]) -> Optional[IrccValue]
+        # type: (IrccGenerator, IrCodeGenContext, Optional[IrCodeSegment]) -> Optional[IrccExpression]
         pass
 
     def _create_generator_value(self, type, generator, code_context):
-        # type: (IrType, IrccGenerator, IrCodeGenContext) -> IrccValue
+        # type: (IrType, IrccGenerator, IrCodeGenContext) -> IrccExpression
         return generator.make_value_load(self._source.create_generator_value(generator, code_context))
 
 
@@ -112,7 +112,7 @@ class IrInstStore(IrInstruction):
         target_type.add_equivalence(equivalence, self._target.get_position(), value_type, self._value.get_position())
 
     def generate(self, generator, context, next_segment):
-        # type: (IrccGenerator, IrCodeGenContext, Optional[IrCodeSegment]) -> Optional[IrccValue]
+        # type: (IrccGenerator, IrCodeGenContext, Optional[IrCodeSegment]) -> Optional[IrccExpression]
         pass
 
 
@@ -161,7 +161,7 @@ class IrInstGetElementPtr(IrInstruction):
         return self._value_type
 
     def _create_generator_value(self, type, generator, code_context):
-        # type: (IrType, IrccGenerator, IrCodeGenContext) -> IrccValue
+        # type: (IrType, IrccGenerator, IrCodeGenContext) -> IrccExpression
         value = self._access[0].create_generator_value(generator, code_context)
         result_type = self._access[0].get_type()
         for index in self._access[1:]:
@@ -171,19 +171,23 @@ class IrInstGetElementPtr(IrInstruction):
                 assert isinstance(index._expression, IrExpressionConstant)
                 assert isinstance(index._expression._value, int)
                 result_type, field_name = result_type._fields[index._expression._value]
-                value = generator.make_value_access(value, field_name)
+                value = generator.make_expression_access(value, field_name)
             elif isinstance(result_type, IrTypePtr):
                 result_type = result_type._pointee
-                value = generator.make_value_index(value, index.create_generator_value(generator, code_context))
+                value = generator.make_expression_subscript(
+                    value, index.create_generator_value(generator, code_context)
+                )
             elif isinstance(result_type, IrTypeArray):
                 result_type = result_type._type
-                value = generator.make_value_index(value, index.create_generator_value(generator, code_context))
+                value = generator.make_expression_subscript(
+                    value, index.create_generator_value(generator, code_context)
+                )
             else:
                 raise NotImplementedError
-        return generator.make_value_addressof(value)
+        return generator.make_expression_address(value)
 
     def generate(self, generator, context, next_segment):
-        # type: (IrccGenerator, IrCodeGenContext, Optional[IrCodeSegment]) -> Optional[IrccValue]
+        # type: (IrccGenerator, IrCodeGenContext, Optional[IrCodeSegment]) -> Optional[IrccExpression]
         pass
 
 
@@ -195,5 +199,5 @@ if TYPE_CHECKING:
     from ..ir_module import IrModule
     from ..ir_type import IrType, IrAddressSpace, IrAddressSpaceInference
     from ..ir_code import IrCodeGenContext, IrCodeSegment
-    from ...ir_codegen import IrccGenerator, IrccValue
+    from ...ir_codegen import IrccGenerator, IrccExpression
     from ...ir_position import IrPosition

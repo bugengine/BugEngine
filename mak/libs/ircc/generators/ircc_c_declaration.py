@@ -1,12 +1,12 @@
-from .ircc_c_values import IrccCValues
+from .ircc_c_expressions import IrccCExpressions
 from .. import IrccType
 from be_typing import TYPE_CHECKING
 
 
-class IrccCDeclaration(IrccCValues):
+class IrccCDeclaration(IrccCExpressions):
     def __init__(self, file):
         # type: (TextIO) -> None
-        IrccCValues.__init__(self, file)
+        IrccCExpressions.__init__(self, file)
 
     def begin_module(self):
         # type: () -> bool

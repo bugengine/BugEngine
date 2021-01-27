@@ -49,7 +49,7 @@ class IrExpression(IrObject):
 
     @abstractmethod
     def create_generator_value(self, type, generator, code_context):
-        # type: (IrType, IrccGenerator, IrCodeGenContext) -> IrccValue
+        # type: (IrType, IrccGenerator, IrCodeGenContext) -> IrccExpression
         raise NotImplementedError
 
 
@@ -78,7 +78,7 @@ class IrExpressionZero(IrExpression):
         return 'zero'
 
     def create_generator_value(self, type, generator, code_context):
-        # type: (IrType, IrccGenerator, IrCodeGenContext) -> IrccValue
+        # type: (IrType, IrccGenerator, IrCodeGenContext) -> IrccExpression
         return type.create_generator_zero(generator, code_context._equivalence)
 
 
@@ -97,17 +97,19 @@ class IrExpressionConstant(IrExpression):
         return str(self._value)
 
     def create_generator_value(self, type, generator, code_context):
-        # type: (IrType, IrccGenerator, IrCodeGenContext) -> IrccValue
+        # type: (IrType, IrccGenerator, IrCodeGenContext) -> IrccExpression
         if isinstance(self._value, bool):
-            return generator.make_value_bool(
+            return generator.make_expression_constant_bool(
                 type.create_generator_type(generator, code_context._equivalence), self._value
             )
         elif isinstance(self._value, int):
-            return generator.make_value_int(
+            return generator.make_expression_constant_int(
                 type.create_generator_type(generator, code_context._equivalence), self._value
             )
         elif self._value is None:
-            return generator.make_value_nullptr(type.create_generator_type(generator, code_context._equivalence))
+            return generator.make_expression_constant_nullptr(
+                type.create_generator_type(generator, code_context._equivalence)
+            )
         else:
             raise NotImplementedError
 
@@ -126,7 +128,7 @@ class IrExpressionUndef(IrExpression):
         return 'undefined'
 
     def create_generator_value(self, type, generator, code_context):
-        # type: (IrType, IrccGenerator, IrCodeGenContext) -> IrccValue
+        # type: (IrType, IrccGenerator, IrCodeGenContext) -> IrccExpression
         return type.create_generator_undef(generator, code_context._equivalence)
 
 
@@ -147,8 +149,10 @@ class IrExpressionArray(IrExpression):
         return '[%s]' % ', '.join(str(v) for v in self._values)
 
     def create_generator_value(self, type, generator, code_context):
-        # type: (IrType, IrccGenerator, IrCodeGenContext) -> IrccValue
-        return generator.make_value_array([v.create_generator_value(generator, code_context) for v in self._values])
+        # type: (IrType, IrccGenerator, IrCodeGenContext) -> IrccExpression
+        return generator.make_expression_array_value(
+            [v.create_generator_value(generator, code_context) for v in self._values]
+        )
 
 
 class IrExpressionAggregate(IrExpression):
@@ -168,8 +172,10 @@ class IrExpressionAggregate(IrExpression):
         return '{%s}' % ', '.join(str(v) for v in self._values)
 
     def create_generator_value(self, type, generator, code_context):
-        # type: (IrType, IrccGenerator, IrCodeGenContext) -> IrccValue
-        return generator.make_value_aggregate([v.create_generator_value(generator, code_context) for v in self._values])
+        # type: (IrType, IrccGenerator, IrCodeGenContext) -> IrccExpression
+        return generator.make_expression_aggregate_value(
+            [v.create_generator_value(generator, code_context) for v in self._values]
+        )
 
 
 class IrExpressionReference(IrExpression):
@@ -198,7 +204,7 @@ class IrExpressionReference(IrExpression):
         return self._expression.get_type(suggested_type)
 
     def create_generator_value(self, type, generator, code_context):
-        # type: (IrType, IrccGenerator, IrCodeGenContext) -> IrccValue
+        # type: (IrType, IrccGenerator, IrCodeGenContext) -> IrccExpression
         assert self._expression is not None
         return self._expression.create_generator_value(type, generator, code_context)
 
@@ -250,8 +256,8 @@ class IrExpressionCast(IrExpression):
         self._value.used_by(expression)
 
     def create_generator_value(self, type, generator, code_context):
-        # type: (IrType, IrccGenerator, IrCodeGenContext) -> IrccValue
-        return generator.make_value_cast(
+        # type: (IrType, IrccGenerator, IrCodeGenContext) -> IrccExpression
+        return generator.make_expression_cast(
             self._result_type.create_generator_type(generator, code_context._equivalence), self._cast_type,
             self._value.create_generator_value(generator, code_context)
         )
@@ -265,4 +271,4 @@ if TYPE_CHECKING:
     from .ir_reference import IrReference
     from .ir_metadata import IrMetadata, IrMetadataLink
     from .ir_code import IrCodeGenContext
-    from ..ir_codegen import IrccGenerator, IrccValue
+    from ..ir_codegen import IrccGenerator, IrccExpression

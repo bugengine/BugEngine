@@ -42,13 +42,14 @@ class IrInstBinaryOp(IrInstruction):
         self._type.create_instance(equivalence)
 
     def generate(self, generator, context, next_segment):
-        # type: (IrccGenerator, IrCodeGenContext, Optional[IrCodeSegment]) -> Optional[IrccValue]
+        # type: (IrccGenerator, IrCodeGenContext, Optional[IrCodeSegment]) -> Optional[IrccExpression]
         pass
 
     def _create_generator_value(self, type, generator, code_context):
-        # type: (IrType, IrccGenerator, IrCodeGenContext) -> IrccValue
-        return generator.make_value_binary_op(
-            self._operation, self._left_operand.create_generator_value(self._type, generator, code_context),
+        # type: (IrType, IrccGenerator, IrCodeGenContext) -> IrccExpression
+        return generator.make_expression_integer_binary_op(
+            self._operation, self._type.create_generator_type(generator, code_context._equivalence),
+            self._left_operand.create_generator_value(self._type, generator, code_context),
             self._right_operand.create_generator_value(self._type, generator, code_context)
         )
 
@@ -93,13 +94,14 @@ class IrInstFloatBinaryOp(IrInstruction):
         self._type.create_instance(equivalence)
 
     def generate(self, generator, context, next_segment):
-        # type: (IrccGenerator, IrCodeGenContext, Optional[IrCodeSegment]) -> Optional[IrccValue]
+        # type: (IrccGenerator, IrCodeGenContext, Optional[IrCodeSegment]) -> Optional[IrccExpression]
         pass
 
     def _create_generator_value(self, type, generator, code_context):
-        # type: (IrType, IrccGenerator, IrCodeGenContext) -> IrccValue
-        return generator.make_value_binary_op(
-            self._operation, self._left_operand.create_generator_value(self._type, generator, code_context),
+        # type: (IrType, IrccGenerator, IrCodeGenContext) -> IrccExpression
+        return generator.make_expression_float_binary_op(
+            self._operation, self._type.create_generator_type(generator, code_context._equivalence),
+            self._left_operand.create_generator_value(self._type, generator, code_context),
             self._right_operand.create_generator_value(self._type, generator, code_context)
         )
 
@@ -112,5 +114,5 @@ if TYPE_CHECKING:
     from ..ir_module import IrModule
     from ..ir_type import IrType, IrAddressSpace, IrAddressSpaceInference
     from ..ir_code import IrCodeGenContext, IrCodeSegment
-    from ...ir_codegen import IrccGenerator, IrccValue
+    from ...ir_codegen import IrccGenerator, IrccExpression
     from ...ir_position import IrPosition
