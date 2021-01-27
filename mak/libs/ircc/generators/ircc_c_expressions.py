@@ -185,7 +185,7 @@ class IrccCExpressionIntegerBinaryOperation(IrccCExpression):
         'or': ('%(left)s | %(right)s', _PREC_OR, False),
         'xor': ('%(left)s ^ %(right)s', _PREC_XOR, False),
         'eq': ('%(left)s == %(right)s', _PREC_EQ, False),
-        'neq': ('%(left)s != %(right)s', _PREC_NEQ, False),
+        'ne': ('%(left)s != %(right)s', _PREC_NEQ, False),
         'ugt': ('%(left)s > %(right)s', _PREC_GT, True),
         'uge': ('%(left)s >= %(right)s', _PREC_GE, True),
         'ult': ('%(left)s < %(right)s', _PREC_LT, True),
