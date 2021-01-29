@@ -41,10 +41,6 @@ class IrInstBinaryOp(IrInstruction):
         # type: (Dict[int, int]) -> None
         self._type.create_instance(equivalence)
 
-    def generate(self, generator, context, next_segment):
-        # type: (IrccGenerator, IrCodeGenContext, Optional[IrCodeSegment]) -> Optional[IrccExpression]
-        pass
-
     def _create_generator_value(self, type, generator, code_context):
         # type: (IrType, IrccGenerator, IrCodeGenContext) -> IrccExpression
         return generator.make_expression_integer_binary_op(
@@ -92,10 +88,6 @@ class IrInstFloatBinaryOp(IrInstruction):
     def create_instance(self, equivalence):
         # type: (Dict[int, int]) -> None
         self._type.create_instance(equivalence)
-
-    def generate(self, generator, context, next_segment):
-        # type: (IrccGenerator, IrCodeGenContext, Optional[IrCodeSegment]) -> Optional[IrccExpression]
-        pass
 
     def _create_generator_value(self, type, generator, code_context):
         # type: (IrType, IrccGenerator, IrCodeGenContext) -> IrccExpression

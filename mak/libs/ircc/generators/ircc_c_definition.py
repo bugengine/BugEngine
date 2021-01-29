@@ -90,7 +90,7 @@ class IrccCDefinition(IrccCExpressions):
 
     def instruction_assign(self, name, value):
         # type: (str, IrccExpression) -> None
-        self._out_file.write('%svar_%s = %s;\n' % (self._indent, name.replace('.', '_'), value))
+        self._out_file.write('%s%s = %s;\n' % (self._indent, name, value))
 
 
 if TYPE_CHECKING:

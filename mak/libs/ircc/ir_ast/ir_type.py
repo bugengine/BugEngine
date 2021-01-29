@@ -184,8 +184,8 @@ class IrType(IrObject):
         raise NotImplementedError
 
     @abstractmethod
-    def create_generator_undef(self, generator, resolved_addressspace, force=False):
-        # type: (IrccGenerator, Dict[int, int], bool) -> IrccExpression
+    def create_generator_undef(self, generator, resolved_addressspace):
+        # type: (IrccGenerator, Dict[int, int]) -> IrccExpression
         raise NotImplementedError
 
     @abstractmethod
@@ -286,10 +286,10 @@ class IrTypeReference(IrType):
         assert self._target is not None
         return self._target.create_generator_zero(generator, resolved_addressspace)
 
-    def create_generator_undef(self, generator, resolved_addressspace, force=False):
-        # type: (IrccGenerator, Dict[int, int], bool) -> IrccExpression
+    def create_generator_undef(self, generator, resolved_addressspace):
+        # type: (IrccGenerator, Dict[int, int]) -> IrccExpression
         assert self._target is not None
-        return self._target.create_generator_undef(generator, resolved_addressspace, force)
+        return self._target.create_generator_undef(generator, resolved_addressspace)
 
     def flatten(self):
         # type: () -> List[IrType]
@@ -342,8 +342,8 @@ class IrTypeOpaque(IrType):
         # type: (IrccGenerator, Dict[int, int]) -> IrccExpression
         raise NotImplementedError
 
-    def create_generator_undef(self, generator, resolved_addressspace, force=False):
-        # type: (IrccGenerator, Dict[int, int], bool) -> IrccExpression
+    def create_generator_undef(self, generator, resolved_addressspace):
+        # type: (IrccGenerator, Dict[int, int]) -> IrccExpression
         raise NotImplementedError
 
 
@@ -368,8 +368,8 @@ class IrTypeVoid(IrType):
         # type: (IrccGenerator, Dict[int, int]) -> IrccExpression
         raise NotImplementedError
 
-    def create_generator_undef(self, generator, resolved_addressspace, force=False):
-        # type: (IrccGenerator, Dict[int, int], bool) -> IrccExpression
+    def create_generator_undef(self, generator, resolved_addressspace):
+        # type: (IrccGenerator, Dict[int, int]) -> IrccExpression
         raise NotImplementedError
 
 
@@ -394,8 +394,8 @@ class IrTypeUndef(IrType):
         # type: (IrccGenerator, Dict[int, int]) -> IrccExpression
         raise NotImplementedError
 
-    def create_generator_undef(self, generator, resolved_addressspace, force=False):
-        # type: (IrccGenerator, Dict[int, int], bool) -> IrccExpression
+    def create_generator_undef(self, generator, resolved_addressspace):
+        # type: (IrccGenerator, Dict[int, int]) -> IrccExpression
         raise NotImplementedError
 
 
@@ -420,8 +420,8 @@ class IrTypeZero(IrType):
         # type: (IrccGenerator, Dict[int, int]) -> IrccExpression
         raise NotImplementedError
 
-    def create_generator_undef(self, generator, resolved_addressspace, force=False):
-        # type: (IrccGenerator, Dict[int, int], bool) -> IrccExpression
+    def create_generator_undef(self, generator, resolved_addressspace):
+        # type: (IrccGenerator, Dict[int, int]) -> IrccExpression
         raise NotImplementedError
 
 
@@ -442,8 +442,8 @@ class IrTypeMetadata(IrType):
         # type: (IrccGenerator, Dict[int, int]) -> IrccExpression
         raise NotImplementedError
 
-    def create_generator_undef(self, generator, resolved_addressspace, force=False):
-        # type: (IrccGenerator, Dict[int, int], bool) -> IrccExpression
+    def create_generator_undef(self, generator, resolved_addressspace):
+        # type: (IrccGenerator, Dict[int, int]) -> IrccExpression
         raise NotImplementedError
 
 
@@ -475,14 +475,11 @@ class IrTypeBuiltin(IrType):
         # type: (IrccGenerator, Dict[int, int]) -> IrccExpression
         return generator.make_expression_constant_zero()
 
-    def create_generator_undef(self, generator, resolved_addressspace, force=False):
-        # type: (IrccGenerator, Dict[int, int], bool) -> IrccExpression
-        if force:
-            assert self._builtin[0] == 'i'
-            bitsize = min(8, int(self._builtin[1:]))
-            return generator.make_expression_constant_undef(bitsize / 8)
-        else:
-            return generator.make_expression_constant_void()
+    def create_generator_undef(self, generator, resolved_addressspace):
+        # type: (IrccGenerator, Dict[int, int]) -> IrccExpression
+        assert self._builtin[0] == 'i'
+        bitsize = min(8, int(self._builtin[1:]))
+        return generator.make_expression_constant_undef(int(bitsize / 8))
 
 
 class IrTypePtr(IrType):
@@ -551,12 +548,9 @@ class IrTypePtr(IrType):
         # type: (IrccGenerator, Dict[int, int]) -> IrccExpression
         return generator.make_expression_constant_zero()
 
-    def create_generator_undef(self, generator, resolved_addressspace, force=False):
-        # type: (IrccGenerator, Dict[int, int], bool) -> IrccExpression
-        if force:
-            return generator.make_expression_constant_undef(4) # TODO
-        else:
-            return generator.make_expression_constant_void()
+    def create_generator_undef(self, generator, resolved_addressspace):
+        # type: (IrccGenerator, Dict[int, int]) -> IrccExpression
+        return generator.make_expression_constant_undef(4) # TODO
 
 
 class IrTypeArray(IrType):
@@ -593,14 +587,9 @@ class IrTypeArray(IrType):
             [self._type.create_generator_zero(generator, resolved_addressspace)] * self._count
         )
 
-    def create_generator_undef(self, generator, resolved_addressspace, force=False):
-        # type: (IrccGenerator, Dict[int, int], bool) -> IrccExpression
-        if force:
-            return generator.make_expression_array_value(
-                [self._type.create_generator_undef(generator, resolved_addressspace, True)] * self._count
-            )
-        else:
-            return generator.make_expression_constant_void()
+    def create_generator_undef(self, generator, resolved_addressspace):
+        # type: (IrccGenerator, Dict[int, int]) -> IrccExpression
+        return generator.make_expression_array_value([])
 
     def flatten(self):
         # type: () -> List[IrType]
@@ -652,18 +641,17 @@ class IrTypeVector(IrType):
 
     def create_generator_zero(self, generator, resolved_addressspace):
         # type: (IrccGenerator, Dict[int, int]) -> IrccExpression
-        return generator.make_expression_vector_value(
-            [self._type.create_generator_zero(generator, resolved_addressspace)] * self._count
+        return generator.make_expression_vector_value_broadcast(
+            self.create_generator_type(generator, resolved_addressspace),
+            self._type.create_generator_zero(generator, resolved_addressspace)
         )
 
-    def create_generator_undef(self, generator, resolved_addressspace, force=False):
-        # type: (IrccGenerator, Dict[int, int], bool) -> IrccExpression
-        if force:
-            return generator.make_expression_vector_value(
-                [self._type.create_generator_undef(generator, resolved_addressspace, True)] * self._count
-            )
-        else:
-            return generator.make_expression_constant_void()
+    def create_generator_undef(self, generator, resolved_addressspace):
+        # type: (IrccGenerator, Dict[int, int]) -> IrccExpression
+        return generator.make_expression_vector_value_broadcast(
+            self.create_generator_type(generator, resolved_addressspace),
+            self._type.create_generator_undef(generator, resolved_addressspace)
+        )
 
     def is_defined(self):
         # type: () -> bool
@@ -720,14 +708,11 @@ class IrTypeStruct(IrType):
             [t.create_generator_zero(generator, resolved_addressspace) for t, _ in self._fields]
         )
 
-    def create_generator_undef(self, generator, resolved_addressspace, force=False):
-        # type: (IrccGenerator, Dict[int, int], bool) -> IrccExpression
-        if force:
-            return generator.make_expression_aggregate_value(
-                [t.create_generator_undef(generator, resolved_addressspace, True) for t, _ in self._fields]
-            )
-        else:
-            return generator.make_expression_constant_void()
+    def create_generator_undef(self, generator, resolved_addressspace):
+        # type: (IrccGenerator, Dict[int, int]) -> IrccExpression
+        return generator.make_expression_aggregate_value(
+            [t.create_generator_undef(generator, resolved_addressspace) for t, _ in self._fields]
+        )
 
     def flatten(self):
         # type: () -> List[IrType]
@@ -802,8 +787,8 @@ class IrTypeMethod(IrType):
         # type: (IrccGenerator, Dict[int, int]) -> IrccExpression
         raise NotImplementedError
 
-    def create_generator_undef(self, generator, resolved_addressspace, force=False):
-        # type: (IrccGenerator, Dict[int, int], bool) -> IrccExpression
+    def create_generator_undef(self, generator, resolved_addressspace):
+        # type: (IrccGenerator, Dict[int, int]) -> IrccExpression
         raise NotImplementedError
 
     def is_defined(self):

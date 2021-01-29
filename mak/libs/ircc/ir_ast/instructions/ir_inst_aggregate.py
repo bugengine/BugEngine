@@ -1,5 +1,5 @@
 from ..ir_code import IrInstruction
-from ..ir_type import IrTypeVoid
+from ..ir_type import IrTypeStruct
 from be_typing import TYPE_CHECKING
 
 
@@ -32,9 +32,16 @@ class IrInstExtractValue(IrInstruction):
         # since value_type is deduced from the target type, no equivalence is needed
         self._source.resolve_type(equivalence, return_type, return_position)
 
-    def generate(self, generator, context, next_segment):
-        # type: (IrccGenerator, IrCodeGenContext, Optional[IrCodeSegment]) -> Optional[IrccExpression]
-        pass
+    def _create_generator_value(self, type, generator, code_context):
+        # type: (IrType, IrccGenerator, IrCodeGenContext) -> IrccExpression
+        value = self._source.create_generator_value(generator, code_context)
+        value_type = self._source.get_type()
+        for index in self._indices:
+            value_type = value_type._get_target_type()
+            assert isinstance(value_type, IrTypeStruct)
+            value_type, field = value_type._fields[index]
+            value = generator.make_expression_access(value, field)
+        return value
 
 
 class IrInstInsertValue(IrInstruction):

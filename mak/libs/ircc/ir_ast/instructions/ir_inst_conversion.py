@@ -37,10 +37,6 @@ class IrInstCast(IrInstruction):
         # type: (Dict[int, int]) -> None
         self._result_type.create_instance(equivalence)
 
-    def generate(self, generator, context, next_segment):
-        # type: (IrccGenerator, IrCodeGenContext, Optional[IrCodeSegment]) -> Optional[IrccExpression]
-        pass
-
     def is_inline(self):
         # type: () -> bool
         return True

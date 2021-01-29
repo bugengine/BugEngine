@@ -104,8 +104,13 @@ class IrccGenerator:
         raise NotImplementedError
 
     @abstractmethod
-    def make_expression_vector_value(self, values):
-        # type: (List[IrccExpression]) -> IrccExpression
+    def make_expression_vector_value(self, vector_type, values):
+        # type: (IrccType, List[IrccExpression]) -> IrccExpression
+        raise NotImplementedError
+
+    @abstractmethod
+    def make_expression_vector_value_broadcast(self, vector_type, value):
+        # type: (IrccType, IrccExpression) -> IrccExpression
         raise NotImplementedError
 
     @abstractmethod
@@ -156,6 +161,21 @@ class IrccGenerator:
     @abstractmethod
     def make_value_call(self, method_name, arguments):
         # type: (str, List[IrccExpression]) -> IrccExpression
+        raise NotImplementedError
+
+    @abstractmethod
+    def make_expression_vector_extract(self, element_type, vector, index):
+        # type: (IrccType, IrccExpression, IrccExpression) -> IrccExpression
+        raise NotImplementedError
+
+    @abstractmethod
+    def make_expression_vector_extract_constant(self, vector, index):
+        # type: (IrccExpression, int) -> IrccExpression
+        raise NotImplementedError
+
+    @abstractmethod
+    def make_expression_vector_shuffle(self, result, source_size, v1, v2, mask):
+        # type: (IrccType, int, IrccExpression, IrccExpression, List[int]) -> IrccExpression
         raise NotImplementedError
 
     def begin_module(self):
@@ -244,6 +264,14 @@ class IrccGenerator:
 
     def instruction_assign(self, name, value):
         # type: (str, IrccExpression) -> None
+        raise NotImplementedError
+
+    def instruction_vector_insert(self, element_type, vector, index, element):
+        # type: (IrccType, IrccExpression, IrccExpression, IrccExpression) -> None
+        raise NotImplementedError
+
+    def instruction_vector_insert_constant(self, vector, index, element):
+        # type: (IrccExpression, int, IrccExpression) -> None
         raise NotImplementedError
 
 

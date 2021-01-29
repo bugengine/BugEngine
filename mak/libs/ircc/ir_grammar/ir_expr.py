@@ -1,4 +1,4 @@
-from ..ir_ast import IrExpressionCast, IrExpressionConstant, IrExpressionReference, IrExpressionArray, IrExpressionAggregate, IrExpressionUndef, IrReference, IrExpressionZero
+from ..ir_ast import IrExpressionCast, IrExpressionConstant, IrExpressionReference, IrExpressionArray, IrExpressionVector, IrExpressionAggregate, IrExpressionUndef, IrReference, IrExpressionZero
 from be_typing import TYPE_CHECKING
 
 
@@ -12,6 +12,7 @@ def p_ir_expr(p):
                 | ir-expr-cast
                 | ir-expr-aggregate
                 | ir-expr-array
+                | ir-expr-vector
     """
     p[0] = p[1]
 
@@ -77,6 +78,14 @@ def p_ir_expr_array(p):
     # type: (YaccProduction) -> None
     """
         ir-expr-array : LBRACKET ir-value-list RBRACKET
+    """
+    p[0] = IrExpressionArray(p[2])
+
+
+def p_ir_expr_vector(p):
+    # type: (YaccProduction) -> None
+    """
+        ir-expr-vector : LANGLE ir-value-list RANGLE
     """
     p[0] = IrExpressionArray(p[2])
 

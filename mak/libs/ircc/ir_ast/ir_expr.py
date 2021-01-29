@@ -47,6 +47,10 @@ class IrExpression(IrObject):
         # type: (IrExpression) -> None
         self._usage.append(expression)
 
+    def is_undef(self):
+        # type: () -> bool
+        return False
+
     @abstractmethod
     def create_generator_value(self, type, generator, code_context):
         # type: (IrType, IrccGenerator, IrCodeGenContext) -> IrccExpression
@@ -131,6 +135,10 @@ class IrExpressionUndef(IrExpression):
         # type: (IrType, IrccGenerator, IrCodeGenContext) -> IrccExpression
         return type.create_generator_undef(generator, code_context._equivalence)
 
+    def is_undef(self):
+        # type: () -> bool
+        return True
+
 
 class IrExpressionArray(IrExpression):
     def __init__(self, values):
@@ -151,6 +159,30 @@ class IrExpressionArray(IrExpression):
     def create_generator_value(self, type, generator, code_context):
         # type: (IrType, IrccGenerator, IrCodeGenContext) -> IrccExpression
         return generator.make_expression_array_value(
+            [v.create_generator_value(generator, code_context) for v in self._values]
+        )
+
+
+class IrExpressionVector(IrExpression):
+    def __init__(self, values):
+        # type: (List[IrValue]) -> None
+        IrExpression.__init__(self)
+        self._values = values
+
+    def resolve(self, module, position):
+        # type: (IrModule, IrPosition) -> IrPosition
+        for v in self._values:
+            v.resolve(module, position)
+        return IrExpression.resolve(self, module, position)
+
+    def __str__(self):
+        # type: () -> str
+        return '<%s>' % ', '.join(str(v) for v in self._values)
+
+    def create_generator_value(self, type, generator, code_context):
+        # type: (IrType, IrccGenerator, IrCodeGenContext) -> IrccExpression
+        return generator.make_expression_vector_value(
+            type.create_generator_type(generator, code_context._equivalence),
             [v.create_generator_value(generator, code_context) for v in self._values]
         )
 

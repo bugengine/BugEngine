@@ -126,10 +126,13 @@ class IrInstruction(IrExpression):
         # type: (IrType, IrccGenerator, IrCodeGenContext) -> IrccExpression
         raise NotImplementedError
 
-    @abstractmethod
     def generate(self, generator, context, next_segment):
         # type: (IrccGenerator, IrCodeGenContext, Optional[IrCodeSegment]) -> Optional[IrccExpression]
-        raise NotImplementedError
+        if not self.is_inline():
+            assert self._result_name is not None
+            value = self._create_generator_value(self.get_type(IrTypeVoid()), generator, context)
+            generator.instruction_assign(self._result_name, value)
+        return None
 
 
 class IrAssignInstruction(IrInstruction):
@@ -145,9 +148,9 @@ class IrAssignInstruction(IrInstruction):
 
     def generate(self, generator, context, next_segment):
         # type: (IrccGenerator, IrCodeGenContext, Optional[IrCodeSegment]) -> Optional[IrccExpression]
-        assert self._result is not None
+        assert self._result_name is not None
         generator.instruction_assign(
-            self._result, self._expression.create_generator_value(self._type, generator, context)
+            self._result_name, self._expression.create_generator_value(self._type, generator, context)
         )
         return None
 

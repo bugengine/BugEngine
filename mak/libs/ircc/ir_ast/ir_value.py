@@ -35,6 +35,10 @@ class IrValue(IrObject):
         # type: (IrExpression) -> None
         pass
 
+    def is_undef(self):
+        # type: () -> bool
+        return False
+
     @abstractmethod
     def create_generator_value(self, generator, code_context):
         # type: (IrccGenerator, IrCodeGenContext) -> IrccExpression
@@ -75,6 +79,10 @@ class IrValueExpr(IrValue):
     def create_generator_value(self, generator, code_context):
         # type: (IrccGenerator, IrCodeGenContext) -> IrccExpression
         return self._expression.create_generator_value(self._type, generator, code_context)
+
+    def is_undef(self):
+        # type: () -> bool
+        return self._expression.is_undef()
 
 
 class IrValueVoid(IrValue):

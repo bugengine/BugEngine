@@ -2,33 +2,33 @@ from .ircc_c_types import IrccCTypes
 from ..ir_codegen import IrccExpression
 from be_typing import TYPE_CHECKING
 
-_PREC_CONSTANT = 0
-_PREC_VARIABLE = 0
-_PREC_CAST = 1
-_PREC_ACCESS = 1
-_PREC_SUBSCRIPT = 1
-_PREC_CALL = 1
-_PREC_ADDRESSOF = 2
-_PREC_DEREFERENCE = 2
-_PREC_MUL = 3
-_PREC_DIV = 3
-_PREC_REM = 3
-_PREC_ADD = 4
-_PREC_SUB = 4
-_PREC_SHL = 5
-_PREC_SHR = 5
-_PREC_GT = 6
-_PREC_GE = 6
-_PREC_LT = 6
-_PREC_LE = 6
-_PREC_EQ = 7
-_PREC_NEQ = 7
-_PREC_AND = 8
-_PREC_XOR = 9
-_PREC_OR = 10
-
 
 class IrccCExpression(IrccExpression):
+    _PREC_CONSTANT = 0
+    _PREC_VARIABLE = 0
+    _PREC_CAST = 1
+    _PREC_ACCESS = 1
+    _PREC_SUBSCRIPT = 1
+    _PREC_CALL = 1
+    _PREC_ADDRESSOF = 2
+    _PREC_DEREFERENCE = 2
+    _PREC_MUL = 3
+    _PREC_DIV = 3
+    _PREC_REM = 3
+    _PREC_ADD = 4
+    _PREC_SUB = 4
+    _PREC_SHL = 5
+    _PREC_SHR = 5
+    _PREC_GT = 6
+    _PREC_GE = 6
+    _PREC_LT = 6
+    _PREC_LE = 6
+    _PREC_EQ = 7
+    _PREC_NEQ = 7
+    _PREC_AND = 8
+    _PREC_XOR = 9
+    _PREC_OR = 10
+
     def __init__(self, precedence):
         # type: (int) -> None
         self._precedence = precedence
@@ -55,7 +55,7 @@ class IrccCExpression(IrccExpression):
 class IrccCExpressionVoid(IrccCExpression):
     def __init__(self):
         # type: () -> None
-        IrccCExpression.__init__(self, _PREC_CONSTANT)
+        IrccCExpression.__init__(self, IrccCExpression._PREC_CONSTANT)
 
     def __str__(self):
         # type: () -> str
@@ -65,7 +65,7 @@ class IrccCExpressionVoid(IrccCExpression):
 class IrccCExpressionIntegerConstant(IrccCExpression):
     def __init__(self, value):
         # type: (str) -> None
-        IrccCExpression.__init__(self, _PREC_CONSTANT)
+        IrccCExpression.__init__(self, IrccCExpression._PREC_CONSTANT)
         self._value = value
 
     def __str__(self):
@@ -76,7 +76,7 @@ class IrccCExpressionIntegerConstant(IrccCExpression):
 class IrccCExpressionVariable(IrccCExpression):
     def __init__(self, value):
         # type: (str) -> None
-        IrccCExpression.__init__(self, _PREC_VARIABLE)
+        IrccCExpression.__init__(self, IrccCExpression._PREC_VARIABLE)
         self._value = value
 
     def __str__(self):
@@ -87,7 +87,7 @@ class IrccCExpressionVariable(IrccCExpression):
 class IrccCExpressionAggregateValue(IrccCExpression):
     def __init__(self, values):
         # type: (List[IrccExpression]) -> None
-        IrccCExpression.__init__(self, _PREC_CONSTANT)
+        IrccCExpression.__init__(self, IrccCExpression._PREC_CONSTANT)
         self._values = values
 
     def __str__(self):
@@ -100,7 +100,7 @@ IrccCExpressionArrayValue = IrccCExpressionAggregateValue
 class IrccCExpressionCast(IrccCExpression):
     def __init__(self, value, target_type, unsigned=False):
         # type: (IrccExpression, IrccType, bool) -> None
-        IrccCExpression.__init__(self, _PREC_CAST)
+        IrccCExpression.__init__(self, IrccCExpression._PREC_CAST)
         self._value = value
         self._target_type = target_type
         self._unsigned = unsigned
@@ -108,13 +108,16 @@ class IrccCExpressionCast(IrccCExpression):
     def __str__(self):
         # type: () -> str
         target_type = self._target_type.format_unsigned([]) if self._unsigned else self._target_type.format([])
-        return '(%s)%s' % (target_type, self._value.make_string_right('right', self._precedence))
+        value = self._value
+        while isinstance(value, IrccCExpressionCast):
+            value = value._value
+        return '(%s)%s' % (target_type, value.make_string_right('right', self._precedence))
 
 
 class IrccCExpressionAddressOf(IrccCExpression):
     def __init__(self, value):
         # type: (IrccExpression) -> None
-        IrccCExpression.__init__(self, _PREC_ADDRESSOF)
+        IrccCExpression.__init__(self, IrccCExpression._PREC_ADDRESSOF)
         self._value = value
 
     def __str__(self):
@@ -125,7 +128,7 @@ class IrccCExpressionAddressOf(IrccCExpression):
 class IrccCExpressionDereference(IrccCExpression):
     def __init__(self, value):
         # type: (IrccExpression) -> None
-        IrccCExpression.__init__(self, _PREC_DEREFERENCE)
+        IrccCExpression.__init__(self, IrccCExpression._PREC_DEREFERENCE)
         self._value = value
 
     def __str__(self):
@@ -136,7 +139,7 @@ class IrccCExpressionDereference(IrccCExpression):
 class IrccCExpressionAccess(IrccCExpression):
     def __init__(self, value, field):
         # type: (IrccExpression, str) -> None
-        IrccCExpression.__init__(self, _PREC_ACCESS)
+        IrccCExpression.__init__(self, IrccCExpression._PREC_ACCESS)
         self._value = value
         self._field = field
 
@@ -148,7 +151,7 @@ class IrccCExpressionAccess(IrccCExpression):
 class IrccCExpressionSubscript(IrccCExpression):
     def __init__(self, value, index):
         # type: (IrccExpression, IrccExpression) -> None
-        IrccCExpression.__init__(self, _PREC_SUBSCRIPT)
+        IrccCExpression.__init__(self, IrccCExpression._PREC_SUBSCRIPT)
         self._value = value
         self._index = index
 
@@ -160,7 +163,7 @@ class IrccCExpressionSubscript(IrccCExpression):
 class IrccCExpressionCall(IrccCExpression):
     def __init__(self, method, arguments):
         # type: (str, List[IrccExpression]) -> None
-        IrccCExpression.__init__(self, _PREC_CALL)
+        IrccCExpression.__init__(self, IrccCExpression._PREC_CALL)
         self._method = method
         self._arguments = arguments
 
@@ -171,29 +174,29 @@ class IrccCExpressionCall(IrccCExpression):
 
 class IrccCExpressionIntegerBinaryOperation(IrccCExpression):
     _OPERATORS = {
-        'add': ('%(left)s + %(right)s', _PREC_ADD, False),
-        'sub': ('%(left)s - %(right)s', _PREC_SUB, False),
-        'mul': ('%(left)s * %(right)s', _PREC_MUL, False),
-        'udiv': ('%(left)s / %(right)s', _PREC_DIV, True),
-        'sdiv': ('%(left)s / %(right)s', _PREC_DIV, False),
-        'urem': ('%(left)s %% %(right)s', _PREC_REM, True),
-        'srem': ('%(left)s %% %(right)s', _PREC_REM, False),
-        'shl': ('%(left)s << %(right)s', _PREC_SHL, False),
-        'lshr': ('%(left)s >> %(right)s', _PREC_SHR, True),
-        'ashr': ('%(left)s >> %(right)s', _PREC_SHR, False),
-        'and': ('%(left)s & %(right)s', _PREC_AND, False),
-        'or': ('%(left)s | %(right)s', _PREC_OR, False),
-        'xor': ('%(left)s ^ %(right)s', _PREC_XOR, False),
-        'eq': ('%(left)s == %(right)s', _PREC_EQ, False),
-        'ne': ('%(left)s != %(right)s', _PREC_NEQ, False),
-        'ugt': ('%(left)s > %(right)s', _PREC_GT, True),
-        'uge': ('%(left)s >= %(right)s', _PREC_GE, True),
-        'ult': ('%(left)s < %(right)s', _PREC_LT, True),
-        'ule': ('%(left)s <= %(right)s', _PREC_LE, True),
-        'sgt': ('%(left)s > %(right)s', _PREC_GT, False),
-        'sge': ('%(left)s >= %(right)s', _PREC_GE, False),
-        'slt': ('%(left)s < %(right)s', _PREC_LT, False),
-        'sle': ('%(left)s <= %(right)s', _PREC_LE, False),
+        'add': ('%(left)s + %(right)s', IrccCExpression._PREC_ADD, False),
+        'sub': ('%(left)s - %(right)s', IrccCExpression._PREC_SUB, False),
+        'mul': ('%(left)s * %(right)s', IrccCExpression._PREC_MUL, False),
+        'udiv': ('%(left)s / %(right)s', IrccCExpression._PREC_DIV, True),
+        'sdiv': ('%(left)s / %(right)s', IrccCExpression._PREC_DIV, False),
+        'urem': ('%(left)s %% %(right)s', IrccCExpression._PREC_REM, True),
+        'srem': ('%(left)s %% %(right)s', IrccCExpression._PREC_REM, False),
+        'shl': ('%(left)s << %(right)s', IrccCExpression._PREC_SHL, False),
+        'lshr': ('%(left)s >> %(right)s', IrccCExpression._PREC_SHR, True),
+        'ashr': ('%(left)s >> %(right)s', IrccCExpression._PREC_SHR, False),
+        'and': ('%(left)s & %(right)s', IrccCExpression._PREC_AND, False),
+        'or': ('%(left)s | %(right)s', IrccCExpression._PREC_OR, False),
+        'xor': ('%(left)s ^ %(right)s', IrccCExpression._PREC_XOR, False),
+        'eq': ('%(left)s == %(right)s', IrccCExpression._PREC_EQ, False),
+        'ne': ('%(left)s != %(right)s', IrccCExpression._PREC_NEQ, False),
+        'ugt': ('%(left)s > %(right)s', IrccCExpression._PREC_GT, True),
+        'uge': ('%(left)s >= %(right)s', IrccCExpression._PREC_GE, True),
+        'ult': ('%(left)s < %(right)s', IrccCExpression._PREC_LT, True),
+        'ule': ('%(left)s <= %(right)s', IrccCExpression._PREC_LE, True),
+        'sgt': ('%(left)s > %(right)s', IrccCExpression._PREC_GT, False),
+        'sge': ('%(left)s >= %(right)s', IrccCExpression._PREC_GE, False),
+        'slt': ('%(left)s < %(right)s', IrccCExpression._PREC_LT, False),
+        'sle': ('%(left)s <= %(right)s', IrccCExpression._PREC_LE, False),
     }
 
     def __init__(self, operation, type, left_operand, right_operand):
@@ -218,23 +221,23 @@ class IrccCExpressionIntegerBinaryOperation(IrccCExpression):
 
 class IrccCExpressionFloatBinaryOperation(IrccCExpression):
     _OPERATORS = {
-        'fadd': ('%(left)s + %(right)s', _PREC_ADD),
-        'fsub': ('%(left)s - %(right)s', _PREC_SUB),
-        'fmul': ('%(left)s * %(right)s', _PREC_MUL),
-        'fdiv': ('%(left)s / %(right)s', _PREC_DIV),
-        'frem': ('fmod(%(left)s, %(right)s)', _PREC_REM),
-        'oeq': ('%(left)s == %(right)s', _PREC_EQ),
-        'ueq': ('%(left)s == %(right)s', _PREC_EQ),
-        'one': ('%(left)s != %(right)s', _PREC_NEQ),
-        'une': ('%(left)s != %(right)s', _PREC_NEQ),
-        'ogt': ('%(left)s > %(right)s', _PREC_GT),
-        'ugt': ('%(left)s > %(right)s', _PREC_GT),
-        'oge': ('%(left)s >= %(right)s', _PREC_GE),
-        'uge': ('%(left)s >= %(right)s', _PREC_GE),
-        'olt': ('%(left)s < %(right)s', _PREC_LT),
-        'ult': ('%(left)s < %(right)s', _PREC_LT),
-        'ole': ('%(left)s <= %(right)s', _PREC_LE),
-        'ule': ('%(left)s <= %(right)s', _PREC_LE),
+        'fadd': ('%(left)s + %(right)s', IrccCExpression._PREC_ADD),
+        'fsub': ('%(left)s - %(right)s', IrccCExpression._PREC_SUB),
+        'fmul': ('%(left)s * %(right)s', IrccCExpression._PREC_MUL),
+        'fdiv': ('%(left)s / %(right)s', IrccCExpression._PREC_DIV),
+        'frem': ('fmod(%(left)s, %(right)s)', IrccCExpression._PREC_REM),
+        'oeq': ('%(left)s == %(right)s', IrccCExpression._PREC_EQ),
+        'ueq': ('%(left)s == %(right)s', IrccCExpression._PREC_EQ),
+        'one': ('%(left)s != %(right)s', IrccCExpression._PREC_NEQ),
+        'une': ('%(left)s != %(right)s', IrccCExpression._PREC_NEQ),
+        'ogt': ('%(left)s > %(right)s', IrccCExpression._PREC_GT),
+        'ugt': ('%(left)s > %(right)s', IrccCExpression._PREC_GT),
+        'oge': ('%(left)s >= %(right)s', IrccCExpression._PREC_GE),
+        'uge': ('%(left)s >= %(right)s', IrccCExpression._PREC_GE),
+        'olt': ('%(left)s < %(right)s', IrccCExpression._PREC_LT),
+        'ult': ('%(left)s < %(right)s', IrccCExpression._PREC_LT),
+        'ole': ('%(left)s <= %(right)s', IrccCExpression._PREC_LE),
+        'ule': ('%(left)s <= %(right)s', IrccCExpression._PREC_LE),
     }
 
     def __init__(self, operation, type, left_operand, right_operand):
@@ -288,10 +291,6 @@ class IrccCExpressions(IrccCTypes):
     def make_expression_aggregate_value(self, values):
         # type: (List[IrccExpression]) -> IrccExpression
         return IrccCExpressionAggregateValue(values)
-
-    def make_expression_vector_value(self, values):
-        # type: (List[IrccExpression]) -> IrccExpression
-        raise NotImplementedError
 
     def make_expression_array_value(self, values):
         # type: (List[IrccExpression]) -> IrccExpression

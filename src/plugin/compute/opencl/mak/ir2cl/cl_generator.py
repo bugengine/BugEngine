@@ -1,9 +1,93 @@
-from ircc.generators import IrccCDeclaration, IrccCDefinition
+from ircc.generators import IrccCDeclaration, IrccCDefinition, IrccCExpression
+from ircc.generators.ircc_c_expressions import IrccCExpressionCast
 from ircc import IrccType
 from be_typing import TYPE_CHECKING
 
 
+class IrccClExpressionVectorValue(IrccCExpression):
+    def __init__(self, values):
+        # type: (List[IrccExpression]) -> None
+        IrccCExpression.__init__(self, IrccCExpression._PREC_CONSTANT)
+        self._values = values
+
+    def __str__(self):
+        # type: () -> str
+        return '(%s)' % (', '.join([str(v) for v in self._values]))
+
+
+class IrccClExpressionVectorValueBroadcast(IrccCExpression):
+    def __init__(self, value):
+        # type: (IrccExpression) -> None
+        IrccCExpression.__init__(self, IrccCExpression._PREC_CONSTANT)
+        self._value = value
+
+    def __str__(self):
+        # type: () -> str
+        return '(%s)' % (self._value)
+
+
+class IrccClExpressionVectorExtract(IrccCExpression):
+    def __init__(self, element_type, value, index):
+        # type: (IrccType, IrccExpression, IrccExpression) -> None
+        IrccCExpression.__init__(self, IrccCExpression._PREC_SUBSCRIPT)
+        self._element_type = element_type
+        self._value = value
+        self._index = index
+
+    def __str__(self):
+        # type: () -> str
+        return '((%s*)&%s)[%s]' % (self._element_type.format([]), self._value, self._index)
+
+
+class IrccClExpressionVectorExtractConstant(IrccCExpression):
+    def __init__(self, value, index):
+        # type: (IrccExpression, int) -> None
+        IrccCExpression.__init__(self, IrccCExpression._PREC_CONSTANT)
+        self._value = value
+        self._index = index
+
+    def __str__(self):
+        # type: () -> str
+        return '%s.s%x' % (self._value, self._index)
+
+
+class IrccClExpressionVectorShuffle(IrccCExpression):
+    def __init__(self, source_size, vector1, vector2, mask):
+        # type: (int, IrccExpression, IrccExpression, List[int]) -> None
+        IrccCExpression.__init__(self, IrccCExpression._PREC_CONSTANT)
+        self._source_size = source_size
+        self._vector1 = vector1
+        self._vector2 = vector2
+        self._mask = mask
+
+    def __str__(self):
+        # type: () -> str
+        v1 = str(self._vector1)
+        v2 = str(self._vector2)
+
+        def get_member(i):
+            # type: (int) -> str
+            if i < self._source_size:
+                return '%s.s%x' % (v1, i)
+            else:
+                return '%s.s%x' % (v2, i - self._source_size)
+
+        return '(%s)' % (', '.join([get_member(i) for i in self._mask]))
+
+
 class ClDeclaration(IrccCDeclaration):
+    _VECTOR_TYPES = {
+        'i8': 'char%(size)d',
+        'i16': 'short%(size)d',
+        'i32': 'int%(size)d',
+        'i64': 'long%(size)d',
+        'u8': 'uchar%(size)d',
+        'u16': 'ushort%(size)d',
+        'u32': 'uint%(size)d',
+        'u64': 'ulong%(size)d',
+        'float': 'float%(size)d',
+    }
+
     def __init__(self, file):
         # type: (TextIO) -> None
         IrccCDeclaration.__init__(self, file)
@@ -35,19 +119,6 @@ class ClDeclaration(IrccCDeclaration):
             'typedef void* meta;\n'
             '\n'
         )
-        for vector_size in 2, 4, 8, 16:
-            self._out_file.write(
-                'typedef char%(size)d   i8_%(size)d;\n'
-                'typedef short%(size)d  i16_%(size)d;\n'
-                'typedef int%(size)d    i32_%(size)d;\n'
-                'typedef long%(size)d   i64_%(size)d;\n'
-                'typedef uchar%(size)d  u8_%(size)d;\n'
-                'typedef ushort%(size)d u16_%(size)d;\n'
-                'typedef uint%(size)d   u32_%(size)d;\n'
-                'typedef ulong%(size)d  u64_%(size)d;\n'
-                'typedef float%(size)d  float_%(size)d;\n'
-                '\n' % {'size': vector_size}
-            )
         return True
 
     def end_module(self):
@@ -67,6 +138,18 @@ class ClDeclaration(IrccCDeclaration):
 
 
 class ClDefinition(IrccCDefinition):
+    _VECTOR_TYPES = {
+        'i8': 'char%(size)d',
+        'i16': 'short%(size)d',
+        'i32': 'int%(size)d',
+        'i64': 'long%(size)d',
+        'u8': 'uchar%(size)d',
+        'u16': 'ushort%(size)d',
+        'u32': 'uint%(size)d',
+        'u64': 'ulong%(size)d',
+        'float': 'float%(size)d',
+    }
+
     def __init__(self, file):
         # type: (TextIO) -> None
         IrccCDefinition.__init__(self, file)
@@ -97,7 +180,37 @@ class ClDefinition(IrccCDefinition):
             self._out_file.write('__kernel\n')
         return IrccCDefinition.begin_method(self, name, return_type, parameters, calling_convention, has_implementation)
 
+    def instruction_vector_insert(self, element_type, vector, index, element):
+        # type: (IrccType, IrccExpression, IrccExpression, IrccExpression) -> None
+        self._out_file.write(
+            '%s((%s*)%s)[%s] = %s;\n' % (self._indent, element_type.format([]), vector, index, element)
+        )
+
+    def instruction_vector_insert_constant(self, vector, index, element):
+        # type: (IrccExpression, int, IrccExpression) -> None
+        self._out_file.write('%s%s.s%x = %s;\n' % (self._indent, vector, index, element))
+
+    def make_expression_vector_value(self, vector_type, values):
+        # type: (IrccType, List[IrccExpression]) -> IrccExpression
+        return IrccCExpressionCast(IrccClExpressionVectorValue(values), vector_type)
+
+    def make_expression_vector_value_broadcast(self, vector_type, value):
+        # type: (IrccType, IrccExpression) -> IrccExpression
+        return IrccCExpressionCast(IrccClExpressionVectorValueBroadcast(value), vector_type)
+
+    def make_expression_vector_extract(self, element_type, vector, index):
+        # type: (IrccType, IrccExpression, IrccExpression) -> IrccExpression
+        return IrccClExpressionVectorExtract(element_type, vector, index)
+
+    def make_expression_vector_extract_constant(self, vector, index):
+        # type: (IrccExpression, int) -> IrccExpression
+        return IrccClExpressionVectorExtractConstant(vector, index)
+
+    def make_expression_vector_shuffle(self, result, source_size, v1, v2, mask):
+        # type: (IrccType, int, IrccExpression, IrccExpression, List[int]) -> IrccExpression
+        return IrccCExpressionCast(IrccClExpressionVectorShuffle(source_size, v1, v2, mask), result)
+
 
 if TYPE_CHECKING:
     from typing import List, TextIO, Tuple
-    from ircc import IrccType
+    from ircc import IrccType, IrccExpression

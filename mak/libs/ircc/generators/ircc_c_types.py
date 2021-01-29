@@ -5,6 +5,8 @@ _UNSIGNED_VERSIONS = {'i8': 'u8', 'i16': 'u16', 'i32': 'u32', 'i64': 'u64'}
 
 
 class IrccCTypes(IrccGenerator):
+    _VECTOR_TYPES = {}
+
     def __init__(self, file):
         # type: (TextIO) -> None
         IrccGenerator.__init__(self, file)
@@ -52,7 +54,13 @@ class IrccCTypes(IrccGenerator):
         assert type._declaration[0] == ''
         assert type._declaration[1] == ''
         assert type._declaration[3] == ''
-        return IrccType(['', '', '%s_%d' % (base_type, count), ''], ['', '', '%s_%d' % (base_type_unsigned, count), ''])
+        return IrccType(
+            ['', '', self._VECTOR_TYPES[base_type] % {
+                'size': count
+            }, ''], ['', '', self._VECTOR_TYPES[base_type_unsigned] % {
+                'size': count
+            }, '']
+        )
 
 
 if TYPE_CHECKING:
