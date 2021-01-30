@@ -129,6 +129,11 @@ class IrccGenerator:
         raise NotImplementedError
 
     @abstractmethod
+    def make_expression_dereference(self, expression):
+        # type: (IrccExpression) -> IrccExpression
+        raise NotImplementedError
+
+    @abstractmethod
     def make_expression_access(self, value, field_name):
         # type: (IrccExpression, str) -> IrccExpression
         raise NotImplementedError
@@ -151,6 +156,18 @@ class IrccGenerator:
     @abstractmethod
     def make_expression_float_binary_op(self, operation, type, left_operand, right_operand):
         # type: (str, IrccType, IrccExpression, IrccExpression) -> IrccExpression
+        raise NotImplementedError
+
+    @abstractmethod
+    def make_expression_vector_integer_binary_op(
+        self, operation, result_type, vector_type, left_operand, right_operand
+    ):
+        # type: (str, IrccType, IrccType, IrccExpression, IrccExpression) -> IrccExpression
+        raise NotImplementedError
+
+    @abstractmethod
+    def make_expression_vector_float_binary_op(self, operation, result_type, vector_type, left_operand, right_operand):
+        # type: (str, IrccType, IrccType, IrccExpression, IrccExpression) -> IrccExpression
         raise NotImplementedError
 
     @abstractmethod
@@ -218,8 +235,8 @@ class IrccGenerator:
         # type: () -> None
         pass
 
-    def declare_variable(self, name, type):
-        # type: (str, IrccType) -> None
+    def declare_variable(self, name, type, value=None):
+        # type: (str, IrccType, Optional[IrccExpression]) -> None
         raise NotImplementedError
 
     def declare_label(self, name):
@@ -262,8 +279,8 @@ class IrccGenerator:
         # type: (str) -> None
         raise NotImplementedError
 
-    def instruction_assign(self, name, value):
-        # type: (str, IrccExpression) -> None
+    def instruction_assign(self, destination, value):
+        # type: (IrccExpression, IrccExpression) -> None
         raise NotImplementedError
 
     def instruction_vector_insert(self, element_type, vector, index, element):
@@ -276,6 +293,6 @@ class IrccGenerator:
 
 
 if TYPE_CHECKING:
-    from typing import List, TextIO, Tuple
+    from typing import List, Optional, TextIO, Tuple
     from .ircc_type import IrccType
     from .ircc_expression import IrccExpression

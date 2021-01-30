@@ -61,7 +61,10 @@ class IrInstIntegerCompare(IrInstruction):
         self._left_operand = left_operand
         self._right_operand = right_operand
         self._operation = operation
-        self._value_type = IrTypeBuiltin('i1')
+        if isinstance(self._type, IrTypeVector):
+            self._value_type = IrTypeVector(IrTypeBuiltin('i1'), self._type._count) # type: IrType
+        else:
+            self._value_type = IrTypeBuiltin('i1')
 
     def resolve(self, module, position):
         # type: (IrModule, IrPosition) -> IrPosition
@@ -99,11 +102,19 @@ class IrInstIntegerCompare(IrInstruction):
 
     def _create_generator_value(self, type, generator, code_context):
         # type: (IrType, IrccGenerator, IrCodeGenContext) -> IrccExpression
-        return generator.make_expression_integer_binary_op(
-            self._operation, self._type.create_generator_type(generator, code_context._equivalence),
-            self._left_operand.create_generator_value(self._type, generator, code_context),
-            self._right_operand.create_generator_value(self._type, generator, code_context)
-        )
+        if isinstance(self._type, IrTypeVector):
+            return generator.make_expression_vector_integer_binary_op(
+                self._operation, self._value_type.create_generator_type(generator, code_context._equivalence),
+                self._type.create_generator_type(generator, code_context._equivalence),
+                self._left_operand.create_generator_value(self._type, generator, code_context),
+                self._right_operand.create_generator_value(self._type, generator, code_context)
+            )
+        else:
+            return generator.make_expression_integer_binary_op(
+                self._operation, self._type.create_generator_type(generator, code_context._equivalence),
+                self._left_operand.create_generator_value(self._type, generator, code_context),
+                self._right_operand.create_generator_value(self._type, generator, code_context)
+            )
 
 
 class IrInstFloatCompare(IrInstruction):
@@ -114,7 +125,10 @@ class IrInstFloatCompare(IrInstruction):
         self._left_operand = left_operand
         self._right_operand = right_operand
         self._operation = operation
-        self._value_type = IrTypeBuiltin('i1')
+        if isinstance(self._type, IrTypeVector):
+            self._value_type = IrTypeVector(IrTypeBuiltin('i1'), self._type._count) # type: IrType
+        else:
+            self._value_type = IrTypeBuiltin('i1')
 
     def resolve(self, module, position):
         # type: (IrModule, IrPosition) -> IrPosition
@@ -152,11 +166,19 @@ class IrInstFloatCompare(IrInstruction):
 
     def _create_generator_value(self, type, generator, code_context):
         # type: (IrType, IrccGenerator, IrCodeGenContext) -> IrccExpression
-        return generator.make_expression_float_binary_op(
-            self._operation, self._type.create_generator_type(generator, code_context._equivalence),
-            self._left_operand.create_generator_value(self._type, generator, code_context),
-            self._right_operand.create_generator_value(self._type, generator, code_context)
-        )
+        if isinstance(self._type, IrTypeVector):
+            return generator.make_expression_vector_float_binary_op(
+                self._operation, self._value_type.create_generator_type(generator, code_context._equivalence),
+                self._type.create_generator_type(generator, code_context._equivalence),
+                self._left_operand.create_generator_value(self._type, generator, code_context),
+                self._right_operand.create_generator_value(self._type, generator, code_context)
+            )
+        else:
+            return generator.make_expression_float_binary_op(
+                self._operation, self._type.create_generator_type(generator, code_context._equivalence),
+                self._left_operand.create_generator_value(self._type, generator, code_context),
+                self._right_operand.create_generator_value(self._type, generator, code_context)
+            )
 
 
 class IrInstPhi(IrInstruction):

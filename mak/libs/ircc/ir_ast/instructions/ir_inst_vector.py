@@ -114,7 +114,10 @@ class IrInstInsertElement(IrInstruction):
                 assert self._value._expression._expression._result_name is not None
                 result_name = self._value._expression._expression._result_name
             else:
-                generator.instruction_assign(result_name, self._value.create_generator_value(generator, context))
+                generator.instruction_assign(
+                    generator.make_expression_variable_reference(result_name),
+                    self._value.create_generator_value(generator, context)
+                )
         if isinstance(self._index, IrValueExpr) and isinstance(self._index._expression, IrExpressionConstant):
             assert isinstance(self._index._expression._value, int)
             generator.instruction_vector_insert_constant(

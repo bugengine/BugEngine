@@ -1,4 +1,5 @@
 from ..ir_code import IrInstruction
+from ..ir_type import IrTypeVector
 from be_typing import TYPE_CHECKING
 
 
@@ -43,11 +44,19 @@ class IrInstBinaryOp(IrInstruction):
 
     def _create_generator_value(self, type, generator, code_context):
         # type: (IrType, IrccGenerator, IrCodeGenContext) -> IrccExpression
-        return generator.make_expression_integer_binary_op(
-            self._operation, self._type.create_generator_type(generator, code_context._equivalence),
-            self._left_operand.create_generator_value(self._type, generator, code_context),
-            self._right_operand.create_generator_value(self._type, generator, code_context)
-        )
+        if isinstance(self._type, IrTypeVector):
+            return generator.make_expression_vector_integer_binary_op(
+                self._operation, self._type.create_generator_type(generator, code_context._equivalence),
+                self._type.create_generator_type(generator, code_context._equivalence),
+                self._left_operand.create_generator_value(self._type, generator, code_context),
+                self._right_operand.create_generator_value(self._type, generator, code_context)
+            )
+        else:
+            return generator.make_expression_integer_binary_op(
+                self._operation, self._type.create_generator_type(generator, code_context._equivalence),
+                self._left_operand.create_generator_value(self._type, generator, code_context),
+                self._right_operand.create_generator_value(self._type, generator, code_context)
+            )
 
 
 class IrInstFloatBinaryOp(IrInstruction):
@@ -91,11 +100,19 @@ class IrInstFloatBinaryOp(IrInstruction):
 
     def _create_generator_value(self, type, generator, code_context):
         # type: (IrType, IrccGenerator, IrCodeGenContext) -> IrccExpression
-        return generator.make_expression_float_binary_op(
-            self._operation, self._type.create_generator_type(generator, code_context._equivalence),
-            self._left_operand.create_generator_value(self._type, generator, code_context),
-            self._right_operand.create_generator_value(self._type, generator, code_context)
-        )
+        if isinstance(self._type, IrTypeVector):
+            return generator.make_expression_vector_float_binary_op(
+                self._operation, self._type.create_generator_type(generator, code_context._equivalence),
+                self._type.create_generator_type(generator, code_context._equivalence),
+                self._left_operand.create_generator_value(self._type, generator, code_context),
+                self._right_operand.create_generator_value(self._type, generator, code_context)
+            )
+        else:
+            return generator.make_expression_float_binary_op(
+                self._operation, self._type.create_generator_type(generator, code_context._equivalence),
+                self._left_operand.create_generator_value(self._type, generator, code_context),
+                self._right_operand.create_generator_value(self._type, generator, code_context)
+            )
 
 
 if TYPE_CHECKING:

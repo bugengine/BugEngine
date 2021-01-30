@@ -35,6 +35,10 @@ class IrccCDeclaration(IrccCExpressions):
         # type: () -> None
         pass
 
+    def declare_variable(self, name, type, value=None):
+        # type: (str, IrccType, Optional[IrccExpression]) -> None
+        pass
+
     def declare_type(self, type, name, ir_name):
         # type: (IrccType, str, str) -> None
         if type._declaration[0]:

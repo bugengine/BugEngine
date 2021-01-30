@@ -35,9 +35,12 @@ class IrccCDefinition(IrccCExpressions):
         self._indent = ''
         self._out_file.write('}\n\n')
 
-    def declare_variable(self, name, type):
-        # type: (str, IrccType) -> None
-        self._out_file.write('%s%s;\n' % (self._indent, type.format(['', '', name, ''])))
+    def declare_variable(self, name, type, value=None):
+        # type: (str, IrccType, Optional[IrccExpression]) -> None
+        if value is None:
+            self._out_file.write('%s%s;\n' % (self._indent, type.format(['', '', name, ''])))
+        else:
+            self._out_file.write('%s%s = %s;\n' % (self._indent, type.format(['', '', name, '']), value))
 
     def declare_label(self, name):
         # type: (str) -> None
@@ -88,11 +91,11 @@ class IrccCDefinition(IrccCExpressions):
         # type: (str) -> None
         self._out_file.write('%scontinue; /* goto %s */\n' % (self._indent, label))
 
-    def instruction_assign(self, name, value):
-        # type: (str, IrccExpression) -> None
-        self._out_file.write('%s%s = %s;\n' % (self._indent, name, value))
+    def instruction_assign(self, destination, value):
+        # type: (IrccExpression, IrccExpression) -> None
+        self._out_file.write('%s%s = %s;\n' % (self._indent, destination, value))
 
 
 if TYPE_CHECKING:
-    from typing import List, TextIO, Tuple
+    from typing import List, Optional, TextIO, Tuple
     from .. import IrccType, IrccExpression

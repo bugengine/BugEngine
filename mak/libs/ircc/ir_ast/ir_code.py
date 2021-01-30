@@ -6,11 +6,14 @@ from abc import abstractmethod
 
 class IrCodeGenContext:
     def __init__(self, equivalence, code):
-        # type: (Dict[int, int], IrCodeBlock) -> None
+        # type: (Dict[int, int], Optional[IrCodeBlock]) -> None
         self._equivalence = equivalence
         self._code = code
-        self._current_segment = code._segments[0]
-        self._loops = []   # type: List[Tuple[IrCodeSegment, IrLoopInfo]]
+        if code is not None:
+            self._current_segment = code._segments[0] # type: Optional[IrCodeSegment]
+        else:
+            self._current_segment = None
+        self._loops = []                              # type: List[Tuple[IrCodeSegment, IrLoopInfo]]
 
     def push_loop(self, owner, loop):
         # type: (IrCodeSegment, IrLoopInfo) -> None
@@ -131,7 +134,7 @@ class IrInstruction(IrExpression):
         if not self.is_inline():
             assert self._result_name is not None
             value = self._create_generator_value(self.get_type(IrTypeVoid()), generator, context)
-            generator.instruction_assign(self._result_name, value)
+            generator.instruction_assign(generator.make_expression_variable_reference(self._result_name), value)
         return None
 
 
@@ -150,7 +153,8 @@ class IrAssignInstruction(IrInstruction):
         # type: (IrccGenerator, IrCodeGenContext, Optional[IrCodeSegment]) -> Optional[IrccExpression]
         assert self._result_name is not None
         generator.instruction_assign(
-            self._result_name, self._expression.create_generator_value(self._type, generator, context)
+            generator.make_expression_variable_reference(self._result_name),
+            self._expression.create_generator_value(self._type, generator, context)
         )
         return None
 
@@ -419,7 +423,7 @@ class IrCodeBlock:
     def _resolve_phi_nodes(self):
         # type: () -> None
         for s in self._segments:
-            for inst in s._instructions:
+            for inst in s._instructions[1:]:
                 phi_exprs = inst.collect_phi_exprs()
                 if len(phi_exprs) == 0:
                     break

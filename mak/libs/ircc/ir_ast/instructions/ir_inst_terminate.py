@@ -34,8 +34,7 @@ class IrInstRet(IrInstruction):
 
     def generate(self, generator, context, next_segment):
         # type: (IrccGenerator, IrCodeGenContext, Optional[IrCodeSegment]) -> Optional[IrccExpression]
-        generator.instruction_return_value(generator.make_expression_constant_void())
-        #generator.instruction_return_value(self._return_value.create_generator_value(generator, context))
+        generator.instruction_return_value(self._return_value.create_generator_value(generator, context))
         return None
 
 
@@ -55,6 +54,7 @@ class IrInstBranch(IrInstruction):
 
     def generate(self, generator, context, next_segment):
         # type: (IrccGenerator, IrCodeGenContext, Optional[IrCodeSegment]) -> Optional[IrccExpression]
+        assert context._code is not None
         segment = context._code._find_segment(self._target[1:])
         segment.visit(generator, context, next_segment)
         return None
@@ -89,6 +89,7 @@ class IrInstConditionalBranch(IrInstruction):
 
     def generate(self, generator, context, next_segment):
         # type: (IrccGenerator, IrCodeGenContext, Optional[IrCodeSegment]) -> Optional[IrccExpression]
+        assert context._code is not None
         segment_true = context._code._find_segment(self._target_true[1:])
         segment_false = context._code._find_segment(self._target_false[1:])
         current_segment = context._current_segment

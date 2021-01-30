@@ -76,10 +76,6 @@ class IrInstLoad(IrInstruction):
         # type: (IrAddressSpaceInference, IrType, IrPosition) -> None
         self._source.resolve_type(equivalence, return_type, return_position)
 
-    def generate(self, generator, context, next_segment):
-        # type: (IrccGenerator, IrCodeGenContext, Optional[IrCodeSegment]) -> Optional[IrccExpression]
-        pass
-
     def _create_generator_value(self, type, generator, code_context):
         # type: (IrType, IrccGenerator, IrCodeGenContext) -> IrccExpression
         return generator.make_value_load(self._source.create_generator_value(generator, code_context))
@@ -113,7 +109,11 @@ class IrInstStore(IrInstruction):
 
     def generate(self, generator, context, next_segment):
         # type: (IrccGenerator, IrCodeGenContext, Optional[IrCodeSegment]) -> Optional[IrccExpression]
-        pass
+        generator.instruction_assign(
+            generator.make_expression_dereference(self._target.create_generator_value(generator, context)),
+            self._value.create_generator_value(generator, context)
+        )
+        return None
 
 
 class IrInstGetElementPtr(IrInstruction):
@@ -185,10 +185,6 @@ class IrInstGetElementPtr(IrInstruction):
             else:
                 raise NotImplementedError
         return generator.make_expression_address(value)
-
-    def generate(self, generator, context, next_segment):
-        # type: (IrccGenerator, IrCodeGenContext, Optional[IrCodeSegment]) -> Optional[IrccExpression]
-        pass
 
 
 if TYPE_CHECKING:

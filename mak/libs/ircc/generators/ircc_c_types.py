@@ -5,7 +5,7 @@ _UNSIGNED_VERSIONS = {'i8': 'u8', 'i16': 'u16', 'i32': 'u32', 'i64': 'u64'}
 
 
 class IrccCTypes(IrccGenerator):
-    _VECTOR_TYPES = {}
+    _VECTOR_TYPES = {}     # type: Dict[str, str]
 
     def __init__(self, file):
         # type: (TextIO) -> None
@@ -64,5 +64,5 @@ class IrccCTypes(IrccGenerator):
 
 
 if TYPE_CHECKING:
-    from typing import List, TextIO, Tuple
+    from typing import Dict, List, TextIO, Tuple
     from ircc import IrccType

@@ -305,7 +305,10 @@ class IrccCExpressions(IrccCTypes):
 
     def make_expression_address(self, value):
         # type: (IrccExpression) -> IrccExpression
-        return IrccCExpressionAddressOf(value)
+        if isinstance(value, IrccCExpressionDereference):
+            return value._value
+        else:
+            return IrccCExpressionAddressOf(value)
 
     def make_expression_access(self, value, field_name):
         # type: (IrccExpression, str) -> IrccExpression
@@ -318,6 +321,13 @@ class IrccCExpressions(IrccCTypes):
     def make_expression_variable_reference(self, name):
         # type: (str) -> IrccExpression
         return IrccCExpressionVariable(name)
+
+    def make_expression_dereference(self, expression):
+        # type: (IrccExpression) -> IrccExpression
+        if isinstance(expression, IrccCExpressionAddressOf):
+            return expression._value
+        else:
+            return IrccCExpressionDereference(expression)
 
     def make_expression_integer_binary_op(self, operation, type, left_operand, right_operand):
         # type: (str, IrccType, IrccExpression, IrccExpression) -> IrccExpression
