@@ -6,20 +6,18 @@ import os
 
 @conf
 def python_module(bld, name, depends, path, conditions):
-    # TODO
-    #module_list, module_multiarch = bld.module(name, path, depends, [], platforms,
-    #    features=['cxx', 'cxxshlib', 'bugengine:python_module'],
-    #    build_features=[],
-    #    extra_includes=[], extra_defines=[],
-    #    extra_public_includes=[], extra_public_defines=[],
-    #    use_master=True, warnings=True, export_all=False, root_namespace='BugEngine')
-    #if module_list[0].preprocess:
-    #    module_list[0].preprocess.env.PLUGIN = name.replace('.', '_')
-    #for module in module_list:
-    #    module.env.cxxshlib_PATTERN = module.env.pymodule_PATTERN
-    #if module_multiarch:
-    #    module_multiarch.env.cxxshlib_PATTERN = module.env.pymodule_PATTERN
-    return
+    def python_lib(env):
+        features = (
+            bld.env.STATIC and ['c', 'cxx', 'cxxobjects', 'bugengine:c', 'bugengine:cxx'] or
+            ['c', 'cxx', 'cxxshlib', 'bugengine:c', 'bugengine:cxx', 'bugengine:shared_lib', 'bugengine:python_module']
+        )
+        result = bld.module(name, env, path, depends, [], features, None, [], [], [], [], conditions)
+        result.env.cxxshlib_PATTERN = result.env.pymodule_PATTERN
+
+    bld.preprocess(name, path, 'BugEngine', name)
+    multiarch_module = bld.multiarch(name, [python_lib(env) for env in bld.multiarch_envs])
+    if multiarch_module is not None:
+        multiarch_module.env.cxxshlib_PATTERN = module.env.pymodule_PATTERN
 
 
 @feature('bugengine:python_module')

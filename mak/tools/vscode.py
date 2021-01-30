@@ -314,8 +314,6 @@ class vscode(Build.BuildContext):
                                 'cppdbg',
                             'request':
                                 'launch',
-                            'externalConsole':
-                                True,
                             'program':
                                 '${input:bugengine-Python}',
                             'miDebuggerPath':
