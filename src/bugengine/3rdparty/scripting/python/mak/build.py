@@ -8,7 +8,6 @@ import os
 def python_module(bld, name, depends, path, conditions):
     def python_lib(env):
         features = (
-            bld.env.STATIC and ['c', 'cxx', 'cxxobjects', 'bugengine:c', 'bugengine:cxx'] or
             ['c', 'cxx', 'cxxshlib', 'bugengine:c', 'bugengine:cxx', 'bugengine:shared_lib', 'bugengine:python_module']
         )
         result = bld.module(name, env, path, depends, [], features, None, [], [], [], [], conditions)

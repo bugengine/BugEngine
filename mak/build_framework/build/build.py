@@ -154,7 +154,7 @@ def set_building_name_inherits(self):
                 self.env.append_unique('DEFINES', 'building_%s' % y.target_name.split('.')[-1])
 
 
-@feature('bugengine:launcher', 'python_module')
+@feature('bugengine:launcher', 'bugengine:python_module')
 @before_method('apply_link')
 @before_method('process_use')
 def static_dependencies(self):
