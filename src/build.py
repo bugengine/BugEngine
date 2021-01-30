@@ -29,7 +29,10 @@ def build_bugengine(bld):
     """
     bld.headers('bugengine.mak', path=bld.bugenginenode.find_node('mak'), features=['Makefile'])
     bld.headers('bugengine.config', [])
-    bld.headers('bugengine.kernel', ['bugengine.config'], extra_public_includes=[bld.path.make_node('bugengine/kernel/api.cpu')])
+    bld.headers(
+        'bugengine.kernel', ['bugengine.config'],
+        extra_public_includes=[bld.path.make_node('bugengine/kernel/api.cpu')]
+    )
     bld.library('bugengine.minitl', bld.platforms + ['bugengine.mak', 'bugengine.kernel'])
     bld.library('bugengine.core', ['bugengine.minitl', 'bugengine.kernel'])
     bld.library('bugengine.network', ['bugengine.core'])
@@ -181,8 +184,8 @@ def build_games(bld):
     if Options.options.tests:
         bld.game('test.settings', ['bugengine'])
         bld.game(
-            'test.compute.copy', ['bugengine', 'plugin.scripting.package'],
-            root_namespace='BugEngine::Test::Compute::Copy'
+            'test.compute.unittests', ['bugengine', 'plugin.scripting.package'],
+            root_namespace='BugEngine::Test::Compute::UnitTests'
         )
 
 

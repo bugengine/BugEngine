@@ -73,7 +73,7 @@ public:
 
         iterator operator++(int)
         {
-            segments result = *this;
+            iterator result = *this;
             ++m_currentOffset;
             while(m_currentOffset == m_currentSegment->size())
             {
@@ -85,7 +85,7 @@ public:
 
         iterator operator--(int)
         {
-            segments result = *this;
+            iterator result = *this;
             --m_currentSegment;
             while(m_currentOffset == (u32)-1)
             {
@@ -107,6 +107,18 @@ public:
                 }
             }
             return *this;
+        }
+
+        iterator operator+(u32 count)
+        {
+            iterator result = *this;
+            return result += count;
+        }
+
+        iterator operator-(u32 count)
+        {
+            iterator result = *this;
+            return result -= count;
         }
 
         T* operator->() const

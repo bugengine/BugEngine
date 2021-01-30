@@ -4,7 +4,7 @@
 #include <stdafx.h>
 #include <storage.script.hh>
 
-namespace BugEngine { namespace Test { namespace Compute { namespace Copy {
+namespace BugEngine { namespace Test { namespace Compute { namespace UnitTests {
 
 Storage::Storage()
 {
@@ -14,4 +14,4 @@ Storage::~Storage()
 {
 }
 
-}}}}  // namespace BugEngine::Test::Compute::Copy
+}}}}  // namespace BugEngine::Test::Compute::UnitTests

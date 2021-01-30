@@ -268,6 +268,7 @@ class Lexer(lex.Lexer):
         self.source = ''
         self.inside = 0
         self.includes = []
+        self.usings = []
 
     def define_macro(self, name):
         name = name.strip()

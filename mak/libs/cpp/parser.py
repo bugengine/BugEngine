@@ -31,4 +31,5 @@ def parse(filename, pickle_file, macro_files, module_name, root_alias):
     if result:
         result.error_count = lexer.lexer.error_count
         result.includes = lexer.lexer.includes
+        result.usings = lexer.lexer.usings
     return result

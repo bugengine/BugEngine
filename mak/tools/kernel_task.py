@@ -42,6 +42,7 @@ TEMPLATE_H = """
 #include    <bugengine/kernel/colors.hh>
 #include    <bugengine/plugin/resourcehook.hh>
 %(includes)s
+%(usings)s
 
 %(Namespace)s
 
@@ -105,6 +106,10 @@ BE_EXPORT ::BugEngine::Plugin::PluginHook< BugEngine::Plugin::ResourceHook< ::Bu
 """
 
 
+def underscore_to_camelcase(value):
+    return ''.join(x.capitalize() or '_' for x in value.split('_'))
+
+
 class kernel_task(Task.Task):
     color = 'PINK'
 
@@ -137,7 +142,8 @@ class kernel_task(Task.Task):
             'PLUGIN': self.generator.env.PLUGIN.upper(),
             'module': self.generator.env.PLUGIN,
             'plugin': self.generator.env.PLUGIN.replace('_', '.'),
-            'includes': '\n'.join(includes),
+            'includes': '\n'.join(includes[0]),
+            'usings': '\n'.join(['using namespace %s;' % u for u in includes[1]]),
         }
         tasks_cc = []
         tasks_h = []
@@ -153,6 +159,7 @@ class kernel_task(Task.Task):
                     % (arg[0], arg[1], arg[0]) for arg in args
                 )
             )
+
             task_params = {
                 'Namespace':
                     ' { '.join('namespace %s' % n.capitalize() for n in kernel_namespace[:-1]) + '\n{\n',
@@ -165,7 +172,7 @@ class kernel_task(Task.Task):
                 'kernelName':
                     method.name,
                 'KernelName':
-                    method.name[0].upper() + method.name[1:],
+                    underscore_to_camelcase(method.name),
                 'argument_count':
                     len(args),
                 'argument_field':

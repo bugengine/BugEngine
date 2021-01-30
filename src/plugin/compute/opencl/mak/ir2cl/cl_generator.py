@@ -75,6 +75,124 @@ class IrccClExpressionVectorShuffle(IrccCExpression):
         return '(%s)' % (', '.join([get_member(i) for i in self._mask]))
 
 
+class IrccClExpressionVectorCast(IrccCExpression):
+    def __init__(self, value, target_type, unsigned=False):
+        # type: (IrccExpression, IrccType, bool) -> None
+        IrccCExpression.__init__(self, IrccCExpression._PREC_CALL)
+        self._value = value
+        self._target_type = target_type
+        self._unsigned = unsigned
+
+    def __str__(self):
+        # type: () -> str
+        target_type = self._target_type.format_unsigned([]) if self._unsigned else self._target_type.format([])
+        value = self._value
+        while isinstance(value, IrccClExpressionVectorCast):
+            value = value._value
+        return 'convert_%s(%s)' % (target_type, value.make_string_right('right', self._precedence))
+
+
+class IrccClExpressionVectorIntegerBinaryOperation(IrccCExpression):
+    _OPERATORS = {
+        'add': ('%(left)s + %(right)s', IrccCExpression._PREC_ADD, False, False),
+        'sub': ('%(left)s - %(right)s', IrccCExpression._PREC_SUB, False, False),
+        'mul': ('%(left)s * %(right)s', IrccCExpression._PREC_MUL, False, False),
+        'udiv': ('%(left)s / %(right)s', IrccCExpression._PREC_DIV, True, False),
+        'sdiv': ('%(left)s / %(right)s', IrccCExpression._PREC_DIV, False, False),
+        'urem': ('%(left)s %% %(right)s', IrccCExpression._PREC_REM, True, False),
+        'srem': ('%(left)s %% %(right)s', IrccCExpression._PREC_REM, False, False),
+        'shl': ('%(left)s << %(right)s', IrccCExpression._PREC_SHL, False, False),
+        'lshr': ('%(left)s >> %(right)s', IrccCExpression._PREC_SHR, True, False),
+        'ashr': ('%(left)s >> %(right)s', IrccCExpression._PREC_SHR, False, False),
+        'and': ('%(left)s & %(right)s', IrccCExpression._PREC_AND, False, False),
+        'or': ('%(left)s | %(right)s', IrccCExpression._PREC_OR, False, False),
+        'xor': ('%(left)s ^ %(right)s', IrccCExpression._PREC_XOR, False, False),
+        'eq': ('%(left)s == %(right)s', IrccCExpression._PREC_EQ, False, True),
+        'ne': ('%(left)s != %(right)s', IrccCExpression._PREC_NEQ, False, True),
+        'ugt': ('%(left)s > %(right)s', IrccCExpression._PREC_GT, True, True),
+        'uge': ('%(left)s >= %(right)s', IrccCExpression._PREC_GE, True, True),
+        'ult': ('%(left)s < %(right)s', IrccCExpression._PREC_LT, True, True),
+        'ule': ('%(left)s <= %(right)s', IrccCExpression._PREC_LE, True, True),
+        'sgt': ('%(left)s > %(right)s', IrccCExpression._PREC_GT, False, True),
+        'sge': ('%(left)s >= %(right)s', IrccCExpression._PREC_GE, False, True),
+        'slt': ('%(left)s < %(right)s', IrccCExpression._PREC_LT, False, True),
+        'sle': ('%(left)s <= %(right)s', IrccCExpression._PREC_LE, False, True),
+    }
+
+    def __init__(self, operation, result_type, vector_type, left_operand, right_operand):
+        # type: (str, IrccType, IrccType, IrccExpression, IrccExpression) -> None
+        operator, precedence, unsigned, convert_result = IrccClExpressionVectorIntegerBinaryOperation._OPERATORS[
+            operation]
+        self._convert_result = unsigned or convert_result
+        self._result_type = result_type
+        IrccCExpression.__init__(self, IrccCExpression._PREC_CALL if self._convert_result else precedence)
+        if unsigned:
+            self._left_operand = IrccClExpressionVectorCast(
+                left_operand, vector_type, unsigned=True
+            )                                                 # type: IrccExpression
+            self._right_operand = IrccClExpressionVectorCast(
+                right_operand, vector_type, unsigned=True
+            )                                                 # type: IrccExpression
+        else:
+            self._left_operand = left_operand
+            self._right_operand = right_operand
+        self._operator = operator
+
+    def __str__(self):
+        # type: () -> str
+        op_result = self._operator % {
+            'left': self._left_operand.make_string_left('left', self._precedence),
+            'right': self._right_operand.make_string_right('left', self._precedence)
+        }
+        if self._convert_result:
+            return 'convert_%s(%s)' % (self._result_type.format([]), op_result)
+        else:
+            return op_result
+
+
+class IrccClExpressionVectorFloatBinaryOperation(IrccCExpression):
+    _OPERATORS = {
+        'fadd': ('%(left)s + %(right)s', IrccCExpression._PREC_ADD, False),
+        'fsub': ('%(left)s - %(right)s', IrccCExpression._PREC_SUB, False),
+        'fmul': ('%(left)s * %(right)s', IrccCExpression._PREC_MUL, False),
+        'fdiv': ('%(left)s / %(right)s', IrccCExpression._PREC_DIV, False),
+        'frem': ('fmod(%(left)s, %(right)s)', IrccCExpression._PREC_REM, False),
+        'oeq': ('%(left)s == %(right)s', IrccCExpression._PREC_EQ, True),
+        'ueq': ('%(left)s == %(right)s', IrccCExpression._PREC_EQ, True),
+        'one': ('%(left)s != %(right)s', IrccCExpression._PREC_NEQ, True),
+        'une': ('%(left)s != %(right)s', IrccCExpression._PREC_NEQ, True),
+        'ogt': ('%(left)s > %(right)s', IrccCExpression._PREC_GT, True),
+        'ugt': ('%(left)s > %(right)s', IrccCExpression._PREC_GT, True),
+        'oge': ('%(left)s >= %(right)s', IrccCExpression._PREC_GE, True),
+        'uge': ('%(left)s >= %(right)s', IrccCExpression._PREC_GE, True),
+        'olt': ('%(left)s < %(right)s', IrccCExpression._PREC_LT, True),
+        'ult': ('%(left)s < %(right)s', IrccCExpression._PREC_LT, True),
+        'ole': ('%(left)s <= %(right)s', IrccCExpression._PREC_LE, True),
+        'ule': ('%(left)s <= %(right)s', IrccCExpression._PREC_LE, True),
+    }
+
+    def __init__(self, operation, result_type, vector_type, left_operand, right_operand):
+        # type: (str, IrccType, IrccType, IrccExpression, IrccExpression) -> None
+        operator, precedence, convert_result = IrccClExpressionVectorFloatBinaryOperation._OPERATORS[operation]
+        IrccCExpression.__init__(self, IrccCExpression._PREC_CALL if convert_result else precedence)
+        self._convert_result = convert_result
+        self._result_type = result_type
+        self._left_operand = left_operand
+        self._right_operand = right_operand
+        self._operator = operator
+
+    def __str__(self):
+        # type: () -> str
+        op_result = self._operator % {
+            'left': self._left_operand.make_string_left('left', self._precedence),
+            'right': self._right_operand.make_string_right('left', self._precedence)
+        }
+        if self._convert_result:
+            return 'convert_%s(%s)' % (self._result_type.format([]), op_result)
+        else:
+            return op_result
+
+
 class ClDeclaration(IrccCDeclaration):
     _VECTOR_TYPES = {
         'i8': 'char%(size)d',
@@ -209,6 +327,20 @@ class ClDefinition(IrccCDefinition):
     def make_expression_vector_shuffle(self, result, source_size, v1, v2, mask):
         # type: (IrccType, int, IrccExpression, IrccExpression, List[int]) -> IrccExpression
         return IrccCExpressionCast(IrccClExpressionVectorShuffle(source_size, v1, v2, mask), result)
+
+    def make_expression_vector_integer_binary_op(
+        self, operation, result_type, vector_type, left_operand, right_operand
+    ):
+        # type: (str, IrccType, IrccType, IrccExpression, IrccExpression) -> IrccExpression
+        return IrccClExpressionVectorIntegerBinaryOperation(
+            operation, result_type, vector_type, left_operand, right_operand
+        )
+
+    def make_expression_vector_float_binary_op(self, operation, result_type, vector_type, left_operand, right_operand):
+        # type: (str, IrccType, IrccType, IrccExpression, IrccExpression) -> IrccExpression
+        return IrccClExpressionVectorFloatBinaryOperation(
+            operation, result_type, vector_type, left_operand, right_operand
+        )
 
 
 if TYPE_CHECKING:

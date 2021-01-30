@@ -4,6 +4,7 @@ from .name import *
 from .value import *
 from .type import *
 from .namespace import *
+from .using import *
 from .variable import *
 from .struct import *
 from .enum import *

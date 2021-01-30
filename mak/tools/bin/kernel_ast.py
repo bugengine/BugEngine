@@ -67,7 +67,7 @@ if __name__ == '__main__':
                 raise Exception("could not locate any kernel method in kernel")
 
             with open(arguments[2], 'wb') as out_file:
-                pickle.dump((arguments[0], result.includes, arguments[1], kernels), out_file)
+                pickle.dump((arguments[0], (result.includes, result.usings), arguments[1], kernels), out_file)
 
             sys.exit(result.error_count)
         except Exception as e:

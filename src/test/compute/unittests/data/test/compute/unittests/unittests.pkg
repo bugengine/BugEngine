@@ -1,0 +1,21 @@
+load test.compute.unittests as unittests;
+
+storage = unittests.Storage
+(
+)
+
+forloop = unittests.Kernels.Statement.ForLoop
+(
+    inout = storage.ComponentInt;
+)
+
+whileloop = unittests.Kernels.Statement.WhileLoop
+(
+    inout = forloop.inout;
+)
+
+world = bugengine.World.World
+(
+    storage = storage;
+    products = [whileloop.inout];
+)
