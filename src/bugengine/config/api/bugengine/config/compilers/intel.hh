@@ -36,6 +36,7 @@
 #    pragma warning disable 791   // calling convention specified more than once
 #    pragma warning disable 1028  // unknown warning specifier
 #    pragma warning disable 1879  // unimplemented pragma ignored
+#    pragma warning disable 2586  // decorated name length exceeded, name was truncated
 #    pragma warning disable 2659  // attribute "align" ignored because no definition follows
 #endif
 #if __ICL >= 1300
