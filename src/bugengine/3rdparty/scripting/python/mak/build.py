@@ -11,7 +11,8 @@ def python_module(bld, name, depends, path, conditions):
             ['c', 'cxx', 'cxxshlib', 'bugengine:c', 'bugengine:cxx', 'bugengine:shared_lib', 'bugengine:python_module']
         )
         result = bld.module(name, env, path, depends, [], features, None, [], [], [], [], conditions)
-        result.env.cxxshlib_PATTERN = result.env.pymodule_PATTERN
+        if result is not None:
+            result.env.cxxshlib_PATTERN = result.env.pymodule_PATTERN
 
     bld.preprocess(name, path, 'BugEngine', name)
     multiarch_module = bld.multiarch(name, [python_lib(env) for env in bld.multiarch_envs])
