@@ -24,6 +24,15 @@ def options(option_context):
     option_context.add_package_options = lambda package_name: add_package_options(option_context, package_name)
 
     gr = option_context.get_option_group('build and install options')
+    gr.add_option(
+        '--tidy',
+        action='store',
+        default='auto',
+        dest='tidy',
+        help=
+        'remove unused files from the build and output folders after build; default is to tidy only if no option is filtering the output folder',
+        choices=('force', 'auto', 'none')
+    )
     gr.add_option('--nomaster', action='store_true', default=False, dest='nomaster', help='build without master files')
     gr.add_option(
         '--static',

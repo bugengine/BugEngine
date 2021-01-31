@@ -100,6 +100,48 @@ def autosetup(execute_method):
     return execute
 
 
+@conf
+def tidy_rm(self, node):
+    col1 = Logs.colors.CYAN
+    col2 = Logs.colors.NORMAL
+    parent = node.parent
+    if getattr(self, '.progress_bar', 0) == 0 and not Options.options.silent:
+        print('{rm}     %s%s%s' % (col1, node, col2))
+    node.delete(evict=True)
+    if len(parent.children) == 0:
+        self.tidy_rm(parent)
+
+
+def tidy_build(execute_method):
+    """
+        Decorator used to set the commands that tidy up the build folders
+    """
+    def execute(self):
+        result = execute_method(self)
+        if Options.options.tidy == 'force' or (
+            Options.options.tidy == 'auto' and Options.options.nomaster == False and Options.options.static == False
+            and Options.options.dynamic == False and Options.options.targets == '' and Options.options.tests
+        ):
+            all_nodes = set(
+                self.bldnode.ant_glob('**') + self.srcnode.ant_glob(os.path.join(self.env.PREFIX, self.optim, '**'))
+            )
+            all_nodes.discard(self.bldnode.make_node(Context.DBFILE))
+            for group in self.groups:
+                for task_gen in group:
+                    install_task = getattr(task_gen, 'bug_install_task', None)
+                    if install_task is not None:
+                        for _, dest_file, _ in install_task.install_step:
+                            all_nodes.discard(self.srcnode.make_node(dest_file))
+                    for task in task_gen.tasks:
+                        for output in task.outputs:
+                            all_nodes.discard(output)
+            for node in all_nodes:
+                self.tidy_rm(node)
+        return result
+
+    return execute
+
+
 class ConfigurationContext(Configure.ConfigurationContext):
     """
         ConfigurationContext subclass, which allows to store the current environment used
@@ -120,6 +162,14 @@ class ConfigurationContext(Configure.ConfigurationContext):
         """
         super(ConfigurationContext, self).execute()
         self.store_options()
+        if Options.options.tidy == 'force' or (
+            Options.options.tidy == 'auto' and Options.options.compilers == [] and Options.options.platforms == []
+        ):
+            all_toolchains = self.bldnode.ant_glob('*', dir=True)
+            for node in all_toolchains:
+                if node.isdir():
+                    if node.name not in [Build.CACHE_DIR, 'packages', 'projects'] + self.env.ALL_TOOLCHAINS:
+                        self.tidy_rm(node)
 
     def store_options(self):
         """
@@ -264,7 +314,7 @@ class Setup(Configure.ConfigurationContext):
         )
 
 
-Build.BuildContext.execute = autoreconfigure(autosetup(Build.BuildContext.execute))
+Build.BuildContext.execute = autoreconfigure(autosetup(tidy_build(Build.BuildContext.execute)))
 
 
 def add_setup_command(toolchain):
