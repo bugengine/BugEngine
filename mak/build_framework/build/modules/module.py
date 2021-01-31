@@ -71,7 +71,7 @@ def preprocess(build_context, name, path, root_namespace, plugin_name, extra_fea
 
     preprocess = build_context(
         env=pp_env,
-        target=name + '.preprocess',
+        target=name + '.pp',
         parent=name,
         features=['bugengine:preprocess'] + extra_features,
         pchstop=pchstop,
@@ -127,7 +127,7 @@ def module(
     else:
         source_list = []
     if not build_context.env.PROJECTS:
-        preprocess = build_context.get_tgen_by_name('%s.preprocess' % name)
+        preprocess = build_context.get_tgen_by_name('%s.pp' % name)
     else:
         preprocess = None
 
