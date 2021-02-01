@@ -38,8 +38,11 @@ def build_bugengine(bld):
     bld.library('bugengine.network', ['bugengine.core'])
     bld.library('bugengine.rtti', ['bugengine.core', 'bugengine.network'], ['bugengine.3rdparty.system.zlib'])
     bld.library('bugengine.filesystem', ['bugengine.core', 'bugengine.rtti'], ['bugengine.3rdparty.system.minizip'])
-    bld.library('bugengine.rttiparse', ['bugengine.core', 'bugengine.rtti', 'bugengine.filesystem'])
-    bld.library('bugengine.settings', ['bugengine.rtti', 'bugengine.rttiparse'])
+    bld.library('bugengine.rtti-ast', ['bugengine.core', 'bugengine.rtti', 'bugengine.filesystem'])
+    bld.library(
+        'bugengine.rtti-parse', ['bugengine.core', 'bugengine.rtti', 'bugengine.filesystem', 'bugengine.rtti-ast']
+    )
+    bld.library('bugengine.settings', ['bugengine.rtti', 'bugengine.rtti-parse'])
     bld.library('bugengine.resource', ['bugengine.core', 'bugengine.rtti', 'bugengine.filesystem'])
     bld.library('bugengine.scheduler', ['bugengine.core', 'bugengine.rtti', 'bugengine.resource', 'bugengine.settings'])
     bld.library('bugengine.world', ['bugengine.core', 'bugengine.rtti', 'bugengine.resource', 'bugengine.scheduler'])
@@ -49,8 +52,8 @@ def build_bugengine(bld):
     )
     bld.shared_library(
         'bugengine', [
-            'bugengine.core', 'bugengine.rtti', 'bugengine.rttiparse', 'bugengine.settings', 'bugengine.scheduler',
-            'bugengine.filesystem', 'bugengine.world', 'bugengine.plugin'
+            'bugengine.core', 'bugengine.rtti', 'bugengine.rtti-ast', 'bugengine.rtti-parse', 'bugengine.settings',
+            'bugengine.scheduler', 'bugengine.filesystem', 'bugengine.world', 'bugengine.plugin'
         ],
         path=bld.path.find_node('bugengine/bugengine')
     )

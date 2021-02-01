@@ -98,6 +98,34 @@ void array< T >::swap(array< T >& other)
     m_array.swap(other.m_array);
 }
 
+template < typename T >
+T& array< T >::first()
+{
+    be_assert(m_array.count() != 0, "first() called on empty array");
+    return m_array[0];
+}
+
+template < typename T >
+const T& array< T >::first() const
+{
+    be_assert(m_array.count() != 0, "first() called on empty array");
+    return m_array[0];
+}
+
+template < typename T >
+T& array< T >::last()
+{
+    be_assert(m_array.count() != 0, "last() called on empty array");
+    return m_array[m_array.count() - 1];
+}
+
+template < typename T >
+const T& array< T >::last() const
+{
+    be_assert(m_array.count() != 0, "last() called on empty array");
+    return m_array[m_array.count() - 1];
+}
+
 }  // namespace minitl
 
 /**************************************************************************************************/

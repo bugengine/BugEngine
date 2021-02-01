@@ -6,12 +6,13 @@
 
 int be_package_lex_destroy();
 
-const minitl::Allocator::Block< u8 >* g_buffer              = 0;
-int                                   g_bufferPosition      = 0;
-int                                   g_packageLine         = 0;
-int                                   g_packageColumnBefore = 0;
-int                                   g_packageColumnAfter  = 0;
-static i_u32                          s_useCount            = i_u32::create(0);
+const minitl::Allocator::Block< u8 >* g_buffer                   = 0;
+int                                   g_bufferPosition           = 0;
+int                                   g_packageLine              = 0;
+int                                   g_packageColumnBefore      = 0;
+int                                   g_packageColumnAfter       = 0;
+int                                   g_packageObjectNestedLevel = 0;
+static i_u32                          s_useCount                 = i_u32::create(0);
 
 namespace BugEngine { namespace PackageBuilder {
 
@@ -25,6 +26,7 @@ BuildContext::BuildContext(const ifilename& filename, const minitl::Allocator::B
     g_bufferPosition      = 0;
     g_packageLine         = 0;
     g_packageColumnBefore = g_packageColumnAfter = 0;
+    g_packageObjectNestedLevel                   = 0;
 }
 
 BuildContext::~BuildContext()

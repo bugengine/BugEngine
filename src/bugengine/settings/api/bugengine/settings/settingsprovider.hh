@@ -7,7 +7,7 @@
 #include <bugengine/settings/stdafx.h>
 #include <bugengine/minitl/tuple.hh>
 #include <bugengine/minitl/vector.hh>
-#include <bugengine/rttiparse/valueparse.hh>
+#include <bugengine/rtti-parse/valueparse.hh>
 
 namespace BugEngine { namespace Settings {
 
@@ -34,7 +34,7 @@ private:
 
 protected:
     typedef minitl::vector<
-       minitl::tuple< istring, ref< RTTI::Parser::Namespace >, ref< RTTI::Parser::Node > > >
+        minitl::tuple< istring, ref< RTTI::AST::Namespace >, ref< RTTI::AST::Node > > >
                                                      SettingsList;
     typedef minitl::hashmap< istring, SettingsList > SettingsCategoryMap;
 
@@ -45,7 +45,7 @@ private:
 
 protected:
     static void addSetting(SettingsCategoryMap & container, istring category, istring name,
-                           ref< RTTI::Parser::Node > value);
+                           ref< RTTI::AST::Node > value);
 
 protected:
     SettingsProvider(const ifilename& settingsOrigin, const SettingsCategoryMap& initialSettings,

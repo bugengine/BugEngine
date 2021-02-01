@@ -125,6 +125,7 @@ def create_cuda_kernels(task_gen):
                     bld_env=env,
                     target=env.ENV_PREFIX % kernel_target,
                     target_name=env.ENV_PREFIX % task_gen.parent,
+                    safe_target_name=kernel_target.replace('.', '_').replace('-', '_'),
                     kernel=kernel,
                     features=[
                         'cxx', task_gen.bld.env.STATIC and 'cxxobjects' or 'cxxshlib', 'bugengine:cxx',

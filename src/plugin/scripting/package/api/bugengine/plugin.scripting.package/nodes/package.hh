@@ -5,59 +5,37 @@
 #define BE_PACKAGE_NODES_PACKAGE_HH_
 /**************************************************************************************************/
 #include <bugengine/plugin.scripting.package/stdafx.h>
+
 #include <bugengine/minitl/hash_map.hh>
 #include <bugengine/minitl/intrusive_list.hh>
 #include <bugengine/minitl/vector.hh>
 #include <bugengine/plugin.scripting.package/logger.hh>
 #include <bugengine/plugin/plugin.hh>
+#include <bugengine/rtti-ast/dbcontext.hh>
+#include <bugengine/rtti-ast/node/node.hh>
 #include <bugengine/rtti/value.hh>
 
 namespace BugEngine { namespace PackageBuilder { namespace Nodes {
 
-class Object;
-class Reference;
-
 class Package : public minitl::refcountable
 {
-    friend class Reference;
-
-private:
-    class Namespace : public minitl::refcountable
-    {
-    private:
-        minitl::hashmap< istring, RTTI::Value >      m_values;
-        minitl::hashmap< istring, ref< Namespace > > m_children;
-
-    public:
-        Namespace();
-        ~Namespace();
-
-        RTTI::Value get(const inamespace& name) const;
-        void        add(const inamespace& name, const RTTI::Value& value);
-    };
-
 private:
     const ifilename                           m_filename;
+    RTTI::AST::DbContext                      m_context;
     minitl::vector< Plugin::Plugin< void* > > m_plugins;
-    ref< Namespace >                          m_rootNamespace;
-    minitl::vector< ref< Object > >           m_nodes;
-    minitl::intrusive_list< Reference >       m_references;
+    minitl::vector< ref< RTTI::AST::Node > >  m_nodes;
     minitl::vector< RTTI::Value >             m_values;
     RTTI::Value                               m_empty;
     Logger                                    m_logger;
-
-private:
-    void addReference(weak< Reference > reference);
-    void resolveReference(weak< Reference > reference);
 
 public:
     Package(const ifilename& filename);
     ~Package();
 
-    void               insertNode(ref< Object > object);
-    void               removeNode(ref< Object > object);
-    ref< Object >      findByName(istring name) const;
-    const RTTI::Value& getValue(weak< const Object > object) const;
+    void                   insertNode(const istring& name, ref< RTTI::AST::Node > object);
+    void                   removeNode(const istring& name, ref< RTTI::AST::Node > object);
+    ref< RTTI::AST::Node > findByName(istring name) const;
+    const RTTI::Value&     getValue(weak< const RTTI::AST::Node > object) const;
 
     void loadPlugin(inamespace plugin, inamespace name);
 

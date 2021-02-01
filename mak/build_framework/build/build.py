@@ -151,7 +151,7 @@ def set_building_name_inherits(self):
         else:
             if 'cxxobjects' in y.features:
                 use += getattr(y, 'use', [])
-                self.env.append_unique('DEFINES', 'building_%s' % y.target_name.split('.')[-1])
+                self.env.append_unique('DEFINES', 'building_%s' % y.safe_target_name)
 
 
 @feature('bugengine:launcher', 'bugengine:python_module')
@@ -278,9 +278,9 @@ def process_use_flags(self):
 @feature('cxxshlib', 'cshlib')
 def be_build_dll(self):
     try:
-        self.export_defines.append('be_dll_%s' % self.target_name.split('.')[-1])
+        self.export_defines.append('be_dll_%s' % self.safe_target_name)
     except AttributeError:
-        self.export_defines = ['be_dll_%s' % self.target_name.split('.')[-1]]
+        self.export_defines = ['be_dll_%s' % self.safe_target_name]
 
 
 @taskgen_method
@@ -321,7 +321,7 @@ def process_use_link(self):
             elif link_objects and ('cxxobjects' in d.features or 'cobjects' in d.features):
                 self.add_objects_from_tgen(d)
                 if 'cxxshlib' in self.features or 'cshlib' in self.features:
-                    self.export_defines.append('be_dll_%s' % d.target_name.split('.')[-1])
+                    self.export_defines.append('be_dll_%s' % d.safe_target_name)
 
 
 @taskgen_method

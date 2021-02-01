@@ -140,6 +140,7 @@ def create_cpu_kernels(task_gen):
                         bld_env=env,
                         target=env.ENV_PREFIX % kernel_target,
                         target_name=env.ENV_PREFIX % task_gen.parent,
+                        safe_target_name=kernel_target.replace('.', '_').replace('-', '_'),
                         variant_name=variant,
                         kernel=kernel,
                         features=[

@@ -9,7 +9,7 @@
 namespace BugEngine { namespace Settings {
 
 void SettingsProvider::addSetting(minitl::hashmap< istring, SettingsList >& container,
-                                  istring category, istring name, ref< RTTI::Parser::Node > value)
+                                  istring category, istring name, ref< RTTI::AST::Node > value)
 {
     minitl::hashmap< istring, SettingsList >::iterator where;
     where = container.insert(category, SettingsList(Arena::general())).first;
@@ -23,8 +23,8 @@ void SettingsProvider::addSetting(minitl::hashmap< istring, SettingsList >& cont
         }
     }
     where->second.push_back(minitl::make_tuple(
-       name, ref< RTTI::Parser::Namespace >::create(Arena::general(), byref(Arena::general())),
-       value));
+        name, ref< RTTI::AST::Namespace >::create(Arena::general(), byref(Arena::general())),
+        value));
 }
 
 SettingsProvider::SettingsProvider(const ifilename&                                settingsOrigin,
@@ -77,15 +77,15 @@ void SettingsProvider::apply(SettingsBase& settings) const
                 setting != it->second.end(); ++setting)
             {
                 raw< const RTTI::Property > property
-                   = settings.m_settingsClass->getProperty(setting->first);
+                    = settings.m_settingsClass->getProperty(setting->first);
                 if(!property)
                 {
                     be_error("Unknwon setting %s in category %s" | setting->first | it->first);
                 }
                 else
                 {
-                    RTTI::Parser::DbContext context(Arena::stack(), m_filename, setting->second,
-                                                    m_folder);
+                    RTTI::AST::DbContext context(Arena::stack(), m_filename, setting->second,
+                                                 m_folder);
                     setting->third->resolve(context);
                     RTTI::Value v = setting->third->eval(context, property->type);
                     if(!context.errorCount)
@@ -94,7 +94,7 @@ void SettingsProvider::apply(SettingsBase& settings) const
                     }
                     else
                     {
-                        for(RTTI::Parser::MessageList::const_iterator message
+                        for(RTTI::AST::MessageList::const_iterator message
                             = context.messages.begin();
                             message != context.messages.end(); ++message)
                         {

@@ -2,7 +2,7 @@
    see LICENSE for detail */
 
 #include <bugengine/world/stdafx.h>
-#include <bugengine/world/kernel/segmentsmemorybuffer.hh>
+#include <kernel/segmentsmemorybuffer.hh>
 
 namespace BugEngine { namespace World {
 

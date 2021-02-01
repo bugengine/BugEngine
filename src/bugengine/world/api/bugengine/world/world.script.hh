@@ -10,24 +10,22 @@
 #include <bugengine/rtti/typeinfo.hh>
 #include <bugengine/scheduler/kernel/iproduct.script.hh>
 #include <bugengine/scheduler/task/group.hh>
-#include <bugengine/world/entity.script.hh>
-#include <bugengine/world/entitystorage.script.hh>
+#include <bugengine/world/component/storageconfiguration.script.hh>
+#include <bugengine/world/entity/entity.script.hh>
 
 namespace BugEngine { namespace World {
-
-class EntityStorage;
 
 class be_api(WORLD) World : public Resource::Description
 {
 private:
     ref< Task::TaskGroup >                              m_task;
-    weak< EntityStorage > const                         m_storage;
     Task::TaskGroup::TaskStartConnection                m_taskStart;
     Task::TaskGroup::TaskEndConnection                  m_taskEnd;
     minitl::array< Task::TaskGroup::TaskEndConnection > m_productEnds;
 
 private:
     void addComponent(Entity e, const void* component, raw< const RTTI::Class > metaclass);
+    void update();
 
 public:
     weak< Task::ITask > updateWorldTask() const;
@@ -45,7 +43,7 @@ published:
     bool        hasComponent(Entity e, raw< const RTTI::Class > metaclass) const;
     RTTI::Value getComponent(Entity e, raw< const RTTI::Class > metaclass) const;
 published:
-    World(weak< EntityStorage >                                    storage,
+    World(ref< const Component::StorageConfiguration >             configuration,
           minitl::array< weak< const KernelScheduler::IProduct > > products);
     ~World();
 };

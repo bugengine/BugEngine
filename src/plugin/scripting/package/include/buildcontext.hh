@@ -5,27 +5,15 @@
 #define BE_PACKAGEBUILDER_BUILDCONTEXT_HH_
 /**************************************************************************************************/
 #include <bugengine/plugin.scripting.package/stdafx.h>
-#include <bugengine/filesystem/folder.script.hh>
-#include <bugengine/plugin.scripting.package/nodes/entity.hh>
 #include <bugengine/plugin.scripting.package/nodes/package.hh>
-#include <bugengine/plugin.scripting.package/nodes/value.hh>
+
 #include <bugengine/plugin/plugin.hh>
+#include <bugengine/rtti-ast/node/node.hh>
 
 union YYSTYPE
 {
-    bool                                                                  bValue;
-    i64                                                                   iValue;
-    double                                                                fValue;
-    char*                                                                 sValue;
-    ref< BugEngine::PackageBuilder::Nodes::Value >*                       value;
-    ref< BugEngine::PackageBuilder::Nodes::Parameter >*                   param;
-    ref< BugEngine::PackageBuilder::Nodes::Object >*                      object;
-    ref< BugEngine::PackageBuilder::Nodes::Component >*                   component;
-    ref< BugEngine::PackageBuilder::Nodes::Entity >*                      entity;
-    minitl::vector< ref< BugEngine::PackageBuilder::Nodes::Value > >*     value_list;
-    minitl::vector< ref< BugEngine::PackageBuilder::Nodes::Parameter > >* param_list;
-    minitl::vector< ref< BugEngine::PackageBuilder::Nodes::Component > >* component_list;
-    minitl::vector< ref< BugEngine::PackageBuilder::Nodes::Entity > >*    entity_list;
+    char*                              sValue;
+    ref< BugEngine::RTTI::AST::Node >* value;
 };
 #define YYSTYPE_IS_DECLARED 1
 #define YYSTYPE_IS_TRIVIAL  1
@@ -47,6 +35,7 @@ struct BuildContext
 extern int g_packageLine;
 extern int g_packageColumnBefore;
 extern int g_packageColumnAfter;
+extern int g_packageObjectNestedLevel;
 
 extern const minitl::Allocator::Block< u8 >* g_buffer;
 extern int                                   g_bufferPosition;

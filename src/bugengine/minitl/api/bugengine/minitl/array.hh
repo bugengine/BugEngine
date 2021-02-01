@@ -42,6 +42,11 @@ public:
     inline const T& operator[](u32 index) const;
 
     inline u32 size() const;
+
+    T&       first();
+    const T& first() const;
+    T&       last();
+    const T& last() const;
 };
 
 }  // namespace minitl

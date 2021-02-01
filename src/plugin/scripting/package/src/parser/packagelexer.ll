@@ -4,9 +4,6 @@
 #include    <bugengine/plugin.scripting.package/stdafx.h>
 #include    <ctype.h>
 #include    <buildcontext.hh>
-#include    <bugengine/plugin.scripting.package/nodes/value.hh>
-
-using namespace BugEngine::PackageBuilder::Nodes;
 
 #define yylval  be_package_lval
 #include "packageparser.hh"
@@ -39,28 +36,6 @@ static char *be_strdup(const char *src)
     char* result = (char*)malloc(x+1);
     strncpy(result, src, x+1);
     return result;
-}
-
-i64 strToInteger(const char *text, size_t l)
-{
-    bool negate = false;
-    i64 result = 0;
-    if (*text == '-')
-    {
-        negate = true;
-        text++;
-        l--;
-    }
-    for (size_t i = 0; i < l; ++i)
-    {
-        result = result * 10 + (text[i]-'0');
-    }
-    return negate?-result:result;
-}
-
-double strToDouble(const char *text, size_t /*l*/)
-{
-    return strtod(text, 0);
 }
 
 static void update (int num)
@@ -97,30 +72,29 @@ extern "C" int be_package_wrap()
 %option never-interactive
 %option nounput
 
-DIGIT         [0-9]
-HEXDIGIT      [0-9A-Fa-f]
-DIGITS        ({DIGIT}+)
-SIGN          ("+"|"-")
+%x RTTIPARSE
 
 %%
 
-true                                                    { update(be_package_leng); yylval.bValue = true; return VAL_BOOLEAN; }
-false                                                   { update(be_package_leng); yylval.bValue = false; return VAL_BOOLEAN; }
-import                                                  { update(be_package_leng); return KW_import; }
-load                                                    { update(be_package_leng); return KW_plugin; }
-namespace                                               { update(be_package_leng); return KW_namespace; }
-zip                                                     { update(be_package_leng); return KW_zip; }
-as                                                      { update(be_package_leng); return KW_as; }
-->                                                      { update(be_package_leng); return KW_notify; }
-[0-9A-Za-z_\-\+\$]*[A-Za-z_\-\+\$]+[0-9A-Za-z_\-\+\$]*  { update(be_package_leng); yylval.sValue = be_strdup(be_package_text); return TOK_ID; }
-\"[^\r\n\"]*\"                                          { update(be_package_leng); yylval.sValue = be_strdup(be_package_text+1); yylval.sValue[be_package_leng-2] = 0; return VAL_STRING; }
-\<[^\r\n\"]*\>                                          { update(be_package_leng); yylval.sValue = be_strdup(be_package_text+1); yylval.sValue[be_package_leng-2] = 0; return VAL_FILENAME; }
--?[0-9]+                                                { update(be_package_leng); yylval.iValue = strToInteger(be_package_text, be_package_leng); return VAL_INTEGER; }
-{DIGITS}("."{DIGITS}?)?([eE]{SIGN}?{DIGITS})?           { update(be_package_leng); yylval.fValue = strToDouble(be_package_text, be_package_leng); return VAL_FLOAT; }
-"\n"                                                    { (void)&yyinput; newline(); }
-[ \r\t]+                                                { update(be_package_leng); }
-\#[^\n]*\n                                              { update(be_package_leng); }
-.                                                       { update(be_package_leng); return *be_package_text; }
+<INITIAL>{
+    import                                                  { update(be_package_leng); be_info(be_package_text);return KW_import; }
+    load                                                    { update(be_package_leng); be_info(be_package_text);return KW_plugin; }
+    as                                                      { update(be_package_leng); be_info(be_package_text);return KW_as; }
+    [A-Za-z_][0-9A-Za-z_<>]*                                { update(be_package_leng); be_info(be_package_text); yylval.sValue = be_strdup(be_package_text); return TOK_ID; }
+    "\n"                                                    { (void)&yyinput; be_info(be_package_text); newline(); }
+    [ \r\t]+                                                { update(be_package_leng); }
+    \#[^\n]*\n                                              { update(be_package_leng); }
+    "="                                                     { update(be_package_leng); BEGIN(RTTIPARSE); be_info(be_package_text);return *be_package_text; }
+    "."                                                     { update(be_package_leng); return *be_package_text; }
+}
+<RTTIPARSE>{
+    ";"                                                     { update(be_package_leng); if (g_packageObjectNestedLevel == 0) { BEGIN(INITIAL); be_info(be_package_text); return TOK_value; } }
+    "("                                                     { update(be_package_leng); be_info(be_package_text);++g_packageObjectNestedLevel; }
+    ")"                                                     { update(be_package_leng); be_info(be_package_text);--g_packageObjectNestedLevel; }
+    "\n"                                                    { (void)&yyinput; newline(); }
+    "."                                                     { update(be_package_leng); }
+}
+
 
 %%
 

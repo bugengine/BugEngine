@@ -3,108 +3,31 @@
 
 #include <bugengine/plugin.scripting.package/stdafx.h>
 #include <bugengine/plugin.scripting.package/logger.hh>
-#include <bugengine/plugin.scripting.package/nodes/object.hh>
 #include <bugengine/plugin.scripting.package/nodes/package.hh>
-#include <bugengine/plugin.scripting.package/nodes/reference.hh>
 #include <bugengine/resource/resourcemanager.hh>
 #include <bugengine/rtti/engine/propertyinfo.script.hh>
 
 namespace BugEngine { namespace PackageBuilder { namespace Nodes {
 
-Package::Namespace::Namespace()
-    : m_values(Arena::packageBuilder())
-    , m_children(Arena::packageBuilder())
-{
-}
-
-Package::Namespace::~Namespace()
-{
-}
-
-RTTI::Value Package::Namespace::get(const inamespace& name) const
-{
-    minitl::hashmap< istring, RTTI::Value >::const_iterator it = m_values.find(name[0]);
-    if(it == m_values.end())
-    {
-        minitl::hashmap< istring, ref< Namespace > >::const_iterator child
-           = m_children.find(name[0]);
-        if(child != m_children.end())
-        {
-            inamespace childname = name;
-            childname.pop_front();
-            return child->second->get(childname);
-        }
-        else
-        {
-            return RTTI::Value();
-        }
-    }
-    else if(!it->second)
-    {
-        return RTTI::Value();
-    }
-    else
-    {
-        RTTI::Value v(it->second);
-        for(u32 i = 1; i < name.size(); ++i)
-        {
-            v = v[name[i]];
-            if(!v)
-            {
-                return v;
-            }
-        }
-        return v;
-    }
-}
-
-void Package::Namespace::add(const inamespace& name, const RTTI::Value& value)
-{
-    if(name.size() == 1)
-    {
-        bool inserted = m_values.insert(name[0], value).second;
-        if(!inserted)
-        {
-            be_notreached();
-        }
-    }
-    else
-    {
-        minitl::hashmap< istring, RTTI::Value >::iterator it = m_values.find(name[0]);
-        if(it != m_values.end())
-        {
-            be_notreached();
-        }
-        minitl::tuple< minitl::hashmap< istring, ref< Namespace > >::iterator, bool > result
-           = m_children.insert(name[0], ref< Namespace >());
-        if(result.second)
-        {
-            result.first->second = ref< Namespace >::create(Arena::packageBuilder());
-        }
-        inamespace childname = name;
-        childname.pop_front();
-        result.first->second->add(childname, value);
-    }
-}
-
 Package::Package(const ifilename& filename)
     : m_filename(filename)
+    , m_context(Arena::packageBuilder(), filename, ref< Folder >())
     , m_plugins(Arena::packageBuilder())
-    , m_rootNamespace(ref< Namespace >::create(Arena::packageBuilder()))
     , m_nodes(Arena::packageBuilder())
     , m_values(Arena::packageBuilder())
     , m_logger()
 {
-    m_rootNamespace->add(inamespace("bugengine"), RTTI::Value(be_bugengine_Namespace()));
 }
 
 Package::~Package()
 {
 }
 
-void Package::insertNode(ref< Object > object)
+void Package::insertNode(const istring& name, ref< RTTI::AST::Node > object)
 {
-    for(minitl::vector< ref< Object > >::iterator it = m_nodes.begin(); it != m_nodes.end(); ++it)
+    be_forceuse(name);
+    for(minitl::vector< ref< RTTI::AST::Node > >::iterator it = m_nodes.begin();
+        it != m_nodes.end(); ++it)
     {
         if(*it == object)
         {
@@ -115,9 +38,10 @@ void Package::insertNode(ref< Object > object)
     m_nodes.push_back(object);
 }
 
-void Package::removeNode(ref< Object > object)
+void Package::removeNode(const istring& name, ref< RTTI::AST::Node > object)
 {
-    minitl::vector< ref< Object > >::iterator it = m_nodes.begin();
+    be_forceuse(name);
+    minitl::vector< ref< RTTI::AST::Node > >::iterator it = m_nodes.begin();
     while(it != m_nodes.end())
     {
         if(*it == object)
@@ -130,25 +54,26 @@ void Package::removeNode(ref< Object > object)
     be_error("Object does not exist");
 }
 
-ref< Object > Package::findByName(istring name) const
+ref< RTTI::AST::Node > Package::findByName(istring name) const
 {
-    minitl::vector< ref< Object > >::const_iterator it = m_nodes.begin();
+    be_forceuse(name);
+    minitl::vector< ref< RTTI::AST::Node > >::const_iterator it = m_nodes.begin();
     while(it != m_nodes.end())
     {
-        if((*it)->name() == name)
-        {
-            return *it;
-        }
+        // if((*it)->name() == name)
+        //{
+        //    return *it;
+        //}
         ++it;
     }
-    return ref< Object >();
+    return ref< RTTI::AST::Node >();
 }
 
-const RTTI::Value& Package::getValue(weak< const Object > object) const
+const RTTI::Value& Package::getValue(weak< const RTTI::AST::Node > object) const
 {
     size_t index = 0;
-    for(minitl::vector< ref< Object > >::const_iterator it = m_nodes.begin(); it != m_nodes.end();
-        ++it, ++index)
+    for(minitl::vector< ref< RTTI::AST::Node > >::const_iterator it = m_nodes.begin();
+        it != m_nodes.end(); ++it, ++index)
     {
         if((*it) == object)
         {
@@ -159,61 +84,6 @@ const RTTI::Value& Package::getValue(weak< const Object > object) const
         }
     }
     return m_empty;
-}
-
-void Package::loadPlugin(inamespace plugin, inamespace name)
-{
-    Plugin::Plugin< void* > p(plugin, Plugin::Plugin< void* >::Preload);
-    if(!p)
-    {
-        be_notreached();
-    }
-    else
-    {
-        m_plugins.push_back(p);
-        m_rootNamespace->add(name, RTTI::Value(p.pluginNamespace()));
-    }
-}
-
-void Package::addReference(weak< Reference > reference)
-{
-    m_references.push_back(*reference);
-    resolveReference(reference);
-}
-
-void Package::resolveReference(weak< Reference > reference)
-{
-    inamespace name = reference->m_name;
-    if(name.size())
-    {
-        reference->m_value = m_rootNamespace->get(name);
-        if(!reference->m_value)
-        {
-            reference->m_object = findByName(name[0]);
-            if(!reference->m_object)
-            {
-                error(reference->m_line, minitl::format< 1024u >("unable to resolve %s") | name);
-            }
-            else
-            {
-                RTTI::Type type = reference->m_object->getType();
-                for(u32 i = 1; i < name.size(); ++i)
-                {
-                    raw< const RTTI::Property > p = type.metaclass->getProperty(name[i]);
-                    if(!p)
-                    {
-                        error(reference->m_line,
-                              minitl::format< 1024u >(
-                                 "unable to resolve %s: can't resolve property %s in type %s")
-                                 | name | name[i] | type.name());
-                        reference->m_object.clear();
-                        break;
-                    }
-                    type = p->type;
-                }
-            }
-        }
-    }
 }
 
 void Package::binarySave() const
@@ -229,7 +99,7 @@ void Package::createObjects(weak< Resource::ResourceManager > manager)
     m_values.resize(m_nodes.size());
     for(size_t i = 0; i < m_nodes.size(); ++i)
     {
-        m_values[i] = m_nodes[i]->create();
+        // m_values[i] = m_nodes[i]->create();
         if(m_values[i].isA(be_type< const Resource::Description >()))
         {
             manager->load(m_values[i].type().metaclass,

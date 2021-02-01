@@ -3,14 +3,6 @@
 %{
 #include    <bugengine/plugin.scripting.package/stdafx.h>
 #include    <buildcontext.hh>
-#include    <bugengine/plugin.scripting.package/nodes/package.hh>
-#include    <bugengine/plugin.scripting.package/nodes/object.hh>
-#include    <bugengine/plugin.scripting.package/nodes/entity.hh>
-#include    <bugengine/plugin.scripting.package/nodes/component.hh>
-#include    <bugengine/plugin.scripting.package/nodes/reference.hh>
-#include    <bugengine/plugin.scripting.package/nodes/parameter.hh>
-#include    <bugengine/plugin.scripting.package/nodes/value.hh>
-#include    <bugengine/plugin.scripting.package/nodes/zip.hh>
 
 #define yyparse be_package_parse
 #define yylex   be_package_lex
@@ -60,38 +52,21 @@ static int yyerror(void* context, const char *msg)
 #define free(x)      BugEngine::Arena::temporary().free(x)
 
 using namespace BugEngine::PackageBuilder;
-using namespace BugEngine::PackageBuilder::Nodes;
+using namespace BugEngine::RTTI::AST;
 
 %}
 
-%token  TOK_ID
-%token  VAL_STRING VAL_INTEGER VAL_FLOAT VAL_BOOLEAN VAL_FILENAME
+%token  TOK_ID TOK_value
+%token  KW_import KW_plugin KW_as
 
-%token  KW_import KW_plugin KW_namespace KW_zip KW_notify KW_as
-
-%type   <bValue>            VAL_BOOLEAN
-%type   <iValue>            VAL_INTEGER
-%type   <fValue>            VAL_FLOAT
-%type   <sValue>            VAL_STRING
-%type   <sValue>            VAL_FILENAME
-%type   <sValue>            TOK_ID
-%type   <sValue>            fullname
-%type   <value>             value value_zip
-%type   <value_list>        value_array
-%type   <object>            object
-%type   <component>         decl_component
-%type   <component_list>    component_array
-%type   <entity>            zip_value
-%type   <entity_list>       zip_array
-%type   <param>             param
-%type   <param_list>        params
+%type   <sValue>            TOK_ID fullname
+%type   <value>            TOK_value
 
 %start  file
 %parse-param { void*  param }
 
-%destructor { free($$); }                   VAL_STRING VAL_FILENAME TOK_ID fullname
-%destructor { $$->~ref(); free($$); }       value value_zip param object decl_component zip_value
-%destructor { $$->~vector(); free($$); }    value_array params zip_array component_array
+%destructor { free($$); }                   TOK_ID fullname
+%destructor { $$->~ref(); free($$); }       TOK_value
 
 %%
 
@@ -146,10 +121,10 @@ decl_plugin:
 
 decl_object:
         editor_attributes
-        TOK_ID '=' object
+        TOK_ID '=' TOK_value
         {
-            (*$4)->setName($2);
-            ((BuildContext*)param)->result->insertNode(*$4);
+            //(*$4)->setName($2);
+            ((BuildContext*)param)->result->insertNode($2, *$4);
             $4->~ref();
             free($4);
             free($2);
@@ -164,318 +139,11 @@ editor_attributes:
     ;
 
 attribute:
-        TOK_ID '=' value
+        TOK_ID '=' TOK_value
         {
             free($1);
             $3->~ref();
             free($3);
-        }
-    ;
-
-params:
-        params
-        param
-        {
-            $$ = $1;
-            $1->push_back(*$2);
-            $2->~ref();
-            free($2);
-        }
-    |
-        /* empty */
-        {
-            $$ = (minitl::vector< ref<Parameter> >*)malloc(sizeof(*$$));
-            new ($$) minitl::vector< ref<Parameter> >(BugEngine::Arena::temporary());
-        }
-    ;
-
-param:
-        TOK_ID '=' value ';'
-        {
-            $$ = (ref<Parameter>*)malloc(sizeof(*$$));
-            new ($$) ref<Parameter>(ref<Parameter>::create(BugEngine::Arena::packageBuilder(),
-                                                           BugEngine::istring($1), *$3));
-            $3->~ref();
-            free($1);
-            free($3);
-        }
-    |
-        TOK_ID ':'  TOK_ID '=' value ';'
-        {
-            $$ = (ref<Parameter>*)malloc(sizeof(*$$));
-            new ($$) ref<Parameter>(ref<Parameter>::create(BugEngine::Arena::packageBuilder(),
-                                                           BugEngine::istring($3), *$5));
-            $5->~ref();
-            free($1);
-            free($3);
-            free($5);
-        }
-    ;
-
-value:
-        fullname
-        {
-            $$ = (ref<Value>*)malloc(sizeof(*$$));
-            ref<Reference> reference = ref<Reference>::create(BugEngine::Arena::packageBuilder(),
-                                                              ((BuildContext*)param)->result,
-                                                              g_packageLine+1,
-                                                              g_packageColumnBefore+1,
-                                                              g_packageColumnAfter+1);
-            reference->setName(BugEngine::inamespace($1));
-            new ($$) ref<Value>(ref<ReferenceValue>::create(BugEngine::Arena::packageBuilder(),
-                                                            reference));
-            free($1);
-        }
-    |
-        object
-        {
-            $$ = (ref<Value>*)malloc(sizeof(*$$));
-            new ($$) ref<Value>(ref<ObjectValue>::create(BugEngine::Arena::packageBuilder(), *$1));
-            $1->~ref();
-            free($1);
-        }
-    |
-        VAL_BOOLEAN
-        {
-            $$ = (ref<Value>*)malloc(sizeof(*$$));
-            new ($$) ref<Value>(ref<BoolValue>::create(BugEngine::Arena::packageBuilder(), $1));
-        }
-    |
-        VAL_INTEGER
-        {
-            $$ = (ref<Value>*)malloc(sizeof(*$$));
-            new ($$) ref<Value>(ref<IntValue>::create(BugEngine::Arena::packageBuilder(), $1));
-        }
-    |
-        VAL_FLOAT
-        {
-            $$ = (ref<Value>*)malloc(sizeof(*$$));
-            new ($$) ref<Value>(ref<FloatValue>::create(BugEngine::Arena::packageBuilder(), $1));
-        }
-    |
-        VAL_STRING
-        {
-            $$ = (ref<Value>*)malloc(sizeof(*$$));
-            new ($$) ref<Value>(ref<StringValue>::create(BugEngine::Arena::packageBuilder(), $1));
-            free($1);
-        }
-    |
-        VAL_FILENAME
-        {
-            $$ = (ref<Value>*)malloc(sizeof(*$$));
-            new ($$) ref<Value>(ref<FileValue>::create(BugEngine::Arena::packageBuilder(),
-                                                       ((BuildContext*)param)->folder, $1));
-            free($1);
-        }
-    |
-        '[' value_array ']'
-        {
-            $$ = (ref<Value>*)malloc(sizeof(*$$));
-            new ($$) ref<Value>(ref<ArrayValue>::create(BugEngine::Arena::packageBuilder(), *$2));
-            $2->~vector();
-            free($2);
-        }
-    |
-        value_zip
-        {
-            $$ = $1;
-        }
-    |
-        '(' VAL_INTEGER ',' VAL_INTEGER ')'
-        {
-            $$ = (ref<Value>*)malloc(sizeof(*$$));
-            new ($$) ref<Value>(ref<Int2Value>::create(BugEngine::Arena::packageBuilder(), $2, $4));
-        }
-    |
-        '(' VAL_INTEGER ',' VAL_INTEGER ',' VAL_INTEGER ')'
-        {
-            $$ = (ref<Value>*)malloc(sizeof(*$$));
-            new ($$) ref<Value>(ref<Int3Value>::create(BugEngine::Arena::packageBuilder(),
-                                                       $2, $4, $6));
-        }
-    |
-        '(' VAL_INTEGER ',' VAL_INTEGER ',' VAL_INTEGER ',' VAL_INTEGER ')'
-        {
-            $$ = (ref<Value>*)malloc(sizeof(*$$));
-            new ($$) ref<Value>(ref<Int4Value>::create(BugEngine::Arena::packageBuilder(),
-                                                       $2, $4, $6, $8));
-        }
-    |
-        '(' VAL_FLOAT ',' VAL_FLOAT ')'
-        {
-            $$ = (ref<Value>*)malloc(sizeof(*$$));
-            new ($$) ref<Value>(ref<Float2Value>::create(BugEngine::Arena::packageBuilder(),
-                                                         $2, $4));
-        }
-    |
-        '(' VAL_FLOAT ',' VAL_FLOAT ',' VAL_FLOAT ')'
-        {
-            $$ = (ref<Value>*)malloc(sizeof(*$$));
-            new ($$) ref<Value>(ref<Float3Value>::create(BugEngine::Arena::packageBuilder(),
-                                                         $2, $4, $6));
-        }
-    |
-        '(' VAL_FLOAT ',' VAL_FLOAT ',' VAL_FLOAT ',' VAL_FLOAT ')'
-        {
-            $$ = (ref<Value>*)malloc(sizeof(*$$));
-            new ($$) ref<Value>(ref<Float4Value>::create(BugEngine::Arena::packageBuilder(),
-                                                         $2, $4, $6, $8));
-        }
-    ;
-
-object:
-        fullname
-        '('
-            params
-        ')'
-        {
-            $$ = (ref<Object>*)malloc(sizeof(*$$));
-            new ($$) ref<Object>(ref<Object>::create(BugEngine::Arena::packageBuilder(),
-                                                     ((BuildContext*)param)->result,
-                                                     g_packageLine+1,
-                                                     g_packageColumnBefore+1,
-                                                     g_packageColumnAfter+1));
-            ref<Nodes::Reference> reference = ref<Reference>::create(BugEngine::Arena::packageBuilder(),
-                                                                     ((BuildContext*)param)->result,
-                                                                     g_packageLine+1,
-                                                                     g_packageColumnBefore+1,
-                                                                     g_packageColumnAfter+1);
-            for (minitl::vector< ref<Parameter> >::iterator it = $3->begin(); it != $3->end(); ++it)
-            {
-                (*$$)->addParameter(*it);
-            }
-            reference->setName(BugEngine::inamespace($1));
-            (*$$)->setMethod(reference);
-            free($1);
-            $3->~vector();
-            free($3);
-        }
-
-value_array:
-        /*empty*/
-        {
-            $$ = (minitl::vector< ref<Value> >*)malloc(sizeof(*$$));
-            new ($$) minitl::vector< ref<Value> >(BugEngine::Arena::packageBuilder());
-        }
-    |
-        value
-        {
-            $$ = (minitl::vector< ref<Value> >*)malloc(sizeof(*$$));
-            new ($$) minitl::vector< ref<Value> >(BugEngine::Arena::packageBuilder());
-            $$->push_back(*$1);
-            $1->~ref();
-            free($1);
-        }
-    |
-        value ',' value_array
-        {
-            $$ = $3;
-            $$->push_back(*$1);
-            $1->~ref();
-            free($1);
-        }
-    ;
-
-value_zip:
-        KW_zip '(' zip_array ')'
-        {
-            $$ = (ref<Value>*)malloc(sizeof(*$$));
-            new ($$) ref<Value>(ref<ZipValue>::create(BugEngine::Arena::packageBuilder(),
-                                                      ((BuildContext*)param)->result));
-            for (minitl::vector< ref<Entity> >::iterator it = $3->begin(); it != $3->end(); ++it)
-            {
-                be_checked_cast<ZipValue>(*$$)->addEntity(*it);
-            }
-            $3->~vector();
-            free($3);
-        }
-    ;
-
-zip_array:
-        /* empty */
-        {
-            $$ = (minitl::vector< ref<Entity> >*)malloc(sizeof(*$$));
-        }
-    |
-        zip_value ';' zip_array
-        {
-            $$ = $3;
-            if ($1)
-            {
-                $$->push_back(*$1);
-                $1->~ref();
-                free($1);
-            }
-        }
-    |
-        TOK_ID '.' TOK_ID '.' TOK_ID KW_notify TOK_ID '.' TOK_ID '.' TOK_ID ';' zip_array
-        {
-            $$ = $13;
-            free($1);
-            free($3);
-            free($5);
-            free($7);
-            free($9);
-            free($11);
-        }
-    ;
-
-zip_value:
-        TOK_ID '=' '(' component_array ')'
-        {
-            $$ = (ref<Entity>*)malloc(sizeof(*$$));
-            new ($$) ref<Entity>(ref<Entity>::create(BugEngine::Arena::packageBuilder(), $1));
-            for (minitl::vector< ref<Component> >::iterator it = $4->begin(); it != $4->end(); ++it)
-            {
-                (*$$)->addComponent(*it);
-            }
-            $4->~vector();
-            free($4);
-            free($1);
-        }
-    ;
-
-component_array:
-        /* empty */
-        {
-            $$ = (minitl::vector< ref<Component> >*)malloc(sizeof(*$$));
-            new ($$) minitl::vector< ref<Component> >(BugEngine::Arena::temporary());
-        }
-    |
-        decl_component
-        {
-            $$ = (minitl::vector< ref<Component> >*)malloc(sizeof(*$$));
-            new ($$) minitl::vector< ref<Component> >(BugEngine::Arena::temporary());
-            $$->push_back(*$1);
-            $1->~ref();
-            free($1);
-        }
-    |
-        component_array ',' decl_component
-        {
-            $$ = $1;
-            $$->push_back(*$3);
-            $3->~ref();
-            free($3);
-        }
-    ;
-
-decl_component:
-        fullname '(' params ')'
-        {
-            $$ = (ref<Component>*)malloc(sizeof($$));
-            new ($$) ref<Component>(ref<Component>::create(BugEngine::Arena::packageBuilder(),
-                                                           ((BuildContext*)param)->result,
-                                                           g_packageLine+1,
-                                                           g_packageColumnBefore+1,
-                                                           g_packageColumnAfter+1));
-            for (minitl::vector< ref<Parameter> >::iterator it = $3->begin(); it != $3->end(); ++it)
-            {
-                (*$$)->addParameter(*it);
-            }
-            $3->~vector();
-            free($3);
-            free($1);
         }
     ;
 
@@ -498,5 +166,4 @@ fullname:
             free($3);
         }
     ;
-
 %%

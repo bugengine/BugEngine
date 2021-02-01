@@ -1,12 +1,15 @@
 load test.compute.unittests as unittests;
 
-storage = unittests.Storage
-(
+config = bugengine.World.Component.StorageConfiguration()
+
+storage_componentFloat = bugengine.World.Component.LogicComponentStorage(
+    configuration = config;
+    component = unittests.ComponentInt;
 )
 
 forloop = unittests.Kernels.Statement.ForLoop
 (
-    inout = storage.ComponentInt;
+    inout = storage_componentFloat.components;
 )
 
 whileloop = unittests.Kernels.Statement.WhileLoop
@@ -16,6 +19,6 @@ whileloop = unittests.Kernels.Statement.WhileLoop
 
 world = bugengine.World.World
 (
-    storage = storage;
+    configuration = config;
     products = [whileloop.inout];
 )

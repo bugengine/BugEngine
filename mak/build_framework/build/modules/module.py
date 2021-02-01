@@ -144,6 +144,7 @@ def module(
         env=env.derive(),
         target=env.ENV_PREFIX % name,
         target_name=name,
+        safe_target_name=safe_name(name.split('.')[-1]),
         features=features[:],
         use=[env.ENV_PREFIX % d for d in depends],
         private_use=[env.ENV_PREFIX % d for d in private_depends],
@@ -153,7 +154,7 @@ def module(
         source=source_list,
         defines=[
             'building_%s' % safe_name(name.split('.')[-1]),
-            'BE_PROJECTID=%s' % name.replace('.', '_'),
+            'BE_PROJECTID=%s' % safe_name(name.replace('.', '_')),
             'BE_PROJECTNAME=%s' % name
         ] + extra_defines,
         export_defines=extra_public_defines[:],

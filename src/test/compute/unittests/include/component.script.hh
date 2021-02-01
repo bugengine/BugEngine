@@ -5,7 +5,7 @@
 #define BE_TEST_COMPUTE_UNITTESTS_COMPONENT_SCRIPT_HH_
 /**************************************************************************************************/
 #include <stdafx.h>
-#include <bugengine/world/component.script.hh>
+#include <bugengine/world/component/component.script.hh>
 
 namespace BugEngine { namespace Test { namespace Compute { namespace UnitTests {
 

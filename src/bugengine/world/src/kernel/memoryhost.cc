@@ -2,7 +2,7 @@
    see LICENSE for detail */
 
 #include <bugengine/world/stdafx.h>
-#include <bugengine/world/kernel/memoryhost.hh>
+#include <kernel/memoryhost.hh>
 
 namespace BugEngine { namespace World {
 

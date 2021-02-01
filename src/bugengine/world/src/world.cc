@@ -4,29 +4,27 @@
 #include <bugengine/world/stdafx.h>
 #include <bugengine/rtti/engine/namespace.hh>
 #include <bugengine/scheduler/task/group.hh>
-#include <bugengine/world/component.script.hh>
-#include <bugengine/world/entitystorage.script.hh>
+#include <bugengine/scheduler/task/method.hh>
 #include <bugengine/world/world.script.hh>
 
 namespace BugEngine { namespace World {
 
-World::World(weak< EntityStorage >                                    storage,
+World::World(ref< const Component::StorageConfiguration >             configuration,
              minitl::array< weak< const KernelScheduler::IProduct > > products)
     : m_task(
-       ref< Task::TaskGroup >::create(Arena::task(), "world:update", Colors::make(89, 89, 180)))
-    , m_storage(storage)
-    , m_taskStart(Task::TaskGroup::TaskStartConnection(m_task, m_storage->initialTask()))
-    , m_taskEnd(Task::TaskGroup::TaskEndConnection(m_task, m_storage->initialTask()))
-    , m_productEnds(Arena::task(), products.size())
+        ref< Task::TaskGroup >::create(Arena::task(), "world:update", Colors::make(89, 89, 180)))
+    , m_taskStart(m_task, configuration->updateStart())
+    , m_productEnds(Arena::task(), products.size() + 1)
 {
     minitl::array< Task::TaskGroup::TaskEndConnection >::iterator connection
-       = m_productEnds.begin();
+        = m_productEnds.begin();
     for(minitl::array< weak< const KernelScheduler::IProduct > >::const_iterator product
         = products.begin();
         product != products.end(); ++product, ++connection)
     {
         *connection = Task::TaskGroup::TaskEndConnection(m_task, (*product)->producer());
     }
+    m_productEnds.last() = Task::TaskGroup::TaskEndConnection(m_task, configuration->updateStart());
 }
 
 World::~World()
@@ -40,37 +38,46 @@ weak< Task::ITask > World::updateWorldTask() const
 
 Entity World::spawn()
 {
-    return m_storage->spawn();
+    Entity result {42};
+    return result;
 }
 
 void World::unspawn(Entity e)
 {
-    m_storage->unspawn(e);
+    be_forceuse(e);
 }
 
 void World::addComponent(Entity e, const void* component, raw< const RTTI::Class > componentType)
 {
-    m_storage->addComponent(e, component, componentType);
+    be_forceuse(e);
+    be_forceuse(component);
+    be_forceuse(componentType);
 }
 
 void World::removeComponent(Entity e, raw< const RTTI::Class > componentType)
 {
-    m_storage->removeComponent(e, componentType);
+    be_forceuse(e);
+    be_forceuse(componentType);
 }
 
 bool World::hasComponent(Entity e, raw< const RTTI::Class > componentType) const
 {
-    return m_storage->hasComponent(e, componentType);
+    be_forceuse(e);
+    be_forceuse(componentType);
+    return false;
 }
 
 void World::addComponent(Entity e, const RTTI::Value& component)
 {
-    addComponent(e, component.as< const void* >(), component.type().metaclass);
+    be_forceuse(e);
+    be_forceuse(component);
 }
 
 RTTI::Value World::getComponent(Entity e, raw< const RTTI::Class > metaclass) const
 {
-    return m_storage->getComponent(e, metaclass);
+    be_forceuse(e);
+    be_forceuse(metaclass);
+    return RTTI::Value();
 }
 
 }}  // namespace BugEngine::World
