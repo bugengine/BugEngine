@@ -4,6 +4,8 @@
 #include <bugengine/rtti-ast/stdafx.h>
 #include <bugengine/rtti-ast/node/reference.hh>
 
+#include <bugengine/rtti-ast/node/object.hh>
+
 namespace BugEngine { namespace RTTI { namespace AST {
 
 Reference::Reference(const ParseLocation& location, const inamespace& name)
