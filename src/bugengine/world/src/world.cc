@@ -38,7 +38,7 @@ weak< Task::ITask > World::updateWorldTask() const
 
 Entity World::spawn()
 {
-    Entity result {42};
+    Entity result = {42};
     return result;
 }
 
