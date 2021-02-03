@@ -4,6 +4,7 @@
 #include    <bugengine/plugin.scripting.package/stdafx.h>
 #include    <ctype.h>
 #include    <buildcontext.hh>
+#include    <bugengine/rtti-parse/valueparse.hh>
 
 #define yylval  be_package_lval
 #include "packageparser.hh"
@@ -77,22 +78,81 @@ extern "C" int be_package_wrap()
 %%
 
 <INITIAL>{
-    import                                                  { update(be_package_leng); be_info(be_package_text);return KW_import; }
-    load                                                    { update(be_package_leng); be_info(be_package_text);return KW_plugin; }
-    as                                                      { update(be_package_leng); be_info(be_package_text);return KW_as; }
-    [A-Za-z_][0-9A-Za-z_<>]*                                { update(be_package_leng); be_info(be_package_text); yylval.sValue = be_strdup(be_package_text); return TOK_ID; }
-    "\n"                                                    { (void)&yyinput; be_info(be_package_text); newline(); }
-    [ \r\t]+                                                { update(be_package_leng); }
-    \#[^\n]*\n                                              { update(be_package_leng); }
-    "="                                                     { update(be_package_leng); BEGIN(RTTIPARSE); be_info(be_package_text);return *be_package_text; }
-    "."                                                     { update(be_package_leng); return *be_package_text; }
+    import {
+         update(be_package_leng);
+         return KW_import;
+    }
+
+    load {
+        update(be_package_leng);
+        return KW_plugin;
+    }
+
+    as {
+        update(be_package_leng);
+        return KW_as;
+    }
+
+    [A-Za-z_][0-9A-Za-z_<>]* {
+        update(be_package_leng);
+        yylval = be_strdup(be_package_text);
+        return TOK_ID;
+    }
+
+    "\n" {
+        (void)&yyinput;
+        newline();
+    }
+
+    [ \r\t]+ {
+        update(be_package_leng);
+    }
+
+    \#[^\n]*\n {
+        update(be_package_leng);
+    }
+
+    "=" {
+        update(be_package_leng);
+        BEGIN(RTTIPARSE);
+        return *be_package_text;
+    }
+
+    . {
+        update(be_package_leng);
+        return *be_package_text;
+    }
 }
+
 <RTTIPARSE>{
-    ";"                                                     { update(be_package_leng); if (g_packageObjectNestedLevel == 0) { BEGIN(INITIAL); be_info(be_package_text); return TOK_value; } }
-    "("                                                     { update(be_package_leng); be_info(be_package_text);++g_packageObjectNestedLevel; }
-    ")"                                                     { update(be_package_leng); be_info(be_package_text);--g_packageObjectNestedLevel; }
-    "\n"                                                    { (void)&yyinput; newline(); }
-    "."                                                     { update(be_package_leng); }
+    ";" {
+        update(be_package_leng);
+        if (g_packageObjectNestedLevel == 0)
+        {
+            BEGIN(INITIAL);
+            yylval = strdup(yytext);
+            return TOK_value;
+        }
+    }
+
+    "(" {
+        update(be_package_leng);
+        ++g_packageObjectNestedLevel;
+    }
+
+    ")" {
+        update(be_package_leng);
+        --g_packageObjectNestedLevel;
+    }
+
+    "\n" {
+        (void)&yyinput;
+        newline();
+    }
+
+    . {
+        update(be_package_leng);
+    }
 }
 
 

@@ -1,8 +1,8 @@
 /* BugEngine <bugengine.devel@gmail.com> / 2008-2014
    see LICENSE for detail */
 
-#ifndef BE_RTTIPARSE_PARSECONTEXT_HH_
-#define BE_RTTIPARSE_PARSECONTEXT_HH_
+#ifndef BE_RTTI_PARSE_PARSECONTEXT_HH_
+#define BE_RTTI_PARSE_PARSECONTEXT_HH_
 /**************************************************************************************************/
 #include <bugengine/rtti-parse/stdafx.h>
 #include <bugengine/rtti-ast/node/node.hh>

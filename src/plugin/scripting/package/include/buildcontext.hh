@@ -10,11 +10,8 @@
 #include <bugengine/plugin/plugin.hh>
 #include <bugengine/rtti-ast/node/node.hh>
 
-union YYSTYPE
-{
-    char*                              sValue;
-    ref< BugEngine::RTTI::AST::Node >* value;
-};
+typedef const char* YYSTYPE;
+
 #define YYSTYPE_IS_DECLARED 1
 #define YYSTYPE_IS_TRIVIAL  1
 

@@ -10,12 +10,12 @@
 #include <bugengine/rtti-ast/stdafx.h>
 #include <bugengine/rtti/stdafx.h>
 
-#if defined(building_rttiparse)
-#    define BE_API_RTTIPARSE BE_EXPORT
-#elif defined(be_dll_rttiparse)
-#    define BE_API_RTTIPARSE BE_IMPORT
+#if defined(building_rtti_parse)
+#    define BE_API_RTTI_PARSE BE_EXPORT
+#elif defined(be_dll_rtti_parse)
+#    define BE_API_RTTI_PARSE BE_IMPORT
 #else
-#    define BE_API_RTTIPARSE
+#    define BE_API_RTTI_PARSE
 #endif
 
 /**************************************************************************************************/

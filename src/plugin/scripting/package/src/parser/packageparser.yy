@@ -4,6 +4,8 @@
 #include    <bugengine/plugin.scripting.package/stdafx.h>
 #include    <buildcontext.hh>
 
+#include    <bugengine/rtti-parse/valueparse.hh>
+
 #define yyparse be_package_parse
 #define yylex   be_package_lex
 #define yyerror be_package_error
@@ -52,21 +54,17 @@ static int yyerror(void* context, const char *msg)
 #define free(x)      BugEngine::Arena::temporary().free(x)
 
 using namespace BugEngine::PackageBuilder;
-using namespace BugEngine::RTTI::AST;
+using namespace BugEngine::RTTI;
 
 %}
 
 %token  TOK_ID TOK_value
 %token  KW_import KW_plugin KW_as
 
-%type   <sValue>            TOK_ID fullname
-%type   <value>            TOK_value
-
 %start  file
 %parse-param { void*  param }
 
-%destructor { free($$); }                   TOK_ID fullname
-%destructor { $$->~ref(); free($$); }       TOK_value
+%destructor { free($$); }                   TOK_ID fullname TOK_value
 
 %%
 
@@ -124,8 +122,9 @@ decl_object:
         TOK_ID '=' TOK_value
         {
             //(*$4)->setName($2);
-            ((BuildContext*)param)->result->insertNode($2, *$4);
-            $4->~ref();
+            BuildContext* context = ((BuildContext*)param);
+            ref<AST::Node> node = parseValue(BugEngine::Arena::package(), context->result->context().messages, $4);
+            ((BuildContext*)param)->result->insertNode($2, node);
             free($4);
             free($2);
         }
@@ -142,7 +141,6 @@ attribute:
         TOK_ID '=' TOK_value
         {
             free($1);
-            $3->~ref();
             free($3);
         }
     ;
@@ -158,12 +156,13 @@ fullname:
             size_t s = strlen($1);
             s += strlen($3);
             s++;
-            $$ = (char*)malloc(s+1);
-            strcpy($$, $1);
-            strcat($$, ".");
-            strcat($$, $3);
+            char* result = (char*)malloc(s+1);
+            strcpy(result, $1);
+            strcat(result, ".");
+            strcat(result, $3);
             free($1);
             free($3);
+            $$ = result;
         }
     ;
 %%

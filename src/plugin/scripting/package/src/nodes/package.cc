@@ -23,6 +23,20 @@ Package::~Package()
 {
 }
 
+void Package::loadPlugin(inamespace plugin, inamespace name)
+{
+    Plugin::Plugin< void* > p(plugin, Plugin::Plugin< void* >::Preload);
+    if(!p)
+    {
+        be_notreached();
+    }
+    else
+    {
+        m_plugins.push_back(p);
+        m_context.rootNamespace->add(m_context, name, RTTI::Value(p.pluginNamespace()));
+    }
+}
+
 void Package::insertNode(const istring& name, ref< RTTI::AST::Node > object)
 {
     be_forceuse(name);

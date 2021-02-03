@@ -53,6 +53,16 @@ public:
     void error(u32 line, const char* message);
 
     bool success() const;
+
+    const RTTI::AST::DbContext& context() const
+    {
+        return m_context;
+    }
+
+    RTTI::AST::DbContext& context()
+    {
+        return m_context;
+    }
 };
 
 }}}  // namespace BugEngine::PackageBuilder::Nodes
