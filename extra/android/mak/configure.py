@@ -73,15 +73,16 @@ class NdkVersionConfig:
                 arch_configs = {}
                 for arch in os.listdir(os.path.join(platforms_directory, version)):
                     sysroot_arch_dir = os.path.join(platforms_directory, version, arch)
-                    arch_name = arch.split('-')[1]
-                    if os.path.isdir(os.path.join(sysroot_arch_dir, 'usr', 'lib64')):
-                        libdir = os.path.join(sysroot_arch_dir, 'usr', 'lib64')
-                    else:
-                        libdir = os.path.join(sysroot_arch_dir, 'usr', 'lib')
-                    arch_configs[arch_name] = NdkConfig(
-                        ndkroot, sysroot_dir if unified_headers else sysroot_arch_dir, sysroot_arch_dir, [libdir],
-                        defines
-                    )
+                    if os.path.isdir(sysroot_arch_dir):
+                        arch_name = arch.split('-')[1]
+                        if os.path.isdir(os.path.join(sysroot_arch_dir, 'usr', 'lib64')):
+                            libdir = os.path.join(sysroot_arch_dir, 'usr', 'lib64')
+                        else:
+                            libdir = os.path.join(sysroot_arch_dir, 'usr', 'lib')
+                        arch_configs[arch_name] = NdkConfig(
+                            ndkroot, sysroot_dir if unified_headers else sysroot_arch_dir, sysroot_arch_dir, [libdir],
+                            defines
+                        )
                 self._versions[version_number] = NdkArchConfig(arch_configs)
         else:
             for toolchain in os.listdir(os.path.join(ndkroot, 'toolchains', 'llvm', 'prebuilt')):
