@@ -66,7 +66,7 @@ def build(bld):
     bld.recurse('install.py')
     for env_name in bld.env.SUB_TOOLCHAINS:
         bld.common_env.append_unique('VALID_PLATFORMS', bld.all_envs[env_name].VALID_PLATFORMS)
-    bld.multiarch_envs = [bld.all_envs[envname] for envname in bld.env.SUB_TOOLCHAINS] or [bld.env]
+    bld.multiarch_envs = [bld.all_envs[envname] for envname in sorted(bld.env.SUB_TOOLCHAINS)] or [bld.env]
 
     bld.recurse('modules/modules.py')
     bld.recurse('target/target.py')

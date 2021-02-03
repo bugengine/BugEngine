@@ -37,10 +37,10 @@ def dex_files(self):
     """
     if 'android' in self.env.VALID_PLATFORMS:
         dexopts = getattr(self, 'dexopts', [])
+        self.outdir.mkdir()
         destfile = self.outdir.find_or_declare(self.destfile)
 
-        self.dex_task = tsk = self.create_task('dex')
-        tsk.set_outputs(destfile)
+        self.dex_task = tsk = self.create_task('dex', [], [destfile])
         tsk.basedir = self.basedir
         tsk.outdir = self.outdir
         tsk.cwd = self.outdir.abspath()

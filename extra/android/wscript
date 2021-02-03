@@ -12,6 +12,18 @@ def options(option_context):
 
     sdk_path = ''
     ndk_paths = []
+
+    def add_ndk_paths():
+        ndk_path = os.path.join(sdk_path, 'ndk-bundle')
+        if os.path.isdir(ndk_path) and ndk_path not in ndk_paths:
+            ndk_paths.append(ndk_path)
+        ndk_path = os.path.join(sdk_path, 'ndk')
+        if os.path.isdir(ndk_path):
+            for version in os.listdir(ndk_path):
+                ndk_version_path = os.path.join(ndk_path, version)
+                if ndk_version_path not in ndk_paths:
+                    ndk_paths.append(ndk_version_path)
+
     path_list = os.environ.get('PATH', '').split(os.pathsep)
     if os.path.isdir('/usr/lib/android-sdk'):
         path_list.append('/usr/lib/android-sdk/tools/bin')
@@ -21,8 +33,10 @@ def options(option_context):
                 path_list.append(os.path.join(vstudio_root_path, p, 'tools'))
         except OSError:
             pass
-    for vstudio_root_path in (r'C:\Microsoft\AndroidNDK64', r'C:\ProgramData\Microsoft\AndroidNDK64',
-                              r'C:\Microsoft\AndroidNDK', r'C:\ProgramData\Microsoft\AndroidNDK'):
+    for vstudio_root_path in (
+        r'C:\Microsoft\AndroidNDK64', r'C:\ProgramData\Microsoft\AndroidNDK64', r'C:\Microsoft\AndroidNDK',
+        r'C:\ProgramData\Microsoft\AndroidNDK'
+    ):
         try:
             for p in os.listdir(vstudio_root_path):
                 path_list.append(os.path.join(vstudio_root_path, p))
@@ -30,60 +44,63 @@ def options(option_context):
             pass
     for path in path_list:
         for ext in ['.exe', '.cmd', '.sh', '.bat', '']:
-            p = os.path.realpath(os.path.join(path, 'adb'+ext))
+            p = os.path.realpath(os.path.join(path, 'adb' + ext))
             if os.path.isfile(p):
                 sdk_path = os.path.dirname(os.path.dirname(p))
-                ndk_path = os.path.join(sdk_path, 'ndk-bundle')
-                if os.path.isdir(ndk_path) and ndk_path not in ndk_paths:
-                    ndk_paths.append(ndk_path)
-            p = os.path.realpath(os.path.join(path, 'sdkmanager'+ext))
-            if os.path.isfile(p):
-                sdk_path = os.path.dirname(os.path.dirname(os.path.dirname(p)))
-                ndk_path = os.path.join(sdk_path, 'ndk-bundle')
-                if os.path.isdir(ndk_path) and ndk_path not in ndk_paths:
-                    ndk_paths.append(ndk_path)
-            p = os.path.realpath(os.path.join(path, 'android'+ext))
-            if os.path.isfile(p):
-                sdk_path = os.path.dirname(os.path.dirname(p))
-                ndk_path = os.path.join(sdk_path, 'ndk-bundle')
-                if os.path.isdir(ndk_path) and ndk_path not in ndk_paths:
-                    ndk_paths.append(ndk_path)
-            p = os.path.realpath(os.path.join(path, 'ndk-build'+ext))
+                add_ndk_paths()
+            else:
+                p = os.path.realpath(os.path.join(path, 'sdkmanager' + ext))
+                if os.path.isfile(p):
+                    sdk_path = os.path.dirname(os.path.dirname(os.path.dirname(p)))
+                    add_ndk_paths()
+                else:
+                    p = os.path.realpath(os.path.join(path, 'android' + ext))
+                    if os.path.isfile(p):
+                        sdk_path = os.path.dirname(os.path.dirname(p))
+                        add_ndk_paths()
+            p = os.path.realpath(os.path.join(path, 'ndk-build' + ext))
             if os.path.isfile(p):
                 ndk_paths.append(path)
     jdk_path = ''
     if Utils.winreg:
         try:
             try:
-                key = Utils.winreg.OpenKey(Utils.winreg.HKEY_LOCAL_MACHINE, r'SOFTWARE\Wow6432Node\Microsoft\VisualStudio\Android')
+                key = Utils.winreg.OpenKey(
+                    Utils.winreg.HKEY_LOCAL_MACHINE, r'SOFTWARE\Wow6432Node\Microsoft\VisualStudio\Android'
+                )
             except OSError:
                 try:
-                    key = Utils.winreg.OpenKey(Utils.winreg.HKEY_LOCAL_MACHINE, r'SOFTWARE\Microsoft\VisualStudio\Android')
+                    key = Utils.winreg.OpenKey(
+                        Utils.winreg.HKEY_LOCAL_MACHINE, r'SOFTWARE\Microsoft\VisualStudio\Android'
+                    )
                 except OSError:
-                    key = Utils.winreg.OpenKey(Utils.winreg.HKEY_LOCAL_MACHINE, r'SOFTWARE\Microsoft\VisualStudio\Android', 0, Utils.winreg.KEY_READ|Utils.winreg.KEY_WOW64_64KEY)
+                    key = Utils.winreg.OpenKey(
+                        Utils.winreg.HKEY_LOCAL_MACHINE, r'SOFTWARE\Microsoft\VisualStudio\Android', 0,
+                        Utils.winreg.KEY_READ | Utils.winreg.KEY_WOW64_64KEY
+                    )
             jdk_path = Utils.winreg.QueryValueEx(key, 'JavaHome')[0]
         except OSError:
             pass
-    option_group.add_option('--android-jdk',
-                            action='store',
-                            default=jdk_path,
-                            dest='android_jdk',
-                            help='Path to the android JDK home')
-    option_group.add_option('--android-sdk',
-                            action='store',
-                            default='all',
-                            dest='android_sdk',
-                            help='Version of the Android SDK to target')
-    option_group.add_option('--android-sdk-path',
-                            action='store',
-                            default=sdk_path,
-                            dest='android_sdk_path',
-                            help='Path to the root of the Android SDK (%s)' % (sdk_path or 'none detected'))
-    option_group.add_option('--android-ndk-path',
-                            action='store',
-                            default=','.join(ndk_paths),
-                            dest='android_ndk_path',
-                            help='Path to the root of the Android NDK (%s)' % (ndk_paths or 'none detected'))
+    option_group.add_option(
+        '--android-jdk', action='store', default=jdk_path, dest='android_jdk', help='Path to the android JDK home'
+    )
+    option_group.add_option(
+        '--android-sdk', action='store', default='all', dest='android_sdk', help='Version of the Android SDK to target'
+    )
+    option_group.add_option(
+        '--android-sdk-path',
+        action='store',
+        default=sdk_path,
+        dest='android_sdk_path',
+        help='Path to the root of the Android SDK (%s)' % (sdk_path or 'none detected')
+    )
+    option_group.add_option(
+        '--android-ndk-path',
+        action='store',
+        default=','.join(ndk_paths),
+        dest='android_ndk_path',
+        help='Path to the root of the Android NDK (%s)' % (ndk_paths or 'none detected')
+    )
     #option_context.recurse('mak/device.py')
 
 

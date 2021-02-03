@@ -1,4 +1,4 @@
-from waflib import Task, Errors, Context
+from waflib import Task, Errors, Context, Utils
 
 
 class android_mft(Task.Task):
@@ -92,6 +92,11 @@ class aapt_pkg(Task.Task):
     """
     color = 'PINK'
 
+    def runnable_status(self):
+        if self.env._7Z:
+            self.outputs.append(self.outputs[0].change_ext('.tmp'))
+        return Task.Task.runnable_status(self)
+
     def run(self):
         bld = self.generator.bld
         root = bld.bldnode
@@ -101,7 +106,7 @@ class aapt_pkg(Task.Task):
             compression_level = 2 if bld.__class__.optim != 'final' else 9
             cmd = self.env._7Z + ['a', '-tzip', '-mx%d' % compression_level, self.outputs[0].abspath()
                                   ] + [i.path_from(root).replace('\\', '/') for i in self.inputs[1:]]
-            with open(self.outputs[0].change_ext('.tmp').abspath(), 'w') as stdout:
+            with open(self.outputs[1].abspath(), 'w') as stdout:
                 return self.exec_command(cmd, cwd=root.abspath(), stdout=stdout)
         else:
             cmd = self.env.AAPT + ['add', self.outputs[0].abspath()
@@ -125,13 +130,16 @@ class jarsigner(Task.Task):
 
     #run_str = '${JARSIGNER} ${JARSIGNER_FLAGS} -signedjar ${TGT} ${SRC} ${JARSIGNER_KEY}'
 
+    def runnable_status(self):
+        self.outputs.append(self.outputs[0].change_ext('.tmp'))
+        return Task.Task.runnable_status(self)
+
     def run(self):
         cmd = self.env.JARSIGNER + self.env.JARSIGNER_FLAGS + [
             '-signedjar', self.outputs[0].abspath(), self.inputs[0].abspath(), self.env.JARSIGNER_KEY
         ]
-        with open(self.outputs[0].change_ext('.tmp').abspath(), 'w') as stdout:
+        with open(self.outputs[1].abspath(), 'w') as stdout:
             return self.exec_command(cmd, stdout=stdout)
-
 
 
 class zipalign(Task.Task):
@@ -161,13 +169,22 @@ class dex(Task.Task):
         if not self.inputs:
             try:
                 self.inputs = [
-                    x for x in self.outdir.ant_glob(self.DEX_RE, remove=False) if id(x) != id(self.outputs[0])
+                    x for x in sorted(self.outdir.ant_glob(self.DEX_RE, remove=False), key=lambda x: str(x))
+                    if id(x) != id(self.outputs[0])
                 ]
                 self.env.INPUT_FILES = [x.path_from(self.outdir) for x in self.inputs]
                 self.env.OUTPUT_FILES = [x.path_from(self.outdir) for x in self.outputs]
             except Exception:
                 raise Errors.WafError('Could not find the basedir %r for %r' % (self.basedir, self))
         return super(dex, self).runnable_status()
+
+    def uid(self):
+        lst = [self.__class__.__name__, self.generator.outdir.abspath()]
+        return Utils.h_list(lst)
+
+    def post_run(self):
+        self.generator.bld.node_sigs[self.outputs[0]] = self.uid()
+        self.generator.bld.task_sigs[self.uid()] = self.cache_sig
 
 
 def build(bld):

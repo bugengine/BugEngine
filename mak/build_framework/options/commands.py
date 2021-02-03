@@ -135,6 +135,11 @@ def tidy_build(execute_method):
                     for task in task_gen.tasks:
                         for output in task.outputs:
                             all_nodes.discard(output)
+                        if task.__class__.__name__ == 'javac':
+                            out_dir = getattr(task.generator, 'outdir', None)
+                            if out_dir is not None:
+                                for node in out_dir.ant_glob('**/*'):
+                                    all_nodes.discard(node)
             for node in all_nodes:
                 self.tidy_rm(node)
         return result
