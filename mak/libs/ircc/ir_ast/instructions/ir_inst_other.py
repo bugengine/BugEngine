@@ -256,9 +256,12 @@ class IrInstSelect(IrInstruction):
             equivalence, self._value_true.get_position(), self._value_false.get_type(), self._value_false.get_position()
         )
 
-    def generate(self, generator, context, next_segment):
-        # type: (IrccGenerator, IrCodeGenContext, Optional[IrCodeSegment]) -> Optional[IrccExpression]
-        pass
+    def _create_generator_value(self, type, generator, code_context):
+        # type: (IrType, IrccGenerator, IrCodeGenContext) -> IrccExpression
+        condition = self._condition.create_generator_value(generator, code_context)
+        value_1 = self._value_true.create_generator_value(generator, code_context)
+        value_2 = self._value_false.create_generator_value(generator, code_context)
+        return generator.make_expression_select(condition, value_1, value_2)
 
 
 if TYPE_CHECKING:

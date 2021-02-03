@@ -28,6 +28,7 @@ class IrccCExpression(IrccExpression):
     _PREC_AND = 8
     _PREC_XOR = 9
     _PREC_OR = 10
+    _PREC_SELECT = 13
 
     def __init__(self, precedence):
         # type: (int) -> None
@@ -256,6 +257,22 @@ class IrccCExpressionFloatBinaryOperation(IrccCExpression):
         }
 
 
+class IrccCExpressionSelect(IrccCExpression):
+    def __init__(self, condition, value_true, value_false):
+        # type: (IrccExpression, IrccExpression, IrccExpression) -> None
+        IrccCExpression.__init__(self, IrccCExpression._PREC_SELECT)
+        self._condition = condition
+        self._value_true = value_true
+        self._value_false = value_false
+
+    def __str__(self):
+        return '%s ? %s : %s' % (
+            self._condition.make_string_left('right', self._precedence),
+            self._value_true.make_string_left('right', self._precedence),
+            self._value_false.make_string_right('right', self._precedence)
+        )
+
+
 class IrccCExpressions(IrccCTypes):
     def __init__(self, file):
         # type: (TextIO) -> None
@@ -347,6 +364,10 @@ class IrccCExpressions(IrccCTypes):
     def make_value_call(self, method_name, arguments):
         # type: (str, List[IrccExpression]) -> IrccExpression
         return IrccCExpressionCall(method_name, arguments)
+
+    def make_expression_select(self, condition, value_true, value_false):
+        # type: (IrccExpression, IrccExpression, IrccExpression) -> IrccExpression
+        return IrccCExpressionSelect(condition, value_true, value_false)
 
 
 if TYPE_CHECKING:

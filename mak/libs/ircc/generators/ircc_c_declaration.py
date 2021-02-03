@@ -63,5 +63,5 @@ class IrccCDeclaration(IrccCExpressions):
 
 
 if TYPE_CHECKING:
-    from typing import List, TextIO, Tuple
-    from ircc import IrccType
+    from typing import List, Optional, TextIO, Tuple
+    from ircc import IrccType, IrccExpression

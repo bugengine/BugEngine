@@ -176,13 +176,16 @@ class IrCodeSegment:
         for i in self._instructions:
             i._segment = self
 
-    def resolve(self, module, position, equivalence, return_type, return_position):
-        # type: (IrModule, IrPosition, IrAddressSpaceInference, IrType, IrPosition) -> IrPosition
+    def resolve(self, module, position):
+        # type: (IrModule, IrPosition) -> IrPosition
         for i in self._instructions:
             position = i.resolve(module, position)
+        return position
+
+    def resolve_type(self, equivalence, return_type, return_position):
+        # type: (IrAddressSpaceInference, IrType, IrPosition) -> None
         for i in self._instructions:
             i.resolve_type(equivalence, return_type, return_position)
-        return position
 
     def _create_instance(self, equivalence):
         # type: (Dict[int, int]) -> None
@@ -417,7 +420,9 @@ class IrCodeBlock:
             deduced at compile time will trigger a compile error.
         """
         for s in self._segments:
-            position = s.resolve(module, position, self._equivalence, return_type, return_position)
+            position = s.resolve(module, position)
+        for s in self._segments:
+            s.resolve_type(self._equivalence, return_type, return_position)
         self._resolve_phi_nodes()
 
     def _resolve_phi_nodes(self):

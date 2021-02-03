@@ -171,6 +171,11 @@ class IrccGenerator:
         raise NotImplementedError
 
     @abstractmethod
+    def make_expression_select(self, condition, value_true, value_false):
+        # type: (IrccExpression, IrccExpression, IrccExpression) -> IrccExpression
+        raise NotImplementedError
+
+    @abstractmethod
     def make_value_load(self, address):
         # type: (IrccExpression) -> IrccExpression
         raise NotImplementedError
