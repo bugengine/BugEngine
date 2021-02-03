@@ -24,3 +24,4 @@ public class BugEngineLib {
      public static native void init(int width, int height);
      public static native void step();
 }
+

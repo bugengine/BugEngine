@@ -8,7 +8,14 @@ from waflib import Context, Errors, Logs, Options, Configure
 
 
 def _get_android_arch(arch):
-    archs = {'armv7a': 'arm', 'amd64': 'x86_64', 'mipsel': 'mips', 'mips64el': 'mips64'}
+    archs = {
+        'armv7a': 'arm',
+        'amd64': 'x86_64',
+        'mipsel': 'mips',
+        'mips64el': 'mips64',
+        'i686': 'x86',
+        'aarch64': 'arm64'
+    }
     return archs.get(arch, arch)
 
 
@@ -72,11 +79,28 @@ class NdkVersionConfig:
                     else:
                         libdir = os.path.join(sysroot_arch_dir, 'usr', 'lib')
                     arch_configs[arch_name] = NdkConfig(
-                        ndkroot, sysroot_dir if unified_headers else sysroot_arch_dir, sysroot_arch_dir, libdir, defines
+                        ndkroot, sysroot_dir if unified_headers else sysroot_arch_dir, sysroot_arch_dir, [libdir],
+                        defines
                     )
                 self._versions[version_number] = NdkArchConfig(arch_configs)
         else:
-            pass   # TODO
+            for toolchain in os.listdir(os.path.join(ndkroot, 'toolchains', 'llvm', 'prebuilt')):
+                sysroot_dir = os.path.join(ndkroot, 'toolchains', 'llvm', 'prebuilt', toolchain, 'sysroot')
+                if os.path.isdir(sysroot_dir):
+                    for target in os.listdir(os.path.join(sysroot_dir, 'usr', 'lib')):
+                        arch = _get_android_arch(target.split('-')[0])
+                        lib_dir = os.path.join(sysroot_dir, 'usr', 'lib', target)
+                        for version in os.listdir(lib_dir):
+                            lib_dir_version = os.path.join(lib_dir, version)
+                            if os.path.isdir(lib_dir_version):
+                                config = NdkConfig(
+                                    ndkroot, sysroot_dir, sysroot_dir, [lib_dir_version, lib_dir],
+                                    ['-D__ANDROID_API__=%s' % version]
+                                )
+                                try:
+                                    self._versions[int(version)]._archs[arch] = config
+                                except KeyError:
+                                    self._versions[int(version)] = NdkArchConfig({arch: config})
 
     def get_ndk_for_sdk(self, sdk):
         sdk_number = int(sdk.split('-')[1])
@@ -247,7 +271,10 @@ class AndroidPlatform(Configure.ConfigurationContext.Platform):
 
         conf.env.append_value('CFLAGS', sysroot_options)
         conf.env.append_value('CXXFLAGS', sysroot_options)
-        conf.env.append_value('LINKFLAGS', ['--sysroot', ndk_config.get_ldsysroot(), '-L%s' % ndk_config.get_libpath()])
+        conf.env.append_value(
+            'LINKFLAGS', ['--sysroot', ndk_config.get_ldsysroot(),
+                          '-B%s' % ndk_config.get_libpath()[0]] + ['-L%s' % l for l in ndk_config.get_libpath()]
+        )
 
 
 class AndroidLoader(Configure.ConfigurationContext.Platform):
