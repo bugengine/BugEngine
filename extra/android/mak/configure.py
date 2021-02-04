@@ -66,24 +66,25 @@ class NdkVersionConfig:
             sysroot_dir = os.path.join(ndkroot, 'sysroot')
             unified_headers = os.path.isdir(sysroot_dir)
             for version in os.listdir(platforms_directory):
-                defines = []
-                version_number = int(version.split('-')[1])
-                if unified_headers:
-                    defines.append('-D__ANDROID_API__=%d' % version_number)
-                arch_configs = {}
-                for arch in os.listdir(os.path.join(platforms_directory, version)):
-                    sysroot_arch_dir = os.path.join(platforms_directory, version, arch)
-                    if os.path.isdir(sysroot_arch_dir):
-                        arch_name = arch.split('-')[1]
-                        if os.path.isdir(os.path.join(sysroot_arch_dir, 'usr', 'lib64')):
-                            libdir = os.path.join(sysroot_arch_dir, 'usr', 'lib64')
-                        else:
-                            libdir = os.path.join(sysroot_arch_dir, 'usr', 'lib')
-                        arch_configs[arch_name] = NdkConfig(
-                            ndkroot, sysroot_dir if unified_headers else sysroot_arch_dir, sysroot_arch_dir, [libdir],
-                            defines
-                        )
-                self._versions[version_number] = NdkArchConfig(arch_configs)
+                if os.path.isdir(os.path.join(platforms_directory, version)):
+                    defines = []
+                    version_number = int(version.split('-')[1])
+                    if unified_headers:
+                        defines.append('-D__ANDROID_API__=%d' % version_number)
+                    arch_configs = {}
+                    for arch in os.listdir(os.path.join(platforms_directory, version)):
+                        sysroot_arch_dir = os.path.join(platforms_directory, version, arch)
+                        if os.path.isdir(sysroot_arch_dir):
+                            arch_name = arch.split('-')[1]
+                            if os.path.isdir(os.path.join(sysroot_arch_dir, 'usr', 'lib64')):
+                                libdir = os.path.join(sysroot_arch_dir, 'usr', 'lib64')
+                            else:
+                                libdir = os.path.join(sysroot_arch_dir, 'usr', 'lib')
+                            arch_configs[arch_name] = NdkConfig(
+                                ndkroot, sysroot_dir if unified_headers else sysroot_arch_dir, sysroot_arch_dir,
+                                [libdir], defines
+                            )
+                    self._versions[version_number] = NdkArchConfig(arch_configs)
         else:
             for toolchain in os.listdir(os.path.join(ndkroot, 'toolchains', 'llvm', 'prebuilt')):
                 sysroot_dir = os.path.join(ndkroot, 'toolchains', 'llvm', 'prebuilt', toolchain, 'sysroot')
