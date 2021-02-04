@@ -3,5 +3,5 @@ load plugin.ui.console as ui;
 w = ui.Window
 (
     name = "BugEngine help";
-)
+);
 

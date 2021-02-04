@@ -4,8 +4,8 @@ load plugin.graphics.3d as 3d;
 
 font = text.OutlineFont
 (
-    fontFile = <DroidSans.ttf>;
-)
+    fontFile = @"DroidSans.ttf";
+);
 
 shader = text.OutlineShader
 (
@@ -17,15 +17,15 @@ shader = text.OutlineShader
     (
         value = (1.0, 1.0, 1.0, 1.0);
     );
-)
+);
 
 window = 3d.RenderWindowDescription
 (
     title = "Test";
-)
+);
 
 window2 = 3d.RenderWindowDescription
 (
     title = "Test2";
-)
+);
 

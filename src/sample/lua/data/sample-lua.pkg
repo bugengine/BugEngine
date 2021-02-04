@@ -1,7 +1,6 @@
 load plugin.scripting.lua as lua;
 
-script= 
- lua.LuaScript
+script = lua.LuaScript
 (
-    script = <sample.lua>;
+    script = @"sample.lua";
 );

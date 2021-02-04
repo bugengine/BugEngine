@@ -8,6 +8,7 @@ int be_package_lex_destroy();
 
 const minitl::Allocator::Block< u8 >* g_buffer                   = 0;
 int                                   g_bufferPosition           = 0;
+int                                   g_packageOffset            = 0;
 int                                   g_packageLine              = 0;
 int                                   g_packageColumnBefore      = 0;
 int                                   g_packageColumnAfter       = 0;
@@ -24,6 +25,7 @@ BuildContext::BuildContext(const ifilename& filename, const minitl::Allocator::B
     be_assert(s_useCount++ == 0, "non reentrant parser used by two threads");
     g_buffer              = &buffer;
     g_bufferPosition      = 0;
+    g_packageOffset       = 0;
     g_packageLine         = 0;
     g_packageColumnBefore = g_packageColumnAfter = 0;
     g_packageObjectNestedLevel                   = 0;

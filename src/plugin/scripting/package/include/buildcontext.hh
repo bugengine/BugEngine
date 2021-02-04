@@ -10,7 +10,17 @@
 #include <bugengine/plugin/plugin.hh>
 #include <bugengine/rtti-ast/node/node.hh>
 
-typedef const char* YYSTYPE;
+struct FileOffset
+{
+    int start;
+    int end;
+};
+
+union YYSTYPE
+{
+    const char* id;
+    FileOffset  offset;
+};
 
 #define YYSTYPE_IS_DECLARED 1
 #define YYSTYPE_IS_TRIVIAL  1
@@ -29,6 +39,7 @@ struct BuildContext
 
 }}  // namespace BugEngine::PackageBuilder
 
+extern int g_packageOffset;
 extern int g_packageLine;
 extern int g_packageColumnBefore;
 extern int g_packageColumnAfter;

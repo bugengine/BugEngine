@@ -131,8 +131,8 @@ false                                           { update(be_value_leng);
                                                   yylval.sValue.value[be_value_leng-2] = 0;
                                                   yylval.sValue.location = ::BugEngine::RTTI::AST::g_parseContext->location;
                                                   return VAL_STRING; }
-@{ID}                                           { update(be_value_leng);
-                                                  yylval.sValue.value = be_strdup(be_value_text+1);
+@\"[^\r\n\"]*\"                                 { update(be_value_leng);
+                                                  yylval.sValue.value = be_strdup(be_value_text+2);
                                                   yylval.sValue.location = ::BugEngine::RTTI::AST::g_parseContext->location;
                                                   return VAL_FILENAME; }
 -?[0-9]+                                        { update(be_value_leng);

@@ -64,7 +64,9 @@ using namespace BugEngine::RTTI;
 %start  file
 %parse-param { void*  param }
 
-%destructor { free($$); }                   TOK_ID fullname TOK_value
+%type <id> TOK_ID fullname
+%type <offset> TOK_value
+%destructor { free($$); }                   TOK_ID fullname
 
 %%
 
@@ -123,9 +125,12 @@ decl_object:
         {
             //(*$4)->setName($2);
             BuildContext* context = ((BuildContext*)param);
-            ref<AST::Node> node = parseValue(BugEngine::Arena::package(), context->result->context().messages, $4);
-            ((BuildContext*)param)->result->insertNode($2, node);
-            free($4);
+            ref<AST::Node> node = parseValue(BugEngine::Arena::package(), context->result->context().messages,
+                                             (const char*)g_buffer->data()+$4.start, (const char*)g_buffer->data()+$4.end);
+            if (node)
+            {
+                context->result->insertNode($2, node);
+            }
             free($2);
         }
     ;
@@ -140,8 +145,11 @@ editor_attributes:
 attribute:
         TOK_ID '=' TOK_value
         {
+            BuildContext* context = ((BuildContext*)param);
+            ref<AST::Node> node = parseValue(BugEngine::Arena::package(), context->result->context().messages,
+                                             (const char*)g_buffer->data()+$3.start, (const char*)g_buffer->data()+$3.end);
+            be_forceuse(node);
             free($1);
-            free($3);
         }
     ;
 

@@ -41,11 +41,13 @@ static char *be_strdup(const char *src)
 
 static void update (int num)
 {
+    g_packageOffset += num;
     g_packageColumnBefore = g_packageColumnAfter;
     g_packageColumnAfter += num;
 }
 static void newline()
 {
+    g_packageOffset ++;
     g_packageLine++;
     g_packageColumnBefore = 0;
     g_packageColumnAfter = 1;
@@ -95,7 +97,7 @@ extern "C" int be_package_wrap()
 
     [A-Za-z_][0-9A-Za-z_<>]* {
         update(be_package_leng);
-        yylval = be_strdup(be_package_text);
+        yylval.id = be_strdup(be_package_text);
         return TOK_ID;
     }
 
@@ -114,7 +116,9 @@ extern "C" int be_package_wrap()
 
     "=" {
         update(be_package_leng);
+        
         BEGIN(RTTIPARSE);
+        yylval.offset.start = g_packageOffset;
         return *be_package_text;
     }
 
@@ -130,7 +134,7 @@ extern "C" int be_package_wrap()
         if (g_packageObjectNestedLevel == 0)
         {
             BEGIN(INITIAL);
-            yylval = strdup(yytext);
+            yylval.offset.end = g_packageOffset-1;
             return TOK_value;
         }
     }

@@ -2,5 +2,5 @@ load plugin.scripting.python as py;
 
 script = py.PythonScript
 (
-    script = <sample.py>;
-)
+    script = @"sample.py";
+);
