@@ -18,8 +18,7 @@ LogicComponentStorage::LogicComponentStorage(weak< StorageConfiguration > config
     be_forceuse(componentType);
 
     istring parameterName(minitl::format< 256u >("Segments<%s>") | componentType->name);
-    raw< const RTTI::ObjectInfo > object
-        = be_bugengine_Namespace_BugEngine_KernelScheduler()->objects;
+    raw< const RTTI::ObjectInfo > object = KernelScheduler::IParameter::getNamespace()->objects;
     while(object)
     {
         if(object->name == parameterName)

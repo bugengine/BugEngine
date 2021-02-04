@@ -6,11 +6,7 @@
 /**************************************************************************************************/
 #include <bugengine/scheduler/stdafx.h>
 
-namespace BugEngine {
-
-be_api(SCHEDULER) raw< RTTI::Class > be_bugengine_Namespace_BugEngine_KernelScheduler();
-
-namespace KernelScheduler {
+namespace BugEngine { namespace KernelScheduler {
 
 class IMemoryBuffer;
 class IMemoryHost;
@@ -31,10 +27,11 @@ protected:
 public:
     weak< const IMemoryBuffer > getCurrentBank() const;
     weak< const IMemoryBuffer > getBank(weak< const IMemoryHost > host) const;
+
+    static raw< RTTI::Class > getNamespace();
 };
 
-}  // namespace KernelScheduler
-}  // namespace BugEngine
+}}  // namespace BugEngine::KernelScheduler
 
 /**************************************************************************************************/
 #endif

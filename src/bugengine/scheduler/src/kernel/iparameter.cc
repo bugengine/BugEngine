@@ -6,7 +6,16 @@
 #include <bugengine/scheduler/kernel/imemoryhost.hh>
 #include <bugengine/scheduler/kernel/parameters/iparameter.script.hh>
 
-namespace BugEngine { namespace KernelScheduler {
+namespace BugEngine {
+
+raw< RTTI::Class > be_bugengine_Namespace_BugEngine_KernelScheduler();
+
+namespace KernelScheduler {
+
+raw< RTTI::Class > IParameter::getNamespace()
+{
+    return be_bugengine_Namespace_BugEngine_KernelScheduler();
+}
 
 IParameter::IParameter()
 {
@@ -30,4 +39,5 @@ weak< const IMemoryBuffer > IParameter::getBank(weak< const IMemoryHost > host) 
     return weak< const IMemoryBuffer >();
 }
 
-}}  // namespace BugEngine::KernelScheduler
+}  // namespace KernelScheduler
+}  // namespace BugEngine

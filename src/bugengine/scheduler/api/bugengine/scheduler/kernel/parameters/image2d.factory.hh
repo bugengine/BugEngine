@@ -29,7 +29,7 @@ struct ClassID< KernelScheduler::Image2D< T > >
                u32(sizeof(KernelScheduler::Image2D< T >)),
                0,
                RTTI::ClassType_Object,
-               {0},
+               KernelScheduler::IParameter::getNamespace(),
                {be_class< KernelScheduler::IParameter >().m_ptr},
                {0},
                {0},
@@ -39,13 +39,12 @@ struct ClassID< KernelScheduler::Image2D< T > >
                {0},
                0,
                0};
-        static RTTI::ObjectInfo registry
-            = {be_bugengine_Namespace_BugEngine_KernelScheduler()->objects,
-               {0},
-               s_class.name,
-               RTTI::Value(s_class)};
+        static RTTI::ObjectInfo registry = {KernelScheduler::IParameter::getNamespace()->objects,
+                                            {0},
+                                            s_class.name,
+                                            RTTI::Value(s_class)};
         static const RTTI::ObjectInfo* ptr
-            = be_bugengine_Namespace_BugEngine_KernelScheduler()->objects.set(&registry);
+            = KernelScheduler::IParameter::getNamespace()->objects.set(&registry);
         be_forceuse(ptr);
 
         raw< const RTTI::Class > result = {&s_class};
