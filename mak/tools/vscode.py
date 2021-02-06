@@ -151,24 +151,20 @@ class vscode(Build.BuildContext):
                     properties['DebuggerType'] = 'cppdbg'
                     properties['DebuggerMode'] = 'gdb'
                     properties['DebuggerPath'] = '/usr/bin/gdb'
-                configurations.append(
-                    {
-                        'name':
-                            '%s - %s' % (env_name, variant),
-                        'includePath': [],
-                        'defines': [],
-                        'compileCommands':
-                            '${workspaceFolder}/.vscode/toolchains/%s/%s/compile_commands.json' % (env_name, variant),
-                        'customConfigurationVariables':
-                            properties
-                    }
-                )
                 commands = []
+                include_paths = []
+                defines = []
                 for g in self.groups:
                     for tg in g:
                         if not isinstance(tg, TaskGen.task_gen):
                             continue
                         tg.post()
+                        include_paths += getattr(tg, 'includes', [])
+                        include_paths += getattr(tg, 'export_includes', [])
+                        include_paths += getattr(tg, 'extra_includes', [])
+                        defines += getattr(tg, 'defines', [])
+                        defines += getattr(tg, 'export_defines', [])
+                        defines += getattr(tg, 'extra_defines', [])
                         for task in tg.tasks:
                             if task.__class__.__name__ in ('cxx', 'c', 'objc', 'objcxx'):
                                 commands.append(
@@ -186,6 +182,23 @@ class vscode(Build.BuildContext):
                                 )
                 with open(variant_node.make_node('compile_commands.json').abspath(), 'w') as compile_commands:
                     json.dump(commands, compile_commands, indent=2)
+                seen = set([self.srcnode, self.bldnode])
+                configurations.append(
+                    {
+                        'name':
+                            '%s - %s' % (env_name, variant),
+                        'includePath':
+                            [
+                                os.path.join('${workspaceFolder}', i.path_from(self.srcnode)) for i in include_paths
+                                if i not in seen and not seen.add(i)
+                            ],
+                        'defines': [d for d in defines if d not in seen and not seen.add(d)],
+                        'compileCommands':
+                            '${workspaceFolder}/.vscode/toolchains/%s/%s/compile_commands.json' % (env_name, variant),
+                        'customConfigurationVariables':
+                            properties
+                    }
+                )
 
         tasks_file = vscode_node.make_node('tasks.json')
         try:
