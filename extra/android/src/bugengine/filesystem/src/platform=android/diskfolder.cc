@@ -1,4 +1,4 @@
-/* BugEngine <bugengine.devel@gmail.com> / 2008-2014
+/* BugEngine <bugengine.devel@gmail.com>
    see LICENSE for detail */
 
 #include <bugengine/filesystem/stdafx.h>
@@ -38,7 +38,8 @@ static void createDirectory(const ipath& path, Folder::CreatePolicy policy)
     }
 }
 
-DiskFolder::DiskFolder(const ipath& diskpath, Folder::ScanPolicy scanPolicy, Folder::CreatePolicy createPolicy)
+DiskFolder::DiskFolder(const ipath& diskpath, Folder::ScanPolicy scanPolicy,
+                       Folder::CreatePolicy createPolicy)
     : m_path(diskpath)
     , m_index(m_path[0] == "apk:" ? 1 : 0)
     , m_watch()
@@ -99,7 +100,8 @@ DiskFolder::~DiskFolder()
 void DiskFolder::doRefresh(Folder::ScanPolicy scanPolicy)
 {
     Folder::doRefresh(scanPolicy);
-    Folder::ScanPolicy newPolicy = (scanPolicy == Folder::ScanRecursive) ? Folder::ScanRecursive : Folder::ScanNone;
+    Folder::ScanPolicy newPolicy
+        = (scanPolicy == Folder::ScanRecursive) ? Folder::ScanRecursive : Folder::ScanNone;
     if(m_handle.ptrHandle)
     {
         ScopedCriticalSection lock(m_lock);
@@ -118,18 +120,20 @@ void DiskFolder::doRefresh(Folder::ScanPolicy scanPolicy)
                 stat(filename.name, &s);
                 if(errno == 0)
                 {
-                    be_error("could not stat file %s: %s(%d)" | filename.name | strerror(errno) | errno);
+                    be_error("could not stat file %s: %s(%d)" | filename.name | strerror(errno)
+                             | errno);
                 }
                 else if(s.st_mode & S_IFDIR)
                 {
-                    ref< DiskFolder > newFolder
-                       = ref< DiskFolder >::create(Arena::filesystem(), p, newPolicy, Folder::CreateNone);
+                    ref< DiskFolder > newFolder = ref< DiskFolder >::create(
+                        Arena::filesystem(), p, newPolicy, Folder::CreateNone);
                     m_folders.push_back(minitl::make_tuple(name, newFolder));
                 }
                 else
                 {
                     File::Media media(File::Media::Disk, s.st_dev, s.st_ino);
-                    ref< File > newFile = ref< PosixFile >::create(Arena::filesystem(), ipath(m_path) + ifilename(name),
+                    ref< File > newFile = ref< PosixFile >::create(Arena::filesystem(),
+                                                                   ipath(m_path) + ifilename(name),
                                                                    media, s.st_size, s.st_mtime);
                     m_files.push_back(minitl::make_tuple(name, newFile));
                 }
@@ -146,7 +150,8 @@ void DiskFolder::doRefresh(Folder::ScanPolicy scanPolicy)
                 {
                     unz_file_info info;
                     char          filepath[4096];
-                    unzGetCurrentFileInfo(m_handle.ptrHandle, &info, filepath, sizeof(filepath), 0, 0, 0, 0);
+                    unzGetCurrentFileInfo(m_handle.ptrHandle, &info, filepath, sizeof(filepath), 0,
+                                          0, 0, 0);
                     ipath   path(filepath);
                     istring filename = path.pop_back();
                     if(path == relativePath)
@@ -154,9 +159,10 @@ void DiskFolder::doRefresh(Folder::ScanPolicy scanPolicy)
                         unz_file_pos filePos;
                         unzGetFilePos(m_handle.ptrHandle, &filePos);
                         ifilename filepath = path + ifilename(filename);
-                        m_files.push_back(
-                           minitl::make_tuple(filename, ref< ZipFile >::create(Arena::filesystem(), m_handle.ptrHandle,
-                                                                               filepath, info, filePos)));
+                        m_files.push_back(minitl::make_tuple(
+                            filename,
+                            ref< ZipFile >::create(Arena::filesystem(), m_handle.ptrHandle,
+                                                   filepath, info, filePos)));
                     }
                     else if(path.size() >= 1)
                     {
@@ -168,7 +174,8 @@ void DiskFolder::doRefresh(Folder::ScanPolicy scanPolicy)
                     }
                 } while(unzGoToNextFile(m_handle.ptrHandle) == UNZ_OK);
 
-                for(minitl::vector< istring >::const_iterator it = subdirs.begin(); it != subdirs.end(); ++it)
+                for(minitl::vector< istring >::const_iterator it = subdirs.begin();
+                    it != subdirs.end(); ++it)
                 {
                     be_info("%s" | *it);
                     if(openFolderNoLock(ipath(*it)) == weak< Folder >())
@@ -177,7 +184,8 @@ void DiskFolder::doRefresh(Folder::ScanPolicy scanPolicy)
                         ipath path = relativePath;
                         path.push_back(*it);
                         m_folders.push_back(minitl::make_tuple(
-                           *it, ref< ZipFolder >::create(Arena::filesystem(), m_handle.ptrHandle, path, newPolicy)));
+                            *it, ref< ZipFolder >::create(Arena::filesystem(), m_handle.ptrHandle,
+                                                          path, newPolicy)));
                     }
                     be_info("%s" | *it);
                 }
@@ -191,8 +199,8 @@ weak< File > DiskFolder::createFile(const istring& name)
 {
     if(m_index == 0)
     {
-        be_assert_recover(m_path[0] != istring("apk:"), "can't create a file in the Package directory",
-                          return weak< File >());
+        be_assert_recover(m_path[0] != istring("apk:"),
+                          "can't create a file in the Package directory", return weak< File >());
         ifilename::Filename path = (m_path + ifilename(name)).str();
         struct stat         s;
         errno   = 0;
@@ -210,12 +218,12 @@ weak< File > DiskFolder::createFile(const istring& name)
         }
 
         ScopedCriticalSection lock(m_lock);
-        ref< File >           result
-           = ref< PosixFile >::create(Arena::filesystem(), m_path + ifilename(name),
-                                      File::Media(File::Media::Disk, s.st_dev, s.st_ino), s.st_size, s.st_mtime);
+        ref< File >           result = ref< PosixFile >::create(
+            Arena::filesystem(), m_path + ifilename(name),
+            File::Media(File::Media::Disk, s.st_dev, s.st_ino), s.st_size, s.st_mtime);
 
-        for(minitl::vector< minitl::tuple< istring, ref< File > > >::iterator it = m_files.begin(); it != m_files.end();
-            ++it)
+        for(minitl::vector< minitl::tuple< istring, ref< File > > >::iterator it = m_files.begin();
+            it != m_files.end(); ++it)
         {
             if(it->first == name)
             {

@@ -1,4 +1,4 @@
-/* BugEngine <bugengine.devel@gmail.com> / 2008-2014
+/* BugEngine <bugengine.devel@gmail.com>
    see LICENSE for detail */
 
 #include <bugengine/core/stdafx.h>
@@ -64,7 +64,8 @@ void Semaphore::release(int count)
 Threads::Waitable::WaitResult Semaphore::wait()
 {
 #if USE_DISPATCH_SEMAPHORE
-    int result = dispatch_semaphore_wait(reinterpret_cast< dispatch_semaphore_t >(m_data), DISPATCH_TIME_FOREVER);
+    int result = dispatch_semaphore_wait(reinterpret_cast< dispatch_semaphore_t >(m_data),
+                                         DISPATCH_TIME_FOREVER);
 #else
     int result = sem_wait((sem_t*)m_data);
 #endif

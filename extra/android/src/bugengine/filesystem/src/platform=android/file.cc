@@ -1,4 +1,4 @@
-/* BugEngine <bugengine.devel@gmail.com> / 2008-2014
+/* BugEngine <bugengine.devel@gmail.com>
    see LICENSE for detail */
 
 #include <bugengine/filesystem/stdafx.h>
@@ -46,14 +46,15 @@ void PosixFile::doFillBuffer(weak< File::Ticket > ticket) const
         for(ticket->processed = 0; !ticket->done();)
         {
             int read = (ticket->processed + g_bufferSize > ticket->total)
-                          ? fread(data, 1, be_checked_numcast< u32 >(ticket->total - ticket->processed), f)
-                          : fread(data, 1, g_bufferSize, f);
+                           ? fread(data, 1,
+                                   be_checked_numcast< u32 >(ticket->total - ticket->processed), f)
+                           : fread(data, 1, g_bufferSize, f);
             ticket->processed += read;
             data += read;
             if(read == 0)
             {
-                be_error("reached premature end of file in %s after reading %d bytes (offset %d)" | m_filename
-                         | ticket->processed | ticket->total);
+                be_error("reached premature end of file in %s after reading %d bytes (offset %d)"
+                         | m_filename | ticket->processed | ticket->total);
                 ticket->error = true;
             }
         }
@@ -88,18 +89,20 @@ void PosixFile::doWriteBuffer(weak< Ticket > ticket) const
         u8* data = ticket->buffer.data();
         for(ticket->processed = 0; !ticket->done();)
         {
-            int written = (ticket->processed + g_bufferSize > ticket->total)
-                             ? fwrite(data, 1, be_checked_numcast< u32 >(ticket->total - ticket->processed), f)
-                             : fwrite(data, 1, g_bufferSize, f);
+            int written
+                = (ticket->processed + g_bufferSize > ticket->total)
+                      ? fwrite(data, 1,
+                               be_checked_numcast< u32 >(ticket->total - ticket->processed), f)
+                      : fwrite(data, 1, g_bufferSize, f);
             ticket->processed += written;
             data += written;
             if(written == 0)
             {
                 const char* errorMessage = strerror(errno);
                 be_forceuse(errorMessage);
-                be_error(
-                   "could not write part of the buffer to file %s; failed after processing %d bytes out of %d (%s)"
-                   | m_filename | ticket->processed | ticket->total | errorMessage);
+                be_error("could not write part of the buffer to file %s; failed after processing "
+                         "%d bytes out of %d (%s)"
+                         | m_filename | ticket->processed | ticket->total | errorMessage);
                 ticket->error = true;
             }
         }
