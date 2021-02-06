@@ -1,4 +1,4 @@
-/* BugEngine <bugengine.devel@gmail.com> / 2008-2014
+/* BugEngine <bugengine.devel@gmail.com>
    see LICENSE for detail */
 
 #ifndef BE_MINITL_PTR_SCOPEDPTR_INL_
@@ -16,7 +16,7 @@ scoped< T >::scoped(T* value, Allocator& allocator) : m_ptr(value)
 {
     be_assert(value->pointer::m_allocator == 0,
               "value of type %s already has a deleter; being refcounting multiple times?"
-                 | typeid(T).name());
+                  | typeid(T).name());
     value->pointer::m_allocator = &allocator;
 }
 

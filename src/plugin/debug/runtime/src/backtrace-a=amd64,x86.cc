@@ -1,4 +1,4 @@
-/* BugEngine <bugengine.devel@gmail.com> / 2008-2014
+/* BugEngine <bugengine.devel@gmail.com>
    see LICENSE for detail */
 
 #include <bugengine/plugin.debug.runtime/stdafx.h>
@@ -47,7 +47,7 @@ BE_NOINLINE size_t Callstack::backtrace(Address* buffer, size_t count, size_t sk
 #ifdef _X64
             // stack frame is aligned on a 16 bytes boundary in x64
             buffer[result].m_address
-               = reinterpret_cast< u64 >(*(minitl::align(stackPointer, 16) + 1));
+                = reinterpret_cast< u64 >(*(minitl::align(stackPointer, 16) + 1));
 #else
             buffer[result].m_address = reinterpret_cast< u64 >(*(stackPointer + 1));
 #endif

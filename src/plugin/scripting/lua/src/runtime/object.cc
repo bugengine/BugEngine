@@ -1,4 +1,4 @@
-/* BugEngine <bugengine.devel@gmail.com> / 2008-2014
+/* BugEngine <bugengine.devel@gmail.com>
  see LICENSE for detail */
 
 #include <stdafx.h>
@@ -17,7 +17,7 @@ namespace BugEngine { namespace Lua {
 static int pushUserdataString(lua_State* L, RTTI::Value* userdata)
 {
     const char* constness
-       = (userdata->type().constness == RTTI::Type::Const) ? "const " : "mutable ";
+        = (userdata->type().constness == RTTI::Type::Const) ? "const " : "mutable ";
     const char* reference;
     const char* closing;
     switch(userdata->type().indirection)
@@ -99,7 +99,7 @@ extern "C" int valueGet(lua_State* state)
         if(userdata->type().isConst())
         {
             return Context::push(
-               state, cls->apiMethods->arrayScripting->indexConst(*userdata, u32(i - 1)));
+                state, cls->apiMethods->arrayScripting->indexConst(*userdata, u32(i - 1)));
         }
         else
         {
@@ -128,7 +128,7 @@ extern "C" int valueSet(lua_State* state)
         if(userdata->type().isConst())
         {
             return Context::push(
-               state, cls->apiMethods->arrayScripting->indexConst(*userdata, u32(i - 1)));
+                state, cls->apiMethods->arrayScripting->indexConst(*userdata, u32(i - 1)));
         }
         else
         {
@@ -145,17 +145,17 @@ extern "C" int valueSet(lua_State* state)
         if(!p)
         {
             return error(state, minitl::format< 4096u >("object of type %s has no property %s")
-                                   | userdata->type().name().c_str() | name.c_str());
+                                    | userdata->type().name().c_str() | name.c_str());
         }
         else if(userdata->type().constness == RTTI::Type::Const)
         {
             return error(state, minitl::format< 4096u >("object %s is const")
-                                   | userdata->type().name().c_str());
+                                    | userdata->type().name().c_str());
         }
         else if(p->type.constness == RTTI::Type::Const)
         {
             return error(state, minitl::format< 4096u >("property %s.%s is const")
-                                   | userdata->type().name().c_str() | name.c_str());
+                                    | userdata->type().name().c_str() | name.c_str());
         }
         else
         {
@@ -173,8 +173,8 @@ extern "C" int valueSet(lua_State* state)
             {
                 return error(state,
                              minitl::format< 4096u >("property %s.%s has incompatible type %s")
-                                | userdata->type().name().c_str() | name.c_str()
-                                | p->type.name().c_str());
+                                 | userdata->type().name().c_str() | name.c_str()
+                                 | p->type.name().c_str());
             }
         }
     }
@@ -189,7 +189,7 @@ extern "C" int valueCall(lua_State* state)
     if(!value)
     {
         return error(state, minitl::format< 4096u >("object %s is not callable")
-                               | userdata->type().name());
+                                | userdata->type().name());
     }
     raw< const RTTI::Method > method = value.as< raw< const RTTI::Method > >();
     if(method)
@@ -199,12 +199,12 @@ extern "C" int valueCall(lua_State* state)
     else
     {
         return error(state, minitl::format< 4096u >("%s.?call is of type &s; expected a Method")
-                               | userdata->type().name() | value.type().name());
+                                | userdata->type().name() | value.type().name());
     }
 }
 
 const luaL_Reg s_valueMetaTable[]
-   = {{"__gc", valueGC},        {"__tostring", valueToString}, {"__index", valueGet},
-      {"__newindex", valueSet}, {"__call", valueCall},         {0, 0}};
+    = {{"__gc", valueGC},        {"__tostring", valueToString}, {"__index", valueGet},
+       {"__newindex", valueSet}, {"__call", valueCall},         {0, 0}};
 
 }}  // namespace BugEngine::Lua

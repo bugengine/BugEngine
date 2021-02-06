@@ -1,4 +1,4 @@
-/* BugEngine <bugengine.devel@gmail.com> / 2008-2014
+/* BugEngine <bugengine.devel@gmail.com>
    see LICENSE for detail */
 
 #include <bugengine/plugin.scripting.pythonlib/stdafx.h>
@@ -9,7 +9,7 @@
 namespace BugEngine { namespace Python {
 
 PyMethodDef PyBugNamespace::s_methods[]
-   = {{"__dir__", &PyBugNamespace::dir, METH_NOARGS, NULL}, {NULL, NULL, 0, NULL}};
+    = {{"__dir__", &PyBugNamespace::dir, METH_NOARGS, NULL}, {NULL, NULL, 0, NULL}};
 
 PyTypeObject PyBugNamespace::s_pyType = {{{0, 0}, 0},
                                          "py_bugengine.Namespace",
@@ -151,8 +151,8 @@ PyObject* PyBugNamespace::dir(PyObject* self, PyObject* args)
     if(!result) return NULL;
     const RTTI::Class&             klass      = self_->value.as< const RTTI::Class& >();
     PyString_FromStringAndSizeType fromString = s_library->getVersion() >= 30
-                                                   ? s_library->m_PyUnicode_FromStringAndSize
-                                                   : s_library->m_PyString_FromStringAndSize;
+                                                    ? s_library->m_PyUnicode_FromStringAndSize
+                                                    : s_library->m_PyString_FromStringAndSize;
 
     for(raw< const RTTI::ObjectInfo > o = klass.objects; o; o = o->next)
     {

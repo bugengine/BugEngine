@@ -1,4 +1,4 @@
-/* BugEngine <bugengine.devel@gmail.com> / 2008-2014
+/* BugEngine <bugengine.devel@gmail.com>
    see LICENSE for detail */
 
 #include <bugengine/plugin.scripting.pythonlib/stdafx.h>
@@ -24,8 +24,7 @@ struct PythonTypeInfo
     PythonTypeInfo(PyObject* object);
 };
 
-RTTI::ConversionCost calculateConversion(const PythonTypeInfo& typeInfo,
-                                         const RTTI::Type&     other)
+RTTI::ConversionCost calculateConversion(const PythonTypeInfo& typeInfo, const RTTI::Type& other)
 {
     return PyBugObject::distance(typeInfo.arg, other);
 }
@@ -73,12 +72,12 @@ PyObject* call(raw< const RTTI::Method > method, PyObject* self, PyObject* args,
 {
     const u32 selfArgCount = self ? 1 : 0;
     const u32 unnamedArgCount
-       = args ? be_checked_numcast< u32 >(s_library->m_PyTuple_Size(args)) : 0;
+        = args ? be_checked_numcast< u32 >(s_library->m_PyTuple_Size(args)) : 0;
     const u32 namedArgCount
-       = kwargs ? be_checked_numcast< u32 >(s_library->m_PyDict_Size(kwargs)) : 0;
+        = kwargs ? be_checked_numcast< u32 >(s_library->m_PyDict_Size(kwargs)) : 0;
     const u32      argCount = selfArgCount + unnamedArgCount + namedArgCount;
     PythonArgInfo* argInfos
-       = reinterpret_cast< PythonArgInfo* >(malloca(argCount * sizeof(PythonArgInfo)));
+        = reinterpret_cast< PythonArgInfo* >(malloca(argCount * sizeof(PythonArgInfo)));
 
     {
         u32 argIndex = 0;
@@ -90,7 +89,7 @@ PyObject* call(raw< const RTTI::Method > method, PyObject* self, PyObject* args,
         for(u32 i = 0; i < unnamedArgCount; ++argIndex, ++i)
         {
             new(&argInfos[argIndex])
-               PythonArgInfo(PythonTypeInfo(s_library->m_PyTuple_GetItem(args, i)));
+                PythonArgInfo(PythonTypeInfo(s_library->m_PyTuple_GetItem(args, i)));
         }
         if(kwargs)
         {
@@ -103,7 +102,7 @@ PyObject* call(raw< const RTTI::Method > method, PyObject* self, PyObject* args,
                 if(version >= 33)
                 {
                     new(&argInfos[argIndex])
-                       PythonArgInfo(s_library->m_PyUnicode_AsUTF8(key), item);
+                        PythonArgInfo(s_library->m_PyUnicode_AsUTF8(key), item);
                 }
                 else if(version >= 30)
                 {
@@ -119,7 +118,7 @@ PyObject* call(raw< const RTTI::Method > method, PyObject* self, PyObject* args,
                 else
                 {
                     new(&argInfos[argIndex])
-                       PythonArgInfo(s_library->m_PyString_AsString(key), PythonTypeInfo(item));
+                        PythonArgInfo(s_library->m_PyString_AsString(key), PythonTypeInfo(item));
                 }
                 ++argIndex;
             }

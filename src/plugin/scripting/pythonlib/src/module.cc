@@ -1,4 +1,4 @@
-/* BugEngine <bugengine.devel@gmail.com> / 2008-2014
+/* BugEngine <bugengine.devel@gmail.com>
    see LICENSE for detail */
 
 #include <bugengine/plugin.scripting.pythonlib/stdafx.h>
@@ -31,7 +31,7 @@ static PyObject* run(PyObject* self, PyObject* args)
 static PyMethodDef s_methods[] = {{"run", &run, METH_NOARGS, NULL}, {NULL, NULL, 0, NULL}};
 
 static PyModuleDef s_module
-   = {PyModuleDef_HEAD_INIT, "py_bugengine", "", 0, s_methods, NULL, NULL, NULL, NULL};
+    = {PyModuleDef_HEAD_INIT, "py_bugengine", "", 0, s_methods, NULL, NULL, NULL, NULL};
 
 static void setupModule(PyObject* module, bool registerLog)
 {

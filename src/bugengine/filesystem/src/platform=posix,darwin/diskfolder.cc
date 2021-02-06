@@ -1,4 +1,4 @@
-/* BugEngine <bugengine.devel@gmail.com> / 2008-2014
+/* BugEngine <bugengine.devel@gmail.com>
    see LICENSE for detail */
 
 #include <bugengine/filesystem/stdafx.h>
@@ -33,7 +33,8 @@ static void createDirectory(const ipath& path, Folder::CreatePolicy policy)
     }
 }
 
-DiskFolder::DiskFolder(const ipath& diskpath, Folder::ScanPolicy scanPolicy, Folder::CreatePolicy createPolicy)
+DiskFolder::DiskFolder(const ipath& diskpath, Folder::ScanPolicy scanPolicy,
+                       Folder::CreatePolicy createPolicy)
     : m_path(diskpath)
     , m_index(0)
     , m_watch()
@@ -73,7 +74,8 @@ DiskFolder::~DiskFolder()
 void DiskFolder::doRefresh(Folder::ScanPolicy scanPolicy)
 {
     Folder::doRefresh(scanPolicy);
-    Folder::ScanPolicy newPolicy = (scanPolicy == Folder::ScanRecursive) ? Folder::ScanRecursive : Folder::ScanNone;
+    Folder::ScanPolicy newPolicy
+        = (scanPolicy == Folder::ScanRecursive) ? Folder::ScanRecursive : Folder::ScanNone;
     if(m_handle.ptrHandle)
     {
         ScopedCriticalSection lock(m_lock);
@@ -90,19 +92,21 @@ void DiskFolder::doRefresh(Folder::ScanPolicy scanPolicy)
             stat(filename.name, &s);
             if(errno == 0)
             {
-                be_error("could not stat file %s: %s(%d)" | filename.name | strerror(errno) | errno);
+                be_error("could not stat file %s: %s(%d)" | filename.name | strerror(errno)
+                         | errno);
             }
             else if(s.st_mode & S_IFDIR)
             {
-                ref< DiskFolder > newFolder
-                   = ref< DiskFolder >::create(Arena::filesystem(), p, newPolicy, Folder::CreateNone);
+                ref< DiskFolder > newFolder = ref< DiskFolder >::create(
+                    Arena::filesystem(), p, newPolicy, Folder::CreateNone);
                 m_folders.push_back(minitl::make_tuple(name, newFolder));
             }
             else
             {
                 File::Media media(File::Media::Disk, s.st_dev, s.st_ino);
-                ref< File > newFile = ref< PosixFile >::create(Arena::filesystem(), ipath(m_path) + ifilename(name),
-                                                               media, s.st_size, s.st_mtime);
+                ref< File > newFile
+                    = ref< PosixFile >::create(Arena::filesystem(), ipath(m_path) + ifilename(name),
+                                               media, s.st_size, s.st_mtime);
                 m_files.push_back(minitl::make_tuple(name, newFile));
             }
         }
@@ -136,12 +140,12 @@ weak< File > DiskFolder::createFile(const istring& name)
     }
 
     ScopedCriticalSection lock(m_lock);
-    ref< File >           result
-       = ref< PosixFile >::create(Arena::filesystem(), m_path + ifilename(name),
-                                  File::Media(File::Media::Disk, s.st_dev, s.st_ino), s.st_size, s.st_mtime);
+    ref< File >           result = ref< PosixFile >::create(
+        Arena::filesystem(), m_path + ifilename(name),
+        File::Media(File::Media::Disk, s.st_dev, s.st_ino), s.st_size, s.st_mtime);
 
-    for(minitl::vector< minitl::tuple< istring, ref< File > > >::iterator it = m_files.begin(); it != m_files.end();
-        ++it)
+    for(minitl::vector< minitl::tuple< istring, ref< File > > >::iterator it = m_files.begin();
+        it != m_files.end(); ++it)
     {
         if(it->first == name)
         {
@@ -171,14 +175,16 @@ void DiskFolder::onChanged()
             int             result = stat(filename.name, &s);
             if(result != 0)
             {
-                be_error("could not stat file %s: %s(%d)" | filename.name | strerror(errno) | errno);
+                be_error("could not stat file %s: %s(%d)" | filename.name | strerror(errno)
+                         | errno);
             }
             else if(s.st_mode & S_IFDIR)
             {
                 /* TODO: deleted folder */
                 bool exists = false;
 
-                for(minitl::vector< minitl::tuple< istring, ref< Folder > > >::iterator it = m_folders.begin();
+                for(minitl::vector< minitl::tuple< istring, ref< Folder > > >::iterator it
+                    = m_folders.begin();
                     it != m_folders.end(); ++it)
                 {
                     if(it->first == name)
@@ -190,8 +196,8 @@ void DiskFolder::onChanged()
                 if(!exists)
                 {
                     be_info("new folder: %s" | p);
-                    ref< DiskFolder > newFolder
-                       = ref< DiskFolder >::create(Arena::filesystem(), p, Folder::ScanNone, Folder::CreateNone);
+                    ref< DiskFolder > newFolder = ref< DiskFolder >::create(
+                        Arena::filesystem(), p, Folder::ScanNone, Folder::CreateNone);
                     m_folders.push_back(minitl::make_tuple(name, newFolder));
                 }
             }
@@ -200,7 +206,8 @@ void DiskFolder::onChanged()
                 /* TODO: deleted file */
                 bool exists = false;
 
-                for(minitl::vector< minitl::tuple< istring, ref< File > > >::iterator it = m_files.begin();
+                for(minitl::vector< minitl::tuple< istring, ref< File > > >::iterator it
+                    = m_files.begin();
                     it != m_files.end(); ++it)
                 {
                     if(it->first == name)
@@ -213,7 +220,8 @@ void DiskFolder::onChanged()
                 {
                     be_info("new file: %s" | p);
                     File::Media media(File::Media::Disk, s.st_dev, s.st_ino);
-                    ref< File > newFile = ref< PosixFile >::create(Arena::filesystem(), ipath(m_path) + ifilename(name),
+                    ref< File > newFile = ref< PosixFile >::create(Arena::filesystem(),
+                                                                   ipath(m_path) + ifilename(name),
                                                                    media, s.st_size, s.st_mtime);
                     m_files.push_back(minitl::make_tuple(name, newFile));
                 }

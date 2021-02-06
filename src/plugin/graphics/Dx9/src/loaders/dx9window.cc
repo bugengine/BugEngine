@@ -1,4 +1,4 @@
-/* BugEngine <bugengine.devel@gmail.com> / 2008-2014
+/* BugEngine <bugengine.devel@gmail.com>
    see LICENSE for detail */
 
 #include <stdafx.h>
@@ -31,7 +31,7 @@ void Dx9Window::setCurrent() const
         LPDIRECT3DSURFACE9 backBuffer;
         d3d_checkResult(m_swapChain->GetBackBuffer(0, D3DBACKBUFFER_TYPE_MONO, &backBuffer));
         d3d_checkResult(be_checked_cast< const Dx9Renderer >(m_renderer)
-                           ->m_device->SetRenderTarget(0, backBuffer));
+                            ->m_device->SetRenderTarget(0, backBuffer));
         backBuffer->Release();
     }
 }
@@ -46,8 +46,8 @@ void Dx9Window::begin(ClearMode clear) const
         if(clear == Clear)
         {
             d3d_checkResult(
-               be_checked_cast< const Dx9Renderer >(m_renderer)
-                  ->m_device->Clear(0, NULL, D3DCLEAR_TARGET, D3DCOLOR_XRGB(0, 0, 0), 1.0f, 0));
+                be_checked_cast< const Dx9Renderer >(m_renderer)
+                    ->m_device->Clear(0, NULL, D3DCLEAR_TARGET, D3DCOLOR_XRGB(0, 0, 0), 1.0f, 0));
         }
         d3d_checkResult(be_checked_cast< const Dx9Renderer >(m_renderer)->m_device->BeginScene());
     }
@@ -65,7 +65,7 @@ void Dx9Window::end(PresentMode present) const
             if(d3d_checkResult(m_swapChain->Present(NULL, NULL, NULL, NULL, 0))
                == D3DERR_DEVICELOST)
                 be_checked_cast< const Dx9Renderer >(m_renderer)->m_deviceState
-                   = Dx9Renderer::DeviceLost;
+                    = Dx9Renderer::DeviceLost;
         }
     }
 }
@@ -87,7 +87,7 @@ void Dx9Window::load(weak< const Resource::Description > windowDescription)
     d3dpp.PresentationInterval = D3DPRESENT_INTERVAL_IMMEDIATE;
 
     d3d_checkResult(be_checked_cast< const Dx9Renderer >(m_renderer)
-                       ->m_device->CreateAdditionalSwapChain(&d3dpp, &m_swapChain));
+                        ->m_device->CreateAdditionalSwapChain(&d3dpp, &m_swapChain));
 }
 
 void Dx9Window::unload()

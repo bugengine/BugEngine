@@ -1,4 +1,4 @@
-/* BugEngine <bugengine.devel@gmail.com> / 2008-2014
+/* BugEngine <bugengine.devel@gmail.com>
    see LICENSE for detail */
 
 #ifndef BE_FILESYSTEM_FILE_FILE_SCRIPT_HH_
@@ -79,7 +79,8 @@ public:
 
     public:
         Ticket(minitl::Allocator& arena, weak< const File > file, i64 offset, u32 size, bool text);
-        Ticket(minitl::Allocator& arena, weak< const File > file, i64 offset, u32 size, bool text, const void* data);
+        Ticket(minitl::Allocator& arena, weak< const File > file, i64 offset, u32 size, bool text,
+               const void* data);
         ~Ticket();
 
     private:

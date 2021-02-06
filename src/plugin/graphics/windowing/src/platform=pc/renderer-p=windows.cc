@@ -1,4 +1,4 @@
-/* BugEngine <bugengine.devel@gmail.com> / 2008-2014
+/* BugEngine <bugengine.devel@gmail.com>
    see LICENSE for detail */
 
 #include <bugengine/plugin.graphics.windowing/stdafx.h>
@@ -66,9 +66,9 @@ Renderer::PlatformRenderer::~PlatformRenderer()
 HWND Renderer::PlatformRenderer::createWindowImplementation(const WindowCreationFlags& flags) const
 {
     HWND hWnd = CreateWindowEx(
-       flags.fullscreen ? WS_EX_TOPMOST : 0, m_windowClassName.c_str(), flags.title, flags.flags,
-       flags.x, flags.y, flags.size.right - flags.size.left, flags.size.bottom - flags.size.top,
-       NULL, NULL, (HINSTANCE)::GetModuleHandle(0), NULL);
+        flags.fullscreen ? WS_EX_TOPMOST : 0, m_windowClassName.c_str(), flags.title, flags.flags,
+        flags.x, flags.y, flags.size.right - flags.size.left, flags.size.bottom - flags.size.top,
+        NULL, NULL, (HINSTANCE)::GetModuleHandle(0), NULL);
     return hWnd;
 }
 

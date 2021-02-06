@@ -1,4 +1,4 @@
-/* BugEngine <bugengine.devel@gmail.com> / 2008-2014
+/* BugEngine <bugengine.devel@gmail.com>
    see LICENSE for detail */
 
 #ifndef BE_CORE_ENDIANNESS_HH_
@@ -14,9 +14,9 @@ enum Endianness
     Endianness_Big,
     Endianness_Self =
 #ifndef BE_BIGENDIAN
-       Endianness_Little
+        Endianness_Little
 #else
-       Endianness_Big
+        Endianness_Big
 #endif
 };
 

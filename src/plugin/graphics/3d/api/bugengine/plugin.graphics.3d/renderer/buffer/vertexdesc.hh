@@ -1,4 +1,4 @@
-/* BugEngine <bugengine.devel@gmail.com> / 2008-2014
+/* BugEngine <bugengine.devel@gmail.com>
    see LICENSE for detail */
 
 #ifndef BE_3D_RENDERER_BUFFER_VERTEXDESC_HH_
@@ -135,7 +135,7 @@ struct VertexDescription
         static VertexBufferFlags pflags   = parent::getFlags();
         desc[VertexComponents - 1].offset = pflags.vertexSize;
         desc[VertexComponents - 1].type   = VertexElementInfo::VertexElementType(
-           VertexElementTypeMapToIndex< typename Queue::VertexSemanticType >::Index);
+            VertexElementTypeMapToIndex< typename Queue::VertexSemanticType >::Index);
         desc[VertexComponents - 1].semantic = VertexSemantics(Queue::semantic);
         if(VertexComponents > 1)
             memcpy(desc, pflags.info, sizeof(VertexElementInfo) * (VertexComponents - 1));
@@ -181,7 +181,7 @@ struct VertexDescription< void >
                         MAKEVERTEXLIST7(t0, s0, t1, s1, t2, s2, t3, s3, t4, s4, t5, s5, t6, s6) >
 #define MAKEVERTEXLIST9(t0, s0, t1, s1, t2, s2, t3, s3, t4, s4, t5, s5, t6, s6, t7, s7, t8, s8)    \
     VertexSemanticList<                                                                            \
-       t8, s8, MAKEVERTEXLIST8(t0, s0, t1, s1, t2, s2, t3, s3, t4, s4, t5, s5, t6, s6, t7, s7) >
+        t8, s8, MAKEVERTEXLIST8(t0, s0, t1, s1, t2, s2, t3, s3, t4, s4, t5, s5, t6, s6, t7, s7) >
 #define MAKEVERTEXLIST10(t0, s0, t1, s1, t2, s2, t3, s3, t4, s4, t5, s5, t6, s6, t7, s7, t8, s8,   \
                          t9, s9)                                                                   \
     VertexSemanticList< t9, s9,                                                                    \

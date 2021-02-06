@@ -1,4 +1,4 @@
-/* BugEngine <bugengine.devel@gmail.com> / 2008-2014
+/* BugEngine <bugengine.devel@gmail.com>
    see LICENSE for detail */
 
 #include <bugengine/core/stdafx.h>
@@ -43,7 +43,7 @@ void Semaphore::release(int count)
 Threads::Waitable::WaitResult Semaphore::wait()
 {
     int result;
-    while ((result = sem_wait(reinterpret_cast< sem_t* >(m_data))) == -1 && errno == EINTR)
+    while((result = sem_wait(reinterpret_cast< sem_t* >(m_data))) == -1 && errno == EINTR)
         continue;
     if(result == 0)
     {

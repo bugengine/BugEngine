@@ -1,4 +1,4 @@
-/* BugEngine <bugengine.devel@gmail.com> / 2008-2014
+/* BugEngine <bugengine.devel@gmail.com>
    see LICENSE for detail */
 
 #ifndef BE_BUGENGINE_SCRIPTENGINE_HH_
@@ -24,17 +24,21 @@ protected:
     ScriptEngine(minitl::Allocator& arena, weak< Resource::ResourceManager > manager);
     virtual void runBuffer(weak< const T > script, Resource::Resource& resource,
                            const minitl::Allocator::Block< u8 >& buffer)
-       = 0;
+        = 0;
     virtual void reloadBuffer(weak< const T > script, Resource::Resource& resource,
                               const minitl::Allocator::Block< u8 >& buffer)
-       = 0;
+        = 0;
 
 private:
-    virtual void load(weak< const Resource::Description > script, Resource::Resource& resource) override;
-    virtual void reload(weak< const Resource::Description > oldScript, weak< const Resource::Description > newScript,
-                        Resource::Resource& resource) override;
-    virtual void onTicketLoaded(weak< const Resource::Description > script, Resource::Resource& resource,
-                                const minitl::Allocator::Block< u8 >& buffer, ILoader::LoadType type) override;
+    virtual void load(weak< const Resource::Description > script,
+                      Resource::Resource&                 resource) override;
+    virtual void reload(weak< const Resource::Description > oldScript,
+                        weak< const Resource::Description > newScript,
+                        Resource::Resource&                 resource) override;
+    virtual void onTicketLoaded(weak< const Resource::Description >   script,
+                                Resource::Resource&                   resource,
+                                const minitl::Allocator::Block< u8 >& buffer,
+                                ILoader::LoadType                     type) override;
 };
 
 }  // namespace BugEngine

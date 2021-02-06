@@ -1,4 +1,4 @@
-/* BugEngine <bugengine.devel@gmail.com> / 2008-2014
+/* BugEngine <bugengine.devel@gmail.com>
    see LICENSE for detail */
 
 #include <bugengine/plugin.graphics.3d/stdafx.h>
@@ -18,14 +18,14 @@ IRenderer::IRenderer(minitl::Allocator& allocator, weak< Resource::ResourceManag
     : m_allocator(allocator)
     , m_resourceManager(manager)
     , m_syncTask(ref< Task::Task< Task::MethodCaller< IRenderer, &IRenderer::flush > > >::create(
-         Arena::task(), "flush", Colors::Red::Red,
-         Task::MethodCaller< IRenderer, &IRenderer::flush >(this), Scheduler::High, affinity))
+          Arena::task(), "flush", Colors::Red::Red,
+          Task::MethodCaller< IRenderer, &IRenderer::flush >(this), Scheduler::High, affinity))
     , m_renderSurfaceLoader(
-         scoped< GPUResourceLoader< RenderSurfaceDescription > >::create(Arena::resource(), this))
+          scoped< GPUResourceLoader< RenderSurfaceDescription > >::create(Arena::resource(), this))
     , m_renderWindowLoader(
-         scoped< GPUResourceLoader< RenderWindowDescription > >::create(Arena::resource(), this))
+          scoped< GPUResourceLoader< RenderWindowDescription > >::create(Arena::resource(), this))
     , m_shaderProgramLoader(
-         scoped< GPUResourceLoader< ShaderProgramDescription > >::create(Arena::resource(), this))
+          scoped< GPUResourceLoader< ShaderProgramDescription > >::create(Arena::resource(), this))
 //,   m_kernelSort(scoped<Kernel::KernelDescription>::create(Arena::task(),
 //"graphics.3d.batchsort")) ,
 // m_kernelRender(scoped<Kernel::KernelDescription>::create(Arena::task(),

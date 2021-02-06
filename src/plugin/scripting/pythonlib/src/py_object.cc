@@ -1,4 +1,4 @@
-/* BugEngine <bugengine.devel@gmail.com> / 2008-2014
+/* BugEngine <bugengine.devel@gmail.com>
    see LICENSE for detail */
 
 #include <bugengine/plugin.scripting.pythonlib/stdafx.h>
@@ -20,21 +20,21 @@
 namespace BugEngine { namespace Python {
 
 PyMethodDef PyBugObject::s_methods[]
-   = {{"__dir__", &PyBugObject::dir, METH_NOARGS, NULL}, {NULL, NULL, 0, NULL}};
+    = {{"__dir__", &PyBugObject::dir, METH_NOARGS, NULL}, {NULL, NULL, 0, NULL}};
 
 static PyTypeObject::Py2NumberMethods s_py2ObjectNumber
-   = {{0, 0, 0}, 0, 0, 0, 0, 0, 0, 0, &PyBugObject::nonZero,
-      0,         0, 0, 0, 0, 0, 0, 0, 0,
-      0,         0, 0, 0, 0, 0, 0, 0, 0,
-      0,         0, 0, 0, 0, 0, 0, 0, 0,
-      0};
+    = {{0, 0, 0}, 0, 0, 0, 0, 0, 0, 0, &PyBugObject::nonZero,
+       0,         0, 0, 0, 0, 0, 0, 0, 0,
+       0,         0, 0, 0, 0, 0, 0, 0, 0,
+       0,         0, 0, 0, 0, 0, 0, 0, 0,
+       0};
 
 static PyTypeObject::Py3NumberMethods s_py3ObjectNumber
-   = {{0, 0, 0}, 0, 0, 0, 0, 0, 0, &PyBugObject::nonZero,
-      0,         0, 0, 0, 0, 0, 0, 0,
-      0,         0, 0, 0, 0, 0, 0, 0,
-      0,         0, 0, 0, 0, 0, 0, 0,
-      0,         0};
+    = {{0, 0, 0}, 0, 0, 0, 0, 0, 0, &PyBugObject::nonZero,
+       0,         0, 0, 0, 0, 0, 0, 0,
+       0,         0, 0, 0, 0, 0, 0, 0,
+       0,         0, 0, 0, 0, 0, 0, 0,
+       0,         0};
 
 PyTypeObject PyBugObject::s_pyType = {{{0, 0}, 0},
                                       "py_bugengine.Value",
@@ -130,23 +130,23 @@ PyObject* createPyString(PyObject* owner, RTTI::Value& value)
 }
 
 static CreateMethod s_createPyNumber[]
-   = {&createPyNumeric< bool >,  &createPyNumeric< u8 >,    &createPyNumeric< u16 >,
-      &createPyNumeric< u32 >,   &createPyNumeric< u64 >,   &createPyNumeric< i8 >,
-      &createPyNumeric< i16 >,   &createPyNumeric< i32 >,   &createPyNumeric< i64 >,
-      &createPyNumeric< float >, &createPyNumeric< double >};
+    = {&createPyNumeric< bool >,  &createPyNumeric< u8 >,    &createPyNumeric< u16 >,
+       &createPyNumeric< u32 >,   &createPyNumeric< u64 >,   &createPyNumeric< i8 >,
+       &createPyNumeric< i16 >,   &createPyNumeric< i32 >,   &createPyNumeric< i64 >,
+       &createPyNumeric< float >, &createPyNumeric< double >};
 
 static CreateMethod s_createNumber[]
-   = {&PyBugNumber< bool >::stealValue,  &PyBugNumber< u8 >::stealValue,
-      &PyBugNumber< u16 >::stealValue,   &PyBugNumber< u32 >::stealValue,
-      &PyBugNumber< u64 >::stealValue,   &PyBugNumber< i8 >::stealValue,
-      &PyBugNumber< i16 >::stealValue,   &PyBugNumber< i32 >::stealValue,
-      &PyBugNumber< i64 >::stealValue,   &PyBugNumber< float >::stealValue,
-      &PyBugNumber< double >::stealValue};
+    = {&PyBugNumber< bool >::stealValue,  &PyBugNumber< u8 >::stealValue,
+       &PyBugNumber< u16 >::stealValue,   &PyBugNumber< u32 >::stealValue,
+       &PyBugNumber< u64 >::stealValue,   &PyBugNumber< i8 >::stealValue,
+       &PyBugNumber< i16 >::stealValue,   &PyBugNumber< i32 >::stealValue,
+       &PyBugNumber< i64 >::stealValue,   &PyBugNumber< float >::stealValue,
+       &PyBugNumber< double >::stealValue};
 
 static CreateMethod s_createString[]
-   = {&PyBugString< istring >::stealValue, &PyBugString< inamespace >::stealValue,
-      &PyBugString< ifilename >::stealValue, &PyBugString< ipath >::stealValue,
-      &PyBugString< text >::stealValue};
+    = {&PyBugString< istring >::stealValue, &PyBugString< inamespace >::stealValue,
+       &PyBugString< ifilename >::stealValue, &PyBugString< ipath >::stealValue,
+       &PyBugString< text >::stealValue};
 
 PyObject* PyBugObject::stealValue(PyObject* owner, RTTI::Value& value)
 {
@@ -359,9 +359,9 @@ void PyBugObject::registerType(PyObject* module)
 static inline void unpackArray(PyObject* arg, const RTTI::Type& type, void* buffer)
 {
     be_assert(type.metaclass->type() == RTTI::ClassType_Array
-                 || type.metaclass->type() == RTTI::ClassType_Variant,
+                  || type.metaclass->type() == RTTI::ClassType_Variant,
               "expected to unpack Python Array into RTTI::ClassType_Array, got %s"
-                 | type.metaclass->name);
+                  | type.metaclass->name);
     be_unimplemented();
     be_forceuse(arg);
     be_forceuse(buffer);
@@ -370,13 +370,13 @@ static inline void unpackArray(PyObject* arg, const RTTI::Type& type, void* buff
 static inline void unpackNumber(PyObject* arg, const RTTI::Type& type, void* buffer)
 {
     be_assert(type.metaclass->type() == RTTI::ClassType_Number
-                 || type.metaclass->type() == RTTI::ClassType_Variant,
+                  || type.metaclass->type() == RTTI::ClassType_Variant,
               "expected to unpack Python Number into RTTI::ClassType_Number, got %s"
-                 | type.metaclass->name);
+                  | type.metaclass->name);
     unsigned long long value
-       = arg->py_type->tp_flags & Py_TPFLAGS_INT_SUBCLASS
-            ? (unsigned long long)s_library->m_PyInt_AsUnsignedLongMask(arg)
-            : (unsigned long long)s_library->m_PyLong_AsUnsignedLongLongMask(arg);
+        = arg->py_type->tp_flags & Py_TPFLAGS_INT_SUBCLASS
+              ? (unsigned long long)s_library->m_PyInt_AsUnsignedLongMask(arg)
+              : (unsigned long long)s_library->m_PyLong_AsUnsignedLongLongMask(arg);
     switch(RTTI::ClassIndex_Numeric(type.metaclass->index()))
     {
     case RTTI::ClassIndex_bool:
@@ -452,9 +452,9 @@ static inline void unpackNumber(PyObject* arg, const RTTI::Type& type, void* buf
 static inline void unpackFloat(PyObject* arg, const RTTI::Type& type, void* buffer)
 {
     be_assert(type.metaclass->type() == RTTI::ClassType_Number
-                 || type.metaclass->type() == RTTI::ClassType_Variant,
+                  || type.metaclass->type() == RTTI::ClassType_Variant,
               "expected to unpack Python Float into RTTI::ClassType_Number, got %s"
-                 | type.metaclass->name);
+                  | type.metaclass->name);
     double value = s_library->m_PyFloat_AsDouble(arg);
     switch(type.metaclass->index())
     {
@@ -531,9 +531,9 @@ static inline void unpackFloat(PyObject* arg, const RTTI::Type& type, void* buff
 static inline void unpackString(PyObject* arg, const RTTI::Type& type, void* buffer)
 {
     be_assert(type.metaclass->type() == RTTI::ClassType_String
-                 || type.metaclass->type() == RTTI::ClassType_Variant,
+                  || type.metaclass->type() == RTTI::ClassType_Variant,
               "expected to unpack Python String into RTTI::ClassType_String, got %s"
-                 | type.metaclass->name);
+                  | type.metaclass->name);
     char*     string;
     PyObject* decodedUnicode = 0;
     if(arg->py_type->tp_flags & Py_TPFLAGS_UNICODE_SUBCLASS)
@@ -571,7 +571,7 @@ static inline void unpackPod(PyObject* arg, const RTTI::Type& type, void* buffer
 {
     be_assert(type.metaclass->type() == RTTI::ClassType_Pod,
               "expected to unpack Python Dict into RTTI::ClassType_Pod, got %s"
-                 | type.metaclass->name);
+                  | type.metaclass->name);
 
     RTTI::Value* result = new(buffer) RTTI::Value(type, RTTI::Value::Reserve);
     RTTI::Value* v      = (RTTI::Value*)malloca(sizeof(RTTI::Value));
@@ -628,16 +628,16 @@ RTTI::ConversionCost PyBugObject::distance(PyObject* object, const RTTI::Type& d
     {
         if(desiredType.metaclass->type() == RTTI::ClassType_Array)
         {
-            PyTuple_SizeType size = object->py_type->tp_flags & (Py_TPFLAGS_LIST_SUBCLASS)
-                                       ? s_library->m_PyList_Size
-                                       : s_library->m_PyTuple_Size;
-            PyTuple_GetItemType get = object->py_type->tp_flags & (Py_TPFLAGS_LIST_SUBCLASS)
-                                         ? s_library->m_PyList_GetItem
-                                         : s_library->m_PyTuple_GetItem;
+            PyTuple_SizeType    size = object->py_type->tp_flags & (Py_TPFLAGS_LIST_SUBCLASS)
+                                           ? s_library->m_PyList_Size
+                                           : s_library->m_PyTuple_Size;
+            PyTuple_GetItemType get  = object->py_type->tp_flags & (Py_TPFLAGS_LIST_SUBCLASS)
+                                           ? s_library->m_PyList_GetItem
+                                           : s_library->m_PyTuple_GetItem;
             if(size(object) != 0)
             {
                 raw< const RTTI::ScriptingArrayAPI > api
-                   = desiredType.metaclass->apiMethods->arrayScripting;
+                    = desiredType.metaclass->apiMethods->arrayScripting;
                 const RTTI::Type& subType     = api->value_type;
                 PyObject*         firstObject = get(object, 0);
                 return distance(firstObject, subType);
@@ -655,8 +655,8 @@ RTTI::ConversionCost PyBugObject::distance(PyObject* object, const RTTI::Type& d
     else if(object->py_type->tp_flags & (Py_TPFLAGS_STRING_SUBCLASS | Py_TPFLAGS_UNICODE_SUBCLASS))
     {
         return desiredType.metaclass->type() == RTTI::ClassType_String
-                  ? RTTI::ConversionCost()
-                  : RTTI::ConversionCost::s_incompatible;
+                   ? RTTI::ConversionCost()
+                   : RTTI::ConversionCost::s_incompatible;
     }
     else if(object->py_type->tp_flags & Py_TPFLAGS_DICT_SUBCLASS)
     {
@@ -679,8 +679,8 @@ RTTI::ConversionCost PyBugObject::distance(PyObject* object, const RTTI::Type& d
                 }
             }
             return i == (u32)s_library->m_PyDict_Size(object)
-                      ? RTTI::ConversionCost()
-                      : RTTI::ConversionCost::s_incompatible;
+                       ? RTTI::ConversionCost()
+                       : RTTI::ConversionCost::s_incompatible;
         }
         else
         {
@@ -715,7 +715,7 @@ void PyBugObject::unpack(PyObject* object, const RTTI::Type& desiredType, void* 
         PyBugObject* object_ = static_cast< PyBugObject* >(object);
         be_assert(desiredType <= object_->value.type(),
                   "incompatible types: %s is not compatible with %s"
-                     | object_->value.type().name().c_str() | desiredType.name().c_str());
+                      | object_->value.type().name().c_str() | desiredType.name().c_str());
         new(buffer) RTTI::Value(RTTI::Value::ByRef(object_->value));
     }
     else if(object->py_type->tp_flags & (Py_TPFLAGS_INT_SUBCLASS | Py_TPFLAGS_LONG_SUBCLASS))
@@ -758,8 +758,8 @@ PyObject* PyBugObject::dir(raw< const RTTI::Class > metaclass)
     PyObject* result = s_library->m_PyList_New(0);
     if(!result) return NULL;
     PyString_FromStringAndSizeType fromString = s_library->getVersion() >= 30
-                                                   ? s_library->m_PyUnicode_FromStringAndSize
-                                                   : s_library->m_PyString_FromStringAndSize;
+                                                    ? s_library->m_PyUnicode_FromStringAndSize
+                                                    : s_library->m_PyString_FromStringAndSize;
 
     for(raw< const RTTI::ObjectInfo > o = metaclass->objects; o; o = o->next)
     {

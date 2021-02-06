@@ -1,4 +1,4 @@
-/* BugEngine <bugengine.devel@gmail.com> / 2008-2014
+/* BugEngine <bugengine.devel@gmail.com>
  see LICENSE for detail */
 
 #include <stdafx.h>
@@ -20,7 +20,7 @@ extern "C" int resourceLoaderGC(lua_State* state)
 {
     Context::checkArg(state, 1, "BugEngine.ResourceManager");
     weak< Resource::ResourceManager >* userdata
-       = (weak< Resource::ResourceManager >*)lua_touserdata(state, 1);
+        = (weak< Resource::ResourceManager >*)lua_touserdata(state, 1);
     userdata->~weak();
     return 0;
 }
@@ -29,7 +29,7 @@ extern "C" int resourceLoaderToString(lua_State* state)
 {
     Context::checkArg(state, 1, "BugEngine.ResourceManager");
     weak< Resource::ResourceManager >* userdata
-       = (weak< Resource::ResourceManager >*)lua_touserdata(state, 1);
+        = (weak< Resource::ResourceManager >*)lua_touserdata(state, 1);
     lua_pushfstring(state, "resourcemanager[%p]", userdata->operator->());
     return 1;
 }
@@ -40,10 +40,10 @@ extern "C" int resourceLoaderLoad(lua_State* state)
     Context::checkArg(state, 2, "BugEngine.Object");
 
     weak< Resource::ResourceManager > userdata
-       = *(weak< Resource::ResourceManager >*)lua_touserdata(state, 1);
+        = *(weak< Resource::ResourceManager >*)lua_touserdata(state, 1);
     RTTI::Value*                        v = (RTTI::Value*)lua_touserdata(state, 2);
     weak< const Resource::Description > description
-       = v->as< weak< const Resource::Description > >();
+        = v->as< weak< const Resource::Description > >();
     ResourceToken* resourceToken = (ResourceToken*)lua_newuserdata(state, sizeof(ResourceToken));
     new((void*)resourceToken) ResourceToken;
     resourceToken->description = description;
@@ -79,6 +79,6 @@ extern "C" int resourceToString(lua_State* state)
 }
 
 const luaL_Reg s_resourceMetaTable[]
-   = {{"__gc", resourceGC}, {"__tostring", resourceToString}, {0, 0}};
+    = {{"__gc", resourceGC}, {"__tostring", resourceToString}, {0, 0}};
 
 }}  // namespace BugEngine::Lua

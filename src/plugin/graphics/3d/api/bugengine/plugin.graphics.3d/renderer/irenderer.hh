@@ -1,4 +1,4 @@
-/* BugEngine <bugengine.devel@gmail.com> / 2008-2014
+/* BugEngine <bugengine.devel@gmail.com>
    see LICENSE for detail */
 
 #ifndef BE_3D_RENDERER_IRENDERER_HH_
@@ -52,9 +52,9 @@ protected:
     virtual void flush();
 
     virtual ref< IGPUResource > create(weak< const RenderSurfaceDescription > rendertarget) const
-       = 0;
+        = 0;
     virtual ref< IGPUResource > create(weak< const RenderWindowDescription > renderwindow) const
-       = 0;
+        = 0;
     // virtual ref<IGPUResource>   create(weak<const Mesh> mesh) const = 0;
     virtual ref< IGPUResource > create(weak< const ShaderProgramDescription > shader) const = 0;
     // virtual ref<IGPUResource>   create(weak<const Texture> texture) = 0;

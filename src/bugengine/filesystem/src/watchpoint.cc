@@ -1,4 +1,4 @@
-/* BugEngine <bugengine.devel@gmail.com> / 2008-2014
+/* BugEngine <bugengine.devel@gmail.com>
    see LICENSE for detail */
 
 #include <bugengine/filesystem/stdafx.h>
@@ -36,7 +36,8 @@ ref< WatchPoint > WatchPoint::getWatchPointOrCreate(const ipath& path)
     {
         ref< WatchPoint >     nextChild;
         ScopedCriticalSection lock(s_lock);
-        for(ChildrenVector::iterator it = result->m_children.begin(); it != result->m_children.end(); ++it)
+        for(ChildrenVector::iterator it = result->m_children.begin();
+            it != result->m_children.end(); ++it)
         {
             if(it->first == path[i])
             {
@@ -62,7 +63,8 @@ ref< WatchPoint > WatchPoint::getWatchPoint(const ipath& path)
     {
         ref< WatchPoint >     nextChild;
         ScopedCriticalSection lock(s_lock);
-        for(ChildrenVector::iterator it = result->m_children.begin(); it != result->m_children.end(); ++it)
+        for(ChildrenVector::iterator it = result->m_children.begin();
+            it != result->m_children.end(); ++it)
         {
             if(it->first == path[i])
             {

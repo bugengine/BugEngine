@@ -1,4 +1,4 @@
-/* BugEngine <bugengine.devel@gmail.com> / 2008-2014
+/* BugEngine <bugengine.devel@gmail.com>
    see LICENSE for detail */
 
 #ifndef BE_PYTHONLIB_PYTHONTYPES_HH_
@@ -444,9 +444,9 @@ struct PyModuleDef_Base
 #define PyModuleDef_HEAD_INIT                                                                      \
     {                                                                                              \
         {1, NULL}, /* ob_base */                                                                   \
-           NULL,   /* m_init */                                                                    \
-           0,      /* m_index */                                                                   \
-           NULL,   /* m_copy */                                                                    \
+            NULL,  /* m_init */                                                                    \
+            0,     /* m_index */                                                                   \
+            NULL,  /* m_copy */                                                                    \
     }
 
 struct PyModuleDef
@@ -466,14 +466,14 @@ struct PyModuleDef
     do                                                                                             \
     {                                                                                              \
         BugEngine::Python::PyObject* o_                                                            \
-           = reinterpret_cast< BugEngine::Python::PyObject* >(pyobject);                           \
+            = reinterpret_cast< BugEngine::Python::PyObject* >(pyobject);                          \
         ++o_->py_refcount;                                                                         \
     } while(0)
 #define Py_DECREF(pyobject)                                                                        \
     do                                                                                             \
     {                                                                                              \
         BugEngine::Python::PyObject* o_                                                            \
-           = reinterpret_cast< BugEngine::Python::PyObject* >(pyobject);                           \
+            = reinterpret_cast< BugEngine::Python::PyObject* >(pyobject);                          \
         if(--o_->py_refcount == 0)                                                                 \
         {                                                                                          \
             o_->py_type->tp_dealloc(o_);                                                           \

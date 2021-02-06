@@ -1,4 +1,4 @@
-/* BugEngine <bugengine.devel@gmail.com> / 2008-2014
+/* BugEngine <bugengine.devel@gmail.com>
    see LICENSE for detail */
 
 #include <bugengine/plugin.graphics.GL4/stdafx.h>
@@ -17,7 +17,7 @@ void GLRenderer::flush()
 }
 
 ref< IGPUResource >
-   GLRenderer::create(weak< const RenderSurfaceDescription > /*renderSurfaceDescription*/) const
+    GLRenderer::create(weak< const RenderSurfaceDescription > /*renderSurfaceDescription*/) const
 {
     return ref< GLSurface >();
 }

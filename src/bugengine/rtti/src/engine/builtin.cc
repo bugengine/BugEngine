@@ -1,4 +1,4 @@
-/* BugEngine <bugengine.devel@gmail.com> / 2008-2014
+/* BugEngine <bugengine.devel@gmail.com>
    see LICENSE for detail */
 
 #include <bugengine/rtti/stdafx.h>
@@ -34,8 +34,8 @@ template <>
 BE_EXPORT raw< const RTTI::Class > ClassID< minitl::pointer >::klass()
 {
     static RTTI::Class s_pointer
-       = {"pointer", 0,      0,      0,   {0}, {be_class< void >().m_ptr},  {0},
-          {0},       {0, 0}, {0, 0}, {0}, {0}, &RTTI::nullconstructor< 0 >, &RTTI::nulldestructor};
+        = {"pointer", 0,      0,      0,   {0}, {be_class< void >().m_ptr},  {0},
+           {0},       {0, 0}, {0, 0}, {0}, {0}, &RTTI::nullconstructor< 0 >, &RTTI::nulldestructor};
     raw< RTTI::Class > ci = {&s_pointer};
     return ci;
 }

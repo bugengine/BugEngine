@@ -1,11 +1,11 @@
-/* BugEngine <bugengine.devel@gmail.com> / 2008-2014
+/* BugEngine <bugengine.devel@gmail.com>
    see LICENSE for detail */
 
 #ifndef BE_MAIN_STDAFX_H_
 #define BE_MAIN_STDAFX_H_
 /**************************************************************************************************/
 
-#include    <bugengine/stdafx.h>
+#include <bugengine/stdafx.h>
 
 /**************************************************************************************************/
 #endif

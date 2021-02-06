@@ -1,4 +1,4 @@
-/* BugEngine <bugengine.devel@gmail.com> / 2008-2014
+/* BugEngine <bugengine.devel@gmail.com>
    see LICENSE for detail */
 
 #include <bugengine/filesystem/stdafx.h>
@@ -92,13 +92,15 @@ unsigned long WINAPI WatchThread::doWatchFolders(void* params)
         HANDLE handles[s_maximumWatchCount + 1];
         int    i     = 0;
         handles[i++] = watchThread->m_semaphore;
-        for(minitl::vector< minitl::tuple< HANDLE, weak< FileSystem::WatchPoint > > >::const_iterator it
+        for(minitl::vector<
+                minitl::tuple< HANDLE, weak< FileSystem::WatchPoint > > >::const_iterator it
             = watchThread->m_watches.begin();
             it != watchThread->m_watches.end(); ++it)
         {
             handles[i++] = it->first;
         }
-        DWORD result = WaitForMultipleObjects(1 + (DWORD)watchThread->m_watches.size(), handles, FALSE, INFINITE);
+        DWORD result = WaitForMultipleObjects(1 + (DWORD)watchThread->m_watches.size(), handles,
+                                              FALSE, INFINITE);
         if(result == WAIT_OBJECT_0)
         {
             WatchRequest* request = watchThread->m_requests.pop();
@@ -108,21 +110,25 @@ unsigned long WINAPI WatchThread::doWatchFolders(void* params)
             }
             else
             {
-                DWORD flags = FILE_NOTIFY_CHANGE_FILE_NAME | FILE_NOTIFY_CHANGE_DIR_NAME | FILE_NOTIFY_CHANGE_ATTRIBUTES
-                              | FILE_NOTIFY_CHANGE_SIZE | FILE_NOTIFY_CHANGE_LAST_WRITE;
-                HANDLE handle = FindFirstChangeNotificationA(request->m_path.str().name, FALSE, flags);
+                DWORD flags = FILE_NOTIFY_CHANGE_FILE_NAME | FILE_NOTIFY_CHANGE_DIR_NAME
+                              | FILE_NOTIFY_CHANGE_ATTRIBUTES | FILE_NOTIFY_CHANGE_SIZE
+                              | FILE_NOTIFY_CHANGE_LAST_WRITE;
+                HANDLE handle
+                    = FindFirstChangeNotificationA(request->m_path.str().name, FALSE, flags);
                 watchThread->m_watches.push_back(minitl::make_tuple(handle, request->m_watchpoint));
                 request->~WatchRequest();
                 Arena::temporary().free(request);
             }
         }
-        else if(result >= WAIT_OBJECT_0 + 1 && result <= WAIT_OBJECT_0 + watchThread->m_watches.size())
+        else if(result >= WAIT_OBJECT_0 + 1
+                && result <= WAIT_OBJECT_0 + watchThread->m_watches.size())
         {
             int index = result - WAIT_OBJECT_0 - 1;
             watchThread->m_watches[index].second->signalDirty();
             FindNextChangeNotification(watchThread->m_watches[index].first);
         }
-        else if(result >= WAIT_ABANDONED_0 + 1 && result <= WAIT_ABANDONED_0 + watchThread->m_watches.size())
+        else if(result >= WAIT_ABANDONED_0 + 1
+                && result <= WAIT_ABANDONED_0 + watchThread->m_watches.size())
         {
             be_notreached();
             int index = result - WAIT_ABANDONED_0 - 1;
@@ -132,8 +138,9 @@ unsigned long WINAPI WatchThread::doWatchFolders(void* params)
         {
             char* errorMessage = 0;
             int   errorCode    = ::GetLastError();
-            FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM, NULL, errorCode,
-                          MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), reinterpret_cast< LPSTR >(&errorMessage), 0, NULL);
+            FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM, NULL,
+                          errorCode, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+                          reinterpret_cast< LPSTR >(&errorMessage), 0, NULL);
             be_error("file watch wait interrupted: %s" | errorMessage);
             ::LocalFree(errorMessage);
             be_notreached();
@@ -158,7 +165,8 @@ WatchThread::~WatchThread()
     be_forceuse(result);
     CloseHandle(m_thread);
     CloseHandle(m_semaphore);
-    for(minitl::vector< minitl::tuple< HANDLE, weak< FileSystem::WatchPoint > > >::iterator it = m_watches.begin();
+    for(minitl::vector< minitl::tuple< HANDLE, weak< FileSystem::WatchPoint > > >::iterator it
+        = m_watches.begin();
         it != m_watches.end(); ++it)
     {
         FindCloseChangeNotification(it->first);
@@ -169,7 +177,8 @@ bool WatchThread::add(const ipath& path, ref< FileSystem::WatchPoint > watchpoin
 {
     if(m_watchCount < s_maximumWatchCount)
     {
-        WatchRequest* request = new(Arena::temporary()) WatchRequest(WatchRequest::Add, path, watchpoint);
+        WatchRequest* request
+            = new(Arena::temporary()) WatchRequest(WatchRequest::Add, path, watchpoint);
         m_requests.push(request);
         m_watchCount++;
         ReleaseSemaphore(m_semaphore, 1, 0);
@@ -190,7 +199,8 @@ ref< Folder::Watch > WatchPoint::addWatch(weak< DiskFolder > folder, const BugEn
     {
         watchpoint = getWatchPointOrCreate(path);
         bool found = false;
-        for(minitl::vector< ref< WatchThread > >::iterator it = s_threads.begin(); it != s_threads.end(); ++it)
+        for(minitl::vector< ref< WatchThread > >::iterator it = s_threads.begin();
+            it != s_threads.end(); ++it)
         {
             if((*it)->add(path, watchpoint))
             {
@@ -204,7 +214,8 @@ ref< Folder::Watch > WatchPoint::addWatch(weak< DiskFolder > folder, const BugEn
             thread->add(path, watchpoint);
         }
     }
-    ref< DiskFolder::Watch > result = ref< DiskFolder::Watch >::create(Arena::filesystem(), folder, watchpoint);
+    ref< DiskFolder::Watch > result
+        = ref< DiskFolder::Watch >::create(Arena::filesystem(), folder, watchpoint);
     return result;
 }
 

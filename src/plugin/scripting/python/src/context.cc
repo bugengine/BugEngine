@@ -1,4 +1,4 @@
-/* BugEngine <bugengine.devel@gmail.com> / 2008-2014
+/* BugEngine <bugengine.devel@gmail.com>
    see LICENSE for detail */
 
 #include <bugengine/plugin.scripting.python/stdafx.h>
@@ -54,7 +54,7 @@ void Context::runCode(const char* buffer, const ifilename& filename)
         PyObject* m = (*m_library->m_PyImport_AddModule)("__main__");
         PyObject* d = (*m_library->m_PyModule_GetDict)(m);
         PyObject* result
-           = (*m_library->m_PyEval_EvalCodeEx)(code, d, d, NULL, 0, NULL, 0, NULL, 0, NULL);
+            = (*m_library->m_PyEval_EvalCodeEx)(code, d, d, NULL, 0, NULL, 0, NULL, 0, NULL);
         if(!result)
         {
             (*m_library->m_PyErr_Print)();

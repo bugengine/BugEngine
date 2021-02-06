@@ -1,4 +1,4 @@
-/* BugEngine <bugengine.devel@gmail.com> / 2008-2014
+/* BugEngine <bugengine.devel@gmail.com>
    see LICENSE for detail */
 
 #include <bugengine/filesystem/stdafx.h>
@@ -39,7 +39,8 @@ static void createDirectory(const ipath& path, Folder::CreatePolicy policy)
 
 static i_u32 s_diskIndex = i_u32::create(0);
 
-DiskFolder::DiskFolder(const ipath& diskpath, Folder::ScanPolicy scanPolicy, Folder::CreatePolicy createPolicy)
+DiskFolder::DiskFolder(const ipath& diskpath, Folder::ScanPolicy scanPolicy,
+                       Folder::CreatePolicy createPolicy)
     : m_path(diskpath)
     , m_index(s_diskIndex++)
     , m_watch()
@@ -49,9 +50,9 @@ DiskFolder::DiskFolder(const ipath& diskpath, Folder::ScanPolicy scanPolicy, Fol
         createDirectory(diskpath, createPolicy);
     }
     ipath::Filename pathname = m_path.str('\\');
-    m_handle.ptrHandle
-       = CreateFileA(pathname.name, GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE, 0,
-                     OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS, 0);
+    m_handle.ptrHandle       = CreateFileA(pathname.name, GENERIC_READ,
+                                     FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE, 0,
+                                     OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS, 0);
     if(m_handle.ptrHandle == INVALID_HANDLE_VALUE)
     {
         int errorCode = ::GetLastError();
@@ -86,11 +87,13 @@ void DiskFolder::doRefresh(Folder::ScanPolicy scanPolicy)
             do
             {
                 if(data.cFileName[0] == '.' && data.cFileName[1] == 0) continue;
-                if(data.cFileName[0] == '.' && data.cFileName[1] == '.' && data.cFileName[2] == 0) continue;
+                if(data.cFileName[0] == '.' && data.cFileName[1] == '.' && data.cFileName[2] == 0)
+                    continue;
                 istring name = data.cFileName;
                 if(data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
                 {
-                    for(minitl::vector< minitl::tuple< istring, ref< Folder > > >::iterator it = m_folders.begin();
+                    for(minitl::vector< minitl::tuple< istring, ref< Folder > > >::iterator it
+                        = m_folders.begin();
                         it != m_folders.end(); ++it)
                     {
                         if(it->first == name)
@@ -98,18 +101,19 @@ void DiskFolder::doRefresh(Folder::ScanPolicy scanPolicy)
                             continue;
                         }
                     }
-                    m_folders.push_back(
-                       minitl::make_tuple(name, ref< DiskFolder >::create(Arena::filesystem(), m_path + ipath(name),
-                                                                          scanPolicy, Folder::CreateNone)));
+                    m_folders.push_back(minitl::make_tuple(
+                        name, ref< DiskFolder >::create(Arena::filesystem(), m_path + ipath(name),
+                                                        scanPolicy, Folder::CreateNone)));
                 }
                 else
                 {
                     u64 size = data.nFileSizeHigh;
                     size <<= 32;
                     size += data.nFileSizeLow;
-                    ref< Win32File > newFile = ref< Win32File >::create(Arena::filesystem(), m_path + ifilename(name),
-                                                                        File::Media(File::Media::Disk, m_index, 0),
-                                                                        size, getTimeStamp(data.ftLastWriteTime));
+                    ref< Win32File > newFile
+                        = ref< Win32File >::create(Arena::filesystem(), m_path + ifilename(name),
+                                                   File::Media(File::Media::Disk, m_index, 0), size,
+                                                   getTimeStamp(data.ftLastWriteTime));
                     m_files.push_back(minitl::make_tuple(name, newFile));
                 }
             } while(FindNextFile(h, &data));
@@ -121,11 +125,12 @@ void DiskFolder::doRefresh(Folder::ScanPolicy scanPolicy)
 weak< File > DiskFolder::createFile(const istring& name)
 {
     const ifilename::Filename path = (m_path + ifilename(name)).str('\\');
-    HANDLE                    h    = CreateFileA(path.name, GENERIC_WRITE, 0, 0, CREATE_ALWAYS, 0, 0);
+    HANDLE                    h = CreateFileA(path.name, GENERIC_WRITE, 0, 0, CREATE_ALWAYS, 0, 0);
     if(h == INVALID_HANDLE_VALUE)
     {
         int errorCode = ::GetLastError();
-        be_info("file %s (%s) could not be opened: CreateFile returned an error (%d)" | m_path | path.name | errorCode);
+        be_info("file %s (%s) could not be opened: CreateFile returned an error (%d)" | m_path
+                | path.name | errorCode);
         return weak< File >();
     }
     else
@@ -136,16 +141,16 @@ weak< File > DiskFolder::createFile(const istring& name)
         if(h == INVALID_HANDLE_VALUE)
         {
             int errorCode = ::GetLastError();
-            be_info("file %s (%s) could not be opened: CreateFile returned an error (%d)" | m_path | path.name
-                    | errorCode);
+            be_info("file %s (%s) could not be opened: CreateFile returned an error (%d)" | m_path
+                    | path.name | errorCode);
             return weak< File >();
         }
         FindClose(h);
         ref< File > result = ref< Win32File >::create(Arena::filesystem(), m_path + ifilename(name),
                                                       File::Media(File::Media::Disk, m_index, 0), 0,
                                                       getTimeStamp(data.ftLastWriteTime));
-        for(minitl::vector< minitl::tuple< istring, ref< File > > >::iterator it = m_files.begin(); it != m_files.end();
-            ++it)
+        for(minitl::vector< minitl::tuple< istring, ref< File > > >::iterator it = m_files.begin();
+            it != m_files.end(); ++it)
         {
             if(it->first == name)
             {
@@ -170,12 +175,14 @@ void DiskFolder::onChanged()
             do
             {
                 if(data.cFileName[0] == '.' && data.cFileName[1] == 0) continue;
-                if(data.cFileName[0] == '.' && data.cFileName[1] == '.' && data.cFileName[2] == 0) continue;
+                if(data.cFileName[0] == '.' && data.cFileName[1] == '.' && data.cFileName[2] == 0)
+                    continue;
                 istring name = data.cFileName;
                 if(data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
                 {
                     bool exists = false;
-                    for(minitl::vector< minitl::tuple< istring, ref< Folder > > >::iterator it = m_folders.begin();
+                    for(minitl::vector< minitl::tuple< istring, ref< Folder > > >::iterator it
+                        = m_folders.begin();
                         it != m_folders.end(); ++it)
                     {
                         if(it->first == name)
@@ -186,15 +193,17 @@ void DiskFolder::onChanged()
                     }
                     if(!exists)
                     {
-                        m_folders.push_back(
-                           minitl::make_tuple(name, ref< DiskFolder >::create(Arena::filesystem(), m_path + ipath(name),
-                                                                              Folder::ScanNone, Folder::CreateNone)));
+                        m_folders.push_back(minitl::make_tuple(
+                            name,
+                            ref< DiskFolder >::create(Arena::filesystem(), m_path + ipath(name),
+                                                      Folder::ScanNone, Folder::CreateNone)));
                     }
                 }
                 else
                 {
                     bool exists = false;
-                    for(minitl::vector< minitl::tuple< istring, ref< File > > >::iterator it = m_files.begin();
+                    for(minitl::vector< minitl::tuple< istring, ref< File > > >::iterator it
+                        = m_files.begin();
                         it != m_files.end(); ++it)
                     {
                         if(it->first == name)
@@ -203,7 +212,8 @@ void DiskFolder::onChanged()
                             u64 size = data.nFileSizeHigh;
                             size <<= 32;
                             size += data.nFileSizeLow;
-                            be_checked_cast< Win32File >(it->second)->refresh(size, getTimeStamp(data.ftLastWriteTime));
+                            be_checked_cast< Win32File >(it->second)
+                                ->refresh(size, getTimeStamp(data.ftLastWriteTime));
                             break;
                         }
                     }
@@ -213,8 +223,9 @@ void DiskFolder::onChanged()
                         size <<= 32;
                         size += data.nFileSizeLow;
                         ref< Win32File > newFile = ref< Win32File >::create(
-                           Arena::filesystem(), m_path + ifilename(name), File::Media(File::Media::Disk, m_index, 0),
-                           size, getTimeStamp(data.ftLastWriteTime));
+                            Arena::filesystem(), m_path + ifilename(name),
+                            File::Media(File::Media::Disk, m_index, 0), size,
+                            getTimeStamp(data.ftLastWriteTime));
                         m_files.push_back(minitl::make_tuple(name, newFile));
                     }
                 }

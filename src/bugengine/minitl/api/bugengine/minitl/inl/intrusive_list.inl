@@ -1,4 +1,4 @@
-/* BugEngine <bugengine.devel@gmail.com> / 2008-2014
+/* BugEngine <bugengine.devel@gmail.com>
    see LICENSE for detail */
 
 #ifndef BE_MINITL_CONTAINER_INL_INTRUSIVE_LIST_INL_
@@ -185,7 +185,7 @@ intrusive_list< T, INDEX >::base_iterator< POLICY >::~base_iterator()
 template < typename T, int INDEX >
 template < typename POLICY >
 bool intrusive_list< T, INDEX >::base_iterator< POLICY >::operator==(
-   const base_iterator< POLICY >& other) const
+    const base_iterator< POLICY >& other) const
 {
     return m_iterator == other.m_iterator;
 }
@@ -193,7 +193,7 @@ bool intrusive_list< T, INDEX >::base_iterator< POLICY >::operator==(
 template < typename T, int INDEX >
 template < typename POLICY >
 bool intrusive_list< T, INDEX >::base_iterator< POLICY >::operator!=(
-   const base_iterator< POLICY >& other) const
+    const base_iterator< POLICY >& other) const
 {
     return m_iterator != other.m_iterator;
 }
@@ -203,7 +203,7 @@ template < typename POLICY >
 typename POLICY::pointer intrusive_list< T, INDEX >::base_iterator< POLICY >::operator->() const
 {
     return const_cast< typename POLICY::pointer >(
-       static_cast< typename POLICY::const_pointer >(m_iterator));
+        static_cast< typename POLICY::const_pointer >(m_iterator));
 }
 
 template < typename T, int INDEX >
@@ -211,7 +211,7 @@ template < typename POLICY >
 typename POLICY::reference intrusive_list< T, INDEX >::base_iterator< POLICY >::operator*() const
 {
     return *const_cast< typename POLICY::pointer >(
-       static_cast< typename POLICY::const_pointer >(m_iterator));
+        static_cast< typename POLICY::const_pointer >(m_iterator));
 }
 
 template < typename T, int INDEX >

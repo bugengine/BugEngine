@@ -1,4 +1,4 @@
-/* BugEngine <bugengine.devel@gmail.com> / 2008-2014
+/* BugEngine <bugengine.devel@gmail.com>
    see LICENSE for detail */
 
 #include <bugengine/plugin.scripting.pythonlib/stdafx.h>
@@ -84,54 +84,54 @@ PyTypeObject::Py3NumberMethods PyBugNumber< T >::s_py3NumberNumber = {{0, 0, 0},
 
 template < typename T >
 PyTypeObject PyBugNumber< T >::s_pyType
-   = {{{0, 0}, 0},
-      istring(minitl::format< 128u >("py_bugengine.%s") | be_type< T >().metaclass->name).c_str(),
-      sizeof(PyBugNumber< T >),
-      0,
-      &PyBugNumber< T >::dealloc,
-      0,
-      0,
-      0,
-      0,
-      &PyBugNumber< T >::repr,
-      0,
-      0,
-      0,
-      0,
-      0,
-      &PyBugNumber< T >::str,
-      0,
-      0,
-      0,
-      Py_TPFLAGS_DEFAULT,
-      "Wrapper class for the C++ BugEngine number types",
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      PyBugObject::s_methods,
-      0,
-      0,
-      &PyBugObject::s_pyType,
-      0,
-      0,
-      0,
-      0,
-      &PyBugNumber< T >::init,
-      0,
-      &PyBugNumber< T >::newinst,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0};
+    = {{{0, 0}, 0},
+       istring(minitl::format< 128u >("py_bugengine.%s") | be_type< T >().metaclass->name).c_str(),
+       sizeof(PyBugNumber< T >),
+       0,
+       &PyBugNumber< T >::dealloc,
+       0,
+       0,
+       0,
+       0,
+       &PyBugNumber< T >::repr,
+       0,
+       0,
+       0,
+       0,
+       0,
+       &PyBugNumber< T >::str,
+       0,
+       0,
+       0,
+       Py_TPFLAGS_DEFAULT,
+       "Wrapper class for the C++ BugEngine number types",
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       PyBugObject::s_methods,
+       0,
+       0,
+       &PyBugObject::s_pyType,
+       0,
+       0,
+       0,
+       0,
+       &PyBugNumber< T >::init,
+       0,
+       &PyBugNumber< T >::newinst,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0};
 
 template < typename T >
 PyObject* PyBugNumber< T >::stealValue(PyObject* owner, RTTI::Value& value)
@@ -140,7 +140,7 @@ PyObject* PyBugNumber< T >::stealValue(PyObject* owner, RTTI::Value& value)
               "PyBugNumber only accepts Number types");
     be_assert(value.type().metaclass->index() == be_type< T >().metaclass->index(),
               "expected %s; got %s" | be_type< T >().metaclass->name
-                 | value.type().metaclass->name);
+                  | value.type().metaclass->name);
     PyObject* result                           = s_pyType.tp_alloc(&s_pyType, 0);
     static_cast< PyBugNumber* >(result)->owner = owner;
 
@@ -197,7 +197,7 @@ PyObject* PyBugNumber< T >::repr(PyObject* self)
     PyBugObject*            self_ = static_cast< PyBugObject* >(self);
     const RTTI::Value&      v     = self_->value;
     minitl::format< 1024u > format
-       = minitl::format< 1024u >("[%s %d]") | v.type().name().c_str() | v.as< const T >();
+        = minitl::format< 1024u >("[%s %d]") | v.type().name().c_str() | v.as< const T >();
     if(s_library->getVersion() >= 30)
     {
         return s_library->m_PyUnicode_FromFormat(format);
@@ -238,8 +238,8 @@ PyObject* PyBugNumber< T >::str(PyObject* self)
     PyBugObject*       self_                       = static_cast< PyBugObject* >(self);
     const RTTI::Value& v                           = self_->value;
     PyObject* (*tostring)(const char* format, ...) = s_library->getVersion() >= 30
-                                                        ? s_library->m_PyUnicode_FromFormat
-                                                        : s_library->m_PyString_FromFormat;
+                                                         ? s_library->m_PyUnicode_FromFormat
+                                                         : s_library->m_PyString_FromFormat;
     return tostring(minitl::format< 1024u >("%d") | v.as< const T >());
 }
 

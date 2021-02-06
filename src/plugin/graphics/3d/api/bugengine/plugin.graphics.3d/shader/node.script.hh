@@ -1,4 +1,4 @@
-/* BugEngine <bugengine.devel@gmail.com> / 2008-2014
+/* BugEngine <bugengine.devel@gmail.com>
    see LICENSE for detail */
 
 #ifndef BE_3D_SHADER_NODE_SCRIPT_HH_
@@ -23,11 +23,11 @@ protected:
 
 public:
     virtual void buildDeclarations(IShaderBuilder & stream, Stage currentStage, Stage targetStage)
-       const
-       = 0;
+        const
+        = 0;
     virtual void buildDefinitions(IShaderBuilder & stream, Stage currentStage, Stage targetStage)
-       const
-       = 0;
+        const
+        = 0;
 };
 
 }}  // namespace BugEngine::Shaders

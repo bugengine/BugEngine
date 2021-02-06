@@ -1,4 +1,4 @@
-/* BugEngine <bugengine.devel@gmail.com> / 2008-2014
+/* BugEngine <bugengine.devel@gmail.com>
    see LICENSE for detail */
 
 #include <bugengine/plugin.graphics.windowing/stdafx.h>
@@ -16,15 +16,15 @@ namespace {
 static GLXFBConfig selectGLXFbConfig(::Display* display, int screen)
 {
     static int s_glxAttributes[]
-       = {GLX_X_RENDERABLE, True, GLX_DRAWABLE_TYPE, GLX_WINDOW_BIT, GLX_RENDER_TYPE, GLX_RGBA_BIT,
-          // GLX_X_VISUAL_TYPE,  GLX_TRUE_COLOR,
-          // GLX_RED_SIZE, 8,
-          // GLX_GREEN_SIZE, 8,
-          // GLX_BLUE_SIZE, 8,
-          // GLX_ALPHA_SIZE, 8,
-          // GLX_DEPTH_SIZE, 24,
-          // GLX_STENCIL_SIZE, 8,
-          GLX_DOUBLEBUFFER, True, None};
+        = {GLX_X_RENDERABLE, True, GLX_DRAWABLE_TYPE, GLX_WINDOW_BIT, GLX_RENDER_TYPE, GLX_RGBA_BIT,
+           // GLX_X_VISUAL_TYPE,  GLX_TRUE_COLOR,
+           // GLX_RED_SIZE, 8,
+           // GLX_GREEN_SIZE, 8,
+           // GLX_BLUE_SIZE, 8,
+           // GLX_ALPHA_SIZE, 8,
+           // GLX_DEPTH_SIZE, 24,
+           // GLX_STENCIL_SIZE, 8,
+           GLX_DOUBLEBUFFER, True, None};
 
     int          configCount;
     GLXFBConfig* configs = glXChooseFBConfig(display, screen, s_glxAttributes, &configCount);
@@ -47,7 +47,7 @@ PlatformData::PlatformData(::Display* display)
 Renderer::PlatformRenderer::PlatformRenderer()
     : m_platformData(XOpenDisplay(0))
     , m_windowProperty(
-         m_platformData.display ? XInternAtom(m_platformData.display, "BE_WINDOW", False) : 0)
+          m_platformData.display ? XInternAtom(m_platformData.display, "BE_WINDOW", False) : 0)
 {
     if(m_platformData.display)
     {
@@ -82,16 +82,16 @@ weak< Window > Renderer::PlatformRenderer::getWindowFromXWindow(::Window w)
 }
 
 static const char* s_messages[]
-   = {"Success",   "BadRequest", "BadValue",    "BadWindow",   "BadPixmap", "BadAtom",
-      "BadCursor", "BadFont",    "BadMatch",    "BadDrawable", "BadAccess", "BadAlloc",
-      "BadColor",  "BadGC",      "BadIDChoice", "BadName",     "BadLength", "BadImplementation"};
+    = {"Success",   "BadRequest", "BadValue",    "BadWindow",   "BadPixmap", "BadAtom",
+       "BadCursor", "BadFont",    "BadMatch",    "BadDrawable", "BadAccess", "BadAlloc",
+       "BadColor",  "BadGC",      "BadIDChoice", "BadName",     "BadLength", "BadImplementation"};
 
 int Renderer::PlatformRenderer::xError(::Display* /*display*/, XErrorEvent* event)
 {
     const u32               size      = sizeof(s_messages) / sizeof(s_messages[0]);
     minitl::format< 1024u > errorCode = minitl::format< 1024u >("%d") | event->error_code;
     const char*             message
-       = event->error_code < size ? s_messages[event->error_code] : errorCode.c_str();
+        = event->error_code < size ? s_messages[event->error_code] : errorCode.c_str();
     be_error("X11 error: %d (%s)" | event->error_code | message);
     return 0;
 }
@@ -106,16 +106,16 @@ int Renderer::PlatformRenderer::ioError(::Display* /*display*/)
 {
     XSetWindowAttributes attributes;
     attributes.colormap = XCreateColormap(
-       m_platformData.display, XRootWindow(m_platformData.display, m_platformData.visual->screen),
-       m_platformData.visual->visual, AllocNone);
+        m_platformData.display, XRootWindow(m_platformData.display, m_platformData.visual->screen),
+        m_platformData.visual->visual, AllocNone);
     attributes.border_pixel      = 0;
     attributes.override_redirect = false;  // flags.fullscreen
     attributes.event_mask  = ExposureMask | KeyPressMask | ButtonPressMask | StructureNotifyMask;
     int      attributeMask = CWBorderPixel | CWEventMask | CWOverrideRedirect | CWColormap;
     ::Window result        = XCreateWindow(
-       m_platformData.display, XRootWindow(m_platformData.display, m_platformData.visual->screen),
-       x, y, w, h, 1, m_platformData.visual->depth, InputOutput, m_platformData.visual->visual,
-       attributeMask, &attributes);
+        m_platformData.display, XRootWindow(m_platformData.display, m_platformData.visual->screen),
+        x, y, w, h, 1, m_platformData.visual->depth, InputOutput, m_platformData.visual->visual,
+        attributeMask, &attributes);
     if(result)
     {
         XMapRaised(m_platformData.display, result);
@@ -174,7 +174,7 @@ void Renderer::flush()
 
                 XEvent   ev;
                 ::Window root_window
-                   = XRootWindow(display, m_platformRenderer->m_platformData.visual->screen);
+                    = XRootWindow(display, m_platformRenderer->m_platformData.visual->screen);
                 ev.type                  = UnmapNotify;
                 ev.xunmap.event          = root_window;
                 ev.xunmap.window         = event.xkey.window;
@@ -197,7 +197,7 @@ void Renderer::flush()
 
                     XEvent   ev;
                     ::Window root_window
-                       = XRootWindow(display, m_platformRenderer->m_platformData.visual->screen);
+                        = XRootWindow(display, m_platformRenderer->m_platformData.visual->screen);
                     ev.type                  = UnmapNotify;
                     ev.xunmap.event          = root_window;
                     ev.xunmap.window         = event.xclient.window;

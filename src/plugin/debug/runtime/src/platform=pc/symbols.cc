@@ -1,4 +1,4 @@
-/* BugEngine <bugengine.devel@gmail.com> / 2008-2014
+/* BugEngine <bugengine.devel@gmail.com>
    see LICENSE for detail */
 
 #include <bugengine/plugin.debug.runtime/stdafx.h>
@@ -53,7 +53,7 @@ ref< const SymbolResolver > SymbolResolver::loadSymbols(const SymbolInformations
         if(pe)
         {
             ref< SymbolResolver > resolver = ref< DwarfModule >::create(
-               Arena::debug(), infos.filename, pe, infos.offset, infos.size);
+                Arena::debug(), infos.filename, pe, infos.offset, infos.size);
             resolver->m_next = next;
             return resolver;
         }
@@ -65,7 +65,7 @@ ref< const SymbolResolver > SymbolResolver::loadSymbols(const SymbolInformations
         if(elf)
         {
             ref< SymbolResolver > resolver = ref< DwarfModule >::create(
-               Arena::debug(), infos.filename, elf, infos.offset, infos.size);
+                Arena::debug(), infos.filename, elf, infos.offset, infos.size);
             resolver->m_next = next;
             return resolver;
         }

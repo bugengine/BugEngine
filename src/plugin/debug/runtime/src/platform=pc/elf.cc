@@ -1,4 +1,4 @@
-/* BugEngine <bugengine.devel@gmail.com> / 2008-2014
+/* BugEngine <bugengine.devel@gmail.com>
    see LICENSE for detail */
 
 #include <bugengine/plugin.debug.runtime/stdafx.h>
@@ -325,7 +325,7 @@ SymbolResolver::SymbolInformations Elf::getSymbolInformation() const
     if(debug_link)
     {
         minitl::Allocator::Block< char > filename(
-           Arena::temporary(), be_checked_numcast< size_t >(debug_link.fileSize));
+            Arena::temporary(), be_checked_numcast< size_t >(debug_link.fileSize));
         readSection(debug_link, filename);
         result.filename = ifilename(filename);
     }

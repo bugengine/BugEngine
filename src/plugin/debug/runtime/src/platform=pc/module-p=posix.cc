@@ -1,4 +1,4 @@
-/* BugEngine <bugengine.devel@gmail.com> / 2008-2014
+/* BugEngine <bugengine.devel@gmail.com>
    see LICENSE for detail */
 
 #include <bugengine/plugin.debug.runtime/stdafx.h>
@@ -17,10 +17,10 @@ namespace BugEngine { namespace Runtime {
 ref< const Module > Module::self()
 {
     static ref< Module > s_module;
-    ref< Module >        module;
 #if defined(__GNU_SOURCE)
-    void*     handle = dlopen(0, RTLD_LAZY | RTLD_NOLOAD);
-    link_map* lmap;
+    ref< Module > module;
+    void*         handle = dlopen(0, RTLD_LAZY | RTLD_NOLOAD);
+    link_map*     lmap;
     dlinfo(handle, 0, &lmap);
     for(int i = 0; lmap; lmap = lmap->l_next, i++)
     {
@@ -39,7 +39,7 @@ ref< const Module > Module::self()
         else
         {
             ref< Module > newModule
-               = ref< Elf >::create(Arena::debug(), lmap->l_name, lmap->l_addr);
+                = ref< Elf >::create(Arena::debug(), lmap->l_name, lmap->l_addr);
             module->m_next = newModule;
             module         = newModule;
         }

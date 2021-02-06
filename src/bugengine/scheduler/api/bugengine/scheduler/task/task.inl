@@ -1,4 +1,4 @@
-/* BugEngine <bugengine.devel@gmail.com> / 2008-2014
+/* BugEngine <bugengine.devel@gmail.com>
    see LICENSE for detail */
 
 #ifndef BE_SCHEDULER_TASL_TASK_INL_
@@ -27,7 +27,7 @@ void Task< Body >::schedule(weak< Scheduler > sc)
     be_assert(m_taskCount == m_taskCompleted,
               "task %s is scheduled again without having completed the previous run: "
               "%d/%d parts completed"
-                 | name | m_taskCompleted | m_taskCount);
+                  | name | m_taskCompleted | m_taskCount);
     m_taskCount     = 0;
     m_taskCompleted = 0;
 

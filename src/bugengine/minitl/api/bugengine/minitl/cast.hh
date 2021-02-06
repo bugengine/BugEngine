@@ -1,4 +1,4 @@
-/* BugEngine <bugengine.devel@gmail.com> / 2008-2014
+/* BugEngine <bugengine.devel@gmail.com>
    see LICENSE for detail */
 
 #ifndef BE_MINITL_CAST_
@@ -19,8 +19,8 @@ template < typename U, typename T >
 inline U* be_checked_cast(T* value)
 {
     be_assert(!value || dynamic_cast< U* >(value), "invalid cast from %s to %s, actual type %s"
-                                                      | typeid(T).name() | typeid(U).name()
-                                                      | typeid(*value).name());
+                                                       | typeid(T).name() | typeid(U).name()
+                                                       | typeid(*value).name());
     return static_cast< U* >(value);
 }
 
@@ -29,7 +29,7 @@ inline ref< U > be_checked_cast(ref< T > value)
 {
     be_assert(!value || dynamic_cast< U* >(value.operator->()),
               "invalid cast from ref<%s> to ref<%s>, actual type ref<%s>" | typeid(T).name()
-                 | typeid(U).name() | typeid(*value.operator->()).name());
+                  | typeid(U).name() | typeid(*value.operator->()).name());
     return ref< U >(static_cast< U* >(value.operator->()));
 }
 
@@ -38,7 +38,7 @@ inline weak< U > be_checked_cast(weak< T > value)
 {
     be_assert(!value || dynamic_cast< U* >(value.operator->()),
               "invalid cast from weak<%s> to weak<%s>, actual type weak<%s>" | typeid(T).name()
-                 | typeid(U).name() | typeid(*value.operator->()).name());
+                  | typeid(U).name() | typeid(*value.operator->()).name());
     return weak< U >(static_cast< U* >(value.operator->()));
 }
 

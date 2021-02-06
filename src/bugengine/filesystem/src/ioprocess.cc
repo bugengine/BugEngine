@@ -1,4 +1,4 @@
-/* BugEngine <bugengine.devel@gmail.com> / 2008-2014
+/* BugEngine <bugengine.devel@gmail.com>
    see LICENSE for detail */
 
 #include <bugengine/filesystem/stdafx.h>
@@ -15,7 +15,8 @@ IOContext::IOContext()
     , m_firstFreeSlot(i_u32::create(0))
     , m_firstUsedSlot(i_u32::create(0))
     , m_ioDone(i_u8::create(0))
-    , m_ioThread("IOThread", &IOContext::ioProcess, reinterpret_cast< intptr_t >(this), 0, Thread::Highest)
+    , m_ioThread("IOThread", &IOContext::ioProcess, reinterpret_cast< intptr_t >(this), 0,
+                 Thread::Highest)
 {
 }
 

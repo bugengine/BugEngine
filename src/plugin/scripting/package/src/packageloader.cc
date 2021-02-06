@@ -1,4 +1,4 @@
-/* BugEngine <bugengine.devel@gmail.com> / 2008-2014
+/* BugEngine <bugengine.devel@gmail.com>
    see LICENSE for detail */
 
 #include <bugengine/plugin.scripting.package/stdafx.h>
@@ -22,7 +22,7 @@ namespace BugEngine { namespace PackageManager {
 PackageLoader::PackageLoader(const Plugin::Context& context)
     : ScriptEngine< Package >(Arena::package(), context.resourceManager)
     , m_packageBuilder(
-         scoped< PackageBuilder::PackageBuilder >::create(Arena::package(), context.dataFolder))
+          scoped< PackageBuilder::PackageBuilder >::create(Arena::package(), context.dataFolder))
 {
 }
 
@@ -34,7 +34,7 @@ void PackageLoader::unload(Resource::Resource& handle)
 {
     {
         weak< PackageBuilder::Nodes::Package > package
-           = handle.getRefHandle< PackageBuilder::Nodes::Package >();
+            = handle.getRefHandle< PackageBuilder::Nodes::Package >();
         if(package)
         {
             package->deleteObjects(m_manager);
@@ -49,7 +49,7 @@ void PackageLoader::runBuffer(weak< const Package > script, Resource::Resource& 
     MD5 md5 = digest(buffer);
     be_info("md5 sum of package: %s" | md5);
     ref< PackageBuilder::Nodes::Package > package
-       = m_packageBuilder->createPackage(script->getScriptName(), buffer);
+        = m_packageBuilder->createPackage(script->getScriptName(), buffer);
     if(package->success())
     {
         resource.setRefHandle(package);
@@ -63,9 +63,9 @@ void PackageLoader::reloadBuffer(weak< const Package > script, Resource::Resourc
     MD5 md5 = digest(buffer);
     be_info("md5 sum of package: %s" | md5);
     ref< PackageBuilder::Nodes::Package > newPackage
-       = m_packageBuilder->createPackage(script->getScriptName(), buffer);
+        = m_packageBuilder->createPackage(script->getScriptName(), buffer);
     weak< PackageBuilder::Nodes::Package > oldPackage
-       = resource.getRefHandle< PackageBuilder::Nodes::Package >();
+        = resource.getRefHandle< PackageBuilder::Nodes::Package >();
     newPackage->diffFromPackage(oldPackage, m_manager);
     oldPackage = weak< PackageBuilder::Nodes::Package >();
     resource.clearRefHandle();

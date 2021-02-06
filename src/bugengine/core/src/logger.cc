@@ -1,4 +1,4 @@
-/* BugEngine <bugengine.devel@gmail.com> / 2008-2014
+/* BugEngine <bugengine.devel@gmail.com>
    see LICENSE for detail */
 
 #include <bugengine/core/stdafx.h>
@@ -9,7 +9,8 @@
 
 namespace BugEngine {
 
-static const char* s_logLevelNames[] = {" SPAM  ", " DEBUG ", " INFO  ", "WARNING", " ERROR ", " FATAL "};
+static const char* s_logLevelNames[]
+    = {" SPAM  ", " DEBUG ", " INFO  ", "WARNING", " ERROR ", " FATAL "};
 
 be_api(CORE) const char* ILogListener::getLogLevelName(LogLevel level)
 {
@@ -60,7 +61,8 @@ ref< Logger > Logger::root()
     return s_rootLogger;
 }
 
-bool Logger::log(const inamespace& name, LogLevel level, const char* filename, int line, const char* msg)
+bool Logger::log(const inamespace& name, LogLevel level, const char* filename, int line,
+                 const char* msg)
 {
     return instance(name)->log(level, filename, line, msg);
 }
@@ -72,7 +74,8 @@ void Logger::addListener(weak< ILogListener > listener)
 
 void Logger::removeListener(weak< ILogListener > listener)
 {
-    for(minitl::vector< weak< ILogListener > >::iterator it = m_listeners.begin(); it != m_listeners.end(); ++it)
+    for(minitl::vector< weak< ILogListener > >::iterator it = m_listeners.begin();
+        it != m_listeners.end(); ++it)
     {
         if(*it == listener)
         {
@@ -88,10 +91,12 @@ bool Logger::log(LogLevel level, const char* filename, int line, const char* msg
     return doLog(level, m_name, filename, line, msg);
 }
 
-bool Logger::doLog(LogLevel level, istring logName, const char* filename, int line, const char* msg) const
+bool Logger::doLog(LogLevel level, istring logName, const char* filename, int line,
+                   const char* msg) const
 {
     bool result = false;
-    for(minitl::vector< weak< ILogListener > >::const_iterator it = m_listeners.begin(); it != m_listeners.end(); ++it)
+    for(minitl::vector< weak< ILogListener > >::const_iterator it = m_listeners.begin();
+        it != m_listeners.end(); ++it)
     {
         result |= (*it)->log(logName, level, filename, line, Thread::name().c_str(), msg);
     }

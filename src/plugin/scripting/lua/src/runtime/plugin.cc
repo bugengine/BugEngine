@@ -1,4 +1,4 @@
-/* BugEngine <bugengine.devel@gmail.com> / 2008-2014
+/* BugEngine <bugengine.devel@gmail.com>
  see LICENSE for detail */
 
 #include <stdafx.h>
@@ -38,6 +38,6 @@ extern "C" int pluginGet(lua_State* state)
 }
 
 const luaL_Reg s_pluginMetaTable[]
-   = {{"__gc", pluginGC}, {"__tostring", pluginToString}, {"__index", pluginGet}, {0, 0}};
+    = {{"__gc", pluginGC}, {"__tostring", pluginToString}, {"__index", pluginGet}, {0, 0}};
 
 }}  // namespace BugEngine::Lua

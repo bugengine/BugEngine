@@ -1,4 +1,4 @@
-/* BugEngine <bugengine.devel@gmail.com> / 2008-2014
+/* BugEngine <bugengine.devel@gmail.com>
    see LICENSE for detail */
 
 #include <bugengine/rtti/stdafx.h>
@@ -41,11 +41,11 @@ void Type::copy(const void* source, void* dest) const
     case RawPtr: memcpy(dest, source, sizeof(void*)); return;
     case RefPtr:
         new(dest) const ref< const minitl::refcountable >(
-           *(const ref< const minitl::refcountable >*)source);
+            *(const ref< const minitl::refcountable >*)source);
         return;
     case WeakPtr:
         new(dest) const weak< const minitl::refcountable >(
-           *(const weak< const minitl::refcountable >*)source);
+            *(const weak< const minitl::refcountable >*)source);
         return;
     default: be_notreached(); return;
     }

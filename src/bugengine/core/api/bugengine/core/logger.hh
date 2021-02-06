@@ -1,4 +1,4 @@
-/* BugEngine <bugengine.devel@gmail.com> / 2008-2014
+/* BugEngine <bugengine.devel@gmail.com>
    see LICENSE for detail */
 
 #ifndef BE_CORE_LOGGER_HH_
@@ -33,8 +33,8 @@ protected:
     virtual ~ILogListener()
     {
     }
-    virtual bool log(const istring& logname, LogLevel level, const char* filename, int line, const char* thread,
-                     const char* msg) const = 0;
+    virtual bool log(const istring& logname, LogLevel level, const char* filename, int line,
+                     const char* thread, const char* msg) const = 0;
 };
 
 class be_api(CORE) Logger : public minitl::refcountable
@@ -57,7 +57,8 @@ public:
     ~Logger();
 
     static minitl::ref< Logger > instance(const inamespace& name);
-    static bool log(const inamespace& name, LogLevel level, const char* filename, int line, const char* msg);
+    static bool log(const inamespace& name, LogLevel level, const char* filename, int line,
+                    const char* msg);
     static minitl::ref< Logger > root();
 
     bool log(LogLevel level, const char* filename, int line, const char* msg) const;
@@ -65,7 +66,8 @@ public:
 private:
     void addListener(minitl::weak< ILogListener > listener);
     void removeListener(minitl::weak< ILogListener > listener);
-    bool doLog(LogLevel level, istring logName, const char* filename, int line, const char* msg) const;
+    bool doLog(LogLevel level, istring logName, const char* filename, int line, const char* msg)
+        const;
 };
 
 struct ScopedLogListener
@@ -90,28 +92,34 @@ private:
 
 #define ALLDEBUG
 #if defined(_DEBUG) || defined(ALLDEBUG)
-#    define be_spam(msg)                                                                                               \
-        ::BugEngine::Logger::root()->log(::BugEngine::logSpam, __FILE__, __LINE__, (minitl::format< 1024u >)msg)
-#    define be_debug(msg)                                                                                              \
-        ::BugEngine::Logger::root()->log(::BugEngine::logDebug, __FILE__, __LINE__, (minitl::format< 1024u >)msg)
+#    define be_spam(msg)                                                                           \
+        ::BugEngine::Logger::root()->log(::BugEngine::logSpam, __FILE__, __LINE__,                 \
+                                         (minitl::format< 1024u >)msg)
+#    define be_debug(msg)                                                                          \
+        ::BugEngine::Logger::root()->log(::BugEngine::logDebug, __FILE__, __LINE__,                \
+                                         (minitl::format< 1024u >)msg)
 #else
 #    define be_spam(msg)
 #    define be_debug(msg)
 #endif
 
 #if !defined(NDEBUG) || defined(ALLDEBUG)
-#    define be_info(msg)                                                                                               \
-        ::BugEngine::Logger::root()->log(::BugEngine::logInfo, __FILE__, __LINE__, (minitl::format< 1024u >)msg)
+#    define be_info(msg)                                                                           \
+        ::BugEngine::Logger::root()->log(::BugEngine::logInfo, __FILE__, __LINE__,                 \
+                                         (minitl::format< 1024u >)msg)
 #else
 #    define be_info(msg)
 #endif
 
-#define be_warning(msg)                                                                                                \
-    ::BugEngine::Logger::root()->log(::BugEngine::logWarning, __FILE__, __LINE__, (minitl::format< 1024u >)msg)
-#define be_error(msg)                                                                                                  \
-    ::BugEngine::Logger::root()->log(::BugEngine::logError, __FILE__, __LINE__, (minitl::format< 1024u >)msg)
-#define be_fatal(msg)                                                                                                  \
-    ::BugEngine::Logger::root()->log(::BugEngine::logFatal, __FILE__, __LINE__, (minitl::format< 1024u >)msg)
+#define be_warning(msg)                                                                            \
+    ::BugEngine::Logger::root()->log(::BugEngine::logWarning, __FILE__, __LINE__,                  \
+                                     (minitl::format< 1024u >)msg)
+#define be_error(msg)                                                                              \
+    ::BugEngine::Logger::root()->log(::BugEngine::logError, __FILE__, __LINE__,                    \
+                                     (minitl::format< 1024u >)msg)
+#define be_fatal(msg)                                                                              \
+    ::BugEngine::Logger::root()->log(::BugEngine::logFatal, __FILE__, __LINE__,                    \
+                                     (minitl::format< 1024u >)msg)
 
 }  // namespace BugEngine
 

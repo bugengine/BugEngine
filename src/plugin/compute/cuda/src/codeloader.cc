@@ -1,4 +1,4 @@
-/* BugEngine <bugengine.devel@gmail.com> / 2008-2014
+/* BugEngine <bugengine.devel@gmail.com>
    see LICENSE for detail */
 
 #include <bugengine/plugin.compute.cuda/stdafx.h>
@@ -21,7 +21,7 @@ void CodeLoader::load(weak< const Resource::Description > kernelDescription,
 {
     be_info("loading Cuda kernel %s" | be_checked_cast< const Kernel >(kernelDescription)->name());
     inamespace name
-       = be_checked_cast< const Kernel >(kernelDescription)->name() + inamespace("cuda");
+        = be_checked_cast< const Kernel >(kernelDescription)->name() + inamespace("cuda");
     resource.setRefHandle(ref< KernelObject >::create(Arena::task(), name));
 }
 

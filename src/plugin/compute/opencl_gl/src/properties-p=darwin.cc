@@ -1,4 +1,4 @@
-/* BugEngine <bugengine.devel@gmail.com> / 2008-2014
+/* BugEngine <bugengine.devel@gmail.com>
    see LICENSE for detail */
 
 #include <stdafx.h>
@@ -12,7 +12,7 @@ minitl::array< cl_context_properties > Scheduler::createPlatformSpecificContextP
     CGLContextObj ctx = CGLGetCurrentContext();
     typedef CGLShareGroupObj (*t_CGLGetShareGroup)(CGLContextObj obj);
     t_CGLGetShareGroup b_CGLGetShareGroup
-       = (t_CGLGetShareGroup)dlsym(RTLD_DEFAULT, "CGLGetShareGroup");
+        = (t_CGLGetShareGroup)dlsym(RTLD_DEFAULT, "CGLGetShareGroup");
     if(!b_CGLGetShareGroup)
     {
         be_warning("CGLGetShareGroup not found; OpenGL/OpenCL compatibility disabled");

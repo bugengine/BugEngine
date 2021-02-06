@@ -1,4 +1,4 @@
-/* BugEngine <bugengine.devel@gmail.com> / 2008-2014
+/* BugEngine <bugengine.devel@gmail.com>
    see LICENSE for detail */
 
 #include <bugengine/plugin.graphics.GL4/stdafx.h>
@@ -10,7 +10,7 @@ create(const BugEngine::Plugin::Context& context)
 {
     minitl::ref< BugEngine::OpenGL::GLRenderer > renderer;
     renderer
-       = minitl::ref< BugEngine::OpenGL::GLRenderer >::create(BugEngine::Arena::game(), context);
+        = minitl::ref< BugEngine::OpenGL::GLRenderer >::create(BugEngine::Arena::game(), context);
     if(!renderer->success())
     {
         renderer = minitl::ref< BugEngine::OpenGL::GLRenderer >();

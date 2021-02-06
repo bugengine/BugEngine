@@ -1,4 +1,4 @@
-/* BugEngine <bugengine.devel@gmail.com> / 2008-2014
+/* BugEngine <bugengine.devel@gmail.com>
    see LICENSE for detail */
 
 #include <stdafx.h>
@@ -24,19 +24,19 @@ void GLESRenderer::flush()
 }
 
 ref< IGPUResource >
-   GLESRenderer::create(weak< const RenderSurfaceDescription > /*renderSurfaceDescription*/) const
+    GLESRenderer::create(weak< const RenderSurfaceDescription > /*renderSurfaceDescription*/) const
 {
     return ref< IGPUResource >();
 }
 
 ref< IGPUResource >
-   GLESRenderer::create(weak< const RenderWindowDescription > /*renderWindowDescription*/) const
+    GLESRenderer::create(weak< const RenderWindowDescription > /*renderWindowDescription*/) const
 {
     return ref< IGPUResource >();
 }
 
 ref< IGPUResource >
-   GLESRenderer::create(weak< const ShaderProgramDescription > /*shaderDescription*/) const
+    GLESRenderer::create(weak< const ShaderProgramDescription > /*shaderDescription*/) const
 {
     return ref< IGPUResource >();
 }

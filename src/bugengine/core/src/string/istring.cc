@@ -1,4 +1,4 @@
-/* BugEngine <bugengine.devel@gmail.com> / 2008-2014
+/* BugEngine <bugengine.devel@gmail.com>
    see LICENSE for detail */
 
 #include <bugengine/core/stdafx.h>
@@ -200,7 +200,8 @@ StringInfo::StringInfoBufferCache& StringInfo::getCache()
 }
 
 StringInfo::StringInfoBufferCache::StringInfoBufferCache()
-    : m_buffers(reinterpret_cast< iptr< StringInfo::StringInfoBuffer >* >(Arena::string().allocate()))
+    : m_buffers(
+        reinterpret_cast< iptr< StringInfo::StringInfoBuffer >* >(Arena::string().allocate()))
     , m_bufferCount(i_u32::create(0))
 {
     m_buffers[0] = 0;
@@ -233,8 +234,9 @@ StringInfo::StringInfoBuffer* StringInfo::StringInfoBufferCache::get(u32 index)
     }
     else
     {
-        be_assert(false, "Asking for a buffer out of range; current buffer count: %d, requested buffer: %d"
-                            | m_bufferCount | index);
+        be_assert(false,
+                  "Asking for a buffer out of range; current buffer count: %d, requested buffer: %d"
+                      | m_bufferCount | index);
         return 0;
     }
 }
@@ -261,7 +263,8 @@ u32 StringInfo::StringInfoBufferCache::allocateStringInfo(u32 size)
     StringInfo::StringInfoBuffer* buffer;
     byte*                         info;
     u32                           place;
-    size = minitl::align(be_checked_numcast< u32 >(sizeof(StringInfo)) + size, be_alignof(StringInfo));
+    size = minitl::align(be_checked_numcast< u32 >(sizeof(StringInfo)) + size,
+                         be_alignof(StringInfo));
     do
     {
         place  = m_bufferCount - 1;
@@ -272,7 +275,8 @@ u32 StringInfo::StringInfoBufferCache::allocateStringInfo(u32 size)
             allocate(place + 1);
         }
     } while(!info);
-    return place << 16 | be_checked_numcast< u16 >(reinterpret_cast< byte* >(info) - buffer->m_data);
+    return place << 16
+           | be_checked_numcast< u16 >(reinterpret_cast< byte* >(info) - buffer->m_data);
 }
 
 u32 StringInfo::unique(const char* begin, const char* end)
@@ -304,7 +308,8 @@ u32 StringInfo::unique(const char* val)
         (void)(new(cache) StringInfo(len));
         strncpy(cache->m_text, val, len + 1);
 
-        minitl::tuple< StringIndex::iterator, bool > insertresult = g_strings.insert(cache->m_text, result);
+        minitl::tuple< StringIndex::iterator, bool > insertresult
+            = g_strings.insert(cache->m_text, result);
         be_forceuse(insertresult);
         return result;
     }
@@ -418,14 +423,17 @@ static void parse(const char* str, const char* end, const char* sep, igenericnam
     return;
 }
 
-igenericnamespace::igenericnamespace() : m_namespace((istring*)(m_buffer)), m_size(0), m_capacity(MaxNamespaceSize)
+igenericnamespace::igenericnamespace()
+    : m_namespace((istring*)(m_buffer))
+    , m_size(0)
+    , m_capacity(MaxNamespaceSize)
 {
 }
 
 igenericnamespace::igenericnamespace(const igenericnamespace& other)
     : m_namespace(other.m_capacity > MaxNamespaceSize
-                     ? (istring*)Arena::general().alloc(other.m_capacity * sizeof(istring))
-                     : (istring*)(m_buffer))
+                      ? (istring*)Arena::general().alloc(other.m_capacity * sizeof(istring))
+                      : (istring*)(m_buffer))
     , m_size(other.m_size)
     , m_capacity(other.m_capacity)
 {

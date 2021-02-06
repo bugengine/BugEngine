@@ -1,4 +1,4 @@
-/* BugEngine <bugengine.devel@gmail.com> / 2008-2014
+/* BugEngine <bugengine.devel@gmail.com>
    see LICENSE for detail */
 
 #ifndef BE_CONFIG_PLATFORMS_HH_
@@ -69,8 +69,8 @@
 // clang-format off
 #    define BE_PLATFORM_INCLUDE_ bugengine/config/platforms/BE_PLATFORM.hh
 // clang-format on
-#    define BE_STRINGIZE__(x)  #x
-#    define BE_STRINGIZE_(x)   BE_STRINGIZE__(x)
+#    define BE_STRINGIZE__(x) #    x
+#    define BE_STRINGIZE_(x)  BE_STRINGIZE__(x)
 #    include BE_STRINGIZE_(BE_PLATFORM_INCLUDE_)
 #    undef BE_PLATFORM_INCLUDE_
 #    undef BE_STRINGIZE_

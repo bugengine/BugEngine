@@ -1,4 +1,4 @@
-/* BugEngine <bugengine.devel@gmail.com> / 2008-2014
+/* BugEngine <bugengine.devel@gmail.com>
    see LICENSE for detail */
 
 #include <bugengine/filesystem/stdafx.h>
@@ -12,7 +12,8 @@ static minitl::Allocator& ticketPool()
     return Arena::filesystem();  // TODO
 }
 
-File::Ticket::Ticket(minitl::Allocator& arena, weak< const File > file, i64 offset, u32 size, bool text)
+File::Ticket::Ticket(minitl::Allocator& arena, weak< const File > file, i64 offset, u32 size,
+                     bool text)
     : action(Read)
     , file(file)
     , buffer(arena, 0)
@@ -25,8 +26,8 @@ File::Ticket::Ticket(minitl::Allocator& arena, weak< const File > file, i64 offs
     file->addref();
 }
 
-File::Ticket::Ticket(minitl::Allocator& arena, weak< const File > file, i64 offset, u32 size, bool text,
-                     const void* data)
+File::Ticket::Ticket(minitl::Allocator& arena, weak< const File > file, i64 offset, u32 size,
+                     bool text, const void* data)
     : action(Write)
     , file(file)
     , buffer(arena, size)
@@ -59,7 +60,8 @@ File::~File()
 {
 }
 
-ref< const File::Ticket > File::beginRead(u32 size, i64 offset, bool text, minitl::Allocator& arena) const
+ref< const File::Ticket > File::beginRead(u32 size, i64 offset, bool text,
+                                          minitl::Allocator& arena) const
 {
     u32 s;
     if(offset >= 0)
@@ -85,7 +87,8 @@ ref< const File::Ticket > File::beginWrite(const void* data, u32 size, i64 offse
         be_assert((u64)offset <= m_size, "writing past end of file");
     else if(offset < 0)
         be_assert(offset + (i64)m_size + 1 >= 0, "writing past end of file");
-    ref< Ticket > t = ref< Ticket >::create(ticketPool(), byref(Arena::temporary()), this, offset, size, false, data);
+    ref< Ticket > t = ref< Ticket >::create(ticketPool(), byref(Arena::temporary()), this, offset,
+                                            size, false, data);
     IOProcess::IOContext::pushTicket(t);
     return t;
 }

@@ -1,4 +1,4 @@
-/* BugEngine <bugengine.devel@gmail.com> / 2008-2014
+/* BugEngine <bugengine.devel@gmail.com>
    see LICENSE for detail */
 
 #include <bugengine/plugin.scripting.pythonlib/stdafx.h>
@@ -10,21 +10,21 @@
 namespace BugEngine { namespace Python {
 
 static PyTypeObject::Py2NumberMethods s_py2ArrayNumber
-   = {{0, 0, 0}, 0, 0, 0, 0, 0, 0, 0, &PyBugArray::nonZero,
-      0,         0, 0, 0, 0, 0, 0, 0, 0,
-      0,         0, 0, 0, 0, 0, 0, 0, 0,
-      0,         0, 0, 0, 0, 0, 0, 0, 0,
-      0};
+    = {{0, 0, 0}, 0, 0, 0, 0, 0, 0, 0, &PyBugArray::nonZero,
+       0,         0, 0, 0, 0, 0, 0, 0, 0,
+       0,         0, 0, 0, 0, 0, 0, 0, 0,
+       0,         0, 0, 0, 0, 0, 0, 0, 0,
+       0};
 
 static PyTypeObject::Py3NumberMethods s_py3ArrayNumber
-   = {{0, 0, 0}, 0, 0, 0, 0, 0, 0, &PyBugArray::nonZero,
-      0,         0, 0, 0, 0, 0, 0, 0,
-      0,         0, 0, 0, 0, 0, 0, 0,
-      0,         0, 0, 0, 0, 0, 0, 0,
-      0,         0};
+    = {{0, 0, 0}, 0, 0, 0, 0, 0, 0, &PyBugArray::nonZero,
+       0,         0, 0, 0, 0, 0, 0, 0,
+       0,         0, 0, 0, 0, 0, 0, 0,
+       0,         0, 0, 0, 0, 0, 0, 0,
+       0,         0};
 
 static PyTypeObject::PySequenceMethods s_pyArraySequence
-   = {&PyBugArray::length, 0, 0, &PyBugArray::item, 0, &PyBugArray::setItem, 0, 0, 0, 0};
+    = {&PyBugArray::length, 0, 0, &PyBugArray::item, 0, &PyBugArray::setItem, 0, 0, 0, 0};
 
 PyTypeObject PyBugArray::s_pyType = {{{0, 0}, 0},
                                      "py_bugengine.Array",
@@ -166,8 +166,9 @@ PyObject* PyBugArray::item(PyObject* self, Py_ssize_t index)
         u32              index_ = be_checked_numcast< u32 >(index);
         const RTTI::Type t      = self_->value.type();
         RTTI::Value      v
-           = t.isConst() ? t.metaclass->apiMethods->arrayScripting->indexConst(self_->value, index_)
-                         : t.metaclass->apiMethods->arrayScripting->index(self_->value, index_);
+            = t.isConst()
+                  ? t.metaclass->apiMethods->arrayScripting->indexConst(self_->value, index_)
+                  : t.metaclass->apiMethods->arrayScripting->index(self_->value, index_);
         return PyBugObject::stealValue(0, v);
     }
     else

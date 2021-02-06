@@ -1,4 +1,4 @@
-/* BugEngine <bugengine.devel@gmail.com> / 2008-2014
+/* BugEngine <bugengine.devel@gmail.com>
 see LICENSE for detail */
 
 #include <bugengine/plugin.scripting.pythonlib/stdafx.h>
@@ -16,14 +16,14 @@ static HMODULE getPythonModuleHandle()
     if(h != 0)
     {
         EnumProcessModules
-           = be_function_cast< EnumProcessModulesFunc >(GetProcAddress(h, "EnumProcessModules"));
+            = be_function_cast< EnumProcessModulesFunc >(GetProcAddress(h, "EnumProcessModules"));
     }
     if(!EnumProcessModules)
     {
         if(h) FreeLibrary(h);
-        h = LoadLibraryA("kernel32.dll");
-        EnumProcessModules
-           = be_function_cast< EnumProcessModulesFunc >(GetProcAddress(h, "K32EnumProcessModules"));
+        h                  = LoadLibraryA("kernel32.dll");
+        EnumProcessModules = be_function_cast< EnumProcessModulesFunc >(
+            GetProcAddress(h, "K32EnumProcessModules"));
     }
 
     if(EnumProcessModules)
@@ -68,8 +68,8 @@ static HMODULE getPythonModuleHandle()
 PythonLibrary::PythonLibrary(const char* pythonLibraryName)
     : m_pythonLibraryName(pythonLibraryName)
     , m_handle(m_pythonLibraryName
-                  ? LoadLibraryA(minitl::format< 1024u >("%s.dll") | m_pythonLibraryName)
-                  : getPythonModuleHandle())
+                   ? LoadLibraryA(minitl::format< 1024u >("%s.dll") | m_pythonLibraryName)
+                   : getPythonModuleHandle())
     , m_status(m_handle != 0)
     , m_api(1013)
     , m_version(0)

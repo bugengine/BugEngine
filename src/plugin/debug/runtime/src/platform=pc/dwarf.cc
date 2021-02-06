@@ -1,4 +1,4 @@
-/* BugEngine <bugengine.devel@gmail.com> / 2008-2014
+/* BugEngine <bugengine.devel@gmail.com>
    see LICENSE for detail */
 
 #include <bugengine/plugin.debug.runtime/stdafx.h>
@@ -113,7 +113,7 @@ bool DwarfModule::AddressRange::operator<(AddressRange other) const
 {
     be_assert(consistent(*this, other) || consistent(other, *this),
               "inconsistent adress comparison : range [%d-%d] versus range [%d-%d]" | other.begin
-                 | other.end | begin | end);
+                  | other.end | begin | end);
     return end < other.begin;
 }
 
@@ -121,7 +121,7 @@ bool DwarfModule::AddressRange::operator==(AddressRange other) const
 {
     be_assert(consistent(*this, other) || consistent(other, *this),
               "inconsistent adress comparison : range [%d-%d] versus range [%d-%d]" | other.begin
-                 | other.end | begin | end);
+                  | other.end | begin | end);
     return (other.begin >= begin && other.begin <= end)
            || (begin >= other.begin && begin <= other.end);
 }
@@ -191,12 +191,12 @@ DwarfModule::Buffer< endianness >&
 DwarfModule::Buffer< endianness >::operator>>(Dwarf::size_t& value)
 {
     value.value
-       = ByteSwap< u32, endianness >::byteswap(*reinterpret_cast< u32* >(m_buffer + m_position));
+        = ByteSwap< u32, endianness >::byteswap(*reinterpret_cast< u32* >(m_buffer + m_position));
     m_position += 4;
     if(value.value == 0xffffffff)
     {
         value.value = ByteSwap< u64, endianness >::byteswap(
-           *reinterpret_cast< u64* >(m_buffer + m_position));
+            *reinterpret_cast< u64* >(m_buffer + m_position));
         m_position += 8;
         m_64 = true;
     }
@@ -210,13 +210,13 @@ DwarfModule::Buffer< endianness >::operator>>(Dwarf::offset_t& value)
     if(m_64)
     {
         value.value = ByteSwap< u64, endianness >::byteswap(
-           *reinterpret_cast< u64* >(m_buffer + m_position));
+            *reinterpret_cast< u64* >(m_buffer + m_position));
         m_position += 8;
     }
     else
     {
         value.value = ByteSwap< u32, endianness >::byteswap(
-           *reinterpret_cast< u32* >(m_buffer + m_position));
+            *reinterpret_cast< u32* >(m_buffer + m_position));
         m_position += 4;
     }
     return *this;
@@ -320,7 +320,7 @@ void DwarfModule::parse(const Module& module)
     if(debug_str)
     {
         m_strings = ref< StringBuffer >::create(
-           Arena::debug(), be_checked_numcast< size_t >(debug_str.fileSize), m_strings);
+            Arena::debug(), be_checked_numcast< size_t >(debug_str.fileSize), m_strings);
         module.readSection(debug_str, m_strings->data());
     }
     const Module::Section& debug_info = module[".debug_info"];
@@ -333,7 +333,7 @@ void DwarfModule::parse(const Module& module)
     }
     const Module::Section& debug_abbrev = module[".debug_abbrev"];
     debugAbbrev                         = minitl::Allocator::Block< u8 >(
-       Arena::temporary(), be_checked_numcast< size_t >(debug_abbrev.fileSize));
+        Arena::temporary(), be_checked_numcast< size_t >(debug_abbrev.fileSize));
     if(debug_abbrev)
     {
         debugAbbrevSize = debug_abbrev.size;
@@ -374,7 +374,7 @@ const char* DwarfModule::storeString(const char* string)
     const char* result = 0;
     be_assert(size < c_stringBufferSize,
               "string is too big to fit in a pool; string size is %d, pool size is %d" | size
-                 | c_stringBufferSize);
+                  | c_stringBufferSize);
     if(!m_strings)
     {
         m_strings = ref< StringBuffer >::create(Arena::temporary(), c_stringBufferSize,
@@ -417,8 +417,8 @@ bool DwarfModule::readAbbreviation(Buffer< endianness >&                  buffer
         {
             be_assert(abbrev.properties[abbrev.propertyCount].type == 0,
                       "inconsistent entry with attribute %d and type %d"
-                         | abbrev.properties[abbrev.propertyCount].attribute
-                         | abbrev.properties[abbrev.propertyCount].type);
+                          | abbrev.properties[abbrev.propertyCount].attribute
+                          | abbrev.properties[abbrev.propertyCount].type);
             return true;
         }
         abbrev.propertyCount++;
@@ -573,7 +573,7 @@ bool DwarfModule::readInfos(Buffer< endianness >& buffer, UnitMap& units,
         bool result = units.insert(u.range, u).second;
         (void)result;
         be_assert(result, "could not add unit %s because range %d-%d is already covered" | u.name
-                             | u.range.begin | u.range.end);
+                              | u.range.begin | u.range.end);
     }
     return true;
 }

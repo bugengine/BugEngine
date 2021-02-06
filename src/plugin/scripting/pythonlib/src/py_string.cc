@@ -1,4 +1,4 @@
-/* BugEngine <bugengine.devel@gmail.com> / 2008-2014
+/* BugEngine <bugengine.devel@gmail.com>
    see LICENSE for detail */
 
 #include <bugengine/plugin.scripting.pythonlib/stdafx.h>
@@ -9,70 +9,70 @@ namespace BugEngine { namespace Python {
 
 template < typename T >
 PyTypeObject::Py2NumberMethods PyBugString< T >::s_py2StringNumber
-   = {{0, 0, 0}, 0, 0, 0, 0, 0, 0, 0, &PyBugString< T >::nonZero,
-      0,         0, 0, 0, 0, 0, 0, 0, 0,
-      0,         0, 0, 0, 0, 0, 0, 0, 0,
-      0,         0, 0, 0, 0, 0, 0, 0, 0,
-      0};
+    = {{0, 0, 0}, 0, 0, 0, 0, 0, 0, 0, &PyBugString< T >::nonZero,
+       0,         0, 0, 0, 0, 0, 0, 0, 0,
+       0,         0, 0, 0, 0, 0, 0, 0, 0,
+       0,         0, 0, 0, 0, 0, 0, 0, 0,
+       0};
 
 template < typename T >
 PyTypeObject::Py3NumberMethods PyBugString< T >::s_py3StringNumber
-   = {{0, 0, 0}, 0, 0, 0, 0, 0, 0, &PyBugString< T >::nonZero,
-      0,         0, 0, 0, 0, 0, 0, 0,
-      0,         0, 0, 0, 0, 0, 0, 0,
-      0,         0, 0, 0, 0, 0, 0, 0,
-      0,         0};
+    = {{0, 0, 0}, 0, 0, 0, 0, 0, 0, &PyBugString< T >::nonZero,
+       0,         0, 0, 0, 0, 0, 0, 0,
+       0,         0, 0, 0, 0, 0, 0, 0,
+       0,         0, 0, 0, 0, 0, 0, 0,
+       0,         0};
 
 template < typename T >
 PyTypeObject PyBugString< T >::s_pyType
-   = {{{0, 0}, 0},
-      istring(minitl::format< 128u >("py_bugengine.%s") | be_type< T >().metaclass->name).c_str(),
-      sizeof(PyBugString< T >),
-      0,
-      &PyBugString< T >::dealloc,
-      0,
-      &PyBugString< T >::getattr,
-      &PyBugString< T >::setattr,
-      0,
-      &PyBugString< T >::repr,
-      0,
-      0,
-      0,
-      0,
-      0,
-      &PyBugString< T >::str,
-      0,
-      0,
-      0,
-      Py_TPFLAGS_DEFAULT,
-      "Wrapper class for the C++ BugEngine string types",
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      &PyBugObject::s_pyType,
-      0,
-      0,
-      0,
-      0,
-      &PyBugString< T >::init,
-      0,
-      &PyBugString< T >::newinst,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0};
+    = {{{0, 0}, 0},
+       istring(minitl::format< 128u >("py_bugengine.%s") | be_type< T >().metaclass->name).c_str(),
+       sizeof(PyBugString< T >),
+       0,
+       &PyBugString< T >::dealloc,
+       0,
+       &PyBugString< T >::getattr,
+       &PyBugString< T >::setattr,
+       0,
+       &PyBugString< T >::repr,
+       0,
+       0,
+       0,
+       0,
+       0,
+       &PyBugString< T >::str,
+       0,
+       0,
+       0,
+       Py_TPFLAGS_DEFAULT,
+       "Wrapper class for the C++ BugEngine string types",
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       &PyBugObject::s_pyType,
+       0,
+       0,
+       0,
+       0,
+       &PyBugString< T >::init,
+       0,
+       &PyBugString< T >::newinst,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0};
 
 template < typename T >
 PyObject* PyBugString< T >::stealValue(PyObject* owner, RTTI::Value& value)
@@ -83,7 +83,7 @@ PyObject* PyBugString< T >::stealValue(PyObject* owner, RTTI::Value& value)
               "PyBugString only accepts String types");
     be_assert(value.type().metaclass->index() == be_type< T >().metaclass->index(),
               "expected %s; got %s" | be_type< T >().metaclass->name
-                 | value.type().metaclass->name);
+                  | value.type().metaclass->name);
     PyObject* result                           = s_pyType.tp_alloc(&s_pyType, 0);
     static_cast< PyBugString* >(result)->owner = owner;
 

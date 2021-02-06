@@ -1,4 +1,4 @@
-/* BugEngine <bugengine.devel@gmail.com> / 2008-2014
+/* BugEngine <bugengine.devel@gmail.com>
    see LICENSE for detail */
 
 #ifndef BE_SCHEDULER_KERNEL_PRODUCT_FACTORY_HH_
@@ -24,20 +24,20 @@ struct ClassID< KernelScheduler::Product< T > >
     static BE_EXPORT raw< const RTTI::Class > klass()
     {
         static const RTTI::Class s_class
-           = {istring(minitl::format< 256u >("Product<%s>") | be_type< T >().name()),
-              u32(sizeof(KernelScheduler::Product< T >)),
-              0,
-              RTTI::ClassType_Object,
-              {0},
-              {be_class< KernelScheduler::IProduct >().m_ptr},
-              {0},
-              {0},
-              {0, 0},
-              {0, 0},
-              {0},
-              {0},
-              0,
-              0};
+            = {istring(minitl::format< 256u >("Product<%s>") | be_type< T >().name()),
+               u32(sizeof(KernelScheduler::Product< T >)),
+               0,
+               RTTI::ClassType_Object,
+               {0},
+               {be_class< KernelScheduler::IProduct >().m_ptr},
+               {0},
+               {0},
+               {0, 0},
+               {0, 0},
+               {0},
+               {0},
+               0,
+               0};
         raw< const RTTI::Class > result = {&s_class};
         return result;
     }

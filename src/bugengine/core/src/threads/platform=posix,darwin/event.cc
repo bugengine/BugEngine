@@ -1,4 +1,4 @@
-/* BugEngine <bugengine.devel@gmail.com> / 2008-2014
+/* BugEngine <bugengine.devel@gmail.com>
    see LICENSE for detail */
 
 #include <bugengine/core/stdafx.h>
@@ -47,8 +47,8 @@ void Event::unlock()
 
 Threads::Waitable::WaitResult Event::wait()
 {
-    int result
-       = pthread_cond_wait(reinterpret_cast< pthread_cond_t* >(m_data), reinterpret_cast< pthread_mutex_t* >(m_lock));
+    int result = pthread_cond_wait(reinterpret_cast< pthread_cond_t* >(m_data),
+                                   reinterpret_cast< pthread_mutex_t* >(m_lock));
     switch(result)
     {
     case 0: return Finished;

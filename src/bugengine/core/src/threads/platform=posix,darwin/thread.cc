@@ -1,4 +1,4 @@
-/* BugEngine <bugengine.devel@gmail.com> / 2008-2014
+/* BugEngine <bugengine.devel@gmail.com>
    see LICENSE for detail */
 
 #include <bugengine/core/stdafx.h>
@@ -96,7 +96,8 @@ Thread::Thread(const istring& name, ThreadFunction f, intptr_t p1, intptr_t p2, 
     : m_params(new ThreadParams(name, f, p1, p2))
     , m_data(new pthread_t)
 {
-    pthread_create(reinterpret_cast< pthread_t* >(m_data), 0, &ThreadParams::threadWrapper, m_params);
+    pthread_create(reinterpret_cast< pthread_t* >(m_data), 0, &ThreadParams::threadWrapper,
+                   m_params);
     m_id = u64(ptrdiff_t(*reinterpret_cast< pthread_t* >(m_data)));
     setPriority(p);
 }
@@ -109,7 +110,8 @@ Thread::~Thread()
     clock_gettime(CLOCK_REALTIME, &abstime);
     abstime.tv_sec += 2;
     int result = pthread_timedjoin_np(*reinterpret_cast< pthread_t* >(m_data), &rvalue, &abstime);
-    be_assert(result != ETIMEDOUT, "timed out when waiting for thread %s" | m_params->m_name.c_str());
+    be_assert(result != ETIMEDOUT,
+              "timed out when waiting for thread %s" | m_params->m_name.c_str());
 #else
     int result = pthread_join(*reinterpret_cast< pthread_t* >(m_data), &rvalue);
 #endif

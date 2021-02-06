@@ -1,4 +1,4 @@
-/* BugEngine <bugengine.devel@gmail.com> / 2008-2014
+/* BugEngine <bugengine.devel@gmail.com>
  see LICENSE for detail */
 
 #include <stdafx.h>
@@ -51,8 +51,7 @@ struct LuaPop
     }
 };
 
-RTTI::ConversionCost calculateConversion(const LuaParameterType& type,
-                                         const RTTI::Type&       target)
+RTTI::ConversionCost calculateConversion(const LuaParameterType& type, const RTTI::Type& target)
 {
     int index;
     if(type.key != -1)
@@ -95,8 +94,8 @@ RTTI::ConversionCost calculateConversion(const LuaParameterType& type,
                                                             : RTTI::ConversionCost::s_incompatible;
         case LUA_TSTRING:
             return target.metaclass->type() == RTTI::ClassType_String
-                      ? RTTI::ConversionCost()
-                      : RTTI::ConversionCost::s_incompatible;
+                       ? RTTI::ConversionCost()
+                       : RTTI::ConversionCost::s_incompatible;
         case LUA_TBOOLEAN: return RTTI::calculateConversion< bool >(target);
         case LUA_TNUMBER: return RTTI::calculateConversion< LUA_NUMBER >(target);
         case LUA_TUSERDATA:
@@ -117,7 +116,7 @@ RTTI::ConversionCost calculateConversion(const LuaParameterType& type,
             if(target.metaclass->type() == RTTI::ClassType_Array)
             {
                 const RTTI::Type& valueType
-                   = target.metaclass->apiMethods->arrayScripting->value_type;
+                    = target.metaclass->apiMethods->arrayScripting->value_type;
                 RTTI::ConversionCost c;
                 lua_pushnil(type.state);
                 while(lua_next(type.state, index < 0 ? index - 1 : index))
@@ -203,7 +202,7 @@ void convert(const LuaParameterType& type, void* buffer, const RTTI::Type& targe
     LuaPop p(type.state, index, type.key != -1);
     bool   result = createValue(type.state, index, target, buffer);
     be_assert(result, "could not convert lua value %s to %s" | Context::tostring(type.state, index)
-                         | target.name());
+                          | target.name());
     be_forceuse(result);
 }
 
@@ -225,12 +224,12 @@ int call(lua_State* state, raw< const RTTI::Method > method)
         u32               positionParameterCount = 0;
         u32               keywordParameterCount  = 0;
         LuaParameterInfo* parameters
-           = (LuaParameterInfo*)malloca(sizeof(LuaParameterInfo) * (parameterCount + 1));
+            = (LuaParameterInfo*)malloca(sizeof(LuaParameterInfo) * (parameterCount + 1));
 
         if(nargs == 2)
         {
             new(&parameters[positionParameterCount++])
-               LuaParameterInfo(LuaParameterType(state, nargs));
+                LuaParameterInfo(LuaParameterType(state, nargs));
             parameterCount++;
         }
         lua_pushnil(state);
@@ -244,7 +243,7 @@ int call(lua_State* state, raw< const RTTI::Method > method)
             {
                 u32 j = (u32)lua_tonumber(state, -1);
                 new(&parameters[positionParameterCount])
-                   LuaParameterInfo(LuaParameterType(state, nargs + 1, istring(), j));
+                    LuaParameterInfo(LuaParameterType(state, nargs + 1, istring(), j));
                 positionParameterCount++;
             }
             break;
@@ -254,7 +253,7 @@ int call(lua_State* state, raw< const RTTI::Method > method)
                 istring     key    = istring(keyStr);
                 keywordParameterCount++;
                 new(&parameters[parameterCount - keywordParameterCount])
-                   LuaParameterInfo(key, LuaParameterType(state, nargs + 1, key, 0));
+                    LuaParameterInfo(key, LuaParameterType(state, nargs + 1, key, 0));
             }
             break;
             default:
@@ -266,13 +265,13 @@ int call(lua_State* state, raw< const RTTI::Method > method)
         if(!error)
         {
             RTTI::CallInfo result
-               = RTTI::resolve(method, parameters, positionParameterCount,
-                               parameters + positionParameterCount, keywordParameterCount);
+                = RTTI::resolve(method, parameters, positionParameterCount,
+                                parameters + positionParameterCount, keywordParameterCount);
             if(result.conversion < RTTI::ConversionCost::s_incompatible)
             {
                 RTTI::Value v
-                   = RTTI::call(result, parameters, positionParameterCount,
-                                parameters + positionParameterCount, keywordParameterCount);
+                    = RTTI::call(result, parameters, positionParameterCount,
+                                 parameters + positionParameterCount, keywordParameterCount);
                 freea(parameters);
                 return Context::push(state, v);
             }
@@ -287,7 +286,7 @@ int call(lua_State* state, raw< const RTTI::Method > method)
         }
     }
     LuaParameterInfo* parameters
-       = (LuaParameterInfo*)malloca(sizeof(LuaParameterInfo) * (nargs + 1));
+        = (LuaParameterInfo*)malloca(sizeof(LuaParameterInfo) * (nargs + 1));
     for(u32 i = 0; i < nargs; ++i)
     {
         new(&parameters[i]) LuaParameterInfo(LuaParameterType(state, 2 + i));
@@ -306,7 +305,7 @@ int call(lua_State* state, raw< const RTTI::Method > method)
         for(u32 i = 0; i < nargs; ++i)
         {
             strcat(message, minitl::format< 128u >("%s%s") | Context::tostring(state, 2 + i)
-                               | (i < nargs - 1 ? ", " : ""));
+                                | (i < nargs - 1 ? ", " : ""));
         }
         return error(state, message);
     }

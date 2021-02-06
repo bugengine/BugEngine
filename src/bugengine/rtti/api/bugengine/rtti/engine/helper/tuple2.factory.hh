@@ -1,4 +1,4 @@
-/* BugEngine <bugengine.devel@gmail.com> / 2008-2014
+/* BugEngine <bugengine.devel@gmail.com>
    see LICENSE for detail */
 
 #ifndef BE_RTTI_ENGINE_HELPER_TUPLE2_HH_
@@ -71,19 +71,19 @@ const RTTI::Method::Parameter ClassID< minitl::tuple< T1, T2 > >::s_method_tuple
        {{0}, istring("second"), be_type< T2 >(), {&RTTI::Method::Parameter::s_noDefaultValue}}};
 
 template < typename T1, typename T2 >
-const RTTI::Method::Overload ClassID< minitl::tuple< T1, T2 > >::s_method_tuple_overloads[] = {
-    {{0},
-     {0, 0},
-     be_type< minitl::tuple< T1, T2 > >(),
-     false,
-     {0, 0},
-     &trampoline_method_tuple_overload_0},
-    {{0},
-     {2, s_method_tuple_overload_1_params},
-     be_type< minitl::tuple< T1, T2 > >(),
-     false,
-     {0, 0},
-     &trampoline_method_tuple_overload_1}};
+const RTTI::Method::Overload ClassID< minitl::tuple< T1, T2 > >::s_method_tuple_overloads[]
+    = {{{0},
+        {0, 0},
+        be_type< minitl::tuple< T1, T2 > >(),
+        false,
+        {0, 0},
+        &trampoline_method_tuple_overload_0},
+       {{0},
+        {2, s_method_tuple_overload_1_params},
+        be_type< minitl::tuple< T1, T2 > >(),
+        false,
+        {0, 0},
+        &trampoline_method_tuple_overload_1}};
 
 template < typename T1, typename T2 >
 const RTTI::Method ClassID< minitl::tuple< T1, T2 > >::s_methods[1]

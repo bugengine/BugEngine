@@ -1,4 +1,4 @@
-/* BugEngine <bugengine.devel@gmail.com> / 2008-2014
+/* BugEngine <bugengine.devel@gmail.com>
    see LICENSE for detail */
 
 #include <bugengine/settings/stdafx.h>
@@ -23,7 +23,7 @@ SettingsBase::SettingsBase(raw< const RTTI::Class > settingsClass) : m_settingsC
 SettingsBase::~SettingsBase()
 {
     be_assert(this->hooked(), "Settings object %s was removed from the settings list"
-                                 | m_settingsClass->fullname());
+                                  | m_settingsClass->fullname());
     this->unhook();
 }
 

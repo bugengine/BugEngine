@@ -1,4 +1,4 @@
-/* BugEngine <bugengine.devel@gmail.com> / 2008-2014
+/* BugEngine <bugengine.devel@gmail.com>
    see LICENSE for detail */
 
 #include <bugengine/core/stdafx.h>
@@ -8,7 +8,9 @@
 
 namespace BugEngine {
 
-text::text(const char* str) : m_text(Arena::general().strdup(str)), m_length(be_checked_numcast< u32 >(strlen(str)))
+text::text(const char* str)
+    : m_text(Arena::general().strdup(str))
+    , m_length(be_checked_numcast< u32 >(strlen(str)))
 {
 }
 

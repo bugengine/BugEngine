@@ -1,4 +1,4 @@
-/* BugEngine <bugengine.devel@gmail.com> / 2008-2014
+/* BugEngine <bugengine.devel@gmail.com>
    see LICENSE for detail */
 
 #ifndef BE_BUGENGINE_APPLICATION_HH_
@@ -56,9 +56,11 @@ private:
     void updateResources();
 
 private:
-    virtual void load(weak< const Resource::Description > scene, Resource::Resource & resource) override;
-    virtual void reload(weak< const Resource::Description > oldScene, weak< const Resource::Description > newScene,
-                        Resource::Resource & resource) override;
+    virtual void load(weak< const Resource::Description > scene, Resource::Resource & resource)
+        override;
+    virtual void reload(weak< const Resource::Description > oldScene,
+                        weak< const Resource::Description > newScene, Resource::Resource & resource)
+        override;
     virtual void unload(Resource::Resource & resource) override;
 
 private:

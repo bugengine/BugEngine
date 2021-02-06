@@ -1,4 +1,4 @@
-/* BugEngine <bugengine.devel@gmail.com> / 2008-2014
+/* BugEngine <bugengine.devel@gmail.com>
    see LICENSE for detail */
 
 #ifndef BE_RTTI_PARSE_PARSECONTEXT_HH_
@@ -61,6 +61,7 @@ extern ParseContext* g_parseContext;
 }}}  // namespace BugEngine::RTTI::AST
 
 extern "C" int be_value_parse(BugEngine::RTTI::AST::ParseContext* context);
+extern "C" int be_value_lex_destroy();
 
 /**************************************************************************************************/
 #endif

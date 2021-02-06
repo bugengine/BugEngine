@@ -1,4 +1,4 @@
-/* BugEngine <bugengine.devel@gmail.com> / 2008-2014
+/* BugEngine <bugengine.devel@gmail.com>
    see LICENSE for detail */
 
 #include <bugengine/core/stdafx.h>
@@ -27,7 +27,8 @@ size_t Environment::getProcessorCount() const
             cpuCount = 1;
         }
     }
-    be_assert_recover(cpuCount >= 1, "Invalid number of CPUs returned by sysctl: %d" | cpuCount, cpuCount = 1);
+    be_assert_recover(cpuCount >= 1, "Invalid number of CPUs returned by sysctl: %d" | cpuCount,
+                      cpuCount = 1);
     be_info("found %d CPU" | cpuCount);
     return cpuCount;
 }

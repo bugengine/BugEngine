@@ -1,4 +1,4 @@
-/* BugEngine <bugengine.devel@gmail.com> / 2008-2014
+/* BugEngine <bugengine.devel@gmail.com>
    see LICENSE for detail */
 
 #include <bugengine/core/stdafx.h>
@@ -135,7 +135,8 @@ Thread::Thread(const istring& name, ThreadFunction f, intptr_t p1, intptr_t p2, 
 Thread::~Thread()
 {
     DWORD result = WaitForSingleObject((HANDLE)m_data, 2000);
-    be_assert(result != WAIT_TIMEOUT, "timed out when waiting for thread %s" | m_params->m_name.c_str());
+    be_assert(result != WAIT_TIMEOUT,
+              "timed out when waiting for thread %s" | m_params->m_name.c_str());
     be_forceuse(result);
     CloseHandle((HANDLE)m_data);
     delete static_cast< ThreadParams* >(m_params);

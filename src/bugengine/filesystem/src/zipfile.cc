@@ -1,4 +1,4 @@
-/* BugEngine <bugengine.devel@gmail.com> / 2008-2014
+/* BugEngine <bugengine.devel@gmail.com>
    see LICENSE for detail */
 
 #include <bugengine/filesystem/stdafx.h>
@@ -6,8 +6,10 @@
 
 namespace BugEngine {
 
-ZipFile::ZipFile(void* handle, const ifilename& filename, const unz_file_info& info, const unz_file_pos& filePos)
-    : File(filename, File::Media(File::Media::Package, 0, 0), u64(info.uncompressed_size), u64(info.dosDate))
+ZipFile::ZipFile(void* handle, const ifilename& filename, const unz_file_info& info,
+                 const unz_file_pos& filePos)
+    : File(filename, File::Media(File::Media::Package, 0, 0), u64(info.uncompressed_size),
+           u64(info.dosDate))
     , m_handle(handle)
     , m_filePos(filePos)
 {
@@ -42,18 +44,21 @@ void ZipFile::doFillBuffer(weak< File::Ticket > ticket) const
     {
         u8  buffer[4096];
         i64 bytesToRead = minitl::min< i64 >(4096, ticket->offset - s_fileOffset);
-        i64 read        = unzReadCurrentFile(m_handle, buffer, be_checked_numcast< unsigned int >(bytesToRead));
+        i64 read
+            = unzReadCurrentFile(m_handle, buffer, be_checked_numcast< unsigned int >(bytesToRead));
         s_fileOffset += read;
     }
 
-    be_assert(ticket->buffer.byteCount() > ticket->total, "buffer is not long enough to read entire file; "
-                                                          "buffer size is %d, requires %d bytes"
-                                                             | ticket->buffer.byteCount() | ticket->total);
+    be_assert(ticket->buffer.byteCount() > ticket->total,
+              "buffer is not long enough to read entire file; "
+              "buffer size is %d, requires %d bytes"
+                  | ticket->buffer.byteCount() | ticket->total);
     u8* buffer = ticket->buffer.begin();
     while(!ticket->done())
     {
         i64 bytesToRead = ticket->total - ticket->processed;
-        u32 bytesRead   = unzReadCurrentFile(m_handle, buffer, be_checked_numcast< u32 >(bytesToRead));
+        u32 bytesRead
+            = unzReadCurrentFile(m_handle, buffer, be_checked_numcast< u32 >(bytesToRead));
         if(bytesRead > 0)
         {
             ticket->processed += bytesRead;

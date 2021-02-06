@@ -1,4 +1,4 @@
-/* BugEngine <bugengine.devel@gmail.com> / 2008-2014
+/* BugEngine <bugengine.devel@gmail.com>
    see LICENSE for detail */
 
 #include <bugengine/filesystem/stdafx.h>
@@ -48,7 +48,7 @@ void ZipFolder::doRefresh(Folder::ScanPolicy scanPolicy)
 {
     Folder::doRefresh(scanPolicy);
     Folder::ScanPolicy newPolicy
-       = (scanPolicy == Folder::ScanRecursive) ? Folder::ScanRecursive : Folder::ScanNone;
+        = (scanPolicy == Folder::ScanRecursive) ? Folder::ScanRecursive : Folder::ScanNone;
     if(m_handle)
     {
         ScopedCriticalSection lock(m_lock);
@@ -68,8 +68,8 @@ void ZipFolder::doRefresh(Folder::ScanPolicy scanPolicy)
                     unzGetFilePos(m_handle, &filePos);
                     ifilename fullFilePath = path + ifilename(filename);
                     m_files.push_back(minitl::make_tuple(
-                       filename, ref< ZipFile >::create(Arena::filesystem(), m_handle, fullFilePath,
-                                                        info, filePos)));
+                        filename, ref< ZipFile >::create(Arena::filesystem(), m_handle,
+                                                         fullFilePath, info, filePos)));
                 }
                 else if(path.size() >= 1)
                 {
@@ -89,8 +89,8 @@ void ZipFolder::doRefresh(Folder::ScanPolicy scanPolicy)
                     ipath path = m_path;
                     path.push_back(*it);
                     m_folders.push_back(minitl::make_tuple(
-                       *it,
-                       ref< ZipFolder >::create(Arena::filesystem(), m_handle, path, newPolicy)));
+                        *it,
+                        ref< ZipFolder >::create(Arena::filesystem(), m_handle, path, newPolicy)));
                 }
             }
         }

@@ -1,4 +1,4 @@
-/* BugEngine <bugengine.devel@gmail.com> / 2008-2014
+/* BugEngine <bugengine.devel@gmail.com>
    see LICENSE for detail */
 
 #include <bugengine/plugin.scripting.pythonlib/stdafx.h>
@@ -9,54 +9,54 @@
 namespace BugEngine { namespace Python {
 
 static PyTypeObject s_bugenginePluginType
-   = {{{0, 0}, 0},
-      "py_bugengine.Plugin",
-      sizeof(PyBugPlugin),
-      0,
-      &PyBugPlugin::dealloc,
-      0,
-      &PyBugPlugin::getattr,
-      &PyBugPlugin::setattr,
-      0,
-      &PyBugPlugin::repr,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      Py_TPFLAGS_DEFAULT,
-      "Wrapper class for the C++ class BugEngine::Plugin::Plugin",
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      &PyBugPlugin::init,
-      0,
-      &PyBugPlugin::create,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0};
+    = {{{0, 0}, 0},
+       "py_bugengine.Plugin",
+       sizeof(PyBugPlugin),
+       0,
+       &PyBugPlugin::dealloc,
+       0,
+       &PyBugPlugin::getattr,
+       &PyBugPlugin::setattr,
+       0,
+       &PyBugPlugin::repr,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       Py_TPFLAGS_DEFAULT,
+       "Wrapper class for the C++ class BugEngine::Plugin::Plugin",
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       &PyBugPlugin::init,
+       0,
+       &PyBugPlugin::create,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0};
 
 PyObject* PyBugPlugin::create(PyTypeObject* type, PyObject* /*args*/, PyObject* /*kwds*/)
 {
@@ -133,7 +133,7 @@ void PyBugPlugin::registerType(PyObject* module)
     be_assert(result >= 0, "unable to register type");
     Py_INCREF(&s_bugenginePluginType);
     result
-       = (*s_library->m_PyModule_AddObject)(module, "Plugin", (PyObject*)&s_bugenginePluginType);
+        = (*s_library->m_PyModule_AddObject)(module, "Plugin", (PyObject*)&s_bugenginePluginType);
     be_assert(result >= 0, "unable to register type");
     be_forceuse(result);
 }

@@ -1,4 +1,4 @@
-/* BugEngine <bugengine.devel@gmail.com> / 2008-2014
+/* BugEngine <bugengine.devel@gmail.com>
    see LICENSE for detail */
 
 #include <bugengine/core/stdafx.h>
@@ -17,7 +17,8 @@ StackAllocator::~StackAllocator()
 void* StackAllocator::internalAlloc(u64 size, u64 alignment)
 {
 #ifdef _MSC_VER
-    return ::_aligned_malloc(be_checked_numcast< size_t >(size), be_checked_numcast< size_t >(alignment));
+    return ::_aligned_malloc(be_checked_numcast< size_t >(size),
+                             be_checked_numcast< size_t >(alignment));
 #else
     be_forceuse(alignment);
     return ::malloc(size);
@@ -32,7 +33,8 @@ bool StackAllocator::internalResize(void* /*ptr*/, u64 /*size*/)
 void* StackAllocator::internalRealloc(void* ptr, u64 size, u64 alignment)
 {
 #ifdef _MSC_VER
-    return ::_aligned_realloc(ptr, be_checked_numcast< size_t >(size), be_checked_numcast< size_t >(alignment));
+    return ::_aligned_realloc(ptr, be_checked_numcast< size_t >(size),
+                              be_checked_numcast< size_t >(alignment));
 #else
     be_forceuse(alignment);
     return ::realloc(ptr, size);

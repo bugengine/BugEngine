@@ -1,12 +1,12 @@
-/* BugEngine <bugengine.devel@gmail.com> / 2008-2014
+/* BugEngine <bugengine.devel@gmail.com>
    see LICENSE for detail */
 
 #ifndef BE_RTTI_TYPEINFO_INL_
 #define BE_RTTI_TYPEINFO_INL_
 /**************************************************************************************************/
 #include <bugengine/rtti/stdafx.h>
-#include <bugengine/rtti/typeinfo.hh>
 #include <bugengine/rtti/conversion.inl>
+#include <bugengine/rtti/typeinfo.hh>
 
 namespace BugEngine { namespace RTTI {
 

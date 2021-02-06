@@ -1,4 +1,4 @@
-/* BugEngine <bugengine.devel@gmail.com> / 2008-2014
+/* BugEngine <bugengine.devel@gmail.com>
    see LICENSE for detail */
 
 #ifndef BE_KERNEL_GCC_ARM_INTERLOCKED_INL_
@@ -58,7 +58,7 @@ struct InterlockedType< 4 >
                                                     "       strex   %1, %2, [%5]\n"
                                                     "       teq             %1, #0\n"
                                                     "       bne             1b\n" DMB(6)
-                                                       AO_THUMB_RESTORE_MODE
+                                                        AO_THUMB_RESTORE_MODE
                              : "=&r"(old), "=&r"(flag), "=&r"(temp), "+m"(*p)
                              : "r"(incr), "r"(p), "r"(0)
                              : AO_THUMB_SWITCH_CLOBBERS "cc");
@@ -75,7 +75,7 @@ struct InterlockedType< 4 >
                                                     "       strex   %1, %4, [%3]\n"
                                                     "       teq             %1, #0\n"
                                                     "       bne             1b\n" DMB(5)
-                                                       AO_THUMB_RESTORE_MODE
+                                                        AO_THUMB_RESTORE_MODE
                              : "=&r"(prev), "=&r"(flag), "+m"(*p)
                              : "r"(p), "r"(v), "r"(0)
                              : AO_THUMB_SWITCH_CLOBBERS "cc");
@@ -85,17 +85,17 @@ struct InterlockedType< 4 >
     {
         value_t result, old;
         __asm__ __volatile__(
-           AO_THUMB_GO_ARM DMB(6) "1:     mov             %0, #2\n" /* store a flag */
-                                  "       ldrex   %1, [%3]\n"       /* get original */
-                                  "       teq             %1, %4\n" /* see if match */
-                                  "       it              eq\n"     /* IT block */
-                                  "       strexeq %0, %5, [%3]\n"   /* store new one if matched */
-                                  "       teq             %0, #1\n"
-                                  "       beq             1b\n" /* if update failed, repeat */
-           DMB(6) AO_THUMB_RESTORE_MODE
-           : "=&r"(result), "=&r"(old), "+m"(*p)
-           : "r"(p), "r"(condition), "r"(v), "r"(0)
-           : AO_THUMB_SWITCH_CLOBBERS "cc");
+            AO_THUMB_GO_ARM DMB(6) "1:     mov             %0, #2\n" /* store a flag */
+                                   "       ldrex   %1, [%3]\n"       /* get original */
+                                   "       teq             %1, %4\n" /* see if match */
+                                   "       it              eq\n"     /* IT block */
+                                   "       strexeq %0, %5, [%3]\n"   /* store new one if matched */
+                                   "       teq             %0, #1\n"
+                                   "       beq             1b\n" /* if update failed, repeat */
+            DMB(6) AO_THUMB_RESTORE_MODE
+            : "=&r"(result), "=&r"(old), "+m"(*p)
+            : "r"(p), "r"(condition), "r"(v), "r"(0)
+            : AO_THUMB_SWITCH_CLOBBERS "cc");
 
         return old;
     }
@@ -136,10 +136,10 @@ struct InterlockedType< 4 >
     {
         tagged_t::value_t result;
         __asm__ __volatile__(
-           AO_THUMB_GO_ARM DMB(2) "       ldrex   %0, [%1]\n" AO_THUMB_RESTORE_MODE
-           : "=r"(result)
-           : "r"(&p.m_value), "r"(0)
-           : AO_THUMB_SWITCH_CLOBBERS "cc");
+            AO_THUMB_GO_ARM DMB(2) "       ldrex   %0, [%1]\n" AO_THUMB_RESTORE_MODE
+            : "=r"(result)
+            : "r"(&p.m_value), "r"(0)
+            : AO_THUMB_SWITCH_CLOBBERS "cc");
         return result;
     }
     static inline bool set_conditional(tagged_t* p, tagged_t::value_t v,
@@ -148,7 +148,7 @@ struct InterlockedType< 4 >
         long result;
 
         __asm__ __volatile__(AO_THUMB_GO_ARM "       strex %0, %2, [%3]\n" DMB(4)
-                                AO_THUMB_RESTORE_MODE
+                                 AO_THUMB_RESTORE_MODE
                              : "=&r"(result), "+m"(*p)
                              : "r"(v), "r"(p), "r"(0)
                              : AO_THUMB_SWITCH_CLOBBERS "cc");

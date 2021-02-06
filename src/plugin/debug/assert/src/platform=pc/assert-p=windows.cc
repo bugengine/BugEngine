@@ -1,4 +1,4 @@
-/* BugEngine <bugengine.devel@gmail.com> / 2008-2014
+/* BugEngine <bugengine.devel@gmail.com>
    see LICENSE for detail */
 
 #include <stdafx.h>
@@ -68,8 +68,8 @@ minitl::AssertionResult AssertionCallback(const char* file, int line, const char
         ref< const Runtime::Module >                executable = Runtime::Module::self();
         static weak< const Runtime::Module >        last       = executable;
         static ref< const Runtime::SymbolResolver > s_symbols
-           = Runtime::SymbolResolver::loadSymbols(executable->getSymbolInformation(),
-                                                  ref< const Runtime::SymbolResolver >());
+            = Runtime::SymbolResolver::loadSymbols(executable->getSymbolInformation(),
+                                                   ref< const Runtime::SymbolResolver >());
         while(last && last->next())
         {
             last                                              = last->next();

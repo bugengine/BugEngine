@@ -1,4 +1,4 @@
-/* BugEngine <bugengine.devel@gmail.com> / 2008-2014
+/* BugEngine <bugengine.devel@gmail.com>
    see LICENSE for detail */
 
 #ifndef BE_MINITL_CONTAINER_INL_VECTOR_INL_
@@ -394,11 +394,11 @@ typename vector< T >::iterator vector< T >::erase(iterator first, iterator last)
                       "can't erase iterator that is not pointing on current vector", return first);
     be_assert_recover(m_memory <= first.m_iterator && m_end > first.m_iterator,
                       "first %p is not in the range of the vector [%p,%p)" | first.m_iterator
-                         | m_memory.data() | m_end,
+                          | m_memory.data() | m_end,
                       return first);
     be_assert_recover(m_memory <= last.m_iterator && m_end >= last.m_iterator,
                       "last %p is not in the range of the vector [%p,%p)" | last.m_iterator
-                         | m_memory.data() | m_end,
+                          | m_memory.data() | m_end,
                       return first);
     be_assert_recover(first.m_iterator <= last.m_iterator,
                       "first %p is not before last %p" | first.m_iterator | last.m_iterator,

@@ -1,4 +1,4 @@
-/* BugEngine <bugengine.devel@gmail.com> / 2008-2014
+/* BugEngine <bugengine.devel@gmail.com>
    see LICENSE for detail */
 
 #ifndef BE_MINITL_INTERLOCKED_MSVC_X86_INTERLOCKED_INL_
@@ -140,7 +140,7 @@ struct InterlockedType< 4 >
             mov         ecx, v
             mov         ebx, eax
             inc         ebx
-             // lock        cmpxch8b esi;
+              // lock        cmpxch8b esi;
             _emit 0xF0
             _emit 0x0F
             _emit 0xC7

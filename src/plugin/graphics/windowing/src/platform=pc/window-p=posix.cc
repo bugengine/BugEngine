@@ -1,4 +1,4 @@
-/* BugEngine <bugengine.devel@gmail.com> / 2008-2014
+/* BugEngine <bugengine.devel@gmail.com>
    see LICENSE for detail */
 
 #include <bugengine/plugin.graphics.windowing/stdafx.h>
@@ -50,16 +50,16 @@ Window::~Window()
 void Window::load(weak< const Resource::Description > /*renderWindowDescription*/)
 {
     m_window.reset(scoped< PlatformWindow >::create(
-       m_renderer->arena(),
-       be_checked_cast< const Renderer >(m_renderer)->m_platformRenderer->m_platformData.display,
-       be_checked_cast< const Renderer >(m_renderer)
-          ->m_platformRenderer->createWindow(0, 0, 200, 200)));
+        m_renderer->arena(),
+        be_checked_cast< const Renderer >(m_renderer)->m_platformRenderer->m_platformData.display,
+        be_checked_cast< const Renderer >(m_renderer)
+            ->m_platformRenderer->createWindow(0, 0, 200, 200)));
     Window* w = this;
     XChangeProperty(
-       be_checked_cast< const Renderer >(m_renderer)->m_platformRenderer->m_platformData.display,
-       m_window->m_window,
-       be_checked_cast< const Renderer >(m_renderer)->m_platformRenderer->m_windowProperty,
-       XA_INTEGER, 8, PropModeReplace, (unsigned char*)&w, sizeof(w));
+        be_checked_cast< const Renderer >(m_renderer)->m_platformRenderer->m_platformData.display,
+        m_window->m_window,
+        be_checked_cast< const Renderer >(m_renderer)->m_platformRenderer->m_windowProperty,
+        XA_INTEGER, 8, PropModeReplace, (unsigned char*)&w, sizeof(w));
 }
 
 void Window::unload()

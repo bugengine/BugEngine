@@ -1,4 +1,4 @@
-/* BugEngine <bugengine.devel@gmail.com> / 2008-2014
+/* BugEngine <bugengine.devel@gmail.com>
    see LICENSE for detail */
 
 #include <bugengine/plugin.graphics.GL4/stdafx.h>
@@ -136,7 +136,7 @@ void GLShaderBuilder::doAddOperator(Shaders::Operator op, Shaders::ValueType typ
 {
     writeln((minitl::format< 1024u >("%s %s = %s %c %s;") | toString(type) | result | op1 | (char)op
              | op2)
-               .c_str());
+                .c_str());
 }
 
 void GLShaderBuilder::doWrite(float value)

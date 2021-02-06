@@ -1,4 +1,4 @@
-/* BugEngine <bugengine.devel@gmail.com> / 2008-2014
+/* BugEngine <bugengine.devel@gmail.com>
    see LICENSE for detail */
 
 #include <bugengine/rtti/stdafx.h>
@@ -19,7 +19,7 @@ Value::Value(const Value& other) : m_type(other.m_type), m_reference(other.m_ref
     else
     {
         m_ref.m_pointer
-           = m_type.size() > sizeof(m_buffer) ? Arena::script().alloc(m_type.size()) : 0;
+            = m_type.size() > sizeof(m_buffer) ? Arena::script().alloc(m_type.size()) : 0;
         m_ref.m_deallocate = (m_ref.m_pointer != 0);
         m_type.copy(other.memory(), memory());
     }

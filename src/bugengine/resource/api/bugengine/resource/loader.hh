@@ -1,4 +1,4 @@
-/* BugEngine <bugengine.devel@gmail.com> / 2008-2014
+/* BugEngine <bugengine.devel@gmail.com>
    see LICENSE for detail */
 
 #ifndef BE_RESOURCE_ILOADER_HH_
@@ -40,7 +40,7 @@ protected:
     virtual void load(weak< const Description > description, Resource & resource) = 0;
     virtual void reload(weak< const Description > oldDescription,
                         weak< const Description > newDescription, Resource & resource)
-       = 0;
+        = 0;
     virtual void unload(Resource & resource) = 0;
 
     virtual void onTicketUpdated(weak< const Description > /*description*/, Resource& /*resource*/,

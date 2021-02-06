@@ -1,4 +1,4 @@
-/* BugEngine <bugengine.devel@gmail.com> / 2008-2014
+/* BugEngine <bugengine.devel@gmail.com>
    see LICENSE for detail */
 
 #include <bugengine/plugin.debug.runtime/stdafx.h>
@@ -34,13 +34,13 @@ ref< const Module > Module::self()
         if(seen == 0)
         {
             s_module
-               = ref< PE >::create(Arena::debug(), moduleName, (u64)(uintptr_t)info.lpBaseOfDll);
+                = ref< PE >::create(Arena::debug(), moduleName, (u64)(uintptr_t)info.lpBaseOfDll);
             module = s_module;
         }
         else
         {
             ref< Module > newModule
-               = ref< PE >::create(Arena::debug(), moduleName, (u64)(uintptr_t)info.lpBaseOfDll);
+                = ref< PE >::create(Arena::debug(), moduleName, (u64)(uintptr_t)info.lpBaseOfDll);
             module->m_next = newModule;
             module         = newModule;
         }

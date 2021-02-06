@@ -1,4 +1,4 @@
-/* BugEngine <bugengine.devel@gmail.com> / 2008-2014
+/* BugEngine <bugengine.devel@gmail.com>
    see LICENSE for detail */
 
 #include <bugengine/plugin.graphics.GL4/stdafx.h>
@@ -31,16 +31,16 @@ void GLShaderProgram::attach()
 
     if(m_vertexShader)
         be_checked_cast< const GLRenderer >(m_renderer)
-           ->shaderext()
-           .glAttachShader(m_shaderProgram, m_vertexShader);
+            ->shaderext()
+            .glAttachShader(m_shaderProgram, m_vertexShader);
     if(m_geometryShader)
         be_checked_cast< const GLRenderer >(m_renderer)
-           ->shaderext()
-           .glAttachShader(m_shaderProgram, m_geometryShader);
+            ->shaderext()
+            .glAttachShader(m_shaderProgram, m_geometryShader);
     if(m_fragmentShader)
         be_checked_cast< const GLRenderer >(m_renderer)
-           ->shaderext()
-           .glAttachShader(m_shaderProgram, m_fragmentShader);
+            ->shaderext()
+            .glAttachShader(m_shaderProgram, m_fragmentShader);
 }
 
 static GLenum toGLShaderStage(Shaders::Stage stage)
@@ -97,11 +97,11 @@ GLhandleARB GLShaderProgram::build(weak< const ShaderProgramDescription > progra
 void GLShaderProgram::load(weak< const Resource::Description > shaderDescription)
 {
     weak< const ShaderProgramDescription > program
-       = be_checked_cast< const ShaderProgramDescription >(shaderDescription);
+        = be_checked_cast< const ShaderProgramDescription >(shaderDescription);
     be_assert(m_shaderProgram == 0, "shader program loaded twice?");
 
     const ShaderExtensions& shaderext
-       = be_checked_cast< const GLRenderer >(m_renderer)->shaderext();
+        = be_checked_cast< const GLRenderer >(m_renderer)->shaderext();
     m_shaderProgram = shaderext.glCreateProgram();
 
     m_vertexShader   = build(program);
@@ -141,15 +141,15 @@ void GLShaderProgram::unload()
     if(m_geometryShader)
     {
         be_checked_cast< const GLRenderer >(m_renderer)
-           ->shaderext()
-           .glDeleteShader(m_geometryShader);
+            ->shaderext()
+            .glDeleteShader(m_geometryShader);
         m_geometryShader = 0;
     }
     if(m_fragmentShader)
     {
         be_checked_cast< const GLRenderer >(m_renderer)
-           ->shaderext()
-           .glDeleteShader(m_fragmentShader);
+            ->shaderext()
+            .glDeleteShader(m_fragmentShader);
         m_fragmentShader = 0;
     }
     be_checked_cast< const GLRenderer >(m_renderer)->shaderext().glDeleteProgram(m_shaderProgram);

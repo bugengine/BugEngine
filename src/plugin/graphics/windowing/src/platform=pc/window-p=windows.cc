@@ -1,4 +1,4 @@
-/* BugEngine <bugengine.devel@gmail.com> / 2008-2014
+/* BugEngine <bugengine.devel@gmail.com>
    see LICENSE for detail */
 
 #include <bugengine/plugin.graphics.windowing/stdafx.h>
@@ -17,8 +17,8 @@ namespace BugEngine { namespace Windowing {
 static inline void displayError()
 {
     char* msg;
-    ::FormatMessageA(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM, 0, ::GetLastError(), 0, (char*)&msg,
-                     0, 0);
+    ::FormatMessageA(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM, 0,
+                     ::GetLastError(), 0, (char*)&msg, 0, 0);
     MessageBox(0, msg, "Win32 error", MB_OK);
     ::LocalFree(msg);
 }
@@ -41,7 +41,7 @@ Window::PlatformWindow::PlatformWindow(weak< const Renderer > renderer, weak< Wi
     f.size.bottom = 600;
     f.fullscreen  = false;
     AdjustWindowRect(
-       &f.size, WS_CAPTION | WS_THICKFRAME | WS_SYSMENU | WS_MINIMIZEBOX | WS_MAXIMIZEBOX, FALSE);
+        &f.size, WS_CAPTION | WS_THICKFRAME | WS_SYSMENU | WS_MINIMIZEBOX | WS_MAXIMIZEBOX, FALSE);
     m_window = renderer->m_platformRenderer->createWindowImplementation(f);
     if(!m_window)
     {
@@ -74,7 +74,7 @@ void Window::load(weak< const Resource::Description > renderWindowDescription)
 {
     be_forceuse(renderWindowDescription);
     m_window.reset(scoped< PlatformWindow >::create(
-       m_renderer->arena(), be_checked_cast< const Renderer >(m_renderer), this));
+        m_renderer->arena(), be_checked_cast< const Renderer >(m_renderer), this));
 }
 
 void Window::unload()

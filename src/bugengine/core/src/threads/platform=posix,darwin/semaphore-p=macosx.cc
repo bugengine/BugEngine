@@ -1,4 +1,4 @@
-/* BugEngine <bugengine.devel@gmail.com> / 2008-2014
+/* BugEngine <bugengine.devel@gmail.com>
    see LICENSE for detail */
 
 #include <bugengine/core/stdafx.h>
@@ -58,7 +58,8 @@ Threads::Waitable::WaitResult Semaphore::wait()
 {
     int result;
 #if __ENVIRONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__ >= 1060
-    result = dispatch_semaphore_wait(reinterpret_cast< dispatch_semaphore_t >(m_data), DISPATCH_TIME_FOREVER);
+    result = dispatch_semaphore_wait(reinterpret_cast< dispatch_semaphore_t >(m_data),
+                                     DISPATCH_TIME_FOREVER);
 #else
     do
     {

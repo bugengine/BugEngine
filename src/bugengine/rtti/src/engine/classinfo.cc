@@ -1,4 +1,4 @@
-/* BugEngine <bugengine.devel@gmail.com> / 2008-2014
+/* BugEngine <bugengine.devel@gmail.com>
    see LICENSE for detail */
 
 #include <bugengine/rtti/stdafx.h>
@@ -463,8 +463,8 @@ Value Class::findClass(inamespace name)
 raw< RTTI::Class > be_bugengine_Namespace()
 {
     static RTTI::Class ci
-       = {"BugEngine", 0, 0, RTTI::ClassType_Namespace, {0}, {0}, {0}, {0}, {0, 0}, {0, 0}, {0},
-          {0},         0, 0};
+        = {"BugEngine", 0, 0, RTTI::ClassType_Namespace, {0}, {0}, {0}, {0}, {0, 0}, {0, 0}, {0},
+           {0},         0, 0};
     raw< RTTI::Class > result = {&ci};
     return result;
 }

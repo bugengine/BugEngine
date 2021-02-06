@@ -1,4 +1,4 @@
-/* BugEngine <bugengine.devel@gmail.com> / 2008-2014
+/* BugEngine <bugengine.devel@gmail.com>
    see LICENSE for detail */
 
 #include <bugengine/plugin.graphics.GL4/stdafx.h>
@@ -22,32 +22,32 @@
 namespace BugEngine { namespace OpenGL {
 
 static const PIXELFORMATDESCRIPTOR s_pfd
-   = {sizeof(PIXELFORMATDESCRIPTOR),
-      1,
-      PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER,
-      PFD_TYPE_RGBA,
-      32,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      24,
-      0,
-      0,
-      PFD_MAIN_PLANE,
-      0,
-      0,
-      0,
-      0};
+    = {sizeof(PIXELFORMATDESCRIPTOR),
+       1,
+       PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER,
+       PFD_TYPE_RGBA,
+       32,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       24,
+       0,
+       0,
+       PFD_MAIN_PLANE,
+       0,
+       0,
+       0,
+       0};
 
 class GLRenderer::Context : public minitl::refcountable
 {
@@ -103,7 +103,7 @@ static HGLRC createGLContext(weak< const GLRenderer > renderer, HDC hdc)
         wglMakeCurrent(dc, glrc);
 
         wglCreateContextAttribsARB = be_function_cast< PFNWGLCREATECONTEXTATTRIBSARBPROC >(
-           wglGetProcAddress("wglCreateContextAttribsARB"));
+            wglGetProcAddress("wglCreateContextAttribsARB"));
 
         wglMakeCurrent(0, 0);
         wglDeleteContext(glrc);
@@ -166,7 +166,7 @@ GLRenderer::Context::Context(weak< const GLRenderer > renderer)
     , m_dummyDC(GetDC(m_dummyHwnd))
     , m_glContext(createGLContext(renderer, m_dummyDC))
     , m_setSwapInterval(
-         be_function_cast< PFNWGLSWAPINTERVALEXTPROC >(wglGetProcAddress("wglSwapIntervalEXT")))
+          be_function_cast< PFNWGLSWAPINTERVALEXTPROC >(wglGetProcAddress("wglSwapIntervalEXT")))
     , m_threadId(Thread::currentId())
     , shaderext()
 {
@@ -237,8 +237,9 @@ void GLRenderer::attachWindow(weak< GLWindow > w) const
 {
     be_assert(Thread::currentId() == m_context->m_threadId, "render command on wrong thread");
     HWND wnd = *(HWND*)w->getWindowHandle();
-    w->m_context.reset(scoped< GLWindow::Context >::create(
-       Arena::general(), m_context->m_glContext, wnd, m_context->m_dummyDC, m_context->m_threadId));
+    w->m_context.reset(scoped< GLWindow::Context >::create(Arena::general(), m_context->m_glContext,
+                                                           wnd, m_context->m_dummyDC,
+                                                           m_context->m_threadId));
     w->setCurrent();
     if(m_context->m_setSwapInterval) (*m_context->m_setSwapInterval)(0);
     w->clearCurrent();

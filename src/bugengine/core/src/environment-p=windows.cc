@@ -1,4 +1,4 @@
-/* BugEngine <bugengine.devel@gmail.com> / 2008-2014
+/* BugEngine <bugengine.devel@gmail.com>
    see LICENSE for detail */
 
 #include <bugengine/core/stdafx.h>
@@ -6,11 +6,17 @@
 
 #include <stdlib.h>
 
-typedef BOOL(WINAPI* GetUserProfileDirectoryFunction)(HANDLE hToken, LPSTR lpProfileDir, LPDWORD lpcchSize);
+typedef BOOL(WINAPI* GetUserProfileDirectoryFunction)(HANDLE hToken, LPSTR lpProfileDir,
+                                                      LPDWORD lpcchSize);
 
 namespace BugEngine {
 
-Environment::Environment() : m_homeDirectory(""), m_dataDirectory("data"), m_game(""), m_user(""), m_programPath(0)
+Environment::Environment()
+    : m_homeDirectory("")
+    , m_dataDirectory("data")
+    , m_game("")
+    , m_user("")
+    , m_programPath(0)
 {
     HANDLE token;
     OpenProcessToken(GetCurrentProcess(), TOKEN_QUERY, &token);
@@ -22,8 +28,9 @@ Environment::Environment() : m_homeDirectory(""), m_dataDirectory("data"), m_gam
     HMODULE h = LoadLibraryA("userenv.dll");
     if(h != 0)
     {
-        FARPROC                         symbol   = GetProcAddress(h, "GetUserProfileDirectoryA");
-        GetUserProfileDirectoryFunction function = be_function_cast< GetUserProfileDirectoryFunction >(symbol);
+        FARPROC                         symbol = GetProcAddress(h, "GetUserProfileDirectoryA");
+        GetUserProfileDirectoryFunction function
+            = be_function_cast< GetUserProfileDirectoryFunction >(symbol);
         (*function)(token, profile, &size);
         FreeLibrary(h);
     }

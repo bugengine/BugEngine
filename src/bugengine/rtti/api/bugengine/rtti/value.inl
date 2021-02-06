@@ -1,4 +1,4 @@
-/* BugEngine <bugengine.devel@gmail.com> / 2008-2014
+/* BugEngine <bugengine.devel@gmail.com>
    see LICENSE for detail */
 
 #ifndef BE_RTTI_VALUE_INL_
@@ -62,7 +62,7 @@ Value& Value::operator=(const T& t)
     {
         be_assert_recover(m_type.isA(be_type< T >()),
                           "Value has type %s; unable to copy from type %s" | m_type
-                             | be_type< T >(),
+                              | be_type< T >(),
                           return *this);
         be_assert_recover(m_type.constness != Type::Const, "Value is const", return *this);
         void* mem = memory();

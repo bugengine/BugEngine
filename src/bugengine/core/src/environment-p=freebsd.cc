@@ -1,4 +1,4 @@
-/* BugEngine <bugengine.devel@gmail.com> / 2008-2014
+/* BugEngine <bugengine.devel@gmail.com>
    see LICENSE for detail */
 
 #include <bugengine/core/stdafx.h>
@@ -6,8 +6,8 @@
 
 #include <cerrno>
 #include <cstdio>
-#include <sys/types.h>
 #include <sys/sysctl.h>
+#include <sys/types.h>
 
 namespace BugEngine {
 
@@ -24,7 +24,8 @@ size_t Environment::getProcessorCount() const
         be_error("Could not retrieve number of processors: %s" | sys_errlist[errno]);
         cpuCount = 1;
     }
-    be_assert_recover(cpuCount >= 1, "Invalid number of CPUs returned by sysctl: %d" | cpuCount, cpuCount = 1);
+    be_assert_recover(cpuCount >= 1, "Invalid number of CPUs returned by sysctl: %d" | cpuCount,
+                      cpuCount = 1);
     be_info("found %d CPU" | cpuCount);
     return cpuCount;
 }

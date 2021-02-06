@@ -1,4 +1,4 @@
-/* BugEngine <bugengine.devel@gmail.com> / 2008-2014
+/* BugEngine <bugengine.devel@gmail.com>
    see LICENSE for detail */
 
 #ifndef BE_FILESYSTEM_WATCHQUEUE_HH_
@@ -24,9 +24,10 @@ private:
 
 private:
     static intptr_t runFileSystemWatch(intptr_t p1, intptr_t p2);
-    static void     onFileSystemEvent(ConstFSEventStreamRef streamRef, void* clientCallBackInfo, size_t numEvents,
-                                      void* eventPaths, const FSEventStreamEventFlags eventFlags[],
-                                      const FSEventStreamEventId eventIds[]);
+    static void     onFileSystemEvent(ConstFSEventStreamRef streamRef, void* clientCallBackInfo,
+                                      size_t numEvents, void* eventPaths,
+                                      const FSEventStreamEventFlags eventFlags[],
+                                      const FSEventStreamEventId    eventIds[]);
 
 public:
     FileSystemWatchProcessQueue();
