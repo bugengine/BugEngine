@@ -1,4 +1,4 @@
-/* BugEngine <bugengine.devel@gmail.com> / 2008-2014
+/* BugEngine <bugengine.devel@gmail.com>
    see LICENSE for detail */
 
 #include <bugengine/rtti-parse/stdafx.h>
@@ -15,6 +15,7 @@ ref< AST::Node > parseValue(minitl::Allocator& arena, AST::MessageList& errors,
     AST::ParseContext context(arena, strBegin, strEnd ? strEnd : (strBegin + strlen(strBegin)),
                               errors, false, initialLine, initialColumn);
     int               result = be_value_parse(&context);
+    be_value_lex_destroy();
     if(result != 0 || !errors.empty())
     {
         return ref< AST::Node >();
@@ -32,6 +33,7 @@ ref< AST::Object > parseObject(minitl::Allocator& arena, AST::MessageList& error
     AST::ParseContext context(arena, strBegin, strEnd ? strEnd : (strBegin + strlen(strBegin)),
                               errors, true, initialLine, initialColumn);
     int               result = be_value_parse(&context);
+    be_value_lex_destroy();
     if(result != 0 || !errors.empty())
     {
         return ref< AST::Object >();

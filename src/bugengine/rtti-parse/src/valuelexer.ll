@@ -1,4 +1,4 @@
-/* BugEngine <bugengine.devel@gmail.com> / 2008-2014
+/* BugEngine <bugengine.devel@gmail.com>
    see LICENSE for detail */
 %{
 #include    <bugengine/rtti-ast/stdafx.h>
@@ -160,6 +160,7 @@ false                                           { update(be_value_leng);
 #if (YY_FLEX_MINOR_VERSION < 5) || (YY_FLEX_MINOR_VERSION == 5 && YY_FLEX_SUBMINOR_VERSION < 5)
 int be_value_lex_destroy()
 {
+    yy_delete_buffer(yy_current_buffer);
     return 0;
 }
 #endif
