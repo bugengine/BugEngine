@@ -10,8 +10,8 @@ ParseContext* g_parseContext;
 static i_u32  s_useCount;
 
 ParseContext::ParseContext(minitl::Allocator& allocator, const char* bufferStart,
-                           const char* bufferEnd, MessageList& errors, bool expectObject,
-                           u32 lineStart, u32 columnStart)
+                           const char* bufferEnd, MessageList& errors, u32 lineStart,
+                           u32 columnStart)
     : arena(&allocator)
     , result()
     , bufferStart(bufferStart)
@@ -19,7 +19,6 @@ ParseContext::ParseContext(minitl::Allocator& allocator, const char* bufferStart
     , buffer(bufferStart)
     , errors(errors)
     , location()
-    , parseHeader(expectObject ? HeaderObject : HeaderAnyValue)
 {
     if(s_useCount++ != 0)
     {

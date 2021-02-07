@@ -32,8 +32,8 @@ public:
     Package(const ifilename& filename);
     ~Package();
 
-    void                   insertNode(const istring& name, ref< RTTI::AST::Node > object);
-    void                   removeNode(const istring& name, ref< RTTI::AST::Node > object);
+    void                   insertNode(const istring name, ref< RTTI::AST::Node > object);
+    void                   removeNode(ref< RTTI::AST::Node > object);
     ref< RTTI::AST::Node > findByName(istring name) const;
     const RTTI::Value&     getValue(weak< const RTTI::AST::Node > object) const;
 

@@ -1,9 +1,10 @@
-/* BugEngine <bugengine.devel@gmail.com>
+/* BugEngine <bugengine.devel@gmail.com> / 2008-2014
    see LICENSE for detail */
 
 #include <bugengine/rtti-ast/stdafx.h>
 #include <bugengine/rtti-ast/node/reference.hh>
 
+#include <bugengine/rtti-ast/dbcontext.hh>
 #include <bugengine/rtti-ast/node/object.hh>
 
 namespace BugEngine { namespace RTTI { namespace AST {
@@ -31,16 +32,17 @@ bool Reference::resolve(DbContext& context)
             ns = child;
             continue;
         }
-        m_cachedNamespace = ns;
-        m_cachedNode      = ns->getNode(n);
-        if(m_cachedNode)
-        {
-            m_cachedType = m_cachedNode->getType();
-        }
-        else
+        weak< const Node > node = ns->getNode(n);
+        if(!node)
         {
             const Value& v = ns->getValue();
-            m_cachedType   = v.type();
+            if(!v)
+            {
+                /* todo: error */
+            }
+            else
+            {
+            }
         }
     }
     return true;

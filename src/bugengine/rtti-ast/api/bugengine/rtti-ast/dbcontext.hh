@@ -7,28 +7,11 @@
 #include <bugengine/rtti-ast/stdafx.h>
 #include <bugengine/filesystem/folder.script.hh>
 #include <bugengine/rtti-ast/dbnamespace.hh>
+#include <bugengine/rtti-ast/location.hh>
+#include <bugengine/rtti-ast/node/node.hh>
 #include <bugengine/rtti/value.hh>
 
 namespace BugEngine { namespace RTTI { namespace AST {
-
-struct ParseLocation
-{
-    u32 line;
-    u32 columnStart;
-    u32 columnEnd;
-
-    void newline()
-    {
-        line++;
-        columnStart = 0;
-        columnEnd   = 1;
-    }
-    void update(u32 column)
-    {
-        columnStart = columnEnd;
-        columnEnd += column;
-    }
-};
 
 struct Message
 {

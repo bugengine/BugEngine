@@ -9,6 +9,8 @@
 
 namespace BugEngine { namespace PackageBuilder { namespace Nodes {
 
+static const istring s_name("name");
+
 Package::Package(const ifilename& filename)
     : m_filename(filename)
     , m_context(Arena::packageBuilder(), filename, ref< Folder >())
@@ -33,13 +35,12 @@ void Package::loadPlugin(inamespace plugin, inamespace name)
     else
     {
         m_plugins.push_back(p);
-        m_context.rootNamespace->add(m_context, name, RTTI::Value(p.pluginNamespace()));
+        m_context.rootNamespace->add(name, RTTI::Value(p.pluginNamespace()));
     }
 }
 
-void Package::insertNode(const istring& name, ref< RTTI::AST::Node > object)
+void Package::insertNode(const istring name, ref< RTTI::AST::Node > object)
 {
-    be_forceuse(name);
     for(minitl::vector< ref< RTTI::AST::Node > >::iterator it = m_nodes.begin();
         it != m_nodes.end(); ++it)
     {
@@ -50,11 +51,15 @@ void Package::insertNode(const istring& name, ref< RTTI::AST::Node > object)
         }
     }
     m_nodes.push_back(object);
+    object->setMetadata(s_name, name);
+    m_context.rootNamespace->add(inamespace(name), object);
 }
 
-void Package::removeNode(const istring& name, ref< RTTI::AST::Node > object)
+void Package::removeNode(ref< RTTI::AST::Node > object)
 {
-    be_forceuse(name);
+    istring name = object->getMetadata(s_name).as< const istring >();
+    m_context.rootNamespace->remove(inamespace(name), object);
+
     minitl::vector< ref< RTTI::AST::Node > >::iterator it = m_nodes.begin();
     while(it != m_nodes.end())
     {
@@ -70,17 +75,7 @@ void Package::removeNode(const istring& name, ref< RTTI::AST::Node > object)
 
 ref< RTTI::AST::Node > Package::findByName(istring name) const
 {
-    be_forceuse(name);
-    minitl::vector< ref< RTTI::AST::Node > >::const_iterator it = m_nodes.begin();
-    while(it != m_nodes.end())
-    {
-        // if((*it)->name() == name)
-        //{
-        //    return *it;
-        //}
-        ++it;
-    }
-    return ref< RTTI::AST::Node >();
+    return m_context.rootNamespace->getNode(name);
 }
 
 const RTTI::Value& Package::getValue(weak< const RTTI::AST::Node > object) const

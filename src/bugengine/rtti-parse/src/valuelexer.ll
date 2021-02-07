@@ -100,20 +100,6 @@ ID              [A-Za-z_][0-9A-Za-z_<>]*
 
 %%
 
-%{
-    using namespace ::BugEngine::RTTI::AST;
-    if (g_parseContext->parseHeader == ParseContext::HeaderObject)
-    {
-        g_parseContext->parseHeader = ParseContext::HeaderDone;
-        return TOK_EXPECT_OBJECT;
-    }
-    else if (g_parseContext->parseHeader == ParseContext::HeaderAnyValue)
-    {
-        g_parseContext->parseHeader = ParseContext::HeaderDone;
-        return TOK_EXPECT_ANY;
-    }
-%}
-
 true                                            { update(be_value_leng);
                                                   yylval.bValue.value = true;
                                                   yylval.bValue.location = ::BugEngine::RTTI::AST::g_parseContext->location;

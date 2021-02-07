@@ -1,10 +1,11 @@
-/* BugEngine <bugengine.devel@gmail.com>
+/* BugEngine <bugengine.devel@gmail.com> / 2008-2014
    see LICENSE for detail */
 
 #ifndef BE_RTTI_PARSE_PARSECONTEXT_HH_
 #define BE_RTTI_PARSE_PARSECONTEXT_HH_
 /**************************************************************************************************/
 #include <bugengine/rtti-parse/stdafx.h>
+#include <bugengine/rtti-ast/dbcontext.hh>
 #include <bugengine/rtti-ast/node/node.hh>
 #include <bugengine/rtti-ast/node/object.hh>
 
@@ -34,13 +35,6 @@ namespace BugEngine { namespace RTTI { namespace AST {
 
 struct ParseContext
 {
-    enum Header
-    {
-        HeaderDone,
-        HeaderAnyValue,
-        HeaderObject
-    };
-
     minitl::Allocator* arena;
     ref< Node >        result;
     const char*        bufferStart;
@@ -48,11 +42,9 @@ struct ParseContext
     const char*        buffer;
     MessageList&       errors;
     ParseLocation      location;
-    Header             parseHeader;
 
     ParseContext(minitl::Allocator& arena, const char* bufferStart, const char* bufferEnd,
-                 MessageList& errors, bool expectObject = false, u32 lineStart = 0,
-                 u32 columnStart = 0);
+                 MessageList& errors, u32 lineStart = 0, u32 columnStart = 0);
     ~ParseContext();
 };
 

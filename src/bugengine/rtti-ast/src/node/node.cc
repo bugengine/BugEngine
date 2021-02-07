@@ -4,7 +4,11 @@
 #include <bugengine/rtti-ast/stdafx.h>
 #include <bugengine/rtti-ast/node/node.hh>
 
+#include <bugengine/rtti-ast/dbcontext.hh>
+
 namespace BugEngine { namespace RTTI { namespace AST {
+
+static const Value s_notFound = Value();
 
 bool Node::resolve(DbContext& context)
 {
@@ -46,6 +50,17 @@ Value Node::eval(DbContext& context, const Type& expectedType) const
         m_cacheSet = true;
     }
     return Value(Value::ByRef(m_cache));
+}
+
+const Value& Node::getMetadata(const istring name) const
+{
+    for(minitl::vector< minitl::tuple< const istring, Value > >::const_iterator it
+        = m_metadata.begin();
+        it != m_metadata.end(); ++it)
+    {
+        if(it->first == name) return it->second;
+    }
+    return s_notFound;
 }
 
 }}}  // namespace BugEngine::RTTI::AST

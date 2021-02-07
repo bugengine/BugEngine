@@ -10,18 +10,14 @@
 namespace BugEngine { namespace RTTI { namespace AST {
 
 class Namespace;
-class Object;
 
 class be_api(RTTI_AST) Reference : public Node
 {
     friend class Object;
 
 private:
-    const inamespace        m_referenceName;
-    inamespace              m_properties;
-    Type                    m_cachedType;
-    weak< const Namespace > m_cachedNamespace;
-    ref< const Object >     m_cachedNode;
+    const inamespace m_referenceName;
+    inamespace       m_properties;
 
 protected:
     virtual bool resolve(DbContext & context) override;

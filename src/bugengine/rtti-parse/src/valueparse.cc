@@ -13,7 +13,7 @@ ref< AST::Node > parseValue(minitl::Allocator& arena, AST::MessageList& errors,
                             u32 initialColumn)
 {
     AST::ParseContext context(arena, strBegin, strEnd ? strEnd : (strBegin + strlen(strBegin)),
-                              errors, false, initialLine, initialColumn);
+                              errors, initialLine, initialColumn);
     int               result = be_value_parse(&context);
     be_value_lex_destroy();
     if(result != 0 || !errors.empty())
@@ -23,24 +23,6 @@ ref< AST::Node > parseValue(minitl::Allocator& arena, AST::MessageList& errors,
     else
     {
         return context.result;
-    }
-}
-
-ref< AST::Object > parseObject(minitl::Allocator& arena, AST::MessageList& errors,
-                               const char* strBegin, const char* strEnd, u32 initialLine,
-                               u32 initialColumn)
-{
-    AST::ParseContext context(arena, strBegin, strEnd ? strEnd : (strBegin + strlen(strBegin)),
-                              errors, true, initialLine, initialColumn);
-    int               result = be_value_parse(&context);
-    be_value_lex_destroy();
-    if(result != 0 || !errors.empty())
-    {
-        return ref< AST::Object >();
-    }
-    else
-    {
-        return be_checked_cast< AST::Object >(context.result);
     }
 }
 

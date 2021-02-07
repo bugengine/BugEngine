@@ -28,51 +28,80 @@ Namespace::~Namespace()
 {
 }
 
-void Namespace::add(DbContext& context, const inamespace& name, const Value& value)
+void Namespace::add(const inamespace& name, const Value& value)
 {
-    be_forceuse(context);
     weak< Namespace > current = this;
     for(u32 i = 0; i < name.size(); ++i)
     {
-        istring          n = name[i];
-        ref< Namespace > newNamespace
-            = ref< Namespace >::create(current->m_allocator, byref(current->m_allocator));
-        current = current->m_children.insert(n, newNamespace).first->second;
+        istring                                                                       n = name[i];
+        minitl::tuple< minitl::hashmap< istring, ref< Namespace > >::iterator, bool > result
+            = current->m_children.insert(n, ref< Namespace >());
+        if(result.second)
+        {
+            result.first->second
+                = ref< Namespace >::create(current->m_allocator, byref(current->m_allocator));
+        }
+        current = result.first->second;
     }
     current->m_value = value;
 }
 
-void Namespace::add(DbContext& context, const inamespace& name, ref< Namespace > ns)
+void Namespace::add(const inamespace& name, ref< Namespace > ns)
 {
-    be_forceuse(context);
     weak< Namespace > current = this;
     if(name.size())
     {
         for(u32 i = 0; i < name.size() - 1; ++i)
         {
-            istring          n = name[i];
-            ref< Namespace > newNamespace
-                = ref< Namespace >::create(current->m_allocator, byref(current->m_allocator));
-            current = current->m_children.insert(n, newNamespace).first->second;
+            istring n = name[i];
+            minitl::tuple< minitl::hashmap< istring, ref< Namespace > >::iterator, bool > result
+                = current->m_children.insert(n, ref< Namespace >());
+            if(result.second)
+            {
+                result.first->second
+                    = ref< Namespace >::create(current->m_allocator, byref(current->m_allocator));
+            }
         }
         current->m_children[name[name.size() - 1]] = ns;
     }
 }
 
-void Namespace::add(DbContext& context, const inamespace& name, ref< Object > node)
+void Namespace::add(const inamespace& name, ref< Node > node)
 {
-    be_forceuse(context);
     weak< Namespace > current = this;
     if(name.size())
     {
         for(u32 i = 0; i < name.size() - 1; ++i)
         {
-            istring          n = name[i];
-            ref< Namespace > newNamespace
-                = ref< Namespace >::create(current->m_allocator, byref(current->m_allocator));
-            current = current->m_children.insert(n, newNamespace).first->second;
+            istring n = name[i];
+            minitl::tuple< minitl::hashmap< istring, ref< Namespace > >::iterator, bool > result
+                = current->m_children.insert(n, ref< Namespace >());
+            if(result.second)
+            {
+                result.first->second
+                    = ref< Namespace >::create(current->m_allocator, byref(current->m_allocator));
+            }
         }
         current->m_nodes[name[name.size() - 1]] = node;
+    }
+}
+
+void Namespace::remove(const inamespace& name, ref< Node > node)
+{
+    weak< Namespace > current = this;
+    if(name.size())
+    {
+        for(u32 i = 0; i < name.size() - 1; ++i)
+        {
+            current = current->getChild(name[i]);
+            be_assert_recover(current,
+                              "could not remove object %s: unable to find child namespace %s" | name
+                                  | name[i],
+                              return;);
+        }
+        be_assert(node == current->m_nodes[name[name.size() - 1]],
+                  "node %s does not match the node to remove" | name);
+        current->m_nodes.erase(current->m_nodes.find(name[name.size() - 1]));
     }
 }
 
@@ -89,9 +118,9 @@ ref< Namespace > Namespace::getChild(const istring name) const
     }
 }
 
-ref< Object > Namespace::getNode(const istring name) const
+ref< Node > Namespace::getNode(const istring name) const
 {
-    minitl::hashmap< istring, ref< Object > >::const_iterator it = m_nodes.find(name);
+    minitl::hashmap< istring, ref< Node > >::const_iterator it = m_nodes.find(name);
     if(it != m_nodes.end())
     {
         return it->second;
