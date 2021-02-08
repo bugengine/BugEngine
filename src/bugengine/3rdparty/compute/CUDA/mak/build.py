@@ -110,7 +110,7 @@ def build_cuda_kernels(task_gen):
 
 @feature('bugengine:preprocess')
 def create_cuda_kernels(task_gen):
-    for kernel, kernel_source, kernel_ast in task_gen.kernels:
+    for kernel, kernel_source, kernel_path, kernel_ast in task_gen.kernels:
         kernel_target = '.'.join([task_gen.parent, '.'.join(kernel), 'cuda'])
         kernel_gens = []
         for env in task_gen.bld.multiarch_envs:

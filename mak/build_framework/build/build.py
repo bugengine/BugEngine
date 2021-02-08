@@ -743,3 +743,24 @@ def strip_debug_info_impl(self):
 def strip_debug_info(self):
     if not self.env.SUBARCH:
         self.strip_debug_info_impl()
+
+
+@feature('c', 'cxx', 'd', 'asm', 'fc', 'includes')
+@after_method('propagate_uselib_vars', 'process_source')
+def apply_incpaths(self):
+    """
+    Task generator method that processes the attribute *includes*::
+
+        tg = bld(features='includes', includes='.')
+
+    The folders only need to be relative to the current directory, the equivalent build directory is
+    added automatically (for headers created in the build directory). This enable using a build directory
+    or not (``top == out``).
+
+    This method will add a list of nodes read by :py:func:`waflib.Tools.ccroot.to_incnodes` in ``tg.env.INCPATHS``,
+    and the list of include paths in ``tg.env.INCLUDES``.
+    """
+
+    lst = self.to_incnodes(self.to_list(getattr(self, 'includes', [])) + self.env.INCLUDES)
+    self.includes_nodes = lst
+    self.env.INCPATHS = [x.abspath() for x in lst]

@@ -74,7 +74,7 @@ class cpuc(Task.Task):
 
         params = {
             'pch': '#include <%s>\n' % self.generator.pchstop if self.generator.pchstop else '',
-            'source': source,
+            'source': self.generator.kernel_source_path,
             'kernels': '\n'.join(kernels)
         }
 
@@ -124,7 +124,7 @@ def build_cpu_kernels(task_gen):
 
 @feature('bugengine:preprocess')
 def create_cpu_kernels(task_gen):
-    for kernel, kernel_source, kernel_ast in task_gen.kernels:
+    for kernel, kernel_source, kernel_path, kernel_ast in task_gen.kernels:
         kernel_gens = {}
         for env in task_gen.bld.multiarch_envs:
             for kernel_type, toolchain in env.KERNEL_TOOLCHAINS:
@@ -143,6 +143,7 @@ def create_cpu_kernels(task_gen):
                         safe_target_name=kernel_target.replace('.', '_').replace('-', '_'),
                         variant_name=variant,
                         kernel=kernel,
+                        kernel_source_path=kernel_source.path_from(kernel_path),
                         features=[
                             'cxx', task_gen.bld.env.STATIC and 'cxxobjects' or 'cxxshlib', 'bugengine:cxx',
                             'bugengine:kernel', 'bugengine:cpu:kernel_create'
@@ -154,7 +155,7 @@ def create_cpu_kernels(task_gen):
                             'BE_KERNEL_TARGET=%s' % kernel_type,
                             'BE_KERNEL_ARCH=%s' % variant
                         ],
-                        includes=tgen.includes,
+                        includes=tgen.includes + [kernel_path],
                         kernel_source=kernel_ast,
                         source_nodes=tgen.source_nodes,
                         use=tgen.use + [env.ENV_PREFIX % 'plugin.compute.cpu'] + ([variant] if variant else []),

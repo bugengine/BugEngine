@@ -368,7 +368,7 @@ class vscode(Build.BuildContext):
 @feature('bugengine:preprocess')
 def create_vscode_kernels(task_gen):
     if 'vscode' in task_gen.env.PROJECTS:
-        for kernel, kernel_source, kernel_ast in task_gen.kernels:
+        for kernel, kernel_source, kernel_path, kernel_ast in task_gen.kernels:
             kernel_type = 'parse'
             env = task_gen.env
             kernel_env = env

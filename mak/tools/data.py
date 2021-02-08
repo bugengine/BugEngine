@@ -1,11 +1,10 @@
 #!/usr/bin/env python
 # encoding: utf-8
 
-from waflib import Task
+from waflib import Task, Errors
 from waflib.TaskGen import extension, feature, before_method, after_method
 import os
 import sys
-from waflib import Task
 try:
     import cPickle
 except ImportError:
@@ -23,7 +22,8 @@ ${PCH_HEADER:PCH}
 --module ${PLUGIN}
 --root ${ROOT_ALIAS}
 --tmp ${TMPDIR}
-${SRC[0].path_from(bld.bldnode)}
+${SRC[0].abspath()}
+${LOCAL_INCLUDE}
 ${TGT[0].abspath()}
 ${TGT[1].abspath()}
 ${TGT[2].abspath()}
@@ -84,6 +84,12 @@ def datagen(self, node):
     outs.append(out_node.change_ext('.doc'))
     outs.append(out_node.change_ext('.namespaces'))
     tsk = self.create_task('datagen', node, outs)
+    for include_node in self.includes:
+        if node.is_child_of(include_node):
+            tsk.env.LOCAL_INCLUDE = node.path_from(include_node)
+            break
+    else:
+        raise Errors.WafError('unable to find include root for node %s' % node)
     tsk.env.DDF = self.bld.bugenginenode.find_node('mak/tools/bin/ddf.py').abspath()
     tsk.env.MACROS_IGNORE = self.bld.bugenginenode.find_node('mak/libs/cpp/macros_ignore').abspath()
     tsk.env.TMPDIR = self.bld.bldnode.parent.parent.abspath()

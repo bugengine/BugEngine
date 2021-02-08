@@ -13,7 +13,7 @@ except ImportError:
         from io import StringIO
 
 option_decl = OptionParser()
-option_decl.set_usage('ddf.py [options] input out_def out_instances out_doc out_namespaces')
+option_decl.set_usage('ddf.py [options] input include out_def out_instances out_doc out_namespaces')
 option_decl.add_option(
     "-d", dest="macro_file", action="append", help="Add the content of <macrofile> to the macros, one macro per line"
 )
@@ -29,7 +29,7 @@ if __name__ == '__main__':
     if not args:
         option_decl.print_help()
         sys.exit(1)
-    elif len(args) != 5:
+    elif len(args) != 6:
         option_decl.print_help()
         sys.exit(1)
     else:
@@ -44,14 +44,14 @@ if __name__ == '__main__':
             if options.pch:
                 classes.write('#include <%s>\n' % options.pch)
                 instances.write('#include <%s>\n' % options.pch)
-            result.dump(classes, instances, args[0])
-            with open(args[1], 'w') as c:
+            result.dump(classes, instances, args[1])
+            with open(args[2], 'w') as c:
                 c.write(classes.getvalue())
-            with open(args[2], 'w') as i:
+            with open(args[3], 'w') as i:
                 i.write(instances.getvalue())
-            with open(args[3], 'w') as d:
+            with open(args[4], 'w') as d:
                 d.write(docs.getvalue())
-            with open(args[4], 'wb') as namespace_file:
+            with open(args[5], 'wb') as namespace_file:
                 result.write_namespaces(namespace_file)
             sys.exit(result.error_count)
         except Exception as e:

@@ -55,7 +55,7 @@ class embed_cl(Task.Task):
 
 @feature('bugengine:preprocess')
 def create_cl_kernels(task_gen):
-    for kernel, kernel_source, kernel_ast in task_gen.kernels:
+    for kernel, kernel_source, kernel_path, kernel_ast in task_gen.kernels:
         kernel_gens = []
         kernel_target = '.'.join([task_gen.parent, '.'.join(kernel), 'cl'])
         for env in task_gen.bld.multiarch_envs:

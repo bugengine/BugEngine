@@ -48,6 +48,7 @@ def preprocess(build_context, name, path, root_namespace, plugin_name, extra_fea
     pp_env.PLUGIN = plugin_name.replace('.', '_')
 
     preprocess_sources = []
+    includes = [build_context.bldnode.make_node(name + '.pp')]
     if build_context.env.PROJECTS:
         globs = ['nothing']
     else:
@@ -55,19 +56,23 @@ def preprocess(build_context, name, path, root_namespace, plugin_name, extra_fea
     for source_node in source_nodes:
         preprocess_sources += source_node.ant_glob(globs)
 
-    api = source_node.find_node('api')
-    include = source_node.find_node('include')
-    pchstop = source_node.find_node('api/bugengine/%s/stdafx.h' % name)
+        include = source_node.find_node('api')
+        if include is not None:
+            includes.append(include)
+        include = source_node.find_node('include')
+        if include is not None:
+            includes.append(include)
+    pchstop = source_nodes[0].find_node('api/bugengine/%s/stdafx.h' % name)
     if pchstop:
-        pchstop = pchstop.path_from(api)
+        pchstop = pchstop.path_from(source_nodes[0].find_node('api'))
     else:
-        pchstop = source_node.find_node('api/%s/stdafx.h' % name)
+        pchstop = source_nodes[0].find_node('api/%s/stdafx.h' % name)
         if pchstop:
-            pchstop = pchstop.path_from(api)
+            pchstop = pchstop.path_from(source_nodes[0].find_node('api'))
         else:
-            pchstop = source_node.find_node('include/stdafx.h')
+            pchstop = source_nodes[0].find_node('include/stdafx.h')
             if pchstop:
-                pchstop = pchstop.path_from(include)
+                pchstop = pchstop.path_from(source_nodes[0].find_node('include'))
 
     preprocess = build_context(
         env=pp_env,
@@ -77,6 +82,7 @@ def preprocess(build_context, name, path, root_namespace, plugin_name, extra_fea
         pchstop=pchstop,
         source=preprocess_sources,
         kernels=[],
+        includes=includes,
         source_nodes=source_nodes,
         root_namespace=root_namespace
     )
@@ -89,7 +95,7 @@ def preprocess(build_context, name, path, root_namespace, plugin_name, extra_fea
                 kernel_name = re.split('[\\\\/]', kernel_name)
                 preprocess.kernels.append(
                     (
-                        kernel_name, kernel,
+                        kernel_name, kernel, kernelspath,
                         preprocess.make_bld_node('src/kernels', None, '%s.ast' % (os.path.join(*kernel_name)))
                     )
                 )
@@ -128,6 +134,7 @@ def module(
         source_list = []
     if not build_context.env.PROJECTS:
         preprocess = build_context.get_tgen_by_name('%s.pp' % name)
+        includes += preprocess.includes
     else:
         preprocess = None
 
@@ -158,8 +165,7 @@ def module(
             'BE_PROJECTNAME=%s' % name
         ] + extra_defines,
         export_defines=extra_public_defines[:],
-        includes=extra_includes + includes + api +
-        [build_context.bugenginenode, build_context.srcnode, build_context.bldnode],
+        includes=extra_includes + includes + api + source_nodes + [build_context.srcnode],
         export_includes=extra_public_includes + api,
     )
     if module_path is not None:
