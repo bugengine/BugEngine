@@ -41,10 +41,11 @@
 
 extern int yylex();
 
-static int yyerror(::BugEngine::RTTI::AST::ParseContext* context, const char *msg)
+static int yyerror(::BugEngine::RTTI::Parse::ParseContext* context, const char *msg)
 {
     using namespace BugEngine::RTTI::AST;
-    context->errors.push_back(Message(context->location,
+    using namespace BugEngine::RTTI::Parse;
+    context->errors.push_back(Message(weak<const Node>(),
                                       Message::MessageType("%s at line %d (%d:%d)")
                                                          | msg
                                                          | (context->location.line+1)
@@ -76,7 +77,7 @@ static int yyerror(::BugEngine::RTTI::AST::ParseContext* context, const char *ms
 %token VAL_BOOLEAN VAL_STRING VAL_INTEGER VAL_FLOAT VAL_FILENAME
 %token TOK_ID
 %token END 0 "end of file"
-%parse-param { BugEngine::RTTI::AST::ParseContext* context }
+%parse-param { BugEngine::RTTI::Parse::ParseContext* context }
 
 %start start
 
@@ -96,12 +97,13 @@ static int yyerror(::BugEngine::RTTI::AST::ParseContext* context, const char *ms
 %type   <value_list>    value_list
 
 %destructor { free($$.value); }                         VAL_STRING VAL_FILENAME TOK_ID fullname
-%destructor { $$.value->~Parameter(); free($$.value); } param
+%destructor { $$.value->~ref(); free($$.value); }       param
 %destructor { $$.value->~ref(); free($$.value); }       object
 %destructor { $$.value->~vector(); free($$.value); }    value_list param_list
 
 %{
 using namespace BugEngine::RTTI::AST;
+using namespace BugEngine::RTTI::Parse;
 %}
 
 %%
@@ -115,7 +117,6 @@ value:
         {
             $$.value = reinterpret_cast< ref<Node>* >(malloc(sizeof(*$$.value)));
             new ($$.value) ref<Node>(ref<Bool>::create(*context->arena,
-                                                       $1.location,
                                                        $1.value));
             $$.location = $1.location;
         }
@@ -124,7 +125,6 @@ value:
         {
             $$.value = reinterpret_cast< ref<Node>* >(malloc(sizeof(*$$.value)));
             new ($$.value) ref<Node>(ref<String>::create(*context->arena,
-                                                         $1.location,
                                                          $1.value));
             $$.location = $1.location;
             free($1.value);
@@ -134,7 +134,6 @@ value:
         {
             $$.value = reinterpret_cast< ref<Node>* >(malloc(sizeof(*$$.value)));
             new ($$.value) ref<Node>(ref<Integer>::create(*context->arena,
-                                                          $1.location,
                                                           $1.value));
             $$.location = $1.location;
         }
@@ -143,7 +142,6 @@ value:
         {
             $$.value = reinterpret_cast< ref<Node>* >(malloc(sizeof(*$$.value)));
             new ($$.value) ref<Node>(ref<Int2>::create(*context->arena,
-                                                       $2.location,
                                                        BugEngine::make_bigint2($2.value, $4.value)));
             $$.location = $1.location;
         }
@@ -152,7 +150,6 @@ value:
         {
             $$.value = reinterpret_cast< ref<Node>* >(malloc(sizeof(*$$.value)));
             new ($$.value) ref<Node>(ref<Int3>::create(*context->arena,
-                                                       $2.location,
                                                        BugEngine::make_bigint3($2.value, $4.value, $6.value)));
             $$.location = $1.location;
         }
@@ -161,7 +158,6 @@ value:
         {
             $$.value = reinterpret_cast< ref<Node>* >(malloc(sizeof(*$$.value)));
             new ($$.value) ref<Node>(ref<Int4>::create(*context->arena,
-                                                       $2.location,
                                                        BugEngine::make_bigint4($2.value, $4.value,
                                                                                $6.value, $8.value)));
             $$.location = $1.location;
@@ -171,7 +167,6 @@ value:
         {
             $$.value = reinterpret_cast< ref<Node>* >(malloc(sizeof(*$$.value)));
             new ($$.value) ref<Node>(ref<Float>::create(*context->arena,
-                                                        $1.location,
                                                         $1.value));
             $$.location = $1.location;
         }
@@ -180,7 +175,6 @@ value:
         {
             $$.value = reinterpret_cast< ref<Node>* >(malloc(sizeof(*$$.value)));
             new ($$.value) ref<Node>(ref<Float2>::create(*context->arena,
-                                                         $1.location,
                                                          BugEngine::make_float2($2.value, $4.value)));
             $$.location = $1.location;
         }
@@ -189,7 +183,6 @@ value:
         {
             $$.value = reinterpret_cast< ref<Node>* >(malloc(sizeof(*$$.value)));
             new ($$.value) ref<Node>(ref<Float3>::create(*context->arena,
-                                                         $1.location,
                                                          BugEngine::make_float3($2.value, $4.value, $6.value)));
             $$.location = $1.location;
         }
@@ -198,7 +191,6 @@ value:
         {
             $$.value = reinterpret_cast< ref<Node>* >(malloc(sizeof(*$$.value)));
             new ($$.value) ref<Node>(ref<Float4>::create(*context->arena,
-                                                         $1.location,
                                                          BugEngine::make_float4($2.value, $4.value,
                                                                                 $6.value, $8.value)));
             $$.location = $1.location;
@@ -208,7 +200,6 @@ value:
         {
             $$.value = reinterpret_cast< ref<Node>* >(malloc(sizeof(*$$.value)));
             new ($$.value) ref<Node>(ref<FileName>::create(*context->arena,
-                                                           $1.location,
                                                            BugEngine::ifilename($1.value)));
             $$.location = $1.location;
             free($1.value);
@@ -218,7 +209,6 @@ value:
         {
             $$.value = reinterpret_cast< ref<Node>* >(malloc(sizeof(*$$.value)));
             new ($$.value) ref<Node>(ref<Reference>::create(*context->arena,
-                                                            $1.location,
                                                             $1.value));
             $$.location = $1.location;
             free($1.value);
@@ -233,7 +223,6 @@ value:
         {
             $$.value = reinterpret_cast< ref<Node>* >(malloc(sizeof(*$$.value)));
             new ($$.value) ref<Node>(ref<Array>::create(*context->arena,
-                                                        $2.location,
                                                         *$2.value));
             $$.location = $2.location;
             $2.value->~vector();
@@ -269,21 +258,21 @@ object:
         {
             if ($3.value->size() >= 2)
             {
-                for (minitl::vector<Parameter>::iterator it = $3.value->begin();
+                for (minitl::vector< ref< Parameter > >::iterator it = $3.value->begin();
                      it != $3.value->end() - 1;
                      ++it)
                 {
-                    for (minitl::vector<Parameter>::iterator it2 = it + 1;
+                    for (minitl::vector< ref< Parameter > >::iterator it2 = it + 1;
                          it2 != $3.value->end();
                          /*nothing*/)
                     {
-                        if (it->name == it2->name)
+                        if ((*it)->name() == (*it2)->name())
                         {
-                            context->errors.push_back(Message(it2->location,
+                            context->errors.push_back(Message(*it,
                                                               Message::MessageType("attribute %s specified several times")
-                                                                                 | it->name,
+                                                                                 | (*it)->name(),
                                                               BugEngine::logError));
-                            context->errors.push_back(Message(it->location,
+                            context->errors.push_back(Message(*it2,
                                                               Message::MessageType("  first defined here"),
                                                               BugEngine::logInfo));
                             it2 = $3.value->erase(it2);
@@ -296,11 +285,9 @@ object:
                 }
             }
             ref<Reference> name = ref<Reference>::create(*context->arena,
-                                                         $1.location,
                                                          BugEngine::inamespace($1.value));
             $$.value = reinterpret_cast< ref<Node>* >(malloc(sizeof(*$$.value)));
             new ($$.value) ref<Node>(ref<Object>::create(*context->arena,
-                                                         $2.location,
                                                          name,
                                                          *$3.value));
             $3.value->~vector();
@@ -337,8 +324,8 @@ value_list:
 param_list:
         /* empty */
         {
-            $$.value = reinterpret_cast< minitl::vector<Parameter>* >(malloc(sizeof(*$$.value)));
-            new ($$.value) minitl::vector<Parameter>(*context->arena);
+            $$.value = reinterpret_cast< minitl::vector< ref<Parameter> >* >(malloc(sizeof(*$$.value)));
+            new ($$.value) minitl::vector< ref<Parameter> >(*context->arena);
         }
     |
         param_list
@@ -347,7 +334,7 @@ param_list:
             $$.location = $2.location;
             $$.value = $1.value;
             $$.value->push_back(*$2.value);
-            $2.value->~Parameter();
+            $2.value->~ref();
             free($2.value);
         }
     ;
@@ -356,11 +343,8 @@ param:
         TOK_ID '=' value ';'
         {
             $$.location = $1.location;
-            $$.value = reinterpret_cast<Parameter*>(malloc(sizeof(*$$.value)));
-            new ($$.value) Parameter;
-            $$.value->location = $1.location;
-            $$.value->name = BugEngine::istring($1.value);
-            $$.value->value = *$3.value;
+            $$.value = reinterpret_cast< ref<Parameter>* >(malloc(sizeof(*$$.value)));
+            new ($$.value) ref<Parameter>(ref<Parameter>::create(*context->arena, BugEngine::istring($1.value), *$3.value));
             $3.value->~ref();
             free($3.value);
             free($1.value);

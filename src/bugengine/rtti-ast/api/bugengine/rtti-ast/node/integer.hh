@@ -19,7 +19,7 @@ protected:
     virtual void doEval(const Type& expectedType, Value& result) const override;
 
 public:
-    Integer(const ParseLocation& location, i64 value);
+    Integer(i64 value);
     ~Integer();
 };
 

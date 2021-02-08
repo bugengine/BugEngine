@@ -6,7 +6,7 @@
 
 namespace BugEngine { namespace RTTI { namespace AST {
 
-Bool::Bool(const ParseLocation& location, bool value) : Node(location), m_value(value)
+Bool::Bool(bool value) : Node(), m_value(value)
 {
     be_forceuse(m_value);
 }

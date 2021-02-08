@@ -62,11 +62,12 @@ static double strToDouble(const char *text, size_t /*l*/)
 
 static void update (int num)
 {
-    ::BugEngine::RTTI::AST::g_parseContext->location.update(num);
+    ::BugEngine::RTTI::Parse::g_parseContext->location.update(num);
 }
+
 static void newline()
 {
-    ::BugEngine::RTTI::AST::g_parseContext->location.newline();
+    ::BugEngine::RTTI::Parse::g_parseContext->location.newline();
 }
 
 extern "C" int be_value_wrap()
@@ -76,7 +77,7 @@ extern "C" int be_value_wrap()
 
 #define YY_INPUT(buf,result,max_size)                                               \
         {                                                                           \
-            using namespace ::BugEngine::RTTI::AST;                              \
+            using namespace ::BugEngine::RTTI::Parse;                               \
             result = max_size > g_parseContext->bufferEnd - g_parseContext->buffer  \
                 ? g_parseContext->bufferEnd - g_parseContext->buffer                \
                 : max_size;                                                         \
@@ -102,39 +103,39 @@ ID              [A-Za-z_][0-9A-Za-z_<>]*
 
 true                                            { update(be_value_leng);
                                                   yylval.bValue.value = true;
-                                                  yylval.bValue.location = ::BugEngine::RTTI::AST::g_parseContext->location;
+                                                  yylval.bValue.location = ::BugEngine::RTTI::Parse::g_parseContext->location;
                                                   return VAL_BOOLEAN; }
 false                                           { update(be_value_leng);
                                                   yylval.bValue.value = false;
-                                                  yylval.bValue.location = ::BugEngine::RTTI::AST::g_parseContext->location;
+                                                  yylval.bValue.location = ::BugEngine::RTTI::Parse::g_parseContext->location;
                                                   return VAL_BOOLEAN; }
 {ID}                                            { update(be_value_leng);
                                                   yylval.sValue.value = be_strdup(be_value_text);
-                                                  yylval.sValue.location = ::BugEngine::RTTI::AST::g_parseContext->location;
+                                                  yylval.sValue.location = ::BugEngine::RTTI::Parse::g_parseContext->location;
                                                   return TOK_ID; }
 \"[^\r\n\"]*\"                                  { update(be_value_leng);
                                                   yylval.sValue.value = be_strdup(be_value_text+1);
                                                   yylval.sValue.value[be_value_leng-2] = 0;
-                                                  yylval.sValue.location = ::BugEngine::RTTI::AST::g_parseContext->location;
+                                                  yylval.sValue.location = ::BugEngine::RTTI::Parse::g_parseContext->location;
                                                   return VAL_STRING; }
 @\"[^\r\n\"]*\"                                 { update(be_value_leng);
                                                   yylval.sValue.value = be_strdup(be_value_text+2);
-                                                  yylval.sValue.location = ::BugEngine::RTTI::AST::g_parseContext->location;
+                                                  yylval.sValue.location = ::BugEngine::RTTI::Parse::g_parseContext->location;
                                                   return VAL_FILENAME; }
 -?[0-9]+                                        { update(be_value_leng);
                                                   yylval.iValue.value = strToInteger(be_value_text, be_value_leng);
-                                                  yylval.iValue.location = ::BugEngine::RTTI::AST::g_parseContext->location;
+                                                  yylval.iValue.location = ::BugEngine::RTTI::Parse::g_parseContext->location;
                                                   return VAL_INTEGER; }
 {DIGITS}("."{DIGITS}?)?([eE]{SIGN}?{DIGITS})?   { update(be_value_leng);
                                                   yylval.fValue.value = strToDouble(be_value_text, be_value_leng);
-                                                  yylval.fValue.location = ::BugEngine::RTTI::AST::g_parseContext->location;
+                                                  yylval.fValue.location = ::BugEngine::RTTI::Parse::g_parseContext->location;
                                                   return VAL_FLOAT; }
 "\n"                                            { (void)&yyinput; newline(); }
 [ \r\t]+                                        { update(be_value_leng); }
 \#[^\n]*\n                                      { update(be_value_leng); }
 .                                               { update(be_value_leng);
                                                   yylval.cValue.value = *be_value_text;
-                                                  yylval.cValue.location = ::BugEngine::RTTI::AST::g_parseContext->location;
+                                                  yylval.cValue.location = ::BugEngine::RTTI::Parse::g_parseContext->location;
                                                   return *be_value_text; }
 
 %%

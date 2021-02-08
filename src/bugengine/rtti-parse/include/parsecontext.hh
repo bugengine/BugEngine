@@ -8,51 +8,52 @@
 #include <bugengine/rtti-ast/dbcontext.hh>
 #include <bugengine/rtti-ast/node/node.hh>
 #include <bugengine/rtti-ast/node/object.hh>
+#include <bugengine/rtti-parse/location.script.hh>
 
 template < typename T >
 struct ParseResult
 {
-    BugEngine::RTTI::AST::ParseLocation location;
-    T                                   value;
+    BugEngine::RTTI::Parse::Location location;
+    T                                value;
 };
 
 union YYSTYPE
 {
-    ParseResult< bool >                                                 bValue;
-    ParseResult< i64 >                                                  iValue;
-    ParseResult< double >                                               fValue;
-    ParseResult< char >                                                 cValue;
-    ParseResult< char* >                                                sValue;
-    ParseResult< ref< BugEngine::RTTI::AST::Node >* >                   value;
-    ParseResult< BugEngine::RTTI::AST::Parameter* >                     param;
-    ParseResult< minitl::vector< BugEngine::RTTI::AST::Parameter >* >   param_list;
-    ParseResult< minitl::vector< ref< BugEngine::RTTI::AST::Node > >* > value_list;
+    ParseResult< bool >                                                      bValue;
+    ParseResult< i64 >                                                       iValue;
+    ParseResult< double >                                                    fValue;
+    ParseResult< char >                                                      cValue;
+    ParseResult< char* >                                                     sValue;
+    ParseResult< ref< BugEngine::RTTI::AST::Node >* >                        value;
+    ParseResult< ref< BugEngine::RTTI::AST::Parameter >* >                   param;
+    ParseResult< minitl::vector< ref< BugEngine::RTTI::AST::Parameter > >* > param_list;
+    ParseResult< minitl::vector< ref< BugEngine::RTTI::AST::Node > >* >      value_list;
 };
 #define YYSTYPE_IS_DECLARED 1
 #define YYSTYPE_IS_TRIVIAL  1
 
-namespace BugEngine { namespace RTTI { namespace AST {
+namespace BugEngine { namespace RTTI { namespace Parse {
 
 struct ParseContext
 {
     minitl::Allocator* arena;
-    ref< Node >        result;
+    ref< AST::Node >   result;
     const char*        bufferStart;
     const char*        bufferEnd;
     const char*        buffer;
-    MessageList&       errors;
-    ParseLocation      location;
+    AST::MessageList&  errors;
+    Location           location;
 
     ParseContext(minitl::Allocator& arena, const char* bufferStart, const char* bufferEnd,
-                 MessageList& errors, u32 lineStart = 0, u32 columnStart = 0);
+                 AST::MessageList& errors, u32 lineStart = 0, u32 columnStart = 0);
     ~ParseContext();
 };
 
 extern ParseContext* g_parseContext;
 
-}}}  // namespace BugEngine::RTTI::AST
+}}}  // namespace BugEngine::RTTI::Parse
 
-extern "C" int be_value_parse(BugEngine::RTTI::AST::ParseContext* context);
+extern "C" int be_value_parse(BugEngine::RTTI::Parse::ParseContext* context);
 extern "C" int be_value_lex_destroy();
 
 /**************************************************************************************************/

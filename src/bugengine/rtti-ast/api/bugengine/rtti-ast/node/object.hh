@@ -12,18 +12,31 @@ namespace BugEngine { namespace RTTI { namespace AST {
 
 class Reference;
 
-struct Parameter
+class be_api(RTTI_AST) Parameter : public Node
 {
-    ParseLocation location;
-    istring       name;
-    ref< Node >   value;
+private:
+    istring     m_name;
+    ref< Node > m_value;
+
+public:
+    Parameter(istring name, ref< Node > value);
+    ~Parameter();
+
+    virtual bool resolve(DbContext & context) override;
+    virtual void doEval(const Type& expectedType, Value& result) const override;
+    virtual bool isCompatible(const Type& expectedType) const override;
+
+    const istring& name() const
+    {
+        return m_name;
+    }
 };
 
 class be_api(RTTI_AST) Object : public Node
 {
 private:
-    const ref< Reference >            m_className;
-    const minitl::vector< Parameter > m_parameters;
+    const ref< Reference >                   m_className;
+    const minitl::vector< ref< Parameter > > m_parameters;
 
 protected:
     virtual bool resolve(DbContext & context) override;
@@ -31,8 +44,7 @@ protected:
     virtual void doEval(const Type& expectedType, Value& result) const override;
 
 public:
-    Object(const ParseLocation& location, ref< Reference > className,
-           const minitl::vector< Parameter >& parameters);
+    Object(ref< Reference > className, const minitl::vector< ref< Parameter > >& parameters);
     ~Object();
     Type getType() const;
 };

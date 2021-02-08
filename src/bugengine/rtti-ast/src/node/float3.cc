@@ -6,7 +6,7 @@
 
 namespace BugEngine { namespace RTTI { namespace AST {
 
-Float3::Float3(const ParseLocation& location, float3 value) : Node(location), m_value(value)
+Float3::Float3(float3 value) : Node(), m_value(value)
 {
     be_forceuse(m_value);
 }

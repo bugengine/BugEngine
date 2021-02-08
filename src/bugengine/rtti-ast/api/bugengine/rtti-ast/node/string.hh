@@ -19,7 +19,7 @@ protected:
     virtual void doEval(const Type& expectedType, Value& result) const override;
 
 public:
-    String(const ParseLocation& location, const char* value);
+    String(const char* value);
     ~String();
 };
 

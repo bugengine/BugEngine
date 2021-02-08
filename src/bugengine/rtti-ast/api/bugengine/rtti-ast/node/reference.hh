@@ -25,7 +25,7 @@ protected:
     virtual void doEval(const Type& expectedType, Value& result) const override;
 
 public:
-    Reference(const ParseLocation& location, const inamespace& name);
+    Reference(const inamespace& name);
     ~Reference();
 };
 

@@ -4,13 +4,13 @@
 #include <bugengine/rtti-ast/stdafx.h>
 #include <parsecontext.hh>
 
-namespace BugEngine { namespace RTTI { namespace AST {
+namespace BugEngine { namespace RTTI { namespace Parse {
 
 ParseContext* g_parseContext;
 static i_u32  s_useCount;
 
 ParseContext::ParseContext(minitl::Allocator& allocator, const char* bufferStart,
-                           const char* bufferEnd, MessageList& errors, u32 lineStart,
+                           const char* bufferEnd, AST::MessageList& errors, u32 lineStart,
                            u32 columnStart)
     : arena(&allocator)
     , result()
@@ -36,4 +36,4 @@ ParseContext::~ParseContext()
     g_parseContext = 0;
 }
 
-}}}  // namespace BugEngine::RTTI::AST
+}}}  // namespace BugEngine::RTTI::Parse

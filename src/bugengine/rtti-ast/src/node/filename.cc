@@ -8,10 +8,7 @@
 
 namespace BugEngine { namespace RTTI { namespace AST {
 
-FileName::FileName(const ParseLocation& location, const ifilename& value)
-    : Node(location)
-    , m_value(value)
-    , m_file()
+FileName::FileName(const ifilename& value) : Node(), m_value(value), m_file()
 {
     be_forceuse(m_value);
 }
@@ -25,7 +22,7 @@ bool FileName::resolve(DbContext& context)
     m_file = context.rootFolder->openFile(m_value);
     if(!m_file)
     {
-        context.error(m_location,
+        context.error(this,
                       Message::MessageType("could not open file: %s: no such file or directory")
                           | m_value);
     }

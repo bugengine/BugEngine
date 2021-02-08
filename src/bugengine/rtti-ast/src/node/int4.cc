@@ -6,7 +6,7 @@
 
 namespace BugEngine { namespace RTTI { namespace AST {
 
-Int4::Int4(const ParseLocation& location, bigint4 value) : Node(location), m_value(value)
+Int4::Int4(bigint4 value) : Node(), m_value(value)
 {
     be_forceuse(m_value);
 }

@@ -12,9 +12,9 @@ ref< AST::Node > parseValue(minitl::Allocator& arena, AST::MessageList& errors,
                             const char* strBegin, const char* strEnd, u32 initialLine,
                             u32 initialColumn)
 {
-    AST::ParseContext context(arena, strBegin, strEnd ? strEnd : (strBegin + strlen(strBegin)),
-                              errors, initialLine, initialColumn);
-    int               result = be_value_parse(&context);
+    Parse::ParseContext context(arena, strBegin, strEnd ? strEnd : (strBegin + strlen(strBegin)),
+                                errors, initialLine, initialColumn);
+    int                 result = be_value_parse(&context);
     be_value_lex_destroy();
     if(result != 0 || !errors.empty())
     {

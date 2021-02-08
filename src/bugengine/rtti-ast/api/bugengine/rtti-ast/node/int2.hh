@@ -20,7 +20,7 @@ protected:
     virtual void doEval(const Type& expectedType, Value& result) const override;
 
 public:
-    Int2(const ParseLocation& location, bigint2 value);
+    Int2(bigint2 value);
     ~Int2();
 };
 

@@ -13,7 +13,7 @@ static const istring s_name("name");
 
 Package::Package(const ifilename& filename)
     : m_filename(filename)
-    , m_context(Arena::packageBuilder(), filename, ref< Folder >())
+    , m_context(Arena::packageBuilder(), ref< Folder >())
     , m_plugins(Arena::packageBuilder())
     , m_nodes(Arena::packageBuilder())
     , m_values(Arena::packageBuilder())

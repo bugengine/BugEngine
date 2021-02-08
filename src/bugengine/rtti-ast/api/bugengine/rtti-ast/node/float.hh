@@ -19,7 +19,7 @@ protected:
     virtual void doEval(const Type& expectedType, Value& result) const override;
 
 public:
-    Float(const ParseLocation& location, double value);
+    Float(double value);
     ~Float();
 };
 

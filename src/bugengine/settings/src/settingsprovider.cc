@@ -27,11 +27,9 @@ void SettingsProvider::addSetting(minitl::hashmap< istring, SettingsList >& cont
         value));
 }
 
-SettingsProvider::SettingsProvider(const ifilename&                                settingsOrigin,
-                                   const minitl::hashmap< istring, SettingsList >& initialSettings,
+SettingsProvider::SettingsProvider(const minitl::hashmap< istring, SettingsList >& initialSettings,
                                    ref< Folder >                                   folder)
-    : m_filename(settingsOrigin)
-    , m_settings(Arena::general(), initialSettings)
+    : m_settings(Arena::general(), initialSettings)
     , m_folder(folder)
 {
     SettingsRegistration::getSettingsList().push_back(*this);
@@ -84,23 +82,17 @@ void SettingsProvider::apply(SettingsBase& settings) const
                 }
                 else
                 {
-                    RTTI::AST::DbContext context(Arena::stack(), m_filename, setting->second,
-                                                 m_folder);
+                    RTTI::AST::DbContext context(Arena::stack(), setting->second, m_folder);
                     setting->third->resolve(context);
                     RTTI::Value v = setting->third->eval(context, property->type);
                     if(!context.errorCount)
                     {
                         property->set(settingsValue, v);
                     }
-                    else
+                    for(RTTI::AST::MessageList::const_iterator message = context.messages.begin();
+                        message != context.messages.end(); ++message)
                     {
-                        for(RTTI::AST::MessageList::const_iterator message
-                            = context.messages.begin();
-                            message != context.messages.end(); ++message)
-                        {
-                            Logger::root()->log(message->severity, m_filename.str(),
-                                                message->location.line, message->message);
-                        }
+                        log(*message);
                     }
                 }
             }

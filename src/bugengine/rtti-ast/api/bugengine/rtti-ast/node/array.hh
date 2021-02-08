@@ -20,7 +20,7 @@ protected:
     virtual void doEval(const Type& expectedType, Value& result) const override;
 
 public:
-    Array(const ParseLocation& location, const minitl::vector< ref< Node > >& value);
+    Array(const minitl::vector< ref< Node > >& value);
     ~Array();
 };
 

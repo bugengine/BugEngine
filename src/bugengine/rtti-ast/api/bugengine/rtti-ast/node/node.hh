@@ -5,34 +5,26 @@
 #define BE_RTTI_AST_NODE_HH_
 /**************************************************************************************************/
 #include <bugengine/rtti-ast/stdafx.h>
-#include <bugengine/rtti-ast/location.hh>
 #include <bugengine/rtti/value.hh>
 
 namespace BugEngine { namespace RTTI { namespace AST {
 
 class Array;
+class Parameter;
 struct DbContext;
 
 class be_api(RTTI_AST) Node : public minitl::refcountable
 {
     friend class Array;
+    friend class Parameter;
 
 private:
     minitl::vector< minitl::tuple< const istring, RTTI::Value > > m_metadata;
+    mutable Value                                                 m_cache;
+    mutable bool                                                  m_cacheSet;
 
 protected:
-    ParseLocation m_location;
-
-private:
-    mutable Value m_cache;
-    mutable bool  m_cacheSet;
-
-protected:
-    Node(const ParseLocation& location)
-        : m_metadata(Arena::rtti())
-        , m_location(location)
-        , m_cache()
-        , m_cacheSet(false)
+    Node() : m_metadata(Arena::rtti()), m_cache(), m_cacheSet(false)
     {
     }
     virtual void doEval(const Type& expectedType, Value& result) const = 0;

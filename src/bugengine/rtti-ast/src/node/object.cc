@@ -10,9 +10,31 @@
 
 namespace BugEngine { namespace RTTI { namespace AST {
 
-Object::Object(const ParseLocation& location, ref< Reference > className,
-               const minitl::vector< Parameter >& parameters)
-    : Node(location)
+Parameter::Parameter(istring name, ref< Node > value) : m_name(name), m_value(value)
+{
+}
+
+Parameter::~Parameter()
+{
+}
+
+bool Parameter::resolve(DbContext& context)
+{
+    return m_value->resolve(context);
+}
+
+void Parameter::doEval(const Type& expectedType, Value& result) const
+{
+    m_value->doEval(expectedType, result);
+}
+
+bool Parameter::isCompatible(const Type& expectedType) const override
+{
+    return m_value->isCompatible(expectedType);
+}
+
+Object::Object(ref< Reference > className, const minitl::vector< ref< Parameter > >& parameters)
+    : Node()
     , m_className(className)
     , m_parameters(parameters)
 
@@ -26,10 +48,10 @@ Object::~Object()
 bool Object::resolve(DbContext& context)
 {
     bool result = m_className->resolve(context);
-    for(minitl::vector< Parameter >::const_iterator it = m_parameters.begin();
+    for(minitl::vector< ref< Parameter > >::const_iterator it = m_parameters.begin();
         it != m_parameters.end(); ++it)
     {
-        result &= it->value->resolve(context);
+        result &= (*it)->resolve(context);
     }
     return result;
 }

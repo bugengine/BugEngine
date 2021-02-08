@@ -9,9 +9,7 @@
 
 namespace BugEngine { namespace RTTI { namespace AST {
 
-Reference::Reference(const ParseLocation& location, const inamespace& name)
-    : Node(location)
-    , m_referenceName(name)
+Reference::Reference(const inamespace& name) : Node(), m_referenceName(name)
 {
 }
 

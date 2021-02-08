@@ -1,14 +1,14 @@
 /* BugEngine <bugengine.devel@gmail.com>
    see LICENSE for detail */
 
-#ifndef BE_RTTI_AST_LOCATION_HH_
-#define BE_RTTI_AST_LOCATION_HH_
+#ifndef BE_RTTI_PARSE_LOCATION_HH_
+#define BE_RTTI_PARSE_LOCATION_HH_
 /**************************************************************************************************/
-#include <bugengine/rtti-ast/stdafx.h>
+#include <bugengine/rtti-parse/stdafx.h>
 
-namespace BugEngine { namespace RTTI { namespace AST {
+namespace BugEngine { namespace RTTI { namespace Parse {
 
-struct ParseLocation
+struct Location
 {
     u32 line;
     u32 columnStart;
@@ -27,7 +27,7 @@ struct ParseLocation
     }
 };
 
-}}}  // namespace BugEngine::RTTI::AST
+}}}  // namespace BugEngine::RTTI::Parse
 
 /**************************************************************************************************/
 #endif

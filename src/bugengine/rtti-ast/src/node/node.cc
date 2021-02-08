@@ -22,7 +22,7 @@ void Node::eval(DbContext& context, const Type& expectedType, Value& result) con
     {
         if(!isCompatible(expectedType))
         {
-            context.error(m_location,
+            context.error(this,
                           Message::MessageType("type mismatch; expected %s") | expectedType.name());
         }
         else
@@ -40,7 +40,7 @@ Value Node::eval(DbContext& context, const Type& expectedType) const
     {
         if(!isCompatible(expectedType))
         {
-            context.error(m_location,
+            context.error(this,
                           Message::MessageType("type mismatch; expected %s") | expectedType.name());
         }
         else

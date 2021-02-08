@@ -6,9 +6,7 @@
 
 namespace BugEngine { namespace RTTI { namespace AST {
 
-String::String(const ParseLocation& location, const char* value)
-    : Node(location)
-    , m_value(Arena::script().strdup(value))
+String::String(const char* value) : Node(), m_value(Arena::script().strdup(value))
 {
 }
 

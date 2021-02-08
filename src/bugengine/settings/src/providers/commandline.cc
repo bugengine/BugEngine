@@ -74,12 +74,17 @@ CommandLineSettingsProvider::buildSettings(int argc, const char* argv[])
 
 CommandLineSettingsProvider::CommandLineSettingsProvider(int argc, const char* argv[],
                                                          ref< Folder > folder)
-    : SettingsProvider(ifilename("<command line>"), buildSettings(argc, argv), folder)
+    : SettingsProvider(buildSettings(argc, argv), folder)
 {
 }
 
 CommandLineSettingsProvider::~CommandLineSettingsProvider()
 {
+}
+
+void CommandLineSettingsProvider::log(const RTTI::AST::Message& message) const override
+{
+    Logger::root()->log(message.severity, "<command line>", 0, message.message);
 }
 
 }}  // namespace BugEngine::Settings

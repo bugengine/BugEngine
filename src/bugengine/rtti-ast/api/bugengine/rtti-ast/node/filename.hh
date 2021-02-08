@@ -22,7 +22,7 @@ protected:
     virtual void doEval(const Type& expectedType, Value& result) const override;
 
 public:
-    FileName(const ParseLocation& location, const ifilename& value);
+    FileName(const ifilename& value);
     ~FileName();
 };
 

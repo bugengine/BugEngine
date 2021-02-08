@@ -39,18 +39,16 @@ protected:
     typedef minitl::hashmap< istring, SettingsList > SettingsCategoryMap;
 
 private:
-    ifilename           m_filename;
     SettingsCategoryMap m_settings;
     ref< Folder >       m_folder;
 
 protected:
-    static void addSetting(SettingsCategoryMap & container, istring category, istring name,
-                           ref< RTTI::AST::Node > value);
-
-protected:
-    SettingsProvider(const ifilename& settingsOrigin, const SettingsCategoryMap& initialSettings,
-                     ref< Folder > folder);
+    SettingsProvider(const SettingsCategoryMap& initialSettings, ref< Folder > folder);
     virtual ~SettingsProvider();
+
+    static void  addSetting(SettingsCategoryMap & container, istring category, istring name,
+                            ref< RTTI::AST::Node > value);
+    virtual void log(const RTTI::AST::Message& message) const = 0;
 
 private:
     void apply(SettingsBase & settings) const;

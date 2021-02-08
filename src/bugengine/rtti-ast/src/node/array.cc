@@ -12,9 +12,7 @@ namespace BugEngine { namespace RTTI { namespace AST {
 
 static const istring value_type = istring("value_type");
 
-Array::Array(const ParseLocation& location, const minitl::vector< ref< Node > >& value)
-    : Node(location)
-    , m_value(value)
+Array::Array(const minitl::vector< ref< Node > >& value) : Node(), m_value(value)
 {
 }
 

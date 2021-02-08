@@ -19,7 +19,7 @@ protected:
     virtual void doEval(const Type& expectedType, Value& result) const override;
 
 public:
-    Bool(const ParseLocation& location, bool value);
+    Bool(bool value);
     ~Bool();
 };
 
