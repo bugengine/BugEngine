@@ -54,6 +54,7 @@ PyTypeObject PyBugClass::s_pyType = {{{0, 0}, 0},
                                      0,
                                      0,
                                      0,
+                                     0,
                                      0};
 
 PyObject* PyBugClass::stealValue(PyObject* owner, RTTI::Value& value)

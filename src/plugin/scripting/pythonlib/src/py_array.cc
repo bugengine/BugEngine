@@ -73,6 +73,7 @@ PyTypeObject PyBugArray::s_pyType = {{{0, 0}, 0},
                                      0,
                                      0,
                                      0,
+                                     0,
                                      0};
 
 PyObject* PyBugArray::stealValue(PyObject* owner, RTTI::Value& value)

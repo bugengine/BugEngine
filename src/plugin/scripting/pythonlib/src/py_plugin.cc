@@ -56,6 +56,7 @@ static PyTypeObject s_bugenginePluginType
        0,
        0,
        0,
+       0,
        0};
 
 PyObject* PyBugPlugin::create(PyTypeObject* type, PyObject* /*args*/, PyObject* /*kwds*/)

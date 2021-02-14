@@ -83,6 +83,7 @@ PyTypeObject PyBugObject::s_pyType = {{{0, 0}, 0},
                                       0,
                                       0,
                                       0,
+                                      0,
                                       0};
 
 typedef PyObject* (*CreateMethod)(PyObject* owner, RTTI::Value& value);

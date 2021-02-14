@@ -128,6 +128,7 @@ PyTypeObject PyBugEnum::s_pyType = {{{0, 0}, 0},
                                     0,
                                     0,
                                     0,
+                                    0,
                                     0};
 
 PyObject* PyBugEnum::stealValue(PyObject* owner, RTTI::Value& value)

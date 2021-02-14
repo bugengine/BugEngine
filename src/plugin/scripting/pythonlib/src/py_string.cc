@@ -72,6 +72,7 @@ PyTypeObject PyBugString< T >::s_pyType
        0,
        0,
        0,
+       0,
        0};
 
 template < typename T >

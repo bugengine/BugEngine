@@ -131,6 +131,7 @@ PyTypeObject PyBugNumber< T >::s_pyType
        0,
        0,
        0,
+       0,
        0};
 
 template < typename T >

@@ -1,10 +1,10 @@
 from py_bugengine import *
-import ctypes
 
-p=Plugin("sample.python")
+p = Plugin("sample.python")
 print(p.BugEngine.TestCases.Enum.Value1)
 print(p.BugEngine.TestCases.Enum.Value2)
 print(p.BugEngine.TestCases.Enum.Value3)
+
 
 def name(type):
     constness = int(type.constness) == 0 and 'const ' or ''
@@ -20,10 +20,7 @@ def name(type):
             ptr = 'ref'
         else:
             ptr = '???'
-        return '%s%s<%s%s>' % (constness,
-                               ptr,
-                               access,
-                               type.metaclass.name)
+        return '%s%s<%s%s>' % (constness, ptr, access, type.metaclass.name)
 
 
 def help(klass):
@@ -32,7 +29,9 @@ def help(klass):
             param_list = []
             for param in overload.params:
                 param_list.append((name(param.type), param.name))
-            print('  %s %s (%s)'%(name(overload.returnType), method.name, ', '.join(('%s %s'%p for p in param_list))))
+            print(
+                '  %s %s (%s)' % (name(overload.returnType), method.name, ', '.join(('%s %s' % p for p in param_list)))
+            )
 
     print('class %s' % klass.name)
     if klass.constructor:
@@ -50,6 +49,7 @@ def help(klass):
         print(' ', object.name)
         object = object.next
 
+
 if __name__ == '__main__':
     help(BugEngine.RTTI.Class.ClassType.metaclass)
     help(BugEngine.RTTI.Class)
@@ -60,4 +60,3 @@ if __name__ == '__main__':
     c = sample.TestCases.Class(y1=1, x1=3)
     c.doStuff(1, 2, True)
     print('%d - %d' % (c.x1, c.y1))
-

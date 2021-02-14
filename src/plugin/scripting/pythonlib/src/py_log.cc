@@ -58,6 +58,7 @@ PyTypeObject PyBugLog::s_pyType = {{{0, 0}, 0},
                                    0,
                                    0,
                                    0,
+                                   0,
                                    0};
 
 int PyBugLog::init(PyObject* self, PyObject* args, PyObject* kwds)

@@ -100,6 +100,7 @@ typedef int (*objobjproc)(PyObject*, PyObject*);
 typedef int (*coercion)(PyObject**, PyObject**);
 typedef PyObject* (*newfunc)(PyTypeObject*, PyObject*, PyObject*);
 typedef PyObject* (*allocfunc)(PyTypeObject*, Py_ssize_t);
+typedef PyObject* (*vectorcallfunc)(PyObject*, PyObject* const*, Py_ssize_t, PyObject*);
 
 typedef int (*PyObject_SetAttrStringType)(PyObject* o, const char* name, PyObject* value);
 typedef PyObject* (*PyObject_GetAttrStringType)(PyObject* o, const char* name);
@@ -405,6 +406,9 @@ struct PyTypeObject
 
     unsigned int tp_version_tag;
     destructor   tp_finalize;
+
+    /* Python 3.9 */
+    vectorcallfunc tp_vectorcall;
 };
 
 struct PyMethodDef

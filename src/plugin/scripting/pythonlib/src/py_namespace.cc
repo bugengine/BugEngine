@@ -58,6 +58,7 @@ PyTypeObject PyBugNamespace::s_pyType = {{{0, 0}, 0},
                                          0,
                                          0,
                                          0,
+                                         0,
                                          0};
 
 PyObject* PyBugNamespace::stealValue(PyObject* owner, RTTI::Value& value)

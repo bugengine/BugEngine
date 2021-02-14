@@ -57,6 +57,7 @@ PyTypeObject PyBoundMethod::s_pyType = {{{0, 0}, 0},
                                         0,
                                         0,
                                         0,
+                                        0,
                                         0};
 
 PyObject* PyBoundMethod::create(raw< const RTTI::Method > method, PyBugObject* value)
