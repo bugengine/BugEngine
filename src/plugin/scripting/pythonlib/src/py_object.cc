@@ -614,15 +614,15 @@ RTTI::ConversionCost PyBugObject::distance(PyObject* object, const RTTI::Type& d
     }
     else if(object->py_type == s_library->m_PyBool_Type)
     {
-        return RTTI::calculateConversion< bool >(desiredType);
+        return RTTI::ConversionCalculator< bool >::calculate(desiredType);
     }
     else if(object->py_type->tp_flags & Py_TPFLAGS_INT_SUBCLASS)
     {
-        return RTTI::calculateConversion< i32 >(desiredType);
+        return RTTI::ConversionCalculator< i32 >::calculate(desiredType);
     }
     else if(object->py_type->tp_flags & Py_TPFLAGS_LONG_SUBCLASS)
     {
-        return RTTI::calculateConversion< i64 >(desiredType);
+        return RTTI::ConversionCalculator< i64 >::calculate(desiredType);
     }
     else if(object->py_type->tp_flags & (Py_TPFLAGS_LIST_SUBCLASS | Py_TPFLAGS_TUPLE_SUBCLASS))
     {
@@ -695,7 +695,7 @@ RTTI::ConversionCost PyBugObject::distance(PyObject* object, const RTTI::Type& d
     }
     else if(object->py_type == s_library->m_PyFloat_Type)
     {
-        return RTTI::calculateConversion< float >(desiredType);
+        return RTTI::ConversionCalculator< float >::calculate(desiredType);
     }
     else
     {

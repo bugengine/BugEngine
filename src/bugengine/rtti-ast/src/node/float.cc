@@ -4,6 +4,8 @@
 #include <bugengine/rtti-ast/stdafx.h>
 #include <bugengine/rtti-ast/node/float.hh>
 
+#include <bugengine/rtti-ast/dbcontext.hh>
+
 namespace BugEngine { namespace RTTI { namespace AST {
 
 Float::Float(double value) : Node(), m_value(value)
@@ -15,14 +17,25 @@ Float::~Float()
 {
 }
 
-bool Float::isCompatible(const Type& expectedType) const
+ConversionCost Float::distance(const Type& type) const
 {
-    return be_type< float >().isA(expectedType) || be_type< double >().isA(expectedType);
+    return ConversionCalculator< double >::calculate(type);
+}
+
+bool Float::isCompatible(DbContext& context, const Type& expectedType) const
+{
+    if(distance(expectedType) >= ConversionCost::s_incompatible)
+    {
+        context.error(this,
+                      Message::MessageType("cannot cast float value to %s") | expectedType.name());
+        return false;
+    }
+    else
+        return true;
 }
 
 void Float::doEval(const RTTI::Type& expectedType, RTTI::Value& result) const
 {
-    be_assert(isCompatible(expectedType), "invalid conversion from float to %s" | expectedType);
     if(be_type< float >().isA(expectedType))
         result = RTTI::Value((float)m_value);
     else

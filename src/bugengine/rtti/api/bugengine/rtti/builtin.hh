@@ -9,6 +9,8 @@
 
 namespace BugEngine { namespace RTTI {
 
+struct Type;
+
 enum ClassIndex_Numeric
 {
     ClassIndex_bool   = 0,
@@ -32,6 +34,9 @@ enum ClassIndex_String
     ClassIndex_ipath      = 3,
     ClassIndex_text       = 4
 };
+
+const Type& getTypeFromIndex(ClassIndex_Numeric index);
+const Type& getTypeFromIndex(ClassIndex_String index);
 
 }}  // namespace BugEngine::RTTI
 

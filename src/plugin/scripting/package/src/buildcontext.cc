@@ -19,8 +19,7 @@ namespace BugEngine { namespace PackageBuilder {
 
 BuildContext::BuildContext(const ifilename& filename, const minitl::Allocator::Block< u8 >& buffer,
                            ref< Folder > folder)
-    : result(ref< Nodes::Package >::create(Arena::packageBuilder(), filename))
-    , folder(folder)
+    : result(ref< Nodes::Package >::create(Arena::packageBuilder(), filename, folder))
 {
     be_assert(s_useCount++ == 0, "non reentrant parser used by two threads");
     g_buffer              = &buffer;

@@ -9,7 +9,6 @@
 #include <bugengine/minitl/hash_map.hh>
 #include <bugengine/minitl/intrusive_list.hh>
 #include <bugengine/minitl/vector.hh>
-#include <bugengine/plugin.scripting.package/logger.hh>
 #include <bugengine/plugin/plugin.hh>
 #include <bugengine/rtti-ast/dbcontext.hh>
 #include <bugengine/rtti-ast/node/node.hh>
@@ -26,10 +25,9 @@ private:
     minitl::vector< ref< RTTI::AST::Node > >  m_nodes;
     minitl::vector< RTTI::Value >             m_values;
     RTTI::Value                               m_empty;
-    Logger                                    m_logger;
 
 public:
-    Package(const ifilename& filename);
+    Package(const ifilename& filename, ref< Folder > dataFolder);
     ~Package();
 
     void                   insertNode(const istring name, ref< RTTI::AST::Node > object);
@@ -39,18 +37,13 @@ public:
 
     void loadPlugin(inamespace plugin, inamespace name);
 
-    void binarySave() const;
-    void textSave() const;
-
     void createObjects(weak< Resource::ResourceManager > manager);
     void deleteObjects(weak< Resource::ResourceManager > manager);
     void diffFromPackage(weak< Package > previous, weak< Resource::ResourceManager > manager);
 
-    const ifilename& filename() const;
+    void resolve();
 
-    void info(u32 line, const char* message);
-    void warning(u32 line, const char* message);
-    void error(u32 line, const char* message);
+    const ifilename& filename() const;
 
     bool success() const;
 

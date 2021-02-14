@@ -5,7 +5,7 @@
 #define BE_RTTI_TYPEINFO_INL_
 /**************************************************************************************************/
 #include <bugengine/rtti/stdafx.h>
-#include <bugengine/rtti/conversion.inl>
+#include <bugengine/rtti/conversion.hh>
 #include <bugengine/rtti/typeinfo.hh>
 
 namespace BugEngine { namespace RTTI {

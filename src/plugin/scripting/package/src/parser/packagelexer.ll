@@ -118,6 +118,8 @@ extern "C" int be_package_wrap()
         update(be_package_leng);
         
         BEGIN(RTTIPARSE);
+        yylval.offset.line = g_packageLine;
+        yylval.offset.column = g_packageColumnAfter;
         yylval.offset.start = g_packageOffset;
         return *be_package_text;
     }

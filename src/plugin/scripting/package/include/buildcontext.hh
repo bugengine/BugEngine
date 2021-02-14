@@ -12,6 +12,8 @@
 
 struct FileOffset
 {
+    int line;
+    int column;
     int start;
     int end;
 };
@@ -30,7 +32,6 @@ namespace BugEngine { namespace PackageBuilder {
 struct BuildContext
 {
     ref< Nodes::Package > result;
-    ref< Folder >         folder;
 
     BuildContext(const ifilename& filename, const minitl::Allocator::Block< u8 >& buffer,
                  ref< Folder > folder);

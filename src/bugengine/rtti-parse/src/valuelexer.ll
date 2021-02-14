@@ -120,6 +120,7 @@ false                                           { update(be_value_leng);
                                                   return VAL_STRING; }
 @\"[^\r\n\"]*\"                                 { update(be_value_leng);
                                                   yylval.sValue.value = be_strdup(be_value_text+2);
+                                                  yylval.sValue.value[be_value_leng-3] = 0;
                                                   yylval.sValue.location = ::BugEngine::RTTI::Parse::g_parseContext->location;
                                                   return VAL_FILENAME; }
 -?[0-9]+                                        { update(be_value_leng);

@@ -73,42 +73,6 @@ public:
     static const ConversionCost s_variant;
 };
 
-template < typename T >
-ConversionCost calculateConversion(const Type& targetType);
-
-template <>
-be_api(RTTI) ConversionCost calculateConversion< u8 >(const Type& targetType);
-
-template <>
-be_api(RTTI) ConversionCost calculateConversion< i8 >(const Type& targetType);
-
-template <>
-be_api(RTTI) ConversionCost calculateConversion< u16 >(const Type& targetType);
-
-template <>
-be_api(RTTI) ConversionCost calculateConversion< i16 >(const Type& targetType);
-
-template <>
-be_api(RTTI) ConversionCost calculateConversion< u32 >(const Type& targetType);
-
-template <>
-be_api(RTTI) ConversionCost calculateConversion< i32 >(const Type& targetType);
-
-template <>
-be_api(RTTI) ConversionCost calculateConversion< u64 >(const Type& targetType);
-
-template <>
-be_api(RTTI) ConversionCost calculateConversion< i64 >(const Type& targetType);
-
-template <>
-be_api(RTTI) ConversionCost calculateConversion< bool >(const Type& targetType);
-
-template <>
-be_api(RTTI) ConversionCost calculateConversion< float >(const Type& targetType);
-
-template <>
-be_api(RTTI) ConversionCost calculateConversion< double >(const Type& targetType);
-
 }}  // namespace BugEngine::RTTI
 
 /**************************************************************************************************/

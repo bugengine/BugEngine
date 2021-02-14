@@ -96,8 +96,8 @@ RTTI::ConversionCost calculateConversion(const LuaParameterType& type, const RTT
             return target.metaclass->type() == RTTI::ClassType_String
                        ? RTTI::ConversionCost()
                        : RTTI::ConversionCost::s_incompatible;
-        case LUA_TBOOLEAN: return RTTI::calculateConversion< bool >(target);
-        case LUA_TNUMBER: return RTTI::calculateConversion< LUA_NUMBER >(target);
+        case LUA_TBOOLEAN: return RTTI::ConversionCalculator< bool >::calculate(target);
+        case LUA_TNUMBER: return RTTI::ConversionCalculator< LUA_NUMBER >::calculate(target);
         case LUA_TUSERDATA:
             lua_getmetatable(type.state, index);
             luaL_getmetatable(type.state, "BugEngine.Object");

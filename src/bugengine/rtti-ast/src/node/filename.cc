@@ -5,6 +5,7 @@
 #include <bugengine/rtti-ast/node/filename.hh>
 
 #include <bugengine/filesystem/file.script.hh>
+#include <bugengine/rtti-ast/dbcontext.hh>
 
 namespace BugEngine { namespace RTTI { namespace AST {
 
@@ -17,7 +18,12 @@ FileName::~FileName()
 {
 }
 
-bool FileName::resolve(DbContext& context)
+ConversionCost FileName::distance(const Type& type) const
+{
+    return ConversionCalculator< weak< const File > >::calculate(type);
+}
+
+bool FileName::doResolve(DbContext& context)
 {
     m_file = context.rootFolder->openFile(m_value);
     if(!m_file)
@@ -25,19 +31,25 @@ bool FileName::resolve(DbContext& context)
         context.error(this,
                       Message::MessageType("could not open file: %s: no such file or directory")
                           | m_value);
+        return false;
     }
-    return m_file;
+    return true;
 }
 
-bool FileName::isCompatible(const Type& expectedType) const
+bool FileName::isCompatible(DbContext& context, const Type& expectedType) const
 {
-    return be_type< weak< const File > >().isA(expectedType);
+    if(!be_type< weak< const File > >().isA(expectedType))
+    {
+        context.error(this,
+                      Message::MessageType("cannot cast file value to %s") | expectedType.name());
+        return false;
+    }
+    else
+        return true;
 }
 
 void FileName::doEval(const Type& expectedType, Value& result) const
 {
-    be_assert(isCompatible(expectedType),
-              "invalid conversion from %s to %s" | be_type< weak< const File > >() | expectedType);
     be_forceuse(expectedType);
     result = RTTI::Value(m_file);
 }

@@ -4,6 +4,8 @@
 #include <bugengine/rtti-ast/stdafx.h>
 #include <bugengine/rtti-ast/node/int3.hh>
 
+#include <bugengine/rtti-ast/dbcontext.hh>
+
 namespace BugEngine { namespace RTTI { namespace AST {
 
 Int3::Int3(bigint3 value) : Node(), m_value(value)
@@ -15,17 +17,28 @@ Int3::~Int3()
 {
 }
 
-bool Int3::isCompatible(const RTTI::Type& expectedType) const
+ConversionCost Int3::distance(const Type& type) const
 {
-    return be_type< byte3 >().isA(expectedType) || be_type< short3 >().isA(expectedType)
-           || be_type< int3 >().isA(expectedType) || be_type< bigint3 >().isA(expectedType)
-           || be_type< ushort3 >().isA(expectedType) || be_type< uint3 >().isA(expectedType)
-           || be_type< biguint3 >().isA(expectedType);
+    return ConversionCalculator< bigint3 >::calculate(type);
+}
+
+bool Int3::isCompatible(DbContext& context, const RTTI::Type& expectedType) const
+{
+    if(!(be_type< byte3 >().isA(expectedType) || be_type< short3 >().isA(expectedType)
+         || be_type< int3 >().isA(expectedType) || be_type< bigint3 >().isA(expectedType)
+         || be_type< ushort3 >().isA(expectedType) || be_type< uint3 >().isA(expectedType)
+         || be_type< biguint3 >().isA(expectedType)))
+    {
+        context.error(this,
+                      Message::MessageType("cannot cast int3 value to %s") | expectedType.name());
+        return false;
+    }
+    else
+        return true;
 }
 
 void Int3::doEval(const RTTI::Type& expectedType, Value& result) const
 {
-    be_assert(isCompatible(expectedType), "invalid conversion from int3 to %s" | expectedType);
     if(be_type< byte3 >().isA(expectedType))
         result = RTTI::Value(make_byte3(be_checked_numcast< i8 >(m_value[0]),
                                         be_checked_numcast< i8 >(m_value[1]),
@@ -54,6 +67,8 @@ void Int3::doEval(const RTTI::Type& expectedType, Value& result) const
         result = RTTI::Value(make_biguint3(be_checked_numcast< u64 >(m_value[0]),
                                            be_checked_numcast< u64 >(m_value[1]),
                                            be_checked_numcast< u64 >(m_value[2])));
+    else
+        be_notreached();
 }
 
 }}}  // namespace BugEngine::RTTI::AST

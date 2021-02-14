@@ -15,8 +15,9 @@ private:
     const minitl::vector< ref< Node > > m_value;
 
 protected:
-    virtual bool resolve(DbContext & context) override;
-    virtual bool isCompatible(const Type& expectedType) const override;
+    virtual ConversionCost distance(const Type& type) const override;
+    virtual bool           doResolve(DbContext & context) override;
+    virtual bool isCompatible(DbContext & context, const Type& expectedType) const override;
     virtual void doEval(const Type& expectedType, Value& result) const override;
 
 public:

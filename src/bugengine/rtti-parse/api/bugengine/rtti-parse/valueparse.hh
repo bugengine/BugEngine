@@ -6,9 +6,7 @@
 /**************************************************************************************************/
 #include <bugengine/rtti-parse/stdafx.h>
 #include <bugengine/rtti-ast/dbcontext.hh>
-#include <bugengine/rtti-ast/dbnamespace.hh>
 #include <bugengine/rtti-ast/node/node.hh>
-#include <bugengine/rtti-ast/node/object.hh>
 #include <bugengine/rtti/value.hh>
 
 namespace BugEngine { namespace RTTI {

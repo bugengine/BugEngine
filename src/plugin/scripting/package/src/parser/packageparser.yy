@@ -31,8 +31,12 @@ extern int yylex();
 
 static int yyerror(void* context, const char *msg)
 {
-    ((BugEngine::PackageBuilder::BuildContext*)context)->result->error(g_packageLine+1, msg);
-    //be_error("%s at line %d (%d:%d)" | msg | (g_packageLine+1) | (g_packageColumnBefore+1) | (g_packageColumnAfter+1));
+    using namespace BugEngine::RTTI::AST;
+    BugEngine::PackageBuilder::BuildContext* buildContext = static_cast<BugEngine::PackageBuilder::BuildContext*>(context);
+    buildContext->result->context().error(weak<const Node>(),
+                                          Message::MessageType("%s at line %d (%d:%d)") | msg | (g_packageLine+1)
+                                                                                        | (g_packageColumnBefore)
+                                                                                        | (g_packageColumnAfter));
     return 0;
 }
 
@@ -126,7 +130,8 @@ decl_object:
             //(*$4)->setName($2);
             BuildContext* context = ((BuildContext*)param);
             ref<AST::Node> node = parseValue(BugEngine::Arena::package(), context->result->context().messages,
-                                             (const char*)g_buffer->data()+$4.start, (const char*)g_buffer->data()+$4.end);
+                                             (const char*)g_buffer->data()+$4.start, (const char*)g_buffer->data()+$4.end,
+                                             $4.line, $4.column);
             if (node)
             {
                 context->result->insertNode($2, node);
@@ -147,7 +152,8 @@ attribute:
         {
             BuildContext* context = ((BuildContext*)param);
             ref<AST::Node> node = parseValue(BugEngine::Arena::package(), context->result->context().messages,
-                                             (const char*)g_buffer->data()+$3.start, (const char*)g_buffer->data()+$3.end);
+                                             (const char*)g_buffer->data()+$3.start, (const char*)g_buffer->data()+$3.end,
+                                             $3.line, $3.column);
             be_forceuse(node);
             free($1);
         }

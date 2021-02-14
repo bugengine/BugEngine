@@ -84,7 +84,7 @@ void SettingsProvider::apply(SettingsBase& settings) const
                 {
                     RTTI::AST::DbContext context(Arena::stack(), setting->second, m_folder);
                     setting->third->resolve(context);
-                    RTTI::Value v = setting->third->eval(context, property->type);
+                    RTTI::Value v = setting->third->eval(property->type);
                     if(!context.errorCount)
                     {
                         property->set(settingsValue, v);

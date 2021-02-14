@@ -10,30 +10,38 @@
 namespace BugEngine { namespace RTTI { namespace AST {
 
 class Array;
-class Parameter;
 struct DbContext;
 
 class be_api(RTTI_AST) Node : public minitl::refcountable
 {
     friend class Array;
-    friend class Parameter;
 
 private:
+    enum State
+    {
+        Parsed,
+        InResolution,
+        Resolved,
+        Evaluated
+    };
     minitl::vector< minitl::tuple< const istring, RTTI::Value > > m_metadata;
     mutable Value                                                 m_cache;
-    mutable bool                                                  m_cacheSet;
+    mutable State                                                 m_state;
 
 protected:
-    Node() : m_metadata(Arena::rtti()), m_cache(), m_cacheSet(false)
+    Node() : m_metadata(Arena::rtti()), m_cache(), m_state(Parsed)
     {
     }
     virtual void doEval(const Type& expectedType, Value& result) const = 0;
+    virtual bool doResolve(DbContext & context);
 
 public:
-    virtual bool isCompatible(const Type& expectedType) const = 0;
-    virtual bool resolve(DbContext & context);
-    void         eval(DbContext & context, const Type& expectedType, Value& result) const;
-    Value        eval(DbContext & context, const Type& expectedType) const;
+    virtual bool           isCompatible(DbContext & context, const Type& expectedType) const = 0;
+    virtual ConversionCost distance(const Type& type) const                                  = 0;
+    virtual minitl::tuple< raw< const RTTI::Method >, bool > getCall(DbContext & context) const;
+    bool                                                     resolve(DbContext & context);
+    void  eval(const Type& expectedType, Value& result) const;
+    Value eval(const Type& expectedType) const;
 
     template < typename T >
     void setMetadata(const istring name, T value)

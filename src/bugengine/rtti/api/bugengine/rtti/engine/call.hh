@@ -30,6 +30,9 @@ struct ArgInfo
     istring name;
     u32     parameter;
     T       type;
+    ArgInfo() : name(), parameter(0), type()
+    {
+    }
     explicit ArgInfo(const T& t) : name(), parameter(0), type(t)
     {
     }

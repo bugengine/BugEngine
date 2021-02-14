@@ -61,4 +61,21 @@ BE_EXPORT raw< const RTTI::Class > ClassID< minitl::refcountable >::klass()
     return ci;
 }
 
+static Type s_numericTypes[]
+    = {be_type< bool >(), be_type< u8 >(),    be_type< u16 >(),   be_type< u32 >(),
+       be_type< u64 >(),  be_type< i8 >(),    be_type< i16 >(),   be_type< i32 >(),
+       be_type< i64 >(),  be_type< float >(), be_type< double >()};
+
+static Type s_stringTypes[] = {be_type< istring >(), be_type< inamespace >(),
+                               be_type< ifilename >(), be_type< ipath >(), be_type< text >()};
+
+const Type& getTypeFromIndex(ClassIndex_Numeric index)
+{
+    return s_numericTypes[index];
+}
+const Type& getTypeFromIndex(ClassIndex_String index)
+{
+    return s_stringTypes[index];
+}
+
 }}  // namespace BugEngine::RTTI

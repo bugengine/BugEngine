@@ -2,7 +2,6 @@
    see LICENSE for detail */
 
 #include <bugengine/plugin.scripting.package/stdafx.h>
-#include <bugengine/plugin.scripting.package/logger.hh>
 #include <bugengine/plugin.scripting.package/nodes/package.hh>
 #include <bugengine/resource/resourcemanager.hh>
 #include <bugengine/rtti/engine/propertyinfo.script.hh>
@@ -11,13 +10,12 @@ namespace BugEngine { namespace PackageBuilder { namespace Nodes {
 
 static const istring s_name("name");
 
-Package::Package(const ifilename& filename)
+Package::Package(const ifilename& filename, ref< Folder > dataFolder)
     : m_filename(filename)
-    , m_context(Arena::packageBuilder(), ref< Folder >())
+    , m_context(Arena::packageBuilder(), dataFolder)
     , m_plugins(Arena::packageBuilder())
     , m_nodes(Arena::packageBuilder())
     , m_values(Arena::packageBuilder())
-    , m_logger()
 {
 }
 
@@ -95,20 +93,12 @@ const RTTI::Value& Package::getValue(weak< const RTTI::AST::Node > object) const
     return m_empty;
 }
 
-void Package::binarySave() const
-{
-}
-
-void Package::textSave() const
-{
-}
-
 void Package::createObjects(weak< Resource::ResourceManager > manager)
 {
     m_values.resize(m_nodes.size());
     for(size_t i = 0; i < m_nodes.size(); ++i)
     {
-        // m_values[i] = m_nodes[i]->create();
+        m_nodes[i]->eval(be_type< void >(), m_values[i]);
         if(m_values[i].isA(be_type< const Resource::Description >()))
         {
             manager->load(m_values[i].type().metaclass,
@@ -146,24 +136,23 @@ const ifilename& Package::filename() const
     return m_filename;
 }
 
-void Package::info(u32 line, const char* message)
-{
-    m_logger.info(m_filename, line, message);
-}
-
-void Package::warning(u32 line, const char* message)
-{
-    m_logger.warning(m_filename, line, message);
-}
-
-void Package::error(u32 line, const char* message)
-{
-    m_logger.error(m_filename, line, message);
-}
-
 bool Package::success() const
 {
-    return m_logger.success();
+    return m_context.errorCount == 0;
+}
+
+void Package::resolve()
+{
+    for(minitl::vector< ref< RTTI::AST::Node > >::const_iterator it = m_nodes.begin();
+        it != m_nodes.end(); ++it)
+    {
+        (*it)->resolve(m_context);
+    }
+    for(minitl::vector< ref< RTTI::AST::Node > >::const_iterator it = m_nodes.begin();
+        it != m_nodes.end(); ++it)
+    {
+        (*it)->isCompatible(m_context, be_type< void >());
+    }
 }
 
 }}}  // namespace BugEngine::PackageBuilder::Nodes

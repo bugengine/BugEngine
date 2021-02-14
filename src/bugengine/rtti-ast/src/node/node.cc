@@ -10,44 +10,43 @@ namespace BugEngine { namespace RTTI { namespace AST {
 
 static const Value s_notFound = Value();
 
-bool Node::resolve(DbContext& context)
+bool Node::doResolve(DbContext& context)
 {
     be_forceuse(context);
     return true;
 }
 
-void Node::eval(DbContext& context, const Type& expectedType, Value& result) const
+bool Node::resolve(DbContext& context)
 {
-    if(!m_cacheSet)
+    be_assert(m_state != Evaluated, "node is already evaluated");
+    if(m_state == InResolution)
     {
-        if(!isCompatible(expectedType))
-        {
-            context.error(this,
-                          Message::MessageType("type mismatch; expected %s") | expectedType.name());
-        }
-        else
-        {
-            doEval(expectedType, result);
-            m_cache = Value(Value::ByRef(result));
-        }
-        m_cacheSet = true;
+        context.error(this, Message::MessageType("circular reference detected"));
+    }
+    m_state     = InResolution;
+    bool result = doResolve(context);
+    m_state     = Resolved;
+    return result;
+}
+
+void Node::eval(const Type& expectedType, Value& result) const
+{
+    if(m_state != Evaluated)
+    {
+        be_assert(m_state == Resolved, "node has skipped resolution stage");
+        doEval(expectedType, result);
+        m_cache = Value(Value::ByRef(result));
+        m_state = Evaluated;
     }
 }
 
-Value Node::eval(DbContext& context, const Type& expectedType) const
+Value Node::eval(const Type& expectedType) const
 {
-    if(!m_cacheSet)
+    if(m_state != Evaluated)
     {
-        if(!isCompatible(expectedType))
-        {
-            context.error(this,
-                          Message::MessageType("type mismatch; expected %s") | expectedType.name());
-        }
-        else
-        {
-            doEval(expectedType, m_cache);
-        }
-        m_cacheSet = true;
+        be_assert(m_state == Resolved, "node has skipped resolution stage");
+        doEval(expectedType, m_cache);
+        m_state = Evaluated;
     }
     return Value(Value::ByRef(m_cache));
 }
@@ -61,6 +60,12 @@ const Value& Node::getMetadata(const istring name) const
         if(it->first == name) return it->second;
     }
     return s_notFound;
+}
+
+minitl::tuple< raw< const RTTI::Method >, bool > Node::getCall(DbContext& context) const
+{
+    be_forceuse(context);
+    return minitl::make_tuple(raw< const RTTI::Method >::null(), false);
 }
 
 }}}  // namespace BugEngine::RTTI::AST

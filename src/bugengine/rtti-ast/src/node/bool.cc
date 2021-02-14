@@ -4,6 +4,8 @@
 #include <bugengine/rtti-ast/stdafx.h>
 #include <bugengine/rtti-ast/node/bool.hh>
 
+#include <bugengine/rtti-ast/dbcontext.hh>
+
 namespace BugEngine { namespace RTTI { namespace AST {
 
 Bool::Bool(bool value) : Node(), m_value(value)
@@ -15,14 +17,24 @@ Bool::~Bool()
 {
 }
 
-bool Bool::isCompatible(const Type& expectedType) const
+ConversionCost Bool::distance(const Type& type) const
 {
-    return be_type< bool >().isA(expectedType);
+    return ConversionCalculator< bool >::calculate(type);
+}
+bool Bool::isCompatible(DbContext& context, const Type& expectedType) const
+{
+    if(!be_type< bool >().isA(expectedType))
+    {
+        context.error(this,
+                      Message::MessageType("cannot cast bool value to %s") | expectedType.name());
+        return false;
+    }
+    else
+        return true;
 }
 
 void Bool::doEval(const RTTI::Type& expectedType, Value& result) const
 {
-    be_assert(isCompatible(expectedType), "invalid conversion from bool to %s" | expectedType);
     be_forceuse(expectedType);
     result = RTTI::Value(m_value);
 }

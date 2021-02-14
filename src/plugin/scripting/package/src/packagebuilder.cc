@@ -32,6 +32,7 @@ ref< Nodes::Package > PackageBuilder::createPackage(const ifilename&            
 {
     BuildContext context(filename, buffer, m_dataFolder);
     be_package_parse(&context);
+    context.result->resolve();
     return context.result;
 }
 

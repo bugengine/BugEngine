@@ -2,7 +2,7 @@
    see LICENSE for detail */
 
 #include <bugengine/rtti/stdafx.h>
-#include <bugengine/rtti/conversion.script.hh>
+#include <bugengine/rtti/conversion.hh>
 #include <bugengine/rtti/typeinfo.script.hh>
 
 namespace BugEngine { namespace RTTI {
@@ -10,8 +10,7 @@ namespace BugEngine { namespace RTTI {
 const ConversionCost ConversionCost::s_incompatible(0, 0, 0, 0, 1);
 const ConversionCost ConversionCost::s_variant(0, 0, 0, 1, 0);
 
-template <>
-be_api(RTTI) ConversionCost calculateConversion< u8 >(const RTTI::Type& targetType)
+be_api(RTTI) ConversionCost ConversionCalculator< u8 >::calculate(const RTTI::Type& targetType)
 {
     if(targetType.metaclass->type() == ClassType_Number)
     {
@@ -43,8 +42,7 @@ be_api(RTTI) ConversionCost calculateConversion< u8 >(const RTTI::Type& targetTy
     }
 }
 
-template <>
-be_api(RTTI) ConversionCost calculateConversion< i8 >(const RTTI::Type& targetType)
+be_api(RTTI) ConversionCost ConversionCalculator< i8 >::calculate(const RTTI::Type& targetType)
 {
     if(targetType.metaclass->type() == ClassType_Number)
     {
@@ -76,8 +74,7 @@ be_api(RTTI) ConversionCost calculateConversion< i8 >(const RTTI::Type& targetTy
     }
 }
 
-template <>
-be_api(RTTI) ConversionCost calculateConversion< u16 >(const RTTI::Type& targetType)
+be_api(RTTI) ConversionCost ConversionCalculator< u16 >::calculate(const RTTI::Type& targetType)
 {
     if(targetType.metaclass->type() == ClassType_Number)
     {
@@ -109,8 +106,7 @@ be_api(RTTI) ConversionCost calculateConversion< u16 >(const RTTI::Type& targetT
     }
 }
 
-template <>
-be_api(RTTI) ConversionCost calculateConversion< i16 >(const RTTI::Type& targetType)
+be_api(RTTI) ConversionCost ConversionCalculator< i16 >::calculate(const RTTI::Type& targetType)
 {
     if(targetType.metaclass->type() == ClassType_Number)
     {
@@ -142,8 +138,7 @@ be_api(RTTI) ConversionCost calculateConversion< i16 >(const RTTI::Type& targetT
     }
 }
 
-template <>
-be_api(RTTI) ConversionCost calculateConversion< u32 >(const RTTI::Type& targetType)
+be_api(RTTI) ConversionCost ConversionCalculator< u32 >::calculate(const RTTI::Type& targetType)
 {
     if(targetType.metaclass->type() == ClassType_Number)
     {
@@ -175,8 +170,7 @@ be_api(RTTI) ConversionCost calculateConversion< u32 >(const RTTI::Type& targetT
     }
 }
 
-template <>
-be_api(RTTI) ConversionCost calculateConversion< i32 >(const RTTI::Type& targetType)
+be_api(RTTI) ConversionCost ConversionCalculator< i32 >::calculate(const RTTI::Type& targetType)
 {
     if(targetType.metaclass->type() == ClassType_Number)
     {
@@ -208,8 +202,7 @@ be_api(RTTI) ConversionCost calculateConversion< i32 >(const RTTI::Type& targetT
     }
 }
 
-template <>
-be_api(RTTI) ConversionCost calculateConversion< u64 >(const RTTI::Type& targetType)
+be_api(RTTI) ConversionCost ConversionCalculator< u64 >::calculate(const RTTI::Type& targetType)
 {
     if(targetType.metaclass->type() == ClassType_Number)
     {
@@ -241,8 +234,7 @@ be_api(RTTI) ConversionCost calculateConversion< u64 >(const RTTI::Type& targetT
     }
 }
 
-template <>
-be_api(RTTI) ConversionCost calculateConversion< i64 >(const RTTI::Type& targetType)
+be_api(RTTI) ConversionCost ConversionCalculator< i64 >::calculate(const RTTI::Type& targetType)
 {
     if(targetType.metaclass->type() == ClassType_Number)
     {
@@ -274,8 +266,7 @@ be_api(RTTI) ConversionCost calculateConversion< i64 >(const RTTI::Type& targetT
     }
 }
 
-template <>
-be_api(RTTI) ConversionCost calculateConversion< bool >(const RTTI::Type& targetType)
+be_api(RTTI) ConversionCost ConversionCalculator< bool >::calculate(const RTTI::Type& targetType)
 {
     if(targetType.metaclass->type() == ClassType_Number)
     {
@@ -307,8 +298,7 @@ be_api(RTTI) ConversionCost calculateConversion< bool >(const RTTI::Type& target
     }
 }
 
-template <>
-be_api(RTTI) ConversionCost calculateConversion< float >(const RTTI::Type& targetType)
+be_api(RTTI) ConversionCost ConversionCalculator< float >::calculate(const RTTI::Type& targetType)
 {
     if(targetType.metaclass->type() == ClassType_Number)
     {
@@ -340,9 +330,7 @@ be_api(RTTI) ConversionCost calculateConversion< float >(const RTTI::Type& targe
     }
 }
 
-template <>
-be_api(RTTI) ConversionCost calculateConversion< double >(const RTTI::Type& targetType)
-
+be_api(RTTI) ConversionCost ConversionCalculator< double >::calculate(const RTTI::Type& targetType)
 {
     if(targetType.metaclass->type() == ClassType_Number)
     {
