@@ -24,7 +24,7 @@ StorageConfiguration::~StorageConfiguration()
 
 void StorageConfiguration::update()
 {
-    be_info("storage update");
+    // be_info("storage update");
 }
 
 }}}  // namespace BugEngine::World::Component

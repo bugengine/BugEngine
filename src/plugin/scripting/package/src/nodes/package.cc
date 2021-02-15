@@ -17,6 +17,7 @@ Package::Package(const ifilename& filename, ref< Folder > dataFolder)
     , m_nodes(Arena::packageBuilder())
     , m_values(Arena::packageBuilder())
 {
+    m_context.rootNamespace->add(inamespace("bugengine"), RTTI::Value(be_bugengine_Namespace()));
 }
 
 Package::~Package()

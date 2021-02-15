@@ -25,7 +25,7 @@ struct ClassID< KernelScheduler::Image2D< T > >
     static BE_EXPORT raw< const RTTI::Class > klass()
     {
         static const RTTI::Class s_class
-            = {istring(minitl::format< 256u >("Image2D<%s>") | be_type< T >().name()),
+            = {istring(minitl::format< 256u >("Image2D<%s>") | be_class< T >()->name),
                u32(sizeof(KernelScheduler::Image2D< T >)),
                0,
                RTTI::ClassType_Object,
@@ -39,15 +39,16 @@ struct ClassID< KernelScheduler::Image2D< T > >
                {0},
                0,
                0};
+        raw< const RTTI::Class > result = {&s_class};
+
         static RTTI::ObjectInfo registry = {KernelScheduler::IParameter::getNamespace()->objects,
                                             {0},
                                             s_class.name,
-                                            RTTI::Value(s_class)};
+                                            RTTI::Value(result)};
         static const RTTI::ObjectInfo* ptr
             = KernelScheduler::IParameter::getNamespace()->objects.set(&registry);
         be_forceuse(ptr);
 
-        raw< const RTTI::Class > result = {&s_class};
         return result;
     }
 };

@@ -38,6 +38,7 @@ protected:
 public:
     virtual bool           isCompatible(DbContext & context, const Type& expectedType) const = 0;
     virtual ConversionCost distance(const Type& type) const                                  = 0;
+    virtual ref< Node >    getProperty(DbContext & context, const inamespace& name) const;
     virtual minitl::tuple< raw< const RTTI::Method >, bool > getCall(DbContext & context) const;
     bool                                                     resolve(DbContext & context);
     void  eval(const Type& expectedType, Value& result) const;

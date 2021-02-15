@@ -91,9 +91,7 @@ bool Array::isCompatible(DbContext& context, const Type& expectedType) const
 
 void Array::doEval(const RTTI::Type& expectedType, Value& result) const
 {
-    raw< const RTTI::ObjectInfo > o = expectedType.metaclass->getStaticProperty(value_type);
-    be_assert(o, "unable to find the array value type");
-    RTTI::Type valueType = o->value.as< const RTTI::Type >();
+    RTTI::Type valueType = expectedType.metaclass->apiMethods->arrayScripting->value_type;
 
     minitl::array< RTTI::Value > v(Arena::temporary(), be_checked_numcast< u32 >(m_value.size()));
     for(u32 i = 0; i < m_value.size(); ++i)

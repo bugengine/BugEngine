@@ -16,10 +16,9 @@ class be_api(RTTI_AST) Reference : public Node
     friend class Object;
 
 private:
-    const inamespace   m_referenceName;
-    inamespace         m_properties;
-    weak< const Node > m_node;
-    RTTI::Value        m_value;
+    const inamespace  m_referenceName;
+    ref< const Node > m_node;
+    RTTI::Value       m_value;
 
 protected:
     virtual minitl::tuple< raw< const RTTI::Method >, bool > getCall(DbContext & context)

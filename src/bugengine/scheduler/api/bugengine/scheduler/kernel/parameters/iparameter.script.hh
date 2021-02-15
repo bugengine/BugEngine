@@ -6,10 +6,19 @@
 /**************************************************************************************************/
 #include <bugengine/scheduler/stdafx.h>
 
-namespace BugEngine { namespace KernelScheduler {
+namespace BugEngine {
+
+namespace Task {
+
+class ITask;
+
+}
+
+namespace KernelScheduler {
 
 class IMemoryBuffer;
 class IMemoryHost;
+class IProduct;
 
 class be_api(SCHEDULER) IParameter : public minitl::refcountable
 {
@@ -29,9 +38,12 @@ public:
     weak< const IMemoryBuffer > getBank(weak< const IMemoryHost > host) const;
 
     static raw< RTTI::Class > getNamespace();
+
+    virtual RTTI::Value makeProduct(ref< IParameter > parameter, weak< Task::ITask > task) = 0;
 };
 
-}}  // namespace BugEngine::KernelScheduler
+}  // namespace KernelScheduler
+}  // namespace BugEngine
 
 /**************************************************************************************************/
 #endif

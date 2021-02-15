@@ -19,22 +19,35 @@ Reference::~Reference()
 
 bool Reference::doResolve(DbContext& context)
 {
-    weak< const Namespace > ns = context.rootNamespace;
-    m_properties               = m_referenceName;
-    inamespace current;
-    while(m_properties.size())
+    weak< const Namespace > ns         = context.rootNamespace;
+    inamespace              properties = m_referenceName;
+    inamespace              current;
+    while(properties.size())
     {
-        istring                 n     = m_properties[0];
+        istring                 n     = properties[0];
         weak< const Namespace > child = ns->getChild(n);
         if(child)
         {
             ns = child;
-            m_properties.pop_front();
+            properties.pop_front();
+            if(properties.size() == 0) m_value = Value(Value::ByRef(ns->getValue()));
         }
         else
         {
-            weak< const Node > node = ns->getNode(n);
-            if(!node)
+            ref< const Node > node = ns->getNode(n);
+            if(node)
+            {
+                m_node = node;
+                properties.pop_front();
+                if(properties.size() != 0)
+                {
+                    ref< Node > propertyNode = m_node->getProperty(context, properties);
+                    if(propertyNode) propertyNode->resolve(context);
+                    m_node = propertyNode;
+                }
+                break;
+            }
+            else
             {
                 const Value& v = ns->getValue();
                 if(!v)
@@ -48,9 +61,9 @@ bool Reference::doResolve(DbContext& context)
                 else
                 {
                     m_value = Value(Value::ByRef(v));
-                    while(m_properties.size())
+                    while(properties.size())
                     {
-                        n = m_properties.pop_front();
+                        n = properties.pop_front();
                         bool  found;
                         Type  t = v.type();
                         Value v = t.metaclass->get(m_value, n, found);
@@ -88,15 +101,26 @@ ConversionCost Reference::distance(const Type& type) const
 
 bool Reference::isCompatible(DbContext& context, const Type& expectedType) const
 {
-    be_forceuse(context);
-    be_forceuse(expectedType);
-    return true;
+    if(distance(expectedType) >= ConversionCost::s_incompatible)
+    {
+        context.error(this, Message::MessageType("cannot cast reference to %s value to %s")
+                                | m_referenceName | expectedType.name());
+        return false;
+    }
+    else
+        return true;
 }
 
 void Reference::doEval(const Type& expectedType, Value& result) const
 {
-    be_forceuse(expectedType);
-    be_forceuse(result);
+    if(m_node)
+    {
+        m_node->eval(expectedType, result);
+    }
+    else
+    {
+        result = m_value;
+    }
 }
 
 minitl::tuple< raw< const RTTI::Method >, bool > Reference::getCall(DbContext& context) const

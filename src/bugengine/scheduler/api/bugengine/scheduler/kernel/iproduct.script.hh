@@ -29,6 +29,8 @@ protected:
     virtual ~IProduct();
 
 public:
+    static raw< RTTI::Class > getNamespace();
+
     weak< Task::ITask > producer() const
     {
         return m_producer;

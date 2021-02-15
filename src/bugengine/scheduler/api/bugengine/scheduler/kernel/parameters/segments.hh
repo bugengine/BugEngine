@@ -9,12 +9,20 @@
 #include <bugengine/minitl/typemanipulation.hh>
 #include <bugengine/scheduler/kernel/parameters/iparameter.script.hh>
 #include <bugengine/scheduler/kernel/parameters/parameters.hh>
+#include <bugengine/scheduler/kernel/product.hh>
 
 namespace BugEngine { namespace KernelScheduler {
 
 template < typename T >
 class Segments : public IParameter
 {
+protected:
+    RTTI::Value makeProduct(ref< IParameter > parameter, weak< Task::ITask > task)
+    {
+        return RTTI::Value(ref< Product< Segments< T > > >::create(
+            Arena::task(), be_checked_cast< Segments< T > >(parameter), task));
+    }
+
 public:
     Segments()
     {

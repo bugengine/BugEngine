@@ -3,6 +3,7 @@
 
 #include <bugengine/rtti-ast/stdafx.h>
 #include <bugengine/rtti-ast/node/object.hh>
+#include <bugengine/rtti-ast/node/property.hh>
 #include <bugengine/rtti-ast/node/reference.hh>
 
 #include <bugengine/rtti-ast/dbcontext.hh>
@@ -107,7 +108,7 @@ bool Object::doResolve(DbContext& context)
                     = ArgInfo(m_parameters[currentArg].name, m_parameters[currentArg].value);
             }
 
-            ArgInfo* arguments = &m_arguments.front();
+            ArgInfo* arguments = m_arguments.empty() ? 0 : &m_arguments.front();
             m_callInfo         = RTTI::resolve(method.first, arguments, m_argumentThis,
                                        arguments + m_argumentThis, m_parameters.size());
         }
@@ -139,7 +140,7 @@ bool Object::isCompatible(DbContext& context, const Type& expectedType) const
 void Object::doEval(const Type& expectedType, Value& result) const
 {
     be_forceuse(expectedType);
-    const ArgInfo* arguments = &m_arguments.front();
+    const ArgInfo* arguments = m_arguments.empty() ? 0 : &m_arguments.front();
     result = RTTI::call(m_callInfo, arguments, m_argumentThis, arguments + m_argumentThis,
                         m_arguments.size() - m_argumentThis);
 }
@@ -147,6 +148,12 @@ void Object::doEval(const Type& expectedType, Value& result) const
 Type Object::getType() const
 {
     return be_type< void >();
+}
+
+ref< Node > Object::getProperty(DbContext& context, const inamespace& propertyName) const
+{
+    be_forceuse(context);
+    return ref< Property >::create(Arena::general(), this, propertyName);
 }
 
 }}}  // namespace BugEngine::RTTI::AST

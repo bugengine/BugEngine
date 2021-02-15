@@ -38,6 +38,10 @@ void Node::eval(const Type& expectedType, Value& result) const
         m_cache = Value(Value::ByRef(result));
         m_state = Evaluated;
     }
+    else
+    {
+        result = m_cache;
+    }
 }
 
 Value Node::eval(const Type& expectedType) const
@@ -66,6 +70,13 @@ minitl::tuple< raw< const RTTI::Method >, bool > Node::getCall(DbContext& contex
 {
     be_forceuse(context);
     return minitl::make_tuple(raw< const RTTI::Method >::null(), false);
+}
+
+ref< Node > Node::getProperty(DbContext& context, const inamespace& name) const
+{
+    be_forceuse(name);
+    context.error(this, Message::MessageType("object does not have properties"));
+    return ref< Node >();
 }
 
 }}}  // namespace BugEngine::RTTI::AST

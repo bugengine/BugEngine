@@ -5,7 +5,11 @@
 #include <bugengine/scheduler/kernel/imemoryhost.hh>
 #include <bugengine/scheduler/kernel/iproduct.script.hh>
 
-namespace BugEngine { namespace KernelScheduler {
+namespace BugEngine {
+
+raw< RTTI::Class > be_bugengine_Namespace_BugEngine_KernelScheduler();
+
+namespace KernelScheduler {
 
 IProduct::~IProduct()
 {
@@ -39,4 +43,10 @@ void IProduct::removeOutputHost(weak< IMemoryHost > host)
     be_notreached();
 }
 
-}}  // namespace BugEngine::KernelScheduler
+raw< RTTI::Class > IProduct::getNamespace()
+{
+    return be_bugengine_Namespace_BugEngine_KernelScheduler();
+}
+
+}  // namespace KernelScheduler
+}  // namespace BugEngine

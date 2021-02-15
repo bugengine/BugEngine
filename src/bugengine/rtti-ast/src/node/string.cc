@@ -26,7 +26,7 @@ ConversionCost String::distance(const Type& type) const
 
 bool String::isCompatible(DbContext& context, const RTTI::Type& expectedType) const
 {
-    if(distance(expectedType) == ConversionCost::s_incompatible)
+    if(distance(expectedType) >= ConversionCost::s_incompatible)
     {
         context.error(this,
                       Message::MessageType("cannot cast string value to %s") | expectedType.name());
