@@ -5,9 +5,13 @@
 #define BE_RTTI_AST_INTROSPECTIONHINT_HH_
 /**************************************************************************************************/
 #include <bugengine/rtti-ast/stdafx.h>
+
+#include <bugengine/rtti-ast/node/node.hh>
 #include <bugengine/rtti/engine/call.hh>
 
 namespace BugEngine { namespace RTTI { namespace AST {
+
+class Object;
 
 static inline RTTI::ConversionCost calculateConversion(weak< const Node > node,
                                                        const RTTI::Type&  other)
@@ -20,8 +24,6 @@ static inline void convert(weak< const Node > node, void* buffer, RTTI::Type typ
     new(buffer) Value(node->eval(type));
 }
 
-class Object;
-class Node;
 typedef RTTI::ArgInfo< weak< const Node > > ArgInfo;
 
 class be_api(RTTI_AST) IntrospectionHint : public minitl::refcountable

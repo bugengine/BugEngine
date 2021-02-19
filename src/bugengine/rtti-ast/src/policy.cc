@@ -4,6 +4,9 @@
 #include <bugengine/rtti-ast/stdafx.h>
 #include <bugengine/rtti-ast/policy.script.hh>
 
+#include <bugengine/rtti-ast/introspectionhint.hh>
+#include <bugengine/rtti-ast/node/object.hh>
+
 namespace BugEngine { namespace RTTI { namespace AST {
 
 Policy::~Policy()
