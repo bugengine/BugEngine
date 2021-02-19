@@ -149,11 +149,6 @@ void Package::resolve()
     {
         (*it)->resolve(m_context);
     }
-    for(minitl::vector< ref< RTTI::AST::Node > >::const_iterator it = m_nodes.begin();
-        it != m_nodes.end(); ++it)
-    {
-        (*it)->isCompatible(m_context, be_type< void >());
-    }
 }
 
 }}}  // namespace BugEngine::PackageBuilder::Nodes

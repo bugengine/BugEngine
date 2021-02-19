@@ -8,22 +8,33 @@
 #include <bugengine/world/component/icomponentstorage.script.hh>
 #include <bugengine/world/component/storageconfiguration.script.hh>
 
+#include <bugengine/rtti-ast/simplepolicy.factory.hh>
 #include <bugengine/scheduler/kernel/iproduct.script.hh>
 #include <bugengine/scheduler/kernel/parameters/iparameter.script.hh>
-
-#include <bugengine/rtti/value.hh>
 
 namespace BugEngine { namespace World { namespace Component {
 
 class LogicComponentStorage : public IComponentStorage
 {
+public:
+    class IntrospectionHint : public RTTI::AST::IntrospectionHint
+    {
+    protected:
+        virtual bool getPropertyType(RTTI::AST::DbContext& context, const istring name,
+                                     RTTI::Type& propertyType) const override;
+
+    public:
+        IntrospectionHint(weak< const RTTI::AST::Object > owner, const RTTI::CallInfo& callInfo,
+                          u32 argumentThis);
+        ~IntrospectionHint();
+    };
+
     published
-        :
+        : be_tag(RTTI::AST::SimplePolicy< LogicComponentStorage::IntrospectionHint >())
+              LogicComponentStorage(weak< StorageConfiguration > configuration,
+                                    raw< const RTTI::Class >     componentType);
 
-        LogicComponentStorage(weak< StorageConfiguration > configuration,
-                              raw< const RTTI::Class >     component);
-
-    const RTTI::Value components;
+    const ref< KernelScheduler::IProduct > components;
 };
 
 }}}  // namespace BugEngine::World::Component

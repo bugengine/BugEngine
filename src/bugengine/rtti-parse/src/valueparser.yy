@@ -4,6 +4,7 @@
 #include    <bugengine/rtti-ast/stdafx.h>
 #include    <parsecontext.hh>
 #include    <bugengine/rtti-ast/node/object.hh>
+#include    <bugengine/rtti-ast/node/parameter.hh>
 #include    <bugengine/rtti-ast/node/reference.hh>
 #include    <bugengine/rtti-ast/node/bool.hh>
 #include    <bugengine/rtti-ast/node/integer.hh>
@@ -96,8 +97,8 @@ static int yyerror(::BugEngine::RTTI::Parse::ParseContext* context, const char *
 %type   <param_list>    param_list
 %type   <value_list>    value_list
 
-%destructor { free($$.value); }                         VAL_STRING VAL_FILENAME TOK_ID fullname param
-%destructor { $$.value->~ref(); free($$.value); }       object
+%destructor { free($$.value); }                         VAL_STRING VAL_FILENAME TOK_ID fullname
+%destructor { $$.value->~ref(); free($$.value); }       object param
 %destructor { $$.value->~vector(); free($$.value); }    value_list param_list
 
 %{
@@ -264,19 +265,19 @@ object:
                                                         BugEngine::inamespace($1.value));
             if ($3.value->size() >= 2)
             {
-                for (minitl::vector< Parameter >::iterator it = $3.value->begin();
+                for (minitl::vector< ref<Parameter> >::iterator it = $3.value->begin();
                      it != $3.value->end() - 1;
                      ++it)
                 {
-                    for (minitl::vector< Parameter >::iterator it2 = it + 1;
+                    for (minitl::vector< ref<Parameter> >::iterator it2 = it + 1;
                          it2 != $3.value->end();
                          /*nothing*/)
                     {
-                        if (it->name == it2->name)
+                        if ((*it)->name() == (*it2)->name())
                         {
-                            context->errors.push_back(Message(name,
+                            context->errors.push_back(Message(*it2,
                                                               Message::MessageType("attribute %s specified several times")
-                                                                                 | it->name,
+                                                                                 | (*it2)->name(),
                                                               BugEngine::logError));
                             it2 = $3.value->erase(it2);
                         }
@@ -325,8 +326,8 @@ value_list:
 param_list:
         /* empty */
         {
-            $$.value = reinterpret_cast< minitl::vector< Parameter >* >(malloc(sizeof(*$$.value)));
-            new ($$.value) minitl::vector< Parameter >(*context->arena);
+            $$.value = reinterpret_cast< minitl::vector< ref<Parameter> >* >(malloc(sizeof(*$$.value)));
+            new ($$.value) minitl::vector< ref<Parameter> >(*context->arena);
         }
     |
         param_list
@@ -335,6 +336,7 @@ param_list:
             $$.location = $2.location;
             $$.value = $1.value;
             $$.value->push_back(*$2.value);
+            $2.value->~ref();
             free($2.value);
         }
     ;
@@ -343,10 +345,8 @@ param:
         TOK_ID '=' value ';'
         {
             $$.location = $1.location;
-            $$.value = reinterpret_cast< Parameter* >(malloc(sizeof(*$$.value)));
-            new ($$.value) Parameter();
-            $$.value->name = BugEngine::istring($1.value);
-            $$.value->value = *$3.value;
+            $$.value = reinterpret_cast< ref<Parameter>* >(malloc(sizeof(*$$.value)));
+            new ($$.value) ref<Parameter>(ref<Parameter>::create(*context->arena, BugEngine::istring($1.value), *$3.value));
             $3.value->~ref();
             free($3.value);
             free($1.value);

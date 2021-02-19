@@ -87,6 +87,7 @@ CallInfo getCost(raw< const Method::Overload > overload, u32 argumentIndices[],
         {
             if(namedParams[j]->name == namedArguments[i].name)
             {
+                cost += calculateConversion(namedArguments[i].type, namedParams[j]->type);
                 found = true;
                 minitl::swap(namedParams[j], namedParams[i]);
                 argumentIndices[i] = (u32)(namedParams[i] - begin);

@@ -39,5 +39,11 @@ weak< const IMemoryBuffer > IParameter::getBank(weak< const IMemoryHost > host) 
     return weak< const IMemoryBuffer >();
 }
 
+const istring IParameter::getProductTypePropertyName()
+{
+    static istring s_producTypePropertyName("productType");
+    return s_producTypePropertyName;
+}
+
 }  // namespace KernelScheduler
 }  // namespace BugEngine

@@ -22,21 +22,6 @@ ConversionCost Int2::distance(const Type& type) const
     return ConversionCalculator< bigint2 >::calculate(type);
 }
 
-bool Int2::isCompatible(DbContext& context, const RTTI::Type& expectedType) const
-{
-    if(!(be_type< byte2 >().isA(expectedType) || be_type< short2 >().isA(expectedType)
-         || be_type< int2 >().isA(expectedType) || be_type< bigint2 >().isA(expectedType)
-         || be_type< ushort2 >().isA(expectedType) || be_type< uint2 >().isA(expectedType)
-         || be_type< biguint2 >().isA(expectedType)))
-    {
-        context.error(this,
-                      Message::MessageType("cannot cast int2 value to %s") | expectedType.name());
-        return false;
-    }
-    else
-        return true;
-}
-
 void Int2::doEval(const RTTI::Type& expectedType, Value& result) const
 {
     if(be_type< byte2 >().isA(expectedType))
@@ -62,6 +47,11 @@ void Int2::doEval(const RTTI::Type& expectedType, Value& result) const
                                            be_checked_numcast< u64 >(m_value[1])));
     else
         be_notreached();
+}
+
+void Int2::doVisit(Node::Visitor& visitor) const
+{
+    visitor.accept(this);
 }
 
 }}}  // namespace BugEngine::RTTI::AST

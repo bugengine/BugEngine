@@ -5,13 +5,15 @@
 #include <bugengine/rtti-ast/node/property.hh>
 
 #include <bugengine/rtti-ast/dbcontext.hh>
+#include <bugengine/rtti/engine/propertyinfo.script.hh>
 
 namespace BugEngine { namespace RTTI { namespace AST {
 
-Property::Property(weak< const Object > owner, const inamespace& propertyName)
+Property::Property(ref< const Object > owner, const inamespace& propertyName)
     : Node()
     , m_owner(owner)
     , m_propertyName(propertyName)
+    , m_type()
 {
 }
 
@@ -21,8 +23,7 @@ Property::~Property()
 
 ConversionCost Property::distance(const Type& type) const
 {
-    be_forceuse(type);
-    return ConversionCost::s_incompatible;
+    return m_type.calculateConversion(type);
 }
 
 minitl::tuple< raw< const RTTI::Method >, bool > Property::getCall(DbContext& context) const
@@ -33,15 +34,26 @@ minitl::tuple< raw< const RTTI::Method >, bool > Property::getCall(DbContext& co
 
 bool Property::doResolve(DbContext& context)
 {
-    be_forceuse(context);
+    if(!m_owner->getPropertyType(context, m_propertyName[0], m_type))
+    {
+        context.error(this, Message::MessageType("type %s does not have a member %s")
+                                | m_owner->getType().name() | m_propertyName[0]);
+    }
+    for(u32 i = 1; i < m_propertyName.size(); ++i)
+    {
+        raw< const RTTI::Property > property = m_type.metaclass->getProperty(m_propertyName[i]);
+        if(property)
+        {
+            m_type = property->type;
+        }
+        else
+        {
+            context.error(this, Message::MessageType("type %s does not have a member %s")
+                                    | m_type.name() | m_propertyName[i]);
+            return false;
+        }
+    }
     return true;
-}
-
-bool Property::isCompatible(DbContext& context, const Type& expectedType) const
-{
-    be_forceuse(context);
-    be_forceuse(expectedType);
-    return false;
 }
 
 void Property::doEval(const Type& expectedType, Value& result) const
@@ -56,6 +68,14 @@ void Property::doEval(const Type& expectedType, Value& result) const
                   "type %s does not have a property %s" | result.type().name() | m_propertyName[i]);
         result.swap(v);
     }
+    /* TODO: Policy */
+    Value v(expectedType, result);
+    result.swap(v);
+}
+
+void Property::doVisit(Node::Visitor& visitor) const
+{
+    visitor.accept(this);
 }
 
 }}}  // namespace BugEngine::RTTI::AST

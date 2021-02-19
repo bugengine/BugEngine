@@ -16,10 +16,10 @@ template < typename T >
 class Segment : public IParameter
 {
 protected:
-    RTTI::Value makeProduct(ref< IParameter > parameter, weak< Task::ITask > task)
+    ref< IProduct > makeProduct(ref< IParameter > parameter, weak< Task::ITask > task)
     {
-        return RTTI::Value(ref< Product< Segment< T > > >::create(
-            Arena::task(), be_checked_cast< Segment< T > >(parameter), task));
+        return ref< Product< Segment< T > > >::create(
+            Arena::task(), be_checked_cast< Segment< T > >(parameter), task);
     }
 
 public:

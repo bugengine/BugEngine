@@ -31,6 +31,7 @@ struct ClassID< KernelScheduler::Segments< T > >
     }
     static const RTTI::Method::Overload s_ctrOverload;
     static const RTTI::Method           s_ctr;
+    static RTTI::ObjectInfo             s_productClass;
 
     static BE_EXPORT raw< const RTTI::Class > klass()
     {
@@ -41,7 +42,7 @@ struct ClassID< KernelScheduler::Segments< T > >
                RTTI::ClassType_Object,
                {KernelScheduler::IParameter::getNamespace().m_ptr},
                be_class< KernelScheduler::IParameter >(),
-               {0},
+               {&s_productClass},
                {0},
                {0, 0},
                {1, &s_ctr},
@@ -70,6 +71,13 @@ const RTTI::Method::Overload ClassID< KernelScheduler::Segments< T > >::s_ctrOve
 template < typename T >
 const RTTI::Method ClassID< KernelScheduler::Segments< T > >::s_ctr
     = {RTTI::Class::nameConstructor(), {1, &s_ctrOverload}, {&s_ctr}};
+
+template < typename T >
+RTTI::ObjectInfo ClassID< KernelScheduler::Segments< T > >::s_productClass
+    = {{0},
+       {0},
+       KernelScheduler::IParameter::getProductTypePropertyName(),
+       Value(be_type< ref< KernelScheduler::Product< KernelScheduler::Segments< T > > > >())};
 
 }  // namespace RTTI
 }  // namespace BugEngine

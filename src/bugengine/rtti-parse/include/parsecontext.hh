@@ -19,15 +19,15 @@ struct ParseResult
 
 union YYSTYPE
 {
-    ParseResult< bool >                                                 bValue;
-    ParseResult< i64 >                                                  iValue;
-    ParseResult< double >                                               fValue;
-    ParseResult< char >                                                 cValue;
-    ParseResult< char* >                                                sValue;
-    ParseResult< ref< BugEngine::RTTI::AST::Node >* >                   value;
-    ParseResult< BugEngine::RTTI::AST::Parameter* >                     param;
-    ParseResult< minitl::vector< BugEngine::RTTI::AST::Parameter >* >   param_list;
-    ParseResult< minitl::vector< ref< BugEngine::RTTI::AST::Node > >* > value_list;
+    ParseResult< bool >                                                      bValue;
+    ParseResult< i64 >                                                       iValue;
+    ParseResult< double >                                                    fValue;
+    ParseResult< char >                                                      cValue;
+    ParseResult< char* >                                                     sValue;
+    ParseResult< ref< BugEngine::RTTI::AST::Node >* >                        value;
+    ParseResult< ref< BugEngine::RTTI::AST::Parameter >* >                   param;
+    ParseResult< minitl::vector< ref< BugEngine::RTTI::AST::Parameter > >* > param_list;
+    ParseResult< minitl::vector< ref< BugEngine::RTTI::AST::Node > >* >      value_list;
 };
 #define YYSTYPE_IS_DECLARED 1
 #define YYSTYPE_IS_TRIVIAL  1

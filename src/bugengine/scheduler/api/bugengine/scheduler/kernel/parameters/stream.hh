@@ -15,10 +15,10 @@ template < typename T >
 class Stream : public IParameter
 {
 protected:
-    RTTI::Value makeProduct(ref< IParameter > parameter, weak< Task::ITask > task)
+    ref< IProduct > makeProduct(ref< IParameter > parameter, weak< Task::ITask > task)
     {
-        return RTTI::Value(ref< Product< Stream< T > > >::create(
-            Arena::task(), be_checked_cast< Stream< T > >(parameter), task));
+        return ref< Product< Stream< T > > >::create(
+            Arena::task(), be_checked_cast< Stream< T > >(parameter), task);
     }
 
 public:

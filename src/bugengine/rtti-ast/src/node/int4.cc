@@ -22,21 +22,6 @@ ConversionCost Int4::distance(const Type& type) const
     return ConversionCalculator< bigint4 >::calculate(type);
 }
 
-bool Int4::isCompatible(DbContext& context, const RTTI::Type& expectedType) const
-{
-    if(!(be_type< byte4 >().isA(expectedType) || be_type< short4 >().isA(expectedType)
-         || be_type< int4 >().isA(expectedType) || be_type< bigint4 >().isA(expectedType)
-         || be_type< ushort4 >().isA(expectedType) || be_type< uint4 >().isA(expectedType)
-         || be_type< biguint4 >().isA(expectedType)))
-    {
-        context.error(this,
-                      Message::MessageType("cannot cast int4 value to %s") | expectedType.name());
-        return false;
-    }
-    else
-        return true;
-}
-
 void Int4::doEval(const RTTI::Type& expectedType, Value& result) const
 {
     if(be_type< byte4 >().isA(expectedType))
@@ -69,6 +54,11 @@ void Int4::doEval(const RTTI::Type& expectedType, Value& result) const
             be_checked_numcast< u64 >(m_value[2]), be_checked_numcast< u64 >(m_value[3])));
     else
         be_notreached();
+}
+
+void Int4::doVisit(Node::Visitor& visitor) const
+{
+    visitor.accept(this);
 }
 
 }}}  // namespace BugEngine::RTTI::AST

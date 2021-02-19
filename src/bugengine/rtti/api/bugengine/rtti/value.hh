@@ -73,6 +73,7 @@ public:
     template < typename T >
     Value(ByRefType< T > t);
     Value(Type typeinfo, void* location);
+    Value(Type typeinfo, const Value& castedFrom);
     ~Value();
 
     template < typename T >

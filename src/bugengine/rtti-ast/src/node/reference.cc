@@ -6,6 +6,7 @@
 
 #include <bugengine/rtti-ast/dbcontext.hh>
 #include <bugengine/rtti-ast/node/object.hh>
+#include <bugengine/rtti/engine/objectinfo.script.hh>
 
 namespace BugEngine { namespace RTTI { namespace AST {
 
@@ -34,18 +35,25 @@ bool Reference::doResolve(DbContext& context)
         }
         else
         {
-            ref< const Node > node = ns->getNode(n);
+            ref< Node > node = ns->getNode(n);
             if(node)
             {
-                m_node = node;
-                properties.pop_front();
-                if(properties.size() != 0)
+                if(node->resolve(context))
                 {
-                    ref< Node > propertyNode = m_node->getProperty(context, properties);
-                    if(propertyNode) propertyNode->resolve(context);
-                    m_node = propertyNode;
+                    m_node = node;
+                    properties.pop_front();
+                    if(properties.size() != 0)
+                    {
+                        ref< Node > propertyNode = m_node->getProperty(context, properties);
+                        if(propertyNode) propertyNode->resolve(context);
+                        m_node = propertyNode;
+                    }
+                    break;
                 }
-                break;
+                else
+                {
+                    return false;
+                }
             }
             else
             {
@@ -99,18 +107,6 @@ ConversionCost Reference::distance(const Type& type) const
     }
 }
 
-bool Reference::isCompatible(DbContext& context, const Type& expectedType) const
-{
-    if(distance(expectedType) >= ConversionCost::s_incompatible)
-    {
-        context.error(this, Message::MessageType("cannot cast reference to %s value to %s")
-                                | m_referenceName | expectedType.name());
-        return false;
-    }
-    else
-        return true;
-}
-
 void Reference::doEval(const Type& expectedType, Value& result) const
 {
     if(m_node)
@@ -153,6 +149,14 @@ minitl::tuple< raw< const RTTI::Method >, bool > Reference::getCall(DbContext& c
             return minitl::make_tuple(raw< const Method >::null(), false);
         }
     }
+}
+
+void Reference::doVisit(Node::Visitor& visitor) const
+{
+    if(m_node)
+        visitor.accept(this, m_node);
+    else
+        visitor.accept(this, m_value);
 }
 
 }}}  // namespace BugEngine::RTTI::AST

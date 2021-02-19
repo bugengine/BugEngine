@@ -22,22 +22,15 @@ ConversionCost Float2::distance(const Type& type) const
     return ConversionCalculator< float2 >::calculate(type);
 }
 
-bool Float2::isCompatible(DbContext& context, const RTTI::Type& expectedType) const
-{
-    if(!be_type< float2 >().isA(expectedType))
-    {
-        context.error(this,
-                      Message::MessageType("cannot cast float2 value to %s") | expectedType.name());
-        return false;
-    }
-    else
-        return true;
-}
-
 void Float2::doEval(const RTTI::Type& expectedType, RTTI::Value& result) const
 {
     be_forceuse(expectedType);
     result = RTTI::Value(m_value);
+}
+
+void Float2::doVisit(Node::Visitor& visitor) const
+{
+    visitor.accept(this);
 }
 
 }}}  // namespace BugEngine::RTTI::AST

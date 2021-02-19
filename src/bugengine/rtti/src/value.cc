@@ -31,6 +31,19 @@ Value::Value(Type type, void* location) : m_type(type), m_reference(true)
     m_ref.m_deallocate = false;
 }
 
+Value::Value(Type type, const Value& castFrom) : m_type(type), m_reference(false)
+{
+    be_assert(m_type.metaclass->isA(castFrom.type().metaclass)
+                  || castFrom.type().metaclass->isA(m_type.metaclass),
+              "cannot cast from %s to %s" | castFrom.type().name() | m_type.name());
+    be_assert(m_type.indirection != Type::Value || castFrom.type().isA(m_type),
+              "cannot upcast value type from %s to %s" | castFrom.type().name() | m_type.name());
+
+    m_ref.m_pointer = m_type.size() > sizeof(m_buffer) ? Arena::script().alloc(m_type.size()) : 0;
+    m_ref.m_deallocate = (m_ref.m_pointer != 0);
+    m_type.copy(castFrom.memory(), memory());
+}
+
 Value::Value(Type type, ReserveType) : m_type(type), m_reference(false)
 {
     m_ref.m_pointer = m_type.size() > sizeof(m_buffer) ? Arena::script().alloc(m_type.size()) : 0;

@@ -38,8 +38,9 @@ public:
     weak< const IMemoryBuffer > getBank(weak< const IMemoryHost > host) const;
 
     static raw< RTTI::Class > getNamespace();
+    static const istring      getProductTypePropertyName();
 
-    virtual RTTI::Value makeProduct(ref< IParameter > parameter, weak< Task::ITask > task) = 0;
+    virtual ref< IProduct > makeProduct(ref< IParameter > parameter, weak< Task::ITask > task) = 0;
 };
 
 }  // namespace KernelScheduler

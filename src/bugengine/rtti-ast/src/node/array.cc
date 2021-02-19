@@ -26,15 +26,15 @@ ConversionCost Array::distance(const Type& type) const
 {
     if(type.metaclass->type() == RTTI::ClassType_Array)
     {
-        if(!m_value.empty())
+        ConversionCost                 result = ConversionCost();
+        raw< const ScriptingArrayAPI > api    = type.metaclass->apiMethods->arrayScripting;
+        for(minitl::vector< ref< Node > >::const_iterator it = m_value.begin(); it != m_value.end();
+            ++it)
         {
-            raw< const ScriptingArrayAPI > api = type.metaclass->apiMethods->arrayScripting;
-            return m_value[0]->distance(api->value_type);
+            ConversionCost itemCost = (*it)->distance(api->value_type);
+            if(itemCost > result) result = itemCost;
         }
-        else
-        {
-            return RTTI::ConversionCost();
-        }
+        return result;
     }
     else
     {
@@ -47,46 +47,9 @@ bool Array::doResolve(DbContext& context)
     bool result = true;
     for(u32 i = 0; i < m_value.size(); ++i)
     {
-        result = result | m_value[i]->resolve(context);
+        result = result & m_value[i]->resolve(context);
     }
     return result;
-}
-
-bool Array::isCompatible(DbContext& context, const Type& expectedType) const
-{
-    if(expectedType.metaclass->type() == RTTI::ClassType_Array)
-    {
-        raw< const RTTI::ObjectInfo > o = expectedType.metaclass->getStaticProperty(value_type);
-        if(!o)
-        {
-            context.error(this, Message::MessageType("type %s does not have a %s property")
-                                    | expectedType.name() | value_type);
-        }
-        else if(!o->value.type().isA(be_type< const RTTI::Type >()))
-        {
-            context.error(
-                this, Message::MessageType(
-                          "type %s, property %s does not have the right type; expected %s, got %s")
-                          | expectedType.name() | value_type | be_type< const RTTI::Type >().name()
-                          | o->value.type().name());
-        }
-        else
-        {
-            RTTI::Type valueType = o->value.as< const RTTI::Type >();
-            u32        i         = 0;
-            for(minitl::vector< ref< Node > >::const_iterator it = m_value.begin();
-                it != m_value.end(); ++it, ++i)
-            {
-                if(!(*it)->isCompatible(context, valueType))
-                {
-                    context.info(this, Message::MessageType("for element %d of array") | i);
-                    return false;
-                }
-            }
-            return true;
-        }
-    }
-    return false;
 }
 
 void Array::doEval(const RTTI::Type& expectedType, Value& result) const
@@ -100,6 +63,11 @@ void Array::doEval(const RTTI::Type& expectedType, Value& result) const
     }
     result = expectedType.metaclass->constructor->doCall(v.begin(),
                                                          be_checked_numcast< u32 >(m_value.size()));
+}
+
+void Array::doVisit(Node::Visitor& visitor) const
+{
+    visitor.accept(this);
 }
 
 }}}  // namespace BugEngine::RTTI::AST

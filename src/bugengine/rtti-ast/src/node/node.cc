@@ -10,6 +10,96 @@ namespace BugEngine { namespace RTTI { namespace AST {
 
 static const Value s_notFound = Value();
 
+void Node::Visitor::accept(weak< const Array > arrayValue)
+{
+    be_forceuse(arrayValue);
+}
+
+void Node::Visitor::accept(weak< const Bool > boolValue)
+{
+    be_forceuse(boolValue);
+}
+
+void Node::Visitor::accept(weak< const FileName > filenameValue)
+{
+    be_forceuse(filenameValue);
+}
+
+void Node::Visitor::accept(weak< const Float > floatValue)
+{
+    be_forceuse(floatValue);
+}
+
+void Node::Visitor::accept(weak< const Float2 > float2Value)
+{
+    be_forceuse(float2Value);
+}
+
+void Node::Visitor::accept(weak< const Float3 > float3Value)
+{
+    be_forceuse(float3Value);
+}
+
+void Node::Visitor::accept(weak< const Float4 > float4Value)
+{
+    be_forceuse(float4Value);
+}
+
+void Node::Visitor::accept(weak< const Integer > integerValue)
+{
+    be_forceuse(integerValue);
+}
+
+void Node::Visitor::accept(weak< const Int2 > int2Value)
+{
+    be_forceuse(int2Value);
+}
+
+void Node::Visitor::accept(weak< const Int3 > int3Value)
+{
+    be_forceuse(int3Value);
+}
+
+void Node::Visitor::accept(weak< const Int4 > int4Value)
+{
+    be_forceuse(int4Value);
+}
+
+void Node::Visitor::accept(weak< const Object > objectValue)
+{
+    be_forceuse(objectValue);
+}
+
+void Node::Visitor::accept(weak< const Parameter > parameter, istring name,
+                           weak< const Node > value)
+{
+    be_forceuse(parameter);
+    be_forceuse(name);
+    be_forceuse(value);
+}
+
+void Node::Visitor::accept(weak< const Property > propertyValue)
+{
+    be_forceuse(propertyValue);
+}
+
+void Node::Visitor::accept(weak< const Reference > referenceValue, const Value& resolvedValue)
+{
+    be_forceuse(referenceValue);
+    be_forceuse(resolvedValue);
+}
+
+void Node::Visitor::accept(weak< const Reference > referenceValue, weak< const Node > resolvedNode)
+{
+    be_forceuse(referenceValue);
+    be_forceuse(resolvedNode);
+}
+
+void Node::Visitor::accept(weak< const String > stringValue)
+{
+    be_forceuse(stringValue);
+}
+
 bool Node::doResolve(DbContext& context)
 {
     be_forceuse(context);
@@ -22,11 +112,19 @@ bool Node::resolve(DbContext& context)
     if(m_state == InResolution)
     {
         context.error(this, Message::MessageType("circular reference detected"));
+        return false;
     }
-    m_state     = InResolution;
-    bool result = doResolve(context);
-    m_state     = Resolved;
-    return result;
+    else if(m_state == Resolved)
+        return true;
+    else if(m_state == ResolvedError)
+        return false;
+    else
+    {
+        m_state     = InResolution;
+        bool result = doResolve(context);
+        m_state     = result ? Resolved : ResolvedError;
+        return result;
+    }
 }
 
 void Node::eval(const Type& expectedType, Value& result) const
@@ -77,6 +175,12 @@ ref< Node > Node::getProperty(DbContext& context, const inamespace& name) const
     be_forceuse(name);
     context.error(this, Message::MessageType("object does not have properties"));
     return ref< Node >();
+}
+
+void Node::visit(Node::Visitor& visitor) const
+{
+    be_assert(m_state >= Resolved, "node is visited but has not yet been resolved");
+    doVisit(visitor);
 }
 
 }}}  // namespace BugEngine::RTTI::AST

@@ -5,6 +5,7 @@
 #define BE_MINITL_REFCOUNTABLE_HH_
 /**************************************************************************************************/
 #include <bugengine/minitl/stdafx.h>
+#include <bugengine/minitl/cast.hh>
 #include <bugengine/minitl/pointer.hh>
 
 namespace minitl {
@@ -42,6 +43,16 @@ private:
     }
 
 protected:
+    template < typename T >
+    ref< T > refFromThis()
+    {
+        return ref< T >(be_checked_cast< T >(this));
+    }
+    template < typename T >
+    ref< const T > refFromThis() const
+    {
+        return ref< const T >(be_checked_cast< const T >(this));
+    }
     void operator delete(void* memory)
     {
         return ::operator delete(memory);

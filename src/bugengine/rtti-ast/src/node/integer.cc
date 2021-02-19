@@ -22,18 +22,6 @@ ConversionCost Integer::distance(const Type& type) const
     return ConversionCalculator< i64 >::calculate(type);
 }
 
-bool Integer::isCompatible(DbContext& context, const RTTI::Type& expectedType) const
-{
-    if(distance(expectedType) >= ConversionCost::s_incompatible)
-    {
-        context.error(this,
-                      Message::MessageType("cannot cast int value to %s") | expectedType.name());
-        return false;
-    }
-    else
-        return true;
-}
-
 void Integer::doEval(const RTTI::Type& expectedType, RTTI::Value& result) const
 {
     if(be_type< i8 >().isA(expectedType))
@@ -54,6 +42,11 @@ void Integer::doEval(const RTTI::Type& expectedType, RTTI::Value& result) const
         result = RTTI::Value(be_checked_numcast< u64 >(m_value));
     else
         be_notreached();
+}
+
+void Integer::doVisit(Node::Visitor& visitor) const
+{
+    visitor.accept(this);
 }
 
 }}}  // namespace BugEngine::RTTI::AST

@@ -16,6 +16,7 @@ class ref
     friend ref< U > be_checked_cast(ref< V > v);
     template < typename U, typename V >
     friend ref< U > be_const_cast(ref< V > v);
+    friend class refcountable;
 
 private:
     template < typename OBJECT >

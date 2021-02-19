@@ -24,18 +24,6 @@ ConversionCost String::distance(const Type& type) const
         return ConversionCost::s_incompatible;
 }
 
-bool String::isCompatible(DbContext& context, const RTTI::Type& expectedType) const
-{
-    if(distance(expectedType) >= ConversionCost::s_incompatible)
-    {
-        context.error(this,
-                      Message::MessageType("cannot cast string value to %s") | expectedType.name());
-        return false;
-    }
-    else
-        return true;
-}
-
 void String::doEval(const RTTI::Type& expectedType, Value& result) const
 {
     if(be_type< istring >().isA(expectedType))
@@ -45,4 +33,10 @@ void String::doEval(const RTTI::Type& expectedType, Value& result) const
     else
         be_notreached();
 }
+
+void String::doVisit(Node::Visitor& visitor) const
+{
+    visitor.accept(this);
+}
+
 }}}  // namespace BugEngine::RTTI::AST

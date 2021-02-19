@@ -22,21 +22,6 @@ ConversionCost Int3::distance(const Type& type) const
     return ConversionCalculator< bigint3 >::calculate(type);
 }
 
-bool Int3::isCompatible(DbContext& context, const RTTI::Type& expectedType) const
-{
-    if(!(be_type< byte3 >().isA(expectedType) || be_type< short3 >().isA(expectedType)
-         || be_type< int3 >().isA(expectedType) || be_type< bigint3 >().isA(expectedType)
-         || be_type< ushort3 >().isA(expectedType) || be_type< uint3 >().isA(expectedType)
-         || be_type< biguint3 >().isA(expectedType)))
-    {
-        context.error(this,
-                      Message::MessageType("cannot cast int3 value to %s") | expectedType.name());
-        return false;
-    }
-    else
-        return true;
-}
-
 void Int3::doEval(const RTTI::Type& expectedType, Value& result) const
 {
     if(be_type< byte3 >().isA(expectedType))
@@ -69,6 +54,11 @@ void Int3::doEval(const RTTI::Type& expectedType, Value& result) const
                                            be_checked_numcast< u64 >(m_value[2])));
     else
         be_notreached();
+}
+
+void Int3::doVisit(Node::Visitor& visitor) const
+{
+    visitor.accept(this);
 }
 
 }}}  // namespace BugEngine::RTTI::AST

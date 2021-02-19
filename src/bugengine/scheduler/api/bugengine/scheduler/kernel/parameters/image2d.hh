@@ -15,10 +15,10 @@ template < typename T >
 class Image2D : public IParameter
 {
 protected:
-    RTTI::Value makeProduct(ref< IParameter > parameter, weak< Task::ITask > task)
+    ref< IProduct > makeProduct(ref< IParameter > parameter, weak< Task::ITask > task)
     {
-        return RTTI::Value(ref< Product< Image2D< T > > >::create(
-            Arena::task(), be_checked_cast< Image2D< T > >(parameter), task));
+        return ref< Product< Image2D< T > > >::create(
+            Arena::task(), be_checked_cast< Image2D< T > >(parameter), task);
     }
 
 public:

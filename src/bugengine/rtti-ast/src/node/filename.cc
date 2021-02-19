@@ -36,21 +36,15 @@ bool FileName::doResolve(DbContext& context)
     return true;
 }
 
-bool FileName::isCompatible(DbContext& context, const Type& expectedType) const
-{
-    if(!be_type< weak< const File > >().isA(expectedType))
-    {
-        context.error(this,
-                      Message::MessageType("cannot cast file value to %s") | expectedType.name());
-        return false;
-    }
-    else
-        return true;
-}
-
 void FileName::doEval(const Type& expectedType, Value& result) const
 {
     be_forceuse(expectedType);
     result = RTTI::Value(m_file);
 }
+
+void FileName::doVisit(Node::Visitor& visitor) const
+{
+    visitor.accept(this);
+}
+
 }}}  // namespace BugEngine::RTTI::AST

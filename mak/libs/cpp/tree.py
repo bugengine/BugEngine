@@ -744,6 +744,7 @@ class Class(Container):
             'HELPER_NAME': helper,
             'OWNER': owner.owner_name(),
             'NAMESPACE': '::'.join(namespace),
+            'PARENT': self.parent,
         }
         if self.type in ('enum'):
             definition.write(
@@ -787,15 +788,12 @@ class Class(Container):
             params['DESTRUCTOR'] = '0'
 
         if self.parent:
-            params['PARENT'] = '::be_class< %s >()' % self.parent
-            params['OFFSET'] = 'i32(ptrdiff_t(static_cast< %s* >((%s*)4))) - 4' % (self.name[-1], self.parent)
+            params['PARENT_CLASS'] = '::be_class< %(PARENT)s >()' % params
+            params['OFFSET'] = 'i32(ptrdiff_t(static_cast< %(CPP_NAME)s* >((%(PARENT)s*)4))) - 4' % params
+            params['OBJECTS'] = '{::be_class< %(PARENT)s >()->objects.m_ptr}' % params
         else:
-            params['PARENT'] = '::be_class< void >()'
+            params['PARENT_CLASS'] = '::be_class< void >()'
             params['OFFSET'] = '0'
-
-        if self.parent:
-            params['OBJECTS'] = '{::be_class< %s >()->objects.m_ptr}' % self.parent
-        else:
             params['OBJECTS'] = '{0}'
 
         for object in self.objects[::-1]:
@@ -896,7 +894,7 @@ class Class(Container):
             '        /* .offset */             %(OFFSET)s,\n'
             '        /* .id */                 %(CLASSTYPE)s,\n'
             '        /* .owner */              {%(OWNER)s.m_ptr},\n'
-            '        /* .parent */             {%(PARENT)s.m_ptr},\n'
+            '        /* .parent */             {%(PARENT_CLASS)s.m_ptr},\n'
             '        /* .objects */            %(OBJECTS)s,\n'
             '        /* .tags */               %(TAGS)s,\n'
             '        /* .properties */         %(PROPERTIES)s,\n'

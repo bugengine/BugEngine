@@ -1,8 +1,8 @@
 /* BugEngine <bugengine.devel@gmail.com>
    see LICENSE for detail */
 
-#ifndef BE_RTTI_AST_INT3_HH_
-#define BE_RTTI_AST_INT3_HH_
+#ifndef BE_RTTI_AST_NODE_INT3_HH_
+#define BE_RTTI_AST_NODE_INT3_HH_
 /**************************************************************************************************/
 #include <bugengine/rtti-ast/stdafx.h>
 #include <bugengine/kernel/simd.hh>
@@ -17,8 +17,8 @@ private:
 
 protected:
     virtual ConversionCost distance(const Type& type) const override;
-    virtual bool isCompatible(DbContext & context, const Type& expectedType) const override;
-    virtual void doEval(const Type& expectedType, Value& result) const override;
+    virtual void           doEval(const Type& expectedType, Value& result) const override;
+    virtual void           doVisit(Node::Visitor & visitor) const override;
 
 public:
     Int3(bigint3 value);

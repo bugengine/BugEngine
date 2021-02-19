@@ -3,36 +3,25 @@
 
 #include <bugengine/rtti-ast/stdafx.h>
 #include <bugengine/rtti-ast/node/object.hh>
-#include <bugengine/rtti-ast/node/property.hh>
-#include <bugengine/rtti-ast/node/reference.hh>
 
 #include <bugengine/rtti-ast/dbcontext.hh>
+#include <bugengine/rtti-ast/introspectionhint.hh>
+#include <bugengine/rtti-ast/node/parameter.hh>
+#include <bugengine/rtti-ast/node/property.hh>
+#include <bugengine/rtti-ast/node/reference.hh>
+#include <bugengine/rtti-ast/policy.script.hh>
+
 #include <bugengine/rtti/classinfo.script.hh>
 #include <bugengine/rtti/engine/call.hh>
-#include <bugengine/rtti/engine/methodinfo.script.hh>
-#include <bugengine/rtti/engine/objectinfo.script.hh>
 #include <bugengine/rtti/value.hh>
 
 namespace BugEngine { namespace RTTI { namespace AST {
 
-RTTI::ConversionCost calculateConversion(weak< const Node > node, const RTTI::Type& other)
-{
-    return node->distance(other);
-}
-
-void convert(weak< const Node > node, void* buffer, RTTI::Type type)
-{
-    // return node->unpack(buffer, type);
-    new(buffer) Value(node->eval(type));
-}
-
-Object::Object(ref< Reference > className, const minitl::vector< Parameter >& parameters)
+Object::Object(ref< Reference > className, const minitl::vector< ref< Parameter > >& parameters)
     : Node()
     , m_className(className)
     , m_parameters(parameters)
     , m_arguments(Arena::temporary())
-    , m_callInfo()
-    , m_argumentThis()
 {
 }
 
@@ -42,9 +31,9 @@ Object::~Object()
 
 ConversionCost Object::distance(const Type& type) const
 {
-    if(m_callInfo.overload)
+    if(m_introspectionHint)
     {
-        return m_callInfo.overload->returnType.calculateConversion(type);
+        return m_introspectionHint->calculateConversion(type);
     }
     else
     {
@@ -54,21 +43,9 @@ ConversionCost Object::distance(const Type& type) const
 
 minitl::tuple< raw< const RTTI::Method >, bool > Object::getCall(DbContext& context) const
 {
-    if(m_callInfo.overload)
+    if(m_introspectionHint)
     {
-        raw< const Class > cls = m_callInfo.overload->returnType.metaclass;
-
-        raw< const ObjectInfo > object = cls->getStaticProperty(Class::nameOperatorCall());
-        if(object)
-        {
-            return minitl::make_tuple(object->value.as< raw< const Method > >(), false);
-        }
-        raw< const RTTI::Method > result = cls->getMethod(Class::nameOperatorCall());
-        if(result) return minitl::make_tuple(result, true);
-        if(cls->getProperty(Class::nameOperatorCall()))
-            context.error(this, Message::MessageType("call on object of type %s is dynamic")
-                                    | m_callInfo.overload->returnType.name());
-        return minitl::make_tuple(raw< const Method >::null(), false);
+        return m_introspectionHint->getCall(context);
     }
     else
     {
@@ -78,12 +55,29 @@ minitl::tuple< raw< const RTTI::Method >, bool > Object::getCall(DbContext& cont
 
 bool Object::doResolve(DbContext& context)
 {
+    be_assert(!m_introspectionHint,
+              "object has already been resolved; make sure to reset the state first");
+    bool result = resolveInternal(context);
+    if(result)
+    {
+        be_assert(m_introspectionHint, "object resolution succeeded without providing a hint");
+    }
+    else
+    {
+        be_assert_recover(!m_introspectionHint, "object resolution failed, but produced a hint",
+                          m_introspectionHint.clear(););
+    }
+    return result;
+}
+
+bool Object::resolveInternal(DbContext& context)
+{
     bool result = m_className->resolve(context);
 
-    for(minitl::vector< Parameter >::const_iterator it = m_parameters.begin();
+    for(minitl::vector< ref< Parameter > >::const_iterator it = m_parameters.begin();
         it != m_parameters.end(); ++it)
     {
-        result &= it->value->resolve(context);
+        result &= (*it)->resolve(context);
     }
     if(result)
     {
@@ -92,11 +86,12 @@ bool Object::doResolve(DbContext& context)
         {
             context.error(this,
                           Message::MessageType("unable to call object %s") | m_className->name());
+            result = false;
         }
         else
         {
-            m_argumentThis    = method.second ? 1 : 0;
-            u32 argumentCount = m_parameters.size() + m_argumentThis;
+            u32 argumentThis  = method.second ? 1 : 0;
+            u32 argumentCount = m_parameters.size() + argumentThis;
             m_arguments.resize(argumentCount);
             if(method.second)
             {
@@ -104,56 +99,79 @@ bool Object::doResolve(DbContext& context)
             }
             for(u32 currentArg = 0; currentArg < m_parameters.size(); ++currentArg)
             {
-                m_arguments[currentArg + m_argumentThis]
-                    = ArgInfo(m_parameters[currentArg].name, m_parameters[currentArg].value);
+                m_arguments[currentArg + argumentThis]
+                    = ArgInfo(m_parameters[currentArg]->name(), m_parameters[currentArg]);
             }
 
             ArgInfo* arguments = m_arguments.empty() ? 0 : &m_arguments.front();
-            m_callInfo         = RTTI::resolve(method.first, arguments, m_argumentThis,
-                                       arguments + m_argumentThis, m_parameters.size());
+            CallInfo callInfo  = RTTI::resolve(method.first, arguments, argumentThis,
+                                              arguments + argumentThis, m_parameters.size());
+            if(callInfo.overload)
+            {
+                RTTI::Value policyTag = callInfo.overload->getTag(be_class< Policy >());
+                if(policyTag)
+                {
+                    const Policy& policy     = policyTag.as< const Policy& >();
+                    u32           errorCount = context.errorCount;
+                    m_introspectionHint      = policy.verify(context, this, callInfo, argumentThis);
+                    result                   = errorCount == context.errorCount;
+                }
+                else
+                {
+                    m_introspectionHint = ref< IntrospectionHint >::create(Arena::rtti(), this,
+                                                                           callInfo, argumentThis);
+                }
+            }
+            else
+            {
+                result = false;
+                context.error(
+                    this, Message::MessageType(
+                              "unable to call object %s: no overload could convert all arguments")
+                              | m_className->name());
+            }
         }
     }
     return result;
-}
-
-bool Object::isCompatible(DbContext& context, const Type& expectedType) const
-{
-    if(m_callInfo.overload)
-    {
-        if(!(expectedType <= m_callInfo.overload->returnType))
-        {
-            context.error(this, Message::MessageType("cannot cast %s value to %s")
-                                    | m_callInfo.overload->returnType.name() | expectedType.name());
-            return false;
-        }
-        else
-        {
-            return true;
-        }
-    }
-    else
-    {
-        return false;
-    }
 }
 
 void Object::doEval(const Type& expectedType, Value& result) const
 {
     be_forceuse(expectedType);
     const ArgInfo* arguments = m_arguments.empty() ? 0 : &m_arguments.front();
-    result = RTTI::call(m_callInfo, arguments, m_argumentThis, arguments + m_argumentThis,
-                        m_arguments.size() - m_argumentThis);
+    result                   = m_introspectionHint->call(arguments, m_arguments.size());
 }
 
 Type Object::getType() const
 {
-    return be_type< void >();
+    return m_introspectionHint->getType();
+}
+
+bool Object::getPropertyType(DbContext& context, const istring propertyName,
+                             Type& propertyType) const
+{
+    return m_introspectionHint->getPropertyType(context, propertyName, propertyType);
 }
 
 ref< Node > Object::getProperty(DbContext& context, const inamespace& propertyName) const
 {
     be_forceuse(context);
-    return ref< Property >::create(Arena::general(), this, propertyName);
+    return ref< Property >::create(Arena::general(), refFromThis< Object >(), propertyName);
+}
+
+weak< const Parameter > Object::getParameter(istring parameterName) const
+{
+    for(minitl::vector< ref< Parameter > >::const_iterator it = m_parameters.begin();
+        it != m_parameters.end(); ++it)
+    {
+        if((*it)->name() == parameterName) return *it;
+    }
+    return weak< const Parameter >();
+}
+
+void Object::doVisit(Node::Visitor& visitor) const
+{
+    visitor.accept(this);
 }
 
 }}}  // namespace BugEngine::RTTI::AST
