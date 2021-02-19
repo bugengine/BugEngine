@@ -48,6 +48,7 @@ struct Visitor : public RTTI::AST::Node::Visitor
     {
     }
 
+    using RTTI::AST::Node::Visitor::accept;
     void accept(weak< const RTTI::AST::Parameter > parameter, istring name,
                 weak< const RTTI::AST::Node > value)
     {
