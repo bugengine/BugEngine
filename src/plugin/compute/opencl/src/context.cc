@@ -36,10 +36,24 @@ Context::Context(weak< Platform > platform, cl_device_id device, cl_context cont
     size_t size = 0;
     checkResult(clGetDeviceInfo(m_device, CL_DEVICE_EXTENSIONS, 0, 0, &size));
 
-    char* deviceExtensions = (char*)malloca(size + 1);
-    deviceExtensions[size] = 0;
+    char* deviceExtensions         = (char*)malloca(size + 1);
+    char* deviceExtensionsIterator = deviceExtensions;
+    deviceExtensions[size]         = 0;
     checkResult(clGetDeviceInfo(m_device, CL_DEVICE_EXTENSIONS, size, deviceExtensions, 0));
-    be_info("Extensions: %s" | deviceExtensions);
+    while(size > 100)
+    {
+        char* nextLine = deviceExtensionsIterator + 100;
+        size -= 100;
+        while(*nextLine != ' ')
+        {
+            nextLine--;
+            size++;
+        }
+        *nextLine = 0;
+        be_info("Extensions: %s" | deviceExtensionsIterator);
+        deviceExtensionsIterator = nextLine + 1;
+    }
+    if(*deviceExtensionsIterator) be_info("Extensions: %s" | deviceExtensionsIterator);
     freea(deviceExtensions);
 }
 
