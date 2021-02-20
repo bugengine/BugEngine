@@ -15,11 +15,10 @@ namespace BugEngine { namespace World { namespace Component {
 static RTTI::Type findProductType(raw< const RTTI::Class > componentType)
 {
     istring parameterName(minitl::format< 256u >("Segments<%s>") | componentType->name);
-    raw< const RTTI::ObjectInfo > object
-        = KernelScheduler::IParameter::getNamespace()->getStaticProperty(parameterName);
-    if(object)
+    raw< const RTTI::Class > parameterClass
+        = KernelScheduler::IParameter::getParameterClass(parameterName);
+    if(parameterClass)
     {
-        raw< const RTTI::Class > parameterClass    = object->value.as< raw< const RTTI::Class > >();
         raw< const RTTI::ObjectInfo > productClass = parameterClass->getStaticProperty(
             KernelScheduler::IParameter::getProductTypePropertyName());
         if(productClass)
@@ -35,7 +34,7 @@ static RTTI::Type findProductType(raw< const RTTI::Class > componentType)
     }
     else
     {
-        be_error("could not locate class %s" | parameterName);
+        be_error("class %s has not been registered as a parameter type" | parameterName);
         return be_type< ref< KernelScheduler::IProduct > >();
     }
 }
@@ -95,12 +94,12 @@ static ref< KernelScheduler::IProduct > makeProduct(raw< const RTTI::Class >    
                                                     weak< StorageConfiguration > configuration)
 {
     istring parameterName(minitl::format< 256u >("Segments<%s>") | componentType->name);
-    raw< const RTTI::ObjectInfo > object
-        = KernelScheduler::IParameter::getNamespace()->getStaticProperty(parameterName);
-    if(object)
+    raw< const RTTI::Class > parameterClass
+        = KernelScheduler::IParameter::getParameterClass(parameterName);
+    if(parameterClass)
     {
         ref< KernelScheduler::IParameter > parameter
-            = object->value(0, 0).as< ref< KernelScheduler::IParameter > >();
+            = parameterClass->constructor->doCall(0, 0).as< ref< KernelScheduler::IParameter > >();
         return parameter->makeProduct(parameter, configuration->updateStart());
     }
     else

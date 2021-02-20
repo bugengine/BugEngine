@@ -6,15 +6,23 @@
 #include <bugengine/scheduler/kernel/imemoryhost.hh>
 #include <bugengine/scheduler/kernel/parameters/iparameter.script.hh>
 
-namespace BugEngine {
+namespace BugEngine { namespace KernelScheduler {
 
-raw< RTTI::Class > be_bugengine_Namespace_BugEngine_KernelScheduler();
-
-namespace KernelScheduler {
-
-raw< RTTI::Class > IParameter::getNamespace()
+IParameter::ParameterRegistration::ParameterRegistration(raw< const RTTI::Class > klass)
+    : m_class(klass)
 {
-    return be_bugengine_Namespace_BugEngine_KernelScheduler();
+    IParameter::parameterClasses().push_back(klass);
+}
+
+IParameter::ParameterRegistration::~ParameterRegistration()
+{
+    minitl::vector< raw< const RTTI::Class > > classes = IParameter::parameterClasses();
+    for(minitl::vector< raw< const RTTI::Class > >::iterator it = classes.begin();
+        it != classes.end(); ++it)
+    {
+        if(*it == m_class) classes.erase(it);
+        break;
+    }
 }
 
 IParameter::IParameter()
@@ -39,11 +47,27 @@ weak< const IMemoryBuffer > IParameter::getBank(weak< const IMemoryHost > host) 
     return weak< const IMemoryBuffer >();
 }
 
+raw< const RTTI::Class > IParameter::getParameterClass(istring parameterClassName)
+{
+    minitl::vector< raw< const RTTI::Class > > classes = IParameter::parameterClasses();
+    for(minitl::vector< raw< const RTTI::Class > >::iterator it = classes.begin();
+        it != classes.end(); ++it)
+    {
+        if((*it)->name == parameterClassName) return *it;
+    }
+    return raw< const RTTI::Class >();
+}
+
+minitl::vector< raw< const RTTI::Class > >& IParameter::parameterClasses()
+{
+    static minitl::vector< raw< const RTTI::Class > > s_classes(Arena::rtti());
+    return s_classes;
+}
+
 const istring IParameter::getProductTypePropertyName()
 {
     static istring s_producTypePropertyName("productType");
     return s_producTypePropertyName;
 }
 
-}  // namespace KernelScheduler
-}  // namespace BugEngine
+}}  // namespace BugEngine::KernelScheduler

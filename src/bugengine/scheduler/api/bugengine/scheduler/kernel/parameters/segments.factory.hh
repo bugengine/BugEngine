@@ -5,6 +5,8 @@
 #define BE_SCHEDULER_KERNEL_PARAMETER_SEGMENTS_FACTORY_HH_
 /**************************************************************************************************/
 #include <bugengine/scheduler/stdafx.h>
+#include <bugengine/scheduler/kernel/parameters/iparameter.script.hh>
+
 #include <bugengine/rtti/classinfo.script.hh>
 #include <bugengine/rtti/engine/methodinfo.script.hh>
 #include <bugengine/rtti/engine/objectinfo.script.hh>
@@ -32,6 +34,7 @@ struct ClassID< KernelScheduler::Segments< T > >
     static const RTTI::Method::Overload s_ctrOverload;
     static const RTTI::Method           s_ctr;
     static RTTI::ObjectInfo             s_productClass;
+    static BE_EXPORT KernelScheduler::IParameter::ParameterRegistration s_registration;
 
     static BE_EXPORT raw< const RTTI::Class > klass()
     {
@@ -40,7 +43,7 @@ struct ClassID< KernelScheduler::Segments< T > >
                u32(sizeof(KernelScheduler::Segments< T >)),
                0,
                RTTI::ClassType_Object,
-               {KernelScheduler::IParameter::getNamespace().m_ptr},
+               {0},
                be_class< KernelScheduler::IParameter >(),
                {&s_productClass},
                {0},
@@ -51,15 +54,7 @@ struct ClassID< KernelScheduler::Segments< T > >
                0,
                0};
         raw< const RTTI::Class > result = {&s_class};
-
-        static RTTI::ObjectInfo registry = {KernelScheduler::IParameter::getNamespace()->objects,
-                                            {0},
-                                            s_class.name,
-                                            RTTI::Value(result)};
-        static const RTTI::ObjectInfo* ptr
-            = KernelScheduler::IParameter::getNamespace()->objects.set(&registry);
-        be_forceuse(ptr);
-
+        (void)s_registration;
         return result;
     }
 };
@@ -78,6 +73,10 @@ RTTI::ObjectInfo ClassID< KernelScheduler::Segments< T > >::s_productClass
        {0},
        KernelScheduler::IParameter::getProductTypePropertyName(),
        Value(be_type< ref< KernelScheduler::Product< KernelScheduler::Segments< T > > > >())};
+
+template < typename T >
+KernelScheduler::IParameter::ParameterRegistration
+    ClassID< KernelScheduler::Segments< T > >::s_registration(klass());
 
 }  // namespace RTTI
 }  // namespace BugEngine
