@@ -103,7 +103,7 @@ def p_ptr_operator(p):
         ptr-operator : OP_TIMES attribute-specifier-seq? cv-qualifier-seq?
                      | OP_AND attribute-specifier-seq?
                      | OP_LAND attribute-specifier-seq?
-                     | OP_SCOPE? nested-name-specifier OP_TIMES attribute-specifier-seq cv-qualifier-seq?
+                     | OP_SCOPE? nested-name-specifier OP_TIMES attribute-specifier-seq? cv-qualifier-seq?
     """
 
 
@@ -135,8 +135,6 @@ def p_declarator_id(p):
     # type: (YaccProduction) -> None
     """
         declarator-id : ELLIPSIS? id-expression
-                      | OP_SCOPE? nested-name-specifier? IDENTIFIER
-                      | OP_SCOPE? nested-name-specifier? simple-template-id
     """
 
 

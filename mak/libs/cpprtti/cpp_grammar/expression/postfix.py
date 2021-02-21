@@ -45,8 +45,6 @@ def p_postfix_expression(p):
                            | typename-specifier braced-init-list
                            | postfix-expression PERIOD KW_TEMPLATE? id-expression
                            | postfix-expression OP_ARROW KW_TEMPLATE? id-expression
-                           | postfix-expression PERIOD pseudo-destructor-name
-                           | postfix-expression OP_ARROW pseudo-destructor-name
                            | postfix-expression OP_PLUSPLUS
                            | postfix-expression OP_MINUSMINUS
                            | KW_DYNAMIC_CAST OP_LT type-id OP_GT LPAREN expression RPAREN
@@ -56,6 +54,8 @@ def p_postfix_expression(p):
                            | KW_TYPEID LPAREN expression RPAREN
                            | KW_TYPEID LPAREN type-id RPAREN
     """
+    # deleted: postfix-expression PERIOD pseudo-destructor-name
+    #          postfix-expression OP_ARROW pseudo-destructor-name
 
 
 def p_expression_list(p):
@@ -65,15 +65,14 @@ def p_expression_list(p):
     """
 
 
-def p_pseudo_destructor_name(p):
-    # type: (YaccProduction) -> None
-    """
-        pseudo-destructor-name : OP_SCOPE? nested-name-specifier? type-name OP_SCOPE OP_NOT type-name
-                               | OP_SCOPE? nested-name-specifier KW_TEMPLATE simple-template-id OP_SCOPE OP_NOT type-name
-                               | OP_SCOPE? nested-name-specifier? OP_NOT type-name
-    """
-    # OP_NOT decltype-specifier # already covered by id-expression
-
+#def p_pseudo_destructor_name(p):
+#    # type: (YaccProduction) -> None
+#    """
+#        pseudo-destructor-name : OP_SCOPE? nested-name-specifier? type-name OP_SCOPE OP_NOT type-name
+#                               | OP_SCOPE? nested-name-specifier KW_TEMPLATE simple-template-id OP_SCOPE OP_NOT type-name
+#                               | OP_SCOPE? nested-name-specifier? OP_NOT type-name
+#    """
+#    # OP_NOT decltype-specifier # already covered by id-expression
 
 if TYPE_CHECKING:
     from ply.yacc import YaccProduction

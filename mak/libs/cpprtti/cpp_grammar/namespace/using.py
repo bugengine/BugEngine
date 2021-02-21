@@ -12,15 +12,14 @@ from be_typing import TYPE_CHECKING
 def p_using_declaration(p):
     # type: (YaccProduction) -> None
     """
-        using-declaration : KW_USING KW_TYPENAME? OP_SCOPE? nested-name-specifier unqualified-id SEMI
-                          | KW_USING OP_SCOPE unqualified-id SEMI
+        using-declaration : KW_USING KW_TYPENAME? id-expression SEMI
     """
 
 
 def p_using_directive(p):
     # type: (YaccProduction) -> None
     """
-        using-directive : attribute-specifier-seq? KW_USING KW_NAMESPACE OP_SCOPE? nested-name-specifier? IDENTIFIER SEMI
+        using-directive : attribute-specifier-seq? KW_USING KW_NAMESPACE id-expression IDENTIFIER SEMI
     """
 
 

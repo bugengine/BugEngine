@@ -19,16 +19,15 @@ from be_typing import TYPE_CHECKING
 def p_namespace_alias_definition(p):
     # type: (YaccProduction) -> None
     """
-        namespace-alias-definition : KW_NAMESPACE IDENTIFIER OP_EQUALS qualified-namespace-specifier SEMI
+        namespace-alias-definition : KW_NAMESPACE IDENTIFIER OP_EQUALS id-expression SEMI
     """
 
 
-def p_qualified_namespace_specifier(p):
-    # type: (YaccProduction) -> None
-    """
-        qualified-namespace-specifier : OP_SCOPE? nested-name-specifier? IDENTIFIER
-    """
-
+#def p_qualified_namespace_specifier(p):
+#    # type: (YaccProduction) -> None
+#    """
+#        qualified-namespace-specifier : id-expression
+#    """
 
 if TYPE_CHECKING:
     from ply.yacc import YaccProduction

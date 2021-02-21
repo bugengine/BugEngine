@@ -39,17 +39,16 @@ def p_class_specifier(p):
 def p_class_head(p):
     # type: (YaccProduction) -> None
     """
-        class-head : class-key attribute-specifier-seq? class-head-name class-virt-specifier-seq? base-clause?
-                   | class-key attribute-specifier-seq? base-clause?
+        class-head : class-key attribute-specifier-seq? id-expression? class-virt-specifier-seq? base-clause?
     """
 
 
-def p_class_head_name(p):
-    # type: (YaccProduction) -> None
-    """
-        class-head-name : nested-name-specifier? IDENTIFIER
-                        | nested-name-specifier? simple-template-id
-    """
+#def p_class_head_name(p):
+#    # type: (YaccProduction) -> None
+#    """
+#        class-head-name : nested-name-specifier? IDENTIFIER
+#                        | nested-name-specifier? simple-template-id
+#    """
 
 
 def p_class_virt_specifier_seq(p):

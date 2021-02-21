@@ -82,7 +82,8 @@ def p_qualified_id(p):
 def p_nested_name_specifier(p):
     # type: (YaccProduction) -> None
     """
-        nested-name-specifier : type-name OP_SCOPE
+        nested-name-specifier : IDENTIFIER OP_SCOPE
+                              | simple-template-id OP_SCOPE
                               | decltype-specifier OP_SCOPE
                               | nested-name-specifier IDENTIFIER OP_SCOPE
                               | nested-name-specifier KW_TEMPLATE? simple-template-id OP_SCOPE

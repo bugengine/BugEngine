@@ -45,8 +45,7 @@ def p_enum_specifier(p):
 def p_enum_head(p):
     # type: (YaccProduction) -> None
     """
-        enum-head : enum-key attribute-specifier-seq? IDENTIFIER? enum-base?
-                  | enum-key attribute-specifier-seq? nested-name-specifier IDENTIFIER enum-base?
+        enum-head : enum-key attribute-specifier-seq? id-expression? enum-base?
     """
 
 
