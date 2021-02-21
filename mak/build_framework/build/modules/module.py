@@ -171,7 +171,7 @@ def module(
     if module_path is not None:
         task_gen.module_path = module_path
 
-    if Options.options.tests:
+    if Options.options.tests and env.UNIT_TESTS:
         for source_node in source_nodes:
             if os.path.isdir(os.path.join(source_node.abspath(), 'tests')):
                 test_path = source_node.make_node('tests')
