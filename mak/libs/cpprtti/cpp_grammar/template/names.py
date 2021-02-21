@@ -22,7 +22,7 @@ from be_typing import TYPE_CHECKING
 def p_simple_template_id(p):
     # type: (YaccProduction) -> None
     """
-        simple-template-id : template-name OP_LT template-argument-list? OP_GT
+        simple-template-id : IDENTIFIER OP_LT template-argument-list? OP_GT
     """
 
 
@@ -35,11 +35,11 @@ def p_template_id(p):
     """
 
 
-def p_template_name(p):
-    # type: (YaccProduction) -> None
-    """
-        template-name : IDENTIFIER
-    """
+#def p_template_name(p):
+#    # type: (YaccProduction) -> None
+#    """
+#        template-name : IDENTIFIER
+#    """
 
 
 def p_template_argument_list(p):
@@ -57,7 +57,6 @@ def p_template_argument(p):
                           | type-id
     """
     # id-expression is included in constant-expression
-
 
 
 if TYPE_CHECKING:
