@@ -27,14 +27,14 @@ from be_typing import TYPE_CHECKING
 def p_lambda_expression(p):
     # type: (YaccProduction) -> None
     """
-        lambda-expression : lambda-introducer lambda-declarator-opt compound-statement
+        lambda-expression : lambda-introducer lambda-declarator? compound-statement
     """
 
 
 def p_lambda_introducer(p):
     # type: (YaccProduction) -> None
     """
-        lambda-introducer : LBRACKET lambda-capture-opt RBRACKET
+        lambda-introducer : LBRACKET lambda-capture? RBRACKET
     """
 
 
@@ -44,14 +44,6 @@ def p_lambda_capture(p):
         lambda-capture : capture-default
                        | capture-list
                        | capture-default COMMA capture-list
-    """
-
-
-def p_lambda_capture_opt(p):
-    # type: (YaccProduction) -> None
-    """
-        lambda-capture-opt : lambda-capture
-                           | empty
     """
 
 
@@ -66,8 +58,8 @@ def p_capture_default(p):
 def p_capture_list(p):
     # type: (YaccProduction) -> None
     """
-        capture-list : capture ellipsis-opt
-                     | capture-list COMMA capture ellipsis-opt
+        capture-list : capture ELLIPSIS?
+                     | capture-list COMMA capture ELLIPSIS?
     """
 
 
@@ -83,23 +75,7 @@ def p_capture(p):
 def p_lambda_declarator(p):
     # type: (YaccProduction) -> None
     """
-        lambda-declarator : LPAREN parameter-declaration-clause RPAREN mutable-opt exception-specification-opt attribute-specifier-seq-opt trailing-return-type-opt
-    """
-
-
-def p_lambda_declarator_opt(p):
-    # type: (YaccProduction) -> None
-    """
-        lambda-declarator-opt : lambda-declarator
-                              | empty
-    """
-
-
-def p_mutable_opt(p):
-    # type: (YaccProduction) -> None
-    """
-        mutable-opt : KW_MUTABLE
-                    | empty
+        lambda-declarator : LPAREN parameter-declaration-clause RPAREN KW_MUTABLE? exception-specification? attribute-specifier-seq? trailing-return-type?
     """
 
 

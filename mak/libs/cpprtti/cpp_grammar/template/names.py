@@ -22,7 +22,7 @@ from be_typing import TYPE_CHECKING
 def p_simple_template_id(p):
     # type: (YaccProduction) -> None
     """
-        simple-template-id : template-name OP_LT template-argument-list-opt OP_GT
+        simple-template-id : template-name OP_LT template-argument-list? OP_GT
     """
 
 
@@ -30,8 +30,8 @@ def p_template_id(p):
     # type: (YaccProduction) -> None
     """
         template-id : simple-template-id
-                    | operator-function-id OP_LT template-argument-list-opt OP_GT
-                    | literal-operator-id OP_LT template-argument-list-opt OP_GT
+                    | operator-function-id OP_LT template-argument-list? OP_GT
+                    | literal-operator-id OP_LT template-argument-list? OP_GT
     """
 
 
@@ -42,19 +42,11 @@ def p_template_name(p):
     """
 
 
-def p_template_argument_list_opt(p):
-    # type: (YaccProduction) -> None
-    """
-        template-argument-list-opt : template-argument-list
-                                   | empty
-    """
-
-
 def p_template_argument_list(p):
     # type: (YaccProduction) -> None
     """
-        template-argument-list : template-argument ellipsis-opt
-                               | template-argument-list COMMA template-argument ellipsis-opt
+        template-argument-list : template-argument ELLIPSIS?
+                               | template-argument-list COMMA template-argument ELLIPSIS?
     """
 
 
@@ -66,13 +58,6 @@ def p_template_argument(p):
     """
     # id-expression is included in constant-expression
 
-
-def p_ellipsis_opt(p):
-    # type: (YaccProduction) -> None
-    """
-        ellipsis-opt : ELLIPSIS
-                     | empty
-    """
 
 
 if TYPE_CHECKING:

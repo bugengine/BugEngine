@@ -25,16 +25,8 @@ def p_condition(p):
     # type: (YaccProduction) -> None
     """
         condition : expression
-                  | attribute-specifier-seq-opt decl-specifier-seq declarator OP_EQUALS initializer-clause
-                  | attribute-specifier-seq-opt decl-specifier-seq declarator braced-init-list
-    """
-
-
-def p_condition_opt(p):
-    # type: (YaccProduction) -> None
-    """
-        condition-opt : condition
-                      | empty
+                  | attribute-specifier-seq? decl-specifier-seq declarator OP_EQUALS initializer-clause
+                  | attribute-specifier-seq? decl-specifier-seq declarator braced-init-list
     """
 
 

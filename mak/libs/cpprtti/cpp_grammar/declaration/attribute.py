@@ -45,14 +45,6 @@ def p_attribute_specifier_seq(p):
     """
 
 
-def p_attribute_specifier_seq_opt(p):
-    # type: (YaccProduction) -> None
-    """
-        attribute-specifier-seq-opt : attribute-specifier-seq
-                                    | empty
-    """
-
-
 def p_attribute_specifier(p):
     # type: (YaccProduction) -> None
     """
@@ -64,16 +56,16 @@ def p_attribute_specifier(p):
 def p_alignment_specifier(p):
     # type: (YaccProduction) -> None
     """
-        alignment-specifier : KW_ALIGNAS LPAREN type-id ellipsis-opt RPAREN
-                            | KW_ALIGNAS LPAREN constant-expression ellipsis-opt RPAREN
+        alignment-specifier : KW_ALIGNAS LPAREN type-id ELLIPSIS? RPAREN
+                            | KW_ALIGNAS LPAREN constant-expression ELLIPSIS? RPAREN
     """
 
 
 def p_attribute_list(p):
     # type: (YaccProduction) -> None
     """
-        attribute-list : attribute-opt
-                       | attribute-list COMMA attribute-opt
+        attribute-list : attribute?
+                       | attribute-list COMMA attribute?
                        | attribute ELLIPSIS
                        | attribute-list COMMA attribute ELLIPSIS
     """
@@ -82,15 +74,7 @@ def p_attribute_list(p):
 def p_attribute(p):
     # type: (YaccProduction) -> None
     """
-        attribute : attribute-token attribute-argument-clause-opt
-    """
-
-
-def p_attribute_opt(p):
-    # type: (YaccProduction) -> None
-    """
-        attribute-opt : attribute
-                      | empty
+        attribute : attribute-token attribute-argument-clause?
     """
 
 
@@ -120,14 +104,6 @@ def p_attribute_argument_clause(p):
     # type: (YaccProduction) -> None
     """
         attribute-argument-clause : LPAREN balanced-token-seq RPAREN
-    """
-
-
-def p_attribute_argument_clause_opt(p):
-    # type: (YaccProduction) -> None
-    """
-        attribute-argument-clause-opt : attribute-argument-clause
-                                      | empty
     """
 
 

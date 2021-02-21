@@ -29,7 +29,7 @@ def p_try_block(p):
 def p_function_try_block(p):
     # type: (YaccProduction) -> None
     """
-        function-try-block : KW_TRY ctor-initializer-opt compound-statement handler-seq
+        function-try-block : KW_TRY ctor-initializer? compound-statement handler-seq
     """
 
 
@@ -51,8 +51,8 @@ def p_handler(p):
 def p_exception_declaration(p):
     # type: (YaccProduction) -> None
     """
-        exception-declaration : attribute-specifier-seq-opt type-specifier-seq declarator
-                              | attribute-specifier-seq-opt type-specifier-seq abstract-declarator-opt
+        exception-declaration : attribute-specifier-seq? type-specifier-seq declarator
+                              | attribute-specifier-seq? type-specifier-seq abstract-declarator?
                               | ELLIPSIS
     """
 
@@ -60,7 +60,7 @@ def p_exception_declaration(p):
 def p_throw_exception(p):
     # type: (YaccProduction) -> None
     """
-        throw-expression : KW_THROW assignment-expression-opt
+        throw-expression : KW_THROW assignment-expression?
     """
 
 

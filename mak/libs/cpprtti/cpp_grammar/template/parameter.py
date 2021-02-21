@@ -25,12 +25,12 @@ def p_template_parameter(p):
 def p_type_parameter(p):
     # type: (YaccProduction) -> None
     """
-        type-parameter : KW_CLASS ellipsis-opt identifier-opt
-                       | KW_CLASS identifier-opt OP_EQUALS type-id
-                       | KW_TYPENAME ellipsis-opt identifier-opt
-                       | KW_TYPENAME identifier-opt OP_EQUALS type-id
-                       | KW_TEMPLATE OP_LT template-parameter-list OP_GT KW_CLASS ellipsis-opt identifier-opt
-                       | KW_TEMPLATE OP_LT template-parameter-list OP_GT KW_CLASS identifier-opt OP_EQUALS id-expression
+        type-parameter : KW_CLASS ELLIPSIS? identifier?
+                       | KW_CLASS identifier? OP_EQUALS type-id
+                       | KW_TYPENAME ELLIPSIS? identifier?
+                       | KW_TYPENAME identifier? OP_EQUALS type-id
+                       | KW_TEMPLATE OP_LT template-parameter-list OP_GT KW_CLASS ELLIPSIS? identifier?
+                       | KW_TEMPLATE OP_LT template-parameter-list OP_GT KW_CLASS identifier? OP_EQUALS id-expression
     """
     # original: template < template-parameter-list > class identifieropt = id-expression
 

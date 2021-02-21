@@ -31,16 +31,8 @@ def p_decl_specifier(p):
 def p_decl_specifier_seq(p):
     # type: (YaccProduction) -> None
     """
-        decl-specifier-seq : decl-specifier attribute-specifier-seq-opt
+        decl-specifier-seq : decl-specifier attribute-specifier-seq?
                            | decl-specifier decl-specifier-seq
-    """
-
-
-def p_decl_specifier_seq_opt(p):
-    # type: (YaccProduction) -> None
-    """
-        decl-specifier-seq-opt : decl-specifier-seq
-                               | empty
     """
 
 

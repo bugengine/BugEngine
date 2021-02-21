@@ -43,7 +43,7 @@ def p_trailing_type_specifier(p):
 def p_type_specifier_seq(p):
     # type: (YaccProduction) -> None
     """
-        type-specifier-seq : type-specifier attribute-specifier-seq-opt
+        type-specifier-seq : type-specifier attribute-specifier-seq?
                            | type-specifier type-specifier-seq
     """
 
@@ -51,7 +51,7 @@ def p_type_specifier_seq(p):
 def p_trailing_type_specifier_seq(p):
     # type: (YaccProduction) -> None
     """
-        trailing-type-specifier-seq : trailing-type-specifier attribute-specifier-seq-opt
+        trailing-type-specifier-seq : trailing-type-specifier attribute-specifier-seq?
                                     | trailing-type-specifier trailing-type-specifier-seq
     """
 

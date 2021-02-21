@@ -20,13 +20,5 @@ def p_expression(p):
     """
 
 
-def p_expression_opt(p):
-    # type: (YaccProduction) -> None
-    """
-        expression-opt : expression
-                       | empty
-    """
-
-
 if TYPE_CHECKING:
     from ply.yacc import YaccProduction

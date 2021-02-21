@@ -50,18 +50,10 @@ def p_init_declarator_list(p):
     """
 
 
-def p_init_declarator_list_opt(p):
-    # type: (YaccProduction) -> None
-    """
-        init-declarator-list-opt : init-declarator-list
-                                 | empty
-    """
-
-
 def p_init_declarator(p):
     # type: (YaccProduction) -> None
     """
-        init-declarator : declarator initializer-opt
+        init-declarator : declarator initializer?
     """
 
 
@@ -84,9 +76,9 @@ def p_ptr_declarator(p):
 def p_noptr_declarator(p):
     # type: (YaccProduction) -> None
     """
-        noptr-declarator : declarator-id attribute-specifier-seq-opt
+        noptr-declarator : declarator-id attribute-specifier-seq?
                          | noptr-declarator parameters-and-qualifiers
-                         | noptr-declarator LBRACKET constant-expression-opt RBRACKET attribute-specifier-seq-opt
+                         | noptr-declarator LBRACKET constant-expression? RBRACKET attribute-specifier-seq?
                          | LPAREN ptr-declarator RPAREN
     """
 
@@ -94,33 +86,24 @@ def p_noptr_declarator(p):
 def p_parameters_and_qualifiers(p):
     # type: (YaccProduction) -> None
     """
-        parameters-and-qualifiers : LPAREN parameter-declaration-clause RPAREN attribute-specifier-seq-opt cv-qualifier-seq-opt ref-qualifier-opt exception-specification-opt
+        parameters-and-qualifiers : LPAREN parameter-declaration-clause RPAREN attribute-specifier-seq? cv-qualifier-seq? ref-qualifier? exception-specification?
     """
 
 
 def p_trailing_return_type(p):
     # type: (YaccProduction) -> None
     """
-        trailing-return-type : OP_ARROW trailing-type-specifier-seq abstract-declarator-opt
-    """
-
-
-def p_trailing_return_type_opt(p):
-    # type: (YaccProduction) -> None
-    """
-        trailing-return-type-opt : trailing-return-type
-                                 | empty
+        trailing-return-type : OP_ARROW trailing-type-specifier-seq abstract-declarator?
     """
 
 
 def p_ptr_operator(p):
     # type: (YaccProduction) -> None
     """
-        ptr-operator : OP_TIMES attribute-specifier-seq-opt cv-qualifier-seq-opt
-                     | OP_AND attribute-specifier-seq-opt
-                     | OP_LAND attribute-specifier-seq-opt
-                     | scope-opt nested-name-specifier OP_TIMES attribute-specifier-seq cv-qualifier-seq-opt
-                     | nested-name-specifier OP_TIMES attribute-specifier-seq-opt cv-qualifier-seq-opt
+        ptr-operator : OP_TIMES attribute-specifier-seq? cv-qualifier-seq?
+                     | OP_AND attribute-specifier-seq?
+                     | OP_LAND attribute-specifier-seq?
+                     | OP_SCOPE? nested-name-specifier OP_TIMES attribute-specifier-seq cv-qualifier-seq?
     """
 
 
@@ -129,14 +112,6 @@ def p_cv_qualifier_seq(p):
     """
         cv-qualifier-seq : cv-qualifier
                          | cv-qualifier cv-qualifier-seq
-    """
-
-
-def p_cv_qualifier_seq_opt(p):
-    # type: (YaccProduction) -> None
-    """
-        cv-qualifier-seq-opt : cv-qualifier-seq
-                             | empty
     """
 
 
@@ -156,19 +131,11 @@ def p_ref_qualifier(p):
     """
 
 
-def p_ref_qualifier_opt(p):
-    # type: (YaccProduction) -> None
-    """
-        ref-qualifier-opt : ref-qualifier
-                          | empty
-    """
-
-
 def p_declarator_id(p):
     # type: (YaccProduction) -> None
     """
-        declarator-id : ellipsis-opt id-expression
-                      | scope-opt nested-name-specifier-opt class-name
+        declarator-id : ELLIPSIS? id-expression
+                      | OP_SCOPE? nested-name-specifier? class-name
     """
 
 

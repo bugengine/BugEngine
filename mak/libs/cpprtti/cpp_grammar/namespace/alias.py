@@ -27,7 +27,7 @@ def p_namespace_alias_definition(p):
 def p_qualified_namespace_specifier(p):
     # type: (YaccProduction) -> None
     """
-        qualified-namespace-specifier : scope-opt nested-name-specifier-opt namespace-name
+        qualified-namespace-specifier : OP_SCOPE? nested-name-specifier? namespace-name
     """
 
 

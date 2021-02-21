@@ -38,7 +38,7 @@ def p_enum_name(p):
 def p_enum_specifier(p):
     # type: (YaccProduction) -> None
     """
-        enum-specifier : enum-head LBRACE enumerator-list-opt RBRACE
+        enum-specifier : enum-head LBRACE enumerator-list? RBRACE
                        | enum-head LBRACE enumerator-list COMMA RBRACE
     """
 
@@ -46,15 +46,15 @@ def p_enum_specifier(p):
 def p_enum_head(p):
     # type: (YaccProduction) -> None
     """
-        enum-head : enum-key attribute-specifier-seq-opt identifier-opt enum-base-opt
-                  | enum-key attribute-specifier-seq-opt nested-name-specifier identifier enum-base-opt
+        enum-head : enum-key attribute-specifier-seq? identifier? enum-base?
+                  | enum-key attribute-specifier-seq? nested-name-specifier identifier enum-base?
     """
 
 
 def p_opaque_enum_declaration(p):
     # type: (YaccProduction) -> None
     """
-        opaque-enum-declaration : enum-key attribute-specifier-seq-opt identifier enum-base-opt SEMI
+        opaque-enum-declaration : enum-key attribute-specifier-seq? identifier enum-base? SEMI
     """
 
 
@@ -74,27 +74,11 @@ def p_enum_base(p):
     """
 
 
-def p_enum_base_opt(p):
-    # type: (YaccProduction) -> None
-    """
-        enum-base-opt : enum-base
-                      | empty
-    """
-
-
 def p_enumerator_list(p):
     # type: (YaccProduction) -> None
     """
         enumerator-list : enumerator-definition
                         | enumerator-list COMMA enumerator-definition
-    """
-
-
-def p_enumerator_list_opt(p):
-    # type: (YaccProduction) -> None
-    """
-        enumerator-list-opt : enumerator-list
-                            | empty
     """
 
 

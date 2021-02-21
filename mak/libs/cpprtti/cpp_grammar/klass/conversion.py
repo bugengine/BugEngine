@@ -20,22 +20,14 @@ def p_conversion_function_id(p):
 def p_conversion_type_id(p):
     # type: (YaccProduction) -> None
     """
-        conversion-type-id : type-specifier-seq conversion-declarator-opt
+        conversion-type-id : type-specifier-seq conversion-declarator?
     """
 
 
 def p_conversion_declarator(p):
     # type: (YaccProduction) -> None
     """
-        conversion-declarator : ptr-operator conversion-declarator-opt
-    """
-
-
-def p_conversion_declarator_opt(p):
-    # type: (YaccProduction) -> None
-    """
-        conversion-declarator-opt : conversion-declarator
-                                  | empty
+        conversion-declarator : ptr-operator conversion-declarator?
     """
 
 

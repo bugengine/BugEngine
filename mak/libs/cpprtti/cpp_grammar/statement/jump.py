@@ -15,7 +15,7 @@ def p_jump_statement(p):
     """
     jump-statement : KW_BREAK SEMI
                    | KW_CONTINUE SEMI
-                   | KW_RETURN expression-opt SEMI
+                   | KW_RETURN expression? SEMI
                    | KW_RETURN braced-init-list SEMI
                    | KW_GOTO identifier SEMI
     """

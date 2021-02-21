@@ -23,8 +23,8 @@ from be_typing import TYPE_CHECKING
 def p_new_expression(p):
     # type: (YaccProduction) -> None
     """
-        new-expression : scope-opt KW_NEW new-placement-opt new-type-id new-initializer-opt
-                       | scope-opt KW_NEW new-placement-opt LPAREN type-id RPAREN new-initializer-opt
+        new-expression : OP_SCOPE? KW_NEW new-placement? new-type-id new-initializer?
+                       | OP_SCOPE? KW_NEW new-placement? LPAREN type-id RPAREN new-initializer?
     """
 
 
@@ -35,58 +35,34 @@ def p_new_placement(p):
     """
 
 
-def p_new_placement_opt(p):
-    # type: (YaccProduction) -> None
-    """
-        new-placement-opt : new-placement
-                          | empty
-    """
-
-
 def p_new_type_id(p):
     # type: (YaccProduction) -> None
     """
-        new-type-id : type-specifier-seq new-declarator-opt
+        new-type-id : type-specifier-seq new-declarator?
     """
 
 
 def p_new_declarator(p):
     # type: (YaccProduction) -> None
     """
-        new-declarator : ptr-operator new-declarator-opt
+        new-declarator : ptr-operator new-declarator?
                        | noptr-new-declarator
-    """
-
-
-def p_new_declarator_opt(p):
-    # type: (YaccProduction) -> None
-    """
-        new-declarator-opt : new-declarator
-                           | empty
     """
 
 
 def p_noptr_new_declarator(p):
     # type: (YaccProduction) -> None
     """
-        noptr-new-declarator : LBRACKET expression RBRACKET attribute-specifier-seq-opt
-                             | noptr-new-declarator LBRACKET constant-expression RBRACKET attribute-specifier-seq-opt
+        noptr-new-declarator : LBRACKET expression RBRACKET attribute-specifier-seq?
+                             | noptr-new-declarator LBRACKET constant-expression RBRACKET attribute-specifier-seq?
     """
 
 
 def p_new_initializer(p):
     # type: (YaccProduction) -> None
     """
-        new-initializer : LPAREN expression-list-opt RPAREN
+        new-initializer : LPAREN expression-list? RPAREN
                         | braced-init-list
-    """
-
-
-def p_new_initializer_opt(p):
-    # type: (YaccProduction) -> None
-    """
-        new-initializer-opt : new-initializer
-                            | empty
     """
 
 

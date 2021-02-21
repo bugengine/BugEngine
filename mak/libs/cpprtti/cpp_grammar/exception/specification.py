@@ -23,34 +23,18 @@ def p_exception_specification(p):
     """
 
 
-def p_exception_specification_opt(p):
-    # type: (YaccProduction) -> None
-    """
-        exception-specification-opt : exception-specification
-                                    | empty
-    """
-
-
 def p_dynamic_exception_specification(p):
     # type: (YaccProduction) -> None
     """
-        dynamic-exception-specification : KW_THROW LPAREN type-id-list-opt RPAREN
+        dynamic-exception-specification : KW_THROW LPAREN type-id-list? RPAREN
     """
 
 
 def p_type_id_list(p):
     # type: (YaccProduction) -> None
     """
-        type-id-list : type-id ellipsis-opt
-                     | type-id-list COMMA type-id ellipsis-opt
-    """
-
-
-def p_type_id_list_opt(p):
-    # type: (YaccProduction) -> None
-    """
-        type-id-list-opt : type-id-list
-                         | empty
+        type-id-list : type-id ELLIPSIS?
+                     | type-id-list COMMA type-id ELLIPSIS?
     """
 
 

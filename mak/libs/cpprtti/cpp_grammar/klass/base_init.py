@@ -22,26 +22,18 @@ def p_ctor_initializer(p):
     """
 
 
-def p_ctor_initializer_opt(p):
-    # type: (YaccProduction) -> None
-    """
-        ctor-initializer-opt : ctor-initializer
-                             | empty
-    """
-
-
 def p_mem_initializer_list(p):
     # type: (YaccProduction) -> None
     """
-        mem-initializer-list : mem-initializer ellipsis-opt
-                             | mem-initializer COMMA mem-initializer-list ellipsis-opt
+        mem-initializer-list : mem-initializer ELLIPSIS?
+                             | mem-initializer COMMA mem-initializer-list ELLIPSIS?
     """
 
 
 def p_mem_initializer(p):
     # type: (YaccProduction) -> None
     """
-        mem-initializer : mem-initializer-id LPAREN expression-list-opt RPAREN
+        mem-initializer : mem-initializer-id LPAREN expression-list? RPAREN
                         | mem-initializer-id braced-init-list
     """
 

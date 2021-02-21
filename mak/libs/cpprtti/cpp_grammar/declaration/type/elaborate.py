@@ -11,9 +11,9 @@ from be_typing import TYPE_CHECKING
 def p_elaborate_type_specifier(p):
     # type: (YaccProduction) -> None
     """
-        elaborated-type-specifier : class-key attribute-specifier-seq-opt scope-opt nested-name-specifier-opt identifier
-                                  | class-key scope-opt nested-name-specifier-opt template-opt simple-template-id
-                                  | enum-key scope-opt nested-name-specifier-opt identifier
+        elaborated-type-specifier : class-key attribute-specifier-seq? OP_SCOPE? nested-name-specifier? identifier
+                                  | class-key OP_SCOPE? nested-name-specifier? KW_TEMPLATE? simple-template-id
+                                  | enum-key OP_SCOPE? nested-name-specifier? identifier
     """
 
 

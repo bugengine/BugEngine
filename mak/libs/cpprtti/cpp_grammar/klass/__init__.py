@@ -40,22 +40,22 @@ def p_class_name(p):
 def p_class_specifier(p):
     # type: (YaccProduction) -> None
     """
-        class-specifier : class-head LBRACE member-specification-opt RBRACE
+        class-specifier : class-head LBRACE member-specification? RBRACE
     """
 
 
 def p_class_head(p):
     # type: (YaccProduction) -> None
     """
-        class-head : class-key attribute-specifier-seq-opt class-head-name class-virt-specifier-seq-opt base-clause-opt
-                   | class-key attribute-specifier-seq-opt base-clause-opt
+        class-head : class-key attribute-specifier-seq? class-head-name class-virt-specifier-seq? base-clause?
+                   | class-key attribute-specifier-seq? base-clause?
     """
 
 
 def p_class_head_name(p):
     # type: (YaccProduction) -> None
     """
-        class-head-name : nested-name-specifier-opt class-name
+        class-head-name : nested-name-specifier? class-name
     """
 
 
@@ -64,14 +64,6 @@ def p_class_virt_specifier_seq(p):
     """
         class-virt-specifier-seq : class-virt-specifier
                                  | class-virt-specifier-seq class-virt-specifier
-    """
-
-
-def p_class_virt_specifier_seq_opt(p):
-    # type: (YaccProduction) -> None
-    """
-        class-virt-specifier-seq-opt : class-virt-specifier-seq
-                                     | empty
     """
 
 

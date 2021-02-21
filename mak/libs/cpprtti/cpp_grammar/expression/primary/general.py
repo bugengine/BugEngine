@@ -71,7 +71,7 @@ def p_unqualified_id(p):
 def p_qualified_id(p):
     # type: (YaccProduction) -> None
     """
-        qualified-id : scope-opt nested-name-specifier template-opt unqualified-id
+        qualified-id : OP_SCOPE? nested-name-specifier KW_TEMPLATE? unqualified-id
                      | OP_SCOPE identifier
                      | OP_SCOPE operator-function-id
                      | OP_SCOPE literal-operator-id
@@ -86,31 +86,7 @@ def p_nested_name_specifier(p):
                               | namespace-name OP_SCOPE
                               | decltype-specifier OP_SCOPE
                               | nested-name-specifier identifier OP_SCOPE
-                              | nested-name-specifier template-opt simple-template-id OP_SCOPE
-    """
-
-
-def p_nested_name_specifier_opt(p):
-    # type: (YaccProduction) -> None
-    """
-        nested-name-specifier-opt : nested-name-specifier
-                                  | empty
-    """
-
-
-def p_template_opt(p):
-    # type: (YaccProduction) -> None
-    """
-        template-opt : KW_TEMPLATE
-                     | empty
-    """
-
-
-def p_scope_opt(p):
-    # type: (YaccProduction) -> None
-    """
-        scope-opt : OP_SCOPE
-                  | empty
+                              | nested-name-specifier KW_TEMPLATE? simple-template-id OP_SCOPE
     """
 
 
@@ -118,14 +94,6 @@ def p_indentifier(p):
     # type: (YaccProduction) -> None
     """
         identifier : IDENTIFIER
-    """
-
-
-def p_indentifier_opt(p):
-    # type: (YaccProduction) -> None
-    """
-        identifier-opt : identifier
-                       | empty
     """
 
 

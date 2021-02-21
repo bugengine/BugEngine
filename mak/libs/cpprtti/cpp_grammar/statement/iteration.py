@@ -21,7 +21,7 @@ def p_iteration_statement(p):
     """
         iteration-statement : KW_WHILE LPAREN condition RPAREN statement
                             | KW_DO statement KW_WHILE LPAREN expression RPAREN SEMI
-                            | KW_FOR LPAREN for-init-statement condition-opt SEMI expression-opt RPAREN statement
+                            | KW_FOR LPAREN for-init-statement condition? SEMI expression? RPAREN statement
                             | KW_FOR LPAREN for-range-declaration COLON for-range-initializer RPAREN statement
     """
 
@@ -37,7 +37,7 @@ def p_for_init_statement(p):
 def p_for_range_declaration(p):
     # type: (YaccProduction) -> None
     """
-        for-range-declaration : attribute-specifier-seq-opt type-specifier-seq declarator
+        for-range-declaration : attribute-specifier-seq? type-specifier-seq declarator
     """
 
 

@@ -57,36 +57,28 @@ def p_named_namespace_definition(p):
 def p_original_namespace_definition(p):
     # type: (YaccProduction) -> None
     """
-        original-namespace-definition : inline-opt KW_NAMESPACE identifier LBRACE namespace-body RBRACE
+        original-namespace-definition : KW_INLINE? KW_NAMESPACE identifier LBRACE namespace-body RBRACE
     """
 
 
 def p_extension_namespace_definition(p):
     # type: (YaccProduction) -> None
     """
-        extension-namespace-definition : inline-opt KW_NAMESPACE original-namespace-name LBRACE namespace-body RBRACE
+        extension-namespace-definition : KW_INLINE? KW_NAMESPACE original-namespace-name LBRACE namespace-body RBRACE
     """
 
 
 def p_unnanmed_namespace_definition(p):
     # type: (YaccProduction) -> None
     """
-        unnamed-namespace-definition : inline-opt KW_NAMESPACE LBRACE namespace-body RBRACE
+        unnamed-namespace-definition : KW_INLINE? KW_NAMESPACE LBRACE namespace-body RBRACE
     """
 
 
 def p_namespace_body(p):
     # type: (YaccProduction) -> None
     """
-        namespace-body : declaration-seq-opt
-    """
-
-
-def p_inline_opt(p):
-    # type: (YaccProduction) -> None
-    """
-        inline-opt : KW_INLINE
-                   | empty
+        namespace-body : declaration-seq?
     """
 
 

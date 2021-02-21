@@ -33,23 +33,15 @@ from be_typing import TYPE_CHECKING
 def p_member_specification(p):
     # type: (YaccProduction) -> None
     """
-        member-specification : member-declaration member-specification-opt
-                             | access-specifier COLON member-specification-opt
-    """
-
-
-def p_member_specification_opt(p):
-    # type: (YaccProduction) -> None
-    """
-        member-specification-opt : member-specification
-                                 | empty
+        member-specification : member-declaration member-specification?
+                             | access-specifier COLON member-specification?
     """
 
 
 def p_member_declaration(p):
     # type: (YaccProduction) -> None
     """
-        member-declaration : attribute-specifier-seq-opt decl-specifier-seq-opt member-declarator-list-opt SEMI
+        member-declaration : attribute-specifier-seq? decl-specifier-seq? member-declarator-list? SEMI
                            | function-definition
                            | function-definition SEMI
                            | using-declaration
@@ -67,29 +59,19 @@ def p_member_declarator_list(p):
     """
 
 
-def p_member_declarator_list_opt(p):
-    # type: (YaccProduction) -> None
-    """
-        member-declarator-list-opt : member-declarator-list
-                                   | empty
-    """
-
-
 def p_member_declarator(p):
     # type: (YaccProduction) -> None
     """
-        member-declarator : declarator virt-specifier-seq-opt pure-specifier-opt
-                          | declarator virt-specifier-seq-opt brace-or-equal-initializer-opt
-                          | identifier-opt attribute-specifier-seq-opt virt-specifier-seq-opt COLON constant-expression
+        member-declarator : declarator virt-specifier-seq? brace-or-equal-initializer?
+                          | identifier? attribute-specifier-seq? virt-specifier-seq? COLON constant-expression
     """
 
 
-def p_pure_specifier_opt(p):
-    # type: (YaccProduction) -> None
-    """
-        pure-specifier-opt : OP_EQUALS INTEGER_LITERAL 
-                           | empty
-    """
+#def p_pure_specifier(p):
+#    # type: (YaccProduction) -> None
+#    """
+#        pure-specifier : OP_EQUALS INTEGER_LITERAL
+#    """
 
 
 def p_virt_specifier_seq(p):
@@ -97,14 +79,6 @@ def p_virt_specifier_seq(p):
     """
         virt-specifier-seq : virt-specifier
                            | virt-specifier-seq virt-specifier
-    """
-
-
-def p_virt_specifier_seq_opt(p):
-    # type: (YaccProduction) -> None
-    """
-        virt-specifier-seq-opt : virt-specifier-seq
-                               | empty
     """
 
 

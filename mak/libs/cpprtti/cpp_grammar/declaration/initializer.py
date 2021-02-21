@@ -27,27 +27,11 @@ def p_initializer(p):
     """
 
 
-def p_initializer_opt(p):
-    # type: (YaccProduction) -> None
-    """
-        initializer-opt : initializer
-                        | empty
-    """
-
-
 def p_brace_or_equal_initializer(p):
     # type: (YaccProduction) -> None
     """
         brace-or-equal-initializer : OP_EQUALS initializer-clause
                                    | braced-init-list
-    """
-
-
-def p_brace_or_equal_initializer_opt(p):
-    # type: (YaccProduction) -> None
-    """
-        brace-or-equal-initializer-opt : brace-or-equal-initializer
-                                       | empty
     """
 
 
@@ -62,32 +46,16 @@ def p_initializer_clause(p):
 def p_initializer_list(p):
     # type: (YaccProduction) -> None
     """
-        initializer-list : initializer-clause ellipsis-opt
-                         | initializer-list COMMA initializer-clause ellipsis-opt
+        initializer-list : initializer-clause ELLIPSIS?
+                         | initializer-list COMMA initializer-clause ELLIPSIS?
     """
 
 
 def p_braced_init_list(p):
     # type: (YaccProduction) -> None
     """
-        braced-init-list : LBRACE initializer-list comma-opt RBRACE
+        braced-init-list : LBRACE initializer-list COMMA? RBRACE
                          | LBRACE RBRACE
-    """
-
-
-def p_braced_init_list_opt(p):
-    # type: (YaccProduction) -> None
-    """
-        braced-init-list-opt : braced-init-list
-                             | empty
-    """
-
-
-def p_comma_opt(p):
-    # type: (YaccProduction) -> None
-    """
-        comma-opt : COMMA
-                  | empty
     """
 
 

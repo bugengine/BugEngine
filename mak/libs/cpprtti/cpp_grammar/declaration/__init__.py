@@ -56,14 +56,6 @@ def p_declaration_seq(p):
     """
 
 
-def p_declaration_seq_opt(p):
-    # type: (YaccProduction) -> None
-    """
-        declaration-seq-opt : declaration-seq
-                            | empty
-    """
-
-
 def p_declaration(p):
     # type: (YaccProduction) -> None
     """
@@ -103,7 +95,7 @@ def p_alias_declaration(p):
 def p_simple_declaration(p):
     # type: (YaccProduction) -> None
     """
-        simple-declaration : attribute-specifier-seq-opt decl-specifier-seq init-declarator-list-opt SEMI
+        simple-declaration : attribute-specifier-seq? decl-specifier-seq init-declarator-list? SEMI
     """
 
 

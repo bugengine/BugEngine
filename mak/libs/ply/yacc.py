@@ -2895,6 +2895,17 @@ def get_caller_module_dict(levels):
 # -----------------------------------------------------------------------------
 def parse_grammar(doc, file, line):
     grammar = []
+    def build_optionals(syms):
+        clean_syms = []
+        for index, sym in enumerate(syms):
+            if sym[-1] == '?':
+                sym = sym[:-1]
+                tails = build_optionals(syms[index+1:])
+                return [clean_syms + [sym] + tail for tail in tails] + [clean_syms + ['empty'] + tail for tail in tails]
+            else:
+                clean_syms.append(sym)
+        return [clean_syms]
+
     # Split the doc string into lines
     pstrings = doc.splitlines()
     lastp = None
@@ -2919,7 +2930,8 @@ def parse_grammar(doc, file, line):
                 if assign != ':' and assign != '::=':
                     raise SyntaxError("%s:%d: Syntax error. Expected ':'" % (file, dline))
 
-            grammar.append((file, dline, prodname, syms))
+            for duped_syms in build_optionals(syms):
+                grammar.append((file, dline, prodname, duped_syms))
         except SyntaxError:
             raise
         except Exception:
