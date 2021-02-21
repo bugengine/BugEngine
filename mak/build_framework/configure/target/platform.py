@@ -55,7 +55,9 @@ class Platform:
             conf.variant = ''
             return None
         else:
-            conf.end_msg(conf.env.COMPILER_ABI)
+            if not sub_compilers:
+                conf.recurse('../unit_test.py', once=False)
+            conf.end_msg('%s%s' % (conf.env.COMPILER_ABI, conf.env.UNIT_TESTS and ' {unit tests}' or ''))
             #if not sub_compilers:
             #    conf.recurse(conf.bugenginenode.abspath(), name='setup', once=False)
             if v.STATIC:

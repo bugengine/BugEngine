@@ -29,7 +29,7 @@ ${TGT[1].abspath()}
 ${TGT[2].abspath()}
 ${TGT[3].abspath()}
 """ % sys.executable.replace('\\', '/')
-cls = Task.task_factory('datagen', ddf, [], 'PINK', ext_in='.h .hh .hxx', ext_out='.cc')
+cls = Task.task_factory('datagen', ddf, [], 'BLUE', ext_in='.h .hh .hxx', ext_out='.cc')
 cls.scan = scan
 
 namespace_register = 'BE_REGISTER_NAMESPACE_%d_NAMED(%s, %s)\n'

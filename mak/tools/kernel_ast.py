@@ -8,7 +8,7 @@ import sys
 
 
 class kernel_ast(Task.Task):
-    color = 'PINK'
+    color = 'CYAN'
     run_str = "${PYTHON} ${KERNEL} -d ${MACROS_IGNORE} --module ${PLUGIN} --tmp ${TMPDIR} ${KERNEL_NAME} ${SRC[0].path_from(bld.bldnode)} ${TGT[0].abspath()}"
 
     def scan(self):

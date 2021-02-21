@@ -18,7 +18,7 @@ class clc32(Task.Task):
     "clc32"
     run_str = '${CLC_CXX}  -S -emit-llvm -x cl -target spir-unknown-unknown -Xclang -finclude-default-header ${CLC_CPPPATH_ST:CLC_KERNEL_HEADER_PATH} ${CLC_CXXFLAGS} ${CLC_CPPPATH_ST:INCPATHS} ${CLC_DEFINES_ST:DEFINES} -D_CLC=1 -DBE_COMPUTE ${CLC_CXX_SRC_F}${SRC[0].abspath()} ${CLC_CXX_TGT_F} ${TGT}'
     ext_out = ['.32.ll']
-    color = 'PINK'
+    color = 'GREEN'
 
     def scan(self):
         kernel_nodes = self.generator.to_incnodes(self.generator.to_list(self.env.CLC_KERNEL_HEADER_PATH))
@@ -30,7 +30,7 @@ class clc64(Task.Task):
     "clc64"
     run_str = '${CLC_CXX}  -S -emit-llvm -x cl -target spir64-unknown-unknown -Xclang -finclude-default-header ${CLC_CPPPATH_ST:CLC_KERNEL_HEADER_PATH} ${CLC_CXXFLAGS} ${CLC_CPPPATH_ST:INCPATHS} ${CLC_DEFINES_ST:DEFINES} -D_CLC=1 -DBE_COMPUTE ${CLC_CXX_SRC_F}${SRC[0].abspath()} ${CLC_CXX_TGT_F} ${TGT}'
     ext_out = ['.64.ll']
-    color = 'PINK'
+    color = 'GREEN'
 
     def scan(self):
         kernel_nodes = self.generator.to_incnodes(self.generator.to_list(self.env.CLC_KERNEL_HEADER_PATH))

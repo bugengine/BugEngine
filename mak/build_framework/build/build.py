@@ -63,6 +63,7 @@ def build(bld):
     bld.common_env = bld.env
 
     bld.recurse('host/host.py')
+    bld.recurse('unit_test.py')
     bld.recurse('install.py')
     for env_name in bld.env.SUB_TOOLCHAINS:
         bld.common_env.append_unique('VALID_PLATFORMS', bld.all_envs[env_name].VALID_PLATFORMS)
@@ -287,7 +288,9 @@ def be_build_dll(self):
 def process_use_link(self):
     link_task = getattr(self, 'link_task', None)
     if link_task:
-        dependencies = [(self.bld.get_tgen_by_name(i), True) for i in self.use + getattr(self, 'private_use', [])]
+        dependencies = [
+            (self.bld.get_tgen_by_name(i), True) for i in getattr(self, 'use', []) + getattr(self, 'private_use', [])
+        ]
         all_deps = dependencies[::]
         seen = set([self])
         while dependencies:
@@ -346,14 +349,8 @@ def gather_extra_source(self):
         self.source += getattr(preprocess, 'out_sources', [])
 
 
-@taskgen_method
-def make_bld_node(self, category, path, name):
-    """
-        constructs a path from the build node:
-            build_node/variant/optim/target/category/path/name
-    """
-    bldnode = self.bld.bldnode
-    node = bldnode.make_node(self.target).make_node(category)
+def _make_bld_node(self, node, category, path, name):
+    node = node.make_node(category)
     if not path:
         node = node.make_node(name)
     elif isinstance(path, Node.Node):
@@ -398,6 +395,24 @@ def make_bld_node(self, category, path, name):
     if not self.env.PROJECTS:
         node.parent.mkdir()
     return node
+
+
+@taskgen_method
+def make_root_bld_node(self, category, path, name):
+    """
+        constructs a path from the build node:
+            build_node/variant/optim/category/path/name
+    """
+    return _make_bld_node(self, self.bld.bldnode, category, path, name)
+
+
+@taskgen_method
+def make_bld_node(self, category, path, name):
+    """
+        constructs a path from the target build node:
+            build_node/variant/optim/target/category/path/name
+    """
+    return _make_bld_node(self, self.bld.bldnode.make_node(self.target), category, path, name)
 
 
 @taskgen_method
@@ -656,7 +671,7 @@ def apply_link(self):
     if not pattern:
         pattern = '%s'
     path, name = os.path.split(self.target)
-    out_node = self.make_bld_node('bin', None, os.path.join(path, pattern % name))
+    out_node = self.make_root_bld_node('bin', None, os.path.join(path, pattern % name))
     self.link_task.set_outputs(out_node)
 
 
@@ -692,14 +707,13 @@ def exec_command_objcopy(self, *k, **kw):
     return self.generator.bld.exec_command(*k, **kw)
 
 
-Task.task_factory('dbg_copy', '${OBJCOPY} --only-keep-debug ${SRC} ${TGT[0].abspath()}', color='BLUE')
-Task.task_factory('dbg_strip', '${STRIP} ${STRIPFLAGS} -S -o ${TGT[0].abspath()} ${SRC[0].abspath()}', color='BLUE')
-dbg_link_cls = Task.task_factory(
-    'dbg_link',
-    '${OBJCOPY} --add-gnu-debuglink=${SRC[0].path_from(tsk.inputs[1].parent)} ${SRC[1].abspath()} ${TGT[0].abspath()}',
-    color='BLUE'
+Task.task_factory('dbg_copy', '${OBJCOPY} --only-keep-debug ${SRC} ${TGT[0].abspath()}', color='YELLOW')
+dbg_strip_cls = Task.task_factory(
+    'dbg_strip',
+    '${OBJCOPY} --strip-all --add-gnu-debuglink=${SRC[0].name} ${SRC[1].abspath()} ${TGT[0].abspath()}',
+    color='YELLOW'
 )
-dbg_link_cls.exec_command = exec_command_objcopy
+dbg_strip_cls.exec_command = exec_command_objcopy
 
 
 @taskgen_method
@@ -715,25 +729,24 @@ def strip_debug_info_impl(self):
             out_dir = full_link.parent.make_node('post-link')
             out_dir.mkdir()
             debug_prog = out_dir.make_node(full_link.name + '.debug')
-            stripped_prog = out_dir.make_node(full_link.name + '.stripped')
             stripped_linked_prog = out_dir.make_node(full_link.name)
+
+            self.dbg_copy_task = self.create_task('dbg_copy', [full_link], [debug_prog])
+            self.dbg_strip_task = self.create_task('dbg_strip', [debug_prog, full_link], [stripped_linked_prog])
+            self.dbg_strip_task.cwd = out_dir.abspath()
+            self.postlink_task = self.dbg_strip_task
 
             if 'bugengine:plugin' in self.features:
                 out_path = self.env.DEPLOY_PLUGINDIR
             elif 'bugengine:kernel' in self.features:
                 out_path = self.env.DEPLOY_KERNELDIR
-            elif 'cshlib' in self.features or 'cxxshlib' in self.features:
+            elif 'bugengine:shared_lib' in self.features:
                 out_path = self.env.DEPLOY_RUNBINDIR
-            elif 'cprogram' in self.features or 'cxxprogram' in self.features:
+            elif 'bugengine:launcher' in self.features:
                 out_path = self.env.DEPLOY_BINDIR
             else:
                 return
 
-            self.dbg_copy_task = self.create_task('dbg_copy', [full_link], [debug_prog])
-            self.strip_task = self.create_task('dbg_strip', [full_link], [stripped_prog])
-            self.dbg_link_task = self.create_task('dbg_link', [debug_prog, stripped_prog], [stripped_linked_prog])
-            self.dbg_link_task.cwd = out_dir.abspath()
-            self.postlink_task = self.dbg_link_task
             self.install_files(os.path.join(self.bld.env.PREFIX, self.bld.optim, out_path), [debug_prog])
 
 

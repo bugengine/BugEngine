@@ -1,8 +1,8 @@
 import os
 import re
-from waflib import Errors
+from waflib import Errors, Options
 from waflib.Configure import conf
-from waflib.TaskGen import feature, before_method, extension
+from waflib.TaskGen import extension
 
 COMPILE_EXTENSIONS = ['cxx', 'cpp', 'cc', 'c', 'rc', 'm', 'mm', 'def', 'masm']
 
@@ -170,6 +170,35 @@ def module(
     )
     if module_path is not None:
         task_gen.module_path = module_path
+
+    if Options.options.tests:
+        for source_node in source_nodes:
+            if os.path.isdir(os.path.join(source_node.abspath(), 'tests')):
+                test_path = source_node.make_node('tests')
+                for test in test_path.ant_glob('**'):
+                    test_name = os.path.splitext(test.path_from(test_path))[0]
+                    test_name = re.split('[\\\\/]', test_name)
+                    target_name = 'unittest.%s.%s' % (name, '.'.join(test_name))
+
+                    build_context(
+                        env=env.derive(),
+                        target=env.ENV_PREFIX % target_name,
+                        target_name=target_name,
+                        safe_target_name=safe_name(test_name[-1]),
+                        features=['cxx', 'cxxprogram', 'bugengine:unit_test'],
+                        use=[task_gen.target],
+                        uselib=[build_context.__class__.optim] +
+                        (build_context.env.STATIC and ['static'] or ['dynamic']),
+                        source=[test],
+                        source_nodes=source_nodes,
+                        defines=[
+                            'building_%s' % safe_name(test_name[-1]),
+                            'BE_PROJECTID=%s' % safe_name('_'.join(test_name)),
+                            'BE_PROJECTNAME=%s' % target_name
+                        ],
+                        includes=extra_includes + includes + api + source_nodes + [build_context.srcnode],
+                    )
+
     return task_gen
 
 

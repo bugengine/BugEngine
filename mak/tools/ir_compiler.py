@@ -3,7 +3,7 @@ import sys
 
 
 class ircc(Task.Task):
-    color = 'PINK'
+    color = 'CYAN'
 
     def run(self):
         return self.exec_command(

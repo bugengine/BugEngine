@@ -9,7 +9,7 @@
 
 namespace BugEngine { namespace World { namespace Component {
 
-class StorageConfiguration : public minitl::refcountable
+class be_api(WORLD) StorageConfiguration : public minitl::refcountable
 {
 private:
     ref< Task::ITask > m_updateStart;
@@ -23,7 +23,8 @@ public:
         return m_updateStart;
     }
 
-    published : StorageConfiguration();
+published:
+    StorageConfiguration();
     ~StorageConfiguration();
 };
 

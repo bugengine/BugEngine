@@ -67,18 +67,18 @@ class vscode(Build.BuildContext):
         self.variant = self.__class__.bugengine_variant
         self.env.PROJECTS = [self.__class__.cmd]
 
-        self.env.VARIANT = '${Variant}'
-        self.env.TOOLCHAIN = '${Toolchain}'
-        self.env.PREFIX = '${Prefix}'
-        self.env.TMPDIR = '${TmpDir}'
-        self.env.DEPLOY_ROOTDIR = '${Deploy_RootDir}'
-        self.env.DEPLOY_BINDIR = '${Deploy_BinDir}'
-        self.env.DEPLOY_RUNBINDIR = '${Deploy_RunBinDir}'
-        self.env.DEPLOY_LIBDIR = '${Deploy_LibDir}'
-        self.env.DEPLOY_INCLUDEDIR = '${Deploy_IncludeDir}'
-        self.env.DEPLOY_DATADIR = '${Deploy_DataDir}'
-        self.env.DEPLOY_PLUGINDIR = '${Deploy_PluginDir}'
-        self.env.DEPLOY_KERNELDIR = '${Deploy_KernelDir}'
+        self.env.VARIANT = '${input:bugengine-Variant}'
+        self.env.TOOLCHAIN = '${input:bugengine-Toolchain}'
+        self.env.PREFIX = '${input:bugengine-Prefix}'
+        self.env.TMPDIR = '${input:bugengine-TmpDir}'
+        self.env.DEPLOY_ROOTDIR = '${input:bugengine-Deploy_RootDir}'
+        self.env.DEPLOY_BINDIR = '${input:bugengine-Deploy_BinDir}'
+        self.env.DEPLOY_RUNBINDIR = '${input:bugengine-Deploy_RunBinDir}'
+        self.env.DEPLOY_LIBDIR = '${input:bugengine-Deploy_LibDir}'
+        self.env.DEPLOY_INCLUDEDIR = '${input:bugengine-Deploy_IncludeDir}'
+        self.env.DEPLOY_DATADIR = '${input:bugengine-Deploy_DataDir}'
+        self.env.DEPLOY_PLUGINDIR = '${input:bugengine-Deploy_PluginDir}'
+        self.env.DEPLOY_KERNELDIR = '${input:bugengine-Deploy_KernelDir}'
         self.features = ['GUI']
 
         self.recurse([self.run_dir])
@@ -229,6 +229,12 @@ class vscode(Build.BuildContext):
 
         for action, command, is_default in [
             ('build', ['build:${input:bugengine-Toolchain}:${input:bugengine-Variant}'], True),
+            (
+                'build[fail-tests=no]',
+                ['build:${input:bugengine-Toolchain}:${input:bugengine-Variant}', '--no-fail-on-tests'], False
+            ), ('build[static]', ['build:${input:bugengine-Toolchain}:${input:bugengine-Variant}', '--static'], False),
+            ('build[dynamic]', ['build:${input:bugengine-Toolchain}:${input:bugengine-Variant}', '--dynamic'], False),
+            ('build[nomaster]', ['build:${input:bugengine-Toolchain}:${input:bugengine-Variant}', '--nomaster'], False),
             ('clean', ['clean:${input:bugengine-Toolchain}:${input:bugengine-Variant}'], False),
             (
                 'rebuild', [
@@ -343,10 +349,28 @@ class vscode(Build.BuildContext):
                                 'bugengine:build'
                         }
                     )
+                if 'bugengine:unit_test' in tg.features:
+                    unit_test = tg.link_task.outputs[0].path_from(tg.bld.bldnode)
+                    launch_configs['configurations'].append(
+                        {
+                            'name': 'bugengine:%s' % tg.target,
+                            'type': 'cppdbg',
+                            'request': 'launch',
+                            'program': '${input:bugengine-TmpDir}/${input:bugengine-Variant}/%s' % unit_test,
+                            'miDebuggerPath': '${input:bugengine-DebuggerPath}',
+                            'MIMode': '${input:bugengine-DebuggerMode}',
+                            'args': [],
+                            'cwd': '${input:bugengine-TmpDir}/${input:bugengine-Variant}',
+                            'windows': {
+                                'type': 'cppvsdbg'
+                            },
+                            'preLaunchTask': 'bugengine:build[fail-tests=no]'
+                        }
+                    )
 
         for input in (
             'Toolchain', 'Variant', 'Prefix', 'Deploy_RunBinDir', 'Deploy_BinDir', 'Launcher', 'Python', 'DebuggerPath',
-            'DebuggerMode'
+            'DebuggerMode', 'TmpDir'
         ):
             launch_configs['inputs'].append(
                 {

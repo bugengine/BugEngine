@@ -113,7 +113,6 @@ LogicComponentStorage::LogicComponentStorage(weak< StorageConfiguration > config
                                              raw< const RTTI::Class >     componentType)
     : components(makeProduct(componentType, configuration))
 {
-    be_forceuse(configuration);
 }
 
 }}}  // namespace BugEngine::World::Component

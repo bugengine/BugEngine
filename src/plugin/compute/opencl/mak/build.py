@@ -36,7 +36,7 @@ _BE_REGISTER_METHOD(BE_KERNEL_ID, s_clKernel64Size);
 
 class embed_cl(Task.Task):
     "embed_cl"
-    color = 'PINK'
+    color = 'CYAN'
 
     def sig_vars(self):
         self.m.update(template_cc.encode('utf-8'))

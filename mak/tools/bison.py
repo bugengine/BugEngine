@@ -9,12 +9,9 @@ from waflib import Task, TaskGen
 import os
 
 bison = '${BISON} ${BISONFLAGS} ${SRC[0].abspath()} -o ${TGT[0].name}'
-cls = Task.task_factory('bison',
-                        bison,
-                        color='GREEN',
-                        ext_in=['.yc', '.y', '.yy'],
-                        ext_out='.cxx .h',
-                        before='c cxx flex')
+cls = Task.task_factory(
+    'bison', bison, color='CYAN', ext_in=['.yc', '.y', '.yy'], ext_out='.cxx .h', before='c cxx flex'
+)
 
 
 def post_run_bison(task):

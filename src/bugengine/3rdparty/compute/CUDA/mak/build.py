@@ -58,7 +58,7 @@ class nvcc(Task.Task):
 
 class cudac(Task.Task):
     "Generates a CUDA binder to call the C++ kernel"
-    color = 'PINK'
+    color = 'CYAN'
 
     def sig_vars(self):
         Task.Task.sig_vars(self)

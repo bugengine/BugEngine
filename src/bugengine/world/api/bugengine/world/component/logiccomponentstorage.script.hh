@@ -14,7 +14,7 @@
 
 namespace BugEngine { namespace World { namespace Component {
 
-class LogicComponentStorage : public IComponentStorage
+class be_api(WORLD) LogicComponentStorage : public IComponentStorage
 {
 public:
     class IntrospectionHint : public RTTI::AST::IntrospectionHint
@@ -29,10 +29,10 @@ public:
         ~IntrospectionHint();
     };
 
-    published
-        : be_tag(RTTI::AST::SimplePolicy< LogicComponentStorage::IntrospectionHint >())
-              LogicComponentStorage(weak< StorageConfiguration > configuration,
-                                    raw< const RTTI::Class >     componentType);
+published:
+    be_tag(RTTI::AST::SimplePolicy< LogicComponentStorage::IntrospectionHint >())
+        LogicComponentStorage(weak< StorageConfiguration > configuration,
+                              raw< const RTTI::Class >     componentType);
 
     const ref< KernelScheduler::IProduct > components;
 };

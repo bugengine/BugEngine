@@ -111,7 +111,7 @@ def underscore_to_camelcase(value):
 
 
 class kernel_task(Task.Task):
-    color = 'PINK'
+    color = 'CYAN'
 
     def sig_vars(self):
         self.m.update(TEMPLATE_CLASS_CC.encode('utf-8'))

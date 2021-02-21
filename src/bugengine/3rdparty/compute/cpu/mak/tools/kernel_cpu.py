@@ -46,7 +46,7 @@ _BE_REGISTER_PLUGIN(BE_KERNEL_ID, BE_KERNEL_NAME);
 
 class cpuc(Task.Task):
     "Generates a C++ trampoline to call the CPU kernel"
-    color = 'PINK'
+    color = 'CYAN'
 
     def sig_vars(self):
         self.m.update(template.encode('utf-8'))
@@ -83,7 +83,7 @@ class cpuc(Task.Task):
 
 
 class cpu_header(Task.Task):
-    color = 'PINK'
+    color = 'BLUE'
 
     def scan(self):
         return ([], [])
