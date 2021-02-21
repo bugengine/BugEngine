@@ -22,20 +22,18 @@ namespace-body:
 
 from be_typing import TYPE_CHECKING
 
+#def p_namespace_name(p):
+#    # type: (YaccProduction) -> None
+#    """
+#        namespace-name : original-namespace-name
+#                       | namespace-alias
+#    """
 
-def p_namespace_name(p):
-    # type: (YaccProduction) -> None
-    """
-        namespace-name : original-namespace-name
-                       | namespace-alias
-    """
-
-
-def p_original_namespace_name(p):
-    # type: (YaccProduction) -> None
-    """
-        original-namespace-name : IDENTIFIER
-    """
+#def p_original_namespace_name(p):
+#    # type: (YaccProduction) -> None
+#    """
+#        original-namespace-name : IDENTIFIER
+#    """
 
 
 def p_namespace_definition(p):
@@ -46,26 +44,26 @@ def p_namespace_definition(p):
     """
 
 
-def p_named_namespace_definition(p):
-    # type: (YaccProduction) -> None
-    """
-        named-namespace-definition : original-namespace-definition
-                                   | extension-namespace-definition
-    """
+#def p_named_namespace_definition(p):
+#    # type: (YaccProduction) -> None
+#    """
+#        named-namespace-definition : original-namespace-definition
+#                                   | extension-namespace-definition
+#    """
 
 
 def p_original_namespace_definition(p):
     # type: (YaccProduction) -> None
     """
-        original-namespace-definition : KW_INLINE? KW_NAMESPACE identifier LBRACE namespace-body RBRACE
+        named-namespace-definition : KW_INLINE? KW_NAMESPACE IDENTIFIER LBRACE namespace-body RBRACE
     """
 
 
-def p_extension_namespace_definition(p):
-    # type: (YaccProduction) -> None
-    """
-        extension-namespace-definition : KW_INLINE? KW_NAMESPACE original-namespace-name LBRACE namespace-body RBRACE
-    """
+#def p_extension_namespace_definition(p):
+#    # type: (YaccProduction) -> None
+#    """
+#        extension-namespace-definition : KW_INLINE? KW_NAMESPACE original-namespace-name LBRACE namespace-body RBRACE
+#    """
 
 
 def p_unnanmed_namespace_definition(p):

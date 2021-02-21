@@ -55,9 +55,7 @@ def p_simple_type_specifier(p):
 def p_type_name(p):
     # type: (YaccProduction) -> None
     """
-        type-name : class-name
-                  | enum-name
-                  | typedef-name
+        type-name : IDENTIFIER
                   | simple-template-id
     """
 

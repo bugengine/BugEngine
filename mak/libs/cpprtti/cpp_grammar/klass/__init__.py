@@ -29,14 +29,6 @@ from .base_init import *
 from be_typing import TYPE_CHECKING
 
 
-def p_class_name(p):
-    # type: (YaccProduction) -> None
-    """
-        class-name : IDENTIFIER
-                   | simple-template-id
-    """
-
-
 def p_class_specifier(p):
     # type: (YaccProduction) -> None
     """
@@ -55,7 +47,8 @@ def p_class_head(p):
 def p_class_head_name(p):
     # type: (YaccProduction) -> None
     """
-        class-head-name : nested-name-specifier? class-name
+        class-head-name : nested-name-specifier? IDENTIFIER
+                        | nested-name-specifier? simple-template-id
     """
 
 

@@ -9,25 +9,24 @@ qualified-namespace-specifier:
 
 from be_typing import TYPE_CHECKING
 
-
-def p_namespace_alias(p):
-    # type: (YaccProduction) -> None
-    """
-        namespace-alias : IDENTIFIER
-    """
+#def p_namespace_alias(p):
+#    # type: (YaccProduction) -> None
+#    """
+#        namespace-alias : IDENTIFIER
+#    """
 
 
 def p_namespace_alias_definition(p):
     # type: (YaccProduction) -> None
     """
-        namespace-alias-definition : KW_NAMESPACE identifier OP_EQUALS qualified-namespace-specifier SEMI
+        namespace-alias-definition : KW_NAMESPACE IDENTIFIER OP_EQUALS qualified-namespace-specifier SEMI
     """
 
 
 def p_qualified_namespace_specifier(p):
     # type: (YaccProduction) -> None
     """
-        qualified-namespace-specifier : OP_SCOPE? nested-name-specifier? namespace-name
+        qualified-namespace-specifier : OP_SCOPE? nested-name-specifier? IDENTIFIER
     """
 
 

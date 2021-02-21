@@ -49,7 +49,8 @@ def p_base_specifier(p):
 def p_class_or_decltype(p):
     # type: (YaccProduction) -> None
     """
-        class-or-decltype : OP_SCOPE? nested-name-specifier? type-name
+        class-or-decltype : OP_SCOPE? nested-name-specifier? IDENTIFIER
+                          | OP_SCOPE? nested-name-specifier? simple-template-id
                           | decltype-specifier
     """
 

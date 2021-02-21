@@ -135,7 +135,8 @@ def p_declarator_id(p):
     # type: (YaccProduction) -> None
     """
         declarator-id : ELLIPSIS? id-expression
-                      | OP_SCOPE? nested-name-specifier? class-name
+                      | OP_SCOPE? nested-name-specifier? IDENTIFIER
+                      | OP_SCOPE? nested-name-specifier? simple-template-id
     """
 
 

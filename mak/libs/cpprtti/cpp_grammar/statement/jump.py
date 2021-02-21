@@ -17,7 +17,7 @@ def p_jump_statement(p):
                    | KW_CONTINUE SEMI
                    | KW_RETURN expression? SEMI
                    | KW_RETURN braced-init-list SEMI
-                   | KW_GOTO identifier SEMI
+                   | KW_GOTO IDENTIFIER SEMI
     """
 
 

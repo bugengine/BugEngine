@@ -66,8 +66,8 @@ def p_capture_list(p):
 def p_capture(p):
     # type: (YaccProduction) -> None
     """
-        capture : identifier
-                | OP_AND identifier
+        capture : IDENTIFIER
+                | OP_AND IDENTIFIER
                 | KW_THIS
     """
 

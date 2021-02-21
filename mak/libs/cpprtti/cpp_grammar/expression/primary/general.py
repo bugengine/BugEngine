@@ -58,11 +58,11 @@ def p_id_expression(self):
 def p_unqualified_id(p):
     # type: (YaccProduction) -> None
     """
-        unqualified-id : identifier
+        unqualified-id : IDENTIFIER
                        | operator-function-id
                        | conversion-function-id
                        | literal-operator-id
-                       | OP_NOT class-name
+                       | OP_NOT IDENTIFIER
                        | OP_NOT decltype-specifier
                        | template-id
     """
@@ -72,7 +72,7 @@ def p_qualified_id(p):
     # type: (YaccProduction) -> None
     """
         qualified-id : OP_SCOPE? nested-name-specifier KW_TEMPLATE? unqualified-id
-                     | OP_SCOPE identifier
+                     | OP_SCOPE IDENTIFIER
                      | OP_SCOPE operator-function-id
                      | OP_SCOPE literal-operator-id
                      | OP_SCOPE template-id
@@ -83,17 +83,9 @@ def p_nested_name_specifier(p):
     # type: (YaccProduction) -> None
     """
         nested-name-specifier : type-name OP_SCOPE
-                              | namespace-name OP_SCOPE
                               | decltype-specifier OP_SCOPE
-                              | nested-name-specifier identifier OP_SCOPE
+                              | nested-name-specifier IDENTIFIER OP_SCOPE
                               | nested-name-specifier KW_TEMPLATE? simple-template-id OP_SCOPE
-    """
-
-
-def p_indentifier(p):
-    # type: (YaccProduction) -> None
-    """
-        identifier : IDENTIFIER
     """
 
 

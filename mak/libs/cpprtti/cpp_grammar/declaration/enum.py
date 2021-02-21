@@ -27,12 +27,11 @@ enumerator:
 
 from be_typing import TYPE_CHECKING
 
-
-def p_enum_name(p):
-    # type: (YaccProduction) -> None
-    """
-        enum-name : IDENTIFIER
-    """
+#def p_enum_name(p):
+#    # type: (YaccProduction) -> None
+#    """
+#        enum-name : IDENTIFIER
+#    """
 
 
 def p_enum_specifier(p):
@@ -46,15 +45,15 @@ def p_enum_specifier(p):
 def p_enum_head(p):
     # type: (YaccProduction) -> None
     """
-        enum-head : enum-key attribute-specifier-seq? identifier? enum-base?
-                  | enum-key attribute-specifier-seq? nested-name-specifier identifier enum-base?
+        enum-head : enum-key attribute-specifier-seq? IDENTIFIER? enum-base?
+                  | enum-key attribute-specifier-seq? nested-name-specifier IDENTIFIER enum-base?
     """
 
 
 def p_opaque_enum_declaration(p):
     # type: (YaccProduction) -> None
     """
-        opaque-enum-declaration : enum-key attribute-specifier-seq? identifier enum-base? SEMI
+        opaque-enum-declaration : enum-key attribute-specifier-seq? IDENTIFIER enum-base? SEMI
     """
 
 
@@ -93,7 +92,7 @@ def p_enumerator_definition(p):
 def p_enumerator(p):
     # type: (YaccProduction) -> None
     """
-        enumerator : identifier
+        enumerator : IDENTIFIER
     """
 
 

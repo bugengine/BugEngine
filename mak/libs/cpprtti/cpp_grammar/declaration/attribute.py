@@ -81,7 +81,7 @@ def p_attribute(p):
 def p_attribute_token(p):
     # type: (YaccProduction) -> None
     """
-        attribute-token : identifier
+        attribute-token : IDENTIFIER
                         | attribute-scoped-token
     """
 
@@ -89,14 +89,14 @@ def p_attribute_token(p):
 def p_attribute_scoped_token(p):
     # type: (YaccProduction) -> None
     """
-        attribute-scoped-token : attribute-namespace OP_SCOPE identifier
+        attribute-scoped-token : attribute-namespace OP_SCOPE IDENTIFIER
     """
 
 
 def p_attribute_namespace(p):
     # type: (YaccProduction) -> None
     """
-        attribute-namespace : identifier
+        attribute-namespace : IDENTIFIER
     """
 
 

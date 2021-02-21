@@ -63,7 +63,7 @@ def p_member_declarator(p):
     # type: (YaccProduction) -> None
     """
         member-declarator : declarator virt-specifier-seq? brace-or-equal-initializer?
-                          | identifier? attribute-specifier-seq? virt-specifier-seq? COLON constant-expression
+                          | IDENTIFIER? attribute-specifier-seq? virt-specifier-seq? COLON constant-expression
     """
 
 

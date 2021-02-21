@@ -88,7 +88,7 @@ def p_block_declaration(p):
 def p_alias_declaration(p):
     # type: (YaccProduction) -> None
     """
-        alias-declaration : KW_USING identifier OP_EQUALS type-id SEMI
+        alias-declaration : KW_USING IDENTIFIER OP_EQUALS type-id SEMI
     """
 
 

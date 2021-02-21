@@ -11,7 +11,7 @@ from be_typing import TYPE_CHECKING
 def p_labeled_statement(p):
     # type: (YaccProduction) -> None
     """
-        labeled-statement : attribute-specifier-seq? identifier COLON statement
+        labeled-statement : attribute-specifier-seq? IDENTIFIER COLON statement
                           | attribute-specifier-seq? KW_CASE constant-expression COLON statement
                           | attribute-specifier-seq? KW_DEFAULT COLON statement
     """

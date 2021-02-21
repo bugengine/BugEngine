@@ -32,7 +32,7 @@ def p_unary_expression(p):
                          | unary-operator cast-expression
                          | KW_SIZEOF unary-expression
                          | KW_SIZEOF LPAREN type-id RPAREN
-                         | KW_SIZEOF ELLIPSIS LPAREN identifier RPAREN
+                         | KW_SIZEOF ELLIPSIS LPAREN IDENTIFIER RPAREN
                          | KW_ALIGNOF LPAREN type-id RPAREN
                          | noexcept-expression
                          | new-expression

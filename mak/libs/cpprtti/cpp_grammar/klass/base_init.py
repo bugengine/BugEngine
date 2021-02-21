@@ -42,7 +42,7 @@ def p_mem_initializer_id(p):
     # type: (YaccProduction) -> None
     """
         mem-initializer-id : class-or-decltype
-                           | identifier
+                           | IDENTIFIER
     """
 
 
