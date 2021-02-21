@@ -34,7 +34,7 @@ def p_namespace_name(p):
 def p_original_namespace_name(p):
     # type: (YaccProduction) -> None
     """
-        original-namespace-name : NAMESPACE_IDENTIFIER
+        original-namespace-name : IDENTIFIER
     """
 
 
@@ -86,8 +86,8 @@ def p_inline_opt(p):
     # type: (YaccProduction) -> None
     """
         inline-opt : KW_INLINE
+                   | empty
     """
-    # TODO: empty
 
 
 if TYPE_CHECKING:

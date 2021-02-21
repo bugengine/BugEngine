@@ -4,7 +4,6 @@ from .unary import *
 from .new import *
 from .delete import *
 from .noexcept import *
-from .unary_noexcept import *
 from .cast import *
 from .member_pointer import *
 from .multiplicative import *

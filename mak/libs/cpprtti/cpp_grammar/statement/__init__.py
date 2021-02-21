@@ -25,19 +25,13 @@ def p_statement(p):
     # type: (YaccProduction) -> None
     """
         statement : labeled-statement
-                  | attribute-specifier-seq expression-statement
-                  | attribute-specifier-seq compound-statement
-                  | attribute-specifier-seq selection-statement
-                  | attribute-specifier-seq iteration-statement
-                  | attribute-specifier-seq jump-statement
-                  | expression-statement
-                  | compound-statement
-                  | selection-statement
-                  | iteration-statement
-                  | jump-statement
+                  | attribute-specifier-seq-opt expression-statement
+                  | attribute-specifier-seq-opt compound-statement
+                  | attribute-specifier-seq-opt selection-statement
+                  | attribute-specifier-seq-opt iteration-statement
+                  | attribute-specifier-seq-opt jump-statement
                   | declaration-statement
-                  | attribute-specifier-seq try-block
-                  | try-block
+                  | attribute-specifier-seq-opt try-block
     """
 
 

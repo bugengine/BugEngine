@@ -13,7 +13,7 @@ from be_typing import TYPE_CHECKING
 def p_namespace_alias(p):
     # type: (YaccProduction) -> None
     """
-        namespace-alias : NAMESPACE_ALIAS_IDENTIFIER
+        namespace-alias : IDENTIFIER
     """
 
 
@@ -27,8 +27,7 @@ def p_namespace_alias_definition(p):
 def p_qualified_namespace_specifier(p):
     # type: (YaccProduction) -> None
     """
-        qualified-namespace-specifier : OP_SCOPE nested-name-specifier-opt namespace-name
-                                      | nested-name-specifier-opt namespace-name
+        qualified-namespace-specifier : scope-opt nested-name-specifier-opt namespace-name
     """
 
 

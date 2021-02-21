@@ -28,8 +28,8 @@ def p_statement_seq_opt(p):
     # type: (YaccProduction) -> None
     """
         statement-seq-opt : statement-seq
+                          | empty
     """
-    # TODO: empty
 
 
 if TYPE_CHECKING:

@@ -51,10 +51,8 @@ def p_handler(p):
 def p_exception_declaration(p):
     # type: (YaccProduction) -> None
     """
-        exception-declaration : attribute-specifier-seq type-specifier-seq declarator
-                              | attribute-specifier-seq type-specifier-seq abstract-declarator-opt
-                              | type-specifier-seq declarator
-                              | type-specifier-seq abstract-declarator-opt
+        exception-declaration : attribute-specifier-seq-opt type-specifier-seq declarator
+                              | attribute-specifier-seq-opt type-specifier-seq abstract-declarator-opt
                               | ELLIPSIS
     """
 
@@ -62,8 +60,7 @@ def p_exception_declaration(p):
 def p_throw_exception(p):
     # type: (YaccProduction) -> None
     """
-        throw-expression : KW_THROW assignment-expression
-                         | KW_THROW
+        throw-expression : KW_THROW assignment-expression-opt
     """
 
 

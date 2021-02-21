@@ -32,11 +32,8 @@ from be_typing import TYPE_CHECKING
 def p_simple_type_specifier(p):
     # type: (YaccProduction) -> None
     """
-        simple-type-specifier : OP_SCOPE nested-name-specifier-opt type-name                    %prec OP_SCOPE
-                              | nested-name-specifier type-name                                 %prec OP_SCOPE
-                              | type-name                                                       %prec SCOPE_REDUCTION
-                              | OP_SCOPE nested-name-specifier unknown-template-id
-                              | nested-name-specifier unknown-template-id
+        simple-type-specifier : scope-opt nested-name-specifier-opt type-name
+                              | scope-opt nested-name-specifier KW_TEMPLATE simple-template-id
                               | KW_CHAR
                               | KW_CHAR16_T
                               | KW_CHAR32_T
@@ -51,7 +48,7 @@ def p_simple_type_specifier(p):
                               | KW_DOUBLE
                               | KW_VOID
                               | KW_AUTO
-                              | decltype-specifier                                              %prec SCOPE_REDUCTION
+                              | decltype-specifier
     """
 
 
@@ -61,7 +58,7 @@ def p_type_name(p):
         type-name : class-name
                   | enum-name
                   | typedef-name
-                  | class-template-id
+                  | simple-template-id
     """
 
 

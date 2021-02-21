@@ -32,7 +32,8 @@ from be_typing import TYPE_CHECKING
 def p_class_name(p):
     # type: (YaccProduction) -> None
     """
-        class-name : CLASS_IDENTIFIER
+        class-name : IDENTIFIER
+                   | simple-template-id
     """
 
 
@@ -46,12 +47,9 @@ def p_class_specifier(p):
 def p_class_head(p):
     # type: (YaccProduction) -> None
     """
-        class-head : class-key attribute-specifier-seq class-head-name class-virt-specifier-seq-opt base-clause-opt
-                   | class-key attribute-specifier-seq base-clause-opt
-                   | class-key class-head-name class-virt-specifier-seq-opt base-clause-opt
-                   | class-key base-clause-opt
+        class-head : class-key attribute-specifier-seq-opt class-head-name class-virt-specifier-seq-opt base-clause-opt
+                   | class-key attribute-specifier-seq-opt base-clause-opt
     """
-    # TODO: base must be class
 
 
 def p_class_head_name(p):
@@ -73,7 +71,7 @@ def p_class_virt_specifier_seq_opt(p):
     # type: (YaccProduction) -> None
     """
         class-virt-specifier-seq-opt : class-virt-specifier-seq
-                                     |
+                                     | empty
     """
 
 

@@ -30,7 +30,7 @@ def p_type_parameter(p):
                        | KW_TYPENAME ellipsis-opt identifier-opt
                        | KW_TYPENAME identifier-opt OP_EQUALS type-id
                        | KW_TEMPLATE OP_LT template-parameter-list OP_GT KW_CLASS ellipsis-opt identifier-opt
-                       | KW_TEMPLATE OP_LT template-parameter-list OP_GT KW_CLASS identifier-opt OP_EQUALS type-id
+                       | KW_TEMPLATE OP_LT template-parameter-list OP_GT KW_CLASS identifier-opt OP_EQUALS id-expression
     """
     # original: template < template-parameter-list > class identifieropt = id-expression
 

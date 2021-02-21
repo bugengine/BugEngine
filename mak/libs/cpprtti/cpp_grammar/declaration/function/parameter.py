@@ -35,21 +35,17 @@ def p_parameter_declaration_list_opt(p):
     # type: (YaccProduction) -> None
     """
         parameter-declaration-list-opt : parameter-declaration-list
+                                       | empty
     """
-    # TODO: empty
 
 
 def p_parameter_declaration(p):
     # type: (YaccProduction) -> None
     """
-        parameter-declaration : attribute-specifier-seq decl-specifier-seq declarator
-                              | attribute-specifier-seq decl-specifier-seq declarator OP_EQUALS initializer-clause
-                              | attribute-specifier-seq decl-specifier-seq abstract-declarator-opt
-                              | attribute-specifier-seq decl-specifier-seq abstract-declarator-opt OP_EQUALS initializer-clause
-                              | decl-specifier-seq declarator
-                              | decl-specifier-seq declarator OP_EQUALS initializer-clause
-                              | decl-specifier-seq abstract-declarator-opt
-                              | decl-specifier-seq abstract-declarator-opt OP_EQUALS initializer-clause
+        parameter-declaration : attribute-specifier-seq-opt decl-specifier-seq declarator
+                              | attribute-specifier-seq-opt decl-specifier-seq declarator OP_EQUALS initializer-clause
+                              | attribute-specifier-seq-opt decl-specifier-seq abstract-declarator-opt
+                              | attribute-specifier-seq-opt decl-specifier-seq abstract-declarator-opt OP_EQUALS initializer-clause
     """
 
 

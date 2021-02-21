@@ -11,13 +11,6 @@ from .keyword import keywords
 
 tokens = tuple('KW_' + kw.upper() for kw in keywords) + (
     'IDENTIFIER',
-    'CLASS_IDENTIFIER',
-    'NAMESPACE_IDENTIFIER',
-    'NAMESPACE_ALIAS_IDENTIFIER',
-    'ENUM_IDENTIFIER',
-    'TEMPLATE_IDENTIFIER',
-    'CLASS_TEMPLATE_IDENTIFIER',
-    'TYPEDEF_IDENTIFIER',
     'FLOATING_LITERAL',
     'INTEGER_LITERAL',
     'STRING_LITERAL',

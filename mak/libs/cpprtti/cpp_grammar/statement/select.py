@@ -25,10 +25,8 @@ def p_condition(p):
     # type: (YaccProduction) -> None
     """
         condition : expression
-                  | attribute-specifier-seq decl-specifier-seq declarator OP_EQUALS initializer-clause
-                  | attribute-specifier-seq decl-specifier-seq declarator braced-init-list
-                  | decl-specifier-seq declarator OP_EQUALS initializer-clause
-                  | decl-specifier-seq declarator braced-init-list
+                  | attribute-specifier-seq-opt decl-specifier-seq declarator OP_EQUALS initializer-clause
+                  | attribute-specifier-seq-opt decl-specifier-seq declarator braced-init-list
     """
 
 
@@ -36,8 +34,8 @@ def p_condition_opt(p):
     # type: (YaccProduction) -> None
     """
         condition-opt : condition
+                      | empty
     """
-    # TODO: empty
 
 
 if TYPE_CHECKING:

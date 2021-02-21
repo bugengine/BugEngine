@@ -29,6 +29,14 @@ def p_assignment_expression(p):
     """
 
 
+def p_assignment_expression_opt(p):
+    # type: (YaccProduction) -> None
+    """
+        assignment-expression-opt : assignment-expression
+                                  | empty
+    """
+
+
 def p_assignment_operator(p):
     # type: (YaccProduction) -> None
     """

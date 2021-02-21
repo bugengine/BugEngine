@@ -27,8 +27,8 @@ def p_exception_specification_opt(p):
     # type: (YaccProduction) -> None
     """
         exception-specification-opt : exception-specification
+                                    | empty
     """
-    # TODO: empty
 
 
 def p_dynamic_exception_specification(p):
@@ -50,8 +50,8 @@ def p_type_id_list_opt(p):
     # type: (YaccProduction) -> None
     """
         type-id-list-opt : type-id-list
+                         | empty
     """
-    # TODO: empty
 
 
 def p_noexcept_specification(p):

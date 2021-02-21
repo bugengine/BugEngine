@@ -53,7 +53,6 @@ def p_lambda_capture_opt(p):
         lambda-capture-opt : lambda-capture
                            | empty
     """
-    # TODO: empty
 
 
 def p_capture_default(p):
@@ -84,8 +83,7 @@ def p_capture(p):
 def p_lambda_declarator(p):
     # type: (YaccProduction) -> None
     """
-        lambda-declarator : LPAREN parameter-declaration-clause RPAREN mutable-opt exception-specification-opt attribute-specifier-seq trailing-return-type-opt
-        lambda-declarator : LPAREN parameter-declaration-clause RPAREN mutable-opt exception-specification-opt trailing-return-type-opt
+        lambda-declarator : LPAREN parameter-declaration-clause RPAREN mutable-opt exception-specification-opt attribute-specifier-seq-opt trailing-return-type-opt
     """
 
 
@@ -93,16 +91,16 @@ def p_lambda_declarator_opt(p):
     # type: (YaccProduction) -> None
     """
         lambda-declarator-opt : lambda-declarator
+                              | empty
     """
-    # TODO: empty
 
 
 def p_mutable_opt(p):
     # type: (YaccProduction) -> None
     """
         mutable-opt : KW_MUTABLE
+                    | empty
     """
-    # TODO: empty
 
 
 if TYPE_CHECKING:

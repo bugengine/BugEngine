@@ -31,8 +31,8 @@ def p_initializer_opt(p):
     # type: (YaccProduction) -> None
     """
         initializer-opt : initializer
+                        | empty
     """
-    # TODO: empty
 
 
 def p_brace_or_equal_initializer(p):
@@ -47,8 +47,8 @@ def p_brace_or_equal_initializer_opt(p):
     # type: (YaccProduction) -> None
     """
         brace-or-equal-initializer-opt : brace-or-equal-initializer
+                                       | empty
     """
-    # TODO: empty
 
 
 def p_initializer_clause(p):
@@ -75,12 +75,20 @@ def p_braced_init_list(p):
     """
 
 
+def p_braced_init_list_opt(p):
+    # type: (YaccProduction) -> None
+    """
+        braced-init-list-opt : braced-init-list
+                             | empty
+    """
+
+
 def p_comma_opt(p):
     # type: (YaccProduction) -> None
     """
         comma-opt : COMMA
+                  | empty
     """
-    # TODO: empty
 
 
 if TYPE_CHECKING:

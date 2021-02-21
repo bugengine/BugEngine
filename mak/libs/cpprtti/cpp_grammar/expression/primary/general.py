@@ -28,7 +28,9 @@ nested-name-specifier:
       decltype-specifier ::     C++0x
       nested-name-specifier identifier ::
       nested-name-specifier templateopt simple-template-id ::
+
 CHANGES:
+========
     moved lambda-expression into expression (comma.py) to avoid constant-expression to match lambdas
 """
 
@@ -60,26 +62,20 @@ def p_unqualified_id(p):
                        | operator-function-id
                        | conversion-function-id
                        | literal-operator-id
-                       | OP_NOT type-name
+                       | OP_NOT class-name
                        | OP_NOT decltype-specifier
                        | template-id
-                       | KW_TEMPLATE unknown-template-id
     """
-    # does not accept simple-template-id
 
 
 def p_qualified_id(p):
     # type: (YaccProduction) -> None
     """
-        qualified-id : OP_SCOPE nested-name-specifier KW_TEMPLATE unqualified-id
-                     | nested-name-specifier KW_TEMPLATE unqualified-id
-                     | OP_SCOPE nested-name-specifier unqualified-id
-                     | nested-name-specifier unqualified-id
+        qualified-id : scope-opt nested-name-specifier template-opt unqualified-id
                      | OP_SCOPE identifier
                      | OP_SCOPE operator-function-id
                      | OP_SCOPE literal-operator-id
                      | OP_SCOPE template-id
-                     | OP_SCOPE KW_TEMPLATE unknown-template-id
     """
 
 
@@ -90,8 +86,7 @@ def p_nested_name_specifier(p):
                               | namespace-name OP_SCOPE
                               | decltype-specifier OP_SCOPE
                               | nested-name-specifier identifier OP_SCOPE
-                              | nested-name-specifier KW_TEMPLATE simple-template-id OP_SCOPE
-                              | nested-name-specifier simple-template-id OP_SCOPE
+                              | nested-name-specifier template-opt simple-template-id OP_SCOPE
     """
 
 
@@ -99,16 +94,24 @@ def p_nested_name_specifier_opt(p):
     # type: (YaccProduction) -> None
     """
         nested-name-specifier-opt : nested-name-specifier
+                                  | empty
     """
-    # TODO: empty
+
+
+def p_template_opt(p):
+    # type: (YaccProduction) -> None
+    """
+        template-opt : KW_TEMPLATE
+                     | empty
+    """
 
 
 def p_scope_opt(p):
     # type: (YaccProduction) -> None
     """
         scope-opt : OP_SCOPE
+                  | empty
     """
-    # TODO: empty
 
 
 def p_indentifier(p):
@@ -122,8 +125,8 @@ def p_indentifier_opt(p):
     # type: (YaccProduction) -> None
     """
         identifier-opt : identifier
+                       | empty
     """
-    # TODO: empty
 
 
 def p_literal(p):

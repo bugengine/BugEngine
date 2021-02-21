@@ -37,17 +37,14 @@ def p_postfix_expression(p):
     """
         postfix-expression : primary-expression
                            | postfix-expression RBRACKET expression RBRACKET
-                           | postfix-expression RBRACKET braced-init-list RBRACKET
-                           | postfix-expression RBRACKET RBRACKET
+                           | postfix-expression RBRACKET braced-init-list-opt RBRACKET
                            | postfix-expression LPAREN expression-list-opt RPAREN
                            | simple-type-specifier LPAREN expression-list-opt RPAREN
                            | typename-specifier LPAREN expression-list-opt RPAREN
                            | simple-type-specifier braced-init-list
                            | typename-specifier braced-init-list
-                           | postfix-expression PERIOD KW_TEMPLATE id-expression
-                           | postfix-expression PERIOD id-expression
-                           | postfix-expression OP_ARROW KW_TEMPLATE id-expression
-                           | postfix-expression OP_ARROW id-expression
+                           | postfix-expression PERIOD template-opt id-expression
+                           | postfix-expression OP_ARROW template-opt id-expression
                            | postfix-expression PERIOD pseudo-destructor-name
                            | postfix-expression OP_ARROW pseudo-destructor-name
                            | postfix-expression OP_PLUSPLUS
@@ -72,19 +69,16 @@ def p_expression_list_opt(p):
     # type: (YaccProduction) -> None
     """
         expression-list-opt : expression-list
+                            | empty
     """
-    # TODO: empty
 
 
 def p_pseudo_destructor_name(p):
     # type: (YaccProduction) -> None
     """
-        pseudo-destructor-name : OP_SCOPE nested-name-specifier-opt type-name OP_SCOPE OP_NOT type-name
-                               | nested-name-specifier-opt type-name OP_SCOPE OP_NOT type-name
-                               | OP_SCOPE nested-name-specifier KW_TEMPLATE simple-template-id OP_SCOPE OP_NOT type-name
-                               | nested-name-specifier KW_TEMPLATE simple-template-id OP_SCOPE OP_NOT type-name
-                               | OP_SCOPE nested-name-specifier-opt OP_NOT type-name
-                               | nested-name-specifier-opt OP_NOT type-name
+        pseudo-destructor-name : scope-opt nested-name-specifier-opt type-name OP_SCOPE OP_NOT type-name
+                               | scope-opt nested-name-specifier KW_TEMPLATE simple-template-id OP_SCOPE OP_NOT type-name
+                               | scope-opt nested-name-specifier-opt OP_NOT type-name
     """
     # OP_NOT decltype-specifier # already covered by id-expression
 

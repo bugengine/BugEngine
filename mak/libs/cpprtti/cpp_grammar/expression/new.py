@@ -23,10 +23,8 @@ from be_typing import TYPE_CHECKING
 def p_new_expression(p):
     # type: (YaccProduction) -> None
     """
-        new-expression : OP_SCOPE KW_NEW new-placement-opt new-type-id new-initializer-opt
-                       | KW_NEW new-placement-opt new-type-id new-initializer-opt
-                       | OP_SCOPE KW_NEW new-placement-opt LPAREN type-id RPAREN new-initializer-opt
-                       | KW_NEW new-placement-opt LPAREN type-id RPAREN new-initializer-opt
+        new-expression : scope-opt KW_NEW new-placement-opt new-type-id new-initializer-opt
+                       | scope-opt KW_NEW new-placement-opt LPAREN type-id RPAREN new-initializer-opt
     """
 
 
@@ -41,8 +39,8 @@ def p_new_placement_opt(p):
     # type: (YaccProduction) -> None
     """
         new-placement-opt : new-placement
+                          | empty
     """
-    # TODO: empty
 
 
 def p_new_type_id(p):
@@ -64,17 +62,15 @@ def p_new_declarator_opt(p):
     # type: (YaccProduction) -> None
     """
         new-declarator-opt : new-declarator
+                           | empty
     """
-    # TODO: empty
 
 
 def p_noptr_new_declarator(p):
     # type: (YaccProduction) -> None
     """
-        noptr-new-declarator : LBRACKET expression RBRACKET attribute-specifier-seq
-                             | noptr-new-declarator LBRACKET constant-expression RBRACKET attribute-specifier-seq
-                             | LBRACKET expression RBRACKET
-                             | noptr-new-declarator LBRACKET constant-expression RBRACKET
+        noptr-new-declarator : LBRACKET expression RBRACKET attribute-specifier-seq-opt
+                             | noptr-new-declarator LBRACKET constant-expression RBRACKET attribute-specifier-seq-opt
     """
 
 
@@ -90,8 +86,8 @@ def p_new_initializer_opt(p):
     # type: (YaccProduction) -> None
     """
         new-initializer-opt : new-initializer
+                            | empty
     """
-    # TODO: empty
 
 
 if TYPE_CHECKING:

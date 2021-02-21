@@ -101,7 +101,7 @@ keywords = (
     'else',
     'enum',
     'explicit',
-    'export',              # C++0x - Reserved for future use
+                           #'export',              # C++0x - Reserved for future use
     'extern',
     'false',
     'final',

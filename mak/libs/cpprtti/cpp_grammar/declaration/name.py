@@ -28,8 +28,7 @@ def p_abstract_declarator(p):
     # type: (YaccProduction) -> None
     """
         abstract-declarator : ptr-abstract-declarator
-                            | noptr-abstract-declarator parameters-and-qualifiers trailing-return-type
-                            | parameters-and-qualifiers trailing-return-type
+                            | noptr-abstract-declarator-opt parameters-and-qualifiers trailing-return-type
                             | ELLIPSIS
     """
 
@@ -46,19 +45,32 @@ def p_ptr_abstract_declarator(p):
     # type: (YaccProduction) -> None
     """
         ptr-abstract-declarator : noptr-abstract-declarator
-                                | ptr-operator ptr-abstract-declarator
-                                | ptr-operator
+                                | ptr-operator ptr-abstract-declarator-opt
+    """
+
+
+def p_ptr_abstract_declarator_opt(p):
+    # type: (YaccProduction) -> None
+    """
+        ptr-abstract-declarator-opt : ptr-abstract-declarator
+                                    | empty
     """
 
 
 def p_noptr_abstract_declarator(p):
     # type: (YaccProduction) -> None
     """
-        noptr-abstract-declarator : noptr-abstract-declarator parameters-and-qualifiers
-                                  | noptr-abstract-declarator LBRACKET constant-expression RBRACKET attribute-specifier-seq-opt
-                                  | parameters-and-qualifiers
-                                  | LBRACKET constant-expression RBRACKET attribute-specifier-seq-opt
+        noptr-abstract-declarator : noptr-abstract-declarator-opt parameters-and-qualifiers
+                                  | noptr-abstract-declarator-opt LBRACKET constant-expression RBRACKET attribute-specifier-seq-opt
                                   | LPAREN ptr-abstract-declarator RPAREN
+    """
+
+
+def p_noptr_abstract_declarator_opt(p):
+    # type: (YaccProduction) -> None
+    """
+        noptr-abstract-declarator-opt : noptr-abstract-declarator
+                                      | empty
     """
 
 

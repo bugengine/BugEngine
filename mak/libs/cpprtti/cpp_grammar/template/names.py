@@ -26,23 +26,11 @@ def p_simple_template_id(p):
     """
 
 
-def p_unknown_template_id(p):
-    # type: (YaccProduction) -> None
-    """
-        unknown-template-id : KW_TEMPLATE IDENTIFIER OP_LT template-argument-list-opt OP_GT
-    """
-
-
-def p_class_template_id(p):
-    # type: (YaccProduction) -> None
-    """
-        class-template-id : class-template-name OP_LT template-argument-list-opt OP_GT
-    """
-
 def p_template_id(p):
     # type: (YaccProduction) -> None
     """
-        template-id : operator-function-id OP_LT template-argument-list-opt OP_GT
+        template-id : simple-template-id
+                    | operator-function-id OP_LT template-argument-list-opt OP_GT
                     | literal-operator-id OP_LT template-argument-list-opt OP_GT
     """
 
@@ -50,14 +38,7 @@ def p_template_id(p):
 def p_template_name(p):
     # type: (YaccProduction) -> None
     """
-        template-name : TEMPLATE_IDENTIFIER
-    """
-
-
-def p_class_template_name(p):
-    # type: (YaccProduction) -> None
-    """
-        class-template-name : CLASS_TEMPLATE_IDENTIFIER
+        template-name : IDENTIFIER
     """
 
 
@@ -65,8 +46,8 @@ def p_template_argument_list_opt(p):
     # type: (YaccProduction) -> None
     """
         template-argument-list-opt : template-argument-list
+                                   | empty
     """
-    # TODO: empty
 
 
 def p_template_argument_list(p):
@@ -90,8 +71,8 @@ def p_ellipsis_opt(p):
     # type: (YaccProduction) -> None
     """
         ellipsis-opt : ELLIPSIS
+                     | empty
     """
-    # TODO: empty
 
 
 if TYPE_CHECKING:

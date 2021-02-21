@@ -31,7 +31,7 @@ from be_typing import TYPE_CHECKING
 def p_enum_name(p):
     # type: (YaccProduction) -> None
     """
-        enum-name : ENUM_IDENTIFIER
+        enum-name : IDENTIFIER
     """
 
 
@@ -46,18 +46,15 @@ def p_enum_specifier(p):
 def p_enum_head(p):
     # type: (YaccProduction) -> None
     """
-        enum-head : enum-key attribute-specifier-seq identifier-opt enum-base-opt
-                  | enum-key attribute-specifier-seq nested-name-specifier identifier enum-base-opt
-                  | enum-key identifier-opt enum-base-opt
-                  | enum-key nested-name-specifier identifier enum-base-opt
+        enum-head : enum-key attribute-specifier-seq-opt identifier-opt enum-base-opt
+                  | enum-key attribute-specifier-seq-opt nested-name-specifier identifier enum-base-opt
     """
 
 
 def p_opaque_enum_declaration(p):
     # type: (YaccProduction) -> None
     """
-        opaque-enum-declaration : enum-key attribute-specifier-seq identifier enum-base-opt SEMI
-                                | enum-key identifier enum-base-opt SEMI
+        opaque-enum-declaration : enum-key attribute-specifier-seq-opt identifier enum-base-opt SEMI
     """
 
 
@@ -81,8 +78,8 @@ def p_enum_base_opt(p):
     # type: (YaccProduction) -> None
     """
         enum-base-opt : enum-base
+                      | empty
     """
-    # TODO: empty
 
 
 def p_enumerator_list(p):
@@ -97,8 +94,8 @@ def p_enumerator_list_opt(p):
     # type: (YaccProduction) -> None
     """
         enumerator-list-opt : enumerator-list
+                            | empty
     """
-    # TODO: empty
 
 
 def p_enumerator_definition(p):

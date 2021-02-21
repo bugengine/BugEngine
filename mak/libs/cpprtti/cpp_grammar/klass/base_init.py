@@ -26,7 +26,7 @@ def p_ctor_initializer_opt(p):
     # type: (YaccProduction) -> None
     """
         ctor-initializer-opt : ctor-initializer
-                             |
+                             | empty
     """
 
 
