@@ -55,8 +55,10 @@ def p_namespace_definition(p):
 def p_original_namespace_definition(p):
     # type: (YaccProduction) -> None
     """
-        named-namespace-definition : KW_INLINE? KW_NAMESPACE IDENTIFIER LBRACE namespace-body RBRACE
+        named-namespace-definition : attribute-specifier-seq? decl-specifier-seq? KW_NAMESPACE IDENTIFIER LBRACE namespace-body RBRACE
     """
+    # TODO: no attributes
+    # TODO: decl specifier INLINE only
     print('namespace %s' % p[3])
 
 
@@ -70,8 +72,10 @@ def p_original_namespace_definition(p):
 def p_unnanmed_namespace_definition(p):
     # type: (YaccProduction) -> None
     """
-        unnamed-namespace-definition : KW_INLINE? KW_NAMESPACE LBRACE namespace-body RBRACE
+        unnamed-namespace-definition : attribute-specifier-seq? decl-specifier-seq? KW_NAMESPACE LBRACE namespace-body RBRACE
     """
+    # TODO: no attributes
+    # TODO: decl specifier INLINE only
 
 
 def p_namespace_body(p):

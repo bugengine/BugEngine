@@ -67,7 +67,6 @@ def p_declaration(p):
                     | linkage-specification
                     | namespace-definition
                     | attribute-declaration
-                    | empty-declaration
     """
 
 
@@ -88,23 +87,24 @@ def p_block_declaration(p):
 def p_alias_declaration(p):
     # type: (YaccProduction) -> None
     """
-        alias-declaration : attribute-specifier-seq? KW_USING IDENTIFIER OP_EQUALS type-id SEMI
+        alias-declaration : attribute-specifier-seq? decl-specifier-seq? KW_USING IDENTIFIER OP_EQUALS type-id SEMI
     """
     # TODO: attribute-specifier-seq?  not allowed here
+    # TODO: decl-specifier-seq? empty
 
 
 def p_simple_declaration(p):
     # type: (YaccProduction) -> None
     """
-        simple-declaration : attribute-specifier-seq? decl-specifier-seq init-declarator-list? SEMI
+        simple-declaration : attribute-specifier-seq? decl-specifier-seq? init-declarator-list? SEMI
     """
 
 
-def p_empty_declaration(p):
-    # type: (YaccProduction) -> None
-    """
-        empty-declaration : SEMI
-    """
+#def p_empty_declaration(p):
+#    # type: (YaccProduction) -> None
+#    """
+#        empty-declaration : SEMI
+#    """
 
 
 def p_static_assert_declaration(p):

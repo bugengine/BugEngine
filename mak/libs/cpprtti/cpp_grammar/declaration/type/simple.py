@@ -32,8 +32,7 @@ from be_typing import TYPE_CHECKING
 def p_simple_type_specifier(p):
     # type: (YaccProduction) -> None
     """
-        simple-type-specifier : simple-type-modifier? id-expression simple-type-modifier?
-                              | simple-type-modifier? KW_CHAR simple-type-modifier?
+        simple-type-specifier : simple-type-modifier? KW_CHAR simple-type-modifier?
                               | simple-type-modifier? KW_CHAR16_T simple-type-modifier?
                               | simple-type-modifier? KW_CHAR32_T simple-type-modifier?
                               | simple-type-modifier? KW_WCHAR_T simple-type-modifier?
@@ -43,8 +42,15 @@ def p_simple_type_specifier(p):
                               | simple-type-modifier? KW_DOUBLE simple-type-modifier?
                               | simple-type-modifier? KW_VOID simple-type-modifier?
                               | simple-type-modifier? KW_AUTO simple-type-modifier?
-                              | simple-type-modifier? decltype-specifier simple-type-modifier?
     """
+
+
+#def p_simple_type_specifier_id(p):
+#   # type: (YaccProduction) -> None
+#    """
+#        simple-type-specifier : simple-type-modifier? id-expression simple-type-modifier?
+#                              | simple-type-modifier? decltype-specifier simple-type-modifier?
+#    """
 
 
 def p_simple_type_modifier(p):

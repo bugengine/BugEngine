@@ -72,11 +72,18 @@ def p_qualified_id(p):
     # type: (YaccProduction) -> None
     """
         qualified-id : nested-name-specifier KW_TEMPLATE? unqualified-id
-                     | OP_SCOPE nested-name-specifier KW_TEMPLATE? unqualified-id
-                     | OP_SCOPE IDENTIFIER
-                     | OP_SCOPE operator-function-id
-                     | OP_SCOPE literal-operator-id
-                     | OP_SCOPE template-id
+                     | OP_SCOPE nested-name-specifier KW_TEMPLATE? unqualified-id   %prec SCOPE_REDUCTION
+                     | OP_SCOPE IDENTIFIER                                          %prec SCOPE_REDUCTION
+                     | OP_SCOPE operator-function-id                                %prec SCOPE_REDUCTION
+                     | OP_SCOPE literal-operator-id                                 %prec SCOPE_REDUCTION
+                     | OP_SCOPE template-id                                         %prec SCOPE_REDUCTION
+    """
+
+
+def p_template_spec(p):
+    # type: (YaccProduction) -> None
+    """
+        template-spec : 
     """
 
 

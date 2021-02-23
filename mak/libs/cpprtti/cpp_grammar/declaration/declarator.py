@@ -103,8 +103,14 @@ def p_ptr_operator(p):
         ptr-operator : OP_TIMES attribute-specifier-seq? cv-qualifier-seq?
                      | OP_AND attribute-specifier-seq?
                      | OP_LAND attribute-specifier-seq?
-                     | OP_SCOPE? nested-name-specifier OP_TIMES attribute-specifier-seq? cv-qualifier-seq?
     """
+
+
+#def p_ptr_operator_nested(p):
+#    # type: (YaccProduction) -> None
+#    """
+#        ptr-operator : OP_SCOPE? nested-name-specifier OP_TIMES attribute-specifier-seq? cv-qualifier-seq?
+#    """
 
 
 def p_cv_qualifier_seq(p):

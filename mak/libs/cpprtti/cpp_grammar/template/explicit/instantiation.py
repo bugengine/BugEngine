@@ -9,8 +9,10 @@ from be_typing import TYPE_CHECKING
 def p_explicit_instantiation(p):
     # type: (YaccProduction) -> None
     """
-        explicit-instantiation : KW_EXTERN? KW_TEMPLATE declaration
+        explicit-instantiation : attribute-specifier-seq? decl-specifier-seq? KW_TEMPLATE declaration
     """
+    # TODO: no attributes
+    # TODO: only extern
 
 
 if TYPE_CHECKING:
