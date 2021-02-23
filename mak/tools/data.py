@@ -32,6 +32,15 @@ ${TGT[3].abspath()}
 cls = Task.task_factory('datagen', ddf, [], 'BLUE', ext_in='.h .hh .hxx', ext_out='.cc')
 cls.scan = scan
 
+cpprtti = """
+%s ${CPPRTTI_GENERATE}
+-m ${MACROS_IGNORE}
+-t ${TMPDIR}
+${SRC[0].abspath()}
+""" % sys.executable.replace('\\', '/')
+cls = Task.task_factory('rtti', cpprtti, [], 'BLUE', ext_in='.h .hh .hxx', ext_out='.cc')
+cls.scan = scan
+
 namespace_register = 'BE_REGISTER_NAMESPACE_%d_NAMED(%s, %s)\n'
 namespace_alias = 'BE_REGISTER_ROOT_NAMESPACE(%s, %s, %s)\n'
 
@@ -83,6 +92,14 @@ def datagen(self, node):
     outs.append(out_node.change_ext('-instances.cc'))
     outs.append(out_node.change_ext('.doc'))
     outs.append(out_node.change_ext('.namespaces'))
+
+    #tsk = self.create_task('rtti', node, [])
+    #tsk.env.CPPRTTI_GENERATE = self.bld.bugenginenode.find_node('mak/tools/bin/cpprtti_generate.py').abspath()
+    #tsk.env.MACROS_IGNORE = self.bld.bugenginenode.find_node('mak/libs/cpp/macros_ignore').abspath()
+    #tsk.env.TMPDIR = self.bld.bldnode.parent.parent.abspath()
+    #tsk.dep_nodes = [self.bld.bugenginenode.find_node('mak/tools/bin/cpprtti_generate.py')]
+    #tsk.dep_nodes += self.bld.bugenginenode.find_node('mak/libs/cpprtti').ant_glob('**/*.py')
+
     tsk = self.create_task('datagen', node, outs)
     for include_node in self.includes:
         if node.is_child_of(include_node):

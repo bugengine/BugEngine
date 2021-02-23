@@ -19,8 +19,9 @@ from be_typing import TYPE_CHECKING
 def p_namespace_alias_definition(p):
     # type: (YaccProduction) -> None
     """
-        namespace-alias-definition : KW_NAMESPACE IDENTIFIER OP_EQUALS id-expression SEMI
+        namespace-alias-definition : KW_INLINE? KW_NAMESPACE IDENTIFIER OP_EQUALS id-expression SEMI
     """
+    # TODO: inline not allowed
 
 
 #def p_qualified_namespace_specifier(p):

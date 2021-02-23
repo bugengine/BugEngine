@@ -71,7 +71,8 @@ def p_unqualified_id(p):
 def p_qualified_id(p):
     # type: (YaccProduction) -> None
     """
-        qualified-id : OP_SCOPE? nested-name-specifier KW_TEMPLATE? unqualified-id
+        qualified-id : nested-name-specifier KW_TEMPLATE? unqualified-id
+                     | OP_SCOPE nested-name-specifier KW_TEMPLATE? unqualified-id
                      | OP_SCOPE IDENTIFIER
                      | OP_SCOPE operator-function-id
                      | OP_SCOPE literal-operator-id

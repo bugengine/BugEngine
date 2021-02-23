@@ -7,6 +7,7 @@ from .name import *
 from .keyword import *
 from .operators import *
 from .literal import *
+from .comment import *
 
 from ply.lex import TOKEN
 from be_typing import TYPE_CHECKING

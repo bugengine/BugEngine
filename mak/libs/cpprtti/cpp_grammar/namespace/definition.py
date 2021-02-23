@@ -57,6 +57,7 @@ def p_original_namespace_definition(p):
     """
         named-namespace-definition : KW_INLINE? KW_NAMESPACE IDENTIFIER LBRACE namespace-body RBRACE
     """
+    print('namespace %s' % p[3])
 
 
 #def p_extension_namespace_definition(p):

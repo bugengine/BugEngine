@@ -29,6 +29,14 @@ class CppLexer:
             )
         return new_token
 
+    def position(self, token):
+        # type: (lex.LexToken) -> CppPosition
+        return CppPosition(self._filename, self._lineno, token.lexpos, token.lexpos + len(token.value), self._lexdata)
+
+    def eof_position(self):
+        # type: () -> CppPosition
+        return CppPosition(self._filename, self._lineno, len(self._lexdata), len(self._lexdata), self._lexdata)
+
 
 if TYPE_CHECKING:
     from typing import Optional

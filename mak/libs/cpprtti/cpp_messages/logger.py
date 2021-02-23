@@ -107,11 +107,11 @@ class Logger:
 
     IDE_FORMAT = {
         'msvc':
-            '{color_filename}{filename}{color_off}({line:d},{column:d}) : {color_error_type}{error_type}{color_off}: {color_message}{message}{color_off}',
+            '{color_filename}{filename}{color_off}({line:d},{column:d}) : {color_error_type}{error_type}{color_off}: {color_message}{message}{color_off}\n',
         'unix':
-            '{color_filename}{filename}{color_off}:{line:d}:{column:d}: {color_error_type}{error_type}{color_off}: {color_message}{message}{color_off}',
+            '{color_filename}{filename}{color_off}:{line:d}:{column:d}: {color_error_type}{error_type}{color_off}: {color_message}{message}{color_off}\n',
         'vi':
-            '{color_filename}{filename}{color_off} +{line:d}:{column:d}: {color_error_type}{error_type}{color_off}: {color_message}{message}{color_off}',
+            '{color_filename}{filename}{color_off} +{line:d}:{column:d}: {color_error_type}{error_type}{color_off}: {color_message}{message}{color_off}\n',
     }
 
     @classmethod
@@ -307,31 +307,37 @@ class Logger:
         return locals()
 
     @error
-    def C0012(self, position, diagnostic):
+    def C0012(self, position):
+        # type: (Logger, CppPosition) -> Dict[str, Any]
+        """unexpected end of file"""
+        return locals()
+
+    @error
+    def C0013(self, position, diagnostic):
         # type: (Logger, CppPosition, str) -> Dict[str, Any]
         """expected diagnostic {diagnostic} was not encountered"""
         return locals()
 
     @error
-    def C0013(self, position, specifier):
+    def C0014(self, position, specifier):
         # type: (Logger, CppPosition, str) -> Dict[str, Any]
         """cannot combine with previous '{specifier}' declaration specifier"""
         return locals()
 
     @error
-    def C0014(self, position):
+    def C0015(self, position):
         # type: (Logger, CppPosition) -> Dict[str, Any]
         """internal error"""
         return locals()
 
     @error
-    def C0015(self, position):
+    def C0016(self, position):
         # type: (Logger, CppPosition) -> Dict[str, Any]
         """expected unqualified id"""
         return locals()
 
     @error
-    def C0016(self, position):
+    def C0017(self, position):
         # type: (Logger, CppPosition) -> Dict[str, Any]
         """unexpected template specifier"""
         return locals()

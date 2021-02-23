@@ -12,8 +12,9 @@ from be_typing import TYPE_CHECKING
 def p_using_declaration(p):
     # type: (YaccProduction) -> None
     """
-        using-declaration : KW_USING KW_TYPENAME? id-expression SEMI
+        using-declaration : attribute-specifier-seq? KW_USING KW_TYPENAME? id-expression SEMI
     """
+    # TODO: attribute-specifier-seq? not allowed here
 
 
 def p_using_directive(p):

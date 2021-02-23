@@ -27,6 +27,17 @@ setattr(yacc.YaccProduction, 'set_position_absolute', set_position_absolute)
 setattr(yacc.YaccProduction, 'position', position)
 
 
+def p_error(self, p):
+    # type: (CppParser, lex.LexToken) -> None
+    """
+        error :
+    """
+    if p:
+        self.lexer.logger.C0011(self.lexer.position(p), p.value, p.type)
+    else:
+        self.lexer.logger.C0012(self.lexer.eof_position())
+
+
 class CppParser:
     from . import cpp_grammar
 
@@ -39,6 +50,7 @@ class CppParser:
             debugfile=os.path.join(tmp_dir, 'cpprtti_grammar.debug'),
             debug=True
         )
+        setattr(self.parser, 'errorfunc', lambda p: p_error(self, p))
 
     def parse(self, logger, filename):
         # type: (Logger, str) -> CppObject
@@ -54,5 +66,6 @@ class CppParser:
 
 from be_typing import TYPE_CHECKING
 if TYPE_CHECKING:
+    from ply import lex
     from .cpp_messages import Logger
     from .cpp_ast.cppobject import CppObject

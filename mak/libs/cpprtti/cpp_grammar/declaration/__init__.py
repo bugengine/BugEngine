@@ -88,8 +88,9 @@ def p_block_declaration(p):
 def p_alias_declaration(p):
     # type: (YaccProduction) -> None
     """
-        alias-declaration : KW_USING IDENTIFIER OP_EQUALS type-id SEMI
+        alias-declaration : attribute-specifier-seq? KW_USING IDENTIFIER OP_EQUALS type-id SEMI
     """
+    # TODO: attribute-specifier-seq?  not allowed here
 
 
 def p_simple_declaration(p):

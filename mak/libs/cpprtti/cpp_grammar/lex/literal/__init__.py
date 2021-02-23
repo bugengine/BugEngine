@@ -16,14 +16,10 @@ decimal.getcontext().prec = 24
 @TOKEN(floating_literal)
 def t_FLOATING_LITERAL(t):
     # type: (LexToken) -> Optional[LexToken]
-    setattr(t, 'constant_value', decimal.Decimal(t.value[:-1]))
-    #if t.value[-1] in 'fF':
-    #    setattr(t, 'constant_type', self._base_types['float'])
-    #elif t.value[-1] in 'dD':
-    #    setattr(t, 'constant_type', self._base_types['double'])
-    #else:
-    #    assert t.value[-1] in '0123456789.'
-    #    setattr(t, 'constant_type', self._base_types['float'])
+    if t.value[-1] in 'fFdD':
+        setattr(t, 'constant_value', decimal.Decimal(t.value[:-1]))
+    else:
+        setattr(t, 'constant_value', decimal.Decimal(t.value))
     return t
 
 

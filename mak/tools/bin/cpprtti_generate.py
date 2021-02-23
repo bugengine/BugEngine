@@ -4,4 +4,5 @@ sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(
 
 if __name__ == '__main__':
     import cpprtti
-    cpprtti.run()
+    argument_context = cpprtti.init_arguments()
+    cpprtti.run(argument_context)
