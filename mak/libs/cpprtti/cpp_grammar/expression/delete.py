@@ -10,8 +10,10 @@ from be_typing import TYPE_CHECKING
 def p_delete_expression(p):
     # type: (YaccProduction) -> None
     """
-        delete-expression : OP_SCOPE? KW_DELETE cast-expression
-                          | OP_SCOPE? KW_DELETE LBRACKET RBRACKET cast-expression
+        delete-expression : OP_SCOPE KW_DELETE cast-expression
+                          | OP_SCOPE KW_DELETE LBRACKET RBRACKET cast-expression
+                          | KW_DELETE cast-expression
+                          | KW_DELETE LBRACKET RBRACKET cast-expression
     """
 
 

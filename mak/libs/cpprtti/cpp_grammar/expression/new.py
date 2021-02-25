@@ -23,8 +23,10 @@ from be_typing import TYPE_CHECKING
 def p_new_expression(p):
     # type: (YaccProduction) -> None
     """
-        new-expression : OP_SCOPE? KW_NEW new-placement? new-type-id new-initializer?
-                       | OP_SCOPE? KW_NEW new-placement? LPAREN type-id RPAREN new-initializer?
+        new-expression : OP_SCOPE KW_NEW new-placement? new-type-id new-initializer?
+                       | OP_SCOPE KW_NEW new-placement? LPAREN type-id RPAREN new-initializer?
+                       | KW_NEW new-placement? new-type-id new-initializer?
+                       | KW_NEW new-placement? LPAREN type-id RPAREN new-initializer?
     """
 
 

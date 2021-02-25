@@ -39,34 +39,33 @@ def p_trailing_type_specifier(p):
     """
 
 
-#def p_type_specifier_seq(p):
-#    # type: (YaccProduction) -> None
-#    """
-#        type-specifier-seq : type-specifier attribute-specifier-seq?
-#                           | type-specifier type-specifier-seq
-#    """
-
-#def p_trailing_type_specifier_seq(p):
-#    # type: (YaccProduction) -> None
-#    """
-#        trailing-type-specifier-seq : trailing-type-specifier attribute-specifier-seq?
-#                                    | trailing-type-specifier trailing-type-specifier-seq
-#    """
-
-
 def p_type_specifier_seq(p):
     # type: (YaccProduction) -> None
     """
-        type-specifier-seq : cv-qualifier? type-specifier cv-qualifier? attribute-specifier-seq?
+        type-specifier-seq : type-specifier attribute-specifier-seq?
+                           | type-specifier type-specifier-seq
     """
 
 
 def p_trailing_type_specifier_seq(p):
     # type: (YaccProduction) -> None
     """
-        trailing-type-specifier-seq : cv-qualifier? trailing-type-specifier cv-qualifier? attribute-specifier-seq?
+        trailing-type-specifier-seq : trailing-type-specifier attribute-specifier-seq?
+                                    | trailing-type-specifier trailing-type-specifier-seq
     """
 
+
+#def p_type_specifier_seq(p):
+#    # type: (YaccProduction) -> None
+#    """
+#        type-specifier-seq : cv-qualifier? type-specifier cv-qualifier? attribute-specifier-seq?
+#    """
+
+#def p_trailing_type_specifier_seq(p):
+#    # type: (YaccProduction) -> None
+#    """
+#        trailing-type-specifier-seq : cv-qualifier? trailing-type-specifier cv-qualifier? attribute-specifier-seq?
+#qqq    """
 
 if TYPE_CHECKING:
     from ply.yacc import YaccProduction

@@ -48,7 +48,7 @@ def p_attribute_specifier_seq(p):
 def p_attribute_specifier(p):
     # type: (YaccProduction) -> None
     """
-        attribute-specifier : LBRACKET LBRACKET attribute-list RBRACKET RBRACKET
+        attribute-specifier : LDOUBLEBRACKET LBRACKET attribute-list RBRACKET RBRACKET
                             | alignment-specifier
     """
 
@@ -175,6 +175,8 @@ def p_token(p):
               | SEMI
               | COLON
               | ELLIPSIS
+              | LANGLE
+              | RANGLE
               | KW_ALIGNAS
               | KW_ALIGNOF
               | KW_ASM

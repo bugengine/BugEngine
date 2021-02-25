@@ -45,7 +45,7 @@ class CppParser:
         # type: (str)->None
         self.parser = yacc.yacc(
             module=self.cpp_grammar,
-            start='translation-unit',
+            start='id-expression',
             picklefile=os.path.join(tmp_dir, 'cpprtti_grammar.pickle'),
             debugfile=os.path.join(tmp_dir, 'cpprtti_grammar.debug'),
             debug=True

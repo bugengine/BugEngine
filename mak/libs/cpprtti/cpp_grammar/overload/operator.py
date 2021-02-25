@@ -54,8 +54,8 @@ def p_operator_function_id(p):
     # type: (YaccProduction) -> None
     """
         operator-function-id : KW_OPERATOR overloadable-operator
-                             | KW_OPERATOR overloadable-operator OP_LT template-argument-list? OP_GT
     """
+    # removed template args.
 
 
 def p_overloadable_operator(p):

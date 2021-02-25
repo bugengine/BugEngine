@@ -66,7 +66,6 @@ def p_declaration(p):
                     | explicit-specialization
                     | linkage-specification
                     | namespace-definition
-                    | attribute-declaration
     """
 
 
@@ -114,12 +113,12 @@ def p_static_assert_declaration(p):
     """
 
 
-def p_attribute_declaration(p):
-    # type: (YaccProduction) -> None
-    """
-        attribute-declaration : attribute-specifier-seq SEMI
-    """
-
+#def p_attribute_declaration(p):
+#    # type: (YaccProduction) -> None
+#    """
+#        attribute-declaration : attribute-specifier-seq SEMI
+#    """
+# captured in simple-declaration
 
 if TYPE_CHECKING:
     from ply.yacc import YaccProduction

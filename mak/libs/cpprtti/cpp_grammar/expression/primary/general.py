@@ -28,10 +28,6 @@ nested-name-specifier:
       decltype-specifier ::     C++0x
       nested-name-specifier identifier ::
       nested-name-specifier templateopt simple-template-id ::
-
-CHANGES:
-========
-    moved lambda-expression into expression (comma.py) to avoid constant-expression to match lambdas
 """
 
 from be_typing import TYPE_CHECKING
@@ -44,6 +40,7 @@ def p_primary_expression(p):
                            | KW_THIS
                            | LPAREN expression RPAREN
                            | id-expression
+                           | lambda-expression
     """
 
 
@@ -58,43 +55,36 @@ def p_id_expression(self):
 def p_unqualified_id(p):
     # type: (YaccProduction) -> None
     """
-        unqualified-id : IDENTIFIER
-                       | operator-function-id
+        unqualified-id : IDENTIFIER template-spec?
+                       | operator-function-id template-spec?
                        | conversion-function-id
-                       | literal-operator-id
+                       | literal-operator-id template-spec?
                        | OP_NOT IDENTIFIER
                        | OP_NOT decltype-specifier
-                       | template-id
     """
 
 
 def p_qualified_id(p):
     # type: (YaccProduction) -> None
     """
-        qualified-id : nested-name-specifier KW_TEMPLATE? unqualified-id
-                     | OP_SCOPE nested-name-specifier KW_TEMPLATE? unqualified-id   %prec SCOPE_REDUCTION
-                     | OP_SCOPE IDENTIFIER                                          %prec SCOPE_REDUCTION
-                     | OP_SCOPE operator-function-id                                %prec SCOPE_REDUCTION
-                     | OP_SCOPE literal-operator-id                                 %prec SCOPE_REDUCTION
-                     | OP_SCOPE template-id                                         %prec SCOPE_REDUCTION
-    """
-
-
-def p_template_spec(p):
-    # type: (YaccProduction) -> None
-    """
-        template-spec : 
+        qualified-id : nested-name-specifier KW_TEMPLATE unqualified-id
+                     | nested-name-specifier unqualified-id
+                     | OP_SCOPE nested-name-specifier KW_TEMPLATE unqualified-id
+                     | OP_SCOPE nested-name-specifier unqualified-id
+                     | OP_SCOPE KW_TEMPLATE IDENTIFIER                              %prec SCOPE_REDUCTION
+                     | OP_SCOPE IDENTIFIER template-spec?                           %prec SCOPE_REDUCTION
+                     | OP_SCOPE operator-function-id template-spec?                 %prec SCOPE_REDUCTION
+                     | OP_SCOPE literal-operator-id template-spec?                  %prec SCOPE_REDUCTION
     """
 
 
 def p_nested_name_specifier(p):
     # type: (YaccProduction) -> None
     """
-        nested-name-specifier : IDENTIFIER OP_SCOPE
-                              | simple-template-id OP_SCOPE
+        nested-name-specifier : IDENTIFIER template-spec? OP_SCOPE
                               | decltype-specifier OP_SCOPE
-                              | nested-name-specifier IDENTIFIER OP_SCOPE
-                              | nested-name-specifier KW_TEMPLATE? simple-template-id OP_SCOPE
+                              | nested-name-specifier KW_TEMPLATE IDENTIFIER template-spec? OP_SCOPE
+                              | nested-name-specifier IDENTIFIER template-spec? OP_SCOPE
     """
 
 
@@ -104,6 +94,13 @@ def p_literal(p):
         literal : STRING_LITERAL
                 | INTEGER_LITERAL
                 | FLOATING_LITERAL
+    """
+
+
+def p_template_spec(p):
+    # type: (YaccProduction) -> None
+    """
+        template-spec : LANGLE template-argument-list? RANGLE
     """
 
 

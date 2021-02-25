@@ -17,7 +17,7 @@ from be_typing import TYPE_CHECKING
 def p_template_declaration(p):
     # type: (YaccProduction) -> None
     """
-        template-declaration : attribute-specifier-seq? decl-specifier-seq? KW_TEMPLATE OP_LT template-parameter-list OP_GT declaration
+        template-declaration : attribute-specifier-seq? decl-specifier-seq? KW_TEMPLATE LANGLE template-parameter-list RANGLE declaration
     """
     # TODO: attributes empty
     # TODO: specifier empty

@@ -32,34 +32,27 @@ from be_typing import TYPE_CHECKING
 def p_simple_type_specifier(p):
     # type: (YaccProduction) -> None
     """
-        simple-type-specifier : simple-type-modifier? KW_CHAR simple-type-modifier?
-                              | simple-type-modifier? KW_CHAR16_T simple-type-modifier?
-                              | simple-type-modifier? KW_CHAR32_T simple-type-modifier?
-                              | simple-type-modifier? KW_WCHAR_T simple-type-modifier?
-                              | simple-type-modifier? KW_BOOL simple-type-modifier?
-                              | simple-type-modifier KW_INT? simple-type-modifier?
-                              | simple-type-modifier? KW_FLOAT simple-type-modifier?
-                              | simple-type-modifier? KW_DOUBLE simple-type-modifier?
-                              | simple-type-modifier? KW_VOID simple-type-modifier?
-                              | simple-type-modifier? KW_AUTO simple-type-modifier?
+        simple-type-specifier : id-expression
+                              | builtin-type-specifier
+                              | decltype-specifier
     """
 
 
-#def p_simple_type_specifier_id(p):
-#   # type: (YaccProduction) -> None
-#    """
-#        simple-type-specifier : simple-type-modifier? id-expression simple-type-modifier?
-#                              | simple-type-modifier? decltype-specifier simple-type-modifier?
-#    """
-
-
-def p_simple_type_modifier(p):
+def p_builtin_type_specifier(p):
     # type: (YaccProduction) -> None
     """
-        simple-type-modifier : simple-type-modifier? KW_SHORT
-                             | simple-type-modifier? KW_LONG
-                             | simple-type-modifier? KW_SIGNED
-                             | simple-type-modifier? KW_UNSIGNED
+        builtin-type-specifier : KW_CHAR
+                               | KW_WCHAR_T
+                               | KW_BOOL
+                               | KW_SHORT
+                               | KW_INT
+                               | KW_LONG
+                               | KW_SIGNED
+                               | KW_UNSIGNED
+                               | KW_FLOAT
+                               | KW_DOUBLE
+                               | KW_VOID
+                               | KW_AUTO
     """
 
 

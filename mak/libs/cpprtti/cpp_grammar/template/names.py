@@ -18,22 +18,19 @@ template-argument:
 
 from be_typing import TYPE_CHECKING
 
+#def p_simple_template_id(p):
+#    # type: (YaccProduction) -> None
+#    """
+#        simple-template-id : IDENTIFIER OP_LT template-argument-list? OP_GT
+#    """
 
-def p_simple_template_id(p):
-    # type: (YaccProduction) -> None
-    """
-        simple-template-id : IDENTIFIER OP_LT template-argument-list? OP_GT
-    """
-
-
-def p_template_id(p):
-    # type: (YaccProduction) -> None
-    """
-        template-id : simple-template-id
-                    | operator-function-id OP_LT template-argument-list? OP_GT
-                    | literal-operator-id OP_LT template-argument-list? OP_GT
-    """
-
+#def p_template_id(p):
+#    # type: (YaccProduction) -> None
+#    """
+#        template-id : simple-template-id
+#                    | operator-function-id OP_LT template-argument-list? OP_GT
+#                    | literal-operator-id OP_LT template-argument-list? OP_GT
+#    """
 
 #def p_template_name(p):
 #    # type: (YaccProduction) -> None

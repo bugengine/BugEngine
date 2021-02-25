@@ -16,7 +16,6 @@ def p_expression(p):
     """
         expression : assignment-expression
                    | expression COMMA assignment-expression
-                   | lambda-expression
     """
 
 

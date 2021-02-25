@@ -39,9 +39,10 @@ def p_postfix_expression(p):
                            | postfix-expression RBRACKET expression RBRACKET
                            | postfix-expression RBRACKET braced-init-list? RBRACKET
                            | postfix-expression LPAREN expression-list? RPAREN
-                           | simple-type-specifier LPAREN expression-list? RPAREN
-                           | typename-specifier LPAREN expression-list? RPAREN
-                           | simple-type-specifier braced-init-list
+                           | builtin-type-specifier LPAREN expression-list? RPAREN
+                           | builtin-type-specifier braced-init-list
+                           | decltype-specifier LPAREN expression-list? RPAREN
+                           | decltype-specifier braced-init-list
                            | typename-specifier braced-init-list
                            | postfix-expression PERIOD KW_TEMPLATE? id-expression
                            | postfix-expression OP_ARROW KW_TEMPLATE? id-expression

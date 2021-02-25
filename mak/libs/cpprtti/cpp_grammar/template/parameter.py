@@ -29,8 +29,8 @@ def p_type_parameter(p):
                        | KW_CLASS IDENTIFIER? OP_EQUALS type-id
                        | KW_TYPENAME ELLIPSIS? IDENTIFIER?
                        | KW_TYPENAME IDENTIFIER? OP_EQUALS type-id
-                       | KW_TEMPLATE OP_LT template-parameter-list OP_GT KW_CLASS ELLIPSIS? IDENTIFIER?
-                       | KW_TEMPLATE OP_LT template-parameter-list OP_GT KW_CLASS IDENTIFIER? OP_EQUALS id-expression
+                       | KW_TEMPLATE LANGLE template-parameter-list RANGLE KW_CLASS ELLIPSIS? IDENTIFIER?
+                       | KW_TEMPLATE LANGLE template-parameter-list RANGLE KW_CLASS IDENTIFIER? OP_EQUALS id-expression
     """
     # original: template < template-parameter-list > class identifieropt = id-expression
 
