@@ -19,26 +19,30 @@ access-specifier:
       public
 """
 
+from ...cpp_parser import cpp98
 from be_typing import TYPE_CHECKING
 
 
-def p_base_clause(p):
-    # type: (YaccProduction) -> None
+@cpp98
+def p_base_clause(parser, p):
+    # type: (CppParser, YaccProduction) -> None
     """
         base-clause : COLON base-specifier-list
     """
 
 
-def p_base_specifier_list(p):
-    # type: (YaccProduction) -> None
+@cpp98
+def p_base_specifier_list(parser, p):
+    # type: (CppParser, YaccProduction) -> None
     """
         base-specifier-list : base-specifier ELLIPSIS?
                             | base-specifier-list COMMA base-specifier ELLIPSIS?
     """
 
 
-def p_base_specifier(p):
-    # type: (YaccProduction) -> None
+@cpp98
+def p_base_specifier(parser, p):
+    # type: (CppParser, YaccProduction) -> None
     """
         base-specifier : attribute-specifier-seq? base-type-specifier
                        | attribute-specifier-seq? KW_VIRTUAL access-specifier? base-type-specifier
@@ -46,23 +50,26 @@ def p_base_specifier(p):
     """
 
 
-def p_class_or_decltype(p):
-    # type: (YaccProduction) -> None
+@cpp98
+def p_class_or_decltype(parser, p):
+    # type: (CppParser, YaccProduction) -> None
     """
         class-or-decltype : id-expression
                           | decltype-specifier
     """
 
 
-def p_base_type_specifier(p):
-    # type: (YaccProduction) -> None
+@cpp98
+def p_base_type_specifier(parser, p):
+    # type: (CppParser, YaccProduction) -> None
     """
         base-type-specifier : class-or-decltype
     """
 
 
-def p_access_specifier(p):
-    # type: (YaccProduction) -> None
+@cpp98
+def p_access_specifier(parser, p):
+    # type: (CppParser, YaccProduction) -> None
     """
         access-specifier : KW_PRIVATE
                          | KW_PROTECTED
@@ -73,3 +80,4 @@ def p_access_specifier(p):
 
 if TYPE_CHECKING:
     from ply.yacc import YaccProduction
+    from ...cpp_parser import CppParser

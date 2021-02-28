@@ -1,6 +1,5 @@
 from ply import lex
-from .cpp_position import CppPosition
-from . import cpp_grammar
+from ..cpp_position import CppPosition
 from be_typing import TYPE_CHECKING
 from copy import copy
 
@@ -49,9 +48,12 @@ _ANGLE_BRACKET_INVALID_TOKENS = ('RPAREN', 'RBRACE', 'RBRACKET', 'SEMICOLON')
 
 
 class CppLexer:
+    tokens = ()    # type: Tuple[str,...]
+    keywords = ()  # type: Tuple[str,...]
+
     def __init__(self, filename, logger):
         # type: (str, Logger) -> None
-        self._lexer = lex.lex(module=cpp_grammar.lex)
+        self._lexer = lex.lex(module=self)
         self._lexer.cpp_lexer = self
         self._filename = filename
         self._lexdata = ''
@@ -75,32 +77,28 @@ class CppLexer:
         else:
             new_token = self._lexer.token()
 
-        if new_token:
+        if new_token is not None:
             new_token.cpp_lexer = self
             new_token.cpp_position = CppPosition(
                 self._filename, self._lineno, new_token.lexpos, new_token.lexpos + len(new_token.value), self._lexdata
             )
 
-            if new_token.type == 'OP_LT':
+            if new_token.type in ('LPAREN', 'LBRACE', 'LBRACKET'):
+                self.begin_scope()
+            elif new_token.type in ('RPAREN', 'RBRACE', 'RBRACKET'):
+                self.end_scope()
+            elif new_token.type == 'OP_LT':
                 if self.scan_rangle(0, self._langle_stack[-1], self._pred1_token, self._pred2_token, self._pred3_token):
                     new_token.type = 'LANGLE'
                     self._langle_stack[-1] += 1
-
-            elif new_token.type in ('LBRACKET', 'LBRACE', 'LPAREN'):
-                self._langle_stack.append(0)
-                if new_token.type == 'LBRACKET':
-                    if getattr(self.look_ahead(0), 'type', '') == 'LBRACKET':
-                        new_token.type = 'LDOUBLEBRACKET'
-            elif new_token.type in ('RBRACKET', 'RBRACE', 'RPAREN'):
-                # discard mismatched brackets, always keep at least one angle stack
-                if len(self._langle_stack) > 1:
-                    assert self._langle_stack[-1] == 0
-                    self._langle_stack.pop(-1)
+            elif new_token.type == 'OP_GT':
+                if self._langle_stack[-1] > 0:
+                    self._langle_stack[-1] -= 1
+                    new_token.type = 'RANGLE'
 
         self._pred3_token = self._pred2_token
         self._pred2_token = self._pred1_token
         self._pred1_token = new_token
-        print(new_token)
         return new_token
 
     def position(self, token):
@@ -119,6 +117,16 @@ class CppLexer:
                 return None
             self._lookahead.append(token)
         return self._lookahead[index]
+
+    def begin_scope(self):
+        # type: () -> None
+        self._langle_stack.append(0)
+
+    def end_scope(self):
+        # type: () -> None
+        if len(self._langle_stack) > 1:
+            assert self._langle_stack[-1] == 0
+            self._langle_stack.pop(-1)
 
     def scan_rangle(self, start_index, langle_count, pred1_token, pred2_token, pred3_token):
         # type: (int, int, Optional[lex.LexToken], Optional[lex.LexToken], Optional[lex.LexToken]) -> Optional[int]
@@ -197,5 +205,6 @@ class CppLexer:
 
 
 if TYPE_CHECKING:
-    from typing import List, Optional
-    from .cpp_messages import Logger
+    from typing import List, Optional, Tuple
+    from types import ModuleType
+    from ..cpp_messages import Logger

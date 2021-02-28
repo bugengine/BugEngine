@@ -17,11 +17,13 @@ new-initializer:
       braced-init-list     C++0x
 """
 
+from ...cpp_parser import cpp98
 from be_typing import TYPE_CHECKING
 
 
-def p_new_expression(p):
-    # type: (YaccProduction) -> None
+@cpp98
+def p_new_expression(parser, p):
+    # type: (CppParser, YaccProduction) -> None
     """
         new-expression : OP_SCOPE KW_NEW new-placement? new-type-id new-initializer?
                        | OP_SCOPE KW_NEW new-placement? LPAREN type-id RPAREN new-initializer?
@@ -30,38 +32,43 @@ def p_new_expression(p):
     """
 
 
-def p_new_placement(p):
-    # type: (YaccProduction) -> None
+@cpp98
+def p_new_placement(parser, p):
+    # type: (CppParser, YaccProduction) -> None
     """
         new-placement : LPAREN expression-list RPAREN
     """
 
 
-def p_new_type_id(p):
-    # type: (YaccProduction) -> None
+@cpp98
+def p_new_type_id(parser, p):
+    # type: (CppParser, YaccProduction) -> None
     """
         new-type-id : type-specifier-seq new-declarator?
     """
 
 
-def p_new_declarator(p):
-    # type: (YaccProduction) -> None
+@cpp98
+def p_new_declarator(parser, p):
+    # type: (CppParser, YaccProduction) -> None
     """
         new-declarator : ptr-operator new-declarator?
                        | noptr-new-declarator
     """
 
 
-def p_noptr_new_declarator(p):
-    # type: (YaccProduction) -> None
+@cpp98
+def p_noptr_new_declarator(parser, p):
+    # type: (CppParser, YaccProduction) -> None
     """
         noptr-new-declarator : LBRACKET expression RBRACKET attribute-specifier-seq?
                              | noptr-new-declarator LBRACKET constant-expression RBRACKET attribute-specifier-seq?
     """
 
 
-def p_new_initializer(p):
-    # type: (YaccProduction) -> None
+@cpp98
+def p_new_initializer(parser, p):
+    # type: (CppParser, YaccProduction) -> None
     """
         new-initializer : LPAREN expression-list? RPAREN
                         | braced-init-list
@@ -70,3 +77,4 @@ def p_new_initializer(p):
 
 if TYPE_CHECKING:
     from ply.yacc import YaccProduction
+    from ...cpp_parser import CppParser

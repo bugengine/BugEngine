@@ -6,11 +6,13 @@ multiplicative-expression:
       multiplicative-expression % pm-expression
 """
 
+from ...cpp_parser import cpp98
 from be_typing import TYPE_CHECKING
 
 
-def p_multiplicative_expression(p):
-    # type: (YaccProduction) -> None
+@cpp98
+def p_multiplicative_expression(parser, p):
+    # type: (CppParser, YaccProduction) -> None
     """
         multiplicative-expression : pm-expression
                                   | multiplicative-expression OP_TIMES pm-expression
@@ -21,3 +23,4 @@ def p_multiplicative_expression(p):
 
 if TYPE_CHECKING:
     from ply.yacc import YaccProduction
+    from ...cpp_parser import CppParser

@@ -16,43 +16,49 @@ braced-init-list:
       { }     C++0x
 """
 
+from ...cpp_parser import cpp98
 from be_typing import TYPE_CHECKING
 
 
-def p_initializer(p):
-    # type: (YaccProduction) -> None
+@cpp98
+def p_initializer(parser, p):
+    # type: (CppParser, YaccProduction) -> None
     """
         initializer : brace-or-equal-initializer
                     | LPAREN expression-list RPAREN
     """
 
 
-def p_brace_or_equal_initializer(p):
-    # type: (YaccProduction) -> None
+@cpp98
+def p_brace_or_equal_initializer(parser, p):
+    # type: (CppParser, YaccProduction) -> None
     """
         brace-or-equal-initializer : OP_EQUALS initializer-clause
                                    | braced-init-list
     """
 
 
-def p_initializer_clause(p):
-    # type: (YaccProduction) -> None
+@cpp98
+def p_initializer_clause(parser, p):
+    # type: (CppParser, YaccProduction) -> None
     """
         initializer-clause : assignment-expression
                            | braced-init-list
     """
 
 
-def p_initializer_list(p):
-    # type: (YaccProduction) -> None
+@cpp98
+def p_initializer_list(parser, p):
+    # type: (CppParser, YaccProduction) -> None
     """
         initializer-list : initializer-clause ELLIPSIS?
                          | initializer-list COMMA initializer-clause ELLIPSIS?
     """
 
 
-def p_braced_init_list(p):
-    # type: (YaccProduction) -> None
+@cpp98
+def p_braced_init_list(parser, p):
+    # type: (CppParser, YaccProduction) -> None
     """
         braced-init-list : LBRACE initializer-list COMMA? RBRACE
                          | LBRACE RBRACE
@@ -61,3 +67,4 @@ def p_braced_init_list(p):
 
 if TYPE_CHECKING:
     from ply.yacc import YaccProduction
+    from ...cpp_parser import CppParser

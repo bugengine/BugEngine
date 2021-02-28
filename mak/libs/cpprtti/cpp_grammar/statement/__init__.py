@@ -10,19 +10,21 @@ statement:
       attribute-specifier-seqopt try-block
 """
 
-from .label import *
-from .expression import *
-from .block import *
-from .select import *
-from .iteration import *
-from .jump import *
-from .declaration import *
+from . import label
+from . import expression
+from . import block
+from . import select
+from . import iteration
+from . import jump
+from . import declaration
 
+from ...cpp_parser import cpp98
 from be_typing import TYPE_CHECKING
 
 
-def p_statement(p):
-    # type: (YaccProduction) -> None
+@cpp98
+def p_statement(parser, p):
+    # type: (CppParser, YaccProduction) -> None
     """
         statement : labeled-statement
                   | attribute-specifier-seq expression-statement
@@ -37,3 +39,4 @@ def p_statement(p):
 
 if TYPE_CHECKING:
     from ply.yacc import YaccProduction
+    from ...cpp_parser import CppParser

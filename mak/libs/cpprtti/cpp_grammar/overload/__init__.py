@@ -1,2 +1,2 @@
-from .operator import *
-from .literal import *
+from . import operator
+from . import literal

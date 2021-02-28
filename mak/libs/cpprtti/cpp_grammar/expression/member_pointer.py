@@ -5,11 +5,13 @@ pm-expression:
       pm-expression ->* cast-expression
 """
 
+from ...cpp_parser import cpp98
 from be_typing import TYPE_CHECKING
 
 
-def p_pm_expression(p):
-    # type: (YaccProduction) -> None
+@cpp98
+def p_pm_expression(parser, p):
+    # type: (CppParser, YaccProduction) -> None
     """
         pm-expression : cast-expression
                       | pm-expression OP_PERIODMEMBER cast-expression
@@ -19,3 +21,4 @@ def p_pm_expression(p):
 
 if TYPE_CHECKING:
     from ply.yacc import YaccProduction
+    from ...cpp_parser import CppParser

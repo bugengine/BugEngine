@@ -33,31 +33,34 @@ attribute-declaration:
   	attribute-specifier-seq ;     C++0x
 """
 
-from .specifier import *
-from .typedef import *
-from .type import *
-from .enum import *
-from .asm import *
-from .linkage import *
-from .attribute import *
-from .declarator import *
-from .name import *
-from .function import *
-from .initializer import *
+from ...cpp_parser import cpp98
+from . import specifier
+from . import typedef
+from . import type
+from . import enum
+from . import asm
+from . import linkage
+from . import attribute
+from . import declarator
+from . import name
+from . import function
+from . import initializer
 
 from be_typing import TYPE_CHECKING
 
 
-def p_declaration_seq(p):
-    # type: (YaccProduction) -> None
+@cpp98
+def p_declaration_seq(parser, p):
+    # type: (CppParser, YaccProduction) -> None
     """
         declaration-seq : declaration
                         | declaration-seq declaration
     """
 
 
-def p_declaration(p):
-    # type: (YaccProduction) -> None
+@cpp98
+def p_declaration(parser, p):
+    # type: (CppParser, YaccProduction) -> None
     """
         declaration : block-declaration
                     | function-definition
@@ -69,8 +72,9 @@ def p_declaration(p):
     """
 
 
-def p_block_declaration(p):
-    # type: (YaccProduction) -> None
+@cpp98
+def p_block_declaration(parser, p):
+    # type: (CppParser, YaccProduction) -> None
     """
         block-declaration : simple-declaration
                           | asm-definition
@@ -83,8 +87,9 @@ def p_block_declaration(p):
     """
 
 
-def p_alias_declaration(p):
-    # type: (YaccProduction) -> None
+@cpp98
+def p_alias_declaration(parser, p):
+    # type: (CppParser, YaccProduction) -> None
     """
         alias-declaration : attribute-specifier-seq? decl-specifier-seq? KW_USING IDENTIFIER OP_EQUALS type-id SEMI
     """
@@ -92,29 +97,31 @@ def p_alias_declaration(p):
     # TODO: decl-specifier-seq? empty
 
 
-def p_simple_declaration(p):
-    # type: (YaccProduction) -> None
+@cpp98
+def p_simple_declaration(parser, p):
+    # type: (CppParser, YaccProduction) -> None
     """
         simple-declaration : attribute-specifier-seq? decl-specifier-seq? init-declarator-list? SEMI
     """
 
 
-#def p_empty_declaration(p):
-#    # type: (YaccProduction) -> None
+#def p_empty_declaration(parser, p):
+#    # type: (CppParser, YaccProduction) -> None
 #    """
 #        empty-declaration : SEMI
 #    """
 
 
-def p_static_assert_declaration(p):
-    # type: (YaccProduction) -> None
+@cpp98
+def p_static_assert_declaration(parser, p):
+    # type: (CppParser, YaccProduction) -> None
     """
         static_assert-declaration : KW_STATIC_ASSERT LPAREN constant-expression COMMA STRING_LITERAL RPAREN SEMI
     """
 
 
-#def p_attribute_declaration(p):
-#    # type: (YaccProduction) -> None
+#def p_attribute_declaration(parser, p):
+#    # type: (CppParser, YaccProduction) -> None
 #    """
 #        attribute-declaration : attribute-specifier-seq SEMI
 #    """
@@ -122,3 +129,4 @@ def p_static_assert_declaration(p):
 
 if TYPE_CHECKING:
     from ply.yacc import YaccProduction
+    from ...cpp_parser import CppParser

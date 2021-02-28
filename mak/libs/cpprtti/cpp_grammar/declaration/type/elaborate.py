@@ -5,11 +5,13 @@ elaborated-type-specifier:
       enum ::opt nested-name-specifieropt identifier
 """
 
+from ....cpp_parser import cpp98
 from be_typing import TYPE_CHECKING
 
 
-def p_elaborate_type_specifier(p):
-    # type: (YaccProduction) -> None
+@cpp98
+def p_elaborate_type_specifier(parser, p):
+    # type: (CppParser, YaccProduction) -> None
     """
         elaborated-type-specifier : class-key id-expression
                                   | enum-key id-expression
@@ -18,3 +20,4 @@ def p_elaborate_type_specifier(p):
 
 if TYPE_CHECKING:
     from ply.yacc import YaccProduction
+    from ....cpp_parser import CppParser

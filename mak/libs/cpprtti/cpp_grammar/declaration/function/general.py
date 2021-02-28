@@ -8,11 +8,13 @@ function-body:
   	function-try-block     C++0x
 """
 
+from ....cpp_parser import cpp98
 from be_typing import TYPE_CHECKING
 
 
-def p_function_definition(p):
-    # type: (YaccProduction) -> None
+@cpp98
+def p_function_definition(parser, p):
+    # type: (CppParser, YaccProduction) -> None
     """
         function-definition : attribute-specifier-seq? decl-specifier-seq? declarator function-body
                             | attribute-specifier-seq? decl-specifier-seq? declarator OP_EQUALS KW_DEFAULT SEMI
@@ -20,8 +22,9 @@ def p_function_definition(p):
     """
 
 
-def p_function_body(p):
-    # type: (YaccProduction) -> None
+@cpp98
+def p_function_body(parser, p):
+    # type: (CppParser, YaccProduction) -> None
     """
         function-body : ctor-initializer? compound-statement
                       | function-try-block
@@ -30,3 +33,4 @@ def p_function_body(p):
 
 if TYPE_CHECKING:
     from ply.yacc import YaccProduction
+    from ....cpp_parser import CppParser

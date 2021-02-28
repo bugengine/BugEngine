@@ -29,20 +29,20 @@ pseudo-destructor-name:
       ~ decltype-specifier     C++0x
 """
 
+from ...cpp_parser import cpp98
 from be_typing import TYPE_CHECKING
 
 
-def p_postfix_expression(p):
-    # type: (YaccProduction) -> None
+@cpp98
+def p_postfix_expression(parser, p):
+    # type: (CppParser, YaccProduction) -> None
     """
         postfix-expression : primary-expression
                            | postfix-expression RBRACKET expression RBRACKET
                            | postfix-expression RBRACKET braced-init-list? RBRACKET
                            | postfix-expression LPAREN expression-list? RPAREN
-                           | builtin-type-specifier LPAREN expression-list? RPAREN
-                           | builtin-type-specifier braced-init-list
-                           | decltype-specifier LPAREN expression-list? RPAREN
-                           | decltype-specifier braced-init-list
+                           | simple-type-specifier-reduced LPAREN expression-list? RPAREN
+                           | simple-type-specifier-reduced braced-init-list
                            | typename-specifier braced-init-list
                            | postfix-expression PERIOD KW_TEMPLATE? id-expression
                            | postfix-expression OP_ARROW KW_TEMPLATE? id-expression
@@ -59,15 +59,26 @@ def p_postfix_expression(p):
     #          postfix-expression OP_ARROW pseudo-destructor-name
 
 
-def p_expression_list(p):
-    # type: (YaccProduction) -> None
+@cpp98
+def p_postfix_expression(parser, p):
+    # type: (CppParser, YaccProduction) -> None
+    """
+        postfix-expression : primary-expression
+    """
+    # deleted: postfix-expression PERIOD pseudo-destructor-name
+    #          postfix-expression OP_ARROW pseudo-destructor-name
+
+
+@cpp98
+def p_expression_list(parser, p):
+    # type: (CppParser, YaccProduction) -> None
     """
         expression-list : initializer-list
     """
 
 
-#def p_pseudo_destructor_name(p):
-#    # type: (YaccProduction) -> None
+#def p_pseudo_destructor_name(parser, p):
+#    # type: (CppParser, YaccProduction) -> None
 #    """
 #        pseudo-destructor-name : OP_SCOPE? nested-name-specifier? type-name OP_SCOPE OP_NOT type-name
 #                               | OP_SCOPE? nested-name-specifier KW_TEMPLATE simple-template-id OP_SCOPE OP_NOT type-name
@@ -77,3 +88,4 @@ def p_expression_list(p):
 
 if TYPE_CHECKING:
     from ply.yacc import YaccProduction
+    from ...cpp_parser import CppParser

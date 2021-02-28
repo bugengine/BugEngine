@@ -1,8 +1,10 @@
 from be_typing import TYPE_CHECKING
+from ...cpp_parser import cpp98
 
 
-def p_builtin_type_specifier_extension(p):
-    # type: (YaccProduction) -> None
+@cpp98
+def p_builtin_type_specifier_extension(parser, p):
+    # type: (CppParser, YaccProduction) -> None
     """
         builtin-type-specifier : KW_I8
                                | KW_I16
@@ -17,3 +19,4 @@ def p_builtin_type_specifier_extension(p):
 
 if TYPE_CHECKING:
     from ply.yacc import YaccProduction
+    from ...cpp_parser import CppParser

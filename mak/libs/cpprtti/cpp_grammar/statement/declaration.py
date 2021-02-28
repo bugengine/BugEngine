@@ -3,11 +3,13 @@ declaration-statement:
       block-declaration
 """
 
+from ...cpp_parser import cpp98
 from be_typing import TYPE_CHECKING
 
 
-def p_declaration_statement(p):
-    # type: (YaccProduction) -> None
+@cpp98
+def p_declaration_statement(parser, p):
+    # type: (CppParser, YaccProduction) -> None
     """
         declaration-statement : block-declaration
     """
@@ -15,3 +17,4 @@ def p_declaration_statement(p):
 
 if TYPE_CHECKING:
     from ply.yacc import YaccProduction
+    from ...cpp_parser import CppParser

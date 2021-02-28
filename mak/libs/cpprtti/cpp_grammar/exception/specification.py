@@ -12,34 +12,39 @@ noexcept-specification:
       noexcept     C++0x
 """
 
+from ...cpp_parser import cpp98
 from be_typing import TYPE_CHECKING
 
 
-def p_exception_specification(p):
-    # type: (YaccProduction) -> None
+@cpp98
+def p_exception_specification(parser, p):
+    # type: (CppParser, YaccProduction) -> None
     """
         exception-specification : dynamic-exception-specification
                                 | noexcept-specification
     """
 
 
-def p_dynamic_exception_specification(p):
-    # type: (YaccProduction) -> None
+@cpp98
+def p_dynamic_exception_specification(parser, p):
+    # type: (CppParser, YaccProduction) -> None
     """
         dynamic-exception-specification : KW_THROW LPAREN type-id-list? RPAREN
     """
 
 
-def p_type_id_list(p):
-    # type: (YaccProduction) -> None
+@cpp98
+def p_type_id_list(parser, p):
+    # type: (CppParser, YaccProduction) -> None
     """
         type-id-list : type-id ELLIPSIS?
                      | type-id-list COMMA type-id ELLIPSIS?
     """
 
 
-def p_noexcept_specification(p):
-    # type: (YaccProduction) -> None
+@cpp98
+def p_noexcept_specification(parser, p):
+    # type: (CppParser, YaccProduction) -> None
     """
         noexcept-specification : KW_NOEXCEPT LPAREN constant-expression RPAREN
                                | KW_NOEXCEPT
@@ -48,3 +53,4 @@ def p_noexcept_specification(p):
 
 if TYPE_CHECKING:
     from ply.yacc import YaccProduction
+    from ...cpp_parser import CppParser

@@ -1,2 +1,2 @@
-from .general import *
-from .parameter import *
+from . import general
+from . import parameter

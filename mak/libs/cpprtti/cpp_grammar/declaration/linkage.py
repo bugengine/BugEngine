@@ -4,11 +4,13 @@ linkage-specification:
       extern string-literal declaration
 """
 
+from ...cpp_parser import cpp98
 from be_typing import TYPE_CHECKING
 
 
-def p_linkage_specification(p):
-    # type: (YaccProduction) -> None
+@cpp98
+def p_linkage_specification(parser, p):
+    # type: (CppParser, YaccProduction) -> None
     """
         linkage-specification : attribute-specifier-seq? decl-specifier-seq STRING_LITERAL LBRACE declaration-seq? RBRACE
     """
@@ -18,3 +20,4 @@ def p_linkage_specification(p):
 
 if TYPE_CHECKING:
     from ply.yacc import YaccProduction
+    from ...cpp_parser import CppParser

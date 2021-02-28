@@ -25,39 +25,44 @@ enumerator:
       identifier
 """
 
+from ...cpp_parser import cpp98
 from be_typing import TYPE_CHECKING
 
-#def p_enum_name(p):
-#    # type: (YaccProduction) -> None
+#def p_enum_name(parser, p):
+#    # type: (CppParser, YaccProduction) -> None
 #    """
 #        enum-name : IDENTIFIER
 #    """
 
 
-def p_enum_specifier(p):
-    # type: (YaccProduction) -> None
+@cpp98
+def p_enum_specifier(parser, p):
+    # type: (CppParser, YaccProduction) -> None
     """
         enum-specifier : enum-head LBRACE enumerator-list? RBRACE
                        | enum-head LBRACE enumerator-list COMMA RBRACE
     """
 
 
-def p_enum_head(p):
-    # type: (YaccProduction) -> None
+@cpp98
+def p_enum_head(parser, p):
+    # type: (CppParser, YaccProduction) -> None
     """
         enum-head : enum-key attribute-specifier-seq? id-expression? enum-base?
     """
 
 
-def p_opaque_enum_declaration(p):
-    # type: (YaccProduction) -> None
+@cpp98
+def p_opaque_enum_declaration(parser, p):
+    # type: (CppParser, YaccProduction) -> None
     """
         opaque-enum-declaration : enum-key attribute-specifier-seq? IDENTIFIER enum-base? SEMI
     """
 
 
-def p_enum_key(p):
-    # type: (YaccProduction) -> None
+@cpp98
+def p_enum_key(parser, p):
+    # type: (CppParser, YaccProduction) -> None
     """
         enum-key : KW_ENUM
                  | KW_ENUM KW_CLASS
@@ -65,31 +70,35 @@ def p_enum_key(p):
     """
 
 
-def p_enum_base(p):
-    # type: (YaccProduction) -> None
+@cpp98
+def p_enum_base(parser, p):
+    # type: (CppParser, YaccProduction) -> None
     """
         enum-base : COLON type-specifier-seq
     """
 
 
-def p_enumerator_list(p):
-    # type: (YaccProduction) -> None
+@cpp98
+def p_enumerator_list(parser, p):
+    # type: (CppParser, YaccProduction) -> None
     """
         enumerator-list : enumerator-definition
                         | enumerator-list COMMA enumerator-definition
     """
 
 
-def p_enumerator_definition(p):
-    # type: (YaccProduction) -> None
+@cpp98
+def p_enumerator_definition(parser, p):
+    # type: (CppParser, YaccProduction) -> None
     """
         enumerator-definition : enumerator
                               | enumerator OP_EQUALS constant-expression
     """
 
 
-def p_enumerator(p):
-    # type: (YaccProduction) -> None
+@cpp98
+def p_enumerator(parser, p):
+    # type: (CppParser, YaccProduction) -> None
     """
         enumerator : IDENTIFIER
     """
@@ -97,3 +106,4 @@ def p_enumerator(p):
 
 if TYPE_CHECKING:
     from ply.yacc import YaccProduction
+    from ...cpp_parser import CppParser

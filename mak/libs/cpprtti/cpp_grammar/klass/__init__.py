@@ -21,54 +21,60 @@ class-key:
       union
 """
 
-from .member import *
-from .base import *
-from .conversion import *
-from .base_init import *
+from . import member
+from . import base
+from . import conversion
+from . import base_init
 
+from ...cpp_parser import cpp98
 from be_typing import TYPE_CHECKING
 
 
-def p_class_specifier(p):
-    # type: (YaccProduction) -> None
+@cpp98
+def p_class_specifier(parser, p):
+    # type: (CppParser, YaccProduction) -> None
     """
         class-specifier : class-head LBRACE member-specification? RBRACE
     """
 
 
-def p_class_head(p):
-    # type: (YaccProduction) -> None
+@cpp98
+def p_class_head(parser, p):
+    # type: (CppParser, YaccProduction) -> None
     """
         class-head : class-key attribute-specifier-seq? id-expression? class-virt-specifier-seq? base-clause?
     """
 
 
-#def p_class_head_name(p):
-#    # type: (YaccProduction) -> None
+#def p_class_head_name(parser, p):
+#    # type: (CppParser, YaccProduction) -> None
 #    """
 #        class-head-name : nested-name-specifier? IDENTIFIER
 #                        | nested-name-specifier? simple-template-id
 #    """
 
 
-def p_class_virt_specifier_seq(p):
-    # type: (YaccProduction) -> None
+@cpp98
+def p_class_virt_specifier_seq(parser, p):
+    # type: (CppParser, YaccProduction) -> None
     """
         class-virt-specifier-seq : class-virt-specifier
                                  | class-virt-specifier-seq class-virt-specifier
     """
 
 
-def p_class_virt_specifier(p):
-    # type: (YaccProduction) -> None
+@cpp98
+def p_class_virt_specifier(parser, p):
+    # type: (CppParser, YaccProduction) -> None
     """
         class-virt-specifier : KW_FINAL
                              | KW_EXPLICIT
     """
 
 
-def p_class_key(p):
-    # type: (YaccProduction) -> None
+@cpp98
+def p_class_key(parser, p):
+    # type: (CppParser, YaccProduction) -> None
     """
         class-key : KW_CLASS
                   | KW_STRUCT
@@ -78,3 +84,4 @@ def p_class_key(p):
 
 if TYPE_CHECKING:
     from ply.yacc import YaccProduction
+    from ...cpp_parser import CppParser

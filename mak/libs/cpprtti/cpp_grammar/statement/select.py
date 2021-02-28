@@ -9,11 +9,13 @@ condition:
       attribute-specifier-seqopt decl-specifier-seq declarator braced-init-list     C++0x
 """
 
+from ...cpp_parser import cpp98
 from be_typing import TYPE_CHECKING
 
 
-def p_selection_statement(p):
-    # type: (YaccProduction) -> None
+@cpp98
+def p_selection_statement(parser, p):
+    # type: (CppParser, YaccProduction) -> None
     """
         selection-statement : KW_IF LPAREN condition RPAREN statement
                             | KW_IF LPAREN condition RPAREN statement KW_ELSE statement
@@ -21,8 +23,9 @@ def p_selection_statement(p):
     """
 
 
-def p_condition(p):
-    # type: (YaccProduction) -> None
+@cpp98
+def p_condition(parser, p):
+    # type: (CppParser, YaccProduction) -> None
     """
         condition : expression
                   | attribute-specifier-seq? decl-specifier-seq declarator OP_EQUALS initializer-clause
@@ -32,3 +35,4 @@ def p_condition(p):
 
 if TYPE_CHECKING:
     from ply.yacc import YaccProduction
+    from ...cpp_parser import CppParser

@@ -17,11 +17,13 @@ assignment-operator:
       |=
 """
 
+from ...cpp_parser import cpp98
 from be_typing import TYPE_CHECKING
 
 
-def p_assignment_expression(p):
-    # type: (YaccProduction) -> None
+@cpp98
+def p_assignment_expression(parser, p):
+    # type: (CppParser, YaccProduction) -> None
     """
         assignment-expression : conditional-expression
                               | logical-or-expression assignment-operator initializer-clause
@@ -29,8 +31,9 @@ def p_assignment_expression(p):
     """
 
 
-def p_assignment_operator(p):
-    # type: (YaccProduction) -> None
+@cpp98
+def p_assignment_operator(parser, p):
+    # type: (CppParser, YaccProduction) -> None
     """
         assignment-operator : OP_EQUALS
                             | OP_TIMESEQUAL
@@ -48,3 +51,4 @@ def p_assignment_operator(p):
 
 if TYPE_CHECKING:
     from ply.yacc import YaccProduction
+    from ...cpp_parser import CppParser

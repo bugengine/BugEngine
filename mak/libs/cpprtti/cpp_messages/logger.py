@@ -169,7 +169,7 @@ class Logger:
         sys.stderr.write(self._diagnostics_format.format(**locals()))
         sys.stderr.write(position.lexdata[offset:end + 1])
         sys.stderr.write(
-            '%s%s%s%s\n' % (
+            '\n%s%s%s%s\n' % (
                 ' ' * (position.start_position - offset), color_caret, '^' *
                 (position.end_position - position.start_position), color_off
             )

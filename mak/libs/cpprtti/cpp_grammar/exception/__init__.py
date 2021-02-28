@@ -1,2 +1,2 @@
-from .exception import *
-from .specification import *
+from . import exception
+from . import specification

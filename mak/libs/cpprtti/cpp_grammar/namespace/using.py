@@ -6,11 +6,13 @@ using-directive:
       attribute-specifier-seqopt using namespace ::opt nested-name-specifieropt namespace-name ;
 """
 
+from ...cpp_parser import cpp98
 from be_typing import TYPE_CHECKING
 
 
-def p_using_declaration(p):
-    # type: (YaccProduction) -> None
+@cpp98
+def p_using_declaration(parser, p):
+    # type: (CppParser, YaccProduction) -> None
     """
         using-declaration : attribute-specifier-seq? decl-specifier-seq? KW_USING KW_TYPENAME? id-expression SEMI
     """
@@ -18,8 +20,9 @@ def p_using_declaration(p):
     # TODO: decl none
 
 
-def p_using_directive(p):
-    # type: (YaccProduction) -> None
+@cpp98
+def p_using_directive(parser, p):
+    # type: (CppParser, YaccProduction) -> None
     """
         using-directive : attribute-specifier-seq? decl-specifier-seq? KW_USING KW_NAMESPACE id-expression IDENTIFIER SEMI
     """
@@ -28,3 +31,4 @@ def p_using_directive(p):
 
 if TYPE_CHECKING:
     from ply.yacc import YaccProduction
+    from ...cpp_parser import CppParser

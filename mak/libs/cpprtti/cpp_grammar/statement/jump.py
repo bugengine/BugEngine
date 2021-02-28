@@ -7,11 +7,13 @@ jump-statement:
       goto identifier ;
 """
 
+from ...cpp_parser import cpp98
 from be_typing import TYPE_CHECKING
 
 
-def p_jump_statement(p):
-    # type: (YaccProduction) -> None
+@cpp98
+def p_jump_statement(parser, p):
+    # type: (CppParser, YaccProduction) -> None
     """
     jump-statement : KW_BREAK SEMI
                    | KW_CONTINUE SEMI
@@ -23,3 +25,4 @@ def p_jump_statement(p):
 
 if TYPE_CHECKING:
     from ply.yacc import YaccProduction
+    from ...cpp_parser import CppParser

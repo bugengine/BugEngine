@@ -1,37 +1,27 @@
-from . import lex
-
-from .basic import *
-from .expression import *
-from .statement import *
-from .declaration import *
-from .namespace import *
-from .klass import *
-from .overload import *
-from .template import *
-from .exception import *
-from .bugengine_extensions import *
+from . import basic
+from . import expression
+from . import statement
+from . import declaration
+from . import namespace
+from . import klass
+from . import overload
+from . import template
+from . import exception
+from . import bugengine_extensions
+from ..cpp_parser import cpp98
 
 from be_typing import TYPE_CHECKING
 
 
-def p_error(p):
-    # type: (YaccProduction) -> None
-    """
-        error :
-    """
-
-
-def p_empty(p):
-    # type: (YaccProduction) -> None
+@cpp98
+def p_empty(parser, p):
+    # type: (CppParser, YaccProduction) -> None
     """
         empty :
     """
     p[0] = None
 
 
-precedence = (('left', 'SCOPE_REDUCTION'), ('left', 'OP_SCOPE'))
-
-tokens = lex.tokens
-
 if TYPE_CHECKING:
     from ply.yacc import YaccProduction
+    from ..cpp_parser import CppParser

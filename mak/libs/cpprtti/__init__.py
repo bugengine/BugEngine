@@ -1,4 +1,4 @@
-from . import cpp_lexer, cpp_parser, cpp_ast, cpp_messages
+from . import cpp_lexer, cpp_parser, cpp_grammar, cpp_ast, cpp_messages
 from argparse import ArgumentParser
 
 
@@ -14,6 +14,14 @@ def init_arguments():
     argument_context.add_argument(
         "-m", "--macros", dest="macros", help="Preprocessor macros to expand", default='', action="store"
     )
+    argument_context.add_argument(
+        "--std",
+        dest="std",
+        help="Language standard to parse",
+        choices=('c++98', 'c++03', 'c++11', 'c++14', 'c++17', 'c++20', 'c++23'),
+        default='c++98',
+        action="store"
+    )
     argument_context.add_argument("input", help="Input source file", metavar="IN")
     cpp_messages.init_arguments(argument_context)
     return argument_context
@@ -25,7 +33,6 @@ def run(argument_context):
     import sys
     import logging
 
-    sys.setrecursionlimit(10000)
     arguments = argument_context.parse_args()
     logger = cpp_messages.load_arguments(arguments)
 
@@ -33,7 +40,7 @@ def run(argument_context):
     if arguments.debug:
         ExceptionType = SyntaxError
     try:
-        parser = cpp_parser.CppParser(arguments.tmp_dir)
+        parser = cpp_parser.parser(arguments.std)(arguments.tmp_dir)
         result = parser.parse(logger, arguments.input)
         if not result:
             sys.exit(0)
@@ -49,3 +56,4 @@ def run(argument_context):
 from be_typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from optparse import OptionParser
+    from types import ModuleType

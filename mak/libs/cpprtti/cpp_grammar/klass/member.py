@@ -27,19 +27,22 @@ pure-specifier:
       = 0
 """
 
+from ...cpp_parser import cpp98
 from be_typing import TYPE_CHECKING
 
 
-def p_member_specification(p):
-    # type: (YaccProduction) -> None
+@cpp98
+def p_member_specification(parser, p):
+    # type: (CppParser, YaccProduction) -> None
     """
         member-specification : member-declaration member-specification?
                              | access-specifier COLON member-specification?
     """
 
 
-def p_member_declaration(p):
-    # type: (YaccProduction) -> None
+@cpp98
+def p_member_declaration(parser, p):
+    # type: (CppParser, YaccProduction) -> None
     """
         member-declaration : attribute-specifier-seq? decl-specifier-seq? member-declarator-list? SEMI
                            | function-definition
@@ -51,39 +54,43 @@ def p_member_declaration(p):
     """
 
 
-def p_member_declarator_list(p):
-    # type: (YaccProduction) -> None
+@cpp98
+def p_member_declarator_list(parser, p):
+    # type: (CppParser, YaccProduction) -> None
     """
         member-declarator-list : member-declarator
                                | member-declarator-list COMMA member-declarator
     """
 
 
-def p_member_declarator(p):
-    # type: (YaccProduction) -> None
+@cpp98
+def p_member_declarator(parser, p):
+    # type: (CppParser, YaccProduction) -> None
     """
         member-declarator : declarator virt-specifier-seq? brace-or-equal-initializer?
                           | IDENTIFIER? attribute-specifier-seq? virt-specifier-seq? COLON constant-expression
     """
 
 
-#def p_pure_specifier(p):
-#    # type: (YaccProduction) -> None
+#def p_pure_specifier(parser, p):
+#    # type: (CppParser, YaccProduction) -> None
 #    """
 #        pure-specifier : OP_EQUALS INTEGER_LITERAL
 #    """
 
 
-def p_virt_specifier_seq(p):
-    # type: (YaccProduction) -> None
+@cpp98
+def p_virt_specifier_seq(parser, p):
+    # type: (CppParser, YaccProduction) -> None
     """
         virt-specifier-seq : virt-specifier
                            | virt-specifier-seq virt-specifier
     """
 
 
-def p_virt_specifier(p):
-    # type: (YaccProduction) -> None
+@cpp98
+def p_virt_specifier(parser, p):
+    # type: (CppParser, YaccProduction) -> None
     """
         virt-specifier : KW_OVERRIDE
                        | KW_FINAL
@@ -93,3 +100,4 @@ def p_virt_specifier(p):
 
 if TYPE_CHECKING:
     from ply.yacc import YaccProduction
+    from ...cpp_parser import CppParser

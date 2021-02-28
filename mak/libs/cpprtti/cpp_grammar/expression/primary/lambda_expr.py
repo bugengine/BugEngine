@@ -21,25 +21,29 @@ lambda-declarator:
       ( parameter-declaration-clause ) mutableopt exception-specificationopt attribute-specifier-seqopt trailing-return-typeopt     C++0x
 """
 
+from ....cpp_parser import cpp98
 from be_typing import TYPE_CHECKING
 
 
-def p_lambda_expression(p):
-    # type: (YaccProduction) -> None
+@cpp98
+def p_lambda_expression(parser, p):
+    # type: (CppParser, YaccProduction) -> None
     """
         lambda-expression : lambda-introducer lambda-declarator? compound-statement
     """
 
 
-def p_lambda_introducer(p):
-    # type: (YaccProduction) -> None
+@cpp98
+def p_lambda_introducer(parser, p):
+    # type: (CppParser, YaccProduction) -> None
     """
         lambda-introducer : LBRACKET lambda-capture? RBRACKET
     """
 
 
-def p_lambda_capture(p):
-    # type: (YaccProduction) -> None
+@cpp98
+def p_lambda_capture(parser, p):
+    # type: (CppParser, YaccProduction) -> None
     """
         lambda-capture : capture-default
                        | capture-list
@@ -47,24 +51,27 @@ def p_lambda_capture(p):
     """
 
 
-def p_capture_default(p):
-    # type: (YaccProduction) -> None
+@cpp98
+def p_capture_default(parser, p):
+    # type: (CppParser, YaccProduction) -> None
     """
         capture-default : OP_AND
                         | OP_EQUALS
     """
 
 
-def p_capture_list(p):
-    # type: (YaccProduction) -> None
+@cpp98
+def p_capture_list(parser, p):
+    # type: (CppParser, YaccProduction) -> None
     """
         capture-list : capture ELLIPSIS?
                      | capture-list COMMA capture ELLIPSIS?
     """
 
 
-def p_capture(p):
-    # type: (YaccProduction) -> None
+@cpp98
+def p_capture(parser, p):
+    # type: (CppParser, YaccProduction) -> None
     """
         capture : IDENTIFIER
                 | OP_AND IDENTIFIER
@@ -72,8 +79,9 @@ def p_capture(p):
     """
 
 
-def p_lambda_declarator(p):
-    # type: (YaccProduction) -> None
+@cpp98
+def p_lambda_declarator(parser, p):
+    # type: (CppParser, YaccProduction) -> None
     """
         lambda-declarator : LPAREN parameter-declaration-clause RPAREN KW_MUTABLE? exception-specification? attribute-specifier-seq? trailing-return-type?
     """
@@ -81,3 +89,4 @@ def p_lambda_declarator(p):
 
 if TYPE_CHECKING:
     from ply.yacc import YaccProduction
+    from ....cpp_parser import CppParser

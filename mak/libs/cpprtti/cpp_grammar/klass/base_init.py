@@ -12,34 +12,39 @@ mem-initializer-id:
       identifier
 """
 
+from ...cpp_parser import cpp98
 from be_typing import TYPE_CHECKING
 
 
-def p_ctor_initializer(p):
-    # type: (YaccProduction) -> None
+@cpp98
+def p_ctor_initializer(parser, p):
+    # type: (CppParser, YaccProduction) -> None
     """
         ctor-initializer : COLON mem-initializer-list
     """
 
 
-def p_mem_initializer_list(p):
-    # type: (YaccProduction) -> None
+@cpp98
+def p_mem_initializer_list(parser, p):
+    # type: (CppParser, YaccProduction) -> None
     """
         mem-initializer-list : mem-initializer ELLIPSIS?
                              | mem-initializer COMMA mem-initializer-list ELLIPSIS?
     """
 
 
-def p_mem_initializer(p):
-    # type: (YaccProduction) -> None
+@cpp98
+def p_mem_initializer(parser, p):
+    # type: (CppParser, YaccProduction) -> None
     """
         mem-initializer : mem-initializer-id LPAREN expression-list? RPAREN
                         | mem-initializer-id braced-init-list
     """
 
 
-def p_mem_initializer_id(p):
-    # type: (YaccProduction) -> None
+@cpp98
+def p_mem_initializer_id(parser, p):
+    # type: (CppParser, YaccProduction) -> None
     """
         mem-initializer-id : class-or-decltype
     """
@@ -47,3 +52,4 @@ def p_mem_initializer_id(p):
 
 if TYPE_CHECKING:
     from ply.yacc import YaccProduction
+    from ...cpp_parser import CppParser

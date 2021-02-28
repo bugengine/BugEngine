@@ -1,2 +1,2 @@
-from .general import *
-from .lambda_expr import *
+from . import general
+from . import lambda_expr

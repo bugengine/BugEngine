@@ -11,14 +11,16 @@ decl-specifier-seq:
   	decl-specifier decl-specifier-seq     C++0x
 """
 
-from .storage_class import *
-from .function import *
+from ....cpp_parser import cpp98
+from . import storage_class
+from . import function
 
 from be_typing import TYPE_CHECKING
 
 
-def p_decl_specifier(p):
-    # type: (YaccProduction) -> None
+@cpp98
+def p_decl_specifier(parser, p):
+    # type: (CppParser, YaccProduction) -> None
     """
         decl-specifier : storage-class-specifier
                        | function-specifier
@@ -28,8 +30,9 @@ def p_decl_specifier(p):
     """
 
 
-def p_decl_specifier_seq(p):
-    # type: (YaccProduction) -> None
+@cpp98
+def p_decl_specifier_seq(parser, p):
+    # type: (CppParser, YaccProduction) -> None
     """
         decl-specifier-seq : decl-specifier attribute-specifier-seq?
                            | decl-specifier decl-specifier-seq
@@ -38,3 +41,4 @@ def p_decl_specifier_seq(p):
 
 if TYPE_CHECKING:
     from ply.yacc import YaccProduction
+    from ....cpp_parser import CppParser

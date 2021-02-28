@@ -1,3 +1,3 @@
-from .definition import *
-from .using import *
-from .alias import *
+from . import definition
+from . import using
+from . import alias

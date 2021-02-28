@@ -8,11 +8,13 @@ storage-class-specifier:
       mutable
 """
 
+from ....cpp_parser import cpp98
 from be_typing import TYPE_CHECKING
 
 
-def p_storage_class_specifier(p):
-    # type: (YaccProduction) -> None
+@cpp98
+def p_storage_class_specifier(parser, p):
+    # type: (CppParser, YaccProduction) -> None
     """
         storage-class-specifier : KW_REGISTER
                                 | KW_STATIC
@@ -24,3 +26,4 @@ def p_storage_class_specifier(p):
 
 if TYPE_CHECKING:
     from ply.yacc import YaccProduction
+    from ....cpp_parser import CppParser

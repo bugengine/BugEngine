@@ -1,8 +1,10 @@
 from be_typing import TYPE_CHECKING
+from ...cpp_parser import cpp98
 
 
-def p_translation_unit(p):
-    # type: (YaccProduction) -> None
+@cpp98
+def p_translation_unit(parser, p):
+    # type: (CppParser, YaccProduction) -> None
     """
         translation-unit : declaration-seq?
     """
@@ -10,3 +12,4 @@ def p_translation_unit(p):
 
 if TYPE_CHECKING:
     from ply.yacc import YaccProduction
+    from ...cpp_parser import CppParser

@@ -5,11 +5,13 @@ function-specifier:
     explicit
 """
 
+from ....cpp_parser import cpp98
 from be_typing import TYPE_CHECKING
 
 
-def p_function_specifier(p):
-    # type: (YaccProduction) -> None
+@cpp98
+def p_function_specifier(parser, p):
+    # type: (CppParser, YaccProduction) -> None
     """
         function-specifier : KW_INLINE
                            | KW_VIRTUAL
@@ -19,3 +21,4 @@ def p_function_specifier(p):
 
 if TYPE_CHECKING:
     from ply.yacc import YaccProduction
+    from ....cpp_parser import CppParser

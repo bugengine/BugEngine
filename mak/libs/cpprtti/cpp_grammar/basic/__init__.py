@@ -1,1 +1,1 @@
-from .link import *
+from . import link

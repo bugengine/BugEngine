@@ -34,35 +34,48 @@ balanced-token:
       token     C++0x - except a parenthesis, a bracket, or a brace
 """
 
+from ...cpp_parser import cpp98
 from be_typing import TYPE_CHECKING
 
 
-def p_attribute_specifier_seq(p):
-    # type: (YaccProduction) -> None
+@cpp98
+def p_attribute_specifier_seq(parser, p):
+    # type: (CppParser, YaccProduction) -> None
     """
         attribute-specifier-seq : attribute-specifier
                                 | attribute-specifier-seq attribute-specifier
     """
 
 
-def p_attribute_specifier(p):
-    # type: (YaccProduction) -> None
+@cpp98
+def p_attribute_specifier(parser, p):
+    # type: (CppParser, YaccProduction) -> None
     """
         attribute-specifier : LDOUBLEBRACKET LBRACKET attribute-list RBRACKET RBRACKET
                             | alignment-specifier
     """
 
 
-def p_alignment_specifier(p):
-    # type: (YaccProduction) -> None
+@cpp98
+def p_alignment_specifier(parser, p):
+    # type: (CppParser, YaccProduction) -> None
     """
         alignment-specifier : KW_ALIGNAS LPAREN type-id ELLIPSIS? RPAREN
                             | KW_ALIGNAS LPAREN constant-expression ELLIPSIS? RPAREN
     """
 
 
-def p_attribute_list(p):
-    # type: (YaccProduction) -> None
+@cpp98
+def p_alignment_specifier(parser, p):
+    # type: (CppParser, YaccProduction) -> None
+    """
+        alignment-specifier : KW_ALIGNAS LPAREN type-id ELLIPSIS? RPAREN
+    """
+
+
+@cpp98
+def p_attribute_list(parser, p):
+    # type: (CppParser, YaccProduction) -> None
     """
         attribute-list : attribute?
                        | attribute-list COMMA attribute?
@@ -71,52 +84,59 @@ def p_attribute_list(p):
     """
 
 
-def p_attribute(p):
-    # type: (YaccProduction) -> None
+@cpp98
+def p_attribute(parser, p):
+    # type: (CppParser, YaccProduction) -> None
     """
         attribute : attribute-token attribute-argument-clause?
     """
 
 
-def p_attribute_token(p):
-    # type: (YaccProduction) -> None
+@cpp98
+def p_attribute_token(parser, p):
+    # type: (CppParser, YaccProduction) -> None
     """
         attribute-token : IDENTIFIER
                         | attribute-scoped-token
     """
 
 
-def p_attribute_scoped_token(p):
-    # type: (YaccProduction) -> None
+@cpp98
+def p_attribute_scoped_token(parser, p):
+    # type: (CppParser, YaccProduction) -> None
     """
         attribute-scoped-token : attribute-namespace OP_SCOPE IDENTIFIER
     """
 
 
-def p_attribute_namespace(p):
-    # type: (YaccProduction) -> None
+@cpp98
+def p_attribute_namespace(parser, p):
+    # type: (CppParser, YaccProduction) -> None
     """
         attribute-namespace : IDENTIFIER
     """
 
 
-def p_attribute_argument_clause(p):
-    # type: (YaccProduction) -> None
+@cpp98
+def p_attribute_argument_clause(parser, p):
+    # type: (CppParser, YaccProduction) -> None
     """
         attribute-argument-clause : LPAREN balanced-token-seq RPAREN
     """
 
 
-def p_balanced_token_seq(p):
-    # type: (YaccProduction) -> None
+@cpp98
+def p_balanced_token_seq(parser, p):
+    # type: (CppParser, YaccProduction) -> None
     """
         balanced-token-seq : balanced-token
                            | balanced-token-seq balanced-token
     """
 
 
-def p_balanced_token(p):
-    # type: (YaccProduction) -> None
+@cpp98
+def p_balanced_token(parser, p):
+    # type: (CppParser, YaccProduction) -> None
     """
         balanced-token : LPAREN balanced-token-seq RPAREN
                        | LBRACKET balanced-token-seq RBRACKET
@@ -125,8 +145,9 @@ def p_balanced_token(p):
     """
 
 
-def p_token(p):
-    # type: (YaccProduction) -> None
+@cpp98
+def p_token(parser, p):
+    # type: (CppParser, YaccProduction) -> None
     """
         token : IDENTIFIER
               | FLOATING_LITERAL
@@ -265,3 +286,4 @@ def p_token(p):
 
 if TYPE_CHECKING:
     from ply.yacc import YaccProduction
+    from ...cpp_parser import CppParser

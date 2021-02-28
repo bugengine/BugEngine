@@ -16,40 +16,46 @@ throw-expression:
       throw assignment-expressionopt
 """
 
+from ...cpp_parser import cpp98
 from be_typing import TYPE_CHECKING
 
 
-def p_try_block(p):
-    # type: (YaccProduction) -> None
+@cpp98
+def p_try_block(parser, p):
+    # type: (CppParser, YaccProduction) -> None
     """
         try-block : KW_TRY compound-statement handler-seq
     """
 
 
-def p_function_try_block(p):
-    # type: (YaccProduction) -> None
+@cpp98
+def p_function_try_block(parser, p):
+    # type: (CppParser, YaccProduction) -> None
     """
         function-try-block : KW_TRY ctor-initializer? compound-statement handler-seq
     """
 
 
-def p_handler_seq(p):
-    # type: (YaccProduction) -> None
+@cpp98
+def p_handler_seq(parser, p):
+    # type: (CppParser, YaccProduction) -> None
     """
         handler-seq : handler
                     | handler handler-seq
     """
 
 
-def p_handler(p):
-    # type: (YaccProduction) -> None
+@cpp98
+def p_handler(parser, p):
+    # type: (CppParser, YaccProduction) -> None
     """
         handler : KW_CATCH LPAREN exception-declaration RPAREN compound-statement
     """
 
 
-def p_exception_declaration(p):
-    # type: (YaccProduction) -> None
+@cpp98
+def p_exception_declaration(parser, p):
+    # type: (CppParser, YaccProduction) -> None
     """
         exception-declaration : attribute-specifier-seq? type-specifier-seq declarator
                               | attribute-specifier-seq? type-specifier-seq abstract-declarator?
@@ -57,8 +63,9 @@ def p_exception_declaration(p):
     """
 
 
-def p_throw_exception(p):
-    # type: (YaccProduction) -> None
+@cpp98
+def p_throw_exception(parser, p):
+    # type: (CppParser, YaccProduction) -> None
     """
         throw-expression : KW_THROW assignment-expression?
     """
@@ -66,3 +73,4 @@ def p_throw_exception(p):
 
 if TYPE_CHECKING:
     from ply.yacc import YaccProduction
+    from ...cpp_parser import CppParser

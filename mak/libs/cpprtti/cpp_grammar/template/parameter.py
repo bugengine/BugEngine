@@ -11,19 +11,22 @@ type-parameter:
       template < template-parameter-list > class identifieropt = id-expression
 """
 
+from ...cpp_parser import cpp98
 from be_typing import TYPE_CHECKING
 
 
-def p_template_parameter(p):
-    # type: (YaccProduction) -> None
+@cpp98
+def p_template_parameter(parser, p):
+    # type: (CppParser, YaccProduction) -> None
     """
         template-parameter : type-parameter
                            | parameter-declaration
     """
 
 
-def p_type_parameter(p):
-    # type: (YaccProduction) -> None
+@cpp98
+def p_type_parameter(parser, p):
+    # type: (CppParser, YaccProduction) -> None
     """
         type-parameter : KW_CLASS ELLIPSIS? IDENTIFIER?
                        | KW_CLASS IDENTIFIER? OP_EQUALS type-id
@@ -37,3 +40,4 @@ def p_type_parameter(p):
 
 if TYPE_CHECKING:
     from ply.yacc import YaccProduction
+    from ...cpp_parser import CppParser

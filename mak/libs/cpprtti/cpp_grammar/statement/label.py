@@ -5,11 +5,13 @@ labeled-statement:
       attribute-specifier-seqopt default: statement
 """
 
+from ...cpp_parser import cpp98
 from be_typing import TYPE_CHECKING
 
 
-def p_labeled_statement(p):
-    # type: (YaccProduction) -> None
+@cpp98
+def p_labeled_statement(parser, p):
+    # type: (CppParser, YaccProduction) -> None
     """
         labeled-statement : attribute-specifier-seq? IDENTIFIER COLON statement
                           | attribute-specifier-seq? KW_CASE constant-expression COLON statement
@@ -19,3 +21,4 @@ def p_labeled_statement(p):
 
 if TYPE_CHECKING:
     from ply.yacc import YaccProduction
+    from ...cpp_parser import CppParser

@@ -1,2 +1,2 @@
-from .instantiation import *
-from .specialization import *
+from . import instantiation
+from . import specialization

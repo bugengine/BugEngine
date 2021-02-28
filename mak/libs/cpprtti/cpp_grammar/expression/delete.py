@@ -4,11 +4,13 @@ delete-expression:
       ::opt delete [ ] cast-expression
 """
 
+from ...cpp_parser import cpp98
 from be_typing import TYPE_CHECKING
 
 
-def p_delete_expression(p):
-    # type: (YaccProduction) -> None
+@cpp98
+def p_delete_expression(parser, p):
+    # type: (CppParser, YaccProduction) -> None
     """
         delete-expression : OP_SCOPE KW_DELETE cast-expression
                           | OP_SCOPE KW_DELETE LBRACKET RBRACKET cast-expression
@@ -19,3 +21,4 @@ def p_delete_expression(p):
 
 if TYPE_CHECKING:
     from ply.yacc import YaccProduction
+    from ...cpp_parser import CppParser

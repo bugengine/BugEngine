@@ -39,66 +39,75 @@ declarator-id:
 
 """
 
+from ...cpp_parser import cpp98
 from be_typing import TYPE_CHECKING
 
 
-def p_init_declarator_list(p):
-    # type: (YaccProduction) -> None
+@cpp98
+def p_init_declarator_list(parser, p):
+    # type: (CppParser, YaccProduction) -> None
     """
         init-declarator-list : init-declarator
                              | init-declarator-list COMMA init-declarator
     """
 
 
-def p_init_declarator(p):
-    # type: (YaccProduction) -> None
+@cpp98
+def p_init_declarator(parser, p):
+    # type: (CppParser, YaccProduction) -> None
     """
         init-declarator : declarator initializer?
     """
 
 
-def p_declarator(p):
-    # type: (YaccProduction) -> None
+@cpp98
+def p_declarator(parser, p):
+    # type: (CppParser, YaccProduction) -> None
     """
         declarator : ptr-declarator
                    | noptr-declarator parameters-and-qualifiers trailing-return-type
     """
 
 
-def p_ptr_declarator(p):
-    # type: (YaccProduction) -> None
+@cpp98
+def p_ptr_declarator(parser, p):
+    # type: (CppParser, YaccProduction) -> None
     """
         ptr-declarator : noptr-declarator
                        | ptr-operator ptr-declarator
     """
 
 
-def p_noptr_declarator(p):
-    # type: (YaccProduction) -> None
+@cpp98
+def p_noptr_declarator(parser, p):
+    # type: (CppParser, YaccProduction) -> None
     """
         noptr-declarator : declarator-id attribute-specifier-seq?
                          | noptr-declarator parameters-and-qualifiers
                          | noptr-declarator LBRACKET constant-expression? RBRACKET attribute-specifier-seq?
-                         | LPAREN ptr-declarator RPAREN
+                         | empty LPAREN ptr-declarator RPAREN
     """
 
 
-def p_parameters_and_qualifiers(p):
-    # type: (YaccProduction) -> None
+@cpp98
+def p_parameters_and_qualifiers(parser, p):
+    # type: (CppParser, YaccProduction) -> None
     """
         parameters-and-qualifiers : LPAREN parameter-declaration-clause RPAREN attribute-specifier-seq? cv-qualifier-seq? ref-qualifier? exception-specification?
     """
 
 
-def p_trailing_return_type(p):
-    # type: (YaccProduction) -> None
+@cpp98
+def p_trailing_return_type(parser, p):
+    # type: (CppParser, YaccProduction) -> None
     """
         trailing-return-type : OP_ARROW trailing-type-specifier-seq abstract-declarator?
     """
 
 
-def p_ptr_operator(p):
-    # type: (YaccProduction) -> None
+@cpp98
+def p_ptr_operator(parser, p):
+    # type: (CppParser, YaccProduction) -> None
     """
         ptr-operator : OP_TIMES attribute-specifier-seq? cv-qualifier-seq?
                      | OP_AND attribute-specifier-seq?
@@ -106,39 +115,43 @@ def p_ptr_operator(p):
     """
 
 
-#def p_ptr_operator_nested(p):
-#    # type: (YaccProduction) -> None
+#def p_ptr_operator_nested(parser, p):
+#    # type: (CppParser, YaccProduction) -> None
 #    """
 #        ptr-operator : OP_SCOPE? nested-name-specifier OP_TIMES attribute-specifier-seq? cv-qualifier-seq?
 #    """
 
 
-def p_cv_qualifier_seq(p):
-    # type: (YaccProduction) -> None
+@cpp98
+def p_cv_qualifier_seq(parser, p):
+    # type: (CppParser, YaccProduction) -> None
     """
         cv-qualifier-seq : cv-qualifier
                          | cv-qualifier cv-qualifier-seq
     """
 
 
-def p_cv_qualifier(p):
-    # type: (YaccProduction) -> None
+@cpp98
+def p_cv_qualifier(parser, p):
+    # type: (CppParser, YaccProduction) -> None
     """
         cv-qualifier : KW_CONST
                      | KW_VOLATILE
     """
 
 
-def p_ref_qualifier(p):
-    # type: (YaccProduction) -> None
+@cpp98
+def p_ref_qualifier(parser, p):
+    # type: (CppParser, YaccProduction) -> None
     """
         ref-qualifier : OP_AND
                       | OP_LAND
     """
 
 
-def p_declarator_id(p):
-    # type: (YaccProduction) -> None
+@cpp98
+def p_declarator_id(parser, p):
+    # type: (CppParser, YaccProduction) -> None
     """
         declarator-id : ELLIPSIS? id-expression
     """
@@ -146,3 +159,4 @@ def p_declarator_id(p):
 
 if TYPE_CHECKING:
     from ply.yacc import YaccProduction
+    from ...cpp_parser import CppParser

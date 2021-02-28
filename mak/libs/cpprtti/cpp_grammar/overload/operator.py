@@ -47,24 +47,27 @@ overloadable-operator: 	See C++ Standard Core Language Issue n. 189
       []
 """
 
+from ...cpp_parser import cpp98
 from be_typing import TYPE_CHECKING
 
 
-def p_operator_function_id(p):
-    # type: (YaccProduction) -> None
+@cpp98
+def p_operator_function_id(parser, p):
+    # type: (CppParser, YaccProduction) -> None
     """
         operator-function-id : KW_OPERATOR overloadable-operator
     """
     # removed template args.
 
 
-def p_overloadable_operator(p):
-    # type: (YaccProduction) -> None
+@cpp98
+def p_overloadable_operator(parser, p):
+    # type: (CppParser, YaccProduction) -> None
     """
-        overloadable-operator : KW_NEW
-                              | KW_DELETE
-                              | KW_NEW LBRACKET RBRACKET
-                              | KW_DELETE LBRACKET RBRACKET
+        overloadable-operator : KW_NEW                          %prec ARRAY_BRACKET
+                              | KW_DELETE                       %prec ARRAY_BRACKET
+                              | KW_NEW LBRACKET RBRACKET        %prec OPERATOR_BRACKET
+                              | KW_DELETE LBRACKET RBRACKET     %prec OPERATOR_BRACKET
                               | OP_PLUS
                               | OP_MINUS
                               | OP_TIMES
@@ -108,3 +111,4 @@ def p_overloadable_operator(p):
 
 if TYPE_CHECKING:
     from ply.yacc import YaccProduction
+    from ...cpp_parser import CppParser

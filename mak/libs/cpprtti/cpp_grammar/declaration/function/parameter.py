@@ -12,27 +12,33 @@ parameter-declaration:
   	attribute-specifier-seqopt decl-specifier-seq abstract-declaratoropt = initializer-clause     C++0x
 """
 
+from ....cpp_parser import cpp98
 from be_typing import TYPE_CHECKING
 
 
-def p_parameter_declaration_clause(p):
-    # type: (YaccProduction) -> None
+@cpp98
+def p_parameter_declaration_clause(parser, p):
+    # type: (CppParser, YaccProduction) -> None
     """
-        parameter-declaration-clause : parameter-declaration-list? ELLIPSIS?
+        parameter-declaration-clause : parameter-declaration-list?
                                      | parameter-declaration-list COMMA ELLIPSIS
+                                     | ELLIPSIS
     """
+    # TODO: parameter-declaration-listopt ...opt is covered by abstract-declarator potentially containing one
 
 
-def p_parameter_declaration_list(p):
-    # type: (YaccProduction) -> None
+@cpp98
+def p_parameter_declaration_list(parser, p):
+    # type: (CppParser, YaccProduction) -> None
     """
         parameter-declaration-list : parameter-declaration
                                    | parameter-declaration-list COMMA parameter-declaration
     """
 
 
-def p_parameter_declaration(p):
-    # type: (YaccProduction) -> None
+@cpp98
+def p_parameter_declaration(parser, p):
+    # type: (CppParser, YaccProduction) -> None
     """
         parameter-declaration : attribute-specifier-seq? decl-specifier-seq declarator
                               | attribute-specifier-seq? decl-specifier-seq declarator OP_EQUALS initializer-clause
@@ -43,3 +49,4 @@ def p_parameter_declaration(p):
 
 if TYPE_CHECKING:
     from ply.yacc import YaccProduction
+    from ....cpp_parser import CppParser

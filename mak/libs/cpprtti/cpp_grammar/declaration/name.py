@@ -14,18 +14,21 @@ noptr-abstract-declarator:
       ( ptr-abstract-declarator )     C++0x
 """
 
+from ...cpp_parser import cpp98
 from be_typing import TYPE_CHECKING
 
 
-def p_type_id(p):
-    # type: (YaccProduction) -> None
+@cpp98
+def p_type_id(parser, p):
+    # type: (CppParser, YaccProduction) -> None
     """
         type-id : type-specifier-seq abstract-declarator?
     """
 
 
-def p_abstract_declarator(p):
-    # type: (YaccProduction) -> None
+@cpp98
+def p_abstract_declarator(parser, p):
+    # type: (CppParser, YaccProduction) -> None
     """
         abstract-declarator : ptr-abstract-declarator
                             | noptr-abstract-declarator? parameters-and-qualifiers trailing-return-type
@@ -33,22 +36,26 @@ def p_abstract_declarator(p):
     """
 
 
-def p_ptr_abstract_declarator(p):
-    # type: (YaccProduction) -> None
+@cpp98
+def p_ptr_abstract_declarator(parser, p):
+    # type: (CppParser, YaccProduction) -> None
     """
         ptr-abstract-declarator : noptr-abstract-declarator
                                 | ptr-operator ptr-abstract-declarator?
     """
 
 
-def p_noptr_abstract_declarator(p):
-    # type: (YaccProduction) -> None
+@cpp98
+def p_noptr_abstract_declarator(parser, p):
+    # type: (CppParser, YaccProduction) -> None
     """
         noptr-abstract-declarator : noptr-abstract-declarator? parameters-and-qualifiers
                                   | noptr-abstract-declarator? LBRACKET constant-expression RBRACKET attribute-specifier-seq?
-                                  | LPAREN ptr-abstract-declarator RPAREN
+                                  | empty LPAREN ptr-abstract-declarator RPAREN
     """
+    # do not remove empty! it helps the parse shift/reduce algorithm
 
 
 if TYPE_CHECKING:
     from ply.yacc import YaccProduction
+    from ...cpp_parser import CppParser

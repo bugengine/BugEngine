@@ -26,20 +26,31 @@ decltype-specifier:
       decltype ( expression )     C++0x
 """
 
+from ....cpp_parser import cpp98
 from be_typing import TYPE_CHECKING
 
 
-def p_simple_type_specifier(p):
-    # type: (YaccProduction) -> None
+@cpp98
+def p_simple_type_specifier_reduced(parser, p):
+    # type: (CppParser, YaccProduction) -> None
+    """
+        simple-type-specifier-reduced : builtin-type-specifier
+                                      | decltype-specifier        %prec SCOPE_REDUCTION
+    """
+
+
+@cpp98
+def p_simple_type_specifier(parser, p):
+    # type: (CppParser, YaccProduction) -> None
     """
         simple-type-specifier : id-expression
-                              | builtin-type-specifier
-                              | decltype-specifier
+                              | simple-type-specifier-reduced
     """
 
 
-def p_builtin_type_specifier(p):
-    # type: (YaccProduction) -> None
+@cpp98
+def p_builtin_type_specifier(parser, p):
+    # type: (CppParser, YaccProduction) -> None
     """
         builtin-type-specifier : KW_CHAR
                                | KW_WCHAR_T
@@ -56,16 +67,17 @@ def p_builtin_type_specifier(p):
     """
 
 
-#def p_type_name(p):
-#    # type: (YaccProduction) -> None
+#def p_type_name(parser, p):
+#    # type: (CppParser, YaccProduction) -> None
 #    """
 #        type-name : IDENTIFIER
 #                  | simple-template-id
 #    """
 
 
-def p_decltype_specifier(p):
-    # type: (YaccProduction) -> None
+@cpp98
+def p_decltype_specifier(parser, p):
+    # type: (CppParser, YaccProduction) -> None
     """
         decltype-specifier : KW_DECLTYPE LPAREN expression RPAREN
     """
@@ -73,3 +85,4 @@ def p_decltype_specifier(p):
 
 if TYPE_CHECKING:
     from ply.yacc import YaccProduction
+    from ....cpp_parser import CppParser

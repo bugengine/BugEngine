@@ -3,11 +3,13 @@ explicit-specialization:
   	template < > declaration
 """
 
+from ....cpp_parser import cpp98
 from be_typing import TYPE_CHECKING
 
 
-def p_explicit_specialization(p):
-    # type: (YaccProduction) -> None
+@cpp98
+def p_explicit_specialization(parser, p):
+    # type: (CppParser, YaccProduction) -> None
     """
         explicit-specialization : attribute-specifier-seq? decl-specifier-seq? KW_TEMPLATE LANGLE RANGLE declaration
     """
@@ -17,3 +19,4 @@ def p_explicit_specialization(p):
 
 if TYPE_CHECKING:
     from ply.yacc import YaccProduction
+    from ....cpp_parser import CppParser

@@ -13,11 +13,13 @@ for-range-initializer:
       expression braced-init-list     C++0x
 """
 
+from ...cpp_parser import cpp98
 from be_typing import TYPE_CHECKING
 
 
-def p_iteration_statement(p):
-    # type: (YaccProduction) -> None
+@cpp98
+def p_iteration_statement(parser, p):
+    # type: (CppParser, YaccProduction) -> None
     """
         iteration-statement : KW_WHILE LPAREN condition RPAREN statement
                             | KW_DO statement KW_WHILE LPAREN expression RPAREN SEMI
@@ -26,23 +28,26 @@ def p_iteration_statement(p):
     """
 
 
-def p_for_init_statement(p):
-    # type: (YaccProduction) -> None
+@cpp98
+def p_for_init_statement(parser, p):
+    # type: (CppParser, YaccProduction) -> None
     """
         for-init-statement : expression-statement
                            | simple-declaration
     """
 
 
-def p_for_range_declaration(p):
-    # type: (YaccProduction) -> None
+@cpp98
+def p_for_range_declaration(parser, p):
+    # type: (CppParser, YaccProduction) -> None
     """
         for-range-declaration : attribute-specifier-seq? type-specifier-seq declarator
     """
 
 
-def p_for_range_initializer(p):
-    # type: (YaccProduction) -> None
+@cpp98
+def p_for_range_initializer(parser, p):
+    # type: (CppParser, YaccProduction) -> None
     """
         for-range-initializer : expression braced-init-list
     """
@@ -50,3 +55,4 @@ def p_for_range_initializer(p):
 
 if TYPE_CHECKING:
     from ply.yacc import YaccProduction
+    from ...cpp_parser import CppParser
