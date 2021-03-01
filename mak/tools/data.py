@@ -36,6 +36,7 @@ cpprtti = """
 %s ${CPPRTTI_GENERATE}
 -m ${MACROS_IGNORE}
 -t ${TMPDIR}
+--std c++11
 ${SRC[0].abspath()}
 """ % sys.executable.replace('\\', '/')
 cls = Task.task_factory('rtti', cpprtti, [], 'BLUE', ext_in='.h .hh .hxx', ext_out='.cc')

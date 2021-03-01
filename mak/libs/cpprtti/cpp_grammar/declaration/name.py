@@ -14,7 +14,7 @@ noptr-abstract-declarator:
       ( ptr-abstract-declarator )     C++0x
 """
 
-from ...cpp_parser import cpp98
+from ...cpp_parser import cpp98, cpp11
 from be_typing import TYPE_CHECKING
 
 
@@ -31,8 +31,15 @@ def p_abstract_declarator(parser, p):
     # type: (CppParser, YaccProduction) -> None
     """
         abstract-declarator : ptr-abstract-declarator
-                            | noptr-abstract-declarator? parameters-and-qualifiers trailing-return-type
                             | ELLIPSIS
+    """
+
+
+@cpp11
+def p_abstract_declarator_trailing_type(parser, p):
+    # type: (CppParser, YaccProduction) -> None
+    """
+        abstract-declarator : noptr-abstract-declarator? parameters-and-qualifiers trailing-return-type
     """
 
 

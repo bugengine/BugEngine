@@ -23,6 +23,7 @@ def p_template_declaration(parser, p):
     """
     # TODO: attributes empty
     # TODO: specifier empty
+    # TODO: storage class empty
 
 
 @cpp98

@@ -19,7 +19,7 @@ access-specifier:
       public
 """
 
-from ...cpp_parser import cpp98
+from ...cpp_parser import cpp98, cpp11
 from be_typing import TYPE_CHECKING
 
 
@@ -46,7 +46,7 @@ def p_base_specifier(parser, p):
     """
         base-specifier : attribute-specifier-seq? base-type-specifier
                        | attribute-specifier-seq? KW_VIRTUAL access-specifier? base-type-specifier
-                       | attribute-specifier-seq access-specifier KW_VIRTUAL? base-type-specifier
+                       | attribute-specifier-seq? access-specifier KW_VIRTUAL? base-type-specifier
     """
 
 
@@ -55,7 +55,14 @@ def p_class_or_decltype(parser, p):
     # type: (CppParser, YaccProduction) -> None
     """
         class-or-decltype : id-expression
-                          | decltype-specifier
+    """
+
+
+@cpp11
+def p_class_or_decltype_cpp11(parser, p):
+    # type: (CppParser, YaccProduction) -> None
+    """
+        class-or-decltype : decltype-specifier
     """
 
 
@@ -74,7 +81,6 @@ def p_access_specifier(parser, p):
         access-specifier : KW_PRIVATE
                          | KW_PROTECTED
                          | KW_PUBLIC
-                         | KW_PUBLISHED
     """
 
 

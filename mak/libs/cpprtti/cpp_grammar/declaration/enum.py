@@ -25,14 +25,16 @@ enumerator:
       identifier
 """
 
-from ...cpp_parser import cpp98
+from ...cpp_parser import cpp98, cpp11, disabled
 from be_typing import TYPE_CHECKING
 
-#def p_enum_name(parser, p):
-#    # type: (CppParser, YaccProduction) -> None
-#    """
-#        enum-name : IDENTIFIER
-#    """
+
+@disabled
+def p_enum_name(parser, p):
+    # type: (CppParser, YaccProduction) -> None
+    """
+        enum-name : IDENTIFIER
+    """
 
 
 @cpp98
@@ -48,15 +50,15 @@ def p_enum_specifier(parser, p):
 def p_enum_head(parser, p):
     # type: (CppParser, YaccProduction) -> None
     """
-        enum-head : enum-key attribute-specifier-seq? id-expression? enum-base?
+        enum-head : enum-key attribute-specifier-seq? id-expression? enum-base
     """
 
 
-@cpp98
+@cpp11
 def p_opaque_enum_declaration(parser, p):
     # type: (CppParser, YaccProduction) -> None
     """
-        opaque-enum-declaration : enum-key attribute-specifier-seq? IDENTIFIER enum-base? SEMI
+        opaque-enum-declaration : enum-key attribute-specifier-seq? IDENTIFIER enum-base SEMI
     """
 
 
@@ -71,6 +73,14 @@ def p_enum_key(parser, p):
 
 
 @cpp98
+def p_enum_base_empty(parser, p):
+    # type: (CppParser, YaccProduction) -> None
+    """
+        enum-base : empty
+    """
+
+
+@cpp11
 def p_enum_base(parser, p):
     # type: (CppParser, YaccProduction) -> None
     """

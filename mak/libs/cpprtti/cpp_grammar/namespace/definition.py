@@ -20,21 +20,25 @@ namespace-body:
       declaration-seqopt
 """
 
-from ...cpp_parser import cpp98
+from ...cpp_parser import cpp98, cpp17, disabled
 from be_typing import TYPE_CHECKING
 
-#def p_namespace_name(parser, p):
-#    # type: (CppParser, YaccProduction) -> None
-#    """
-#        namespace-name : original-namespace-name
-#                       | namespace-alias
-#    """
 
-#def p_original_namespace_name(parser, p):
-#    # type: (CppParser, YaccProduction) -> None
-#    """
-#        original-namespace-name : IDENTIFIER
-#    """
+@disabled
+def p_namespace_name(parser, p):
+    # type: (CppParser, YaccProduction) -> None
+    """
+        namespace-name : original-namespace-name
+                       | namespace-alias
+    """
+
+
+@disabled
+def p_original_namespace_name(parser, p):
+    # type: (CppParser, YaccProduction) -> None
+    """
+        original-namespace-name : IDENTIFIER
+    """
 
 
 @cpp98
@@ -46,37 +50,40 @@ def p_namespace_definition(parser, p):
     """
 
 
-#def p_named_namespace_definition(parser, p):
-#    # type: (CppParser, YaccProduction) -> None
-#    """
-#        named-namespace-definition : original-namespace-definition
-#                                   | extension-namespace-definition
-#    """
+@disabled
+def p_named_namespace_definition(parser, p):
+    # type: (CppParser, YaccProduction) -> None
+    """
+        named-namespace-definition : original-namespace-definition
+                                   | extension-namespace-definition
+    """
 
 
 @cpp98
 def p_original_namespace_definition(parser, p):
     # type: (CppParser, YaccProduction) -> None
     """
-        named-namespace-definition : attribute-specifier-seq? decl-specifier-seq? KW_NAMESPACE IDENTIFIER LBRACE namespace-body RBRACE
+        named-namespace-definition : attribute-specifier-seq? decl-specifier-seq? KW_INLINE? KW_NAMESPACE id-expression LBRACE namespace-body RBRACE
     """
     # TODO: no attributes
     # TODO: decl specifier INLINE only
+    # TODO: qualified is C++17 only
     print('namespace %s' % p[3])
 
 
-#def p_extension_namespace_definition(parser, p):
-#    # type: (CppParser, YaccProduction) -> None
-#    """
-#        extension-namespace-definition : KW_INLINE? KW_NAMESPACE original-namespace-name LBRACE namespace-body RBRACE
-#    """
+@disabled
+def p_extension_namespace_definition(parser, p):
+    # type: (CppParser, YaccProduction) -> None
+    """
+        extension-namespace-definition : KW_INLINE? KW_NAMESPACE original-namespace-name LBRACE namespace-body RBRACE
+    """
 
 
 @cpp98
 def p_unnanmed_namespace_definition(parser, p):
     # type: (CppParser, YaccProduction) -> None
     """
-        unnamed-namespace-definition : attribute-specifier-seq? decl-specifier-seq? KW_NAMESPACE LBRACE namespace-body RBRACE
+        unnamed-namespace-definition : attribute-specifier-seq? decl-specifier-seq? KW_INLINE? KW_NAMESPACE LBRACE namespace-body RBRACE
     """
     # TODO: no attributes
     # TODO: decl specifier INLINE only

@@ -6,14 +6,14 @@ from ...cpp_parser import cpp98
 def p_builtin_type_specifier_extension(parser, p):
     # type: (CppParser, YaccProduction) -> None
     """
-        builtin-type-specifier : KW_I8
-                               | KW_I16
-                               | KW_I32
-                               | KW_I64
-                               | KW_U8
-                               | KW_U16
-                               | KW_U32
-                               | KW_U64
+        simple-type-specifier : KW_I8
+                              | KW_I32
+                              | KW_I64
+                              | KW_U8
+                              | KW_U16
+                              | KW_U32
+                              | KW_I16
+                              | KW_U64
     """
 
 

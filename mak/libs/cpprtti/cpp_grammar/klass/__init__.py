@@ -26,8 +26,16 @@ from . import base
 from . import conversion
 from . import base_init
 
-from ...cpp_parser import cpp98
+from ...cpp_parser import cpp98, cpp11, disabled
 from be_typing import TYPE_CHECKING
+
+
+@disabled
+def p_class_name(p):
+    """
+        class-name : identifier
+                   | simple-template-id
+    """
 
 
 @cpp98
@@ -42,19 +50,28 @@ def p_class_specifier(parser, p):
 def p_class_head(parser, p):
     # type: (CppParser, YaccProduction) -> None
     """
-        class-head : class-key attribute-specifier-seq? id-expression? class-virt-specifier-seq? base-clause?
+        class-head : class-key attribute-specifier-seq? id-expression? class-virt-specifier-seq base-clause?
     """
 
 
-#def p_class_head_name(parser, p):
-#    # type: (CppParser, YaccProduction) -> None
-#    """
-#        class-head-name : nested-name-specifier? IDENTIFIER
-#                        | nested-name-specifier? simple-template-id
-#    """
+@disabled
+def p_class_head_name(parser, p):
+    # type: (CppParser, YaccProduction) -> None
+    """
+        class-head-name : nested-name-specifier? IDENTIFIER
+                        | nested-name-specifier? simple-template-id
+    """
 
 
 @cpp98
+def p_class_virt_specifier_seq_empty(parser, p):
+    # type: (CppParser, YaccProduction) -> None
+    """
+        class-virt-specifier-seq : empty
+    """
+
+
+@cpp11
 def p_class_virt_specifier_seq(parser, p):
     # type: (CppParser, YaccProduction) -> None
     """
@@ -63,7 +80,7 @@ def p_class_virt_specifier_seq(parser, p):
     """
 
 
-@cpp98
+@cpp11
 def p_class_virt_specifier(parser, p):
     # type: (CppParser, YaccProduction) -> None
     """

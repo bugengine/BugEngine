@@ -27,7 +27,7 @@ pure-specifier:
       = 0
 """
 
-from ...cpp_parser import cpp98
+from ...cpp_parser import cpp98, cpp11
 from be_typing import TYPE_CHECKING
 
 
@@ -45,11 +45,17 @@ def p_member_declaration(parser, p):
     # type: (CppParser, YaccProduction) -> None
     """
         member-declaration : attribute-specifier-seq? decl-specifier-seq? member-declarator-list? SEMI
-                           | function-definition
-                           | function-definition SEMI
+                           | function-definition SEMI?
                            | using-declaration
-                           | static_assert-declaration
                            | template-declaration
+    """
+
+
+@cpp11
+def p_member_declaration_cpp11(parser, p):
+    # type: (CppParser, YaccProduction) -> None
+    """
+        member-declaration : static_assert-declaration
                            | alias-declaration
     """
 
@@ -67,16 +73,25 @@ def p_member_declarator_list(parser, p):
 def p_member_declarator(parser, p):
     # type: (CppParser, YaccProduction) -> None
     """
-        member-declarator : declarator virt-specifier-seq? brace-or-equal-initializer?
+        member-declarator : declarator virt-specifier-seq? pure-specifier?
                           | IDENTIFIER? attribute-specifier-seq? virt-specifier-seq? COLON constant-expression
     """
 
 
-#def p_pure_specifier(parser, p):
-#    # type: (CppParser, YaccProduction) -> None
-#    """
-#        pure-specifier : OP_EQUALS INTEGER_LITERAL
-#    """
+@cpp11
+def p_member_declarator_braced(parser, p):
+    # type: (CppParser, YaccProduction) -> None
+    """
+        member-declarator : declarator virt-specifier-seq? brace-or-equal-initializer
+    """
+
+
+@cpp98
+def p_pure_specifier(parser, p):
+    # type: (CppParser, YaccProduction) -> None
+    """
+        pure-specifier : OP_EQUALS INTEGER_LITERAL
+    """
 
 
 @cpp98

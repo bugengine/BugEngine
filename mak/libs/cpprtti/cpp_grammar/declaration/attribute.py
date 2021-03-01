@@ -34,7 +34,7 @@ balanced-token:
       token     C++0x - except a parenthesis, a bracket, or a brace
 """
 
-from ...cpp_parser import cpp98
+from ...cpp_parser import cpp98, cpp11, disabled
 from be_typing import TYPE_CHECKING
 
 
@@ -47,7 +47,7 @@ def p_attribute_specifier_seq(parser, p):
     """
 
 
-@cpp98
+@cpp11
 def p_attribute_specifier(parser, p):
     # type: (CppParser, YaccProduction) -> None
     """
@@ -56,24 +56,34 @@ def p_attribute_specifier(parser, p):
     """
 
 
+# the only valid attribute specifier for C++ 98 is a documentation comment
 @cpp98
+def p_attribute_specifier_doc(parser, p):
+    # type: (CppParser, YaccProduction) -> None
+    """
+        attribute-specifier : DOXYCOMMENT
+    """
+
+
+@cpp11
 def p_alignment_specifier(parser, p):
     # type: (CppParser, YaccProduction) -> None
     """
         alignment-specifier : KW_ALIGNAS LPAREN type-id ELLIPSIS? RPAREN
-                            | KW_ALIGNAS LPAREN constant-expression ELLIPSIS? RPAREN
+                            | KW_ALIGNAS LPAREN expression ELLIPSIS? RPAREN
     """
 
 
-@cpp98
-def p_alignment_specifier(parser, p):
+@disabled
+def p_alignment_specifier_type(parser, p):
     # type: (CppParser, YaccProduction) -> None
     """
         alignment-specifier : KW_ALIGNAS LPAREN type-id ELLIPSIS? RPAREN
     """
+    # type-id is included in constant-expression
 
 
-@cpp98
+@cpp11
 def p_attribute_list(parser, p):
     # type: (CppParser, YaccProduction) -> None
     """
@@ -84,7 +94,7 @@ def p_attribute_list(parser, p):
     """
 
 
-@cpp98
+@cpp11
 def p_attribute(parser, p):
     # type: (CppParser, YaccProduction) -> None
     """
@@ -92,7 +102,7 @@ def p_attribute(parser, p):
     """
 
 
-@cpp98
+@cpp11
 def p_attribute_token(parser, p):
     # type: (CppParser, YaccProduction) -> None
     """
@@ -101,23 +111,15 @@ def p_attribute_token(parser, p):
     """
 
 
-@cpp98
+@cpp11
 def p_attribute_scoped_token(parser, p):
     # type: (CppParser, YaccProduction) -> None
     """
-        attribute-scoped-token : attribute-namespace OP_SCOPE IDENTIFIER
+        attribute-scoped-token : IDENTIFIER OP_SCOPE IDENTIFIER
     """
 
 
-@cpp98
-def p_attribute_namespace(parser, p):
-    # type: (CppParser, YaccProduction) -> None
-    """
-        attribute-namespace : IDENTIFIER
-    """
-
-
-@cpp98
+@cpp11
 def p_attribute_argument_clause(parser, p):
     # type: (CppParser, YaccProduction) -> None
     """
@@ -125,7 +127,7 @@ def p_attribute_argument_clause(parser, p):
     """
 
 
-@cpp98
+@cpp11
 def p_balanced_token_seq(parser, p):
     # type: (CppParser, YaccProduction) -> None
     """
@@ -134,7 +136,7 @@ def p_balanced_token_seq(parser, p):
     """
 
 
-@cpp98
+@cpp11
 def p_balanced_token(parser, p):
     # type: (CppParser, YaccProduction) -> None
     """
@@ -145,7 +147,7 @@ def p_balanced_token(parser, p):
     """
 
 
-@cpp98
+@cpp11
 def p_token(parser, p):
     # type: (CppParser, YaccProduction) -> None
     """

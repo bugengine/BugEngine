@@ -88,6 +88,12 @@ class CppParser23(CppParser20):
     Lexer = cpp_lexer.CppLexer23
 
 
+def _empty_rule(self, p):
+    # type: (CppParser, yacc.YaccProduction) -> None
+    """ """
+    pass
+
+
 def cpp98(func):
     setattr(CppParser98, func.__name__, func)
     return func
@@ -120,6 +126,41 @@ def cpp20(func):
 
 def cpp23(func):
     setattr(CppParser23, func.__name__, func)
+    return func
+
+
+def disabled(func):
+    setattr(CppParser98, func.__name__, _empty_rule)
+    return func
+
+
+def deprecate_cpp03(func):
+    setattr(CppParser03, func.__name__, _empty_rule)
+    return func
+
+
+def deprecate_cpp11(func):
+    setattr(CppParser11, func.__name__, _empty_rule)
+    return func
+
+
+def deprecate_cpp14(func):
+    setattr(CppParser14, func.__name__, _empty_rule)
+    return func
+
+
+def deprecate_cpp17(func):
+    setattr(CppParser17, func.__name__, _empty_rule)
+    return func
+
+
+def deprecate_cpp20(func):
+    setattr(CppParser20, func.__name__, _empty_rule)
+    return func
+
+
+def deprecate_cpp23(func):
+    setattr(CppParser23, func.__name__, _empty_rule)
     return func
 
 

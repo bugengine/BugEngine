@@ -20,7 +20,7 @@ unary-operator:
       ~
 """
 
-from ...cpp_parser import cpp98
+from ...cpp_parser import cpp98, cpp11, disabled
 from be_typing import TYPE_CHECKING
 
 
@@ -33,22 +33,26 @@ def p_unary_expression(parser, p):
                          | OP_MINUSMINUS cast-expression
                          | unary-operator cast-expression
                          | KW_SIZEOF unary-expression
-                         | KW_SIZEOF LPAREN type-id RPAREN
-                         | KW_SIZEOF ELLIPSIS LPAREN IDENTIFIER RPAREN
-                         | KW_ALIGNOF LPAREN type-id RPAREN
-                         | noexcept-expression
                          | new-expression
                          | delete-expression
     """
 
 
-@cpp98
-def p_unary_expression(parser, p):
+@disabled
+def p_unary_expression_disabled(parser, p):
     # type: (CppParser, YaccProduction) -> None
     """
-        unary-expression : postfix-expression
-                         | KW_SIZEOF unary-expression
-                         | KW_SIZEOF ELLIPSIS LPAREN IDENTIFIER RPAREN
+        unary-expression : KW_SIZEOF LPAREN type-id RPAREN
+    """
+    # disabled, as KW_SIZEOF unary-expression can expand to LPAREN type-id RPAREN
+
+
+@cpp11
+def p_unary_expression_cpp11(parser, p):
+    # type: (CppParser, YaccProduction) -> None
+    """
+        unary-expression : KW_SIZEOF ELLIPSIS LPAREN IDENTIFIER RPAREN
+                         | KW_ALIGNOF LPAREN type-id RPAREN
                          | noexcept-expression
     """
 

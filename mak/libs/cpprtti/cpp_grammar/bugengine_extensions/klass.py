@@ -1,17 +1,12 @@
-"""
-typedef-name:
-      identifier
-"""
-
-from ...cpp_parser import disabled
 from be_typing import TYPE_CHECKING
+from ...cpp_parser import cpp98, cpp11
 
 
-@disabled
-def p_typedef_name(parser, p):
+@cpp98
+def p_access_specifier_published(parser, p):
     # type: (CppParser, YaccProduction) -> None
     """
-        typedef-name : IDENTIFIER
+        access-specifier : KW_PUBLISHED
     """
 
 

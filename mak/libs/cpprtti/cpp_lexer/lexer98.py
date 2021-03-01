@@ -102,6 +102,7 @@ class CppLexer98(CppLexer):
         'SEMI',
         'COLON',
         'ELLIPSIS',
+        'DOXYCOMMENT',
     ) + tuple('KW_' + kw.upper() for kw in keywords_98)
 
     t_ignore = ' \t'

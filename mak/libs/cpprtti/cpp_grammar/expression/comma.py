@@ -2,8 +2,6 @@
 expression:
       assignment-expression
       expression , assignment-expression
-CHANGES:
-    moved lambda-expression into expression to avoid constant-expression to match lambdas
 """
 
 from ...cpp_parser import cpp98

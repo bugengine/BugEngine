@@ -16,7 +16,7 @@ trailing-type-specifier-seq:
       trailing-type-specifier trailing-type-specifier-seq     C++0x
 """
 
-from ....cpp_parser import cpp98
+from ....cpp_parser import cpp98, cpp11
 from . import simple
 from . import elaborate
 from be_typing import TYPE_CHECKING
@@ -33,28 +33,13 @@ def p_type_specifier(parser, p):
 
 
 @cpp98
-def p_type_specifier(parser, p):
-    # type: (CppParser, YaccProduction) -> None
-    """
-        type-specifier : trailing-type-specifier
-    """
-
-
-@cpp98
 def p_trailing_type_specifier(parser, p):
     # type: (CppParser, YaccProduction) -> None
     """
         trailing-type-specifier : simple-type-specifier
                                 | elaborated-type-specifier
                                 | typename-specifier
-    """
-
-
-@cpp98
-def p_trailing_type_specifier(parser, p):
-    # type: (CppParser, YaccProduction) -> None
-    """
-        trailing-type-specifier : simple-type-specifier
+                                | cv-qualifier
     """
 
 
@@ -67,7 +52,7 @@ def p_type_specifier_seq(parser, p):
     """
 
 
-@cpp98
+@cpp11
 def p_trailing_type_specifier_seq(parser, p):
     # type: (CppParser, YaccProduction) -> None
     """
@@ -75,18 +60,6 @@ def p_trailing_type_specifier_seq(parser, p):
                                     | trailing-type-specifier trailing-type-specifier-seq
     """
 
-
-#def p_type_specifier_seq(parser, p):
-#    # type: (CppParser, YaccProduction) -> None
-#    """
-#        type-specifier-seq : cv-qualifier? type-specifier cv-qualifier? attribute-specifier-seq?
-#    """
-
-#def p_trailing_type_specifier_seq(parser, p):
-#    # type: (CppParser, YaccProduction) -> None
-#    """
-#        trailing-type-specifier-seq : cv-qualifier? trailing-type-specifier cv-qualifier? attribute-specifier-seq?
-#qqq    """
 
 if TYPE_CHECKING:
     from ply.yacc import YaccProduction

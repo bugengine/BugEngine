@@ -8,7 +8,7 @@ storage-class-specifier:
       mutable
 """
 
-from ....cpp_parser import cpp98
+from ....cpp_parser import cpp98, cpp11, deprecate_cpp11
 from be_typing import TYPE_CHECKING
 
 
@@ -18,9 +18,25 @@ def p_storage_class_specifier(parser, p):
     """
         storage-class-specifier : KW_REGISTER
                                 | KW_STATIC
-                                | KW_THREAD_LOCAL
                                 | KW_EXTERN
                                 | KW_MUTABLE
+    """
+
+
+@cpp98
+@deprecate_cpp11
+def p_storage_class_specifier_auto(parser, p):
+    # type: (CppParser, YaccProduction) -> None
+    """
+        storage-class-specifier : KW_AUTO
+    """
+
+
+@cpp11
+def p_storage_class_specifier_thread_local(parser, p):
+    # type: (CppParser, YaccProduction) -> None
+    """
+        storage-class-specifier : KW_THREAD_LOCAL
     """
 
 

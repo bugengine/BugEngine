@@ -26,17 +26,8 @@ decltype-specifier:
       decltype ( expression )     C++0x
 """
 
-from ....cpp_parser import cpp98
+from ....cpp_parser import cpp98, cpp11, disabled
 from be_typing import TYPE_CHECKING
-
-
-@cpp98
-def p_simple_type_specifier_reduced(parser, p):
-    # type: (CppParser, YaccProduction) -> None
-    """
-        simple-type-specifier-reduced : builtin-type-specifier
-                                      | decltype-specifier        %prec SCOPE_REDUCTION
-    """
 
 
 @cpp98
@@ -44,38 +35,41 @@ def p_simple_type_specifier(parser, p):
     # type: (CppParser, YaccProduction) -> None
     """
         simple-type-specifier : id-expression
-                              | simple-type-specifier-reduced
+                              | KW_CHAR
+                              | KW_WCHAR_T
+                              | KW_BOOL
+                              | KW_SHORT
+                              | KW_INT
+                              | KW_LONG
+                              | KW_SIGNED
+                              | KW_UNSIGNED
+                              | KW_FLOAT
+                              | KW_DOUBLE
+                              | KW_VOID
     """
 
 
-@cpp98
-def p_builtin_type_specifier(parser, p):
+@cpp11
+def p_builtin_type_specifier_cpp11(parser, p):
     # type: (CppParser, YaccProduction) -> None
     """
-        builtin-type-specifier : KW_CHAR
-                               | KW_WCHAR_T
-                               | KW_BOOL
-                               | KW_SHORT
-                               | KW_INT
-                               | KW_LONG
-                               | KW_SIGNED
-                               | KW_UNSIGNED
-                               | KW_FLOAT
-                               | KW_DOUBLE
-                               | KW_VOID
-                               | KW_AUTO
+        builtin-type-specifier : KW_AUTO
+                               | decltype-specifier
     """
 
 
-#def p_type_name(parser, p):
-#    # type: (CppParser, YaccProduction) -> None
-#    """
-#        type-name : IDENTIFIER
-#                  | simple-template-id
-#    """
+@disabled
+def p_type_name(parser, p):
+    # type: (CppParser, YaccProduction) -> None
+    """
+        type-name : class-name
+                  | enum-name
+                  | typedef-name
+                  | simple-template-id
+    """
 
 
-@cpp98
+@cpp11
 def p_decltype_specifier(parser, p):
     # type: (CppParser, YaccProduction) -> None
     """

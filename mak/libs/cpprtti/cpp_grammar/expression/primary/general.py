@@ -30,7 +30,7 @@ nested-name-specifier:
       nested-name-specifier templateopt simple-template-id ::
 """
 
-from ....cpp_parser import cpp98
+from ....cpp_parser import cpp98, cpp11, disabled
 from be_typing import TYPE_CHECKING
 
 
@@ -42,18 +42,14 @@ def p_primary_expression(parser, p):
                            | KW_THIS
                            | LPAREN expression RPAREN
                            | id-expression
-                           | lambda-expression
     """
 
 
-@cpp98
-def p_primary_expression(parser, p):
+@cpp11
+def p_primary_expression_lambda(parser, p):
     # type: (CppParser, YaccProduction) -> None
     """
-        primary-expression : literal
-                           | KW_THIS
-                           | LPAREN expression RPAREN
-                           | id-expression
+        primary-expression : lambda-expression
     """
 
 
@@ -73,20 +69,15 @@ def p_unqualified_id(parser, p):
         unqualified-id : IDENTIFIER template-spec?
                        | operator-function-id template-spec?
                        | conversion-function-id
-                       | literal-operator-id template-spec?
                        | OP_NOT IDENTIFIER
-                       | OP_NOT decltype-specifier
     """
 
 
-@cpp98
-def p_unqualified_id(parser, p):
+@cpp11
+def p_unqualified_id_cpp11(parser, p):
     # type: (CppParser, YaccProduction) -> None
     """
-        unqualified-id : IDENTIFIER template-spec?                                  %prec SCOPE_REDUCTION
-                       | operator-function-id template-spec?
-                       | literal-operator-id template-spec?
-                       | OP_NOT IDENTIFIER
+        unqualified-id : literal-operator-id template-spec?
                        | OP_NOT decltype-specifier
     """
 
@@ -95,14 +86,18 @@ def p_unqualified_id(parser, p):
 def p_qualified_id(parser, p):
     # type: (CppParser, YaccProduction) -> None
     """
-        qualified-id : nested-name-specifier KW_TEMPLATE unqualified-id
-                     | nested-name-specifier unqualified-id
-                     | OP_SCOPE nested-name-specifier KW_TEMPLATE unqualified-id    %prec SCOPE_REDUCTION
-                     | OP_SCOPE nested-name-specifier unqualified-id                %prec SCOPE_REDUCTION
-                     | OP_SCOPE KW_TEMPLATE IDENTIFIER                              %prec SCOPE_REDUCTION
+        qualified-id : nested-name-specifier KW_TEMPLATE? unqualified-id
+                     | OP_SCOPE nested-name-specifier KW_TEMPLATE? unqualified-id   %prec SCOPE_REDUCTION
                      | OP_SCOPE IDENTIFIER template-spec?                           %prec SCOPE_REDUCTION
                      | OP_SCOPE operator-function-id template-spec?                 %prec SCOPE_REDUCTION
-                     | OP_SCOPE literal-operator-id template-spec?                  %prec SCOPE_REDUCTION
+    """
+
+
+@cpp11
+def p_qualified_id_cpp11(parser, p):
+    # type: (CppParser, YaccProduction) -> None
+    """
+        qualified-id : OP_SCOPE literal-operator-id template-spec?                  %prec SCOPE_REDUCTION
     """
 
 
@@ -111,9 +106,16 @@ def p_nested_name_specifier(parser, p):
     # type: (CppParser, YaccProduction) -> None
     """
         nested-name-specifier : IDENTIFIER template-spec? OP_SCOPE
-                              | decltype-specifier OP_SCOPE
                               | nested-name-specifier KW_TEMPLATE IDENTIFIER template-spec? OP_SCOPE
                               | nested-name-specifier IDENTIFIER template-spec? OP_SCOPE
+    """
+
+
+@cpp11
+def p_nested_name_specifier_decltype(parser, p):
+    # type: (CppParser, YaccProduction) -> None
+    """
+        nested-name-specifier : decltype-specifier OP_SCOPE
     """
 
 
@@ -124,14 +126,6 @@ def p_literal(parser, p):
         literal : STRING_LITERAL
                 | INTEGER_LITERAL
                 | FLOATING_LITERAL
-    """
-
-
-@cpp98
-def p_template_spec(parser, p):
-    # type: (CppParser, YaccProduction) -> None
-    """
-        template-spec : OP_LT template-argument-list? OP_GT
     """
 
 

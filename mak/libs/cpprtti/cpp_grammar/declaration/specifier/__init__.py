@@ -11,7 +11,7 @@ decl-specifier-seq:
   	decl-specifier decl-specifier-seq     C++0x
 """
 
-from ....cpp_parser import cpp98
+from ....cpp_parser import cpp98, cpp11, cpp20
 from . import storage_class
 from . import function
 
@@ -23,10 +23,27 @@ def p_decl_specifier(parser, p):
     # type: (CppParser, YaccProduction) -> None
     """
         decl-specifier : storage-class-specifier
+                       | type-specifier
                        | function-specifier
                        | KW_FRIEND
                        | KW_TYPEDEF
-                       | KW_CONSTEXPR
+    """
+
+
+@cpp11
+def p_decl_specifier_cpp11(parser, p):
+    # type: (CppParser, YaccProduction) -> None
+    """
+        decl-specifier : KW_CONSTEXPR
+    """
+
+
+@cpp20
+def p_decl_specifier_cpp20(parser, p):
+    # type: (CppParser, YaccProduction) -> None
+    """
+        decl-specifier : KW_CONSTEVAL
+                       | KW_CONSTINIT
     """
 
 

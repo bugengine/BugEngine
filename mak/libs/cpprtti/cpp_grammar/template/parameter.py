@@ -35,7 +35,6 @@ def p_type_parameter(parser, p):
                        | KW_TEMPLATE LANGLE template-parameter-list RANGLE KW_CLASS ELLIPSIS? IDENTIFIER?
                        | KW_TEMPLATE LANGLE template-parameter-list RANGLE KW_CLASS IDENTIFIER? OP_EQUALS id-expression
     """
-    # original: template < template-parameter-list > class identifieropt = id-expression
 
 
 if TYPE_CHECKING:

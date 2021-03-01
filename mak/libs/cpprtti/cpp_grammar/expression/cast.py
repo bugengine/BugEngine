@@ -17,14 +17,6 @@ def p_cast_expression(parser, p):
     """
 
 
-@cpp98
-def p_cast_expression(parser, p):
-    # type: (CppParser, YaccProduction) -> None
-    """
-        cast-expression : unary-expression
-    """
-
-
 if TYPE_CHECKING:
     from ply.yacc import YaccProduction
     from ...cpp_parser import CppParser

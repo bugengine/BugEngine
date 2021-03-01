@@ -3,11 +3,11 @@ literal-operator-id:
   	operator "" identifier     C++0x
 """
 
-from ...cpp_parser import cpp98
+from ...cpp_parser import cpp11
 from be_typing import TYPE_CHECKING
 
 
-@cpp98
+@cpp11
 def p_literal_operator_id(parser, p):
     # type: (CppParser, YaccProduction) -> None
     """

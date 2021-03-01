@@ -21,11 +21,11 @@ lambda-declarator:
       ( parameter-declaration-clause ) mutableopt exception-specificationopt attribute-specifier-seqopt trailing-return-typeopt     C++0x
 """
 
-from ....cpp_parser import cpp98
+from ....cpp_parser import cpp11
 from be_typing import TYPE_CHECKING
 
 
-@cpp98
+@cpp11
 def p_lambda_expression(parser, p):
     # type: (CppParser, YaccProduction) -> None
     """
@@ -33,7 +33,7 @@ def p_lambda_expression(parser, p):
     """
 
 
-@cpp98
+@cpp11
 def p_lambda_introducer(parser, p):
     # type: (CppParser, YaccProduction) -> None
     """
@@ -41,7 +41,7 @@ def p_lambda_introducer(parser, p):
     """
 
 
-@cpp98
+@cpp11
 def p_lambda_capture(parser, p):
     # type: (CppParser, YaccProduction) -> None
     """
@@ -51,7 +51,7 @@ def p_lambda_capture(parser, p):
     """
 
 
-@cpp98
+@cpp11
 def p_capture_default(parser, p):
     # type: (CppParser, YaccProduction) -> None
     """
@@ -60,7 +60,7 @@ def p_capture_default(parser, p):
     """
 
 
-@cpp98
+@cpp11
 def p_capture_list(parser, p):
     # type: (CppParser, YaccProduction) -> None
     """
@@ -69,7 +69,7 @@ def p_capture_list(parser, p):
     """
 
 
-@cpp98
+@cpp11
 def p_capture(parser, p):
     # type: (CppParser, YaccProduction) -> None
     """
@@ -79,7 +79,7 @@ def p_capture(parser, p):
     """
 
 
-@cpp98
+@cpp11
 def p_lambda_declarator(parser, p):
     # type: (CppParser, YaccProduction) -> None
     """

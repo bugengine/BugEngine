@@ -7,31 +7,36 @@ qualified-namespace-specifier:
       ::opt nested-name-specifieropt namespace-name
 """
 
-from ...cpp_parser import cpp98
+from ...cpp_parser import cpp98, disabled
 from be_typing import TYPE_CHECKING
 
-#def p_namespace_alias(parser, p):
-#    # type: (CppParser, YaccProduction) -> None
-#    """
-#        namespace-alias : IDENTIFIER
-#    """
+
+@disabled
+def p_namespace_alias(parser, p):
+    # type: (CppParser, YaccProduction) -> None
+    """
+        namespace-alias : IDENTIFIER
+    """
 
 
 @cpp98
 def p_namespace_alias_definition(parser, p):
     # type: (CppParser, YaccProduction) -> None
     """
-        namespace-alias-definition : attribute-specifier-seq? decl-specifier-seq? KW_NAMESPACE IDENTIFIER OP_EQUALS id-expression SEMI
+        namespace-alias-definition : attribute-specifier-seq? decl-specifier-seq? KW_INLINE? KW_NAMESPACE IDENTIFIER OP_EQUALS id-expression SEMI
     """
     # TODO: attributes empty
     # TODO: decl specifier none
+    # TODO: not inline
 
 
-#def p_qualified_namespace_specifier(parser, p):
-#    # type: (CppParser, YaccProduction) -> None
-#    """
-#        qualified-namespace-specifier : id-expression
-#    """
+@disabled
+def p_qualified_namespace_specifier(parser, p):
+    # type: (CppParser, YaccProduction) -> None
+    """
+        qualified-namespace-specifier : id-expression
+    """
+
 
 if TYPE_CHECKING:
     from ply.yacc import YaccProduction

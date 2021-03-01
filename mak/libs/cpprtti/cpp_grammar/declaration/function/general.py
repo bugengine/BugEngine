@@ -8,7 +8,7 @@ function-body:
   	function-try-block     C++0x
 """
 
-from ....cpp_parser import cpp98
+from ....cpp_parser import cpp98, cpp11
 from be_typing import TYPE_CHECKING
 
 
@@ -17,7 +17,14 @@ def p_function_definition(parser, p):
     # type: (CppParser, YaccProduction) -> None
     """
         function-definition : attribute-specifier-seq? decl-specifier-seq? declarator function-body
-                            | attribute-specifier-seq? decl-specifier-seq? declarator OP_EQUALS KW_DEFAULT SEMI
+    """
+
+
+@cpp11
+def p_function_definition_cpp11(parser, p):
+    # type: (CppParser, YaccProduction) -> None
+    """
+        function-definition : attribute-specifier-seq? decl-specifier-seq? declarator OP_EQUALS KW_DEFAULT SEMI
                             | attribute-specifier-seq? decl-specifier-seq? declarator OP_EQUALS KW_DELETE SEMI
     """
 

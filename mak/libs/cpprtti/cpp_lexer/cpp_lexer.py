@@ -83,6 +83,8 @@ class CppLexer:
                 self._filename, self._lineno, new_token.lexpos, new_token.lexpos + len(new_token.value), self._lexdata
             )
 
+            # These rules need to be in token() and not in the individual parretn functions
+            # Otherise, lookahead would trigger those rules and the lookahead stack will become invalid
             if new_token.type in ('LPAREN', 'LBRACE', 'LBRACKET'):
                 self.begin_scope()
             elif new_token.type in ('RPAREN', 'RBRACE', 'RBRACKET'):
@@ -91,7 +93,7 @@ class CppLexer:
                 if self.scan_rangle(0, self._langle_stack[-1], self._pred1_token, self._pred2_token, self._pred3_token):
                     new_token.type = 'LANGLE'
                     self._langle_stack[-1] += 1
-            elif new_token.type == 'OP_GT':
+            elif new_token.type in ('OP_GT', 'RANGLE'):
                 if self._langle_stack[-1] > 0:
                     self._langle_stack[-1] -= 1
                     new_token.type = 'RANGLE'
@@ -99,6 +101,7 @@ class CppLexer:
         self._pred3_token = self._pred2_token
         self._pred2_token = self._pred1_token
         self._pred1_token = new_token
+        print(new_token)
         return new_token
 
     def position(self, token):

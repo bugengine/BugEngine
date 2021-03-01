@@ -12,7 +12,7 @@ mem-initializer-id:
       identifier
 """
 
-from ...cpp_parser import cpp98
+from ...cpp_parser import cpp98, cpp11
 from be_typing import TYPE_CHECKING
 
 
@@ -38,7 +38,14 @@ def p_mem_initializer(parser, p):
     # type: (CppParser, YaccProduction) -> None
     """
         mem-initializer : mem-initializer-id LPAREN expression-list? RPAREN
-                        | mem-initializer-id braced-init-list
+    """
+
+
+@cpp11
+def p_mem_initializer_braced(parser, p):
+    # type: (CppParser, YaccProduction) -> None
+    """
+        mem-initializer : mem-initializer-id braced-init-list
     """
 
 

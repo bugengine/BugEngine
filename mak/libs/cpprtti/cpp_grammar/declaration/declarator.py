@@ -39,7 +39,7 @@ declarator-id:
 
 """
 
-from ...cpp_parser import cpp98
+from ...cpp_parser import cpp98, cpp11, disabled
 from be_typing import TYPE_CHECKING
 
 
@@ -65,7 +65,14 @@ def p_declarator(parser, p):
     # type: (CppParser, YaccProduction) -> None
     """
         declarator : ptr-declarator
-                   | noptr-declarator parameters-and-qualifiers trailing-return-type
+    """
+
+
+@cpp11
+def p_declarator_trailing(parser, p):
+    # type: (CppParser, YaccProduction) -> None
+    """
+        declarator : noptr-declarator parameters-and-qualifiers trailing-return-type
     """
 
 
@@ -85,7 +92,7 @@ def p_noptr_declarator(parser, p):
         noptr-declarator : declarator-id attribute-specifier-seq?
                          | noptr-declarator parameters-and-qualifiers
                          | noptr-declarator LBRACKET constant-expression? RBRACKET attribute-specifier-seq?
-                         | empty LPAREN ptr-declarator RPAREN
+                         | LPAREN ptr-declarator RPAREN
     """
 
 
@@ -93,11 +100,11 @@ def p_noptr_declarator(parser, p):
 def p_parameters_and_qualifiers(parser, p):
     # type: (CppParser, YaccProduction) -> None
     """
-        parameters-and-qualifiers : LPAREN parameter-declaration-clause RPAREN attribute-specifier-seq? cv-qualifier-seq? ref-qualifier? exception-specification?
+        parameters-and-qualifiers : LPAREN parameter-declaration-clause RPAREN attribute-specifier-seq? cv-qualifier-seq? ref-qualifier exception-specification?
     """
 
 
-@cpp98
+@cpp11
 def p_trailing_return_type(parser, p):
     # type: (CppParser, YaccProduction) -> None
     """
@@ -111,15 +118,17 @@ def p_ptr_operator(parser, p):
     """
         ptr-operator : OP_TIMES attribute-specifier-seq? cv-qualifier-seq?
                      | OP_AND attribute-specifier-seq?
-                     | OP_LAND attribute-specifier-seq?
+                     | OP_SCOPE? nested-name-specifier OP_TIMES attribute-specifier-seq? cv-qualifier-seq?
+
     """
 
 
-#def p_ptr_operator_nested(parser, p):
-#    # type: (CppParser, YaccProduction) -> None
-#    """
-#        ptr-operator : OP_SCOPE? nested-name-specifier OP_TIMES attribute-specifier-seq? cv-qualifier-seq?
-#    """
+@cpp11
+def p_ptr_operator_rvalue_ref(parser, p):
+    # type: (CppParser, YaccProduction) -> None
+    """
+        ptr-operator : OP_LAND attribute-specifier-seq?
+    """
 
 
 @cpp98
@@ -144,6 +153,14 @@ def p_cv_qualifier(parser, p):
 def p_ref_qualifier(parser, p):
     # type: (CppParser, YaccProduction) -> None
     """
+        ref-qualifier : empty
+    """
+
+
+@cpp11
+def p_ref_qualifier_cpp11(parser, p):
+    # type: (CppParser, YaccProduction) -> None
+    """
         ref-qualifier : OP_AND
                       | OP_LAND
     """
@@ -154,6 +171,14 @@ def p_declarator_id(parser, p):
     # type: (CppParser, YaccProduction) -> None
     """
         declarator-id : ELLIPSIS? id-expression
+    """
+
+
+@disabled
+def p_declarator_id_disabled(parser, p):
+    # type: (CppParser, YaccProduction) -> None
+    """
+        declarator-id : OP_SCOPE? nested-name-specifier? class-name
     """
 
 

@@ -12,7 +12,7 @@ noexcept-specification:
       noexcept     C++0x
 """
 
-from ...cpp_parser import cpp98
+from ...cpp_parser import cpp98, cpp11
 from be_typing import TYPE_CHECKING
 
 
@@ -21,7 +21,14 @@ def p_exception_specification(parser, p):
     # type: (CppParser, YaccProduction) -> None
     """
         exception-specification : dynamic-exception-specification
-                                | noexcept-specification
+    """
+
+
+@cpp11
+def p_exception_specification_noexcept(parser, p):
+    # type: (CppParser, YaccProduction) -> None
+    """
+        exception-specification : noexcept-specification
     """
 
 
@@ -42,7 +49,7 @@ def p_type_id_list(parser, p):
     """
 
 
-@cpp98
+@cpp11
 def p_noexcept_specification(parser, p):
     # type: (CppParser, YaccProduction) -> None
     """

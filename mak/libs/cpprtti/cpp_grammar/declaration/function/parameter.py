@@ -20,11 +20,9 @@ from be_typing import TYPE_CHECKING
 def p_parameter_declaration_clause(parser, p):
     # type: (CppParser, YaccProduction) -> None
     """
-        parameter-declaration-clause : parameter-declaration-list?
+        parameter-declaration-clause : parameter-declaration-list? ELLIPSIS?
                                      | parameter-declaration-list COMMA ELLIPSIS
-                                     | ELLIPSIS
     """
-    # TODO: parameter-declaration-listopt ...opt is covered by abstract-declarator potentially containing one
 
 
 @cpp98

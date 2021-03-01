@@ -29,7 +29,7 @@ pseudo-destructor-name:
       ~ decltype-specifier     C++0x
 """
 
-from ...cpp_parser import cpp98
+from ...cpp_parser import cpp98, cpp11, disabled
 from be_typing import TYPE_CHECKING
 
 
@@ -39,11 +39,9 @@ def p_postfix_expression(parser, p):
     """
         postfix-expression : primary-expression
                            | postfix-expression RBRACKET expression RBRACKET
-                           | postfix-expression RBRACKET braced-init-list? RBRACKET
                            | postfix-expression LPAREN expression-list? RPAREN
-                           | simple-type-specifier-reduced LPAREN expression-list? RPAREN
-                           | simple-type-specifier-reduced braced-init-list
-                           | typename-specifier braced-init-list
+                           | simple-type-specifier LPAREN expression-list? RPAREN
+                           | typename-specifier LPAREN expression-list? RPAREN
                            | postfix-expression PERIOD KW_TEMPLATE? id-expression
                            | postfix-expression OP_ARROW KW_TEMPLATE? id-expression
                            | postfix-expression OP_PLUSPLUS
@@ -55,18 +53,27 @@ def p_postfix_expression(parser, p):
                            | KW_TYPEID LPAREN expression RPAREN
                            | KW_TYPEID LPAREN type-id RPAREN
     """
-    # deleted: postfix-expression PERIOD pseudo-destructor-name
-    #          postfix-expression OP_ARROW pseudo-destructor-name
 
 
-@cpp98
-def p_postfix_expression(parser, p):
+@cpp11
+def p_postfix_expression_cpp11(parser, p):
     # type: (CppParser, YaccProduction) -> None
     """
-        postfix-expression : primary-expression
+        postfix-expression : postfix-expression RBRACKET braced-init-list? RBRACKET
+                           | simple-type-specifier braced-init-list
+                           | typename-specifier braced-init-list
     """
-    # deleted: postfix-expression PERIOD pseudo-destructor-name
-    #          postfix-expression OP_ARROW pseudo-destructor-name
+
+
+@disabled
+def p_postfix_expression_disabled(parser, p):
+    # type: (CppParser, YaccProduction) -> None
+    """
+        postfix-expression : postfix-expression PERIOD pseudo-destructor-name
+                           | postfix-expression OP_ARROW pseudo-destructor-name
+    """
+    # disabled, as KW_TEMPLATE? id-expression covers pseudo-destructor-name
+    # type-id covers constructors/function calls/etc
 
 
 @cpp98
@@ -77,14 +84,16 @@ def p_expression_list(parser, p):
     """
 
 
-#def p_pseudo_destructor_name(parser, p):
-#    # type: (CppParser, YaccProduction) -> None
-#    """
-#        pseudo-destructor-name : OP_SCOPE? nested-name-specifier? type-name OP_SCOPE OP_NOT type-name
-#                               | OP_SCOPE? nested-name-specifier KW_TEMPLATE simple-template-id OP_SCOPE OP_NOT type-name
-#                               | OP_SCOPE? nested-name-specifier? OP_NOT type-name
-#    """
-#    # OP_NOT decltype-specifier # already covered by id-expression
+@disabled
+def p_pseudo_destructor_name(parser, p):
+    # type: (CppParser, YaccProduction) -> None
+    """
+        pseudo-destructor-name : OP_SCOPE? nested-name-specifier? type-name OP_SCOPE OP_NOT type-name
+                               | OP_SCOPE? nested-name-specifier KW_TEMPLATE simple-template-id OP_SCOPE OP_NOT type-name
+                               | OP_SCOPE? nested-name-specifier? OP_NOT type-name
+                               | OP_NOT decltype-specifier
+    """
+
 
 if TYPE_CHECKING:
     from ply.yacc import YaccProduction

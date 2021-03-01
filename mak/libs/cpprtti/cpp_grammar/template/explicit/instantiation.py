@@ -12,6 +12,7 @@ def p_explicit_instantiation(parser, p):
     # type: (CppParser, YaccProduction) -> None
     """
         explicit-instantiation : attribute-specifier-seq? decl-specifier-seq? KW_TEMPLATE declaration
+        explicit-instantiation : attribute-specifier-seq? decl-specifier-seq? KW_EXTERN KW_TEMPLATE declaration
     """
     # TODO: no attributes
     # TODO: only extern

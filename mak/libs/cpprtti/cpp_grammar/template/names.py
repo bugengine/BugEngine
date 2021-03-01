@@ -16,28 +16,34 @@ template-argument:
       id-expression     C++0x
 """
 
-from ...cpp_parser import cpp98
+from ...cpp_parser import cpp98, disabled
 from be_typing import TYPE_CHECKING
 
-#def p_simple_template_id(parser, p):
-#    # type: (CppParser, YaccProduction) -> None
-#    """
-#        simple-template-id : IDENTIFIER OP_LT template-argument-list? OP_GT
-#    """
 
-#def p_template_id(parser, p):
-#    # type: (CppParser, YaccProduction) -> None
-#    """
-#        template-id : simple-template-id
-#                    | operator-function-id OP_LT template-argument-list? OP_GT
-#                    | literal-operator-id OP_LT template-argument-list? OP_GT
-#    """
+@disabled
+def p_simple_template_id(parser, p):
+    # type: (CppParser, YaccProduction) -> None
+    """
+        simple-template-id : template-name OP_LT template-argument-list? OP_GT
+    """
 
-#def p_template_name(parser, p):
-#    # type: (CppParser, YaccProduction) -> None
-#    """
-#        template-name : IDENTIFIER
-#    """
+
+@disabled
+def p_template_id(parser, p):
+    # type: (CppParser, YaccProduction) -> None
+    """
+        template-id : simple-template-id
+                    | operator-function-id OP_LT template-argument-list? OP_GT
+                    | literal-operator-id OP_LT template-argument-list? OP_GT
+    """
+
+
+@disabled
+def p_template_name(parser, p):
+    # type: (CppParser, YaccProduction) -> None
+    """
+        template-name : IDENTIFIER
+    """
 
 
 @cpp98
@@ -59,11 +65,11 @@ def p_template_argument(parser, p):
     # id-expression is included in constant-expression
 
 
-@cpp98
-def p_template_argument(parser, p):
+@disabled
+def p_template_argument_disabled(parser, p):
     # type: (CppParser, YaccProduction) -> None
     """
-        template-argument : constant-expression
+        template-argument : id-expression
     """
     # id-expression is included in constant-expression
 

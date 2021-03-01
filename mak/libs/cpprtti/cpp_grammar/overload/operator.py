@@ -57,7 +57,7 @@ def p_operator_function_id(parser, p):
     """
         operator-function-id : KW_OPERATOR overloadable-operator
     """
-    # removed template args.
+    # removed template args. Looks duplicated
 
 
 @cpp98
