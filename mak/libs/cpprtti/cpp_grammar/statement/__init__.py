@@ -27,13 +27,13 @@ def p_statement(parser, p):
     # type: (CppParser, YaccProduction) -> None
     """
         statement : labeled-statement
-                  | attribute-specifier-seq expression-statement
-                  | attribute-specifier-seq compound-statement
-                  | attribute-specifier-seq selection-statement
-                  | attribute-specifier-seq iteration-statement
-                  | attribute-specifier-seq jump-statement
+                  | expression-statement
+                  | attribute-specifier-seq? compound-statement
+                  | attribute-specifier-seq? selection-statement
+                  | attribute-specifier-seq? iteration-statement
+                  | attribute-specifier-seq? jump-statement
                   | declaration-statement
-                  | attribute-specifier-seq try-block
+                  | attribute-specifier-seq? try-block
     """
 
 

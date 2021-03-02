@@ -24,7 +24,7 @@ def p_using_declaration(parser, p):
 def p_using_directive(parser, p):
     # type: (CppParser, YaccProduction) -> None
     """
-        using-directive : attribute-specifier-seq? decl-specifier-seq? KW_USING KW_NAMESPACE id-expression IDENTIFIER SEMI
+        using-directive : attribute-specifier-seq? decl-specifier-seq? KW_USING KW_NAMESPACE id-expression SEMI
     """
     # TODO: decl none
 

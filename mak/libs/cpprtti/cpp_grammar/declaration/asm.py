@@ -11,8 +11,9 @@ from be_typing import TYPE_CHECKING
 def p_asm_definition(parser, p):
     # type: (CppParser, YaccProduction) -> None
     """
-        asm-definition : KW_ASM LPAREN STRING_LITERAL RPAREN SEMI
+        asm-definition : attribute-specifier-seq? decl-specifier-seq? KW_ASM LPAREN STRING_LITERAL RPAREN SEMI
     """
+    # TODO: no specifier
 
 
 if TYPE_CHECKING:
