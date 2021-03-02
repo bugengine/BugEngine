@@ -13,7 +13,7 @@ from be_typing import TYPE_CHECKING
 def p_elaborate_type_specifier(parser, p):
     # type: (CppParser, YaccProduction) -> None
     """
-        elaborated-type-specifier : class-key attribute-specifier-seq? id-expression
+        elaborated-type-specifier : class-key attribute-specifier-seq? id-expression class-virt-specifier-seq empty
                                   | enum-key id-expression
     """
 

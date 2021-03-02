@@ -3,7 +3,7 @@ expression-statement:
       expressionopt ;
 """
 
-from ...cpp_parser import cpp98
+from ...cpp_parser import cpp98, disabled
 from be_typing import TYPE_CHECKING
 
 
@@ -11,8 +11,17 @@ from be_typing import TYPE_CHECKING
 def p_expression_statement(parser, p):
     # type: (CppParser, YaccProduction) -> None
     """
-        expression-statement : expression? SEMI
+        expression-statement : expression SEMI
     """
+
+
+@disabled
+def p_expression_statement_disabled(parser, p):
+    # type: (CppParser, YaccProduction) -> None
+    """
+        expression-statement : SEMI
+    """
+    # covered by empty declaration
 
 
 if TYPE_CHECKING:

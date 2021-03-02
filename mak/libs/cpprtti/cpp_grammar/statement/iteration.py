@@ -13,7 +13,7 @@ for-range-initializer:
       expression braced-init-list     C++0x
 """
 
-from ...cpp_parser import cpp98
+from ...cpp_parser import cpp98, cpp11
 from be_typing import TYPE_CHECKING
 
 
@@ -24,7 +24,14 @@ def p_iteration_statement(parser, p):
         iteration-statement : KW_WHILE LPAREN condition RPAREN statement
                             | KW_DO statement KW_WHILE LPAREN expression RPAREN SEMI
                             | KW_FOR LPAREN for-init-statement condition? SEMI expression? RPAREN statement
-                            | KW_FOR LPAREN for-range-declaration COLON for-range-initializer RPAREN statement
+    """
+
+
+@cpp11
+def p_iteration_statement_range(parser, p):
+    # type: (CppParser, YaccProduction) -> None
+    """
+        iteration-statement : KW_FOR LPAREN for-range-declaration COLON for-range-initializer RPAREN statement
     """
 
 
@@ -37,7 +44,7 @@ def p_for_init_statement(parser, p):
     """
 
 
-@cpp98
+@cpp11
 def p_for_range_declaration(parser, p):
     # type: (CppParser, YaccProduction) -> None
     """
@@ -45,7 +52,7 @@ def p_for_range_declaration(parser, p):
     """
 
 
-@cpp98
+@cpp11
 def p_for_range_initializer(parser, p):
     # type: (CppParser, YaccProduction) -> None
     """

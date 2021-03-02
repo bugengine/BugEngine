@@ -16,7 +16,7 @@ braced-init-list:
       { }     C++0x
 """
 
-from ...cpp_parser import cpp98
+from ...cpp_parser import cpp98, cpp11
 from be_typing import TYPE_CHECKING
 
 
@@ -34,7 +34,14 @@ def p_brace_or_equal_initializer(parser, p):
     # type: (CppParser, YaccProduction) -> None
     """
         brace-or-equal-initializer : OP_EQUALS initializer-clause
-                                   | braced-init-list
+    """
+
+
+@cpp11
+def p_brace_or_equal_initializer_braced_init_list(parser, p):
+    # type: (CppParser, YaccProduction) -> None
+    """
+        brace-or-equal-initializer : braced-init-list
     """
 
 
@@ -43,7 +50,14 @@ def p_initializer_clause(parser, p):
     # type: (CppParser, YaccProduction) -> None
     """
         initializer-clause : assignment-expression
-                           | braced-init-list
+    """
+
+
+@cpp11
+def p_initializer_clause_braced_init_list(parser, p):
+    # type: (CppParser, YaccProduction) -> None
+    """
+        initializer-clause : braced-init-list
     """
 
 

@@ -119,7 +119,6 @@ def p_ptr_operator(parser, p):
         ptr-operator : OP_TIMES attribute-specifier-seq? cv-qualifier-seq?
                      | OP_AND attribute-specifier-seq?
                      | OP_SCOPE? nested-name-specifier OP_TIMES attribute-specifier-seq? cv-qualifier-seq?
-
     """
 
 

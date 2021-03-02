@@ -40,7 +40,7 @@ def p_postfix_expression(parser, p):
         postfix-expression : primary-expression
                            | postfix-expression RBRACKET expression RBRACKET
                            | postfix-expression LPAREN expression-list? RPAREN
-                           | simple-type-specifier LPAREN expression-list? RPAREN
+                           | builtin-type-specifier LPAREN expression-list? RPAREN
                            | typename-specifier LPAREN expression-list? RPAREN
                            | postfix-expression PERIOD KW_TEMPLATE? id-expression
                            | postfix-expression OP_ARROW KW_TEMPLATE? id-expression

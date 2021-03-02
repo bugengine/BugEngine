@@ -67,7 +67,14 @@ def p_enum_key(parser, p):
     # type: (CppParser, YaccProduction) -> None
     """
         enum-key : KW_ENUM
-                 | KW_ENUM KW_CLASS
+    """
+
+
+@cpp11
+def p_enum_key_cpp11(parser, p):
+    # type: (CppParser, YaccProduction) -> None
+    """
+        enum-key : KW_ENUM KW_CLASS
                  | KW_ENUM KW_STRUCT
     """
 

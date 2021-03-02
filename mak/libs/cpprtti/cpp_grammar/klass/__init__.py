@@ -42,7 +42,7 @@ def p_class_name(p):
 def p_class_specifier(parser, p):
     # type: (CppParser, YaccProduction) -> None
     """
-        class-specifier : class-head LBRACE member-specification? RBRACE
+        class-specifier : class-head member-specification? RBRACE
     """
 
 
@@ -50,8 +50,10 @@ def p_class_specifier(parser, p):
 def p_class_head(parser, p):
     # type: (CppParser, YaccProduction) -> None
     """
-        class-head : class-key attribute-specifier-seq? id-expression? class-virt-specifier-seq base-clause?
+        class-head : class-key attribute-specifier-seq? id-expression class-virt-specifier-seq base-clause? LBRACE
+                   | class-key attribute-specifier-seq? base-clause? LBRACE
     """
+    pass
 
 
 @disabled

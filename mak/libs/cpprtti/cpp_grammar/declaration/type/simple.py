@@ -35,26 +35,34 @@ def p_simple_type_specifier(parser, p):
     # type: (CppParser, YaccProduction) -> None
     """
         simple-type-specifier : id-expression
-                              | KW_CHAR
-                              | KW_WCHAR_T
-                              | KW_BOOL
-                              | KW_SHORT
-                              | KW_INT
-                              | KW_LONG
-                              | KW_SIGNED
-                              | KW_UNSIGNED
-                              | KW_FLOAT
-                              | KW_DOUBLE
-                              | KW_VOID
+                              | builtin-type-specifier
+    """
+
+
+@cpp98
+def p_builtin_type_specifier(parser, p):
+    # type: (CppParser, YaccProduction) -> None
+    """
+        builtin-type-specifier : KW_CHAR
+                               | KW_WCHAR_T
+                               | KW_BOOL
+                               | KW_SHORT
+                               | KW_INT
+                               | KW_LONG
+                               | KW_SIGNED
+                               | KW_UNSIGNED
+                               | KW_FLOAT
+                               | KW_DOUBLE
+                               | KW_VOID
     """
 
 
 @cpp11
-def p_builtin_type_specifier_cpp11(parser, p):
+def p_simple_type_specifier_cpp11(parser, p):
     # type: (CppParser, YaccProduction) -> None
     """
-        builtin-type-specifier : KW_AUTO
-                               | decltype-specifier
+        simple-type-specifier : KW_AUTO
+                              | decltype-specifier
     """
 
 
