@@ -35,8 +35,8 @@ enum ClassIndex_String
     ClassIndex_text       = 4
 };
 
-const Type& getTypeFromIndex(ClassIndex_Numeric index);
-const Type& getTypeFromIndex(ClassIndex_String index);
+be_api(RTTI) const Type& getTypeFromIndex(ClassIndex_Numeric index);
+be_api(RTTI) const Type& getTypeFromIndex(ClassIndex_String index);
 
 }}  // namespace BugEngine::RTTI
 
