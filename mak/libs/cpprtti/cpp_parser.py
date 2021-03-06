@@ -42,7 +42,7 @@ class CppParser(object):
         self.tokens = self.__class__.Lexer.tokens
         self.parser = yacc.yacc(
             module=self,
-            start='translation-unit',
+            start='type-id',
             picklefile=os.path.join(tmp_dir, 'cpprtti_grammar_%s.pickle' % self.__class__.__name__[-2:]),
             debugfile=os.path.join(tmp_dir, 'cpprtti_grammar_%s.debug' % self.__class__.__name__[-2:]),
             debug=True

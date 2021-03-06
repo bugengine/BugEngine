@@ -28,8 +28,17 @@ def p_ctor_initializer(parser, p):
 def p_mem_initializer_list(parser, p):
     # type: (CppParser, YaccProduction) -> None
     """
-        mem-initializer-list : mem-initializer ELLIPSIS?
-                             | mem-initializer COMMA mem-initializer-list ELLIPSIS?
+        mem-initializer-list : mem-initializer
+                             | mem-initializer COMMA mem-initializer-list
+    """
+
+
+@cpp11
+def p_mem_initializer_list_ellipsis(parser, p):
+    # type: (CppParser, YaccProduction) -> None
+    """
+        mem-initializer-list : mem-initializer ELLIPSIS
+                             | mem-initializer COMMA mem-initializer-list ELLIPSIS
     """
 
 

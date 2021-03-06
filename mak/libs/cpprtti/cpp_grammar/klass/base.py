@@ -35,8 +35,17 @@ def p_base_clause(parser, p):
 def p_base_specifier_list(parser, p):
     # type: (CppParser, YaccProduction) -> None
     """
-        base-specifier-list : base-specifier ELLIPSIS?
-                            | base-specifier-list COMMA base-specifier ELLIPSIS?
+        base-specifier-list : base-specifier
+                            | base-specifier-list COMMA base-specifier
+    """
+
+
+@cpp11
+def p_base_specifier_list_ellipsis(parser, p):
+    # type: (CppParser, YaccProduction) -> None
+    """
+        base-specifier-list : base-specifier ELLIPSIS
+                            | base-specifier-list COMMA base-specifier ELLIPSIS
     """
 
 
@@ -54,7 +63,7 @@ def p_base_specifier(parser, p):
 def p_class_or_decltype(parser, p):
     # type: (CppParser, YaccProduction) -> None
     """
-        class-or-decltype : id-expression
+        class-or-decltype : id-type
     """
 
 

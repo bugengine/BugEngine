@@ -97,6 +97,17 @@ def p_noptr_declarator(parser, p):
 
 
 @cpp98
+def p_noptr_declarator(parser, p):
+    # type: (CppParser, YaccProduction) -> None
+    """
+        noptr-declarator : declarator-id attribute-specifier-seq?
+                         | noptr-declarator parameters-and-qualifiers
+                         | noptr-declarator LBRACKET  RBRACKET attribute-specifier-seq?
+                         | LPAREN ptr-declarator RPAREN
+    """
+
+
+@cpp98
 def p_parameters_and_qualifiers(parser, p):
     # type: (CppParser, YaccProduction) -> None
     """
@@ -117,8 +128,9 @@ def p_ptr_operator(parser, p):
     # type: (CppParser, YaccProduction) -> None
     """
         ptr-operator : OP_TIMES attribute-specifier-seq? cv-qualifier-seq?
-                     | OP_AND attribute-specifier-seq?
-                     | OP_SCOPE? nested-name-specifier OP_TIMES attribute-specifier-seq? cv-qualifier-seq?
+                     | OP_AND attribute-specifier-seq? cv-qualifier-seq?
+                     | OP_SCOPE nested-name-specifier OP_TIMES attribute-specifier-seq? cv-qualifier-seq? %prec SCOPE_REDUCTION
+                     | nested-name-specifier OP_TIMES attribute-specifier-seq? cv-qualifier-seq?
     """
 
 
@@ -126,7 +138,7 @@ def p_ptr_operator(parser, p):
 def p_ptr_operator_rvalue_ref(parser, p):
     # type: (CppParser, YaccProduction) -> None
     """
-        ptr-operator : OP_LAND attribute-specifier-seq?
+        ptr-operator : OP_LAND attribute-specifier-seq? cv-qualifier-seq?
     """
 
 
@@ -169,7 +181,15 @@ def p_ref_qualifier_cpp11(parser, p):
 def p_declarator_id(parser, p):
     # type: (CppParser, YaccProduction) -> None
     """
-        declarator-id : ELLIPSIS? id-expression
+        declarator-id : id-expression
+    """
+
+
+@cpp11
+def p_declarator_id_ellipsis(parser, p):
+    # type: (CppParser, YaccProduction) -> None
+    """
+        declarator-id : ELLIPSIS id-expression
     """
 
 

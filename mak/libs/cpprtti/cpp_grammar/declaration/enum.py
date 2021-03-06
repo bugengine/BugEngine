@@ -50,7 +50,7 @@ def p_enum_specifier(parser, p):
 def p_enum_head(parser, p):
     # type: (CppParser, YaccProduction) -> None
     """
-        enum-head : enum-key attribute-specifier-seq? id-expression? enum-base
+        enum-head : enum-key attribute-specifier-seq? id-type? enum-base
     """
 
 

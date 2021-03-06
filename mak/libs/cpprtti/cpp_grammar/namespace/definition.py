@@ -63,7 +63,7 @@ def p_named_namespace_definition(parser, p):
 def p_original_namespace_definition(parser, p):
     # type: (CppParser, YaccProduction) -> None
     """
-        named-namespace-definition : attribute-specifier-seq? decl-specifier-seq? KW_NAMESPACE id-expression LBRACE namespace-body RBRACE
+        named-namespace-definition : attribute-specifier-seq? decl-specifier-seq? KW_NAMESPACE id-type LBRACE namespace-body RBRACE
     """
     # TODO: no attributes
     # TODO: decl specifier INLINE only

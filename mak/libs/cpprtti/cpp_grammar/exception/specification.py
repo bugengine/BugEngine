@@ -44,8 +44,17 @@ def p_dynamic_exception_specification(parser, p):
 def p_type_id_list(parser, p):
     # type: (CppParser, YaccProduction) -> None
     """
-        type-id-list : type-id ELLIPSIS?
-                     | type-id-list COMMA type-id ELLIPSIS?
+        type-id-list : type-id
+                     | type-id-list COMMA type-id
+    """
+
+
+@cpp11
+def p_type_id_list_ellipsis(parser, p):
+    # type: (CppParser, YaccProduction) -> None
+    """
+        type-id-list : type-id ELLIPSIS
+                     | type-id-list COMMA type-id ELLIPSIS
     """
 
 

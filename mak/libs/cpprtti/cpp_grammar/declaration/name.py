@@ -31,8 +31,16 @@ def p_abstract_declarator(parser, p):
     # type: (CppParser, YaccProduction) -> None
     """
         abstract-declarator : ptr-abstract-declarator
-                            | ELLIPSIS
     """
+
+
+@cpp11
+def p_abstract_declarator_ellipsis(parser, p):
+    # type: (CppParser, YaccProduction) -> None
+    """
+        abstract-declarator : ELLIPSIS
+    """
+    # TODO: really necessary?
 
 
 @cpp11
@@ -48,7 +56,7 @@ def p_ptr_abstract_declarator(parser, p):
     # type: (CppParser, YaccProduction) -> None
     """
         ptr-abstract-declarator : noptr-abstract-declarator
-                                | ptr-operator ptr-abstract-declarator?
+                                | ptr-operator  ptr-abstract-declarator?
     """
 
 
@@ -58,6 +66,17 @@ def p_noptr_abstract_declarator(parser, p):
     """
         noptr-abstract-declarator : noptr-abstract-declarator? parameters-and-qualifiers
                                   | noptr-abstract-declarator? LBRACKET constant-expression RBRACKET attribute-specifier-seq?
+                                  | empty LPAREN ptr-abstract-declarator RPAREN
+    """
+    # do not remove empty! it helps the parse shift/reduce algorithm
+
+
+@cpp98
+def p_noptr_abstract_declarator(parser, p):
+    # type: (CppParser, YaccProduction) -> None
+    """
+        noptr-abstract-declarator : noptr-abstract-declarator? parameters-and-qualifiers
+                                  | noptr-abstract-declarator? LBRACKET RBRACKET attribute-specifier-seq?
                                   | empty LPAREN ptr-abstract-declarator RPAREN
     """
     # do not remove empty! it helps the parse shift/reduce algorithm

@@ -28,12 +28,22 @@ def p_template_parameter(parser, p):
 def p_type_parameter(parser, p):
     # type: (CppParser, YaccProduction) -> None
     """
-        type-parameter : KW_CLASS ELLIPSIS? IDENTIFIER?
+        type-parameter : KW_CLASS IDENTIFIER?
                        | KW_CLASS IDENTIFIER? OP_EQUALS type-id
-                       | KW_TYPENAME ELLIPSIS? IDENTIFIER?
+                       | KW_TYPENAME IDENTIFIER?
                        | KW_TYPENAME IDENTIFIER? OP_EQUALS type-id
-                       | KW_TEMPLATE LANGLE template-parameter-list RANGLE KW_CLASS ELLIPSIS? IDENTIFIER?
-                       | KW_TEMPLATE LANGLE template-parameter-list RANGLE KW_CLASS IDENTIFIER? OP_EQUALS id-expression
+                       | KW_TEMPLATE LANGLE template-parameter-list RANGLE KW_CLASS IDENTIFIER?
+                       | KW_TEMPLATE LANGLE template-parameter-list RANGLE KW_CLASS IDENTIFIER? OP_EQUALS id-type
+    """
+
+
+@cpp98
+def p_type_parameter_ellipsis(parser, p):
+    # type: (CppParser, YaccProduction) -> None
+    """
+        type-parameter : KW_CLASS ELLIPSIS IDENTIFIER?
+                       | KW_TYPENAME ELLIPSIS IDENTIFIER?
+                       | KW_TEMPLATE LANGLE template-parameter-list RANGLE KW_CLASS ELLIPSIS IDENTIFIER?
     """
 
 

@@ -17,7 +17,7 @@ new-initializer:
       braced-init-list     C++0x
 """
 
-from ...cpp_parser import cpp98
+from ...cpp_parser import cpp98, cpp11
 from be_typing import TYPE_CHECKING
 
 
@@ -69,7 +69,14 @@ def p_new_initializer(parser, p):
     # type: (CppParser, YaccProduction) -> None
     """
         new-initializer : LPAREN expression-list? RPAREN
-                        | braced-init-list
+    """
+
+
+@cpp11
+def p_new_initializer_braced_init_list(parser, p):
+    # type: (CppParser, YaccProduction) -> None
+    """
+        new-initializer : braced-init-list
     """
 
 

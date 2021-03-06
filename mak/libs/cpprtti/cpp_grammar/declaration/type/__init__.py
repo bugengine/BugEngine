@@ -33,6 +33,14 @@ def p_type_specifier(parser, p):
 
 
 @cpp98
+def p_type_specifier(parser, p):
+    # type: (CppParser, YaccProduction) -> None
+    """
+        type-specifier : trailing-type-specifier
+    """
+
+
+@cpp98
 def p_trailing_type_specifier(parser, p):
     # type: (CppParser, YaccProduction) -> None
     """

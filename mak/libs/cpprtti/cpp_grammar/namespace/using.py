@@ -14,7 +14,7 @@ from be_typing import TYPE_CHECKING
 def p_using_declaration(parser, p):
     # type: (CppParser, YaccProduction) -> None
     """
-        using-declaration : attribute-specifier-seq? decl-specifier-seq? KW_USING KW_TYPENAME? id-expression SEMI
+        using-declaration : attribute-specifier-seq? decl-specifier-seq? KW_USING KW_TYPENAME? id-type SEMI
     """
     # TODO: attribute-specifier-seq? not allowed here
     # TODO: decl none
@@ -24,7 +24,7 @@ def p_using_declaration(parser, p):
 def p_using_directive(parser, p):
     # type: (CppParser, YaccProduction) -> None
     """
-        using-directive : attribute-specifier-seq? decl-specifier-seq? KW_USING KW_NAMESPACE id-expression SEMI
+        using-directive : attribute-specifier-seq? decl-specifier-seq? KW_USING KW_NAMESPACE id-type SEMI
     """
     # TODO: decl none
 

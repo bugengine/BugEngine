@@ -23,7 +23,7 @@ def p_namespace_alias(parser, p):
 def p_namespace_alias_definition(parser, p):
     # type: (CppParser, YaccProduction) -> None
     """
-        namespace-alias-definition : attribute-specifier-seq? decl-specifier-seq? KW_NAMESPACE IDENTIFIER OP_EQUALS id-expression SEMI
+        namespace-alias-definition : attribute-specifier-seq? decl-specifier-seq? KW_NAMESPACE IDENTIFIER OP_EQUALS id-type SEMI
     """
     # TODO: attributes empty
     # TODO: decl specifier none
@@ -33,7 +33,7 @@ def p_namespace_alias_definition(parser, p):
 def p_qualified_namespace_specifier(parser, p):
     # type: (CppParser, YaccProduction) -> None
     """
-        qualified-namespace-specifier : id-expression
+        qualified-namespace-specifier : id-type
     """
 
 

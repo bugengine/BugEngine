@@ -50,7 +50,7 @@ def p_class_specifier(parser, p):
 def p_class_head(parser, p):
     # type: (CppParser, YaccProduction) -> None
     """
-        class-head : class-key attribute-specifier-seq? id-expression class-virt-specifier-seq base-clause? LBRACE
+        class-head : class-key attribute-specifier-seq? id-type class-virt-specifier-seq base-clause? LBRACE
                    | class-key attribute-specifier-seq? base-clause? LBRACE
     """
     pass

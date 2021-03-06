@@ -38,7 +38,7 @@ def p_postfix_expression(parser, p):
     # type: (CppParser, YaccProduction) -> None
     """
         postfix-expression : primary-expression
-                           | postfix-expression RBRACKET expression RBRACKET
+                           | postfix-expression LBRACKET expression RBRACKET
                            | postfix-expression LPAREN expression-list? RPAREN
                            | builtin-type-specifier LPAREN expression-list? RPAREN
                            | typename-specifier LPAREN expression-list? RPAREN
@@ -59,7 +59,7 @@ def p_postfix_expression(parser, p):
 def p_postfix_expression_cpp11(parser, p):
     # type: (CppParser, YaccProduction) -> None
     """
-        postfix-expression : postfix-expression RBRACKET braced-init-list? RBRACKET
+        postfix-expression : postfix-expression LBRACKET braced-init-list? RBRACKET
                            | simple-type-specifier braced-init-list
                            | typename-specifier braced-init-list
     """
@@ -71,6 +71,7 @@ def p_postfix_expression_disabled(parser, p):
     """
         postfix-expression : postfix-expression PERIOD pseudo-destructor-name
                            | postfix-expression OP_ARROW pseudo-destructor-name
+                           | simple-type-specifier LPAREN expression-list? RPAREN
     """
     # disabled, as KW_TEMPLATE? id-expression covers pseudo-destructor-name
     # type-id covers constructors/function calls/etc

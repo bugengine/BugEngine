@@ -34,7 +34,7 @@ from be_typing import TYPE_CHECKING
 def p_simple_type_specifier(parser, p):
     # type: (CppParser, YaccProduction) -> None
     """
-        simple-type-specifier : id-expression
+        simple-type-specifier : id-type
                               | builtin-type-specifier
     """
 

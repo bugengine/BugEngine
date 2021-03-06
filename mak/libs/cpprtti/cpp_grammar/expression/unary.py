@@ -35,16 +35,8 @@ def p_unary_expression(parser, p):
                          | KW_SIZEOF unary-expression
                          | new-expression
                          | delete-expression
+                         | KW_SIZEOF LPAREN type-id RPAREN
     """
-
-
-@disabled
-def p_unary_expression_disabled(parser, p):
-    # type: (CppParser, YaccProduction) -> None
-    """
-        unary-expression : KW_SIZEOF LPAREN type-id RPAREN
-    """
-    # disabled, as KW_SIZEOF unary-expression can expand to LPAREN type-id RPAREN
 
 
 @cpp11

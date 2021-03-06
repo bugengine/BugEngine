@@ -12,7 +12,7 @@ from be_typing import TYPE_CHECKING
 def p_typename_specifier(parser, p):
     # type: (CppParser, YaccProduction) -> None
     """
-        typename-specifier : KW_TYPENAME id-expression
+        typename-specifier : KW_TYPENAME id-type
     """
 
 

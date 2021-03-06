@@ -26,6 +26,14 @@ def p_parameter_declaration_clause(parser, p):
 
 
 @cpp98
+def p_parameter_declaration_clause(parser, p):
+    # type: (CppParser, YaccProduction) -> None
+    """
+        parameter-declaration-clause : ELLIPSIS?
+    """
+
+
+@cpp98
 def p_parameter_declaration_list(parser, p):
     # type: (CppParser, YaccProduction) -> None
     """

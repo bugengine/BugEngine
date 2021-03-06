@@ -65,8 +65,17 @@ def p_initializer_clause_braced_init_list(parser, p):
 def p_initializer_list(parser, p):
     # type: (CppParser, YaccProduction) -> None
     """
-        initializer-list : initializer-clause ELLIPSIS?
-                         | initializer-list COMMA initializer-clause ELLIPSIS?
+        initializer-list : initializer-clause
+                         | initializer-list COMMA initializer-clause
+    """
+
+
+@cpp11
+def p_initializer_list_ellipsis(parser, p):
+    # type: (CppParser, YaccProduction) -> None
+    """
+        initializer-list : initializer-clause ELLIPSIS
+                         | initializer-list COMMA initializer-clause ELLIPSIS
     """
 
 
