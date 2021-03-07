@@ -91,7 +91,7 @@ bool Object::resolveInternal(DbContext& context)
         else
         {
             u32 argumentThis  = method.second ? 1 : 0;
-            u32 argumentCount = m_parameters.size() + argumentThis;
+            u32 argumentCount = be_checked_numcast< u32 >(m_parameters.size()) + argumentThis;
             m_arguments.resize(argumentCount);
             if(method.second)
             {
@@ -104,8 +104,9 @@ bool Object::resolveInternal(DbContext& context)
             }
 
             ArgInfo* arguments = m_arguments.empty() ? 0 : &m_arguments.front();
-            CallInfo callInfo  = RTTI::resolve(method.first, arguments, argumentThis,
-                                              arguments + argumentThis, m_parameters.size());
+            CallInfo callInfo
+                = RTTI::resolve(method.first, arguments, argumentThis, arguments + argumentThis,
+                                be_checked_numcast< u32 >(m_parameters.size()));
             if(callInfo.overload)
             {
                 RTTI::Value policyTag = callInfo.overload->getTag(be_class< Policy >());
@@ -139,7 +140,7 @@ void Object::doEval(const Type& expectedType, Value& result) const
 {
     be_forceuse(expectedType);
     const ArgInfo* arguments = m_arguments.empty() ? 0 : &m_arguments.front();
-    result                   = m_introspectionHint->call(arguments, m_arguments.size());
+    result = m_introspectionHint->call(arguments, be_checked_numcast< u32 >(m_arguments.size()));
 }
 
 Type Object::getType() const

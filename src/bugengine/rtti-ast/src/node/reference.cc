@@ -73,9 +73,9 @@ bool Reference::doResolve(DbContext& context)
                     {
                         n = properties.pop_front();
                         bool  found;
-                        Type  t = v.type();
-                        Value v = t.metaclass->get(m_value, n, found);
-                        m_value.swap(v);
+                        Type  t         = v.type();
+                        Value propValue = t.metaclass->get(m_value, n, found);
+                        m_value.swap(propValue);
                         if(!found)
                         {
                             context.error(
