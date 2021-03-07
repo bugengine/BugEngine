@@ -6,8 +6,9 @@
 
 #include <cerrno>
 #include <cstdio>
-#include <sys/sysctl.h>
 #include <sys/types.h>
+
+#include <sys/sysctl.h>
 
 namespace BugEngine {
 
