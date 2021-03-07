@@ -82,7 +82,7 @@ CommandLineSettingsProvider::~CommandLineSettingsProvider()
 {
 }
 
-void CommandLineSettingsProvider::log(const RTTI::AST::Message& message) const override
+void CommandLineSettingsProvider::log(const RTTI::AST::Message& message) const
 {
     Logger::root()->log(message.severity, "<command line>", 0, message.message);
 }
