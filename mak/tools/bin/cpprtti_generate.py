@@ -3,6 +3,6 @@ import sys
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(sys.argv[0]))), 'libs'))
 
 if __name__ == '__main__':
-    import cpprtti
-    argument_context = cpprtti.init_arguments()
-    cpprtti.run(argument_context)
+    import cxx
+    argument_context = cxx.init_arguments()
+    cxx.run(argument_context)
