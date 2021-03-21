@@ -47,7 +47,7 @@ from be_typing import TYPE_CHECKING
 def p_init_declarator_list(parser, p):
     # type: (CppParser, YaccProduction) -> None
     """
-        init-declarator-list : init-declarator
+        init-declarator-list : init-declarator-fix
                              | init-declarator-list COMMA init-declarator
     """
 
@@ -57,6 +57,30 @@ def p_init_declarator(parser, p):
     # type: (CppParser, YaccProduction) -> None
     """
         init-declarator : declarator initializer?
+    """
+
+
+@cpp98
+def p_init_declarator_fix(parser, p):
+    # type: (CppParser, YaccProduction) -> None
+    """
+        init-declarator-fix : declarator-fix initializer?
+    """
+
+
+@cpp98
+def p_init_declarator(parser, p):
+    # type: (CppParser, YaccProduction) -> None
+    """
+        init-declarator : declarator 
+    """
+
+
+@cpp98
+def p_init_declarator_fix(parser, p):
+    # type: (CppParser, YaccProduction) -> None
+    """
+        init-declarator-fix : declarator-fix
     """
 
 
@@ -77,11 +101,28 @@ def p_declarator_trailing(parser, p):
 
 
 @cpp98
+def p_declarator_fix(parser, p):
+    # type: (CppParser, YaccProduction) -> None
+    """
+        declarator-fix : ptr-declarator-fix
+    """
+
+
+@cpp98
 def p_ptr_declarator(parser, p):
     # type: (CppParser, YaccProduction) -> None
     """
         ptr-declarator : noptr-declarator
                        | ptr-operator ptr-declarator
+    """
+
+
+@cpp98
+def p_ptr_declarator_fix(parser, p):
+    # type: (CppParser, YaccProduction) -> None
+    """
+        ptr-declarator-fix : noptr-declarator-fix
+                           | ptr-operator ptr-declarator
     """
 
 
@@ -100,11 +141,27 @@ def p_noptr_declarator(parser, p):
 def p_noptr_declarator(parser, p):
     # type: (CppParser, YaccProduction) -> None
     """
-        noptr-declarator : declarator-id attribute-specifier-seq?
+        noptr-declarator : id-expression attribute-specifier-seq?
+                         | id-type attribute-specifier-seq?
                          | noptr-declarator parameters-and-qualifiers
                          | noptr-declarator LBRACKET  RBRACKET attribute-specifier-seq?
-                         | LPAREN ptr-declarator RPAREN
+                         | empty LPAREN ptr-declarator RPAREN
     """
+
+
+@cpp98
+def p_noptr_declarator_fix(parser, p):
+    # type: (CppParser, YaccProduction) -> None
+    """
+        noptr-declarator-fix : id-expression attribute-specifier-seq?
+                             | id-type attribute-specifier-seq?
+                             | empty
+                             | noptr-declarator-fix parameters-and-qualifiers
+                             | noptr-declarator-fix LBRACKET  RBRACKET attribute-specifier-seq?
+                             | noptr-declarator-fix LPAREN ptr-declarator RPAREN
+    """
+    # todo:     noptr-declarator-fix LPAREN ptr-declarator RPAREN
+    # should be                      LPAREN ptr-declarator RPAREN
 
 
 @cpp98
@@ -127,10 +184,18 @@ def p_trailing_return_type(parser, p):
 def p_ptr_operator(parser, p):
     # type: (CppParser, YaccProduction) -> None
     """
-        ptr-operator : OP_TIMES attribute-specifier-seq? cv-qualifier-seq?
-                     | OP_AND attribute-specifier-seq? cv-qualifier-seq?
-                     | OP_SCOPE nested-name-specifier OP_TIMES attribute-specifier-seq? cv-qualifier-seq? %prec SCOPE_REDUCTION
-                     | nested-name-specifier OP_TIMES attribute-specifier-seq? cv-qualifier-seq?
+        ptr-operator : OP_TIMES attribute-specifier-seq cv-qualifier-seq
+                     | OP_TIMES attribute-specifier-seq
+                     | OP_TIMES cv-qualifier-seq
+                     | OP_TIMES
+                     | OP_AND attribute-specifier-seq                                                       %prec OP_SCOPE
+                     | OP_AND                                                                               %prec EMPTY
+                     | OP_SCOPE nested-name-specifier OP_TIMES attribute-specifier-seq? cv-qualifier-seq
+                     | OP_SCOPE nested-name-specifier OP_TIMES attribute-specifier-seq                      %prec OP_SCOPE
+                     | OP_SCOPE nested-name-specifier OP_TIMES                                              %prec EMPTY
+                     | nested-name-specifier OP_TIMES attribute-specifier-seq? cv-qualifier-seq
+                     | nested-name-specifier OP_TIMES attribute-specifier-seq                               %prec OP_SCOPE
+                     | nested-name-specifier OP_TIMES                                                       %prec SCOPE_REDUCTION
     """
 
 
@@ -138,7 +203,8 @@ def p_ptr_operator(parser, p):
 def p_ptr_operator_rvalue_ref(parser, p):
     # type: (CppParser, YaccProduction) -> None
     """
-        ptr-operator : OP_LAND attribute-specifier-seq? cv-qualifier-seq?
+        ptr-operator : OP_LAND attribute-specifier-seq                                                      %prec OP_SCOPE
+                     | OP_LAND                                                                              %prec SCOPE_REDUCTION
     """
 
 
@@ -182,6 +248,7 @@ def p_declarator_id(parser, p):
     # type: (CppParser, YaccProduction) -> None
     """
         declarator-id : id-expression
+                      | id-type
     """
 
 

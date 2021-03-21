@@ -67,6 +67,14 @@ def p_noexcept_specification(parser, p):
     """
 
 
+@cpp11
+def p_noexcept_specification(parser, p):
+    # type: (CppParser, YaccProduction) -> None
+    """
+        noexcept-specification : KW_NOEXCEPT
+    """
+
+
 if TYPE_CHECKING:
     from ply.yacc import YaccProduction
     from ...cpp_parser import CppParser

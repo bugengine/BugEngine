@@ -19,7 +19,7 @@ access-specifier:
       public
 """
 
-from ...cpp_parser import cpp98, cpp11
+from ...cpp_parser import cpp98, cpp11, disabled
 from be_typing import TYPE_CHECKING
 
 
@@ -67,12 +67,13 @@ def p_class_or_decltype(parser, p):
     """
 
 
-@cpp11
+@disabled
 def p_class_or_decltype_cpp11(parser, p):
     # type: (CppParser, YaccProduction) -> None
     """
         class-or-decltype : decltype-specifier
     """
+    # TODO: reinstate
 
 
 @cpp98

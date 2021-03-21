@@ -55,7 +55,8 @@ def p_trailing_type_specifier(parser, p):
 def p_type_specifier_seq(parser, p):
     # type: (CppParser, YaccProduction) -> None
     """
-        type-specifier-seq : type-specifier attribute-specifier-seq?
+        type-specifier-seq : type-specifier attribute-specifier-seq     %prec OP_SCOPE
+                           | type-specifier                             %prec SCOPE_REDUCTION
                            | type-specifier type-specifier-seq
     """
 

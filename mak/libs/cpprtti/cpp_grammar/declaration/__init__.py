@@ -118,7 +118,8 @@ def p_alias_declaration(parser, p):
 def p_simple_declaration(parser, p):
     # type: (CppParser, YaccProduction) -> None
     """
-        simple-declaration : attribute-specifier-seq? decl-specifier-seq? init-declarator-list? SEMI
+        simple-declaration : attribute-specifier-seq? decl-specifier-seq init-declarator-list SEMI      %prec OP_SCOPE
+                           | attribute-specifier-seq? empty init-declarator SEMI                        %prec SCOPE_REDUCTION
     """
 
 
@@ -128,6 +129,7 @@ def p_empty_declaration(parser, p):
     """
         empty-declaration : SEMI
     """
+    # covered by empty init declarator
 
 
 @cpp11

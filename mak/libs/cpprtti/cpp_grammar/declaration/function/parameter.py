@@ -12,7 +12,7 @@ parameter-declaration:
   	attribute-specifier-seqopt decl-specifier-seq abstract-declaratoropt = initializer-clause     C++0x
 """
 
-from ....cpp_parser import cpp98
+from ....cpp_parser import cpp98, cpp11
 from be_typing import TYPE_CHECKING
 
 
@@ -20,16 +20,17 @@ from be_typing import TYPE_CHECKING
 def p_parameter_declaration_clause(parser, p):
     # type: (CppParser, YaccProduction) -> None
     """
-        parameter-declaration-clause : parameter-declaration-list? ELLIPSIS?
-                                     | parameter-declaration-list COMMA ELLIPSIS
+        parameter-declaration-clause : parameter-declaration-list COMMA ELLIPSIS
+                                     | parameter-declaration-list
+                                     | ELLIPSIS?
     """
 
 
-@cpp98
-def p_parameter_declaration_clause(parser, p):
+@cpp11
+def p_parameter_declaration_clause_texpand(parser, p):
     # type: (CppParser, YaccProduction) -> None
     """
-        parameter-declaration-clause : ELLIPSIS?
+        parameter-declaration-clause : parameter-declaration-list ELLIPSIS
     """
 
 
@@ -50,6 +51,15 @@ def p_parameter_declaration(parser, p):
                               | attribute-specifier-seq? decl-specifier-seq declarator OP_EQUALS initializer-clause
                               | attribute-specifier-seq? decl-specifier-seq abstract-declarator?
                               | attribute-specifier-seq? decl-specifier-seq abstract-declarator? OP_EQUALS initializer-clause
+    """
+
+
+@cpp98
+def p_parameter_declaration(parser, p):
+    # type: (CppParser, YaccProduction) -> None
+    """
+        parameter-declaration : attribute-specifier-seq? decl-specifier-seq declarator
+                              | attribute-specifier-seq? decl-specifier-seq abstract-declarator?
     """
 
 

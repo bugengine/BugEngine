@@ -75,6 +75,14 @@ def p_alignment_specifier(parser, p):
 
 
 @cpp11
+def p_alignment_specifier(parser, p):
+    # type: (CppParser, YaccProduction) -> None
+    """
+        alignment-specifier : KW_ALIGNAS LPAREN type-id ELLIPSIS? RPAREN
+    """
+
+
+@cpp11
 def p_attribute_list(parser, p):
     # type: (CppParser, YaccProduction) -> None
     """

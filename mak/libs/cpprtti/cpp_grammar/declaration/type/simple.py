@@ -66,6 +66,14 @@ def p_simple_type_specifier_cpp11(parser, p):
     """
 
 
+@cpp11
+def p_simple_type_specifier_cpp11(parser, p):
+    # type: (CppParser, YaccProduction) -> None
+    """
+        simple-type-specifier : KW_AUTO
+    """
+
+
 @disabled
 def p_type_name(parser, p):
     # type: (CppParser, YaccProduction) -> None

@@ -31,10 +31,13 @@ class CppParser(object):
     Lexer = cpp_lexer.CppLexer
 
     precedence = (
+        ('nonassoc', 'EMPTY'),
+        ('left', 'SCOPE_REDUCTION'),
         ('left', 'ARRAY_BRACKET'),
         ('left', 'OPERATOR_BRACKET'),
-        ('left', 'SCOPE_REDUCTION'),
+        ('left', 'IDENTIFIER'),
         ('left', 'OP_SCOPE'),
+        ('left', 'DECL_SPEC_GREEDY'),
     )
 
     def __init__(self, tmp_dir):
@@ -42,7 +45,7 @@ class CppParser(object):
         self.tokens = self.__class__.Lexer.tokens
         self.parser = yacc.yacc(
             module=self,
-            start='type-id',
+            start='simple-declaration',
             picklefile=os.path.join(tmp_dir, 'cpprtti_grammar_%s.pickle' % self.__class__.__name__[-2:]),
             debugfile=os.path.join(tmp_dir, 'cpprtti_grammar_%s.debug' % self.__class__.__name__[-2:]),
             debug=True

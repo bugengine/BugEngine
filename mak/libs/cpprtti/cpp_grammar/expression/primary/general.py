@@ -60,14 +60,16 @@ def p_id_type(parser, p):
         id-type : unqualified-type-id
                 | qualified-type-id
     """
+    p[0] = p[1]
 
 
 @cpp98
 def p_unqualified_type_id(parser, p):
     # type: (CppParser, YaccProduction) -> None
     """
-        unqualified-type-id : IDENTIFIER template-spec?
+        unqualified-type-id : IDENTIFIER template-spec?                                         %prec SCOPE_REDUCTION
     """
+    p[0] = p[1]
 
 
 @cpp98
@@ -75,7 +77,7 @@ def p_qualified_type_id(parser, p):
     # type: (CppParser, YaccProduction) -> None
     """
         qualified-type-id : nested-name-specifier KW_TEMPLATE? unqualified-type-id
-                          | OP_SCOPE nested-name-specifier KW_TEMPLATE? unqualified-type-id     %prec SCOPE_REDUCTION
+                          | OP_SCOPE nested-name-specifier KW_TEMPLATE? unqualified-type-id
                           | OP_SCOPE IDENTIFIER template-spec?                                  %prec SCOPE_REDUCTION
     """
 
@@ -86,8 +88,8 @@ def p_id_expression(parser, p):
     """
         id-expression : unqualified-expression-id
                       | qualified-expression-id
-                      | id-type
     """
+    p[0] = p[1]
 
 
 @cpp98
@@ -109,13 +111,21 @@ def p_unqualified_expression_id_cpp11(parser, p):
     """
 
 
+@cpp11
+def p_unqualified_expression_id_cpp11(parser, p):
+    # type: (CppParser, YaccProduction) -> None
+    """
+        unqualified-expression-id : literal-operator-id template-spec?
+    """
+
+
 @cpp98
 def p_qualified_expression_id(parser, p):
     # type: (CppParser, YaccProduction) -> None
     """
         qualified-expression-id : nested-name-specifier KW_TEMPLATE? unqualified-expression-id
-                                | OP_SCOPE nested-name-specifier KW_TEMPLATE? unqualified-expression-id   %prec SCOPE_REDUCTION
-                                | OP_SCOPE operator-function-id template-spec?                            %prec SCOPE_REDUCTION
+                                | OP_SCOPE nested-name-specifier KW_TEMPLATE? unqualified-expression-id
+                                | OP_SCOPE operator-function-id template-spec?
     """
 
 
@@ -123,7 +133,7 @@ def p_qualified_expression_id(parser, p):
 def p_qualified_expression_id_cpp11(parser, p):
     # type: (CppParser, YaccProduction) -> None
     """
-        qualified-expression-id : OP_SCOPE literal-operator-id template-spec?                  %prec SCOPE_REDUCTION
+        qualified-expression-id : OP_SCOPE literal-operator-id template-spec?
     """
 
 
@@ -136,12 +146,13 @@ def p_nested_name_specifier(parser, p):
     """
 
 
-@cpp11
+@disabled
 def p_nested_name_specifier_decltype(parser, p):
     # type: (CppParser, YaccProduction) -> None
     """
         nested-name-specifier : decltype-specifier OP_SCOPE
     """
+    # TODO: cpp11
 
 
 @cpp98

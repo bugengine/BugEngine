@@ -51,8 +51,9 @@ def p_decl_specifier_cpp20(parser, p):
 def p_decl_specifier_seq(parser, p):
     # type: (CppParser, YaccProduction) -> None
     """
-        decl-specifier-seq : decl-specifier attribute-specifier-seq?
-                           | decl-specifier decl-specifier-seq
+        decl-specifier-seq : decl-specifier attribute-specifier-seq     %prec DECL_SPEC_GREEDY
+                           | decl-specifier                             %prec SCOPE_REDUCTION
+                           | decl-specifier decl-specifier-seq          %prec DECL_SPEC_GREEDY
     """
 
 

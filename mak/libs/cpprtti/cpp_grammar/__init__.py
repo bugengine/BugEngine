@@ -17,7 +17,7 @@ from be_typing import TYPE_CHECKING
 def p_empty(parser, p):
     # type: (CppParser, YaccProduction) -> None
     """
-        empty :
+        empty : %prec EMPTY
     """
     p[0] = None
 
