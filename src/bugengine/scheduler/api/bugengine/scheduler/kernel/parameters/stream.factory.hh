@@ -7,10 +7,10 @@
 #include <bugengine/scheduler/stdafx.h>
 #include <bugengine/scheduler/kernel/parameters/iparameter.script.hh>
 
-#include <bugengine/rtti/classinfo.script.hh>
-#include <bugengine/rtti/engine/methodinfo.script.hh>
-#include <bugengine/rtti/engine/objectinfo.script.hh>
-#include <bugengine/rtti/typeinfo.hh>
+#include <bugengine/meta/classinfo.script.hh>
+#include <bugengine/meta/engine/methodinfo.script.hh>
+#include <bugengine/meta/engine/objectinfo.script.hh>
+#include <bugengine/meta/typeinfo.hh>
 
 namespace BugEngine {
 
@@ -20,7 +20,7 @@ template < typename T >
 class Stream;
 }  // namespace KernelScheduler
 
-namespace RTTI {
+namespace Meta {
 
 template < typename T >
 struct ClassID< KernelScheduler::Stream< T > >
@@ -31,18 +31,18 @@ struct ClassID< KernelScheduler::Stream< T > >
         be_forceuse(parameters);
         return Value(ref< KernelScheduler::Stream< T > >::create(Arena::task()));
     }
-    static const RTTI::Method::Overload s_ctrOverload;
-    static const RTTI::Method           s_ctr;
-    static RTTI::ObjectInfo             s_productClass;
+    static const Meta::Method::Overload s_ctrOverload;
+    static const Meta::Method           s_ctr;
+    static Meta::ObjectInfo             s_productClass;
     static BE_EXPORT KernelScheduler::IParameter::ParameterRegistration s_registration;
 
-    static BE_EXPORT raw< const RTTI::Class > klass()
+    static BE_EXPORT raw< const Meta::Class > klass()
     {
-        static const RTTI::Class s_class
+        static const Meta::Class s_class
             = {istring(minitl::format< 256u >("Stream<%s>") | be_class< T >()->name),
                u32(sizeof(KernelScheduler::Stream< T >)),
                0,
-               RTTI::ClassType_Object,
+               Meta::ClassType_Object,
                {0},
                be_class< KernelScheduler::IParameter >(),
                {&s_productClass},
@@ -53,22 +53,22 @@ struct ClassID< KernelScheduler::Stream< T > >
                {0},
                0,
                0};
-        raw< const RTTI::Class > result = {&s_class};
+        raw< const Meta::Class > result = {&s_class};
         (void)s_registration;
         return result;
     }
 };
 
 template < typename T >
-const RTTI::Method::Overload ClassID< KernelScheduler::Stream< T > >::s_ctrOverload
+const Meta::Method::Overload ClassID< KernelScheduler::Stream< T > >::s_ctrOverload
     = {{0}, {0, 0}, be_type< ref< KernelScheduler::Stream< T > > >(), false, {0, 0}, &construct};
 
 template < typename T >
-const RTTI::Method ClassID< KernelScheduler::Stream< T > >::s_ctr
-    = {RTTI::Class::nameConstructor(), {1, &s_ctrOverload}, {&s_ctr}};
+const Meta::Method ClassID< KernelScheduler::Stream< T > >::s_ctr
+    = {Meta::Class::nameConstructor(), {1, &s_ctrOverload}, {&s_ctr}};
 
 template < typename T >
-RTTI::ObjectInfo ClassID< KernelScheduler::Stream< T > >::s_productClass
+Meta::ObjectInfo ClassID< KernelScheduler::Stream< T > >::s_productClass
     = {{0},
        {0},
        KernelScheduler::IParameter::getProductTypePropertyName(),
@@ -78,7 +78,7 @@ template < typename T >
 KernelScheduler::IParameter::ParameterRegistration
     ClassID< KernelScheduler::Stream< T > >::s_registration(klass());
 
-}  // namespace RTTI
+}  // namespace Meta
 }  // namespace BugEngine
 
 /**************************************************************************************************/

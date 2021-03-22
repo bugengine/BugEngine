@@ -32,7 +32,7 @@ extern "C" int pluginGet(lua_State* state)
 
     Plugin::Plugin< void >* userdata = (Plugin::Plugin< void >*)lua_touserdata(state, 1);
     const char*             name     = lua_tostring(state, 2);
-    RTTI::Value             v(userdata->pluginNamespace());
+    Meta::Value             v(userdata->pluginNamespace());
     Context::push(state, v[name]);
     return 1;
 }

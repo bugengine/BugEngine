@@ -8,7 +8,7 @@
 
 namespace BugEngine { namespace Lua {
 
-bool createValue(lua_State* state, int index, const RTTI::Type& type, void* buffer);
+bool createValue(lua_State* state, int index, const Meta::Type& type, void* buffer);
 
 }}  // namespace BugEngine::Lua
 

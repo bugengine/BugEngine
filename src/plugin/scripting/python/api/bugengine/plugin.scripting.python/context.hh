@@ -6,11 +6,11 @@
 /**************************************************************************************************/
 #include <bugengine/plugin.scripting.python/stdafx.h>
 #include <bugengine/filesystem/file.script.hh>
+#include <bugengine/meta/classinfo.script.hh>
+#include <bugengine/meta/value.hh>
 #include <bugengine/plugin.scripting.python/pythonscript.script.hh>
 #include <bugengine/plugin.scripting.pythonlib/pythonlib.hh>
 #include <bugengine/plugin/plugin.hh>
-#include <bugengine/rtti/classinfo.script.hh>
-#include <bugengine/rtti/value.hh>
 #include <bugengine/scriptengine.hh>
 
 namespace BugEngine { namespace Python {

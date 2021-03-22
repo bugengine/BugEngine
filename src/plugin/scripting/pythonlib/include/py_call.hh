@@ -10,7 +10,7 @@
 
 namespace BugEngine { namespace Python {
 
-PyObject* call(raw< const RTTI::Method > method, PyObject* self, PyObject* args, PyObject* kwargs);
+PyObject* call(raw< const Meta::Method > method, PyObject* self, PyObject* args, PyObject* kwargs);
 
 }}  // namespace BugEngine::Python
 

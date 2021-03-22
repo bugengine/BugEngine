@@ -36,23 +36,23 @@ def build_bugengine(bld):
     bld.library('bugengine.minitl', bld.platforms + ['bugengine.mak', 'bugengine.kernel'])
     bld.library('bugengine.core', ['bugengine.minitl', 'bugengine.kernel'])
     bld.library('bugengine.network', ['bugengine.core'])
-    bld.library('bugengine.rtti', ['bugengine.core', 'bugengine.network'], ['bugengine.3rdparty.system.zlib'])
-    bld.library('bugengine.filesystem', ['bugengine.core', 'bugengine.rtti'], ['bugengine.3rdparty.system.minizip'])
-    bld.library('bugengine.rtti-ast', ['bugengine.core', 'bugengine.rtti', 'bugengine.filesystem'])
+    bld.library('bugengine.meta', ['bugengine.core', 'bugengine.network'], ['bugengine.3rdparty.system.zlib'])
+    bld.library('bugengine.filesystem', ['bugengine.core', 'bugengine.meta'], ['bugengine.3rdparty.system.minizip'])
+    bld.library('bugengine.introspect', ['bugengine.core', 'bugengine.meta', 'bugengine.filesystem'])
     bld.library(
-        'bugengine.rtti-parse', ['bugengine.core', 'bugengine.rtti', 'bugengine.filesystem', 'bugengine.rtti-ast']
+        'bugengine.reflection', ['bugengine.core', 'bugengine.meta', 'bugengine.filesystem', 'bugengine.introspect']
     )
-    bld.library('bugengine.settings', ['bugengine.rtti', 'bugengine.rtti-parse'])
-    bld.library('bugengine.resource', ['bugengine.core', 'bugengine.rtti', 'bugengine.filesystem'])
-    bld.library('bugengine.scheduler', ['bugengine.core', 'bugengine.rtti', 'bugengine.resource', 'bugengine.settings'])
-    bld.library('bugengine.world', ['bugengine.core', 'bugengine.rtti', 'bugengine.resource', 'bugengine.scheduler'])
+    bld.library('bugengine.settings', ['bugengine.meta', 'bugengine.reflection'])
+    bld.library('bugengine.resource', ['bugengine.core', 'bugengine.meta', 'bugengine.filesystem'])
+    bld.library('bugengine.scheduler', ['bugengine.core', 'bugengine.meta', 'bugengine.resource', 'bugengine.settings'])
+    bld.library('bugengine.world', ['bugengine.core', 'bugengine.meta', 'bugengine.resource', 'bugengine.scheduler'])
     bld.library(
         'bugengine.plugin',
-        ['bugengine.core', 'bugengine.rtti', 'bugengine.filesystem', 'bugengine.resource', 'bugengine.scheduler']
+        ['bugengine.core', 'bugengine.meta', 'bugengine.filesystem', 'bugengine.resource', 'bugengine.scheduler']
     )
     bld.shared_library(
         'bugengine', [
-            'bugengine.core', 'bugengine.rtti', 'bugengine.rtti-ast', 'bugengine.rtti-parse', 'bugengine.settings',
+            'bugengine.core', 'bugengine.meta', 'bugengine.introspect', 'bugengine.reflection', 'bugengine.settings',
             'bugengine.scheduler', 'bugengine.filesystem', 'bugengine.world', 'bugengine.plugin'
         ],
         path=bld.path.find_node('bugengine/bugengine')

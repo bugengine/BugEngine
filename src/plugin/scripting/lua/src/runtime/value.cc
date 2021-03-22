@@ -2,22 +2,22 @@
  see LICENSE for detail */
 
 #include <stdafx.h>
-#include <bugengine/rtti/engine/methodinfo.script.hh>
-#include <bugengine/rtti/engine/objectinfo.script.hh>
-#include <bugengine/rtti/engine/propertyinfo.script.hh>
-#include <bugengine/rtti/engine/scriptingapi.hh>
+#include <bugengine/meta/engine/methodinfo.script.hh>
+#include <bugengine/meta/engine/objectinfo.script.hh>
+#include <bugengine/meta/engine/propertyinfo.script.hh>
+#include <bugengine/meta/engine/scriptingapi.hh>
 #include <context.hh>
 #include <runtime/value.hh>
 
 namespace BugEngine { namespace Lua {
 
-static bool convertNilToValue(lua_State* state, int index, const RTTI::Type& type, void* buffer)
+static bool convertNilToValue(lua_State* state, int index, const Meta::Type& type, void* buffer)
 {
     be_forceuse(state);
     be_forceuse(index);
-    if(type.indirection >= RTTI::Type::RawPtr)
+    if(type.indirection >= Meta::Type::RawPtr)
     {
-        RTTI::Value* value = new(buffer) RTTI::Value(type, RTTI::Value::Reserve);
+        Meta::Value* value = new(buffer) Meta::Value(type, Meta::Value::Reserve);
         *static_cast< void** >(value->memory()) = 0;
         return true;
     }
@@ -27,26 +27,26 @@ static bool convertNilToValue(lua_State* state, int index, const RTTI::Type& typ
     }
 }
 
-static bool convertStringToValue(lua_State* state, int index, const RTTI::Type& type, void* buffer)
+static bool convertStringToValue(lua_State* state, int index, const Meta::Type& type, void* buffer)
 {
-    if(type.metaclass->type() == RTTI::ClassType_String)
+    if(type.metaclass->type() == Meta::ClassType_String)
     {
         switch(type.metaclass->index())
         {
-        case RTTI::ClassIndex_istring:
-            new(buffer) RTTI::Value(istring(lua_tostring(state, index)));
+        case Meta::ClassIndex_istring:
+            new(buffer) Meta::Value(istring(lua_tostring(state, index)));
             return true;
-        case RTTI::ClassIndex_inamespace:
-            new(buffer) RTTI::Value(inamespace(lua_tostring(state, index)));
+        case Meta::ClassIndex_inamespace:
+            new(buffer) Meta::Value(inamespace(lua_tostring(state, index)));
             return true;
-        case RTTI::ClassIndex_ifilename:
-            new(buffer) RTTI::Value(ifilename(lua_tostring(state, index)));
+        case Meta::ClassIndex_ifilename:
+            new(buffer) Meta::Value(ifilename(lua_tostring(state, index)));
             return true;
-        case RTTI::ClassIndex_ipath:
-            new(buffer) RTTI::Value(ipath(lua_tostring(state, index)));
+        case Meta::ClassIndex_ipath:
+            new(buffer) Meta::Value(ipath(lua_tostring(state, index)));
             return true;
-        case RTTI::ClassIndex_text:
-            new(buffer) RTTI::Value(text(lua_tostring(state, index)));
+        case Meta::ClassIndex_text:
+            new(buffer) Meta::Value(text(lua_tostring(state, index)));
             return true;
         default: be_notreached(); return false;
         }
@@ -57,48 +57,48 @@ static bool convertStringToValue(lua_State* state, int index, const RTTI::Type& 
     }
 }
 
-static bool convertBooleanToValue(lua_State* state, int index, const RTTI::Type& type, void* buffer)
+static bool convertBooleanToValue(lua_State* state, int index, const Meta::Type& type, void* buffer)
 {
     if(type.metaclass == be_type< bool >().metaclass)
     {
-        new(buffer) RTTI::Value(lua_toboolean(state, index) ? true : false);
+        new(buffer) Meta::Value(lua_toboolean(state, index) ? true : false);
         return true;
     }
-    else if(type.metaclass->type() == RTTI::ClassType_Number)
+    else if(type.metaclass->type() == Meta::ClassType_Number)
     {
         be_warning("%s: - dubious cast: Lua bool to %s" | Context::getCallInfo(state)
                    | type.metaclass->name);
         switch(type.metaclass->index())
         {
-        case RTTI::ClassIndex_u8:
-            new(buffer) RTTI::Value(static_cast< u8 >(lua_toboolean(state, index)));
+        case Meta::ClassIndex_u8:
+            new(buffer) Meta::Value(static_cast< u8 >(lua_toboolean(state, index)));
             return true;
-        case RTTI::ClassIndex_u16:
-            new(buffer) RTTI::Value(static_cast< u16 >(lua_toboolean(state, index)));
+        case Meta::ClassIndex_u16:
+            new(buffer) Meta::Value(static_cast< u16 >(lua_toboolean(state, index)));
             return true;
-        case RTTI::ClassIndex_u32:
-            new(buffer) RTTI::Value(static_cast< u32 >(lua_toboolean(state, index)));
+        case Meta::ClassIndex_u32:
+            new(buffer) Meta::Value(static_cast< u32 >(lua_toboolean(state, index)));
             return true;
-        case RTTI::ClassIndex_u64:
-            new(buffer) RTTI::Value(static_cast< u64 >(lua_toboolean(state, index)));
+        case Meta::ClassIndex_u64:
+            new(buffer) Meta::Value(static_cast< u64 >(lua_toboolean(state, index)));
             return true;
-        case RTTI::ClassIndex_i8:
-            new(buffer) RTTI::Value(static_cast< i8 >(lua_toboolean(state, index)));
+        case Meta::ClassIndex_i8:
+            new(buffer) Meta::Value(static_cast< i8 >(lua_toboolean(state, index)));
             return true;
-        case RTTI::ClassIndex_i16:
-            new(buffer) RTTI::Value(static_cast< i16 >(lua_toboolean(state, index)));
+        case Meta::ClassIndex_i16:
+            new(buffer) Meta::Value(static_cast< i16 >(lua_toboolean(state, index)));
             return true;
-        case RTTI::ClassIndex_i32:
-            new(buffer) RTTI::Value(static_cast< i32 >(lua_toboolean(state, index)));
+        case Meta::ClassIndex_i32:
+            new(buffer) Meta::Value(static_cast< i32 >(lua_toboolean(state, index)));
             return true;
-        case RTTI::ClassIndex_i64:
-            new(buffer) RTTI::Value(static_cast< i64 >(lua_toboolean(state, index)));
+        case Meta::ClassIndex_i64:
+            new(buffer) Meta::Value(static_cast< i64 >(lua_toboolean(state, index)));
             return true;
-        case RTTI::ClassIndex_float:
-            new(buffer) RTTI::Value(static_cast< float >(lua_toboolean(state, index)));
+        case Meta::ClassIndex_float:
+            new(buffer) Meta::Value(static_cast< float >(lua_toboolean(state, index)));
             return true;
-        case RTTI::ClassIndex_double:
-            new(buffer) RTTI::Value(static_cast< double >(lua_toboolean(state, index)));
+        case Meta::ClassIndex_double:
+            new(buffer) Meta::Value(static_cast< double >(lua_toboolean(state, index)));
             return true;
         default: be_notreached(); return false;
         }
@@ -109,48 +109,48 @@ static bool convertBooleanToValue(lua_State* state, int index, const RTTI::Type&
     }
 }
 
-static bool convertNumberToValue(lua_State* state, int index, const RTTI::Type& type, void* buffer)
+static bool convertNumberToValue(lua_State* state, int index, const Meta::Type& type, void* buffer)
 {
-    if(type.metaclass->type() == RTTI::ClassType_Number)
+    if(type.metaclass->type() == Meta::ClassType_Number)
     {
         switch(type.metaclass->index())
         {
-        case RTTI::ClassIndex_bool:
+        case Meta::ClassIndex_bool:
         {
             lua_Number       v         = lua_tonumber(state, index);
             const lua_Number g_epsilon = 0.000001f;
-            new(buffer) RTTI::Value(v > g_epsilon || v < -g_epsilon);
+            new(buffer) Meta::Value(v > g_epsilon || v < -g_epsilon);
             return true;
         }
-        case RTTI::ClassIndex_u8:
-            new(buffer) RTTI::Value(static_cast< u8 >(lua_tonumber(state, index)));
+        case Meta::ClassIndex_u8:
+            new(buffer) Meta::Value(static_cast< u8 >(lua_tonumber(state, index)));
             return true;
-        case RTTI::ClassIndex_u16:
-            new(buffer) RTTI::Value(static_cast< u16 >(lua_tonumber(state, index)));
+        case Meta::ClassIndex_u16:
+            new(buffer) Meta::Value(static_cast< u16 >(lua_tonumber(state, index)));
             return true;
-        case RTTI::ClassIndex_u32:
-            new(buffer) RTTI::Value(static_cast< u32 >(lua_tonumber(state, index)));
+        case Meta::ClassIndex_u32:
+            new(buffer) Meta::Value(static_cast< u32 >(lua_tonumber(state, index)));
             return true;
-        case RTTI::ClassIndex_u64:
-            new(buffer) RTTI::Value(static_cast< u64 >(lua_tonumber(state, index)));
+        case Meta::ClassIndex_u64:
+            new(buffer) Meta::Value(static_cast< u64 >(lua_tonumber(state, index)));
             return true;
-        case RTTI::ClassIndex_i8:
-            new(buffer) RTTI::Value(static_cast< i8 >(lua_tonumber(state, index)));
+        case Meta::ClassIndex_i8:
+            new(buffer) Meta::Value(static_cast< i8 >(lua_tonumber(state, index)));
             return true;
-        case RTTI::ClassIndex_i16:
-            new(buffer) RTTI::Value(static_cast< i16 >(lua_tonumber(state, index)));
+        case Meta::ClassIndex_i16:
+            new(buffer) Meta::Value(static_cast< i16 >(lua_tonumber(state, index)));
             return true;
-        case RTTI::ClassIndex_i32:
-            new(buffer) RTTI::Value(static_cast< i32 >(lua_tonumber(state, index)));
+        case Meta::ClassIndex_i32:
+            new(buffer) Meta::Value(static_cast< i32 >(lua_tonumber(state, index)));
             return true;
-        case RTTI::ClassIndex_i64:
-            new(buffer) RTTI::Value(static_cast< i64 >(lua_tonumber(state, index)));
+        case Meta::ClassIndex_i64:
+            new(buffer) Meta::Value(static_cast< i64 >(lua_tonumber(state, index)));
             return true;
-        case RTTI::ClassIndex_float:
-            new(buffer) RTTI::Value(static_cast< float >(lua_tonumber(state, index)));
+        case Meta::ClassIndex_float:
+            new(buffer) Meta::Value(static_cast< float >(lua_tonumber(state, index)));
             return true;
-        case RTTI::ClassIndex_double:
-            new(buffer) RTTI::Value(static_cast< double >(lua_tonumber(state, index)));
+        case Meta::ClassIndex_double:
+            new(buffer) Meta::Value(static_cast< double >(lua_tonumber(state, index)));
             return true;
         default: be_notreached(); return false;
         }
@@ -161,7 +161,7 @@ static bool convertNumberToValue(lua_State* state, int index, const RTTI::Type& 
     }
 }
 
-static bool convertUserdataToValue(lua_State* state, int index, const RTTI::Type& type,
+static bool convertUserdataToValue(lua_State* state, int index, const Meta::Type& type,
                                    void* buffer)
 {
     lua_getmetatable(state, index);
@@ -169,15 +169,15 @@ static bool convertUserdataToValue(lua_State* state, int index, const RTTI::Type
     if(lua_rawequal(state, -1, -2))
     {
         lua_pop(state, 2);
-        RTTI::Value*         userdata   = (RTTI::Value*)lua_touserdata(state, index);
-        RTTI::ConversionCost conversion = userdata->type().calculateConversion(type);
-        if(conversion >= RTTI::ConversionCost::s_incompatible)
+        Meta::Value*         userdata   = (Meta::Value*)lua_touserdata(state, index);
+        Meta::ConversionCost conversion = userdata->type().calculateConversion(type);
+        if(conversion >= Meta::ConversionCost::s_incompatible)
         {
             return false;
         }
         else
         {
-            new(buffer) RTTI::Value(*userdata);
+            new(buffer) Meta::Value(*userdata);
             return true;
         }
     }
@@ -188,14 +188,14 @@ static bool convertUserdataToValue(lua_State* state, int index, const RTTI::Type
     }
 }
 
-static bool convertTableToValue(lua_State* state, int index, const RTTI::Type& type, void* buffer)
+static bool convertTableToValue(lua_State* state, int index, const Meta::Type& type, void* buffer)
 {
-    if(type.metaclass->type() == RTTI::ClassType_Array)
+    if(type.metaclass->type() == Meta::ClassType_Array)
     {
-        RTTI::Type   arrayType  = type.metaclass->apiMethods->arrayScripting->value_type;
+        Meta::Type   arrayType  = type.metaclass->apiMethods->arrayScripting->value_type;
         u32          count      = be_checked_numcast< u32 >(luaL_len(state, index));
-        RTTI::Value* parameters = (RTTI::Value*)malloca(
-            minitl::align(count * sizeof(RTTI::Value), be_alignof(RTTI::Value)));
+        Meta::Value* parameters = (Meta::Value*)malloca(
+            minitl::align(count * sizeof(Meta::Value), be_alignof(Meta::Value)));
 
         lua_pushnil(state);
         int  i      = 0;
@@ -226,8 +226,8 @@ static bool convertTableToValue(lua_State* state, int index, const RTTI::Type& t
         }
         if(result)
         {
-            RTTI::Value array = type.metaclass->constructor->doCall(parameters, count);
-            new(buffer) RTTI::Value(array);
+            Meta::Value array = type.metaclass->constructor->doCall(parameters, count);
+            new(buffer) Meta::Value(array);
         }
         for(int j = count - 1; j >= 0; --j)
         {
@@ -236,12 +236,12 @@ static bool convertTableToValue(lua_State* state, int index, const RTTI::Type& t
         freea(parameters);
         return result;
     }
-    else if(type.metaclass->type() == RTTI::ClassType_Pod)
+    else if(type.metaclass->type() == Meta::ClassType_Pod)
     {
-        be_assert(type.indirection == RTTI::Type::Value, "POD type can only be value");
-        RTTI::Type   valueType = RTTI::Type::makeType(type.metaclass, RTTI::Type::Value,
-                                                    RTTI::Type::Mutable, RTTI::Type::Mutable);
-        RTTI::Value* value     = new(buffer) RTTI::Value(valueType, RTTI::Value::Reserve);
+        be_assert(type.indirection == Meta::Type::Value, "POD type can only be value");
+        Meta::Type   valueType = Meta::Type::makeType(type.metaclass, Meta::Type::Value,
+                                                    Meta::Type::Mutable, Meta::Type::Mutable);
+        Meta::Value* value     = new(buffer) Meta::Value(valueType, Meta::Value::Reserve);
         lua_pushnil(state);
         while(lua_next(state, index) != 0)
         {
@@ -252,14 +252,14 @@ static bool convertTableToValue(lua_State* state, int index, const RTTI::Type& t
                 return false;
             }
             const char*                 str      = lua_tostring(state, -2);
-            raw< const RTTI::Property > property = type.metaclass->getProperty(str);
+            raw< const Meta::Property > property = type.metaclass->getProperty(str);
             if(!property)
             {
                 lua_pop(state, 2);
                 value->~Value();
                 return false;
             }
-            RTTI::Value* v      = (RTTI::Value*)malloca(sizeof(RTTI::Value));
+            Meta::Value* v      = (Meta::Value*)malloca(sizeof(Meta::Value));
             bool         result = createValue(state, -1, property->type, v);
             if(!result)
             {
@@ -280,7 +280,7 @@ static bool convertTableToValue(lua_State* state, int index, const RTTI::Type& t
     }
 }
 
-bool createValue(lua_State* state, int index, const RTTI::Type& type, void* value)
+bool createValue(lua_State* state, int index, const Meta::Type& type, void* value)
 {
     int t = lua_type(state, index);
     switch(t)

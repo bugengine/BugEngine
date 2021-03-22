@@ -6,7 +6,7 @@
 /**************************************************************************************************/
 
 #include <bugengine/core/stdafx.h>
-#include <bugengine/rtti/stdafx.h>
+#include <bugengine/meta/stdafx.h>
 
 #if defined(building_filesystem)
 #    define BE_API_FILESYSTEM BE_EXPORT

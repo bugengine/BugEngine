@@ -5,25 +5,25 @@
 #include <bugengine/world/stdafx.h>
 #include <bugengine/world/component/logiccomponentstorage.script.hh>
 
-#include <bugengine/rtti-ast/node/object.hh>
-#include <bugengine/rtti-ast/node/parameter.hh>
-#include <bugengine/rtti/engine/objectinfo.script.hh>
+#include <bugengine/introspect/node/object.hh>
+#include <bugengine/introspect/node/parameter.hh>
+#include <bugengine/meta/engine/objectinfo.script.hh>
 #include <bugengine/scheduler/kernel/parameters/iparameter.script.hh>
 
 namespace BugEngine { namespace World { namespace Component {
 
-static RTTI::Type findProductType(raw< const RTTI::Class > componentType)
+static Meta::Type findProductType(raw< const Meta::Class > componentType)
 {
     istring parameterName(minitl::format< 256u >("Segments<%s>") | componentType->name);
-    raw< const RTTI::Class > parameterClass
+    raw< const Meta::Class > parameterClass
         = KernelScheduler::IParameter::getParameterClass(parameterName);
     if(parameterClass)
     {
-        raw< const RTTI::ObjectInfo > productClass = parameterClass->getStaticProperty(
+        raw< const Meta::ObjectInfo > productClass = parameterClass->getStaticProperty(
             KernelScheduler::IParameter::getProductTypePropertyName());
         if(productClass)
         {
-            return productClass->value.as< const RTTI::Type& >();
+            return productClass->value.as< const Meta::Type& >();
         }
         else
         {
@@ -39,33 +39,33 @@ static RTTI::Type findProductType(raw< const RTTI::Class > componentType)
     }
 }
 
-struct Visitor : public RTTI::AST::Node::Visitor
+struct Visitor : public Meta::AST::Node::Visitor
 {
-    RTTI::Type result;
+    Meta::Type result;
 
     Visitor() : result(be_type< ref< KernelScheduler::IProduct > >())
     {
     }
 
-    using RTTI::AST::Node::Visitor::accept;
-    void accept(weak< const RTTI::AST::Parameter > parameter, istring name,
-                weak< const RTTI::AST::Node > value)
+    using Meta::AST::Node::Visitor::accept;
+    void accept(weak< const Meta::AST::Parameter > parameter, istring name,
+                weak< const Meta::AST::Node > value)
     {
         be_forceuse(parameter);
         be_forceuse(name);
         value->visit(*this);
     }
-    void accept(weak< const RTTI::AST::Reference > reference, const RTTI::Value& referencedValue)
+    void accept(weak< const Meta::AST::Reference > reference, const Meta::Value& referencedValue)
     {
         be_forceuse(reference);
-        result = findProductType(referencedValue.as< raw< const RTTI::Class > >());
+        result = findProductType(referencedValue.as< raw< const Meta::Class > >());
     }
 };
 
-LogicComponentStorage::IntrospectionHint::IntrospectionHint(weak< const RTTI::AST::Object > owner,
-                                                            const RTTI::CallInfo& callInfo,
+LogicComponentStorage::IntrospectionHint::IntrospectionHint(weak< const Meta::AST::Object > owner,
+                                                            const Meta::CallInfo& callInfo,
                                                             u32                   argumentThis)
-    : RTTI::AST::IntrospectionHint(owner, callInfo, argumentThis)
+    : Meta::AST::IntrospectionHint(owner, callInfo, argumentThis)
 {
 }
 
@@ -73,15 +73,15 @@ LogicComponentStorage::IntrospectionHint::~IntrospectionHint()
 {
 }
 
-bool LogicComponentStorage::IntrospectionHint::getPropertyType(RTTI::AST::DbContext& context,
+bool LogicComponentStorage::IntrospectionHint::getPropertyType(Meta::AST::DbContext& context,
                                                                const istring         name,
-                                                               RTTI::Type& propertyType) const
+                                                               Meta::Type& propertyType) const
 {
     /* overrides type of "components" property */
-    bool result = RTTI::AST::IntrospectionHint::getPropertyType(context, name, propertyType);
+    bool result = Meta::AST::IntrospectionHint::getPropertyType(context, name, propertyType);
     if(result && name == istring("components"))
     {
-        weak< const RTTI::AST::Parameter > parameter = m_owner->getParameter("componentType");
+        weak< const Meta::AST::Parameter > parameter = m_owner->getParameter("componentType");
         be_assert(parameter, "could not locate parameter %s" | name);
         Visitor visitor;
         parameter->visit(visitor);
@@ -90,11 +90,11 @@ bool LogicComponentStorage::IntrospectionHint::getPropertyType(RTTI::AST::DbCont
     return result;
 }
 
-static ref< KernelScheduler::IProduct > makeProduct(raw< const RTTI::Class >     componentType,
+static ref< KernelScheduler::IProduct > makeProduct(raw< const Meta::Class >     componentType,
                                                     weak< StorageConfiguration > configuration)
 {
     istring parameterName(minitl::format< 256u >("Segments<%s>") | componentType->name);
-    raw< const RTTI::Class > parameterClass
+    raw< const Meta::Class > parameterClass
         = KernelScheduler::IParameter::getParameterClass(parameterName);
     if(parameterClass)
     {
@@ -110,7 +110,7 @@ static ref< KernelScheduler::IProduct > makeProduct(raw< const RTTI::Class >    
 }
 
 LogicComponentStorage::LogicComponentStorage(weak< StorageConfiguration > configuration,
-                                             raw< const RTTI::Class >     componentType)
+                                             raw< const Meta::Class >     componentType)
     : components(makeProduct(componentType, configuration))
 {
 }

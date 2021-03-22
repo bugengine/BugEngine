@@ -11,7 +11,7 @@ namespace BugEngine { namespace Python {
 
 struct PyBugClass : public PyBugNamespace
 {
-    static PyObject* stealValue(PyObject* owner, RTTI::Value& value);
+    static PyObject* stealValue(PyObject* owner, Meta::Value& value);
 
     static void         registerType(PyObject* module);
     static PyTypeObject s_pyType;

@@ -20,7 +20,7 @@ static minitl::Allocator& lua()
 namespace Lua {
 
 static ref< Logger >                  s_logger(Logger::instance("scripting.lua"));
-static const raw< const RTTI::Class > s_voidClass = be_class< void >();
+static const raw< const Meta::Class > s_voidClass = be_class< void >();
 
 static const char* s_metaTables[]
     = {"BugEngine.Object", "BugEngine.Resource", "BugEngine.ResourceManager", "BugEngine.Plugin"};
@@ -83,7 +83,7 @@ void Context::checkArg(lua_State* state, int narg, const char* userDataType)
     lua_pop(state, 2);
 }
 
-void Context::checkArg(lua_State* state, int narg, const RTTI::Type& type)
+void Context::checkArg(lua_State* state, int narg, const Meta::Type& type)
 {
     if(lua_type(state, narg) != LUA_TUSERDATA)
     {
@@ -108,40 +108,40 @@ void Context::checkArg(lua_State* state, int narg, const RTTI::Type& type)
         typeError(state, narg, type.name().c_str(), typeName);
     }
     lua_pop(state, 2);
-    RTTI::Value* value = (RTTI::Value*)lua_touserdata(state, narg);
+    Meta::Value* value = (Meta::Value*)lua_touserdata(state, narg);
     if(!value->type().isA(type))
     {
         typeError(state, narg, type.name().c_str(), value->type().name().c_str());
     }
 }
 
-int Context::push(lua_State* state, const RTTI::Value& v)
+int Context::push(lua_State* state, const Meta::Value& v)
 {
-    const RTTI::Type& t = v.type();
+    const Meta::Type& t = v.type();
     if(t.metaclass == s_voidClass)
     {
         return 0;
     }
-    else if(v.type().indirection >= RTTI::Type::RawPtr && v.as< const void* const >() == 0)
+    else if(v.type().indirection >= Meta::Type::RawPtr && v.as< const void* const >() == 0)
     {
         lua_pushnil(state);
         return 1;
     }
-    else if(t.metaclass->type() == RTTI::ClassType_Number)
+    else if(t.metaclass->type() == Meta::ClassType_Number)
     {
         switch(t.metaclass->index())
         {
-        case RTTI::ClassIndex_bool: lua_pushboolean(state, v.as< bool >()); return 1;
-        case RTTI::ClassIndex_u8: lua_pushnumber(state, v.as< u8 >()); return 1;
-        case RTTI::ClassIndex_u16: lua_pushnumber(state, v.as< u16 >()); return 1;
-        case RTTI::ClassIndex_u32: lua_pushnumber(state, v.as< u32 >()); return 1;
-        case RTTI::ClassIndex_u64: lua_pushnumber(state, (lua_Number)v.as< u64 >()); return 1;
-        case RTTI::ClassIndex_i8: lua_pushnumber(state, v.as< i8 >()); return 1;
-        case RTTI::ClassIndex_i16: lua_pushnumber(state, v.as< i16 >()); return 1;
-        case RTTI::ClassIndex_i32: lua_pushnumber(state, v.as< i32 >()); return 1;
-        case RTTI::ClassIndex_i64: lua_pushnumber(state, (lua_Number)v.as< i64 >()); return 1;
-        case RTTI::ClassIndex_float: lua_pushnumber(state, v.as< float >()); return 1;
-        case RTTI::ClassIndex_double: lua_pushnumber(state, v.as< double >()); return 1;
+        case Meta::ClassIndex_bool: lua_pushboolean(state, v.as< bool >()); return 1;
+        case Meta::ClassIndex_u8: lua_pushnumber(state, v.as< u8 >()); return 1;
+        case Meta::ClassIndex_u16: lua_pushnumber(state, v.as< u16 >()); return 1;
+        case Meta::ClassIndex_u32: lua_pushnumber(state, v.as< u32 >()); return 1;
+        case Meta::ClassIndex_u64: lua_pushnumber(state, (lua_Number)v.as< u64 >()); return 1;
+        case Meta::ClassIndex_i8: lua_pushnumber(state, v.as< i8 >()); return 1;
+        case Meta::ClassIndex_i16: lua_pushnumber(state, v.as< i16 >()); return 1;
+        case Meta::ClassIndex_i32: lua_pushnumber(state, v.as< i32 >()); return 1;
+        case Meta::ClassIndex_i64: lua_pushnumber(state, (lua_Number)v.as< i64 >()); return 1;
+        case Meta::ClassIndex_float: lua_pushnumber(state, v.as< float >()); return 1;
+        case Meta::ClassIndex_double: lua_pushnumber(state, v.as< double >()); return 1;
         default:
             be_notreached();
             lua_pushnumber(state, 0);
@@ -150,8 +150,8 @@ int Context::push(lua_State* state, const RTTI::Value& v)
     }
     else
     {
-        void* userdata = lua_newuserdata(state, sizeof(RTTI::Value));
-        new(userdata) RTTI::Value(v);
+        void* userdata = lua_newuserdata(state, sizeof(Meta::Value));
+        new(userdata) Meta::Value(v);
         luaL_getmetatable(state, "BugEngine.Object");
         lua_setmetatable(state, -2);
         return 1;
@@ -176,26 +176,26 @@ minitl::format< 1024u > Context::tostring(lua_State* state, int element)
         if(lua_rawequal(state, -1, -2))
         {
             lua_pop(state, 2);
-            RTTI::Value* userdata = (RTTI::Value*)lua_touserdata(state, element);
+            Meta::Value* userdata = (Meta::Value*)lua_touserdata(state, element);
             const char*  constness
-                = (userdata->type().constness == RTTI::Type::Const) ? "const " : "mutable ";
+                = (userdata->type().constness == Meta::Type::Const) ? "const " : "mutable ";
             const char* reference;
             const char* closing;
             switch(userdata->type().indirection)
             {
-            case RTTI::Type::RefPtr:
+            case Meta::Type::RefPtr:
                 reference = "ref<";
                 closing   = ">";
                 break;
-            case RTTI::Type::WeakPtr:
+            case Meta::Type::WeakPtr:
                 reference = "weak<";
                 closing   = ">";
                 break;
-            case RTTI::Type::RawPtr:
+            case Meta::Type::RawPtr:
                 reference = "raw<";
                 closing   = ">";
                 break;
-            case RTTI::Type::Value:
+            case Meta::Type::Value:
                 reference = "";
                 constness = "";
                 closing   = "";
@@ -206,7 +206,7 @@ minitl::format< 1024u > Context::tostring(lua_State* state, int element)
                 closing   = ">";
                 break;
             }
-            const char* access = (userdata->type().access == RTTI::Type::Const) ? "const " : "";
+            const char* access = (userdata->type().access == Meta::Type::Const) ? "const " : "";
             return minitl::format< 1024u >("%s%s%s%s%s[@0x%p]") | constness | reference | access
                    | userdata->type().metaclass->name.c_str() | closing | userdata;
         }
@@ -309,9 +309,9 @@ extern "C" int luaGet(lua_State* state)
     Context::checkArg(state, 1, "BugEngine.Object");
     Context::checkArg(state, 2, LUA_TSTRING);
 
-    RTTI::Value* userdata = (RTTI::Value*)lua_touserdata(state, -2);
+    Meta::Value* userdata = (Meta::Value*)lua_touserdata(state, -2);
     const char*  name     = lua_tostring(state, -1);
-    RTTI::Value  v        = (*userdata)[name];
+    Meta::Value  v        = (*userdata)[name];
     if(!v)
     {
         lua_pushnil(state);
@@ -330,8 +330,8 @@ extern "C" int luaGetType(lua_State* state)
     }
     Context::checkArg(state, 1, "BugEngine.Object");
 
-    RTTI::Value* userdata = (RTTI::Value*)lua_touserdata(state, -2);
-    Context::push(state, RTTI::Value(userdata->type()));
+    Meta::Value* userdata = (Meta::Value*)lua_touserdata(state, -2);
+    Context::push(state, Meta::Value(userdata->type()));
     return 1;
 }
 
@@ -420,7 +420,7 @@ Context::Context(const Plugin::Context& context)
     lua_setmetatable(m_state, -2);
     lua_setglobal(m_state, "resources");
 
-    push(m_state, RTTI::Value(be_bugengine_Namespace()));
+    push(m_state, Meta::Value(be_bugengine_Namespace()));
     lua_setglobal(m_state, "BugEngine");
     for(const luaL_Reg* method = base_funcs; method->func != 0; ++method)
     {

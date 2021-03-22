@@ -14,7 +14,7 @@ struct PyBugString : public PyBugObject
 {
     static void registerType(PyObject* module);
 
-    static PyObject* stealValue(PyObject* owner, RTTI::Value& value);
+    static PyObject* stealValue(PyObject* owner, Meta::Value& value);
     static int       init(PyObject* self, PyObject* args, PyObject* kwds);
     static PyObject* repr(PyObject* self);
     static PyObject* str(PyObject* self);

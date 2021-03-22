@@ -2,7 +2,7 @@
    see LICENSE for detail */
 
 #include <bugengine/scheduler/stdafx.h>
-#include <bugengine/rtti/engine/namespace.hh>
+#include <bugengine/meta/engine/namespace.hh>
 #include <bugengine/scheduler/kernel/imemorybuffer.hh>
 #include <bugengine/scheduler/kernel/ischeduler.hh>
 #include <bugengine/scheduler/kernel/kernel.script.hh>

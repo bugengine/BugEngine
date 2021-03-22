@@ -3,8 +3,8 @@
 
 #include <stdafx.h>
 #include <bugengine/filesystem/diskfolder.script.hh>
+#include <bugengine/meta/engine/namespace.hh>
 #include <bugengine/plugin/plugin.hh>
-#include <bugengine/rtti/engine/namespace.hh>
 #include <application.hh>
 
 namespace BugEngine { namespace Test { namespace Compute { namespace UnitTests {

@@ -2,11 +2,11 @@
    see LICENSE for detail */
 
 #include <bugengine/plugin.scripting.pythonlib/stdafx.h>
+#include <bugengine/meta/classinfo.script.hh>
+#include <bugengine/meta/engine/methodinfo.script.hh>
+#include <bugengine/meta/engine/propertyinfo.script.hh>
+#include <bugengine/meta/engine/scriptingapi.hh>
 #include <bugengine/plugin.scripting.pythonlib/pythonlib.hh>
-#include <bugengine/rtti/classinfo.script.hh>
-#include <bugengine/rtti/engine/methodinfo.script.hh>
-#include <bugengine/rtti/engine/propertyinfo.script.hh>
-#include <bugengine/rtti/engine/scriptingapi.hh>
 #include <py_array.hh>
 #include <py_boundmethod.hh>
 #include <py_call.hh>
@@ -56,7 +56,7 @@ PyTypeObject PyBugObject::s_pyType = {{{0, 0}, 0},
                                       0,
                                       0,
                                       Py_TPFLAGS_DEFAULT | Py_TPFLAGS_IS_ABSTRACT,
-                                      "Wrapper class for the C++ class BugEngine::RTTI::Value",
+                                      "Wrapper class for the C++ class BugEngine::Meta::Value",
                                       0,
                                       0,
                                       0,
@@ -86,10 +86,10 @@ PyTypeObject PyBugObject::s_pyType = {{{0, 0}, 0},
                                       0,
                                       0};
 
-typedef PyObject* (*CreateMethod)(PyObject* owner, RTTI::Value& value);
+typedef PyObject* (*CreateMethod)(PyObject* owner, Meta::Value& value);
 
 template < typename T >
-PyObject* createPyNumeric(PyObject* owner, RTTI::Value& value)
+PyObject* createPyNumeric(PyObject* owner, Meta::Value& value)
 {
     be_forceuse(owner);
     unsigned long long v = static_cast< unsigned long long >(value.as< T >());
@@ -97,7 +97,7 @@ PyObject* createPyNumeric(PyObject* owner, RTTI::Value& value)
 }
 
 template <>
-PyObject* createPyNumeric< bool >(PyObject* owner, RTTI::Value& value)
+PyObject* createPyNumeric< bool >(PyObject* owner, Meta::Value& value)
 {
     be_forceuse(owner);
     long v = static_cast< long >(value.as< bool >());
@@ -105,7 +105,7 @@ PyObject* createPyNumeric< bool >(PyObject* owner, RTTI::Value& value)
 }
 
 template <>
-PyObject* createPyNumeric< float >(PyObject* owner, RTTI::Value& value)
+PyObject* createPyNumeric< float >(PyObject* owner, Meta::Value& value)
 {
     be_forceuse(owner);
     double v = static_cast< double >(value.as< float >());
@@ -113,14 +113,14 @@ PyObject* createPyNumeric< float >(PyObject* owner, RTTI::Value& value)
 }
 
 template <>
-PyObject* createPyNumeric< double >(PyObject* owner, RTTI::Value& value)
+PyObject* createPyNumeric< double >(PyObject* owner, Meta::Value& value)
 {
     be_forceuse(owner);
     double v = value.as< double >();
     return s_library->m_PyFloat_FromDouble(v);
 }
 
-PyObject* createPyString(PyObject* owner, RTTI::Value& value)
+PyObject* createPyString(PyObject* owner, Meta::Value& value)
 {
     be_forceuse(owner);
     const text& t = static_cast< const text& >(value.as< const text& >());
@@ -149,40 +149,40 @@ static CreateMethod s_createString[]
        &PyBugString< ifilename >::stealValue, &PyBugString< ipath >::stealValue,
        &PyBugString< text >::stealValue};
 
-PyObject* PyBugObject::stealValue(PyObject* owner, RTTI::Value& value)
+PyObject* PyBugObject::stealValue(PyObject* owner, Meta::Value& value)
 {
-    const RTTI::Type& t = value.type();
+    const Meta::Type& t = value.type();
     if(!value)
     {
         PyObject* result = s_library->m__Py_NoneStruct;
         Py_INCREF(result);
         return result;
     }
-    else if(t.indirection != RTTI::Type::Value && value.as< const void* const >() == 0)
+    else if(t.indirection != Meta::Type::Value && value.as< const void* const >() == 0)
     {
         PyObject* result = s_library->m__Py_NoneStruct;
         Py_INCREF(result);
         return result;
     }
-    else if(t.indirection == RTTI::Type::Value && t.metaclass->type() == RTTI::ClassType_Number)
+    else if(t.indirection == Meta::Type::Value && t.metaclass->type() == Meta::ClassType_Number)
     {
         return s_createPyNumber[t.metaclass->index()](owner, value);
     }
-    else if(t.indirection == RTTI::Type::Value && t.metaclass->type() == RTTI::ClassType_String
-            && t.metaclass->index() == RTTI::ClassIndex_text)
+    else if(t.indirection == Meta::Type::Value && t.metaclass->type() == Meta::ClassType_String
+            && t.metaclass->index() == Meta::ClassIndex_text)
     {
         return createPyString(owner, value);
     }
     else
         switch(t.metaclass->type())
         {
-        case RTTI::ClassType_Number: return s_createNumber[t.metaclass->index()](owner, value);
-        case RTTI::ClassType_Enum: return PyBugEnum::stealValue(owner, value);
-        case RTTI::ClassType_String: return s_createString[t.metaclass->index()](owner, value);
-        case RTTI::ClassType_Array: return PyBugArray::stealValue(owner, value);
-        case RTTI::ClassType_Namespace:
+        case Meta::ClassType_Number: return s_createNumber[t.metaclass->index()](owner, value);
+        case Meta::ClassType_Enum: return PyBugEnum::stealValue(owner, value);
+        case Meta::ClassType_String: return s_createString[t.metaclass->index()](owner, value);
+        case Meta::ClassType_Array: return PyBugArray::stealValue(owner, value);
+        case Meta::ClassType_Namespace:
         {
-            const RTTI::Class& cls = value.as< const RTTI::Class& >();
+            const Meta::Class& cls = value.as< const Meta::Class& >();
             if(cls.constructor)
             {
                 return PyBugClass::stealValue(owner, value);
@@ -196,7 +196,7 @@ PyObject* PyBugObject::stealValue(PyObject* owner, RTTI::Value& value)
         {
             PyObject* result              = s_pyType.tp_alloc(&s_pyType, 0);
             ((PyBugObject*)result)->owner = owner;
-            new(&(static_cast< PyBugObject* >(result))->value) RTTI::Value();
+            new(&(static_cast< PyBugObject* >(result))->value) Meta::Value();
             (static_cast< PyBugObject* >(result))->value.swap(value);
             if(owner)
             {
@@ -213,22 +213,22 @@ PyObject* PyBugObject::newinst(PyTypeObject* type, PyObject* args, PyObject* kwd
     be_forceuse(kwds);
     PyBugObject* inst = static_cast< PyBugObject* >(type->tp_alloc(type, 0));
     inst->owner       = 0;
-    new(&inst->value) RTTI::Value();
+    new(&inst->value) Meta::Value();
     return inst;
 }
 
 PyObject* PyBugObject::getattr(PyObject* self, const char* name)
 {
     PyBugObject*                self_     = static_cast< PyBugObject* >(self);
-    raw< const RTTI::Class >    metaclass = self_->value.type().metaclass;
+    raw< const Meta::Class >    metaclass = self_->value.type().metaclass;
     istring                     name_(name);
-    raw< const RTTI::Property > p = metaclass->getProperty(name_);
+    raw< const Meta::Property > p = metaclass->getProperty(name_);
     if(p)
     {
-        RTTI::Value v = p->get(self_->value);
+        Meta::Value v = p->get(self_->value);
         return stealValue(self, v);
     }
-    raw< const RTTI::Method > m = metaclass->getMethod(name_);
+    raw< const Meta::Method > m = metaclass->getMethod(name_);
     if(m)
     {
         PyObject* result = PyBoundMethod::create(m, self_);
@@ -242,13 +242,13 @@ PyObject* PyBugObject::getattr(PyObject* self, const char* name)
 int PyBugObject::setattr(PyObject* self, const char* name, PyObject* value)
 {
     PyBugObject* self_ = static_cast< PyBugObject* >(self);
-    if(self_->value.type().access == RTTI::Type::Const)
+    if(self_->value.type().access == Meta::Type::Const)
     {
         s_library->m_PyErr_Format(*s_library->m_PyExc_TypeError, "instance of %s is const",
                                   self_->value.type().name().c_str());
         return -1;
     }
-    raw< const RTTI::Property > prop = self_->value.type().metaclass->getProperty(name);
+    raw< const Meta::Property > prop = self_->value.type().metaclass->getProperty(name);
     if(!prop)
     {
         s_library->m_PyErr_Format(*s_library->m_PyExc_AttributeError,
@@ -256,21 +256,21 @@ int PyBugObject::setattr(PyObject* self, const char* name, PyObject* value)
                                   self_->value.type().name().c_str(), name);
         return -1;
     }
-    if(prop->type.access == RTTI::Type::Const)
+    if(prop->type.access == Meta::Type::Const)
     {
         s_library->m_PyErr_Format(*s_library->m_PyExc_TypeError, "property %s.%s is const",
                                   self_->value.type().name().c_str(), name);
         return -1;
     }
-    RTTI::ConversionCost c = distance(value, prop->type);
-    if(c >= RTTI::ConversionCost::s_incompatible)
+    Meta::ConversionCost c = distance(value, prop->type);
+    if(c >= Meta::ConversionCost::s_incompatible)
     {
         s_library->m_PyErr_Format(*s_library->m_PyExc_TypeError, "%s.%s is of type %s",
                                   self_->value.type().name().c_str(), name,
                                   prop->type.name().c_str());
         return -1;
     }
-    RTTI::Value* v = (RTTI::Value*)malloca(sizeof(RTTI::Value));
+    Meta::Value* v = (Meta::Value*)malloca(sizeof(Meta::Value));
     unpack(value, prop->type, v);
     prop->set(self_->value, *v);
     v->~Value();
@@ -281,7 +281,7 @@ int PyBugObject::setattr(PyObject* self, const char* name, PyObject* value)
 PyObject* PyBugObject::repr(PyObject* self)
 {
     PyBugObject*       self_ = static_cast< PyBugObject* >(self);
-    const RTTI::Value& v     = self_->value;
+    const Meta::Value& v     = self_->value;
     if(s_library->getVersion() >= 30)
     {
         return s_library->m_PyUnicode_FromFormat("[%s @0x%p]", v.type().name().c_str(), &v);
@@ -307,7 +307,7 @@ PyObject* PyBugObject::call(PyObject* self, PyObject* args, PyObject* kwds)
 {
     PyBugObject*         self_ = static_cast< PyBugObject* >(self);
     static const istring callName("?call");
-    RTTI::Value          v(self_->value[callName]);
+    Meta::Value          v(self_->value[callName]);
     if(!v)
     {
         s_library->m_PyErr_Format(*s_library->m_PyExc_Exception, "%s object is not callable",
@@ -316,7 +316,7 @@ PyObject* PyBugObject::call(PyObject* self, PyObject* args, PyObject* kwds)
     }
     else
     {
-        raw< const RTTI::Method > method = v.as< raw< const RTTI::Method > >();
+        raw< const Meta::Method > method = v.as< raw< const Meta::Method > >();
         if(!method)
         {
             s_library->m_PyErr_Format(*s_library->m_PyExc_Exception, "%s object is not callable",
@@ -330,8 +330,8 @@ PyObject* PyBugObject::call(PyObject* self, PyObject* args, PyObject* kwds)
 int PyBugObject::nonZero(PyObject* self)
 {
     PyBugObject*     self_ = static_cast< PyBugObject* >(self);
-    const RTTI::Type t     = self_->value.type();
-    if(t.indirection == RTTI::Type::Value)
+    const Meta::Type t     = self_->value.type();
+    if(t.indirection == Meta::Type::Value)
     {
         return 1;
     }
@@ -357,104 +357,104 @@ void PyBugObject::registerType(PyObject* module)
     PyBoundMethod::registerType(module);
 }
 
-static inline void unpackArray(PyObject* arg, const RTTI::Type& type, void* buffer)
+static inline void unpackArray(PyObject* arg, const Meta::Type& type, void* buffer)
 {
-    be_assert(type.metaclass->type() == RTTI::ClassType_Array
-                  || type.metaclass->type() == RTTI::ClassType_Variant,
-              "expected to unpack Python Array into RTTI::ClassType_Array, got %s"
+    be_assert(type.metaclass->type() == Meta::ClassType_Array
+                  || type.metaclass->type() == Meta::ClassType_Variant,
+              "expected to unpack Python Array into Meta::ClassType_Array, got %s"
                   | type.metaclass->name);
     be_unimplemented();
     be_forceuse(arg);
     be_forceuse(buffer);
 }
 
-static inline void unpackNumber(PyObject* arg, const RTTI::Type& type, void* buffer)
+static inline void unpackNumber(PyObject* arg, const Meta::Type& type, void* buffer)
 {
-    be_assert(type.metaclass->type() == RTTI::ClassType_Number
-                  || type.metaclass->type() == RTTI::ClassType_Variant,
-              "expected to unpack Python Number into RTTI::ClassType_Number, got %s"
+    be_assert(type.metaclass->type() == Meta::ClassType_Number
+                  || type.metaclass->type() == Meta::ClassType_Variant,
+              "expected to unpack Python Number into Meta::ClassType_Number, got %s"
                   | type.metaclass->name);
     unsigned long long value
         = arg->py_type->tp_flags & Py_TPFLAGS_INT_SUBCLASS
               ? (unsigned long long)s_library->m_PyInt_AsUnsignedLongMask(arg)
               : (unsigned long long)s_library->m_PyLong_AsUnsignedLongLongMask(arg);
-    switch(RTTI::ClassIndex_Numeric(type.metaclass->index()))
+    switch(Meta::ClassIndex_Numeric(type.metaclass->index()))
     {
-    case RTTI::ClassIndex_bool:
+    case Meta::ClassIndex_bool:
     {
         bool v = value ? true : false;
-        new(buffer) RTTI::Value(v);
+        new(buffer) Meta::Value(v);
         break;
     }
-    case RTTI::ClassIndex_u8:
+    case Meta::ClassIndex_u8:
     {
         u8 v = (u8)value;
-        new(buffer) RTTI::Value(v);
+        new(buffer) Meta::Value(v);
         break;
     }
-    case RTTI::ClassIndex_u16:
+    case Meta::ClassIndex_u16:
     {
         u16 v = (u16)value;
-        new(buffer) RTTI::Value(v);
+        new(buffer) Meta::Value(v);
         break;
     }
-    case RTTI::ClassIndex_u32:
+    case Meta::ClassIndex_u32:
     {
         u32 v = (u32)value;
-        new(buffer) RTTI::Value(v);
+        new(buffer) Meta::Value(v);
         break;
     }
-    case RTTI::ClassIndex_u64:
+    case Meta::ClassIndex_u64:
     {
         u64 v = (u64)value;
-        new(buffer) RTTI::Value(v);
+        new(buffer) Meta::Value(v);
         break;
     }
-    case RTTI::ClassIndex_i8:
+    case Meta::ClassIndex_i8:
     {
         i8 v = (i8)value;
-        new(buffer) RTTI::Value(v);
+        new(buffer) Meta::Value(v);
         break;
     }
-    case RTTI::ClassIndex_i16:
+    case Meta::ClassIndex_i16:
     {
         i16 v = (i16)value;
-        new(buffer) RTTI::Value(v);
+        new(buffer) Meta::Value(v);
         break;
     }
-    case RTTI::ClassIndex_i32:
+    case Meta::ClassIndex_i32:
     {
         i32 v = (i32)value;
-        new(buffer) RTTI::Value(v);
+        new(buffer) Meta::Value(v);
         break;
     }
-    case RTTI::ClassIndex_i64:
+    case Meta::ClassIndex_i64:
     {
         i64 v = (i64)value;
-        new(buffer) RTTI::Value(v);
+        new(buffer) Meta::Value(v);
         break;
     }
-    case RTTI::ClassIndex_float:
+    case Meta::ClassIndex_float:
     {
         float v = (float)value;
-        new(buffer) RTTI::Value(v);
+        new(buffer) Meta::Value(v);
         break;
     }
-    case RTTI::ClassIndex_double:
+    case Meta::ClassIndex_double:
     {
         double v = (double)value;
-        new(buffer) RTTI::Value(v);
+        new(buffer) Meta::Value(v);
         break;
     }
-    default: be_notreached(); new(buffer) RTTI::Value(0);
+    default: be_notreached(); new(buffer) Meta::Value(0);
     }
 }
 
-static inline void unpackFloat(PyObject* arg, const RTTI::Type& type, void* buffer)
+static inline void unpackFloat(PyObject* arg, const Meta::Type& type, void* buffer)
 {
-    be_assert(type.metaclass->type() == RTTI::ClassType_Number
-                  || type.metaclass->type() == RTTI::ClassType_Variant,
-              "expected to unpack Python Float into RTTI::ClassType_Number, got %s"
+    be_assert(type.metaclass->type() == Meta::ClassType_Number
+                  || type.metaclass->type() == Meta::ClassType_Variant,
+              "expected to unpack Python Float into Meta::ClassType_Number, got %s"
                   | type.metaclass->name);
     double value = s_library->m_PyFloat_AsDouble(arg);
     switch(type.metaclass->index())
@@ -462,78 +462,78 @@ static inline void unpackFloat(PyObject* arg, const RTTI::Type& type, void* buff
     case 0:
     {
         bool v = value ? true : false;
-        new(buffer) RTTI::Value(v);
+        new(buffer) Meta::Value(v);
         break;
     }
     case 1:
     {
         u8 v = (u8)value;
-        new(buffer) RTTI::Value(v);
+        new(buffer) Meta::Value(v);
         break;
     }
     case 2:
     {
         u16 v = (u16)value;
-        new(buffer) RTTI::Value(v);
+        new(buffer) Meta::Value(v);
         break;
     }
     case 3:
     {
         u32 v = (u32)value;
-        new(buffer) RTTI::Value(v);
+        new(buffer) Meta::Value(v);
         break;
     }
     case 4:
     {
         u64 v = (u64)value;
-        new(buffer) RTTI::Value(v);
+        new(buffer) Meta::Value(v);
         break;
     }
     case 5:
     {
         i8 v = (i8)value;
-        new(buffer) RTTI::Value(v);
+        new(buffer) Meta::Value(v);
         break;
     }
     case 6:
     {
         i16 v = (i16)value;
-        new(buffer) RTTI::Value(v);
+        new(buffer) Meta::Value(v);
         break;
     }
     case 7:
     {
         i32 v = (i32)value;
-        new(buffer) RTTI::Value(v);
+        new(buffer) Meta::Value(v);
         break;
     }
     case 8:
     {
         i64 v = (i64)value;
-        new(buffer) RTTI::Value(v);
+        new(buffer) Meta::Value(v);
         break;
     }
     case 9:
     {
         float v = (float)value;
-        new(buffer) RTTI::Value(v);
+        new(buffer) Meta::Value(v);
         break;
     }
     case 10:
     {
         double v = (double)value;
-        new(buffer) RTTI::Value(v);
+        new(buffer) Meta::Value(v);
         break;
     }
-    default: be_notreached(); new(buffer) RTTI::Value(0);
+    default: be_notreached(); new(buffer) Meta::Value(0);
     }
 }
 
-static inline void unpackString(PyObject* arg, const RTTI::Type& type, void* buffer)
+static inline void unpackString(PyObject* arg, const Meta::Type& type, void* buffer)
 {
-    be_assert(type.metaclass->type() == RTTI::ClassType_String
-                  || type.metaclass->type() == RTTI::ClassType_Variant,
-              "expected to unpack Python String into RTTI::ClassType_String, got %s"
+    be_assert(type.metaclass->type() == Meta::ClassType_String
+                  || type.metaclass->type() == Meta::ClassType_Variant,
+              "expected to unpack Python String into Meta::ClassType_String, got %s"
                   | type.metaclass->name);
     char*     string;
     PyObject* decodedUnicode = 0;
@@ -555,11 +555,11 @@ static inline void unpackString(PyObject* arg, const RTTI::Type& type, void* buf
     }
     switch(type.metaclass->index())
     {
-    case 0: new(buffer) RTTI::Value(istring(string)); break;
-    case 1: new(buffer) RTTI::Value(inamespace(string)); break;
-    case 2: new(buffer) RTTI::Value(ifilename(string)); break;
-    case 3: new(buffer) RTTI::Value(ipath(string)); break;
-    default: be_notreached(); new(buffer) RTTI::Value();
+    case 0: new(buffer) Meta::Value(istring(string)); break;
+    case 1: new(buffer) Meta::Value(inamespace(string)); break;
+    case 2: new(buffer) Meta::Value(ifilename(string)); break;
+    case 3: new(buffer) Meta::Value(ipath(string)); break;
+    default: be_notreached(); new(buffer) Meta::Value();
     }
 
     if(decodedUnicode)
@@ -568,17 +568,17 @@ static inline void unpackString(PyObject* arg, const RTTI::Type& type, void* buf
     }
 }
 
-static inline void unpackPod(PyObject* arg, const RTTI::Type& type, void* buffer)
+static inline void unpackPod(PyObject* arg, const Meta::Type& type, void* buffer)
 {
-    be_assert(type.metaclass->type() == RTTI::ClassType_Pod,
-              "expected to unpack Python Dict into RTTI::ClassType_Pod, got %s"
+    be_assert(type.metaclass->type() == Meta::ClassType_Pod,
+              "expected to unpack Python Dict into Meta::ClassType_Pod, got %s"
                   | type.metaclass->name);
 
-    RTTI::Value* result = new(buffer) RTTI::Value(type, RTTI::Value::Reserve);
-    RTTI::Value* v      = (RTTI::Value*)malloca(sizeof(RTTI::Value));
-    for(raw< const RTTI::Class > c = type.metaclass; c; c = c->parent)
+    Meta::Value* result = new(buffer) Meta::Value(type, Meta::Value::Reserve);
+    Meta::Value* v      = (Meta::Value*)malloca(sizeof(Meta::Value));
+    for(raw< const Meta::Class > c = type.metaclass; c; c = c->parent)
     {
-        for(const RTTI::Property* p = c->properties.begin(); p != c->properties.end(); ++p)
+        for(const Meta::Property* p = c->properties.begin(); p != c->properties.end(); ++p)
         {
             PyObject* value = s_library->m_PyDict_GetItemString(arg, p->name.c_str());
 
@@ -590,20 +590,20 @@ static inline void unpackPod(PyObject* arg, const RTTI::Type& type, void* buffer
     freea(v);
 }
 
-RTTI::ConversionCost PyBugObject::distance(PyObject* object, const RTTI::Type& desiredType)
+Meta::ConversionCost PyBugObject::distance(PyObject* object, const Meta::Type& desiredType)
 {
-    if(desiredType.metaclass->type() == RTTI::ClassType_Variant)
+    if(desiredType.metaclass->type() == Meta::ClassType_Variant)
     {
         if(object->py_type == &PyBugObject::s_pyType
            || object->py_type->tp_base == &PyBugObject::s_pyType
            || object->py_type->tp_flags & (Py_TPFLAGS_INT_SUBCLASS | Py_TPFLAGS_LONG_SUBCLASS)
            || object->py_type == s_library->m_PyFloat_Type)
         {
-            return RTTI::ConversionCost::s_variant;
+            return Meta::ConversionCost::s_variant;
         }
         else
         {
-            return RTTI::ConversionCost::s_incompatible;
+            return Meta::ConversionCost::s_incompatible;
         }
     }
     else if(object->py_type == &PyBugObject::s_pyType
@@ -615,19 +615,19 @@ RTTI::ConversionCost PyBugObject::distance(PyObject* object, const RTTI::Type& d
     }
     else if(object->py_type == s_library->m_PyBool_Type)
     {
-        return RTTI::ConversionCalculator< bool >::calculate(desiredType);
+        return Meta::ConversionCalculator< bool >::calculate(desiredType);
     }
     else if(object->py_type->tp_flags & Py_TPFLAGS_INT_SUBCLASS)
     {
-        return RTTI::ConversionCalculator< i32 >::calculate(desiredType);
+        return Meta::ConversionCalculator< i32 >::calculate(desiredType);
     }
     else if(object->py_type->tp_flags & Py_TPFLAGS_LONG_SUBCLASS)
     {
-        return RTTI::ConversionCalculator< i64 >::calculate(desiredType);
+        return Meta::ConversionCalculator< i64 >::calculate(desiredType);
     }
     else if(object->py_type->tp_flags & (Py_TPFLAGS_LIST_SUBCLASS | Py_TPFLAGS_TUPLE_SUBCLASS))
     {
-        if(desiredType.metaclass->type() == RTTI::ClassType_Array)
+        if(desiredType.metaclass->type() == Meta::ClassType_Array)
         {
             PyTuple_SizeType    size = object->py_type->tp_flags & (Py_TPFLAGS_LIST_SUBCLASS)
                                            ? s_library->m_PyList_Size
@@ -637,76 +637,76 @@ RTTI::ConversionCost PyBugObject::distance(PyObject* object, const RTTI::Type& d
                                            : s_library->m_PyTuple_GetItem;
             if(size(object) != 0)
             {
-                raw< const RTTI::ScriptingArrayAPI > api
+                raw< const Meta::ScriptingArrayAPI > api
                     = desiredType.metaclass->apiMethods->arrayScripting;
-                const RTTI::Type& subType     = api->value_type;
+                const Meta::Type& subType     = api->value_type;
                 PyObject*         firstObject = get(object, 0);
                 return distance(firstObject, subType);
             }
             else
             {
-                return RTTI::ConversionCost();
+                return Meta::ConversionCost();
             }
         }
         else
         {
-            return RTTI::ConversionCost::s_incompatible;
+            return Meta::ConversionCost::s_incompatible;
         }
     }
     else if(object->py_type->tp_flags & (Py_TPFLAGS_STRING_SUBCLASS | Py_TPFLAGS_UNICODE_SUBCLASS))
     {
-        return desiredType.metaclass->type() == RTTI::ClassType_String
-                   ? RTTI::ConversionCost()
-                   : RTTI::ConversionCost::s_incompatible;
+        return desiredType.metaclass->type() == Meta::ClassType_String
+                   ? Meta::ConversionCost()
+                   : Meta::ConversionCost::s_incompatible;
     }
     else if(object->py_type->tp_flags & Py_TPFLAGS_DICT_SUBCLASS)
     {
-        if(desiredType.metaclass->type() == RTTI::ClassType_Pod)
+        if(desiredType.metaclass->type() == Meta::ClassType_Pod)
         {
             u32 i = 0;
-            for(raw< const RTTI::Class > c = desiredType.metaclass; c; c = c->parent)
+            for(raw< const Meta::Class > c = desiredType.metaclass; c; c = c->parent)
             {
-                for(const RTTI::Property* p = c->properties.begin(); p != c->properties.end(); ++p)
+                for(const Meta::Property* p = c->properties.begin(); p != c->properties.end(); ++p)
                 {
                     PyObject* value = s_library->m_PyDict_GetItemString(object, p->name.c_str());
                     if(!value)
                     {
-                        return RTTI::ConversionCost::s_incompatible;
+                        return Meta::ConversionCost::s_incompatible;
                     }
-                    if(distance(value, p->type) >= RTTI::ConversionCost::s_incompatible)
+                    if(distance(value, p->type) >= Meta::ConversionCost::s_incompatible)
                     {
-                        return RTTI::ConversionCost::s_incompatible;
+                        return Meta::ConversionCost::s_incompatible;
                     }
                 }
             }
             return i == (u32)s_library->m_PyDict_Size(object)
-                       ? RTTI::ConversionCost()
-                       : RTTI::ConversionCost::s_incompatible;
+                       ? Meta::ConversionCost()
+                       : Meta::ConversionCost::s_incompatible;
         }
         else
         {
             be_unimplemented();
-            return RTTI::ConversionCost::s_incompatible;
+            return Meta::ConversionCost::s_incompatible;
         }
     }
     else if(object == s_library->m__Py_NoneStruct)
     {
-        return desiredType.indirection >= RTTI::Type::RawPtr ? RTTI::ConversionCost()
-                                                             : RTTI::ConversionCost::s_incompatible;
+        return desiredType.indirection >= Meta::Type::RawPtr ? Meta::ConversionCost()
+                                                             : Meta::ConversionCost::s_incompatible;
     }
     else if(object->py_type == s_library->m_PyFloat_Type)
     {
-        return RTTI::ConversionCalculator< float >::calculate(desiredType);
+        return Meta::ConversionCalculator< float >::calculate(desiredType);
     }
     else
     {
-        return RTTI::ConversionCost::s_incompatible;
+        return Meta::ConversionCost::s_incompatible;
     }
 }
 
-void PyBugObject::unpack(PyObject* object, const RTTI::Type& desiredType, void* buffer)
+void PyBugObject::unpack(PyObject* object, const Meta::Type& desiredType, void* buffer)
 {
-    if(desiredType.metaclass->type() == RTTI::ClassType_Variant)
+    if(desiredType.metaclass->type() == Meta::ClassType_Variant)
     {
         unpackAny(object, buffer);
     }
@@ -717,7 +717,7 @@ void PyBugObject::unpack(PyObject* object, const RTTI::Type& desiredType, void* 
         be_assert(desiredType <= object_->value.type(),
                   "incompatible types: %s is not compatible with %s"
                       | object_->value.type().name().c_str() | desiredType.name().c_str());
-        new(buffer) RTTI::Value(RTTI::Value::ByRef(object_->value));
+        new(buffer) Meta::Value(Meta::Value::ByRef(object_->value));
     }
     else if(object->py_type->tp_flags & (Py_TPFLAGS_INT_SUBCLASS | Py_TPFLAGS_LONG_SUBCLASS))
     {
@@ -733,7 +733,7 @@ void PyBugObject::unpack(PyObject* object, const RTTI::Type& desiredType, void* 
     }
     else if(object->py_type->tp_flags & (Py_TPFLAGS_DICT_SUBCLASS))
     {
-        if(desiredType.metaclass->type() == RTTI::ClassType_Pod)
+        if(desiredType.metaclass->type() == Meta::ClassType_Pod)
         {
             unpackPod(object, desiredType, buffer);
         }
@@ -745,16 +745,16 @@ void PyBugObject::unpack(PyObject* object, const RTTI::Type& desiredType, void* 
     else if(object == s_library->m__Py_NoneStruct)
     {
         void* ptr = 0;
-        new(buffer) RTTI::Value(desiredType, &ptr);
+        new(buffer) Meta::Value(desiredType, &ptr);
     }
     else
     {
         be_notreached();
-        new(buffer) RTTI::Value();
+        new(buffer) Meta::Value();
     }
 }
 
-PyObject* PyBugObject::dir(raw< const RTTI::Class > metaclass)
+PyObject* PyBugObject::dir(raw< const Meta::Class > metaclass)
 {
     PyObject* result = s_library->m_PyList_New(0);
     if(!result) return NULL;
@@ -762,7 +762,7 @@ PyObject* PyBugObject::dir(raw< const RTTI::Class > metaclass)
                                                     ? s_library->m_PyUnicode_FromStringAndSize
                                                     : s_library->m_PyString_FromStringAndSize;
 
-    for(raw< const RTTI::ObjectInfo > o = metaclass->objects; o; o = o->next)
+    for(raw< const Meta::ObjectInfo > o = metaclass->objects; o; o = o->next)
     {
         PyObject* str = fromString(o->name.c_str(), o->name.size());
         if(!str)
@@ -778,9 +778,9 @@ PyObject* PyBugObject::dir(raw< const RTTI::Class > metaclass)
         }
         Py_DECREF(str);
     }
-    for(raw< const RTTI::Class > cls = metaclass; cls; cls = cls->parent)
+    for(raw< const Meta::Class > cls = metaclass; cls; cls = cls->parent)
     {
-        for(const RTTI::Property* p = cls->properties.begin(); p != cls->properties.end(); ++p)
+        for(const Meta::Property* p = cls->properties.begin(); p != cls->properties.end(); ++p)
         {
             PyObject* str = fromString(p->name.c_str(), p->name.size());
             if(!str)
@@ -796,7 +796,7 @@ PyObject* PyBugObject::dir(raw< const RTTI::Class > metaclass)
             }
             Py_DECREF(str);
         }
-        for(const RTTI::Method* m = cls->methods.begin(); m != cls->methods.end(); ++m)
+        for(const Meta::Method* m = cls->methods.begin(); m != cls->methods.end(); ++m)
         {
             PyObject* str = fromString(m->name.c_str(), m->name.size());
             if(!str)
@@ -828,7 +828,7 @@ void PyBugObject::unpackAny(PyObject* object, void* buffer)
        || object->py_type->tp_base == &PyBugObject::s_pyType)
     {
         PyBugObject* object_ = static_cast< PyBugObject* >(object);
-        new(buffer) RTTI::Value(object_->value);
+        new(buffer) Meta::Value(object_->value);
     }
     else if(object->py_type->tp_flags & Py_TPFLAGS_INT_SUBCLASS)
     {
@@ -844,12 +844,12 @@ void PyBugObject::unpackAny(PyObject* object, void* buffer)
     }
     else if(object == s_library->m__Py_NoneStruct)
     {
-        new(buffer) RTTI::Value((const void*)0);
+        new(buffer) Meta::Value((const void*)0);
     }
     else
     {
         be_notreached();
-        new(buffer) RTTI::Value();
+        new(buffer) Meta::Value();
     }
 }
 

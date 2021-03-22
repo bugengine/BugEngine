@@ -6,8 +6,8 @@
 /**************************************************************************************************/
 
 #include <bugengine/core/stdafx.h>
-#include <bugengine/rtti-parse/stdafx.h>
-#include <bugengine/rtti/stdafx.h>
+#include <bugengine/meta/stdafx.h>
+#include <bugengine/reflection/stdafx.h>
 
 #if defined(building_settings)
 #    define BE_API_SETTINGS BE_EXPORT

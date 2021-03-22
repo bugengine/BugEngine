@@ -7,7 +7,7 @@
 
 #include <bugengine/core/stdafx.h>
 #include <bugengine/filesystem/stdafx.h>
-#include <bugengine/rtti/stdafx.h>
+#include <bugengine/meta/stdafx.h>
 
 #if defined(building_resource)
 #    define BE_API_RESOURCE BE_EXPORT

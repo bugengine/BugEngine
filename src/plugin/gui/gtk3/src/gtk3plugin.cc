@@ -8,10 +8,10 @@
 #include <gobject.hh>
 #include <gtk3loader.hh>
 
+#include <bugengine/meta/engine/helper/method.hh>
+#include <bugengine/meta/engine/methodinfo.script.hh>
+#include <bugengine/meta/engine/namespace.hh>
 #include <bugengine/plugin/plugin.hh>
-#include <bugengine/rtti/engine/helper/method.hh>
-#include <bugengine/rtti/engine/methodinfo.script.hh>
-#include <bugengine/rtti/engine/namespace.hh>
 
 namespace BugEngine { namespace Gtk3 {
 

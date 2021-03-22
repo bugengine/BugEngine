@@ -8,7 +8,7 @@
 #include <bugengine/world/component/icomponentstorage.script.hh>
 #include <bugengine/world/component/storageconfiguration.script.hh>
 
-#include <bugengine/rtti-ast/simplepolicy.factory.hh>
+#include <bugengine/introspect/simplepolicy.factory.hh>
 #include <bugengine/scheduler/kernel/iproduct.script.hh>
 #include <bugengine/scheduler/kernel/parameters/iparameter.script.hh>
 
@@ -17,22 +17,22 @@ namespace BugEngine { namespace World { namespace Component {
 class be_api(WORLD) LogicComponentStorage : public IComponentStorage
 {
 public:
-    class IntrospectionHint : public RTTI::AST::IntrospectionHint
+    class IntrospectionHint : public Meta::AST::IntrospectionHint
     {
     protected:
-        virtual bool getPropertyType(RTTI::AST::DbContext& context, const istring name,
-                                     RTTI::Type& propertyType) const override;
+        virtual bool getPropertyType(Meta::AST::DbContext& context, const istring name,
+                                     Meta::Type& propertyType) const override;
 
     public:
-        IntrospectionHint(weak< const RTTI::AST::Object > owner, const RTTI::CallInfo& callInfo,
+        IntrospectionHint(weak< const Meta::AST::Object > owner, const Meta::CallInfo& callInfo,
                           u32 argumentThis);
         ~IntrospectionHint();
     };
 
 published:
-    be_tag(RTTI::AST::SimplePolicy< LogicComponentStorage::IntrospectionHint >())
+    be_tag(Meta::AST::SimplePolicy< LogicComponentStorage::IntrospectionHint >())
         LogicComponentStorage(weak< StorageConfiguration > configuration,
-                              raw< const RTTI::Class >     componentType);
+                              raw< const Meta::Class >     componentType);
 
     const ref< KernelScheduler::IProduct > components;
 };

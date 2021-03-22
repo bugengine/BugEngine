@@ -2,8 +2,8 @@
    see LICENSE for detail */
 
 #include <bugengine/plugin.scripting.pythonlib/stdafx.h>
+#include <bugengine/meta/engine/methodinfo.script.hh>
 #include <bugengine/plugin.scripting.pythonlib/pythonlib.hh>
-#include <bugengine/rtti/engine/methodinfo.script.hh>
 #include <py_boundmethod.hh>
 #include <py_call.hh>
 #include <py_object.hh>
@@ -60,7 +60,7 @@ PyTypeObject PyBoundMethod::s_pyType = {{{0, 0}, 0},
                                         0,
                                         0};
 
-PyObject* PyBoundMethod::create(raw< const RTTI::Method > method, PyBugObject* value)
+PyObject* PyBoundMethod::create(raw< const Meta::Method > method, PyBugObject* value)
 {
     PyBoundMethod* result = reinterpret_cast< PyBoundMethod* >(s_pyType.tp_alloc(&s_pyType, 0));
     result->method        = method;

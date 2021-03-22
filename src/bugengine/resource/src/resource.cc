@@ -2,8 +2,8 @@
    see LICENSE for detail */
 
 #include <bugengine/resource/stdafx.h>
+#include <bugengine/meta/engine/namespace.hh>
 #include <bugengine/resource/resource.hh>
-#include <bugengine/rtti/engine/namespace.hh>
 
 namespace BugEngine { namespace Resource {
 

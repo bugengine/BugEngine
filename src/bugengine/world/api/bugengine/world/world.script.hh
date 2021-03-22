@@ -6,8 +6,8 @@
 /**************************************************************************************************/
 #include <bugengine/world/stdafx.h>
 #include <bugengine/core/memory/allocators/system.hh>
+#include <bugengine/meta/typeinfo.hh>
 #include <bugengine/resource/description.script.hh>
-#include <bugengine/rtti/typeinfo.hh>
 #include <bugengine/scheduler/kernel/iproduct.script.hh>
 #include <bugengine/scheduler/task/group.hh>
 #include <bugengine/world/component/storageconfiguration.script.hh>
@@ -24,7 +24,7 @@ private:
     minitl::array< Task::TaskGroup::TaskEndConnection > m_productEnds;
 
 private:
-    void addComponent(Entity e, const void* component, raw< const RTTI::Class > metaclass);
+    void addComponent(Entity e, const void* component, raw< const Meta::Class > metaclass);
     void update();
 
 public:
@@ -38,10 +38,10 @@ published:
     Entity spawn();
     void   unspawn(Entity e);
 
-    void        addComponent(Entity e, const RTTI::Value& v);
-    void        removeComponent(Entity e, raw< const RTTI::Class > metaclass);
-    bool        hasComponent(Entity e, raw< const RTTI::Class > metaclass) const;
-    RTTI::Value getComponent(Entity e, raw< const RTTI::Class > metaclass) const;
+    void        addComponent(Entity e, const Meta::Value& v);
+    void        removeComponent(Entity e, raw< const Meta::Class > metaclass);
+    bool        hasComponent(Entity e, raw< const Meta::Class > metaclass) const;
+    Meta::Value getComponent(Entity e, raw< const Meta::Class > metaclass) const;
 published:
     World(ref< const Component::StorageConfiguration >             configuration,
           minitl::array< weak< const KernelScheduler::IProduct > > products);

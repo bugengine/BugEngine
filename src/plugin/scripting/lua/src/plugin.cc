@@ -3,8 +3,8 @@
 
 #include <stdafx.h>
 
+#include <bugengine/meta/engine/namespace.hh>
 #include <bugengine/plugin/plugin.hh>
-#include <bugengine/rtti/engine/namespace.hh>
 #include <context.hh>
 
 BE_PLUGIN_REGISTER(BugEngine::Lua::Context);

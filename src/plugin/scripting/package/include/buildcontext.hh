@@ -7,8 +7,8 @@
 #include <bugengine/plugin.scripting.package/stdafx.h>
 #include <bugengine/plugin.scripting.package/nodes/package.hh>
 
+#include <bugengine/introspect/node/node.hh>
 #include <bugengine/plugin/plugin.hh>
-#include <bugengine/rtti-ast/node/node.hh>
 
 struct FileOffset
 {

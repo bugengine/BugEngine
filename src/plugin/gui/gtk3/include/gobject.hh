@@ -8,7 +8,7 @@
 
 namespace BugEngine {
 
-BE_EXPORT raw< RTTI::Class > be_plugin_ui_gtk3_Namespace();
+BE_EXPORT raw< Meta::Class > be_plugin_ui_gtk3_Namespace();
 
 }
 

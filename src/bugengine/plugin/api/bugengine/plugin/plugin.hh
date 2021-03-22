@@ -14,7 +14,7 @@
 
 namespace BugEngine {
 
-namespace RTTI {
+namespace Meta {
 struct Class;
 }
 
@@ -48,7 +48,7 @@ private:
 private:
     typedef Interface*(CreateFunction)(const Context& context);
     typedef void(DestroyFunction)(Interface* instance, weak< Resource::ResourceManager > manager);
-    typedef const RTTI::Class*(GetPluginNamespace)();
+    typedef const Meta::Class*(GetPluginNamespace)();
 
 public:
     enum PreloadType
@@ -81,7 +81,7 @@ public:
         return !m_dynamicObject || !*m_dynamicObject;
     }
 
-    raw< const RTTI::Class > pluginNamespace() const;
+    raw< const Meta::Class > pluginNamespace() const;
     const inamespace&        name() const
     {
         return m_name;

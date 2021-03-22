@@ -2,11 +2,11 @@
    see LICENSE for detail */
 
 #include <bugengine/plugin.scripting.pythonlib/stdafx.h>
+#include <bugengine/meta/classinfo.script.hh>
+#include <bugengine/meta/engine/call.hh>
+#include <bugengine/meta/engine/methodinfo.script.hh>
+#include <bugengine/meta/value.hh>
 #include <bugengine/plugin.scripting.pythonlib/pythonlib.hh>
-#include <bugengine/rtti/classinfo.script.hh>
-#include <bugengine/rtti/engine/call.hh>
-#include <bugengine/rtti/engine/methodinfo.script.hh>
-#include <bugengine/rtti/value.hh>
 #include <py_call.hh>
 #include <py_object.hh>
 
@@ -16,20 +16,20 @@ struct PythonTypeInfo
 {
     PyObject*     arg;
     PyTypeObject* pythonType;
-    RTTI::Type    bugengineType;
+    Meta::Type    bugengineType;
 
-    static RTTI::Type    getTypeFromPyObject(PyObject* object);
+    static Meta::Type    getTypeFromPyObject(PyObject* object);
     static PyTypeObject* getPyTypeFromPyObject(PyObject* object);
 
     PythonTypeInfo(PyObject* object);
 };
 
-RTTI::ConversionCost calculateConversion(const PythonTypeInfo& typeInfo, const RTTI::Type& other)
+Meta::ConversionCost calculateConversion(const PythonTypeInfo& typeInfo, const Meta::Type& other)
 {
     return PyBugObject::distance(typeInfo.arg, other);
 }
 
-void convert(const PythonTypeInfo& typeInfo, void* buffer, RTTI::Type type)
+void convert(const PythonTypeInfo& typeInfo, void* buffer, Meta::Type type)
 {
     PyBugObject::unpack(typeInfo.arg, type, buffer);
 }
@@ -41,7 +41,7 @@ PythonTypeInfo::PythonTypeInfo(PyObject* object)
 {
 }
 
-RTTI::Type PythonTypeInfo::getTypeFromPyObject(PyObject* object)
+Meta::Type PythonTypeInfo::getTypeFromPyObject(PyObject* object)
 {
     if(object->py_type == &PyBugObject::s_pyType)
     {
@@ -66,9 +66,9 @@ PyTypeObject* PythonTypeInfo::getPyTypeFromPyObject(PyObject* object)
     }
 }
 
-typedef RTTI::ArgInfo< PythonTypeInfo > PythonArgInfo;
+typedef Meta::ArgInfo< PythonTypeInfo > PythonArgInfo;
 
-PyObject* call(raw< const RTTI::Method > method, PyObject* self, PyObject* args, PyObject* kwargs)
+PyObject* call(raw< const Meta::Method > method, PyObject* self, PyObject* args, PyObject* kwargs)
 {
     const u32 selfArgCount = self ? 1 : 0;
     const u32 unnamedArgCount
@@ -125,11 +125,11 @@ PyObject* call(raw< const RTTI::Method > method, PyObject* self, PyObject* args,
         }
     }
 
-    RTTI::CallInfo info = RTTI::resolve(method, argInfos, selfArgCount + unnamedArgCount,
+    Meta::CallInfo info = Meta::resolve(method, argInfos, selfArgCount + unnamedArgCount,
                                         argInfos + selfArgCount + unnamedArgCount, namedArgCount);
-    if(info.conversion < RTTI::ConversionCost::s_incompatible)
+    if(info.conversion < Meta::ConversionCost::s_incompatible)
     {
-        RTTI::Value result = RTTI::call(info, argInfos, selfArgCount + unnamedArgCount,
+        Meta::Value result = Meta::call(info, argInfos, selfArgCount + unnamedArgCount,
                                         argInfos + selfArgCount + unnamedArgCount, namedArgCount);
         for(u32 i = argCount; i > 0; --i)
         {

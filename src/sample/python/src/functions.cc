@@ -2,7 +2,7 @@
    see LICENSE for detail */
 
 #include <stdafx.h>
-#include <bugengine/rtti/engine/namespace.hh>
+#include <bugengine/meta/engine/namespace.hh>
 #include <functions.script.hh>
 
 namespace BugEngine { namespace TestCases {

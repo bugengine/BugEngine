@@ -23,7 +23,7 @@ ResourceManager::~ResourceManager()
 {
 }
 
-ResourceManager::LoaderInfo& ResourceManager::getLoaderInfo(raw< const RTTI::Class > classinfo)
+ResourceManager::LoaderInfo& ResourceManager::getLoaderInfo(raw< const Meta::Class > classinfo)
 {
     for(minitl::array< LoaderInfo >::iterator it = m_loaders.begin(); it != m_loaders.end(); ++it)
     {
@@ -38,7 +38,7 @@ ResourceManager::LoaderInfo& ResourceManager::getLoaderInfo(raw< const RTTI::Cla
     return m_loaders[0];
 }
 
-void ResourceManager::attach(raw< const RTTI::Class > classinfo, weak< ILoader > loader)
+void ResourceManager::attach(raw< const Meta::Class > classinfo, weak< ILoader > loader)
 {
     LoaderInfo& info = getLoaderInfo(classinfo);
     for(minitl::vector< weak< ILoader > >::iterator it = info.loaders.begin();
@@ -57,7 +57,7 @@ void ResourceManager::attach(raw< const RTTI::Class > classinfo, weak< ILoader >
     }
 }
 
-void ResourceManager::detach(raw< const RTTI::Class > classinfo, weak< const ILoader > loader)
+void ResourceManager::detach(raw< const Meta::Class > classinfo, weak< const ILoader > loader)
 {
     for(minitl::vector< Ticket >::iterator it = m_watches.begin(); it != m_watches.end(); ++it)
     {
@@ -93,7 +93,7 @@ void ResourceManager::detach(raw< const RTTI::Class > classinfo, weak< const ILo
     be_error("loader was not in the list of loaders for type %s" | classinfo->name);
 }
 
-void ResourceManager::load(raw< const RTTI::Class >  classinfo,
+void ResourceManager::load(raw< const Meta::Class >  classinfo,
                            weak< const Description > description)
 {
     LoaderInfo& info = getLoaderInfo(classinfo);
@@ -105,7 +105,7 @@ void ResourceManager::load(raw< const RTTI::Class >  classinfo,
     info.resources.push_back(*description.operator->());
 }
 
-void ResourceManager::unload(raw< const RTTI::Class >  classinfo,
+void ResourceManager::unload(raw< const Meta::Class >  classinfo,
                              weak< const Description > description)
 {
     description->unhook();

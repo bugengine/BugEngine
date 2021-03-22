@@ -5,7 +5,7 @@
 #define BE_PYTHONLIB_PYTHONSCRIPT_SCRIPT_HH_
 /**************************************************************************************************/
 #include <bugengine/plugin.scripting.pythonlib/stdafx.h>
-#include <bugengine/rtti/tags/editor.script.hh>
+#include <bugengine/meta/tags/editor.script.hh>
 #include <bugengine/script.script.hh>
 
 namespace BugEngine {

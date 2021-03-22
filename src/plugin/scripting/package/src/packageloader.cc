@@ -50,7 +50,7 @@ void PackageLoader::runBuffer(weak< const Package > script, Resource::Resource& 
     be_info("md5 sum of package: %s" | md5);
     ref< PackageBuilder::Nodes::Package > package
         = m_packageBuilder->createPackage(script->getScriptName(), buffer);
-    for(RTTI::AST::MessageList::const_iterator it = package->context().messages.begin();
+    for(Meta::AST::MessageList::const_iterator it = package->context().messages.begin();
         it != package->context().messages.end(); ++it)
     {
         Logger::root()->log(it->severity, __FILE__, __LINE__, it->message.c_str());

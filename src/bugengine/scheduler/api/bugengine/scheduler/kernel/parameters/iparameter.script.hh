@@ -31,7 +31,7 @@ private:
     ref< const IMemoryBuffer > m_buffers[BufferCount];
 
 private:
-    static minitl::vector< raw< const RTTI::Class > >& parameterClasses();
+    static minitl::vector< raw< const Meta::Class > >& parameterClasses();
 
 protected:
     IParameter();
@@ -43,16 +43,16 @@ public:
 
     virtual ref< IProduct > makeProduct(ref< IParameter > parameter, weak< Task::ITask > task) = 0;
 
-    static raw< const RTTI::Class > getParameterClass(const istring parameterTypeName);
+    static raw< const Meta::Class > getParameterClass(const istring parameterTypeName);
     static const istring            getProductTypePropertyName();
 
     struct be_api(SCHEDULER) ParameterRegistration
     {
     private:
-        raw< const RTTI::Class > m_class;
+        raw< const Meta::Class > m_class;
 
     public:
-        ParameterRegistration(raw< const RTTI::Class > klass);
+        ParameterRegistration(raw< const Meta::Class > klass);
         ~ParameterRegistration();
     };
     friend struct ParameterRegistration;

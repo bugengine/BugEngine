@@ -15,7 +15,7 @@ private:
     minitl::hashmap< istring, SettingsProvider::SettingsList > buildSettings(int         argc,
                                                                              const char* argv[]);
 
-    virtual void log(const RTTI::AST::Message& message) const override;
+    virtual void log(const Meta::AST::Message& message) const override;
 
 public:
     CommandLineSettingsProvider(int argc, const char* argv[], ref< Folder > folder);

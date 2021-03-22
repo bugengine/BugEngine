@@ -2,9 +2,9 @@
    see LICENSE for detail */
 
 #include <bugengine/plugin.compute.opencl/stdafx.h>
+#include <bugengine/meta/classinfo.script.hh>
 #include <bugengine/plugin.compute.opencl/scheduler.hh>
 #include <bugengine/plugin/plugin.hh>
-#include <bugengine/rtti/classinfo.script.hh>
 #include <context.hh>
 #include <platform.hh>
 

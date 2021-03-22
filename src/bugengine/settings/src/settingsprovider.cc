@@ -2,14 +2,14 @@
    see LICENSE for detail */
 
 #include <bugengine/settings/stdafx.h>
-#include <bugengine/rtti/engine/namespace.hh>
+#include <bugengine/meta/engine/namespace.hh>
 #include <bugengine/settings/settings.factory.hh>
 #include <bugengine/settings/settingsprovider.hh>
 
 namespace BugEngine { namespace Settings {
 
 void SettingsProvider::addSetting(minitl::hashmap< istring, SettingsList >& container,
-                                  istring category, istring name, ref< RTTI::AST::Node > value)
+                                  istring category, istring name, ref< Meta::AST::Node > value)
 {
     minitl::hashmap< istring, SettingsList >::iterator where;
     where = container.insert(category, SettingsList(Arena::general())).first;
@@ -23,7 +23,7 @@ void SettingsProvider::addSetting(minitl::hashmap< istring, SettingsList >& cont
         }
     }
     where->second.push_back(minitl::make_tuple(
-        name, ref< RTTI::AST::Namespace >::create(Arena::general(), byref(Arena::general())),
+        name, ref< Meta::AST::Namespace >::create(Arena::general(), byref(Arena::general())),
         value));
 }
 
@@ -64,9 +64,9 @@ SettingsProvider::SettingsRegistration::getSettingsList()
 
 void SettingsProvider::apply(SettingsBase& settings) const
 {
-    RTTI::Type  type          = RTTI::Type::makeType(settings.m_settingsClass, RTTI::Type::Value,
-                                           RTTI::Type::Mutable, RTTI::Type::Mutable);
-    RTTI::Value settingsValue = RTTI::Value(type, &settings);
+    Meta::Type  type          = Meta::Type::makeType(settings.m_settingsClass, Meta::Type::Value,
+                                           Meta::Type::Mutable, Meta::Type::Mutable);
+    Meta::Value settingsValue = Meta::Value(type, &settings);
     for(SettingsCategoryMap::const_iterator it = m_settings.begin(); it != m_settings.end(); ++it)
     {
         if(it->first == settings.m_settingsClass->name)
@@ -74,7 +74,7 @@ void SettingsProvider::apply(SettingsBase& settings) const
             for(SettingsList::const_iterator setting = it->second.begin();
                 setting != it->second.end(); ++setting)
             {
-                raw< const RTTI::Property > property
+                raw< const Meta::Property > property
                     = settings.m_settingsClass->getProperty(setting->first);
                 if(!property)
                 {
@@ -82,14 +82,14 @@ void SettingsProvider::apply(SettingsBase& settings) const
                 }
                 else
                 {
-                    RTTI::AST::DbContext context(Arena::stack(), setting->second, m_folder);
+                    Meta::AST::DbContext context(Arena::stack(), setting->second, m_folder);
                     setting->third->resolve(context);
-                    RTTI::Value v = setting->third->eval(property->type);
+                    Meta::Value v = setting->third->eval(property->type);
                     if(!context.errorCount)
                     {
                         property->set(settingsValue, v);
                     }
-                    for(RTTI::AST::MessageList::const_iterator message = context.messages.begin();
+                    for(Meta::AST::MessageList::const_iterator message = context.messages.begin();
                         message != context.messages.end(); ++message)
                     {
                         log(*message);

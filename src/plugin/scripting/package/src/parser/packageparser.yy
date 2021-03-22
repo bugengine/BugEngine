@@ -4,7 +4,7 @@
 #include    <bugengine/plugin.scripting.package/stdafx.h>
 #include    <buildcontext.hh>
 
-#include    <bugengine/rtti-parse/valueparse.hh>
+#include    <bugengine/reflection/valueparse.hh>
 
 #define yyparse be_package_parse
 #define yylex   be_package_lex
@@ -31,7 +31,7 @@ extern int yylex();
 
 static int yyerror(void* context, const char *msg)
 {
-    using namespace BugEngine::RTTI::AST;
+    using namespace BugEngine::Meta::AST;
     BugEngine::PackageBuilder::BuildContext* buildContext = static_cast<BugEngine::PackageBuilder::BuildContext*>(context);
     buildContext->result->context().error(weak<const Node>(),
                                           Message::MessageType("%s at line %d (%d:%d)") | msg | (g_packageLine+1)
@@ -58,7 +58,7 @@ static int yyerror(void* context, const char *msg)
 #define free(x)      BugEngine::Arena::temporary().free(x)
 
 using namespace BugEngine::PackageBuilder;
-using namespace BugEngine::RTTI;
+using namespace BugEngine::Meta;
 
 %}
 

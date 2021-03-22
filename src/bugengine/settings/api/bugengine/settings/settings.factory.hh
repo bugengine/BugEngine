@@ -5,11 +5,11 @@
 #define BE_SETTINGS_SETTINGS_FACTORY_HH_
 /**************************************************************************************************/
 #include <bugengine/settings/stdafx.h>
-#include <bugengine/rtti/engine/methodinfo.script.hh>
-#include <bugengine/rtti/engine/objectinfo.script.hh>
-#include <bugengine/rtti/engine/propertyinfo.script.hh>
-#include <bugengine/rtti/typeinfo.hh>
-#include <bugengine/rtti/value.hh>
+#include <bugengine/meta/engine/methodinfo.script.hh>
+#include <bugengine/meta/engine/objectinfo.script.hh>
+#include <bugengine/meta/engine/propertyinfo.script.hh>
+#include <bugengine/meta/typeinfo.hh>
+#include <bugengine/meta/value.hh>
 #include <bugengine/settings/settingsprovider.hh>
 
 namespace BugEngine { namespace Settings {
@@ -27,13 +27,13 @@ private:
     static minitl::intrusive_list< SettingsBase >& getSettings();
 
 private:
-    raw< const RTTI::Class > const m_settingsClass;
+    raw< const Meta::Class > const m_settingsClass;
 
 private:
     static void onProviderAdded(weak< const SettingsProvider > provider);
 
 protected:
-    SettingsBase(raw< const RTTI::Class > settingsClass);
+    SettingsBase(raw< const Meta::Class > settingsClass);
     ~SettingsBase();
 };
 
@@ -68,53 +68,53 @@ BE_EXPORT SettingsProvider::SettingsRegistration Settings< T >::s_registration(g
 
 namespace BugEngine {
 
-BE_EXPORT raw< RTTI::Class > be_bugengine_Namespace_BugEngine_Settings();
+BE_EXPORT raw< Meta::Class > be_bugengine_Namespace_BugEngine_Settings();
 
-namespace RTTI {
+namespace Meta {
 template < typename T >
 struct ClassID< Settings::Settings< T > >
 {
-    static BE_EXPORT raw< const RTTI::Class > klass();
+    static BE_EXPORT raw< const Meta::Class > klass();
 };
-}  // namespace RTTI
+}  // namespace Meta
 
 namespace Settings {
 
 template < typename T >
 struct BE_EXPORT Settings_BugHelper
 {
-    static RTTI::Value                  trampoline_method_get_overload_0(RTTI::Value* parameters,
+    static Meta::Value                  trampoline_method_get_overload_0(Meta::Value* parameters,
                                                                          u32          parameterCount);
-    static const RTTI::Method::Overload s_method_get_overloads[];
-    static const RTTI::Method           s_methods[];
+    static const Meta::Method::Overload s_method_get_overloads[];
+    static const Meta::Method           s_methods[];
 };
 
 template < typename T >
-RTTI::Value Settings_BugHelper< T >::trampoline_method_get_overload_0(RTTI::Value* params,
+Meta::Value Settings_BugHelper< T >::trampoline_method_get_overload_0(Meta::Value* params,
                                                                       u32          paramCount)
 {
     be_assert(paramCount == 0, "expected no parameter; received %d" | paramCount);
     be_forceuse(params);
-    return RTTI::Value(RTTI::Value::ByRef(Settings< T >::get()));
+    return Meta::Value(Meta::Value::ByRef(Settings< T >::get()));
 }
 
 template < typename T >
-const RTTI::Method::Overload Settings_BugHelper< T >::s_method_get_overloads[]
+const Meta::Method::Overload Settings_BugHelper< T >::s_method_get_overloads[]
     = {{{0}, {0, 0}, be_type< T& >(), false, {0, 0}, &trampoline_method_get_overload_0}};
 
 template < typename T >
-const RTTI::Method Settings_BugHelper< T >::s_methods[1]
+const Meta::Method Settings_BugHelper< T >::s_methods[1]
     = {{istring("get"), {1, s_method_get_overloads}, {0}}};
 
 }  // namespace Settings
 
 template < typename T >
-BE_EXPORT raw< const RTTI::Class > RTTI::ClassID< Settings::Settings< T > >::klass()
+BE_EXPORT raw< const Meta::Class > Meta::ClassID< Settings::Settings< T > >::klass()
 {
-    static RTTI::Class       s_class = {"Settings",
+    static Meta::Class       s_class = {"Settings",
                                   0,
                                   0,
-                                  RTTI::ClassType_Struct,
+                                  Meta::ClassType_Struct,
                                   {be_bugengine_Namespace_BugEngine_Settings().m_ptr},
                                   be_class< void >(),
                                   {0},
@@ -125,7 +125,7 @@ BE_EXPORT raw< const RTTI::Class > RTTI::ClassID< Settings::Settings< T > >::kla
                                   {0},
                                   0,
                                   0};
-    raw< const RTTI::Class > result  = {&s_class};
+    raw< const Meta::Class > result  = {&s_class};
     return result;
 }
 

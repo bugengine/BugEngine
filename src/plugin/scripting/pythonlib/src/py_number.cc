@@ -135,9 +135,9 @@ PyTypeObject PyBugNumber< T >::s_pyType
        0};
 
 template < typename T >
-PyObject* PyBugNumber< T >::stealValue(PyObject* owner, RTTI::Value& value)
+PyObject* PyBugNumber< T >::stealValue(PyObject* owner, Meta::Value& value)
 {
-    be_assert(value.type().metaclass->type() == RTTI::ClassType_Number,
+    be_assert(value.type().metaclass->type() == Meta::ClassType_Number,
               "PyBugNumber only accepts Number types");
     be_assert(value.type().metaclass->index() == be_type< T >().metaclass->index(),
               "expected %s; got %s" | be_type< T >().metaclass->name
@@ -149,7 +149,7 @@ PyObject* PyBugNumber< T >::stealValue(PyObject* owner, RTTI::Value& value)
     {
         Py_INCREF(owner);
     }
-    new(&(static_cast< PyBugNumber* >(result))->value) RTTI::Value();
+    new(&(static_cast< PyBugNumber* >(result))->value) Meta::Value();
     (static_cast< PyBugNumber* >(result))->value.swap(value);
     return result;
 }
@@ -162,7 +162,7 @@ int PyBugNumber< T >::init(PyObject* self, PyObject* args, PyObject* kwds)
     Py_ssize_t   argCount = s_library->m_PyTuple_Size(args);
     if(argCount == 0)
     {
-        self_->value = RTTI::Value(T());
+        self_->value = Meta::Value(T());
     }
     else if(argCount == 1)
     {
@@ -174,12 +174,12 @@ int PyBugNumber< T >::init(PyObject* self, PyObject* args, PyObject* kwds)
         else if(arg->py_type->tp_flags & Py_TPFLAGS_INT_SUBCLASS)
         {
             unsigned long value = s_library->m_PyInt_AsUnsignedLongMask(arg);
-            self_->value        = RTTI::Value(T(value));
+            self_->value        = Meta::Value(T(value));
         }
         else if(arg->py_type->tp_flags & Py_TPFLAGS_LONG_SUBCLASS)
         {
             unsigned long long value = s_library->m_PyLong_AsUnsignedLongLongMask(arg);
-            self_->value             = RTTI::Value(T(value));
+            self_->value             = Meta::Value(T(value));
         }
         else
         {
@@ -196,7 +196,7 @@ template < typename T >
 PyObject* PyBugNumber< T >::repr(PyObject* self)
 {
     PyBugObject*            self_ = static_cast< PyBugObject* >(self);
-    const RTTI::Value&      v     = self_->value;
+    const Meta::Value&      v     = self_->value;
     minitl::format< 1024u > format
         = minitl::format< 1024u >("[%s %d]") | v.type().name().c_str() | v.as< const T >();
     if(s_library->getVersion() >= 30)
@@ -237,7 +237,7 @@ template < typename T >
 PyObject* PyBugNumber< T >::str(PyObject* self)
 {
     PyBugObject*       self_                       = static_cast< PyBugObject* >(self);
-    const RTTI::Value& v                           = self_->value;
+    const Meta::Value& v                           = self_->value;
     PyObject* (*tostring)(const char* format, ...) = s_library->getVersion() >= 30
                                                          ? s_library->m_PyUnicode_FromFormat
                                                          : s_library->m_PyString_FromFormat;
@@ -248,9 +248,9 @@ template < typename T >
 int PyBugNumber< T >::nonZero(PyObject* self)
 {
     PyBugNumber*     self_ = static_cast< PyBugNumber* >(self);
-    const RTTI::Type t     = self_->value.type();
-    be_assert(t.metaclass->type() == RTTI::ClassType_Number, "PyBugNumber expected number value");
-    if(t.indirection == RTTI::Type::Value)
+    const Meta::Type t     = self_->value.type();
+    be_assert(t.metaclass->type() == Meta::ClassType_Number, "PyBugNumber expected number value");
+    if(t.indirection == Meta::Type::Value)
     {
         return self_->value.template as< const T >() != 0;
     }

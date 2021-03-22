@@ -3,10 +3,10 @@
 
 #include <stdafx.h>
 
+#include <bugengine/meta/engine/namespace.hh>
 #include <bugengine/plugin.scripting.python/context.hh>
 #include <bugengine/plugin.scripting.pythonlib/pythonlib.hh>
 #include <bugengine/plugin/plugin.hh>
-#include <bugengine/rtti/engine/namespace.hh>
 
 #ifndef PYTHON_LIBRARY
 #    error PYTHON_LIBRARY must be defined to the library name for this module

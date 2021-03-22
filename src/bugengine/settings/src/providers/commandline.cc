@@ -2,7 +2,7 @@
    see LICENSE for detail */
 
 #include <bugengine/settings/stdafx.h>
-#include <bugengine/rtti-parse/valueparse.hh>
+#include <bugengine/reflection/valueparse.hh>
 #include <bugengine/settings/providers/commandline.hh>
 
 namespace BugEngine { namespace Settings {
@@ -55,12 +55,12 @@ CommandLineSettingsProvider::buildSettings(int argc, const char* argv[])
             }
             else
             {
-                RTTI::AST::MessageList errorList(Arena::stack());
+                Meta::AST::MessageList errorList(Arena::stack());
                 istring                category(nameBegin, sep);
                 istring                property(sep + 1, nameEnd);
-                ref< RTTI::AST::Node > value
-                    = RTTI::parseValue(Arena::script(), errorList, optionBegin, optionEnd, 0, 0);
-                for(RTTI::AST::MessageList::const_iterator it = errorList.begin();
+                ref< Meta::AST::Node > value
+                    = Meta::parseValue(Arena::script(), errorList, optionBegin, optionEnd, 0, 0);
+                for(Meta::AST::MessageList::const_iterator it = errorList.begin();
                     it != errorList.end(); ++it)
                 {
                     Logger::root()->log(logError, "<command line>", 0, it->message);
@@ -82,7 +82,7 @@ CommandLineSettingsProvider::~CommandLineSettingsProvider()
 {
 }
 
-void CommandLineSettingsProvider::log(const RTTI::AST::Message& message) const
+void CommandLineSettingsProvider::log(const Meta::AST::Message& message) const
 {
     Logger::root()->log(message.severity, "<command line>", 0, message.message);
 }

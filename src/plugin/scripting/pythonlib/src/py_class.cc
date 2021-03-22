@@ -57,9 +57,9 @@ PyTypeObject PyBugClass::s_pyType = {{{0, 0}, 0},
                                      0,
                                      0};
 
-PyObject* PyBugClass::stealValue(PyObject* owner, RTTI::Value& value)
+PyObject* PyBugClass::stealValue(PyObject* owner, Meta::Value& value)
 {
-    be_assert(value.type().metaclass->type() == RTTI::ClassType_Namespace,
+    be_assert(value.type().metaclass->type() == Meta::ClassType_Namespace,
               "PyBugClass only accepts Namespace types");
     PyObject* result                          = s_pyType.tp_alloc(&s_pyType, 0);
     static_cast< PyBugClass* >(result)->owner = owner;
@@ -68,7 +68,7 @@ PyObject* PyBugClass::stealValue(PyObject* owner, RTTI::Value& value)
     {
         Py_INCREF(owner);
     }
-    new(&(static_cast< PyBugClass* >(result))->value) RTTI::Value();
+    new(&(static_cast< PyBugClass* >(result))->value) Meta::Value();
     (static_cast< PyBugClass* >(result))->value.swap(value);
     return result;
 }

@@ -40,7 +40,7 @@ def run(argument_context):
     if arguments.debug:
         ExceptionType = SyntaxError
     try:
-        parser = cxx_parser.parser(arguments.std)(arguments.tmp_dir, arguments.input, logger)
+        parser = cxx_parser.parser(arguments.std)(arguments.tmp_dir)
         result = parser.parse(arguments.input)
         if not result:
             sys.exit(0)

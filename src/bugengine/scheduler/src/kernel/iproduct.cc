@@ -7,7 +7,7 @@
 
 namespace BugEngine {
 
-raw< RTTI::Class > be_bugengine_Namespace_BugEngine_KernelScheduler();
+raw< Meta::Class > be_bugengine_Namespace_BugEngine_KernelScheduler();
 
 namespace KernelScheduler {
 
@@ -43,7 +43,7 @@ void IProduct::removeOutputHost(weak< IMemoryHost > host)
     be_notreached();
 }
 
-raw< RTTI::Class > IProduct::getNamespace()
+raw< Meta::Class > IProduct::getNamespace()
 {
     return be_bugengine_Namespace_BugEngine_KernelScheduler();
 }

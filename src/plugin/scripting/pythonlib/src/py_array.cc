@@ -2,9 +2,9 @@
    see LICENSE for detail */
 
 #include <bugengine/plugin.scripting.pythonlib/stdafx.h>
+#include <bugengine/meta/engine/call.hh>
+#include <bugengine/meta/engine/scriptingapi.hh>
 #include <bugengine/plugin.scripting.pythonlib/pythonlib.hh>
-#include <bugengine/rtti/engine/call.hh>
-#include <bugengine/rtti/engine/scriptingapi.hh>
 #include <py_array.hh>
 
 namespace BugEngine { namespace Python {
@@ -76,9 +76,9 @@ PyTypeObject PyBugArray::s_pyType = {{{0, 0}, 0},
                                      0,
                                      0};
 
-PyObject* PyBugArray::stealValue(PyObject* owner, RTTI::Value& value)
+PyObject* PyBugArray::stealValue(PyObject* owner, Meta::Value& value)
 {
-    be_assert(value.type().metaclass->type() == RTTI::ClassType_Array,
+    be_assert(value.type().metaclass->type() == Meta::ClassType_Array,
               "PyBugArray only accepts Array types");
     PyBugArray* result = static_cast< PyBugArray* >(s_pyType.tp_alloc(&s_pyType, 0));
     (result)->owner    = owner;
@@ -88,8 +88,8 @@ PyObject* PyBugArray::stealValue(PyObject* owner, RTTI::Value& value)
         Py_INCREF(owner);
     }
 
-    raw< const RTTI::Class > arrayClass = value.type().metaclass;
-    new(&(static_cast< PyBugArray* >(result))->value) RTTI::Value();
+    raw< const Meta::Class > arrayClass = value.type().metaclass;
+    new(&(static_cast< PyBugArray* >(result))->value) Meta::Value();
     (static_cast< PyBugArray* >(result))->value.swap(value);
     be_assert(arrayClass->apiMethods,
               "Array type %s does not implement API methods" | arrayClass->fullname());
@@ -102,26 +102,26 @@ PyObject* PyBugArray::stealValue(PyObject* owner, RTTI::Value& value)
 PyObject* PyBugArray::repr(PyObject* self)
 {
     PyBugObject*       self_ = static_cast< PyBugObject* >(self);
-    const RTTI::Value& v     = self_->value;
+    const Meta::Value& v     = self_->value;
 
-    const char* constness = (v.type().constness == RTTI::Type::Const) ? "const " : "mutable ";
+    const char* constness = (v.type().constness == Meta::Type::Const) ? "const " : "mutable ";
     const char* reference;
     const char* closing;
     switch(v.type().indirection)
     {
-    case RTTI::Type::RefPtr:
+    case Meta::Type::RefPtr:
         reference = "ref<";
         closing   = ">";
         break;
-    case RTTI::Type::WeakPtr:
+    case Meta::Type::WeakPtr:
         reference = "weak<";
         closing   = ">";
         break;
-    case RTTI::Type::RawPtr:
+    case Meta::Type::RawPtr:
         reference = "raw<";
         closing   = ">";
         break;
-    case RTTI::Type::Value:
+    case Meta::Type::Value:
         reference = "";
         constness = "";
         closing   = "";
@@ -132,7 +132,7 @@ PyObject* PyBugArray::repr(PyObject* self)
         closing   = ">";
         break;
     }
-    const char* access = (v.type().access == RTTI::Type::Const) ? "const " : "";
+    const char* access = (v.type().access == Meta::Type::Const) ? "const " : "";
 
     if(s_library->getVersion() >= 30)
     {
@@ -154,8 +154,8 @@ int PyBugArray::nonZero(PyObject* self)
 Py_ssize_t PyBugArray::length(PyObject* self)
 {
     PyBugArray*      self_ = static_cast< PyBugArray* >(self);
-    const RTTI::Type t     = self_->value.type();
-    be_assert(t.metaclass->type() == RTTI::ClassType_Array, "PyBugArray expected array value");
+    const Meta::Type t     = self_->value.type();
+    be_assert(t.metaclass->type() == Meta::ClassType_Array, "PyBugArray expected array value");
     return Py_ssize_t(t.metaclass->apiMethods->arrayScripting->size(self_->value));
 }
 
@@ -165,8 +165,8 @@ PyObject* PyBugArray::item(PyObject* self, Py_ssize_t index)
     if(index >= 0 && index < length(self))
     {
         u32              index_ = be_checked_numcast< u32 >(index);
-        const RTTI::Type t      = self_->value.type();
-        RTTI::Value      v
+        const Meta::Type t      = self_->value.type();
+        Meta::Value      v
             = t.isConst()
                   ? t.metaclass->apiMethods->arrayScripting->indexConst(self_->value, index_)
                   : t.metaclass->apiMethods->arrayScripting->index(self_->value, index_);
@@ -182,15 +182,15 @@ PyObject* PyBugArray::item(PyObject* self, Py_ssize_t index)
 int PyBugArray::setItem(PyObject* self, Py_ssize_t index, PyObject* value)
 {
     PyBugArray*                          self_    = static_cast< PyBugArray* >(self);
-    const RTTI::Type                     t        = self_->value.type();
-    raw< const RTTI::ScriptingArrayAPI > arrayApi = t.metaclass->apiMethods->arrayScripting;
+    const Meta::Type                     t        = self_->value.type();
+    raw< const Meta::ScriptingArrayAPI > arrayApi = t.metaclass->apiMethods->arrayScripting;
     if(t.isConst())
     {
         s_library->m_PyErr_Format(*s_library->m_PyExc_TypeError, "instance of %s is const",
                                   self_->value.type().name().c_str());
         return -1;
     }
-    else if(distance(value, arrayApi->value_type) >= RTTI::ConversionCost::s_incompatible)
+    else if(distance(value, arrayApi->value_type) >= Meta::ConversionCost::s_incompatible)
     {
         s_library->m_PyErr_Format(*s_library->m_PyExc_TypeError,
                                   "Cannot convert to array value_type %s",
@@ -200,7 +200,7 @@ int PyBugArray::setItem(PyObject* self, Py_ssize_t index, PyObject* value)
     else
     {
         u32          index_ = be_checked_numcast< u32 >(index);
-        RTTI::Value* v      = (RTTI::Value*)malloca(sizeof(RTTI::Value));
+        Meta::Value* v      = (Meta::Value*)malloca(sizeof(Meta::Value));
         PyBugObject::unpack(value, arrayApi->value_type, v);
         arrayApi->index(self_->value, index_) = *v;
         v->~Value();

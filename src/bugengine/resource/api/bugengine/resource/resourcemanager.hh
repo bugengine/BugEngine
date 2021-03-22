@@ -6,13 +6,13 @@
 /**************************************************************************************************/
 #include <bugengine/resource/stdafx.h>
 #include <bugengine/filesystem/file.script.hh>
+#include <bugengine/meta/classinfo.script.hh>
+#include <bugengine/meta/typeinfo.hh>
 #include <bugengine/minitl/array.hh>
 #include <bugengine/minitl/intrusive_list.hh>
 #include <bugengine/minitl/refcountable.hh>
 #include <bugengine/resource/description.script.hh>
 #include <bugengine/resource/loader.hh>
-#include <bugengine/rtti/classinfo.script.hh>
-#include <bugengine/rtti/typeinfo.hh>
 
 namespace BugEngine { namespace Resource {
 
@@ -24,7 +24,7 @@ private:
     struct LoaderInfo
     {
         LoaderInfo();
-        raw< const RTTI::Class >                       classinfo;
+        raw< const Meta::Class >                       classinfo;
         minitl::vector< weak< ILoader > >              loaders;
         minitl::intrusive_list< const Description, 2 > resources;
     };
@@ -48,16 +48,16 @@ private:
     minitl::vector< Ticket >    m_watches;
 
 private:
-    LoaderInfo& getLoaderInfo(raw< const RTTI::Class > classinfo);
+    LoaderInfo& getLoaderInfo(raw< const Meta::Class > classinfo);
 
 public:
     ResourceManager();
     ~ResourceManager();
 
-    void attach(raw< const RTTI::Class > classinfo, weak< ILoader > loader);
-    void detach(raw< const RTTI::Class > classinfo, weak< const ILoader > loader);
-    void load(raw< const RTTI::Class > classinfo, weak< const Description > resource);
-    void unload(raw< const RTTI::Class > classinfo, weak< const Description > resource);
+    void attach(raw< const Meta::Class > classinfo, weak< ILoader > loader);
+    void detach(raw< const Meta::Class > classinfo, weak< const ILoader > loader);
+    void load(raw< const Meta::Class > classinfo, weak< const Description > resource);
+    void unload(raw< const Meta::Class > classinfo, weak< const Description > resource);
 
     template < typename T >
     void attach(weak< ILoader > loader)

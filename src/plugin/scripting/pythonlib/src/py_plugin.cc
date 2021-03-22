@@ -86,8 +86,8 @@ PyObject* PyBugPlugin::getattr(PyObject* self, const char* name)
     PyBugPlugin* self_ = reinterpret_cast< PyBugPlugin* >(self);
     if(self_->value)
     {
-        RTTI::Value v(self_->value.pluginNamespace());
-        RTTI::Value result = v[name];
+        Meta::Value v(self_->value.pluginNamespace());
+        Meta::Value result = v[name];
         return PyBugObject::stealValue(self, result);
     }
     else

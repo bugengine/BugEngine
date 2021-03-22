@@ -8,7 +8,7 @@
 
 namespace BugEngine { namespace KernelScheduler {
 
-IParameter::ParameterRegistration::ParameterRegistration(raw< const RTTI::Class > klass)
+IParameter::ParameterRegistration::ParameterRegistration(raw< const Meta::Class > klass)
     : m_class(klass)
 {
     IParameter::parameterClasses().push_back(klass);
@@ -16,8 +16,8 @@ IParameter::ParameterRegistration::ParameterRegistration(raw< const RTTI::Class 
 
 IParameter::ParameterRegistration::~ParameterRegistration()
 {
-    minitl::vector< raw< const RTTI::Class > > classes = IParameter::parameterClasses();
-    for(minitl::vector< raw< const RTTI::Class > >::iterator it = classes.begin();
+    minitl::vector< raw< const Meta::Class > > classes = IParameter::parameterClasses();
+    for(minitl::vector< raw< const Meta::Class > >::iterator it = classes.begin();
         it != classes.end(); ++it)
     {
         if(*it == m_class) classes.erase(it);
@@ -47,20 +47,20 @@ weak< const IMemoryBuffer > IParameter::getBank(weak< const IMemoryHost > host) 
     return weak< const IMemoryBuffer >();
 }
 
-raw< const RTTI::Class > IParameter::getParameterClass(istring parameterClassName)
+raw< const Meta::Class > IParameter::getParameterClass(istring parameterClassName)
 {
-    minitl::vector< raw< const RTTI::Class > > classes = IParameter::parameterClasses();
-    for(minitl::vector< raw< const RTTI::Class > >::iterator it = classes.begin();
+    minitl::vector< raw< const Meta::Class > > classes = IParameter::parameterClasses();
+    for(minitl::vector< raw< const Meta::Class > >::iterator it = classes.begin();
         it != classes.end(); ++it)
     {
         if((*it)->name == parameterClassName) return *it;
     }
-    return raw< const RTTI::Class >();
+    return raw< const Meta::Class >();
 }
 
-minitl::vector< raw< const RTTI::Class > >& IParameter::parameterClasses()
+minitl::vector< raw< const Meta::Class > >& IParameter::parameterClasses()
 {
-    static minitl::vector< raw< const RTTI::Class > > s_classes(Arena::rtti());
+    static minitl::vector< raw< const Meta::Class > > s_classes(Arena::meta());
     return s_classes;
 }
 

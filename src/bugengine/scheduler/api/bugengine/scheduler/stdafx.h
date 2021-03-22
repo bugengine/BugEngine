@@ -7,8 +7,8 @@
 
 #include <bugengine/core/stdafx.h>
 #include <bugengine/filesystem/stdafx.h>
+#include <bugengine/meta/stdafx.h>
 #include <bugengine/resource/stdafx.h>
-#include <bugengine/rtti/stdafx.h>
 
 #if defined(building_scheduler)
 #    define BE_API_SCHEDULER BE_EXPORT

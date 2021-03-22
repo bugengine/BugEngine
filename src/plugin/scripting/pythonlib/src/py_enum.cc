@@ -2,8 +2,8 @@
    see LICENSE for detail */
 
 #include <bugengine/plugin.scripting.pythonlib/stdafx.h>
+#include <bugengine/meta/engine/methodinfo.script.hh>
 #include <bugengine/plugin.scripting.pythonlib/pythonlib.hh>
-#include <bugengine/rtti/engine/methodinfo.script.hh>
 #include <py_enum.hh>
 
 namespace BugEngine { namespace Python {
@@ -131,9 +131,9 @@ PyTypeObject PyBugEnum::s_pyType = {{{0, 0}, 0},
                                     0,
                                     0};
 
-PyObject* PyBugEnum::stealValue(PyObject* owner, RTTI::Value& value)
+PyObject* PyBugEnum::stealValue(PyObject* owner, Meta::Value& value)
 {
-    be_assert(value.type().metaclass->type() == RTTI::ClassType_Enum,
+    be_assert(value.type().metaclass->type() == Meta::ClassType_Enum,
               "PyBugNumber only accepts Enum types");
     PyObject* result                         = s_pyType.tp_alloc(&s_pyType, 0);
     static_cast< PyBugEnum* >(result)->owner = owner;
@@ -142,7 +142,7 @@ PyObject* PyBugEnum::stealValue(PyObject* owner, RTTI::Value& value)
     {
         Py_INCREF(owner);
     }
-    new(&(static_cast< PyBugEnum* >(result))->value) RTTI::Value();
+    new(&(static_cast< PyBugEnum* >(result))->value) Meta::Value();
     (static_cast< PyBugEnum* >(result))->value.swap(value);
     return result;
 }
@@ -153,8 +153,8 @@ static istring s_toInt    = istring("toInt");
 PyObject* PyBugEnum::str(PyObject* self)
 {
     PyBugEnum*                self_    = static_cast< PyBugEnum* >(self);
-    const RTTI::Value&        v        = self_->value;
-    raw< const RTTI::Method > toString = self_->value[s_toString].as< raw< const RTTI::Method > >();
+    const Meta::Value&        v        = self_->value;
+    raw< const Meta::Method > toString = self_->value[s_toString].as< raw< const Meta::Method > >();
     minitl::format< 1024u >   format   = minitl::format< 1024u >("%s.%s") | v.type().name().c_str()
                                      | toString->doCall(&self_->value, 1).as< const istring >();
     if(s_library->getVersion() >= 30)
@@ -170,7 +170,7 @@ PyObject* PyBugEnum::str(PyObject* self)
 PyObject* PyBugEnum::toint(PyObject* self)
 {
     PyBugObject*              self_ = static_cast< PyBugObject* >(self);
-    raw< const RTTI::Method > toInt = self_->value[s_toInt].as< raw< const RTTI::Method > >();
+    raw< const Meta::Method > toInt = self_->value[s_toInt].as< raw< const Meta::Method > >();
     long                      value = (long)toInt->doCall(&self_->value, 1).as< u32 >();
     return s_library->m_PyInt_FromLong(value);
 }
@@ -178,7 +178,7 @@ PyObject* PyBugEnum::toint(PyObject* self)
 PyObject* PyBugEnum::tolong(PyObject* self)
 {
     PyBugObject*              self_ = static_cast< PyBugObject* >(self);
-    raw< const RTTI::Method > toInt = self_->value[s_toInt].as< raw< const RTTI::Method > >();
+    raw< const Meta::Method > toInt = self_->value[s_toInt].as< raw< const Meta::Method > >();
     unsigned long long value = (unsigned long long)toInt->doCall(&self_->value, 1).as< u32 >();
     return s_library->m_PyLong_FromUnsignedLongLong(value);
 }
@@ -186,7 +186,7 @@ PyObject* PyBugEnum::tolong(PyObject* self)
 PyObject* PyBugEnum::tofloat(PyObject* self)
 {
     PyBugObject*              self_ = static_cast< PyBugObject* >(self);
-    raw< const RTTI::Method > toInt = self_->value[s_toInt].as< raw< const RTTI::Method > >();
+    raw< const Meta::Method > toInt = self_->value[s_toInt].as< raw< const Meta::Method > >();
     double                    value = (double)toInt->doCall(&self_->value, 1).as< u32 >();
     return s_library->m_PyFloat_FromDouble(value);
 }
@@ -194,7 +194,7 @@ PyObject* PyBugEnum::tofloat(PyObject* self)
 int PyBugEnum::nonZero(PyObject* self)
 {
     PyBugObject*              self_ = static_cast< PyBugObject* >(self);
-    raw< const RTTI::Method > toInt = self_->value[s_toInt].as< raw< const RTTI::Method > >();
+    raw< const Meta::Method > toInt = self_->value[s_toInt].as< raw< const Meta::Method > >();
     return toInt->doCall(&self_->value, 1).as< u32 >() != 0;
 }
 

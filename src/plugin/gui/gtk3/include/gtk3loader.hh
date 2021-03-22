@@ -4,9 +4,9 @@
 #ifndef BE_GUI_GTK3_GTK3LOADER_HH_
 #define BE_GUI_GTK3_GTK3LOADER_HH_
 /**************************************************************************************************/
+#include <bugengine/meta/classinfo.script.hh>
 #include <bugengine/plugin/plugin.hh>
 #include <bugengine/resource/loader.hh>
-#include <bugengine/rtti/classinfo.script.hh>
 #include <gtk3plugin.hh>
 
 namespace BugEngine { namespace Gtk3 {

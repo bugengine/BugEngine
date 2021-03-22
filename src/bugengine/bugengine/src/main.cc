@@ -8,9 +8,9 @@
 
 #include <bugengine/core/environment.hh>
 #include <bugengine/filesystem/diskfolder.script.hh>
+#include <bugengine/meta/engine/namespace.hh>
 #include <bugengine/plugin/plugin.hh>
 #include <bugengine/resource/resourcemanager.hh>
-#include <bugengine/rtti/engine/namespace.hh>
 #include <bugengine/scheduler/scheduler.hh>
 #include <bugengine/settings/providers/commandline.hh>
 

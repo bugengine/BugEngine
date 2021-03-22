@@ -12,7 +12,7 @@ namespace BugEngine { namespace Lua {
 struct ResourceToken
 {
     weak< Resource::ResourceManager >   manager;
-    raw< const RTTI::Class >            type;
+    raw< const Meta::Class >            type;
     weak< const Resource::Description > description;
 };
 
@@ -41,7 +41,7 @@ extern "C" int resourceLoaderLoad(lua_State* state)
 
     weak< Resource::ResourceManager > userdata
         = *(weak< Resource::ResourceManager >*)lua_touserdata(state, 1);
-    RTTI::Value*                        v = (RTTI::Value*)lua_touserdata(state, 2);
+    Meta::Value*                        v = (Meta::Value*)lua_touserdata(state, 2);
     weak< const Resource::Description > description
         = v->as< weak< const Resource::Description > >();
     ResourceToken* resourceToken = (ResourceToken*)lua_newuserdata(state, sizeof(ResourceToken));

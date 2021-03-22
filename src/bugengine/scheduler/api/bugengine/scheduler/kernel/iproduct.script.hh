@@ -29,7 +29,7 @@ protected:
     virtual ~IProduct();
 
 public:
-    static raw< RTTI::Class > getNamespace();
+    static raw< Meta::Class > getNamespace();
 
     weak< Task::ITask > producer() const
     {

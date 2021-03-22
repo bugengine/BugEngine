@@ -2,8 +2,8 @@
    see LICENSE for detail */
 
 #include <bugengine/plugin.scripting.pythonlib/stdafx.h>
+#include <bugengine/meta/classinfo.script.hh>
 #include <bugengine/plugin.scripting.pythonlib/pythonlib.hh>
-#include <bugengine/rtti/classinfo.script.hh>
 #include <py_namespace.hh>
 
 namespace BugEngine { namespace Python {
@@ -61,9 +61,9 @@ PyTypeObject PyBugNamespace::s_pyType = {{{0, 0}, 0},
                                          0,
                                          0};
 
-PyObject* PyBugNamespace::stealValue(PyObject* owner, RTTI::Value& value)
+PyObject* PyBugNamespace::stealValue(PyObject* owner, Meta::Value& value)
 {
-    be_assert(value.type().metaclass->type() == RTTI::ClassType_Namespace,
+    be_assert(value.type().metaclass->type() == Meta::ClassType_Namespace,
               "PyBugNamespace only accepts Namespace types");
     PyObject* result                              = s_pyType.tp_alloc(&s_pyType, 0);
     static_cast< PyBugNamespace* >(result)->owner = owner;
@@ -72,7 +72,7 @@ PyObject* PyBugNamespace::stealValue(PyObject* owner, RTTI::Value& value)
     {
         Py_INCREF(owner);
     }
-    new(&(static_cast< PyBugNamespace* >(result))->value) RTTI::Value();
+    new(&(static_cast< PyBugNamespace* >(result))->value) Meta::Value();
     (static_cast< PyBugNamespace* >(result))->value.swap(value);
     return result;
 }
@@ -89,13 +89,13 @@ int PyBugNamespace::init(PyObject* self, PyObject* args, PyObject* kwds)
 PyObject* PyBugNamespace::getattr(PyObject* self, const char* name)
 {
     PyBugNamespace*    self_ = static_cast< PyBugNamespace* >(self);
-    const RTTI::Class& klass = self_->value.as< const RTTI::Class& >();
+    const Meta::Class& klass = self_->value.as< const Meta::Class& >();
     istring            name_(name);
-    for(raw< const RTTI::ObjectInfo > o = klass.objects; o; o = o->next)
+    for(raw< const Meta::ObjectInfo > o = klass.objects; o; o = o->next)
     {
         if(o->name == name_)
         {
-            RTTI::Value v = o->value;
+            Meta::Value v = o->value;
             return PyBugObject::stealValue(self, v);
         }
     }
@@ -106,17 +106,17 @@ int PyBugNamespace::setattr(PyObject* self, const char* name, PyObject* value)
 {
     PyBugObject*       self_ = static_cast< PyBugObject* >(self);
     istring            name_(name);
-    const RTTI::Class& klass = self_->value.as< const RTTI::Class& >();
-    for(raw< const RTTI::ObjectInfo > ob = klass.objects; ob; ob = ob->next)
+    const Meta::Class& klass = self_->value.as< const Meta::Class& >();
+    for(raw< const Meta::ObjectInfo > ob = klass.objects; ob; ob = ob->next)
     {
         if(ob->name == name_)
         {
-            if(ob->value.type().access != RTTI::Type::Const)
+            if(ob->value.type().access != Meta::Type::Const)
             {
-                RTTI::ConversionCost c = distance(value, ob->value.type());
-                if(c < RTTI::ConversionCost::s_incompatible)
+                Meta::ConversionCost c = distance(value, ob->value.type());
+                if(c < Meta::ConversionCost::s_incompatible)
                 {
-                    RTTI::Value* v = (RTTI::Value*)malloca(sizeof(RTTI::Value));
+                    Meta::Value* v = (Meta::Value*)malloca(sizeof(Meta::Value));
                     unpack(value, ob->value.type(), v);
                     ob->value = *v;
                     v->~Value();
@@ -150,12 +150,12 @@ PyObject* PyBugNamespace::dir(PyObject* self, PyObject* args)
     be_forceuse(args);
     PyObject* result = s_library->m_PyList_New(0);
     if(!result) return NULL;
-    const RTTI::Class&             klass      = self_->value.as< const RTTI::Class& >();
+    const Meta::Class&             klass      = self_->value.as< const Meta::Class& >();
     PyString_FromStringAndSizeType fromString = s_library->getVersion() >= 30
                                                     ? s_library->m_PyUnicode_FromStringAndSize
                                                     : s_library->m_PyString_FromStringAndSize;
 
-    for(raw< const RTTI::ObjectInfo > o = klass.objects; o; o = o->next)
+    for(raw< const Meta::ObjectInfo > o = klass.objects; o; o = o->next)
     {
         PyObject* str = fromString(o->name.c_str(), o->name.size());
         if(!str)
@@ -177,8 +177,8 @@ PyObject* PyBugNamespace::dir(PyObject* self, PyObject* args)
 PyObject* PyBugNamespace::repr(PyObject* self)
 {
     PyBugObject*       self_ = static_cast< PyBugObject* >(self);
-    const RTTI::Value& v     = self_->value;
-    const RTTI::Class& ns    = v.as< const RTTI::Class& >();
+    const Meta::Value& v     = self_->value;
+    const Meta::Class& ns    = v.as< const Meta::Class& >();
 
     if(s_library->getVersion() >= 30)
     {
@@ -197,7 +197,7 @@ void PyBugNamespace::registerType(PyObject* module)
     Py_INCREF(&s_pyType);
     result = (*s_library->m_PyModule_AddObject)(module, "Namespace", (PyObject*)&s_pyType);
     be_assert(result >= 0, "unable to register type");
-    RTTI::Value v = RTTI::Value(be_bugengine_Namespace());
+    Meta::Value v = Meta::Value(be_bugengine_Namespace());
     result        = (*s_library->m_PyModule_AddObject)(module, "BugEngine", stealValue(0, v));
     be_assert(result >= 0, "unable to register type");
     be_forceuse(result);

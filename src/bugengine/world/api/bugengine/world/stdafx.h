@@ -7,8 +7,8 @@
 
 #include <bugengine/core/stdafx.h>
 #include <bugengine/filesystem/stdafx.h>
+#include <bugengine/meta/stdafx.h>
 #include <bugengine/resource/stdafx.h>
-#include <bugengine/rtti/stdafx.h>
 #include <bugengine/scheduler/stdafx.h>
 
 #if defined(building_world)

@@ -4,7 +4,7 @@
 #include    <bugengine/plugin.scripting.package/stdafx.h>
 #include    <ctype.h>
 #include    <buildcontext.hh>
-#include    <bugengine/rtti-parse/valueparse.hh>
+#include    <bugengine/reflection/valueparse.hh>
 
 #define yylval  be_package_lval
 #include "packageparser.hh"

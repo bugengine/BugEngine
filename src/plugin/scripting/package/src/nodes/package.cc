@@ -2,9 +2,9 @@
    see LICENSE for detail */
 
 #include <bugengine/plugin.scripting.package/stdafx.h>
+#include <bugengine/meta/engine/propertyinfo.script.hh>
 #include <bugengine/plugin.scripting.package/nodes/package.hh>
 #include <bugengine/resource/resourcemanager.hh>
-#include <bugengine/rtti/engine/propertyinfo.script.hh>
 
 namespace BugEngine { namespace PackageBuilder { namespace Nodes {
 
@@ -17,7 +17,7 @@ Package::Package(const ifilename& filename, ref< Folder > dataFolder)
     , m_nodes(Arena::packageBuilder())
     , m_values(Arena::packageBuilder())
 {
-    m_context.rootNamespace->add(inamespace("bugengine"), RTTI::Value(be_bugengine_Namespace()));
+    m_context.rootNamespace->add(inamespace("bugengine"), Meta::Value(be_bugengine_Namespace()));
 }
 
 Package::~Package()
@@ -34,13 +34,13 @@ void Package::loadPlugin(inamespace plugin, inamespace name)
     else
     {
         m_plugins.push_back(p);
-        m_context.rootNamespace->add(name, RTTI::Value(p.pluginNamespace()));
+        m_context.rootNamespace->add(name, Meta::Value(p.pluginNamespace()));
     }
 }
 
-void Package::insertNode(const istring name, ref< RTTI::AST::Node > object)
+void Package::insertNode(const istring name, ref< Meta::AST::Node > object)
 {
-    for(minitl::vector< ref< RTTI::AST::Node > >::iterator it = m_nodes.begin();
+    for(minitl::vector< ref< Meta::AST::Node > >::iterator it = m_nodes.begin();
         it != m_nodes.end(); ++it)
     {
         if(*it == object)
@@ -54,12 +54,12 @@ void Package::insertNode(const istring name, ref< RTTI::AST::Node > object)
     m_context.rootNamespace->add(inamespace(name), object);
 }
 
-void Package::removeNode(ref< RTTI::AST::Node > object)
+void Package::removeNode(ref< Meta::AST::Node > object)
 {
     istring name = object->getMetadata(s_name).as< const istring >();
     m_context.rootNamespace->remove(inamespace(name), object);
 
-    minitl::vector< ref< RTTI::AST::Node > >::iterator it = m_nodes.begin();
+    minitl::vector< ref< Meta::AST::Node > >::iterator it = m_nodes.begin();
     while(it != m_nodes.end())
     {
         if(*it == object)
@@ -72,15 +72,15 @@ void Package::removeNode(ref< RTTI::AST::Node > object)
     be_error("Object does not exist");
 }
 
-ref< RTTI::AST::Node > Package::findByName(istring name) const
+ref< Meta::AST::Node > Package::findByName(istring name) const
 {
     return m_context.rootNamespace->getNode(name);
 }
 
-const RTTI::Value& Package::getValue(weak< const RTTI::AST::Node > object) const
+const Meta::Value& Package::getValue(weak< const Meta::AST::Node > object) const
 {
     size_t index = 0;
-    for(minitl::vector< ref< RTTI::AST::Node > >::const_iterator it = m_nodes.begin();
+    for(minitl::vector< ref< Meta::AST::Node > >::const_iterator it = m_nodes.begin();
         it != m_nodes.end(); ++it, ++index)
     {
         if((*it) == object)
@@ -144,7 +144,7 @@ bool Package::success() const
 
 void Package::resolve()
 {
-    for(minitl::vector< ref< RTTI::AST::Node > >::const_iterator it = m_nodes.begin();
+    for(minitl::vector< ref< Meta::AST::Node > >::const_iterator it = m_nodes.begin();
         it != m_nodes.end(); ++it)
     {
         (*it)->resolve(m_context);

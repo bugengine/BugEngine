@@ -5,7 +5,7 @@
 #define BE_PACKAGE_PACKAGE_SCRIPT_HH_
 /**************************************************************************************************/
 #include <bugengine/plugin.scripting.package/stdafx.h>
-#include <bugengine/rtti/tags/editor.script.hh>
+#include <bugengine/meta/tags/editor.script.hh>
 #include <bugengine/script.script.hh>
 
 namespace BugEngine {

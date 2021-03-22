@@ -2,7 +2,7 @@
    see LICENSE for detail */
 
 #include <bugengine/world/stdafx.h>
-#include <bugengine/rtti/engine/namespace.hh>
+#include <bugengine/meta/engine/namespace.hh>
 #include <bugengine/scheduler/task/group.hh>
 #include <bugengine/scheduler/task/method.hh>
 #include <bugengine/world/world.script.hh>
@@ -47,37 +47,37 @@ void World::unspawn(Entity e)
     be_forceuse(e);
 }
 
-void World::addComponent(Entity e, const void* component, raw< const RTTI::Class > componentType)
+void World::addComponent(Entity e, const void* component, raw< const Meta::Class > componentType)
 {
     be_forceuse(e);
     be_forceuse(component);
     be_forceuse(componentType);
 }
 
-void World::removeComponent(Entity e, raw< const RTTI::Class > componentType)
+void World::removeComponent(Entity e, raw< const Meta::Class > componentType)
 {
     be_forceuse(e);
     be_forceuse(componentType);
 }
 
-bool World::hasComponent(Entity e, raw< const RTTI::Class > componentType) const
+bool World::hasComponent(Entity e, raw< const Meta::Class > componentType) const
 {
     be_forceuse(e);
     be_forceuse(componentType);
     return false;
 }
 
-void World::addComponent(Entity e, const RTTI::Value& component)
+void World::addComponent(Entity e, const Meta::Value& component)
 {
     be_forceuse(e);
     be_forceuse(component);
 }
 
-RTTI::Value World::getComponent(Entity e, raw< const RTTI::Class > metaclass) const
+Meta::Value World::getComponent(Entity e, raw< const Meta::Class > metaclass) const
 {
     be_forceuse(e);
     be_forceuse(metaclass);
-    return RTTI::Value();
+    return Meta::Value();
 }
 
 }}  // namespace BugEngine::World

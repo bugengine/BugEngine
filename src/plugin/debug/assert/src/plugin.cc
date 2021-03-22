@@ -2,8 +2,8 @@
    see LICENSE for detail */
 
 #include <stdafx.h>
+#include <bugengine/meta/classinfo.script.hh>
 #include <bugengine/plugin/plugin.hh>
-#include <bugengine/rtti/classinfo.script.hh>
 
 namespace BugEngine { namespace Debug {
 

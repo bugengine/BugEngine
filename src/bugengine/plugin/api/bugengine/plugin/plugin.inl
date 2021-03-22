@@ -3,25 +3,25 @@
 
 #include <bugengine/plugin/stdafx.h>
 #include <bugengine/core/environment.hh>
+#include <bugengine/meta/classinfo.script.hh>
+#include <bugengine/meta/engine/helper/staticarray.hh>
+#include <bugengine/meta/engine/objectinfo.script.hh>
+#include <bugengine/meta/value.hh>
 #include <bugengine/plugin/dynobjectlist.hh>
 #include <bugengine/plugin/hook.hh>
 #include <bugengine/plugin/plugin.hh>
-#include <bugengine/rtti/classinfo.script.hh>
-#include <bugengine/rtti/engine/helper/staticarray.hh>
-#include <bugengine/rtti/engine/objectinfo.script.hh>
-#include <bugengine/rtti/value.hh>
 
 namespace BugEngine { namespace Plugin {
 
 #define BE_PLUGIN_NAMESPACE_CREATE_(name)                                                          \
     namespace BugEngine {                                                                          \
-    raw< RTTI::Class > be_##name##_Namespace()                                                     \
+    raw< Meta::Class > be_##name##_Namespace()                                                     \
     {                                                                                              \
-        static RTTI::ObjectInfo              ob    = {{0}, {0}, "BugEngine", RTTI::Value()};       \
-        static RTTI::Class                   ci    = {istring("BugEngine"),                        \
+        static Meta::ObjectInfo              ob    = {{0}, {0}, "BugEngine", Meta::Value()};       \
+        static Meta::Class                   ci    = {istring("BugEngine"),                        \
                                  0,                                           \
                                  0,                                           \
-                                 RTTI::ClassType_Namespace,                   \
+                                 Meta::ClassType_Namespace,                   \
                                  {0},                                         \
                                  {0},                                         \
                                  {&ob},                                       \
@@ -32,16 +32,16 @@ namespace BugEngine { namespace Plugin {
                                  {0},                                         \
                                  0,                                           \
                                  0};                                          \
-        static raw< const RTTI::ObjectInfo > obptr = {((ob.value = RTTI::Value(&ci)), &ob)};       \
+        static raw< const Meta::ObjectInfo > obptr = {((ob.value = Meta::Value(&ci)), &ob)};       \
         be_forceuse(obptr);                                                                        \
-        raw< RTTI::Class > ptr = {&ci};                                                            \
+        raw< Meta::Class > ptr = {&ci};                                                            \
         return ptr;                                                                                \
     }                                                                                              \
     }
 
 #define BE_PLUGIN_NAMESPACE_REGISTER_NAMED__(name, id)                                             \
     BE_PLUGIN_NAMESPACE_CREATE_(id)                                                                \
-    _BE_PLUGIN_EXPORT const BugEngine::RTTI::Class* be_pluginNamespace()                           \
+    _BE_PLUGIN_EXPORT const BugEngine::Meta::Class* be_pluginNamespace()                           \
     {                                                                                              \
         return BugEngine::be_##id##_Namespace().operator->();                                      \
     }                                                                                              \
@@ -78,7 +78,7 @@ namespace BugEngine { namespace Plugin {
             it != g_pluginHooks_##id.end(); ++it)                                                  \
             it->onunload(manager);                                                                 \
     }                                                                                              \
-    _BE_PLUGIN_EXPORT const BugEngine::RTTI::Class* be_pluginNamespace()                           \
+    _BE_PLUGIN_EXPORT const BugEngine::Meta::Class* be_pluginNamespace()                           \
     {                                                                                              \
         return BugEngine::be_##id##_Namespace().operator->();                                      \
     }                                                                                              \
@@ -187,7 +187,7 @@ void Plugin< T >::swap(Plugin& other)
 }
 
 template < typename T >
-raw< const RTTI::Class > Plugin< T >::pluginNamespace() const
+raw< const Meta::Class > Plugin< T >::pluginNamespace() const
 {
     if(m_dynamicObject && *m_dynamicObject)
     {
@@ -195,11 +195,11 @@ raw< const RTTI::Class > Plugin< T >::pluginNamespace() const
             = m_dynamicObject->getSymbol< GetPluginNamespace >("be_pluginNamespace");
         if(getNamespace)
         {
-            raw< const RTTI::Class > ci = {(*getNamespace)()};
+            raw< const Meta::Class > ci = {(*getNamespace)()};
             return ci;
         }
     }
-    raw< const RTTI::Class > ci = {0};
+    raw< const Meta::Class > ci = {0};
     return ci;
 }
 

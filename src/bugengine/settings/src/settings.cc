@@ -2,7 +2,7 @@
    see LICENSE for detail */
 
 #include <bugengine/settings/stdafx.h>
-#include <bugengine/rtti/engine/namespace.hh>
+#include <bugengine/meta/engine/namespace.hh>
 #include <bugengine/settings/settings.factory.hh>
 
 BE_REGISTER_NAMESPACE_2_NAMED(bugengine, BugEngine, Settings);
@@ -15,7 +15,7 @@ minitl::intrusive_list< SettingsBase >& SettingsBase::getSettings()
     return s_settingsList;
 }
 
-SettingsBase::SettingsBase(raw< const RTTI::Class > settingsClass) : m_settingsClass(settingsClass)
+SettingsBase::SettingsBase(raw< const Meta::Class > settingsClass) : m_settingsClass(settingsClass)
 {
     getSettings().push_back(*this);
 }

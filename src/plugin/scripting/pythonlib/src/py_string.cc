@@ -76,11 +76,11 @@ PyTypeObject PyBugString< T >::s_pyType
        0};
 
 template < typename T >
-PyObject* PyBugString< T >::stealValue(PyObject* owner, RTTI::Value& value)
+PyObject* PyBugString< T >::stealValue(PyObject* owner, Meta::Value& value)
 {
     const T& t = value.as< const T& >();
     be_forceuse(t);
-    be_assert(value.type().metaclass->type() == RTTI::ClassType_String,
+    be_assert(value.type().metaclass->type() == Meta::ClassType_String,
               "PyBugString only accepts String types");
     be_assert(value.type().metaclass->index() == be_type< T >().metaclass->index(),
               "expected %s; got %s" | be_type< T >().metaclass->name
@@ -92,7 +92,7 @@ PyObject* PyBugString< T >::stealValue(PyObject* owner, RTTI::Value& value)
     {
         Py_INCREF(owner);
     }
-    new(&(static_cast< PyBugString* >(result))->value) RTTI::Value();
+    new(&(static_cast< PyBugString* >(result))->value) Meta::Value();
     (static_cast< PyBugString* >(result))->value.swap(value);
     return result;
 }
@@ -105,7 +105,7 @@ int PyBugString< T >::init(PyObject* self, PyObject* args, PyObject* kwds)
     Py_ssize_t   argCount = s_library->m_PyTuple_Size(args);
     if(argCount == 0)
     {
-        self_->value = RTTI::Value(T(""));
+        self_->value = Meta::Value(T(""));
     }
     else if(argCount == 1)
     {
@@ -117,20 +117,20 @@ int PyBugString< T >::init(PyObject* self, PyObject* args, PyObject* kwds)
         else if(arg->py_type->tp_flags & Py_TPFLAGS_STRING_SUBCLASS)
         {
             const char* value = s_library->m_PyString_AsString(arg);
-            self_->value      = RTTI::Value(T(value));
+            self_->value      = Meta::Value(T(value));
         }
         else if(arg->py_type->tp_flags & Py_TPFLAGS_UNICODE_SUBCLASS)
         {
             if(s_library->getVersion() >= 33)
             {
                 const char* value = s_library->m_PyUnicode_AsUTF8(arg);
-                self_->value      = RTTI::Value(T(value));
+                self_->value      = Meta::Value(T(value));
             }
             else
             {
                 PyObject*   decodedUnicode = s_library->m_PyUnicode_AsUTF8String(arg);
                 const char* value          = s_library->m_PyBytes_AsString(decodedUnicode);
-                self_->value               = RTTI::Value(T(value));
+                self_->value               = Meta::Value(T(value));
                 Py_DECREF(decodedUnicode);
             }
         }
@@ -149,7 +149,7 @@ template < typename T >
 PyObject* PyBugString< T >::repr(PyObject* self)
 {
     PyBugObject*       self_ = static_cast< PyBugObject* >(self);
-    const RTTI::Value& v     = self_->value;
+    const Meta::Value& v     = self_->value;
     typedef PyObject* (*toStringType)(const char* format, ...);
     toStringType toString = s_library->getVersion() >= 30 ? s_library->m_PyUnicode_FromFormat
                                                           : s_library->m_PyString_FromFormat;
@@ -185,7 +185,7 @@ template < typename T >
 PyObject* PyBugString< T >::str(PyObject* self)
 {
     PyBugObject*       self_ = static_cast< PyBugObject* >(self);
-    const RTTI::Value& v     = self_->value;
+    const Meta::Value& v     = self_->value;
     typedef PyObject* (*toStringType)(const char* format);
     toStringType toString = s_library->getVersion() >= 30 ? s_library->m_PyUnicode_FromString
                                                           : s_library->m_PyString_FromString;
@@ -208,9 +208,9 @@ template < typename T >
 int PyBugString< T >::nonZero(PyObject* self)
 {
     PyBugObject*     self_ = static_cast< PyBugObject* >(self);
-    const RTTI::Type t     = self_->value.type();
-    be_assert(t.metaclass->type() == RTTI::ClassType_String, "PyBugString expected string value");
-    if(t.indirection == RTTI::Type::Value)
+    const Meta::Type t     = self_->value.type();
+    be_assert(t.metaclass->type() == Meta::ClassType_String, "PyBugString expected string value");
+    if(t.indirection == Meta::Type::Value)
     {
         return nonZeroString(self_->value.as< const T& >());
     }

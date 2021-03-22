@@ -1,14 +1,14 @@
 import os
 import glrp
-from . import cxx_lexer
+from . import cxx_lexer, cxx_messages
 
 
 class CxxParser(glrp.Parser):
     Lexer = cxx_lexer.CxxLexer
 
-    def __init__(self, tmp_dir, filename, logger):
-        # type: (str, str, Logger)->None
-        self.lexer = self.__class__.Lexer(filename, logger)
+    def __init__(self, tmp_dir):
+        # type: (str)->None
+        self.lexer = self.__class__.Lexer()
         glrp.Parser.__init__(self, self.lexer)
         #    self.tokens = self.__class__.Lexer.tokens
         #    self.parser = yacc.yacc(

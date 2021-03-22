@@ -63,7 +63,7 @@ class nsdef(Task.Task):
             pch = getattr(self, 'pch', '')
             if pch:
                 namespace_file.write('#include <%s>\n' % pch)
-            namespace_file.write('#include <bugengine/rtti/engine/namespace.hh>\n')
+            namespace_file.write('#include <bugengine/meta/engine/namespace.hh>\n')
             for input in self.inputs:
                 with open(input.abspath(), 'rb') as in_file:
                     while True:

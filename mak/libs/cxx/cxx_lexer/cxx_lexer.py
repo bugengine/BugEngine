@@ -49,11 +49,9 @@ class CxxLexer(glrp.Lexer):
     tokens = ('<[', ']>', 'doxycomment') # type: Tuple[str,...]
     keywords = ()                        # type: Tuple[str,...]
 
-    def __init__(self, filename, logger):
-        # type: (str, Logger) -> None
+    def __init__(self):
+        # type: () -> None
         glrp.Lexer.__init__(self)
-        self._filename = filename
-        self.logger = logger
         self._token_generator = glrp.Lexer.token(self)
         self._lookahead = []   # type: List[glrp.Token]
 

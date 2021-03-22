@@ -7,9 +7,9 @@
 #include <bugengine/scheduler/stdafx.h>
 #include <bugengine/scheduler/kernel/iproduct.script.hh>
 
-#include <bugengine/rtti/classinfo.script.hh>
-#include <bugengine/rtti/engine/objectinfo.script.hh>
-#include <bugengine/rtti/typeinfo.hh>
+#include <bugengine/meta/classinfo.script.hh>
+#include <bugengine/meta/engine/objectinfo.script.hh>
+#include <bugengine/meta/typeinfo.hh>
 
 namespace BugEngine {
 
@@ -19,18 +19,18 @@ template < typename T >
 class Product;
 }  // namespace KernelScheduler
 
-namespace RTTI {
+namespace Meta {
 
 template < typename T >
 struct ClassID< KernelScheduler::Product< T > >
 {
-    static BE_EXPORT raw< const RTTI::Class > klass()
+    static BE_EXPORT raw< const Meta::Class > klass()
     {
-        static const RTTI::Class s_class
+        static const Meta::Class s_class
             = {istring(minitl::format< 256u >("Product<%s>") | be_class< T >()->name),
                u32(sizeof(KernelScheduler::Product< T >)),
                0,
-               RTTI::ClassType_Object,
+               Meta::ClassType_Object,
                {KernelScheduler::IProduct::getNamespace().m_ptr},
                {be_class< KernelScheduler::IProduct >().m_ptr},
                {0},
@@ -41,13 +41,13 @@ struct ClassID< KernelScheduler::Product< T > >
                {0},
                0,
                0};
-        raw< const RTTI::Class > result = {&s_class};
+        raw< const Meta::Class > result = {&s_class};
 
-        static RTTI::ObjectInfo registry = {KernelScheduler::IProduct::getNamespace()->objects,
+        static Meta::ObjectInfo registry = {KernelScheduler::IProduct::getNamespace()->objects,
                                             {0},
                                             s_class.name,
-                                            RTTI::Value(result)};
-        static const RTTI::ObjectInfo* ptr
+                                            Meta::Value(result)};
+        static const Meta::ObjectInfo* ptr
             = KernelScheduler::IProduct::getNamespace()->objects.set(&registry);
         be_forceuse(ptr);
 
@@ -55,7 +55,7 @@ struct ClassID< KernelScheduler::Product< T > >
     }
 };
 
-}  // namespace RTTI
+}  // namespace Meta
 }  // namespace BugEngine
 
 /**************************************************************************************************/
