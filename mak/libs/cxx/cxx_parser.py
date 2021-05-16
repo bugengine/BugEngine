@@ -9,7 +9,9 @@ class CxxParser(glrp.Parser):
     def __init__(self, tmp_dir):
         # type: (str)->None
         self.lexer = self.__class__.Lexer()
-        glrp.Parser.__init__(self, self.lexer)
+        glrp.Parser.__init__(
+            self, self.lexer, 'simple-declaration', os.path.join(tmp_dir, self.__class__.__name__ + '.tab')
+        )
         #    self.tokens = self.__class__.Lexer.tokens
         #    self.parser = yacc.yacc(
         #        module=self,

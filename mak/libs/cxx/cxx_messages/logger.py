@@ -1,5 +1,6 @@
 import sys
 import argparse
+import glrp
 from be_typing import TypeVar, cast
 
 T = TypeVar('T', bound='Callable[..., Dict[str, Any]]')
@@ -12,7 +13,7 @@ def diagnostic(func):
         if call in self._expected_diagnostics:
             self._expected_diagnostics.remove(cast(T, call))
         format_values = func(self, position, *args, **kw_args)
-        self._msg('note', position, getattr(self.LANG, func.__name__, func.__doc__).format(**format_values))
+        self._msg_position('note', position, getattr(self.LANG, func.__name__, func.__doc__).format(**format_values))
 
     return cast(T, call)
 
@@ -29,7 +30,7 @@ def warning(flag_name, enabled=False, enabled_in=[]):
             self._warning_count += 1
             if self._warning_count == 1 and self._arguments.warn_error:
                 self.C0002(position)
-            self._msg(
+            self._msg_position(
                 'warning', position,
                 getattr(self.LANG, func.__name__, func.__doc__).format(**format_values) + ' [-W{}]'.format(flag_name)
             )
@@ -48,62 +49,14 @@ def error(func):
         # type: (Logger, glrp.Position, *Union[str, int], **Union[str, int]) -> None
         self._error_count += 1
         format_values = func(self, position, *args, **kw_args)
-        self._msg('error', position, getattr(self.LANG, func.__name__, func.__doc__).format(**format_values))
+        self._msg_position('error', position, getattr(self.LANG, func.__name__, func.__doc__).format(**format_values))
 
     call.__name__ = func.__name__
     return cast(T, call)
 
 
-class Logger:
+class Logger(glrp.Logger):
     LANG = None
-
-    COLOR_LIST = {
-        'BOLD': '\x1b[01;1m',
-        'BLACK': '\x1b[30m',
-        'RED': '\x1b[31m',
-        'GREEN': '\x1b[32m',
-        'YELLOW': '\x1b[33m',
-        'BLUE': '\x1b[34m',
-        'PINK': '\x1b[35m',
-        'CYAN': '\x1b[36m',
-        'WHITE': '\x1b[37m',
-        'BBLACK': '\x1b[01;30m',
-        'BRED': '\x1b[01;31m',
-        'BGREEN': '\x1b[01;32m',
-        'BYELLOW': '\x1b[01;33m',
-        'BBLUE': '\x1b[01;34m',
-        'BPINK': '\x1b[01;35m',
-        'BCYAN': '\x1b[01;36m',
-        'BWHITE': '\x1b[01;37m',
-        'NORMAL': '\x1b[0m',
-    }
-
-    DEFAULT_COLOR_PATTERN = (
-        COLOR_LIST['BWHITE'], COLOR_LIST['BWHITE'], COLOR_LIST['NORMAL'], COLOR_LIST['BGREEN'], COLOR_LIST['NORMAL']
-    )
-
-    COLOR_PATTERN = {
-        'note':
-            (
-                COLOR_LIST['BBLACK'], COLOR_LIST['BWHITE'], COLOR_LIST['NORMAL'], COLOR_LIST['BGREEN'],
-                COLOR_LIST['NORMAL']
-            ),
-        'info':
-            (
-                COLOR_LIST['BWHITE'], COLOR_LIST['BWHITE'], COLOR_LIST['NORMAL'], COLOR_LIST['BGREEN'],
-                COLOR_LIST['NORMAL']
-            ),
-        'warning':
-            (
-                COLOR_LIST['BYELLOW'], COLOR_LIST['BWHITE'], COLOR_LIST['NORMAL'], COLOR_LIST['BGREEN'],
-                COLOR_LIST['NORMAL']
-            ),
-        'error':
-            (
-                COLOR_LIST['BRED'], COLOR_LIST['BWHITE'], COLOR_LIST['BWHITE'], COLOR_LIST['BGREEN'],
-                COLOR_LIST['NORMAL']
-            ),
-    }
 
     IDE_FORMAT = {
         'msvc':
@@ -136,14 +89,14 @@ class Logger:
 
     def __init__(self, arguments):
         # type: (Namespace) -> None
+        glrp.Logger.__init__(self, sys.stderr)
         self._arguments = arguments
-        self._error_color = sys.stderr.isatty()
-        self._diagnostics_format = Logger.IDE_FORMAT[getattr(arguments, 'diagnostics_format')]
         self._warning_count = 0
         self._error_count = 0
+        self._diagnostics_format = Logger.IDE_FORMAT[getattr(arguments, 'diagnostics_format')]
         self._expected_diagnostics = [] # type: List[Callable[..., Dict[str, Any]]]
 
-    def _msg(self, error_type, position, message):
+    def _msg_position(self, error_type, position, message):
         # type: (str, glrp.Position, str) -> None
         if self._error_color:
             (color_error_type, color_filename, color_message, color_caret,
@@ -159,21 +112,21 @@ class Logger:
         line, column = position.start
         context = position.context()
 
-        sys.stderr.write(self._diagnostics_format.format(**locals()))
+        self._out_file.write(self._diagnostics_format.format(**locals()))
         if len(context) == 1:
-            sys.stderr.write(context[0])
-            sys.stderr.write(
+            self._out_file.write(context[0])
+            self._out_file.write(
                 '\n%s%s%s%s\n' % (' ' * (column - 1), color_caret, '^' * (position.end[1] - column), color_off)
             )
         else:
             for text in context[:-1]:
-                sys.stderr.write(text)
-                sys.stderr.write(
+                self._out_file.write(text)
+                self._out_file.write(
                     '\n%s%s%s%s\n' % (' ' * (column - 1), color_caret, '^' * (len(text) - column + 1), color_off)
                 )
                 column = 1
-            sys.stderr.write(context[-1])
-            sys.stderr.write('\n%s%s%s\n' % (color_caret, '^' * (position.end[1] - 1), color_off))
+            self._out_file.write(context[-1])
+            self._out_file.write('\n%s%s%s\n' % (color_caret, '^' * (position.end[1] - 1), color_off))
 
     def push_expected_diagnostics(self, diagnostics):
         # type: (List[Callable[..., Dict[str, Any]]]) -> None

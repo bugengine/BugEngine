@@ -1,17 +1,48 @@
 from .production import Production
 from .grammar import Grammar
+from ..lex import Token
 from be_typing import TYPE_CHECKING, TypeVar
 from abc import abstractmethod
+import os
 import re
 try:
     import cPickle as pickle
 except ImportError:
     import pickle  # type: ignore
 
-F = TypeVar('F', bound='Parser')
-
 
 class Parser:
+    class Stack:
+        def __init__(self, stack, parent=None):
+            # type: (List[Symbol], Optional[Parser.Stack]) -> None
+            self._parent = parent
+            self._stack = []   # type: List[Symbol]
+
+        def __eq__(self, other):
+            # type: (object) -> bool
+            if isinstance(other, Parser.Stack):
+                if self._parent == other._parent and len(self._stack) == len(other._stack):
+                    for i1, i2 in zip(self._stack, other._stack):
+                        if i1._id != i2._id:
+                            break
+                    else:
+                        return True
+            return False
+
+        def clone(self):
+            # type: () -> Parser.Stack
+            return Parser.Stack(self._stack[:], self)
+
+        def shift(self, symbol):
+            # type: (Symbol) -> None
+            self._stack.append(symbol)
+
+        def reduce(self, rule):
+            # type: (Grammar.Rule) -> None
+            prod_len = len(rule._production)
+            prod = self._stack[-prod_len:]
+            self._stack[-prod_len:] = [Production(rule._id, rule._name, prod, rule._action)]
+
     class Action:
         def __init__(self):
             # type: () -> None
@@ -19,7 +50,7 @@ class Parser:
 
         @abstractmethod
         def __call__(self, parser):
-            # type: (Parser) -> Callable[[F, Production], None]
+            # type: (Parser) -> Callable[[Production], None]
             raise NotImplementedError
 
     class DirectAction(Action):
@@ -29,7 +60,7 @@ class Parser:
             self._action_name = action_name
 
         def __call__(self, parser):
-            # type: (Parser) -> Callable[[F, Production], None]
+            # type: (Parser) -> Callable[[Production], None]
             return getattr(parser, self._action_name)
 
     class OptionalAction(Action):
@@ -40,33 +71,51 @@ class Parser:
             self._index = optional_index
 
         def __call__(self, parser):
-            # type: (Parser) -> Callable[[F, Production], None]
+            # type: (Parser) -> Callable[[Production], None]
             action = self._action(parser)
 
-            def call(parser, production):
-                # type: (F, Production) -> Any
-                #production.insert(self._index, None)
-                action(parser, production)
+            def call(production):
+                # type: (Production) -> Any
+                production._insert(self._index, Token(1, '<empty>', production._position, None, []))
+                action(production)
 
             return call
 
-    def __init__(self, lexer):
-        # type: (Lexer) -> None
+    class AcceptAction(Action):
+        def __init__(self):
+            # type: () -> None
+            Parser.Action.__init__(self)
+
+        def __call__(self, parser):
+            # type: (Parser) -> Callable[[Production], None]
+            return parser.accept
+
+    def __init__(self, lexer, start_symbol, tab_filename):
+        # type: (Lexer, str, str) -> None
         self._lexer = lexer
 
         rules = []     # type: List[Tuple[str, Parser.Action, List[str]]]
-        for rule_action in dir(self.__class__):
-            action = getattr(self.__class__, rule_action)
+        for rule_action in dir(self):
+            action = getattr(self, rule_action)
             for rule_string in getattr(action, 'rules', []):
                 rules += _parse_rule(rule_string, rule_action)
 
-        grammar = Grammar(self._lexer._terminals, rules)
+        grammar = Grammar(
+            self._lexer._terminals, rules, start_symbol, self, tab_filename,
+            os.path.splitext(tab_filename)[0] + '.log'
+        )
 
     def parse(self, filename):
         # type: (str) -> Any
         self._lexer.input(filename)
+
+        s = Parser.Stack([])
         for token in self._lexer.token():
-            print(token)
+            s.shift(token)
+
+    def accept(self, p):
+        # type: (Production) -> None
+        p[0] = p[1]
 
 
 _id = r'([a-zA-Z_\-][a-zA-Z_\-0-9]*)'
@@ -127,10 +176,13 @@ def _parse_rule(rule_string, action):
     return result
 
 
+T = TypeVar('T', bound=Parser)
+
+
 def rule(rule_string):
-    # type: (str) -> Callable[[Callable[[F, Production], None]], Callable[[F, Production], None]]
+    # type: (str) -> Callable[[Callable[[T, Production], None]], Callable[[T, Production], None]]
     def attach(method):
-        # type: (Callable[[F, Production], None]) -> Callable[[F, Production], None]
+        # type: (Callable[[T, Production], None]) -> Callable[[T, Production], None]
         if not hasattr(method, 'rules'):
             setattr(method, 'rules', [])
         getattr(method, 'rules').append(rule_string)
@@ -140,5 +192,6 @@ def rule(rule_string):
 
 
 if TYPE_CHECKING:
-    from typing import Any, Callable, List, Tuple
+    from typing import Any, Callable, List, Optional, Tuple
     from ..lex import Lexer
+    from ..symbol import Symbol

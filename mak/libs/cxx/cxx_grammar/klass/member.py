@@ -66,10 +66,18 @@ def p_member_declarator_list(parser, p):
     pass
 
 
-@glrp.rule("member-declarator : declarator virt-specifier-seq? pure-specifier?")
-@glrp.rule("member-declarator : 'identifier'? attribute-specifier-seq? virt-specifier-seq? ':' constant-expression")
+@glrp.rule("member-declarator : declarator pure-specifier?")
+@glrp.rule("member-declarator : 'identifier'? attribute-specifier-seq? ':' constant-expression")
 @cxx98
 def p_member_declarator(parser, p):
+    # type: (CxxParser, glrp.Production) -> None
+    pass
+
+
+@glrp.rule("member-declarator : declarator virt-specifier-seq pure-specifier?")
+@glrp.rule("member-declarator : 'identifier'? attribute-specifier-seq virt-specifier-seq? ':' constant-expression")
+@cxx11
+def p_member_declarator_virt_specifier(parser, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
@@ -90,7 +98,7 @@ def p_pure_specifier(parser, p):
 
 @glrp.rule("virt-specifier-seq : virt-specifier")
 @glrp.rule("virt-specifier-seq : virt-specifier-seq virt-specifier")
-@cxx98
+@cxx11
 def p_virt_specifier_seq(parser, p):
     # type: (CxxParser, glrp.Production) -> None
     pass

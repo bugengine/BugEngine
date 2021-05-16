@@ -18,7 +18,7 @@ class Lexer:
         # type: () -> None
         self._states = {}          # type: Dict[str, Lexer.State]
         self._state_stack = []     # type: List[Lexer.State]
-        self._terminals = {'<eof>': 0}
+        self._terminals = {'<eof>': 0, '<empty>': 1}
         self._filename = ''
         self._lexdata = ''
         self._lexlen = 0
@@ -125,7 +125,7 @@ def token(pattern, name=None):
     return attach
 
 
-def _form_master_re(rule_list, start_index=1):
+def _form_master_re(rule_list, start_index=2):
     # type: (List[Tuple[str, str, Pattern[str], Callable[[F, Token], Optional[Token]]]], int) -> List[Tuple[Pattern[str], List[Optional[Tuple[Callable[[F, Token], Optional[Token]], str, int]]]]]
     if not rule_list:
         return []
