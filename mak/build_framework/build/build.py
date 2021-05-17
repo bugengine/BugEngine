@@ -324,14 +324,14 @@ def process_use_link(self):
             elif link_objects and ('cxxobjects' in d.features or 'cobjects' in d.features):
                 self.add_objects_from_tgen(d)
                 if 'cxxshlib' in self.features or 'cshlib' in self.features:
-                    self.export_defines.append('be_dll_%s' % d.safe_target_name)
+                    d.export_defines.append('be_dll_%s' % d.safe_target_name)
 
 
 @taskgen_method
 def process_use(self):
     self.check_use_taskgens()
-    self.process_use_flags()
     self.process_use_link()
+    self.process_use_flags()
     self.uselib = Utils.to_list(getattr(self, 'uselib', []))
     for x in getattr(self, 'use', []):
         y = self.bld.get_tgen_by_name(x)
