@@ -124,6 +124,9 @@ class Darwin(Configure.ConfigurationContext.Platform):
         if compiler.arch == 'x86':
             conf.env.append_unique('CFLAGS', ['-msse2'])
             conf.env.append_unique('CXXFLAGS', ['-msse2'])
+        if 'GCC' in compiler.NAMES:
+            conf.env.append_unique('CFLAGS', ['-fno-visibility-inlines-hidden'])
+            conf.env.append_unique('CXXFLAGS', ['-fno-visibility-inlines-hidden'])
         conf.env.env = dict(os.environ)
 
     platform_sdk_re = re.compile('.*/Platforms/\w*\.platform/Developer/SDKs/[\.\w]*\.sdk')
