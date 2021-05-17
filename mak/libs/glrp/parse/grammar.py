@@ -113,7 +113,7 @@ class Grammar(object):
                 name_map.append(nonterminal)
                 assert name_map[i] == nonterminal
 
-        name_map.append('\u03b5')
+        name_map.append('<epsilon>')
 
         start_id = len(index)
         productions = _create_productions(rules, index, log)
