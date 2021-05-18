@@ -5,8 +5,8 @@ import sys
 
 class Grammar(object):
     class Rule:
-        def __init__(self, id, prod_index, prod_name, production, action):
-            # type: (int, int, str, List[int], Parser.Action) -> None
+        def __init__(self, id, prod_index, prod_name, production, action, attribute_list, filename, lineno):
+            # type: (int, int, str, List[int], Parser.Action, List[Tuple[str, List[str]]], str, int) -> None
             self._id = id
             self._prod_index = prod_index
             self._prod_name = prod_name
@@ -16,6 +16,40 @@ class Grammar(object):
             self._item = Grammar.LR0Item(self, len(production), None, predecessor, [], set([-1]))
             self._precedence = ('right', 0)
             self._reduced = 0
+            for attribute, values in attribute_list:
+                if attribute == "prec":
+                    if len(values) == 1:
+                        try:
+                            precedence = int(values[0])
+                        except ValueError:
+                            raise SyntaxError(
+                                'incorrect precedence: value should be an integer or a pair (string,integer), got %s' %
+                                values[0], (filename, lineno, 0, '')
+                            )
+                        else:
+                            self._precedence = ('nonassoc', precedence)
+                    elif len(values) == 2:
+                        if values[0] not in ('left', 'right', 'nonassoc'):
+                            raise SyntaxError(
+                                'incorrect precedence: value should be an integer or a pair (string,integer), got %s' %
+                                ', '.join(values), (filename, lineno, 0, '')
+                            )
+                        try:
+                            precedence = int(values[1])
+                        except ValueError:
+                            raise SyntaxError(
+                                'incorrect precedence: value should be an integer or a pair (string,integer), got %s' %
+                                ', '.join(values), (filename, lineno, 0, '')
+                            )
+                        else:
+                            self._precedence = (values[0], precedence)
+                    else:
+                        raise SyntaxError(
+                            'incorrect precedence: value should be an integer or a pair (string,integer), got %s' %
+                            ', '.join(values), lineno, (filename, lineno, 0, '')
+                        )
+                else:
+                    raise SyntaxError('unknown attribute %s' % attribute, (filename, lineno, 0, ''))
 
         def to_string(self, name_map):
             # type: (List[str]) -> str
@@ -98,15 +132,18 @@ class Grammar(object):
             return [i.to_string(name_map) for i in self._items]
 
     def __init__(self, terminals, rules, start_symbol, parser, tab_filename, debug_filename):
-        # type: (Dict[str, int], List[Tuple[str, Parser.Action, List[str]]], str, Parser, str, str) -> None
+        # type: (Dict[str, int], List[Tuple[str, Parser.Action, List[str], List[Tuple[str, List[str]]], str, int]], str, Parser, str, str) -> None
         index = dict(terminals)
         name_map = [''] * (1 + len(terminals))
         log = Logger(open(debug_filename, 'w'))
+        stderr = Logger(sys.stderr)
         for name, i in terminals.items():
             name_map[i] = name
 
-        rules = rules + [("%s'" % start_symbol, parser.__class__.AcceptAction(), [start_symbol, name_map[0]])]
-        for nonterminal, action, production in rules:
+        rules = rules + [
+            ("%s'" % start_symbol, parser.__class__.AcceptAction(), [start_symbol, name_map[0]], [], '', 1)
+        ]
+        for nonterminal, _, _, _, _, _ in rules:
             if nonterminal not in index:
                 i = 1 + len(index)
                 index[nonterminal] = i
@@ -123,7 +160,7 @@ class Grammar(object):
                 log.info('  %s', rule.to_string(name_map))
 
         _create_lr0_items(productions)
-        _create_parser_table(productions, start_id, name_map, len(terminals), {}, log)
+        _create_parser_table(productions, start_id, name_map, len(terminals), {}, log, stderr)
 
         #with open('cxx.y', 'w') as yaccfile:
         #    for index, terminal in enumerate(name_map[2:1 + len(terminals)]):
@@ -147,14 +184,17 @@ class Grammar(object):
 
 
 def _create_productions(rules, index, log):
-    # type: (List[Tuple[str, Parser.Action, List[str]]], Dict[str, int], Logger) -> Dict[int, Grammar.Production]
-    productions = {}               # type: Dict[int, Grammar.Production]
+    # type: (List[Tuple[str, Parser.Action, List[str], List[Tuple[str, List[str]]], str, int]], Dict[str, int], Logger) -> Dict[int, Grammar.Production]
+    productions = {}                                                                                                   # type: Dict[int, Grammar.Production]
     rule_index = 0
-    for nonterminal, action, production in rules:
+    for nonterminal, action, production, attribute_list, filename, lineno in rules:
         prod_index = index[nonterminal]
         try:
-            rule = Grammar.Rule(rule_index, prod_index, nonterminal, [index[s] for s in production], action)
-        except KeyError as error:  # unknown rule or terminal
+            rule = Grammar.Rule(
+                rule_index, prod_index, nonterminal, [index[s] for s in production], action, attribute_list, filename,
+                lineno
+            )
+        except KeyError as error:                                                                                      # unknown rule or terminal
             log.error('unknown object used in rule: %s', str(error))
         else:
             rule_index += 1
@@ -241,8 +281,8 @@ def _closure(item_set):
     return Grammar.LR0ItemSet(result)
 
 
-def _create_parser_table(productions, start_id, name_map, terminal_count, precedence, log):
-    # type: (Dict[int, Grammar.Production], int, List[str], int, Dict[int, Tuple[str, int]], Logger) -> None
+def _create_parser_table(productions, start_id, name_map, terminal_count, precedence, log, error_log):
+    # type: (Dict[int, Grammar.Production], int, List[str], int, Dict[int, Tuple[str, int]], Logger, Logger) -> None
     cidhash = {}
     goto_cache = {}    # type: Dict[Tuple[int, int], Optional[Grammar.LR0ItemSet]]
     goto_cache_2 = {}  # type: Dict[int, Any]
@@ -518,14 +558,10 @@ def _create_parser_table(productions, start_id, name_map, terminal_count, preced
     states = create_item_sets()
     add_lalr_lookahead(states)
     st = 0
-    sr_conflicts = []
-    rr_conflicts = []
-
+    """
     for item_group in states:
         # Loop over each production
-        actlist = []       # List of actions
-        st_action = {}     # type: Dict[int, Optional[int]]
-        st_actionp = {}
+        st_action = {}     # type: Dict[int, List[Tuple[int, Grammar.LR0Item]]]
         st_goto = {}
         log.info('state %d:', st)
         log.info('')
@@ -537,65 +573,12 @@ def _create_parser_table(productions, start_id, name_map, terminal_count, preced
             if len(item._rule) == item._index:
                 if item._rule._prod_index == start_id:
                     # Start symbol. Accept!
-                    st_action[0] = 0
-                    st_actionp[0] = item
+                    st_action[0] = st_action.get(0, []) + [(0, item)]
                 else:
                     # We are at the end of a production.  Reduce!
                     for a in item._lookaheads[st]:
-                        actlist.append(
-                            (a, item, 'reduce using rule %d (%s)' % (item._rule._id, item._rule.to_string(name_map)))
-                        )
-                        r = st_action.get(a)
-                        if r is not None:
-                            # Whoa. Have a shift/reduce or reduce/reduce conflict
-                            if r > 0:
-                                # Need to decide on shift or reduce here
-                                # By default we favor shifting. Need to add
-                                # some precedence rules here.
-
-                                # Shift precedence comes from the token
-                                sprec, slevel = precedence.get(a, ('right', 0))
-
-                                # Reduce precedence comes from rule being reduced (p)
-                                rprec, rlevel = item._rule._precedence
-
-                                if (slevel < rlevel) or ((slevel == rlevel) and (rprec == 'left')):
-                                    # We really need to reduce here.
-                                    st_action[a] = -item._rule._id
-                                    st_actionp[a] = item
-                                    if not slevel and not rlevel:
-                                        log.info('  ! shift/reduce conflict for %s resolved as reduce', name_map[a])
-                                        sr_conflicts.append((st, a, item._rule, 'reduce'))
-                                    item._rule._reduced += 1
-                                elif (slevel == rlevel) and (rprec == 'nonassoc'):
-                                    st_action[a] = None
-                                else:
-                                    # Hmmm. Guess we'll keep the shift
-                                    if not rlevel:
-                                        log.info('  ! shift/reduce conflict for %s resolved as shift', name_map[a])
-                                        sr_conflicts.append((st, a, item._rule, 'shift'))
-                            elif r < 0:
-                                # Reduce/reduce conflict.   In this case, we favor the rule
-                                # that was defined first in the grammar
-                                if -r > item._rule._id:
-                                    chosenp, rejectp = item._rule, st_actionp[a]._rule
-                                    st_action[a] = -item._rule._id
-                                    st_actionp[a] = item
-                                    chosenp._reduced += 1
-                                    rejectp._reduced -= 1
-                                else:
-                                    chosenp, rejectp = st_actionp[a]._rule, item._rule
-                                rr_conflicts.append((st, chosenp, rejectp))
-                                log.info(
-                                    '  ! reduce/reduce conflict for %s resolved using rule %d (%s)', name_map[a],
-                                    st_actionp[a]._rule._id, st_actionp[a]._rule.to_string(name_map)
-                                )
-                            else:
-                                raise SyntaxError('Unknown conflict in state %d' % st)
-                        else:
-                            st_action[a] = -item._rule._id
-                            st_actionp[a] = item
-                            item._rule._reduced += 1
+                        st_action[a] = st_action.get(a, []) + [(-item._rule._id, item)]
+                        item._rule._reduced += 1
             else:
                 i = item._index
                 a = item._rule[i]  # Get symbol right after the "."
@@ -603,47 +586,14 @@ def _create_parser_table(productions, start_id, name_map, terminal_count, preced
                     g = goto(item_group, a)
                     j = cidhash[id(g)]
                     if j >= 0:
-                                   # We are in a shift state
-                        actlist.append((a, item, 'shift and go to state %d' % j))
-                        r = st_action.get(a)
-                        if r is not None:
-                                   # Whoa have a shift/reduce or shift/shift conflict
-                            if r > 0:
-                                if r != j:
-                                    raise SyntaxError('Shift/shift conflict in state %d' % st)
-                            elif r < 0:
-                                   # Do a precedence check.
-                                   #   -  if precedence of reduce rule is higher, we reduce.
-                                   #   -  if precedence of reduce is same and left assoc, we reduce.
-                                   #   -  otherwise we shift
+                        st_action[a] = st_action.get(a, []) + [(j, item)]
 
-                                # Shift precedence comes from the token
-                                sprec, slevel = precedence.get(a, ('right', 0))
-
-                                # Reduce precedence comes from the rule that could have been reduced
-                                rprec, rlevel = st_actionp[a]._rule._precedence
-
-                                if (slevel > rlevel) or ((slevel == rlevel) and (rprec == 'right')):
-                                    # We decide to shift here... highest precedence to shift
-                                    # TODO Productions[st_actionp[a].number].reduced -= 1
-                                    st_action[a] = j
-                                    st_actionp[a] = item
-                                    if not rlevel:
-                                        log.info('  ! shift/reduce conflict for %s resolved as shift', name_map[a])
-                                        sr_conflicts.append((st, a, st_actionp[a]._rule, 'shift'))
-                                elif (slevel == rlevel) and (rprec == 'nonassoc'):
-                                    st_action[a] = None
-                                else:
-                                    # Hmmm. Guess we'll keep the reduce
-                                    if not slevel and not rlevel:
-                                        log.info('  ! shift/reduce conflict for %s resolved as reduce', name_map[a])
-                                        sr_conflicts.append((st, a, st_actionp[a]._rule, 'reduce'))
-
-                            else:
-                                raise SyntaxError('Unknown conflict in state %d' % st)
-                        else:
-                            st_action[a] = j
-                            st_actionp[a] = item
+        for a, actions in st_action.items():
+            if len(actions) > 0:
+                # looks like a potential conflict, look into it.
+                shift = 0
+                shift_list = []
+                reduce_list = []
 
         # Print the actions associated with each terminal
         _actprint = {}
@@ -680,7 +630,6 @@ def _create_parser_table(productions, start_id, name_map, terminal_count, preced
                 log.info('    %-30s shift and go to state %d', name_map[n], j)
 
         action[st] = st_action
-        actionp[st] = st_actionp
         goto_table[st] = st_goto
         st += 1
 
@@ -691,12 +640,14 @@ def _create_parser_table(productions, start_id, name_map, terminal_count, preced
         log.warning('1 shift/reduce conflict')
     elif num_sr > 1:
         log.warning('%d shift/reduce conflicts', num_sr)
+        error_log.warning('%d shift/reduce conflicts', num_sr)
 
     num_rr = len(rr_conflicts)
     if num_rr == 1:
         log.warning('1 reduce/reduce conflict')
     elif num_rr > 1:
         log.warning('%d reduce/reduce conflicts', num_rr)
+        error_log.warning('%d reduce/reduce conflicts', num_rr)
 
     # Write out conflicts to the output file
     if (sr_conflicts or rr_conflicts):
@@ -707,6 +658,10 @@ def _create_parser_table(productions, start_id, name_map, terminal_count, preced
         for state, tok, rule, resolution in sr_conflicts:
             log.warning('shift/reduce conflict for %s in state %d resolved as %s', name_map[tok], state, resolution)
             log.warning('  reduce rule %s', rule.to_string(name_map))
+            error_log.warning(
+                'shift/reduce conflict for %s in state %d resolved as %s', name_map[tok], state, resolution
+            )
+            error_log.warning('  reduce rule %s', rule.to_string(name_map))
 
         already_reported = set()
         for state, rule, rejected in rr_conflicts:
@@ -714,6 +669,10 @@ def _create_parser_table(productions, start_id, name_map, terminal_count, preced
                 continue
             log.warning('reduce/reduce conflict in state %d resolved using rule (%s)', state, rule.to_string(name_map))
             log.warning('rejected rule (%s) in state %d', rejected.to_string(name_map), state)
+            error_log.warning(
+                'reduce/reduce conflict in state %d resolved using rule (%s)', state, rule.to_string(name_map)
+            )
+            error_log.warning('rejected rule (%s) in state %d', rejected.to_string(name_map), state)
             already_reported.add((state, id(rule), id(rejected)))
 
         warned_never = []
@@ -721,6 +680,7 @@ def _create_parser_table(productions, start_id, name_map, terminal_count, preced
             if not rejected._reduced and (rejected not in warned_never):
                 log.warning('Rule (%s) is never reduced', rejected.to_string(name_map))
                 warned_never.append(rejected)
+    """
 
 
 if TYPE_CHECKING:

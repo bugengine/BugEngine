@@ -57,6 +57,9 @@ class Logger:
         if self._error_color:
             (color_error_type, color_filename, color_message, color_caret,
              color_off) = self.COLOR_PATTERN.get(error_type, self.DEFAULT_COLOR_PATTERN)
+            self._out_file.write(
+                '{color_error_type}{error_type}{color_off}: {color_message}{message}{color_off}\n'.format(**locals())
+            )
         else:
             color_error_type = ''
             color_filename = ''
@@ -64,7 +67,7 @@ class Logger:
             color_caret = ''
             color_off = ''
 
-        self._out_file.write('{color_message}{message}{color_off}\n'.format(**locals()))
+            self._out_file.write('{color_message}{message}{color_off}\n'.format(**locals()))
 
     def note(self, message, *args):
         # type: (str, *Union[str, int]) -> None
