@@ -283,6 +283,13 @@ def be_build_dll(self):
     except AttributeError:
         self.export_defines = ['be_dll_%s' % self.safe_target_name]
 
+@feature('cxxobjects', 'cobjects')
+def be_build_objects(self):
+    if not self.env.STATIC:
+        try:
+            self.export_defines.append('be_dll_%s' % self.safe_target_name)
+        except AttributeError:
+            self.export_defines = ['be_dll_%s' % self.safe_target_name]
 
 @taskgen_method
 def process_use_link(self):
@@ -323,8 +330,6 @@ def process_use_link(self):
                 self.env.append_value('LIBPATH', [tmp_path])
             elif link_objects and ('cxxobjects' in d.features or 'cobjects' in d.features):
                 self.add_objects_from_tgen(d)
-                if 'cxxshlib' in self.features or 'cshlib' in self.features:
-                    d.export_defines.append('be_dll_%s' % d.safe_target_name)
 
 
 @taskgen_method
