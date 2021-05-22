@@ -5,51 +5,26 @@ import sys
 
 class Grammar(object):
     class Rule:
-        def __init__(self, id, prod_index, prod_name, production, action, attribute_list, filename, lineno):
-            # type: (int, int, str, List[int], Parser.Action, List[Tuple[str, List[str]]], str, int) -> None
+        def __init__(self, id, prod_index, prod_name, production, action, annnotation_list, filename, lineno):
+            # type: (int, int, str, List[int], Parser.Action, List[Tuple[str, List[str], int]], str, int) -> None
             self._id = id
             self._prod_index = prod_index
             self._prod_name = prod_name
             self._production = production
             self._action = action
+            self._filename = filename
+            self._lineno = lineno
             predecessor = self._production[-1] if len(self._production) else None
+            self._annotations = {}     # type: Dict[int, Dict[str, List[str]]]
+            for annotation, values, index in annnotation_list:
+                if index == len(production):
+                    index = -1
+                try:
+                    self._annotations[index][annotation] = values
+                except KeyError:
+                    self._annotations[index] = {annotation: values}
             self._item = Grammar.LR0Item(self, len(production), None, predecessor, [], set([-1]))
-            self._precedence = ('right', 0)
             self._reduced = 0
-            for attribute, values in attribute_list:
-                if attribute == "prec":
-                    if len(values) == 1:
-                        try:
-                            precedence = int(values[0])
-                        except ValueError:
-                            raise SyntaxError(
-                                'incorrect precedence: value should be an integer or a pair (string,integer), got %s' %
-                                values[0], (filename, lineno, 0, '')
-                            )
-                        else:
-                            self._precedence = ('nonassoc', precedence)
-                    elif len(values) == 2:
-                        if values[0] not in ('left', 'right', 'nonassoc'):
-                            raise SyntaxError(
-                                'incorrect precedence: value should be an integer or a pair (string,integer), got %s' %
-                                ', '.join(values), (filename, lineno, 0, '')
-                            )
-                        try:
-                            precedence = int(values[1])
-                        except ValueError:
-                            raise SyntaxError(
-                                'incorrect precedence: value should be an integer or a pair (string,integer), got %s' %
-                                ', '.join(values), (filename, lineno, 0, '')
-                            )
-                        else:
-                            self._precedence = (values[0], precedence)
-                    else:
-                        raise SyntaxError(
-                            'incorrect precedence: value should be an integer or a pair (string,integer), got %s' %
-                            ', '.join(values), lineno, (filename, lineno, 0, '')
-                        )
-                else:
-                    raise SyntaxError('unknown attribute %s' % attribute, (filename, lineno, 0, ''))
 
         def to_string(self, name_map):
             # type: (List[str]) -> str
@@ -107,15 +82,61 @@ class Grammar(object):
             self._after = successors
             self._symbols = set(rule._production)
             self._follow = follow
-            self._lookaheads = {}  # type: Dict[int, List[int]]
+            self._lookaheads = {}      # type: Dict[int, List[int]]
+            self._precedence = None    # type: Optional[Tuple[str, int]]
+
+            if index == len(rule):
+                index = -1
+            annotations = rule._annotations.get(index, {})
+            for annotation, values in annotations.items():
+                if annotation == "prec":
+                    if len(values) == 1:
+                        try:
+                            precedence = int(values[0])
+                        except ValueError:
+                            raise SyntaxError(
+                                'incorrect precedence: value should be an integer or a pair (string,integer), got %s' %
+                                values[0], (rule._filename, rule._lineno, 0, '')
+                            )
+                        else:
+                            self._precedence = ('nonassoc', precedence)
+                    elif len(values) == 2:
+                        if values[0] not in ('left', 'right', 'nonassoc'):
+                            raise SyntaxError(
+                                'incorrect precedence: value should be an integer or a pair (string,integer), got %s' %
+                                ', '.join(values), (rule._filename, rule._lineno, 0, '')
+                            )
+                        try:
+                            precedence = int(values[1])
+                        except ValueError:
+                            raise SyntaxError(
+                                'incorrect precedence: value should be an integer or a pair (string,integer), got %s' %
+                                ', '.join(values), (rule._filename, rule._lineno, 0, '')
+                            )
+                        else:
+                            self._precedence = (values[0], precedence)
+                    else:
+                        raise SyntaxError(
+                            'incorrect precedence: value should be an integer or a pair (string,integer), got %s' %
+                            ', '.join(values), (rule._filename, rule._lineno, 0, '')
+                        )
+                else:
+                    raise SyntaxError('unknown annotation %s' % annotation, (rule._filename, rule._lineno, 0, ''))
+
+        def _annotations(self):
+            # type: () -> str
+            result = ''
+            if self._precedence is not None:
+                result += '[prec:%s,%d]' % self._precedence
+            return result
 
         def to_string(self, name_map):
             # type: (List[str]) -> str
-            return '%s -> %s { follow: %s }' % (
+            return '%s -> %s' % (
                 name_map[self._rule._prod_index], ' '.join(
-                    [name_map[p] for p in self._rule._production[:self._index]] + ['.'] +
+                    [name_map[p] for p in self._rule._production[:self._index]] + ['.%s' % self._annotations()] +
                     [name_map[p] for p in self._rule._production[self._index:]]
-                ), ' '.join([name_map[p] for p in self._follow])
+                )
             )
 
     class LR0ItemSet:
@@ -132,7 +153,7 @@ class Grammar(object):
             return [i.to_string(name_map) for i in self._items]
 
     def __init__(self, terminals, rules, start_symbol, parser, tab_filename, debug_filename):
-        # type: (Dict[str, int], List[Tuple[str, Parser.Action, List[str], List[Tuple[str, List[str]]], str, int]], str, Parser, str, str) -> None
+        # type: (Dict[str, int], List[Tuple[str, Parser.Action, List[str], List[Tuple[str, List[str], int]], str, int]], str, Parser, str, str) -> None
         index = dict(terminals)
         name_map = [''] * (1 + len(terminals))
         log = Logger(open(debug_filename, 'w'))
@@ -160,7 +181,7 @@ class Grammar(object):
                 log.info('  %s', rule.to_string(name_map))
 
         _create_lr0_items(productions)
-        _create_parser_table(productions, start_id, name_map, len(terminals), {}, log, stderr)
+        _create_parser_table(productions, start_id, name_map, len(terminals), log, stderr)
 
         #with open('cxx.y', 'w') as yaccfile:
         #    for index, terminal in enumerate(name_map[2:1 + len(terminals)]):
@@ -184,9 +205,10 @@ class Grammar(object):
 
 
 def _create_productions(rules, index, log):
-    # type: (List[Tuple[str, Parser.Action, List[str], List[Tuple[str, List[str]]], str, int]], Dict[str, int], Logger) -> Dict[int, Grammar.Production]
-    productions = {}                                                                                                   # type: Dict[int, Grammar.Production]
+    # type: (List[Tuple[str, Parser.Action, List[str], List[Tuple[str, List[str], int]], str, int]], Dict[str, int], Logger) -> Dict[int, Grammar.Production]
     rule_index = 0
+    productions = {}   # type: Dict[int, Grammar.Production]
+
     for nonterminal, action, production, attribute_list, filename, lineno in rules:
         prod_index = index[nonterminal]
         try:
@@ -194,7 +216,7 @@ def _create_productions(rules, index, log):
                 rule_index, prod_index, nonterminal, [index[s] for s in production], action, attribute_list, filename,
                 lineno
             )
-        except KeyError as error:                                                                                      # unknown rule or terminal
+        except KeyError as error:  # unknown rule or terminal
             log.error('unknown object used in rule: %s', str(error))
         else:
             rule_index += 1
@@ -281,8 +303,8 @@ def _closure(item_set):
     return Grammar.LR0ItemSet(result)
 
 
-def _create_parser_table(productions, start_id, name_map, terminal_count, precedence, log, error_log):
-    # type: (Dict[int, Grammar.Production], int, List[str], int, Dict[int, Tuple[str, int]], Logger, Logger) -> None
+def _create_parser_table(productions, start_id, name_map, terminal_count, log, error_log):
+    # type: (Dict[int, Grammar.Production], int, List[str], int, Logger, Logger) -> None
     cidhash = {}
     goto_cache = {}    # type: Dict[Tuple[int, int], Optional[Grammar.LR0ItemSet]]
     goto_cache_2 = {}  # type: Dict[int, Any]
@@ -558,7 +580,10 @@ def _create_parser_table(productions, start_id, name_map, terminal_count, preced
     states = create_item_sets()
     add_lalr_lookahead(states)
     st = 0
-    """
+
+    num_missing_annotations = 0
+    num_rr = 0
+
     for item_group in states:
         # Loop over each production
         st_action = {}     # type: Dict[int, List[Tuple[int, Grammar.LR0Item]]]
@@ -574,6 +599,7 @@ def _create_parser_table(productions, start_id, name_map, terminal_count, preced
                 if item._rule._prod_index == start_id:
                     # Start symbol. Accept!
                     st_action[0] = st_action.get(0, []) + [(0, item)]
+                    item._rule._reduced += 1
                 else:
                     # We are at the end of a production.  Reduce!
                     for a in item._lookaheads[st]:
@@ -589,12 +615,44 @@ def _create_parser_table(productions, start_id, name_map, terminal_count, preced
                         st_action[a] = st_action.get(a, []) + [(j, item)]
 
         for a, actions in st_action.items():
-            if len(actions) > 0:
-                # looks like a potential conflict, look into it.
-                shift = 0
-                shift_list = []
-                reduce_list = []
+            action_dest = {}   # type: Dict[int, List[Grammar.LR0Item]]
+            for i, item in actions:
+                try:
+                    action_dest[i].append(item)
+                except KeyError:
+                    action_dest[i] = [item]
 
+            if len(action_dest) > 1:
+                # looks like a potential conflict, look at precedence
+                actions = sorted(actions, key=lambda x: x[1]._precedence[1] if x[1]._precedence is not None else -1)
+                precedence = actions[-1][1]._precedence[1] if actions[-1][1]._precedence is not None else -1
+                associativity = actions[-1][1]._precedence[0] if actions[-1][1]._precedence is not None else 'left'
+                for _, item in actions:
+                    if item._precedence is None:
+                        log.warning('  ** %s [%s] needs a precedence annotation', item.to_string(name_map), name_map[a])
+                        error_log.warning(
+                            '  ** %s [%s] needs a precedence annotation', item.to_string(name_map), name_map[a]
+                        )
+                        num_missing_annotations += 1
+                for _, item in actions:
+                    if item._precedence is not None and item._precedence[1] < precedence:
+                        log.info('  -- %s is not used', item.to_string(name_map))
+                assoc_conflict = False
+                for _, item in actions:
+                    if item._precedence is not None and item._precedence[0] != associativity:
+                        log.error('  *** associativity conflicts!')
+                        log.error('  *** %s', item.to_string(name_map))
+                        error_log.error('  *** associativity conflicts!')
+                        error_log.error('  *** %s', item.to_string(name_map))
+                        assoc_conflict = True
+                if assoc_conflict:
+                    log.error('  *** %s', actions[-1][1].to_string(name_map))
+                    log.error('  *** using %s', actions[-1][1].to_string(name_map))
+                    error_log.error('  *** %s', actions[-1][1].to_string(name_map))
+                    error_log.error('  *** using %s', actions[-1][1].to_string(name_map))
+
+        st += 1
+        """
         # Print the actions associated with each terminal
         _actprint = {}
         for a, p, m in actlist:
@@ -633,28 +691,6 @@ def _create_parser_table(productions, start_id, name_map, terminal_count, preced
         goto_table[st] = st_goto
         st += 1
 
-    num_sr = len(sr_conflicts)
-
-    # Report shift/reduce and reduce/reduce conflicts
-    if num_sr == 1:
-        log.warning('1 shift/reduce conflict')
-    elif num_sr > 1:
-        log.warning('%d shift/reduce conflicts', num_sr)
-        error_log.warning('%d shift/reduce conflicts', num_sr)
-
-    num_rr = len(rr_conflicts)
-    if num_rr == 1:
-        log.warning('1 reduce/reduce conflict')
-    elif num_rr > 1:
-        log.warning('%d reduce/reduce conflicts', num_rr)
-        error_log.warning('%d reduce/reduce conflicts', num_rr)
-
-    # Write out conflicts to the output file
-    if (sr_conflicts or rr_conflicts):
-        log.warning('')
-        log.warning('Conflicts:')
-        log.warning('')
-
         for state, tok, rule, resolution in sr_conflicts:
             log.warning('shift/reduce conflict for %s in state %d resolved as %s', name_map[tok], state, resolution)
             log.warning('  reduce rule %s', rule.to_string(name_map))
@@ -674,13 +710,25 @@ def _create_parser_table(productions, start_id, name_map, terminal_count, preced
             )
             error_log.warning('rejected rule (%s) in state %d', rejected.to_string(name_map), state)
             already_reported.add((state, id(rule), id(rejected)))
+        """
+    # Report shift/reduce and reduce/reduce conflicts
+    if num_missing_annotations == 1:
+        log.warning('1 missing annotation')
+        error_log.warning('1 missing annotation')
+    elif num_missing_annotations > 1:
+        log.warning('%d missing annotations', num_missing_annotations)
+        error_log.warning('%d missing annotations', num_missing_annotations)
 
-        warned_never = []
-        for state, rule, rejected in rr_conflicts:
-            if not rejected._reduced and (rejected not in warned_never):
-                log.warning('Rule (%s) is never reduced', rejected.to_string(name_map))
-                warned_never.append(rejected)
-    """
+    if num_rr == 1:
+        log.warning('1 reduce/reduce conflict')
+    elif num_rr > 1:
+        log.warning('%d reduce/reduce conflicts', num_rr)
+        error_log.warning('%d reduce/reduce conflicts', num_rr)
+
+    for _, production in productions.items():
+        for rule in production:
+            if rule._reduced == 0:
+                log.warning('Rule (%s) is never reduced', rule.to_string(name_map))
 
 
 if TYPE_CHECKING:
