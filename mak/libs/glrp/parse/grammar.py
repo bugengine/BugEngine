@@ -1,5 +1,6 @@
 from ..log import Logger
 from be_typing import TYPE_CHECKING
+import os
 import sys
 
 
@@ -73,6 +74,40 @@ class Grammar(object):
             return len(self._rule_list)
 
     class LR0Item:
+        class DominatorNode:
+            def __init__(self, item_set_id, item, predecessors, all_dominators):
+                # type: (int, Grammar.LR0Item, List[Grammar.LR0Item.DominatorNode], List[Grammar.LR0Item.DominatorNode]) -> None
+                self._item_set = item_set_id
+                self._item = item
+                self._dominators = set([self])
+                self._post_dominators = set([self])
+                self._predecessors = predecessors
+                self._direct_predecessors = set([]) # type: Set[Grammar.LR0Item.DominatorNode]
+                self._successors = set([])          # type: Set[Grammar.LR0Item.DominatorNode]
+                self._direct_successors = set([])   # type: Set[Grammar.LR0Item.DominatorNode]
+                self._parent = None                 # type: Optional[Grammar.LR0Item.DominatorNode]
+                self._children = []                 # type: List[Grammar.LR0Item.DominatorNode]
+                self._extended_successors = set([]) # type: Set[Grammar.LR0Item.DominatorNode]
+                for p in predecessors:
+                    p._successors.add(self)
+                all_dominators.append(self)
+
+            def find_core(self, parent_state_count, seen):
+                # type: (int, Set[Grammar.LR0Item.DominatorNode]) -> List[Grammar.LR0Item.DominatorNode]
+                if self in seen:
+                    return []
+                seen.add(self)
+                result = []    # type: List[Grammar.LR0Item.DominatorNode]
+                if parent_state_count == 0:
+                    result.append(self)
+                else:
+                    for pred in self._predecessors:
+                        if pred._item_set == self._item_set:
+                            result += pred.find_core(parent_state_count, seen)
+                        else:
+                            result += pred.find_core(parent_state_count - 1, seen)
+                return result
+
         def __init__(self, rule, index, next, predecessor, successors, follow):
             # type: (Grammar.Rule, int, Optional[Grammar.LR0Item], Optional[int], List[Grammar.Rule], Set[int]) -> None
             self._rule = rule
@@ -84,6 +119,8 @@ class Grammar(object):
             self._follow = follow
             self._lookaheads = {}      # type: Dict[int, List[int]]
             self._precedence = None    # type: Optional[Tuple[str, int]]
+            self._split = False
+            self._dominators = {}      # type: Dict[int, Grammar.LR0Item.DominatorNode]
 
             if index == len(rule):
                 index = -1
@@ -120,6 +157,13 @@ class Grammar(object):
                             'incorrect precedence: value should be an integer or a pair (string,integer), got %s' %
                             ', '.join(values), (rule._filename, rule._lineno, 0, '')
                         )
+                elif annotation == "split":
+                    if len(values) != 0:
+                        raise SyntaxError(
+                            'incorrect annotation: split does not take any argument, got %s' % ','.join(values),
+                            (rule._filename, rule._lineno, 0, '')
+                        )
+                    self._split = True
                 else:
                     raise SyntaxError('unknown annotation %s' % annotation, (rule._filename, rule._lineno, 0, ''))
 
@@ -139,10 +183,17 @@ class Grammar(object):
                 )
             )
 
+        def is_reduction_item(self):
+            # type: () -> bool
+            return self._index == len(self._rule)
+
     class LR0ItemSet:
-        def __init__(self, items):
-            # type: (List[Grammar.LR0Item]) -> None
-            self._items = items
+        def __init__(self, core, all_dominators):
+            # type: (List[Tuple[Grammar.LR0Item, Grammar.LR0Item.DominatorNode]], List[Grammar.LR0Item.DominatorNode]) -> None
+            self._core = set(c for c, _ in core)
+            self._items = list(self._core)
+            self.add_caller(core, all_dominators)
+            self._close(all_dominators)
 
         def __iter__(self):
             # type: () -> Iterator[Grammar.LR0Item]
@@ -152,12 +203,60 @@ class Grammar(object):
             # type: (List[str]) -> List[str]
             return [i.to_string(name_map) for i in self._items]
 
+        def add_caller(self, core, all_dominators):
+            # type: (List[Tuple[Grammar.LR0Item, Grammar.LR0Item.DominatorNode]], List[Grammar.LR0Item.DominatorNode]) -> None
+            item_set_id = id(self)
+            for item, node in core:
+                try:
+                    target_node = item._dominators[item_set_id]
+                except KeyError:
+                    item._dominators[item_set_id] = Grammar.LR0Item.DominatorNode(
+                        item_set_id, item, [node], all_dominators
+                    )
+                else:
+                    if node not in target_node._predecessors:
+                        target_node._predecessors.append(node)
+                        node._successors.add(item._dominators[item_set_id])
+
+        def _close(self, all_dominators):
+            # type: (List[Grammar.LR0Item.DominatorNode]) -> None
+            item_set_id = id(self)
+            size = 0
+            while size != len(self._items):
+                old_size = len(self._items)
+                for item in self._items[size:]:
+                    dn = item._dominators[item_set_id]
+                    for x in item._after:
+                        try:
+                            successor = x._item._dominators[item_set_id]
+                        except KeyError:
+                            successor = x._item._dominators[item_set_id] = Grammar.LR0Item.DominatorNode(
+                                item_set_id, x._item, [dn], all_dominators
+                            )
+                            self._items.append(x._item)
+                        dn._successors.add(successor)
+                        if successor not in dn._direct_successors:
+                            dn._direct_successors.add(successor)
+                            dn._direct_successors.update(successor._direct_successors)
+                            for node in dn._direct_predecessors:
+                                node._direct_successors.add(successor)
+                                node._direct_successors.update(successor._direct_successors)
+
+                            successor._predecessors.append(dn)
+                            successor._direct_predecessors.add(dn)
+                            successor._direct_predecessors.update(dn._direct_predecessors)
+                            for node in successor._direct_successors:
+                                node._direct_predecessors.add(dn)
+                                node._direct_predecessors.update(dn._direct_predecessors)
+                size = old_size
+
     def __init__(self, terminals, rules, start_symbol, parser, tab_filename, debug_filename):
         # type: (Dict[str, int], List[Tuple[str, Parser.Action, List[str], List[Tuple[str, List[str], int]], str, int]], str, Parser, str, str) -> None
         index = dict(terminals)
         name_map = [''] * (1 + len(terminals))
         log = Logger(open(debug_filename, 'w'))
         stderr = Logger(sys.stderr)
+        dot_file = Logger(open(os.path.splitext(debug_filename)[0] + '.dot', 'w'))
         for name, i in terminals.items():
             name_map[i] = name
 
@@ -181,7 +280,7 @@ class Grammar(object):
                 log.info('  %s', rule.to_string(name_map))
 
         _create_lr0_items(productions)
-        _create_parser_table(productions, start_id, name_map, len(terminals), log, stderr)
+        _create_parser_table(productions, start_id, name_map, len(terminals), log, stderr, dot_file)
 
         #with open('cxx.y', 'w') as yaccfile:
         #    for index, terminal in enumerate(name_map[2:1 + len(terminals)]):
@@ -286,33 +385,18 @@ def _create_lr0_items(productions):
                 i -= 1
 
 
-def _closure(item_set):
-    # type: (List[Grammar.LR0Item]) -> Grammar.LR0ItemSet
-    result = item_set[:]
-    seen = set([])
-    added = True
-    while added:
-        added = False
-        for item in result:
-            for x in item._after:
-                if x in seen:
-                    continue
-                seen.add(x)
-                added = True
-                result.append(x._item)
-    return Grammar.LR0ItemSet(result)
-
-
-def _create_parser_table(productions, start_id, name_map, terminal_count, log, error_log):
-    # type: (Dict[int, Grammar.Production], int, List[str], int, Logger, Logger) -> None
+def _create_parser_table(productions, start_id, name_map, terminal_count, log, error_log, dot_file):
+    # type: (Dict[int, Grammar.Production], int, List[str], int, Logger, Logger, Logger) -> None
     cidhash = {}
-    goto_cache = {}    # type: Dict[Tuple[int, int], Optional[Grammar.LR0ItemSet]]
-    goto_cache_2 = {}  # type: Dict[int, Any]
+    goto_cache = {}        # type: Dict[Tuple[int, int], Optional[Grammar.LR0ItemSet]]
+    goto_cache_2 = {}      # type: Dict[int, Any]
+    dominator_nodes = []   # type: List[Grammar.LR0Item.DominatorNode]
 
     def goto(item_set, lookahead):
         # type: (Grammar.LR0ItemSet, int) -> Optional[Grammar.LR0ItemSet]
         # First we look for a previously cached entry
-        result = goto_cache.get((id(item_set), lookahead), None)
+        item_set_id = id(item_set)
+        result = goto_cache.get((item_set_id, lookahead), None)
         if result is not None:
             return result
 
@@ -329,24 +413,28 @@ def _create_parser_table(productions, start_id, name_map, terminal_count, log, e
                 if not s1:
                     s1 = {}
                     s[id(next)] = s1
-                gs.append(next)
+                gs.append((next, item._dominators[item_set_id]))
                 s = s1
 
         result = s.get(0, None)
         if result is None:
             if gs:
-                result = _closure(gs)
+                result = Grammar.LR0ItemSet(gs, dominator_nodes)
                 s[0] = result
             else:
                 s[0] = None
+        else:
+            result.add_caller(gs, dominator_nodes)
 
-        goto_cache[(id(item_set), lookahead)] = result
+        goto_cache[(item_set_id, lookahead)] = result
         return result
 
     def create_item_sets():
-        # type: () -> List[Grammar.LR0ItemSet]
+        # type: () -> Tuple[List[Grammar.LR0Item.DominatorNode], List[Grammar.LR0ItemSet]]
         assert len(productions[start_id]) == 1
-        states = [_closure([productions[start_id][0]._item])]
+        assert len(dominator_nodes) == 0
+        root_node = Grammar.LR0Item.DominatorNode(0, productions[start_id][0]._item, [], dominator_nodes)
+        states = [Grammar.LR0ItemSet([(productions[start_id][0]._item, root_node)], dominator_nodes)]
         cidhash[id(states[0])] = 0
 
         # Loop over the items in C and each grammar symbols
@@ -368,7 +456,7 @@ def _create_parser_table(productions, start_id, name_map, terminal_count, log, e
                 cidhash[id(g)] = len(states)
                 states.append(g)
 
-        return states
+        return dominator_nodes, states
 
     def add_lalr_lookahead(states):
         # type: (List[Grammar.LR0ItemSet]) -> None
@@ -577,13 +665,67 @@ def _create_parser_table(productions, start_id, name_map, terminal_count, log, e
     actionp = {}       # Action production array (temporary)
 
     # Build the parser table, state by state
-    states = create_item_sets()
+    dominator_nodes, states = create_item_sets()
     add_lalr_lookahead(states)
+
+    # build dominance tree for items
+    all_nodes = set(dominator_nodes)
+    for node in dominator_nodes[1:]:
+        node._dominators = all_nodes
+    changed = True
+    while changed:
+        changed = False
+        for node in dominator_nodes[1:]:
+            dominators = set([])   # type: Set[Grammar.LR0Item.DominatorNode]
+            dominators.update(node._predecessors[0]._dominators)
+            for pred in node._predecessors[1:]:
+                dominators.intersection_update(pred._dominators)
+            dominators.add(node)
+            if node._dominators != dominators:
+                changed = True
+                node._dominators = dominators
+
+    for node in dominator_nodes[1:]:
+        parent = None  # type: Optional[Grammar.LR0Item.DominatorNode]
+        for dom_node in node._dominators:
+            if dom_node == node:
+                continue
+            elif parent is None:
+                parent = dom_node
+            elif dom_node in parent._dominators:
+                assert parent not in dom_node._dominators
+            else:
+                assert parent in dom_node._dominators
+                parent = dom_node
+        node._parent = parent
+        if parent is not None:
+            parent._children.append(node)
+
     st = 0
 
     num_missing_annotations = 0
     num_rr = 0
 
+    dot_file.info('digraph Grammar {')
+    for item_group in states:
+        dot_file.info("  subgraph cluster_%d {", st)
+        dot_file.info('    label="State %d";', st)
+        dot_file.info('    style=filled;')
+        dot_file.info('    color=lightgray;')
+        dot_file.info('    node[style=filled;color=white];')
+        state_id = id(item_group)
+        for item in item_group:
+            dot_file.info('    %d[label="%s"];', id(item._dominators[state_id]), item.to_string(name_map))
+        for item in item_group:
+            dnode = item._dominators[id(item_group)]
+            for predecessor in dnode._predecessors:
+                if predecessor._item_set == state_id:
+                    dot_file.info('    %d -> %d;', id(predecessor), id(dnode))
+        dot_file.info("  }")
+        st += 1
+    dot_file.info('  %d[label="start"];', id(dominator_nodes[0]))
+
+    st = 0
     for item_group in states:
         # Loop over each production
         st_action = {}     # type: Dict[int, List[Tuple[int, Grammar.LR0Item]]]
@@ -622,6 +764,8 @@ def _create_parser_table(productions, start_id, name_map, terminal_count, log, e
                 except KeyError:
                     action_dest[i] = [item]
 
+            accepted_actions = {}  # type: Dict[int, List[Grammar.LR0Item]]
+
             if len(action_dest) > 1:
                 # looks like a potential conflict, look at precedence
                 actions = sorted(actions, key=lambda x: x[1]._precedence[1] if x[1]._precedence is not None else -1)
@@ -634,22 +778,183 @@ def _create_parser_table(productions, start_id, name_map, terminal_count, log, e
                             '  ** %s [%s] needs a precedence annotation', item.to_string(name_map), name_map[a]
                         )
                         num_missing_annotations += 1
-                for _, item in actions:
-                    if item._precedence is not None and item._precedence[1] < precedence:
-                        log.info('  -- %s is not used', item.to_string(name_map))
                 assoc_conflict = False
-                for _, item in actions:
-                    if item._precedence is not None and item._precedence[0] != associativity:
-                        log.error('  *** associativity conflicts!')
-                        log.error('  *** %s', item.to_string(name_map))
-                        error_log.error('  *** associativity conflicts!')
-                        error_log.error('  *** %s', item.to_string(name_map))
-                        assoc_conflict = True
+                for j, item in actions:
+                    if item._precedence is not None:
+                        if item._precedence[1] < precedence:
+                            log.info('  -- %s is not used', item.to_string(name_map))
+                        elif item._precedence[0] != associativity:
+                            log.error('  *** associativity conflicts!')
+                            log.error('  *** %s', item.to_string(name_map))
+                            error_log.error('  *** associativity conflicts!')
+                            error_log.error('  *** %s', item.to_string(name_map))
+                            assoc_conflict = True
+                        elif associativity == 'left' and j >= 0:
+                            try:
+                                accepted_actions[j].append(item)
+                            except KeyError:
+                                accepted_actions[j] = [item]
+                        elif associativity == 'right' and j < 0:
+                            try:
+                                accepted_actions[j].append(item)
+                            except KeyError:
+                                accepted_actions[j] = [item]
+                        elif associativity == 'nonassoc':
+                            try:
+                                accepted_actions[j].append(item)
+                            except KeyError:
+                                accepted_actions[j] = [item]
+                        else:
+                            log.info('  -- %s is not used', item.to_string(name_map))
+                    else:
+                        try:
+                            accepted_actions[j].append(item)
+                        except KeyError:
+                            accepted_actions[j] = [item]
+
                 if assoc_conflict:
                     log.error('  *** %s', actions[-1][1].to_string(name_map))
                     log.error('  *** using %s', actions[-1][1].to_string(name_map))
                     error_log.error('  *** %s', actions[-1][1].to_string(name_map))
                     error_log.error('  *** using %s', actions[-1][1].to_string(name_map))
+            else:
+                accepted_actions = action_dest
+
+            for target_group, item_list in accepted_actions.items():
+                if target_group >= 0:
+                    for item1 in item_list:
+                        node1 = item1._dominators[id(item_group)]
+                        for item2 in states[target_group]:
+                            node2 = item2._dominators[id(states[target_group])]
+                            if node1 in node2._predecessors:
+                                dot_file.info('  %d -> %d[label="%s"];', id(node1), id(node2), name_map[a])
+            if len(accepted_actions) > 1:
+                # get the longest reduce action
+                dom_nodes = {}     # type: Dict[int, Set[Grammar.LR0Item.DominatorNode]]
+                longest_reduction = 0
+                conflict_nodes = set([])
+                for _, item_list in accepted_actions.items():
+                    for item in item_list:
+                        longest_reduction = max(longest_reduction, item._index)
+                for _, item_list in accepted_actions.items():
+                    for item in item_list:
+                        for core_node in item._dominators[id(item_group)].find_core(longest_reduction, set([])):
+                            conflict_nodes.add(core_node)
+                    for node in conflict_nodes:
+                        try:
+                            dom_nodes[node._item_set].add(node)
+                        except:
+                            dom_nodes[node._item_set] = set([node])
+
+                conflict_symbols = set([])
+                for _, item_list in accepted_actions.items():
+                    for item in item_list:
+                        if not item._split:
+                            log.warning('  ** %s [%s] needs a split annotation', item.to_string(name_map), name_map[a])
+                            error_log.warning(
+                                '  ** %s [%s] needs a split annotation', item.to_string(name_map), name_map[a]
+                            )
+                            num_missing_annotations += 1
+                        conflict_symbols.add(item._rule._prod_index)
+
+                # reduce until...
+                reduced = True
+                while reduced:
+                    new_dom_nodes = {} # type: Dict[int, Set[Grammar.LR0Item.DominatorNode]]
+                    reduced = False
+
+                    #error_log.warning('  ** state %d', st)
+                    #for _, nodes in dom_nodes.items():
+                    #    for node in nodes:
+                    #        log.warning('  ** %s needs a merge annotation', node._item.to_string(name_map))
+                    #        error_log.warning('  ** %s needs a merge annotation', node._item.to_string(name_map))
+                    #        num_missing_annotations += 1
+
+                    for item_group_id, nodes in dom_nodes.items():
+                        conflict_nodes = set([])
+                        n1 = nodes.pop()
+                        longest_reduction = n1._item._index
+                        origin = set(n1._direct_predecessors)
+                        for node in nodes:
+                            longest_reduction = max(longest_reduction, node._item._index)
+                            origin.intersection_update(node._direct_predecessors)
+                        nodes.add(n1)
+                        if longest_reduction == 0 and len(origin) == 0:
+                            for node in nodes:
+                                for pred in node._direct_predecessors:
+                                    if pred._item._index != 0:
+                                        origin.add(pred)
+                            nodes = origin
+                            longest_reduction = 0
+                            for node in nodes:
+                                longest_reduction = max(longest_reduction, node._item._index)
+                        if longest_reduction != 0:
+                            reduced = True
+                            for node in nodes:
+                                for core_node in node.find_core(longest_reduction, set([])):
+                                    conflict_nodes.add(core_node)
+                            for node in conflict_nodes:
+                                try:
+                                    new_dom_nodes[node._item_set].add(node)
+                                except:
+                                    new_dom_nodes[node._item_set] = set([node])
+                        else:
+                            new_dom_nodes[item_group_id] = nodes
+                    dom_nodes = new_dom_nodes
+
+                # find the deepest nodes of each state that reach only one of the conflicts
+                #error_log.warning('  ** state %d', st)
+                #for _, nodes in dom_nodes.items():
+                #    for node in nodes:
+                #        log.warning('  ** %s needs a merge annotation', node._item.to_string(name_map))
+                #        error_log.warning('  ** %s needs a merge annotation', node._item.to_string(name_map))
+                #        num_missing_annotations += 1
+
+                for item_group_id, nodes in dom_nodes.items():
+                    leaves = set(nodes)
+                    conflict_nodes = set(nodes)
+                    node = nodes.pop()
+                    origin = set(node._direct_predecessors)
+                    while nodes:
+                        origin.intersection_update(nodes.pop()._direct_predecessors)
+                    for o in origin:
+                        for successor in o._direct_successors:
+                            inter = leaves.intersection(successor._direct_successors)
+                            if len(inter) > 0 and len(inter) < len(leaves):
+                                conflict_nodes.add(successor)
+                    for n1 in conflict_nodes:
+                        for n2 in conflict_nodes:
+                            if n2 in n1._direct_predecessors:
+                                break
+                        else:
+                            log.warning('  ** %s needs a merge annotation', n1._item.to_string(name_map))
+                            error_log.warning('  ** %s needs a merge annotation', n1._item.to_string(name_map))
+                            num_missing_annotations += 1
+
+                # find the deepest nodes of each state that reach only one of the conflicts
+                #error_log.warning('  ** state %d', st)
+                #for _, nodes in dom_nodes.items():
+                #    for node in nodes:
+                #        log.warning('  ** %s needs a merge annotation', node._item.to_string(name_map))
+                #        error_log.warning('  ** %s needs a merge annotation', node._item.to_string(name_map))
+                #        num_missing_annotations += 1
+
+        nkeys = set([])
+        for item in item_group:
+            node1 = item._dominators[id(item_group)]
+            for s in item._symbols:
+                if s > terminal_count:
+                    g = goto(item_group, s)
+                    j = cidhash.get(id(g), -1)
+                    if j >= 0:
+                        for item2 in states[j]:
+                            dnode = item2._dominators[id(states[j])]
+                            if node1 in dnode._predecessors:
+                                dot_file.info('  %d->%d[label="%s"];', id(node1), id(dnode), name_map[s])
+                        if s not in nkeys:
+                            nkeys.add(s)
+                            #st_goto[n] = j
+                            log.info('    %-30s shift and go to state %d', name_map[s], j)
 
         st += 1
         """
@@ -711,6 +1016,8 @@ def _create_parser_table(productions, start_id, name_map, terminal_count, log, e
             error_log.warning('rejected rule (%s) in state %d', rejected.to_string(name_map), state)
             already_reported.add((state, id(rule), id(rejected)))
         """
+    dot_file.info('}')
+
     # Report shift/reduce and reduce/reduce conflicts
     if num_missing_annotations == 1:
         log.warning('1 missing annotation')

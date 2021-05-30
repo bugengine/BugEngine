@@ -39,8 +39,8 @@ import glrp
 from be_typing import TYPE_CHECKING
 
 
-@glrp.rule("attribute-specifier-seq : attribute-specifier")
-@glrp.rule("attribute-specifier-seq : attribute-specifier-seq attribute-specifier")
+@glrp.rule("attribute-specifier-seq [prec:left,1] : attribute-specifier ")
+@glrp.rule("attribute-specifier-seq [prec:left,1] : attribute-specifier-seq [prec:left,1] attribute-specifier")
 @cxx98
 def p_attribute_specifier_seq(parser, p):
     # type: (CxxParser, glrp.Production) -> None
@@ -56,7 +56,7 @@ def p_attribute_specifier(parser, p):
 
 
 # the only valid attribute specifier for C++ 98 is a documentation comment
-@glrp.rule("attribute-specifier : doxycomment")
+@glrp.rule("attribute-specifier : [prec:left,1] doxycomment")
 @cxx98
 def p_attribute_specifier_doc(parser, p):
     # type: (CxxParser, glrp.Production) -> None

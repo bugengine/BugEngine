@@ -1,2 +1,0 @@
-class CppObject(object):
-    pass

@@ -61,10 +61,10 @@ def p_operator_function_id(parser, p):
 
 
 @cxx98
-@glrp.rule("overloadable-operator : 'new'")
-@glrp.rule("overloadable-operator : 'delete'")
-@glrp.rule("overloadable-operator : 'new' '[' ']'")
-@glrp.rule("overloadable-operator : 'delete' '[' ']'")
+@glrp.rule("overloadable-operator : 'new' [prec:left,0] ")
+@glrp.rule("overloadable-operator : 'delete' [prec:left,0] ")
+@glrp.rule("overloadable-operator : 'new' [prec:left,0] '[' ']'")
+@glrp.rule("overloadable-operator : 'delete' [prec:left,0] '[' ']'")
 @glrp.rule("overloadable-operator : '+'")
 @glrp.rule("overloadable-operator : '-'")
 @glrp.rule("overloadable-operator : '*'")

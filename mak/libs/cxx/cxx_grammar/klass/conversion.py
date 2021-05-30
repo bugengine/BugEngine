@@ -19,14 +19,14 @@ def p_conversion_function_id(parser, p):
     pass
 
 
-@glrp.rule("conversion-type-id : type-specifier-seq conversion-declarator?")
+@glrp.rule("conversion-type-id : type-specifier-seq [prec:left,1] conversion-declarator?")
 @cxx98
 def p_conversion_type_id(parser, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
 
-@glrp.rule("conversion-declarator : ptr-operator conversion-declarator?")
+@glrp.rule("conversion-declarator : ptr-operator [prec:left,1] conversion-declarator?")
 @cxx98
 def p_conversion_declarator(parser, p):
     # type: (CxxParser, glrp.Production) -> None

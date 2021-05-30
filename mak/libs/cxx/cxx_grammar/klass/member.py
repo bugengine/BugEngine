@@ -75,7 +75,7 @@ def p_member_declarator(parser, p):
 
 
 @glrp.rule("member-declarator : declarator virt-specifier-seq pure-specifier?")
-@glrp.rule("member-declarator : 'identifier'? attribute-specifier-seq virt-specifier-seq? ':' constant-expression")
+@glrp.rule("member-declarator : 'identifier'? attribute-specifier-seq? virt-specifier-seq ':' constant-expression")
 @cxx11
 def p_member_declarator_virt_specifier(parser, p):
     # type: (CxxParser, glrp.Production) -> None

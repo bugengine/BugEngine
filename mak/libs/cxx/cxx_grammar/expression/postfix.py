@@ -29,7 +29,7 @@ pseudo-destructor-name:
       ~ decltype-specifier     C++0x
 """
 
-from ...cxx_parser import cxx98, cxx11
+from ...cxx_parser import cxx98, cxx11, disabled
 import glrp
 from be_typing import TYPE_CHECKING
 
@@ -42,8 +42,6 @@ from be_typing import TYPE_CHECKING
 @glrp.rule("postfix-expression : typename-specifier '(' expression-list? ')'")
 @glrp.rule("postfix-expression : postfix-expression '.' 'template'? id-expression")
 @glrp.rule("postfix-expression : postfix-expression '->' 'template'? id-expression")
-@glrp.rule("postfix-expression : postfix-expression '.' pseudo-destructor-name")
-@glrp.rule("postfix-expression : postfix-expression '->' pseudo-destructor-name")
 @glrp.rule("postfix-expression : postfix-expression '++'")
 @glrp.rule("postfix-expression : postfix-expression '--'")
 @glrp.rule("postfix-expression : 'dynamic_cast' '<[' type-id ']>' '(' expression ')'")
@@ -55,6 +53,17 @@ from be_typing import TYPE_CHECKING
 @cxx98
 def p_postfix_expression(parser, p):
     # type: (CxxParser, glrp.Production) -> None
+    pass
+
+
+@glrp.rule("postfix-expression : postfix-expression '.' pseudo-destructor-name")
+@glrp.rule("postfix-expression : postfix-expression '->' pseudo-destructor-name")
+@disabled
+def p_postfix_expression_disabled(parser, p):
+    # type: (CxxParser, glrp.Production) -> None
+    # Already covered in
+    # @glrp.rule("postfix-expression : postfix-expression '.' 'template'? id-expression")
+    # @glrp.rule("postfix-expression : postfix-expression '->' 'template'? id-expression")
     pass
 
 
@@ -75,15 +84,9 @@ def p_expression_list(parser, p):
 
 
 @glrp.rule("pseudo-destructor-name : '::'? nested-name-specifier? '~' 'identifier'")
-@cxx98
-def p_pseudo_destructor_name(parser, p):
-    # type: (CxxParser, glrp.Production) -> None
-    pass
-
-
 @glrp.rule("pseudo-destructor-name : '~' decltype-specifier")
-@cxx11
-def p_pseudo_destructor_name_cpp11(parser, p):
+@disabled
+def p_pseudo_destructor_name(parser, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 

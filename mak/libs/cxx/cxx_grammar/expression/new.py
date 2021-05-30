@@ -37,14 +37,14 @@ def p_new_placement(parser, p):
     pass
 
 
-@glrp.rule("new-type-id : type-specifier-seq new-declarator?")
+@glrp.rule("new-type-id : type-specifier-seq [prec:left,1] new-declarator?")
 @cxx98
 def p_new_type_id(parser, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
 
-@glrp.rule("new-declarator : ptr-operator new-declarator?")
+@glrp.rule("new-declarator : ptr-operator [prec:left,1] new-declarator?")
 @glrp.rule("new-declarator : noptr-new-declarator")
 @cxx98
 def p_new_declarator(parser, p):

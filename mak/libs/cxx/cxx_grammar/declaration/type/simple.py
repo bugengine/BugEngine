@@ -31,7 +31,7 @@ import glrp
 from be_typing import TYPE_CHECKING
 
 
-@glrp.rule("simple-type-specifier : id-type | builtin-type-specifier")
+@glrp.rule("simple-type-specifier : id-type [prec:nonassoc,0][split] | builtin-type-specifier")
 @cxx98
 def p_simple_type_specifier(parser, p):
     # type: (CxxParser, glrp.Production) -> None

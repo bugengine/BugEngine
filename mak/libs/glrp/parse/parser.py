@@ -160,8 +160,8 @@ def _parse_rule(rule_string, action, filename, lineno):
 
         while True:
             productions = [
-                (Parser.DirectAction(action), [], annotations)
-            ]                                                  # type: List[Tuple[Parser.Action, List[str], List[Tuple[str, List[str], int]]]]
+                (Parser.DirectAction(action), [], annotations[:])
+            ]                                                     # type: List[Tuple[Parser.Action, List[str], List[Tuple[str, List[str], int]]]]
 
             while m is not None:
                 parse_start = m.end()
@@ -178,11 +178,11 @@ def _parse_rule(rule_string, action, filename, lineno):
                                                    len(p[1]) - 1), p[1][:-1], p[2][:]) for p in productions
                         ]
                     continue
-                elif m.lastindex == 7:  # |
+                elif m.lastindex == 7: # |
                     for p in productions:
                         result.append((id, p[0], p[1], p[2], filename, lineno))
                     break
-                elif m.lastindex == 8:  # ;
+                elif m.lastindex == 8: # ;
                     for p in productions:
                         result.append((id, p[0], p[1], p[2], filename, lineno))
                     rule_string = rule_string[m.end():]
@@ -191,18 +191,34 @@ def _parse_rule(rule_string, action, filename, lineno):
                         if m is None:
                             raise SyntaxError('unable to parse rule', (filename, lineno, 0, rule_string))
                         id = m.group(1)
+
+                        annotations = []
+                        while m is not None:
+                            parse_start = m.end()
+                            m = _rule_annotation.match(rule_string, m.end())
+                            if m is None:
+                                raise SyntaxError('unable to parse rule', (filename, lineno, parse_start, rule_string))
+                            if m.lastindex == 1:   # :
+                                break
+                            elif m.lastindex == 2: # annotation
+                                annotation = m.group(2)
+                                annotations.append((annotation, [], -1))
+                            elif m.lastindex == 3: # annotation=value
+                                annotation = m.group(2)
+                                values = [v.strip() for v in m.group(3)[1:].split(',')]
+                                annotations.append((annotation, values, -1))
                         break
                     else:
                         return result
-                elif m.lastindex == 9:  # $
+                elif m.lastindex == 9:             # $
                     for p in productions:
                         result.append((id, p[0], p[1], p[2], filename, lineno))
                     return result
-                elif m.lastindex == 10: # annotation
+                elif m.lastindex == 10:            # annotation
                     annotation = m.group(10)
                     for p in productions:
                         p[2].append((annotation, [], len(p[1])))
-                elif m.lastindex == 11: # annotation=value
+                elif m.lastindex == 11:            # annotation=value
                     annotation = m.group(10)
                     values = [v.strip() for v in m.group(11)[1:].split(',')]
                     for p in productions:

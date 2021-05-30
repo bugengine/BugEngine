@@ -35,7 +35,7 @@ import glrp
 from be_typing import TYPE_CHECKING
 
 
-@glrp.rule("primary-expression : literal | 'this' | '(' expression ')' | id-expression")
+@glrp.rule("primary-expression : literal | 'this' | '(' expression ')' | id-expression [prec:nonassoc,0][split]")
 @cxx98
 def p_primary_expression(parser, p):
     # type: (CxxParser, glrp.Production) -> None
@@ -56,7 +56,7 @@ def p_id_type(parser, p):
     pass
 
 
-@glrp.rule("unqualified-type-id [prec:left,0] : 'identifier' template-spec?")
+@glrp.rule("unqualified-type-id [prec:left,1] : [prec:left,1] 'identifier' template-spec?")
 @cxx98
 def p_unqualified_type_id(parser, p):
     # type: (CxxParser, glrp.Production) -> None
@@ -64,8 +64,8 @@ def p_unqualified_type_id(parser, p):
 
 
 @glrp.rule("qualified-type-id : nested-name-specifier 'template'? unqualified-type-id")
-@glrp.rule("qualified-type-id : [prec:left,1] '::' nested-name-specifier 'template'? unqualified-type-id")
-@glrp.rule("qualified-type-id : [prec:left,1] '::' 'identifier' template-spec?")
+@glrp.rule("qualified-type-id [prec:left,1] : [prec:left,1] '::' nested-name-specifier 'template'? unqualified-type-id")
+@glrp.rule("qualified-type-id [prec:left,1] : [prec:left,1] '::' 'identifier' template-spec?")
 @cxx98
 def p_qualified_type_id(parser, p):
     # type: (CxxParser, glrp.Production) -> None
@@ -81,7 +81,7 @@ def p_id_expression(parser, p):
 
 @glrp.rule("unqualified-expression-id : operator-function-id template-spec?")
 @glrp.rule("unqualified-expression-id : conversion-function-id")
-@glrp.rule("unqualified-expression-id : '~' 'identifier'")
+@glrp.rule("unqualified-expression-id [prec:nonassoc,0] : '~' 'identifier'")
 @cxx98
 def p_unqualified_expression_id(parser, p):
     # type: (CxxParser, glrp.Production) -> None
@@ -112,8 +112,8 @@ def p_qualified_expression_id_cxx11(parser, p):
     pass
 
 
-@glrp.rule("nested-name-specifier : 'identifier' template-spec? [prec:left,2] '::'")
-@glrp.rule("nested-name-specifier : nested-name-specifier 'template'? 'identifier' template-spec? '::'")
+@glrp.rule("nested-name-specifier : [prec:left,1] 'identifier' template-spec? [prec:left,1] '::'")
+@glrp.rule("nested-name-specifier : nested-name-specifier 'template'? 'identifier' template-spec? [prec:left,1] '::'")
 @cxx98
 def p_nested_name_specifier(parser, p):
     # type: (CxxParser, glrp.Production) -> None

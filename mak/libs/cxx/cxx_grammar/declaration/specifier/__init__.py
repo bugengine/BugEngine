@@ -39,7 +39,7 @@ def p_decl_specifier_cxx20(parser, p):
     pass
 
 
-@glrp.rule("decl-specifier-seq : decl-specifier attribute-specifier-seq?")
+@glrp.rule("decl-specifier-seq [prec:left,1] : decl-specifier attribute-specifier-seq?")
 @glrp.rule("decl-specifier-seq : decl-specifier decl-specifier-seq")
 @cxx98
 def p_decl_specifier_seq(parser, p):

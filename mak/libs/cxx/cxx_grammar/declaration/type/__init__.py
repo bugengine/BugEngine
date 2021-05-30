@@ -40,8 +40,8 @@ def p_trailing_type_specifier(parser, p):
     pass
 
 
-@glrp.rule("type-specifier-seq : type-specifier attribute-specifier-seq?")
-@glrp.rule("type-specifier-seq : type-specifier type-specifier-seq")
+@glrp.rule("type-specifier-seq [prec:left,1] : type-specifier [prec:left,1] attribute-specifier-seq?")
+@glrp.rule("type-specifier-seq [prec:left,1] : type-specifier type-specifier-seq")
 @cxx98
 def p_type_specifier_seq(parser, p):
     # type: (CxxParser, glrp.Production) -> None
