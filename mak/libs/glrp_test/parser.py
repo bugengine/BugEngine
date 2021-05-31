@@ -84,3 +84,46 @@ class Parser2(glrp.Parser):
         # type: ()->None
         self.lexer = self.__class__.Lexer()
         glrp.Parser.__init__(self, self.lexer, 'prog', self.__class__.__name__ + '.tab')
+
+
+class Parser3(glrp.Parser):
+    class Lexer(glrp.Lexer):
+        @glrp.token(r'if', 'if')
+        @glrp.token(r'else', 'else')
+        @glrp.token(r'\(', '(')
+        @glrp.token(r'\)', ')')
+        @glrp.token(r'\{', '{')
+        @glrp.token(r'\}', '}')
+        @glrp.token(r'\;', ';')
+        @glrp.token(r'identifier', 'identifier')
+        def tok(self, token):
+            # type: (glrp.Token) -> glrp.Token
+            return token
+
+    @glrp.rule("prog :")
+    @glrp.rule("prog : prog stmt")
+    def p_prog(self, p):
+        # type: (glrp.Production) -> None
+        pass
+
+    @glrp.rule("stmt : expr ';'")
+    @glrp.rule("stmt : if_stmt")
+    def p_stmt(self, p):
+        # type: (glrp.Production) -> None
+        pass
+
+    @glrp.rule("expr : 'identifier'")
+    def p_expr(self, p):
+        # type: (glrp.Production) -> None
+        pass
+
+    @glrp.rule("if_stmt : 'if' '(' expr ')' stmt")
+    @glrp.rule("if_stmt : 'if' '(' expr ')' stmt 'else' stmt")
+    def p_if_stmt(self, p):
+        # type: (glrp.Production) -> None
+        pass
+
+    def __init__(self):
+        # type: ()->None
+        self.lexer = self.__class__.Lexer()
+        glrp.Parser.__init__(self, self.lexer, 'prog', self.__class__.__name__ + '.tab')

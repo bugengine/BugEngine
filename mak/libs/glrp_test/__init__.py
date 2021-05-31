@@ -5,6 +5,7 @@ import sys
 def run():
     # type: () -> None
     try:
+        parser.Parser3()
         parser.Parser1()
         parser.Parser2()
     except SyntaxError as exception:
