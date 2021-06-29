@@ -1,10 +1,11 @@
-from be_typing import TYPE_CHECKING
+from be_typing import TYPE_CHECKING, overload
 
 
 class LR0Item:
     def __init__(self, rule, index, next, predecessor, successors, follow):
         # type: (Grammar.Rule, int, Optional[LR0Item], Optional[int], List[Grammar.Rule], Set[int]) -> None
         self._rule = rule
+        self._symbol = rule._prod_symbol
         self._index = index
         self._next = next
         self._before = predecessor
@@ -70,8 +71,9 @@ class LR0Item:
     def to_string(self, name_map):
         # type: (List[str]) -> str
         return '%s -> %s' % (
-            name_map[self._rule._prod_index], ' '.join(
-                [name_map[p] for p in self._rule._production[:self._index]] + ['.%s' % self._annotations()] +
+            name_map[self._rule._prod_symbol], ' '.join(
+                [name_map[p]
+                 for p in self._rule._production[:self._index]] + ['%s%s' % (name_map[1], self._annotations())] +
                 [name_map[p] for p in self._rule._production[self._index:]]
             )
         )
@@ -80,7 +82,25 @@ class LR0Item:
         # type: () -> bool
         return self._index == len(self._rule)
 
+    @overload
+    def __getitem__(self, index):
+        # type: (int) -> int
+        return self._rule[index]
+
+    @overload
+    def __getitem__(self, index):
+        # type: (slice) -> Sequence[int]
+        return self._rule[index]
+
+    def __getitem__(self, index):
+        # type: (Union[int, slice]) -> Union[int, Sequence[int]]
+        return self._rule[index]
+
+    def __len__(self):
+        # type: () -> int
+        return len(self._rule)
+
 
 if TYPE_CHECKING:
-    from be_typing import Dict, List, Optional, Set, Tuple
+    from be_typing import Dict, List, Optional, Sequence, Set, Tuple, Union
     from .grammar import Grammar

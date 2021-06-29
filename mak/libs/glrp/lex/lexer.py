@@ -18,7 +18,7 @@ class Lexer:
         # type: () -> None
         self._states = {}          # type: Dict[str, Lexer.State]
         self._state_stack = []     # type: List[Lexer.State]
-        self._terminals = {'<eof>': 0, '<empty>': 1}
+        self._terminals = {'<eof>': 0, '\u2666': 1, '<start>': 2}
         self._filename = ''
         self._lexdata = ''
         self._lexlen = 0
@@ -31,7 +31,7 @@ class Lexer:
                         self._terminals[name] = index
         for token_name in self.tokens:
             if token_name not in self._terminals:
-                self._terminals[token_name] = len(self._terminals) + 1
+                self._terminals[token_name] = len(self._terminals)
 
     def input(self, filename):
         # type: (str) -> None

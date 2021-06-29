@@ -12,13 +12,14 @@ class Parser1(glrp.Parser):
             return token
 
     @glrp.rule("prog : A")
-    @glrp.rule("prog : A prog")
+    @glrp.rule("prog : prog A")
     def p_prog(self, p):
         # type: (glrp.Production) -> None
         pass
 
     @glrp.rule("A : a B c")
     @glrp.rule("A : a a B c")
+    #@glrp.rule("A : B c")
     def p_A(self, p):
         # type: (glrp.Production) -> None
         pass
@@ -100,8 +101,7 @@ class Parser3(glrp.Parser):
             # type: (glrp.Token) -> glrp.Token
             return token
 
-    @glrp.rule("prog :")
-    @glrp.rule("prog : prog stmt")
+    @glrp.rule("prog : stmt")
     def p_prog(self, p):
         # type: (glrp.Production) -> None
         pass
@@ -127,3 +127,33 @@ class Parser3(glrp.Parser):
         # type: ()->None
         self.lexer = self.__class__.Lexer()
         glrp.Parser.__init__(self, self.lexer, 'prog', self.__class__.__name__ + '.tab')
+
+
+class Parser4(glrp.Parser):
+    class Lexer(glrp.Lexer):
+        @glrp.token(r'id', 'id')
+        @glrp.token(r'\,', ',')
+        def tok(self, token):
+            # type: (glrp.Token) -> glrp.Token
+            return token
+
+    @glrp.rule("s : a id")
+    def p_s(self, p):
+        # type: (glrp.Production) -> None
+        pass
+
+    @glrp.rule("a : expr")
+    def p_a(self, p):
+        # type: (glrp.Production) -> None
+        pass
+
+    @glrp.rule("expr : ")
+    @glrp.rule("expr : expr 'id' ','")
+    def p_expr(self, p):
+        # type: (glrp.Production) -> None
+        pass
+
+    def __init__(self):
+        # type: ()->None
+        self.lexer = self.__class__.Lexer()
+        glrp.Parser.__init__(self, self.lexer, 's', self.__class__.__name__ + '.tab')

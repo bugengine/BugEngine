@@ -1,2 +1,0 @@
-class CxxObject(object):
-    pass

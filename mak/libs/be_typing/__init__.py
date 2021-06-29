@@ -14,6 +14,10 @@ else:
     Tuple = _Index()
     List = _Index()
     TypeVar = _Index()
+    Callable = _Index()
+
+    def overload(x):
+        return x
 
     def cast(a, b):
         return b

@@ -91,7 +91,7 @@ class Parser:
             # type: (Parser) -> Callable[[Production], None]
             return parser.accept
 
-    def __init__(self, lexer, start_symbol, tab_filename):
+    def __init__(self, lexer, start_symbol, output_directory):
         # type: (Lexer, str, str) -> None
         self._lexer = lexer
 
@@ -101,10 +101,7 @@ class Parser:
             for rule_string, filename, lineno in getattr(action, 'rules', []):
                 rules += _parse_rule(rule_string, rule_action, filename, lineno)
 
-        grammar = Grammar(
-            self._lexer._terminals, rules, start_symbol, self, tab_filename,
-            os.path.splitext(tab_filename)[0] + '.log'
-        )
+        grammar = Grammar(self.__class__.__name__, self._lexer._terminals, rules, start_symbol, self, output_directory)
 
     def parse(self, filename):
         # type: (str) -> Any

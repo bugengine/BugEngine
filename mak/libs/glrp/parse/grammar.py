@@ -1,5 +1,5 @@
 from ..log import Logger
-from be_typing import TYPE_CHECKING
+from be_typing import TYPE_CHECKING, overload
 from .lr0item import LR0Item
 from . import lalr
 import os
@@ -8,10 +8,10 @@ import sys
 
 class Grammar(object):
     class Rule:
-        def __init__(self, id, prod_index, prod_name, production, action, annnotation_list, filename, lineno):
+        def __init__(self, id, prod_symbol, prod_name, production, action, annnotation_list, filename, lineno):
             # type: (int, int, str, List[int], Parser.Action, List[Tuple[str, List[str], int]], str, int) -> None
             self._id = id
-            self._prod_index = prod_index
+            self._prod_symbol = prod_symbol
             self._prod_name = prod_name
             self._production = production
             self._action = action
@@ -31,14 +31,24 @@ class Grammar(object):
 
         def to_string(self, name_map):
             # type: (List[str]) -> str
-            return '%s -> %s' % (name_map[self._prod_index], ' '.join([name_map[p] for p in self._production]))
+            return '%s -> %s' % (name_map[self._prod_symbol], ' '.join([name_map[p] for p in self._production]))
 
         def __iter__(self):
             # type: () -> Iterator[int]
             return iter(self._production)
 
+        @overload
         def __getitem__(self, index):
             # type: (int) -> int
+            return self._production[index]
+
+        @overload
+        def __getitem__(self, index):
+            # type: (slice) -> Sequence[int]
+            return self._production[index]
+
+        def __getitem__(self, index):
+            # type: (Union[int, slice]) -> Union[int, Sequence[int]]
             return self._production[index]
 
         def __len__(self):
@@ -46,10 +56,10 @@ class Grammar(object):
             return len(self._production)
 
     class Production:
-        def __init__(self, prod_index, rule_list):
+        def __init__(self, prod_symbol, rule_list):
             # type: (int, List[Grammar.Rule]) -> None
             self._rule_list = rule_list
-            self._prod_index = prod_index
+            self._prod_symbol = prod_symbol
             self._first = set([])  # type: Set[int]
             self._empty = False
             self._nonterminal_count = 0
@@ -75,10 +85,11 @@ class Grammar(object):
             # type: () -> int
             return len(self._rule_list)
 
-    def __init__(self, terminals, rules, start_symbol, parser, tab_filename, debug_filename):
-        # type: (Dict[str, int], List[Tuple[str, Parser.Action, List[str], List[Tuple[str, List[str], int]], str, int]], str, Parser, str, str) -> None
+    def __init__(self, name, terminals, rules, start_symbol, parser, output_dir):
+        # type: (str, Dict[str, int], List[Tuple[str, Parser.Action, List[str], List[Tuple[str, List[str], int]], str, int]], str, Parser, str) -> None
+        debug_filename = os.path.join(output_dir, name + '.txt')
         index = dict(terminals)
-        name_map = [''] * (1 + len(terminals))
+        name_map = [''] * (len(terminals))
         log = Logger(open(debug_filename, 'w'))
         stderr = Logger(sys.stderr)
         dot_file = Logger(open(os.path.splitext(debug_filename)[0] + '.dot', 'w'))
@@ -90,17 +101,17 @@ class Grammar(object):
         ]
         for nonterminal, _, _, _, _, _ in rules:
             if nonterminal not in index:
-                i = 1 + len(index)
+                i = len(index)
                 index[nonterminal] = i
                 name_map.append(nonterminal)
                 assert name_map[i] == nonterminal
 
         name_map.append('<epsilon>')
 
-        start_id = len(index)
+        start_id = len(index) - 1
         productions = _create_productions(rules, index, log)
-        for prod_index, prod in productions.items():
-            log.info('%d %s {%s}', prod_index, name_map[prod_index], ', '.join([name_map[t] for t in prod._first]))
+        for prod_symbol, prod in productions.items():
+            log.info('%d %s {%s}', prod_symbol, name_map[prod_symbol], ', '.join([name_map[t] for t in prod._first]))
             for rule in prod:
                 log.info('  %s', rule.to_string(name_map))
 
@@ -111,21 +122,50 @@ class Grammar(object):
         #    for index, terminal in enumerate(name_map[2:1 + len(terminals)]):
         #        yaccfile.write('%%token _%d "%s"\n' % (index - 1, terminal))
         #    yaccfile.write('\n%%start %s\n\n%%%%\n' % start_symbol)
-        #    for prod_index, prod in productions.items():
-        #        print(name_map[prod_index])
-        #        if prod_index == start_id:
+        #    for prod_symbol, prod in productions.items():
+        #        print(name_map[prod_symbol])
+        #        if prod_symbol == start_id:
         #            continue
         #        for rule in prod:
         #            if len(rule) == 0:
-        #                yaccfile.write('\n%s: ;\n' % (name_map[prod_index]))
+        #                yaccfile.write('\n%s: ;\n' % (name_map[prod_symbol]))
         #            else:
         #                yaccfile.write(
         #                    '\n%s:\n        %s\n    ;\n' % (
-        #                        name_map[prod_index],
+        #                        name_map[prod_symbol],
         #                        ' '.join(name_map[i] if i > len(terminals) else '"%s"' % name_map[i] for i in rule)
         #                    )
         #                )
         #    yaccfile.write('\n%%%%\n')
+
+        #with open('cxx.py', 'w') as slyfile:
+        #    slyfile.write('import sly\nclass CxxLexer(sly.Lexer):\n    tokens = []\n    literals = {\n')
+        #    for index, terminal in enumerate(name_map[2:1 + len(terminals)]):
+        #        slyfile.write('        "%s",\n' % (terminal))
+        #    slyfile.write('    }\n')
+        #    slyfile.write(
+        #        '\nclass CxxParser(sly.Parser):\n    tokens = CxxLexer.tokens\n    debugfile = "cxxparser.out"\n'
+        #    )
+
+        #    for prod_symbol, prod in productions.items():
+        #        print(name_map[prod_symbol])
+        #        if prod_symbol == start_id:
+        #            continue
+        #        for rule in prod:
+        #            if len(rule) == 0:
+        #                slyfile.write(
+        #                    '\n    @_(\'\')\n    def %s(self, p):\n        pass\n' %
+        #                    (name_map[prod_symbol].replace('-', '_'))
+        #                )
+        #            else:
+        #                slyfile.write(
+        #                    '\n    @_(\'%s\')\n    def %s(self, p):\n        pass\n' % (
+        #                        ' '.join(
+        #                            name_map[i].replace('-', '_') if i > len(terminals) else
+        #                            (name_map[i] if len(name_map[i]) > 1 else '"%s"' % name_map[i]) for i in rule
+        #                        ), name_map[prod_symbol].replace('-', '_')
+        #                    )
+        #                )
 
 
 def _create_productions(rules, index, log):
@@ -134,10 +174,10 @@ def _create_productions(rules, index, log):
     productions = {}   # type: Dict[int, Grammar.Production]
 
     for nonterminal, action, production, attribute_list, filename, lineno in rules:
-        prod_index = index[nonterminal]
+        prod_symbol = index[nonterminal]
         try:
             rule = Grammar.Rule(
-                rule_index, prod_index, nonterminal, [index[s] for s in production], action, attribute_list, filename,
+                rule_index, prod_symbol, nonterminal, [index[s] for s in production], action, attribute_list, filename,
                 lineno
             )
         except KeyError as error:  # unknown rule or terminal
@@ -145,14 +185,14 @@ def _create_productions(rules, index, log):
         else:
             rule_index += 1
             try:
-                productions[prod_index].add_rule(rule)
+                productions[prod_symbol].add_rule(rule)
             except KeyError:
-                productions[prod_index] = Grammar.Production(prod_index, [rule])
+                productions[prod_symbol] = Grammar.Production(prod_symbol, [rule])
 
     queue = list(productions.keys())
     while queue:
-        prod_index = queue.pop(0)
-        prod = productions[prod_index]
+        prod_symbol = queue.pop(0)
+        prod = productions[prod_symbol]
         len_set_before = len(prod._first)
         if prod._empty:
             prod._first.add(-1)
@@ -179,7 +219,7 @@ def _create_productions(rules, index, log):
                                 found_epsilon = True
         len_set_after = len(prod._first)
         if len_set_before != len_set_after or len_set_after == 0:
-            queue.append(prod_index)
+            queue.append(prod_symbol)
 
     return productions
 
@@ -211,5 +251,5 @@ def _create_lr0_items(productions):
 
 
 if TYPE_CHECKING:
-    from typing import Dict, Iterator, List, Set, Tuple
+    from typing import Dict, Iterator, List, Sequence, Set, Tuple, Union
     from .parser import Parser

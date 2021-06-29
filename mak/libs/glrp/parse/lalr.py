@@ -1,5 +1,6 @@
 from .lr0itemset import LR0ItemSet
 from .lr0dominancenode import LR0DominanceNode
+from .lr0path import LR0Path
 from be_typing import TYPE_CHECKING
 import sys
 
@@ -7,9 +8,8 @@ import sys
 def create_parser_table(productions, start_id, name_map, terminal_count, log, error_log, dot_file):
     # type: (Dict[int, Grammar.Production], int, List[str], int, Logger, Logger, Logger) -> None
     cidhash = {}
-    goto_cache = {}        # type: Dict[Tuple[int, int], Optional[LR0ItemSet]]
-    goto_cache_2 = {}      # type: Dict[int, Any]
-    dominator_nodes = []   # type: List[LR0DominanceNode]
+    goto_cache = {}    # type: Dict[Tuple[int, int], Optional[LR0ItemSet]]
+    goto_cache_2 = {}  # type: Dict[int, Any]
 
     def goto(item_set, lookahead):
         # type: (LR0ItemSet, int) -> Optional[LR0ItemSet]
@@ -24,7 +24,7 @@ def create_parser_table(productions, start_id, name_map, terminal_count, log, er
             s = {}
             goto_cache_2[lookahead] = s
 
-        gs = []
+        gs = []    # type: List[Tuple[LR0Item, Optional[LR0DominanceNode], int]]
         for item in item_set:
             next = item._next
             if next and next._before == lookahead:
@@ -38,22 +38,20 @@ def create_parser_table(productions, start_id, name_map, terminal_count, log, er
         result = s.get(0, None)
         if result is None:
             if gs:
-                result = LR0ItemSet(gs, dominator_nodes)
+                result = LR0ItemSet(gs)
                 s[0] = result
             else:
                 s[0] = None
         else:
-            result.add_caller(gs, dominator_nodes)
+            result.add_core(gs)
 
         goto_cache[(item_set_id, lookahead)] = result
         return result
 
     def create_item_sets():
-        # type: () -> Tuple[List[LR0DominanceNode], List[LR0ItemSet]]
+        # type: () -> List[LR0ItemSet]
         assert len(productions[start_id]) == 1
-        assert len(dominator_nodes) == 0
-        root_node = LR0DominanceNode(None, productions[start_id][0]._item, {}, dominator_nodes)
-        states = [LR0ItemSet([(productions[start_id][0]._item, root_node, 1)], dominator_nodes)]
+        states = [LR0ItemSet([(productions[start_id][0]._item, None, 2)])]
         cidhash[id(states[0])] = 0
 
         # Loop over the items in C and each grammar symbols
@@ -75,7 +73,7 @@ def create_parser_table(productions, start_id, name_map, terminal_count, log, er
                 cidhash[id(g)] = len(states)
                 states.append(g)
 
-        return dominator_nodes, states
+        return states
 
     def add_lalr_lookahead(states):
         # type: (List[LR0ItemSet]) -> None
@@ -175,7 +173,7 @@ def create_parser_table(productions, start_id, name_map, terminal_count, log, er
                 lookb = []
                 includes = []
                 for p in states[state]:
-                    if p._rule._prod_index != N:
+                    if p._rule._prod_symbol != N:
                         continue
 
                     # Okay, we have a name match.  We now follow the production all the way
@@ -209,7 +207,7 @@ def create_parser_table(productions, start_id, name_map, terminal_count, log, er
 
                     # When we get here, j is the final state, now we have to locate the production
                     for r in states[j]:
-                        if r._rule._prod_index != p._rule._prod_index:
+                        if r._rule._prod_symbol != p._rule._prod_symbol:
                             continue
                         if len(r._rule) != len(p._rule):
                             continue
@@ -253,9 +251,9 @@ def create_parser_table(productions, start_id, name_map, terminal_count, log, er
 
         # Determine all of the nullable nonterminals
         nullable = set([])
-        for prod_index, prod in productions.items():
+        for prod_symbol, prod in productions.items():
             if prod._empty:
-                nullable.add(prod_index)
+                nullable.add(prod_symbol)
 
         # Find all non-terminal transitions
         trans = []
@@ -284,41 +282,8 @@ def create_parser_table(productions, start_id, name_map, terminal_count, log, er
     actionp = {}       # Action production array (temporary)
 
     # Build the parser table, state by state
-    dominator_nodes, states = create_item_sets()
+    states = create_item_sets()
     add_lalr_lookahead(states)
-
-    # build dominance tree for items
-    #all_nodes = set(dominator_nodes)
-    #for node in dominator_nodes[1:]:
-    #    node._dominators = all_nodes
-    #changed = True
-    #while changed:
-    #    changed = False
-    #    for node in dominator_nodes[1:]:
-    #        dominators = set([])   # type: Set[LR0DominanceNode]
-    #        dominators.update(node._predecessors[0]._dominators)
-    #        for pred in node._predecessors[1:]:
-    #            dominators.intersection_update(pred._dominators)
-    #        dominators.add(node)
-    #        if node._dominators != dominators:
-    #            changed = True
-    #            node._dominators = dominators
-
-    #for node in dominator_nodes[1:]:
-    #    parent = None  # type: Optional[LR0DominanceNode]
-    #    for dom_node in node._dominators:
-    #        if dom_node == node:
-    #            continue
-    #        elif parent is None:
-    #            parent = dom_node
-    #        elif dom_node in parent._dominators:
-    #            assert parent not in dom_node._dominators
-    #        else:
-    #            assert parent in dom_node._dominators
-    #            parent = dom_node
-    #    node._parent = parent
-    #    if parent is not None:
-    #        parent._children.append(node)
 
     st = 0
 
@@ -337,27 +302,31 @@ def create_parser_table(productions, start_id, name_map, terminal_count, log, er
             dot_file.info('    %d[label="%s"];', id(item_group._items[item]), item.to_string(name_map))
         for item in item_group:
             dnode = item_group._items[item]
-            for predecessor in dnode._predecessors:
-                if predecessor._item_set == state_id:
-                    dot_file.info('    %d -> %d;', id(predecessor), id(dnode))
+            for child in dnode._direct_children:
+                dot_file.info('    %d -> %d;', id(child), id(dnode))
         dot_file.info("  }")
         st += 1
-    dot_file.info('  %d[label="start"];', id(dominator_nodes[0]))
 
-    st = 0
-    for item_group in states:
+    for st, item_group in enumerate(states):
+        for _, node in item_group._items.items():
+            for predecessor in node._predecessors:
+                assert node._predecessor_lookahead is not None
+                dot_file.info(
+                    '  %d -> %d[label="%s"];', id(predecessor), id(node), name_map[node._predecessor_lookahead]
+                )
+
         # Loop over each production
         st_action = {}     # type: Dict[int, List[Tuple[int, LR0Item]]]
         st_goto = {}
         log.info('state %d:', st)
         log.info('')
         for item in item_group:
-            log.info('    (%d) %s', item._rule._prod_index, item.to_string(name_map))
+            log.info('    (%d) %s', item._rule._prod_symbol, item.to_string(name_map))
         log.info('')
 
         for item in item_group:
             if len(item._rule) == item._index:
-                if item._rule._prod_index == start_id:
+                if item._rule._prod_symbol == start_id:
                     # Start symbol. Accept!
                     st_action[0] = st_action.get(0, []) + [(0, item)]
                     item._rule._reduced += 1
@@ -439,127 +408,9 @@ def create_parser_table(productions, start_id, name_map, terminal_count, log, er
             else:
                 accepted_actions = action_dest
 
-            for target_group, item_list in accepted_actions.items():
-                if target_group >= 0:
-                    for item1 in item_list:
-                        node1 = item_group._items[item1]
-                        for item2 in states[target_group]:
-                            node2 = states[target_group]._items[item2]
-                            if node1 in node2._predecessors:
-                                dot_file.info('  %d -> %d[label="%s"];', id(node1), id(node2), name_map[a])
             if len(accepted_actions) > 1:
-                # get the longest reduce action
-                dom_nodes = {}     # type: Dict[Optional[LR0ItemSet], Dict[LR0DominanceNode, LR0Path]]
-                longest_reduction = 0
-                conflict_paths = {}
-                for _, item_list in accepted_actions.items():
-                    for item in item_list:
-                        longest_reduction = max(longest_reduction, item._index)
-                for _, item_list in accepted_actions.items():
-                    for item in item_list:
-                        for path in item_group._items[item].find_core(longest_reduction, set([])):
-                            conflict_paths[path._node] = path
-                    for node, path in conflict_paths.items():
-                        try:
-                            dom_nodes[node._item_set][path._node] = path
-                        except:
-                            dom_nodes[node._item_set] = {path._node: path}
-
-                for _, item_list in accepted_actions.items():
-                    for item in item_list:
-                        if not item._split:
-                            log.warning('  ** %s [%s] needs a split annotation', item.to_string(name_map), name_map[a])
-                            error_log.warning(
-                                '  ** %s [%s] needs a split annotation', item.to_string(name_map), name_map[a]
-                            )
-                            num_missing_annotations += 1
-
-                # reduce until...
-                reduced = True
-                while reduced:
-                    new_dom_nodes = {} # type: Dict[Optional[LR0ItemSet], Dict[LR0DominanceNode, LR0Path]]
-                    reduced = False
-
-                    #error_log.warning('  ** state %d', st)
-                    #for _, nodes in dom_nodes.items():
-                    #    for node in nodes:
-                    #        log.warning('  ** %s needs a merge annotation', node._item.to_string(name_map))
-                    #        error_log.warning('  ** %s needs a merge annotation', node._item.to_string(name_map))
-                    #        num_missing_annotations += 1
-
-                    for item_group_id, nodes in dom_nodes.items():
-                        conflict_paths = {}
-                        n1, p1 = nodes.popitem()
-                        longest_reduction = n1._item._index
-                        origin = set(n1._direct_predecessors)
-                        for node in nodes:
-                            longest_reduction = max(longest_reduction, node._item._index)
-                            origin.intersection_update(node._direct_predecessors)
-                        nodes[n1] = p1
-                        if longest_reduction == 0 and len(origin) == 0:
-                            for node in nodes:
-                                for pred in node._direct_predecessors:
-                                    if pred._item._index != 0:
-                                        origin.add(pred)
-                            longest_reduction = 0
-                            for node in origin:
-                                longest_reduction = max(longest_reduction, node._item._index)
-                        if longest_reduction != 0:
-                            reduced = True
-                            for node, path in nodes.items():
-                                for core_path in node.find_core(longest_reduction, set([])):
-                                    conflict_paths[core_path._node] = core_path.extend(path)
-                            for node, path in conflict_paths.items():
-                                try:
-                                    new_dom_nodes[node._item_set][path._node] = path
-                                except:
-                                    new_dom_nodes[node._item_set] = {path._node: path}
-                        else:
-                            new_dom_nodes[item_group_id] = nodes
-                    dom_nodes = new_dom_nodes
-
-                # find the deepest nodes of each state that reach only one of the conflicts
-                #error_log.warning('  ** state %d', st)
-                #for _, nodes in dom_nodes.items():
-                #    for node in nodes:
-                #        log.warning('  ** %s needs a merge annotation', node._item.to_string(name_map))
-                #        error_log.warning('  ** %s needs a merge annotation', node._item.to_string(name_map))
-                #        num_missing_annotations += 1
-
-                for item_group_id, nodes in dom_nodes.items():
-                    leaves = dict(nodes)
-                    conflict_nodes = {}
-                    for node, path in nodes.items():
-                        conflict_nodes[node] = [path]
-                    node, path = nodes.popitem()
-                    origin = set(node._direct_predecessors)
-                    while nodes:
-                        node, path = nodes.popitem()
-                        origin.intersection_update(node._direct_predecessors)
-                    for o in origin:
-                        for successor in o._direct_successors:
-                            inter = set(leaves).intersection(successor._direct_successors)
-                            if len(inter) > 0 and len(inter) < len(leaves):
-                                conflict_nodes[successor] = [leaves[x] for x in inter]
-                    for n1, paths in conflict_nodes.items():
-                        for n2, _ in conflict_nodes.items():
-                            if n2 in n1._direct_predecessors:
-                                break
-                        else:
-                            log.warning('  ** %s needs a merge annotation', n1._item.to_string(name_map))
-                            error_log.warning('  ** %s needs a merge annotation', n1._item.to_string(name_map))
-                            for p in paths:
-                                p.log(log, name_map)
-                                p.log(error_log, name_map)
-                            num_missing_annotations += 1
-
-                # find the deepest nodes of each state that reach only one of the conflicts
-                #error_log.warning('  ** state %d', st)
-                #for _, nodes in dom_nodes.items():
-                #    for node in nodes:
-                #        log.warning('  ** %s needs a merge annotation', node._item.to_string(name_map))
-                #        error_log.warning('  ** %s needs a merge annotation', node._item.to_string(name_map))
-                #        num_missing_annotations += 1
+                # handle conflicts
+                pass
 
         nkeys = set([])
         for item in item_group:
@@ -569,16 +420,10 @@ def create_parser_table(productions, start_id, name_map, terminal_count, log, er
                     g = goto(item_group, s)
                     j = cidhash.get(id(g), -1)
                     if j >= 0:
-                        for item2 in states[j]:
-                            dnode = states[j]._items[item2]
-                            if node1 in dnode._predecessors:
-                                dot_file.info('  %d->%d[label="%s"];', id(node1), id(dnode), name_map[s])
                         if s not in nkeys:
                             nkeys.add(s)
                             #st_goto[n] = j
                             log.info('    %-30s shift and go to state %d', name_map[s], j)
-
-        st += 1
         """
         # Print the actions associated with each terminal
         _actprint = {}
