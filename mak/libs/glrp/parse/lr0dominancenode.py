@@ -26,7 +26,7 @@ class LR0DominanceNode(object):
             parent._children.add(self)
 
     def expand_empty(self, first_set):
-        # type: (Dict[int, List[int]]) -> Optional[LR0Path]
+        # type: (Dict[int, Set[int]]) -> Optional[LR0Path]
         # expand the first item of the path to build empty productions
         if self._item._index == len(self._item):
             return LR0Path(self, [], use_marker=False)
@@ -40,7 +40,7 @@ class LR0DominanceNode(object):
                 return result
             else:
                 assert child._successor is not None
-                if -1 in first_set[following_symbol]:
+                if -1 in first_set.get(following_symbol, set([following_symbol])):
                     p = child._successor.expand_empty(first_set)
                     if p is not None:
                         result = child.expand_empty(first_set)
@@ -51,7 +51,7 @@ class LR0DominanceNode(object):
         return None
 
     def expand_lookahead(self, lookahead, first_set):
-        # type: (int, Dict[int, List[int]]) -> Optional[LR0Path]
+        # type: (int, Dict[int, Set[int]]) -> Optional[LR0Path]
         # expand the first item of the path until it starts with the lookahead
         if self._item[self._item._index] == lookahead:
             return LR0Path(self, [], use_marker=False)
@@ -66,12 +66,12 @@ class LR0DominanceNode(object):
                     result = LR0Path(child, [], use_marker=False)
                     result = result.derive_from(self, None)
                     return result
-                elif lookahead in first_set[following_symbol]:
+                elif lookahead in first_set.get(following_symbol, set([following_symbol])):
                     result = child.expand_lookahead(lookahead, first_set)
                     assert result is not None
                     result = result.derive_from(self, None)
                     return result
-                elif '<empty>' in first_set[following_symbol]:
+                elif -1 in first_set.get(following_symbol, set([following_symbol])):
                     assert child._successor is not None
                     p = child._successor.expand_lookahead(lookahead, first_set)
                     if p:
@@ -83,7 +83,7 @@ class LR0DominanceNode(object):
         return None
 
     def filter_node_by_lookahead(self, path, lookahead, first_set):
-        # type: (LR0Path, Optional[int], Dict[int, List[int]]) -> List[Tuple[LR0Path, Optional[int]]]
+        # type: (LR0Path, Optional[int], Dict[int, Set[int]]) -> List[Tuple[LR0Path, Optional[int]]]
         result = []    # type: List[Tuple[LR0Path, Optional[int]]]
         if lookahead is not None:
             try:
@@ -92,12 +92,12 @@ class LR0DominanceNode(object):
                 result.append((path, lookahead))
             else:
                 assert self._successor is not None
-                if -1 in first_set[following_symbol]:
+                if -1 in first_set.get(following_symbol, set([following_symbol])):
                     successor_path = self._successor.expand_empty(first_set)
                     assert successor_path is not None
                     for p, la in self._successor.filter_node_by_lookahead(successor_path, lookahead, first_set):
                         result.append((path.expand(1, p), la))
-                if lookahead in first_set[following_symbol]:
+                if lookahead in first_set.get(following_symbol, set([following_symbol])):
                     successor_path = self._successor.expand_lookahead(lookahead, first_set)
                     assert successor_path is not None
                     result.append((path.expand(1, successor_path), None))
@@ -106,9 +106,10 @@ class LR0DominanceNode(object):
         return result
 
     def backtrack_up(self, path, state, lookahead, first_set, seen):
-        # type: (LR0Path, LR0ItemSet, Optional[int], Dict[int, List[int]], Set[Tuple[LR0DominanceNode, Optional[int]]]) -> List[Tuple[LR0Path, Optional[int]]]
+        # type: (LR0Path, Optional[LR0ItemSet], Optional[int], Dict[int, Set[int]], Set[Tuple[LR0DominanceNode, Optional[int]]]) -> List[Tuple[LR0Path, Optional[int]]]
         queue = [(path, lookahead)]
-        result = []
+        result = []    # type: List[Tuple[LR0Path, Optional[int]]]
+
         shortest_path_seen = set()
         while queue:
             path, lookahead = queue.pop(0)

@@ -9,7 +9,7 @@ import sys
 class Grammar(object):
     class Rule:
         def __init__(self, id, prod_symbol, prod_name, production, action, annnotation_list, filename, lineno):
-            # type: (int, int, str, List[int], Parser.Action, List[Tuple[str, List[str], int]], str, int) -> None
+            # type: (int, int, str, Tuple[int,...], Parser.Action, List[Tuple[str, List[str], int]], str, int) -> None
             self._id = id
             self._prod_symbol = prod_symbol
             self._prod_name = prod_name
@@ -177,8 +177,8 @@ def _create_productions(rules, index, log):
         prod_symbol = index[nonterminal]
         try:
             rule = Grammar.Rule(
-                rule_index, prod_symbol, nonterminal, [index[s] for s in production], action, attribute_list, filename,
-                lineno
+                rule_index, prod_symbol, nonterminal, tuple(index[s] for s in production), action, attribute_list,
+                filename, lineno
             )
         except KeyError as error:  # unknown rule or terminal
             log.error('unknown object used in rule: %s', str(error))

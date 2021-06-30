@@ -5,11 +5,101 @@ from be_typing import TYPE_CHECKING
 import sys
 
 
+def _log(title, conflict_paths, out, name_map):
+    # type: (str, List[LR0Path], Logger, List[str]) -> None
+    seen = set([])
+    if conflict_paths:
+        count = len(set(conflict_paths))
+        out.info('   %s' % (title))
+        out.info('   \u256d\u2574')
+        for path in conflict_paths:
+            if path in seen:
+                continue
+            count -= 1
+            seen.add(path)
+            strings = path.expand_left().to_string(name_map)[0]
+            for s in strings:
+                out.info('   \u2502 %s' % s)
+            if count == 0:
+                out.info('   \u2570\u2574')
+            else:
+                out.info('   \u251c\u2574')
+
+
+def _log_counterexamples(conflict_list, out, first_set, name_map):
+    # type: (List[Tuple[LR0DominanceNode, str, Optional[int]]], Logger, Dict[int, Set[int]], List[str]) -> List[LR0Item]
+    conflict_paths = [(message, []) for _, message, _ in conflict_list] # type: List[Tuple[str, List[LR0Path]]]
+    result = []                                                         # type: List[LR0Item]
+
+    queue = []     # type: List[List[Tuple[LR0Path, Optional[int], Set[Tuple[LR0DominanceNode, Optional[int]]], int]]]
+
+    queue.append(
+        [(LR0Path(node, []), lookahead, set(), index) for index, (node, _, lookahead) in enumerate(conflict_list)]
+    )
+    while queue:
+        path_list = queue.pop(0)
+        #assert path_1._node.item_set == path_2._node.item_set
+        path_len = 0
+        found_lookaheads = True
+        for path, lookahead, _, _ in path_list:
+            path_len = max(path_len, path._node._item._index)
+            found_lookaheads &= lookahead is None
+
+        if path_len == 0:
+            if found_lookaheads:
+                for path, _, _, index in path_list:
+                    conflict_paths[index][1].append(path)
+            else:
+                states = {
+                }              # type: Dict[LR0ItemSet, List[Tuple[LR0Path, Optional[int], Set[Tuple[LR0DominanceNode, Optional[int]]], int]]]
+
+                for path, lookahead, seen, index in path_list:
+                    if lookahead is not None:
+                        for path, la in path._node.backtrack_up(path, None, lookahead, first_set, seen):
+                            try:
+                                states[path._node._item_set].append((path, la, seen, index))
+                            except KeyError:
+                                states[path._node._item_set] = [(path, la, seen, index)]
+                for state, plist in states.items():
+                    for path, lookahead, seen, index in path_list:
+                        if lookahead is None:
+                            for path, la in path._node.backtrack_up(path, state, la, first_set, seen):
+                                #assert path1._node.item_set == path2._node.item_set
+                                plist.append((path, la, seen, index))
+                for _, plist in states.items():
+                    queue.append(plist)
+        else:
+            states = {}
+            for path, lookahead, seen, index in path_list:
+                if path._node._item._index > 0:
+                    for path, la in path._node.backtrack_up(path, None, lookahead, first_set, seen):
+                        try:
+                            states[path._node._item_set].append((path, la, seen, index))
+                        except KeyError:
+                            states[path._node._item_set] = [(path, la, seen, index)]
+            for state, plist in states.items():
+                for path, lookahead, seen, index in path_list:
+                    if path._node._item._index == 0:
+                        for path, la in path._node.backtrack_up(path, state, la, first_set, seen):
+                            #assert path1._node.item_set == path2._node.item_set
+                            plist.append((path, la, seen, index))
+            for _, plist in states.items():
+                queue.append(plist)
+
+    for message, conflicts in conflict_paths:
+        _log(message, conflicts, out, name_map)
+        out.info('')
+    return result
+
+
 def create_parser_table(productions, start_id, name_map, terminal_count, log, error_log, dot_file):
     # type: (Dict[int, Grammar.Production], int, List[str], int, Logger, Logger, Logger) -> None
     cidhash = {}
     goto_cache = {}    # type: Dict[Tuple[int, int], Optional[LR0ItemSet]]
     goto_cache_2 = {}  # type: Dict[int, Any]
+    first_set = {}
+    for prod_index, prod in productions.items():
+        first_set[prod_index] = prod._first
 
     def goto(item_set, lookahead):
         # type: (LR0ItemSet, int) -> Optional[LR0ItemSet]
@@ -410,11 +500,18 @@ def create_parser_table(productions, start_id, name_map, terminal_count, log, er
 
             if len(accepted_actions) > 1:
                 # handle conflicts
-                pass
+                conflicts = []     # type: List[Tuple[LR0DominanceNode, str, Optional[int]]]
+                for j, items in accepted_actions.items():
+                    for item in items:
+                        node = item_group[item]
+                        if j > 0:
+                            conflicts.append((node, 'Shift using rule %s' % item.to_string(name_map), None))
+                        else:
+                            conflicts.append((node, 'Reduce using rule %s' % item.to_string(name_map), a))
+                _log_counterexamples(conflicts, error_log, first_set, name_map)
 
         nkeys = set([])
         for item in item_group:
-            node1 = item_group._items[item]
             for s in item._symbols:
                 if s > terminal_count:
                     g = goto(item_group, s)
@@ -422,7 +519,6 @@ def create_parser_table(productions, start_id, name_map, terminal_count, log, er
                     if j >= 0:
                         if s not in nkeys:
                             nkeys.add(s)
-                            #st_goto[n] = j
                             log.info('    %-30s shift and go to state %d', name_map[s], j)
         """
         # Print the actions associated with each terminal

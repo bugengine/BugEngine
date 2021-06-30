@@ -41,7 +41,7 @@ class LR0Path(object):
         # type: (LR0DominanceNode, Optional[int]) -> LR0Path
         if lookahead is None:
             sequence = [self]  # type: (List[Union[LR0Path, LR0Path.PathItem]])
-            result = LR0Path(node, sequence + [LR0Path.PathItem(i) for i in node._item[node._item._index:]])
+            result = LR0Path(node, sequence + [LR0Path.PathItem(i) for i in node._item[node._item._index + 1:]])
         else:
             sequence = [LR0Path.PathItem(lookahead)]
             result = LR0Path(node, sequence + self._sequence)
@@ -52,6 +52,7 @@ class LR0Path(object):
         sequence = [
             LR0Path.PathItem(i) for i in self._node._item[:self._node._item._index]
         ]                                                                           # type: (List[Union[LR0Path, LR0Path.PathItem]])
+
         return LR0Path(self._node, sequence + self._sequence)
 
     def expand(self, index, path):
