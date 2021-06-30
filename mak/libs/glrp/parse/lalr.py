@@ -55,17 +55,20 @@ def _log_counterexamples(conflict_list, out, first_set, name_map):
 
                 for path, lookahead, seen, index in path_list:
                     if lookahead is not None:
-                        for path, la in path._node.backtrack_up(path, None, lookahead, first_set, seen):
+                        for p, la in path._node.backtrack_up(path, None, lookahead, first_set, seen):
                             try:
-                                states[path._node._item_set].append((path, la, seen, index))
+                                states[p._node._item_set].append((p, la, seen, index))
                             except KeyError:
-                                states[path._node._item_set] = [(path, la, seen, index)]
+                                states[p._node._item_set] = [(p, la, seen, index)]
                 for state, plist in states.items():
                     for path, lookahead, seen, index in path_list:
                         if lookahead is None:
-                            for path, la in path._node.backtrack_up(path, state, la, first_set, seen):
-                                #assert path1._node.item_set == path2._node.item_set
-                                plist.append((path, la, seen, index))
+                            if path._node._item_set == state:
+                                plist.append((path, lookahead, seen, index))
+                            else:
+                                for p, la in path._node.backtrack_up(path, state, None, first_set, seen):
+                                    #assert path1._node.item_set == path2._node.item_set
+                                    plist.append((p, la, seen, index))
                 for _, plist in states.items():
                     queue.append(plist)
         else:
@@ -84,7 +87,8 @@ def _log_counterexamples(conflict_list, out, first_set, name_map):
                             #assert path1._node.item_set == path2._node.item_set
                             plist.append((path, la, seen, index))
             for _, plist in states.items():
-                queue.append(plist)
+                if len(plist) > 1:
+                    queue.append(plist)
 
     for message, conflicts in conflict_paths:
         _log(message, conflicts, out, name_map)

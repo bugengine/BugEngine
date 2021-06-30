@@ -12,18 +12,19 @@ class Parser1(glrp.Parser):
             return token
 
     @glrp.rule("prog : A")
-    @glrp.rule("prog : prog A")
     def p_prog(self, p):
         # type: (glrp.Production) -> None
         pass
 
-    @glrp.rule("A : a B c")
-    @glrp.rule("A : a a B c")
+    @glrp.rule("A : a B ")
+    @glrp.rule("A : a a B ")
+    @glrp.rule("A : a a a B ")
     #@glrp.rule("A : B c")
     def p_A(self, p):
         # type: (glrp.Production) -> None
         pass
 
+    @glrp.rule("B [prec:right,0][split]: a a b")
     @glrp.rule("B [prec:right,0][split]: a b")
     @glrp.rule("B [prec:right,0][split]: b")
     def p_B(self, p):
