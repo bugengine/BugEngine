@@ -1,4 +1,5 @@
 from be_typing import TYPE_CHECKING
+import functools
 from .lr0path import LR0Path
 
 
@@ -53,33 +54,38 @@ class LR0DominanceNode(object):
     def expand_lookahead(self, lookahead, first_set):
         # type: (int, Dict[int, Set[int]]) -> Optional[LR0Path]
         # expand the first item of the path until it starts with the lookahead
-        if self._item[self._item._index] == lookahead:
-            return LR0Path(self, [], use_marker=False)
-        result = None  # type: Optional[LR0Path]
-        for child in self._direct_children:
+        queue = [(self, [[]])]     # type: List[Tuple[LR0DominanceNode, List[List[LR0Path]]]]
+        seen = set()
+
+        while queue:
+            node, paths = queue.pop(0)
+            if node in seen:
+                continue
+            seen.add(node)
+
             try:
-                following_symbol = child._item[0]
+                following_symbol = node._item[node._item._index]
             except IndexError:
-                pass
-            else:
-                if lookahead == following_symbol:
-                    result = LR0Path(child, [], use_marker=False)
-                    result = result.derive_from(self, None)
-                    return result
-                elif lookahead in first_set.get(following_symbol, set([following_symbol])):
-                    result = child.expand_lookahead(lookahead, first_set)
-                    assert result is not None
-                    result = result.derive_from(self, None)
-                    return result
-                elif -1 in first_set.get(following_symbol, set([following_symbol])):
-                    assert child._successor is not None
-                    p = child._successor.expand_lookahead(lookahead, first_set)
-                    if p:
-                        result = child.expand_empty(first_set)
-                        assert result is not None
-                        result = result.expand(1, p)
-                        result = result.derive_from(self, None)
-                        return result
+                continue
+
+            if following_symbol == lookahead:
+                result = None
+                paths[-1].append(LR0Path(node, [], use_marker=False))
+                while paths:
+                    child_paths = paths.pop(-1)
+                    if result is not None:
+                        child_paths[-1] = child_paths[-1].expand(1, result)
+                    merge_children = lambda x, y: x.derive_from(y._node, None)
+                    result = functools.reduce(merge_children, child_paths[::-1])
+                return result
+            elif lookahead in first_set.get(following_symbol, []):
+                for child in sorted(node._direct_children, key=lambda n: len(n._item)):
+                    queue.append((child, paths[:-1] + [paths[-1] + [LR0Path(node, [], use_marker=False)]]))
+            elif -1 in first_set.get(following_symbol, []) and node._successor is not None:
+                empty_path = node.expand_empty(first_set)
+                if empty_path is not None:
+                    queue.append((node._successor, paths[:-1] + [paths[-1] + [empty_path]] + [[]]))
+
         return None
 
     def filter_node_by_lookahead(self, path, lookahead, first_set):
