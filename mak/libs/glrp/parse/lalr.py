@@ -63,9 +63,12 @@ def _log_counterexamples(conflict_list, out, first_set, name_map):
                 for state, plist in states.items():
                     for path, lookahead, seen, index in path_list:
                         if lookahead is None:
-                            for path, la in path._node.backtrack_up(path, state, la, first_set, seen):
-                                #assert path1._node.item_set == path2._node.item_set
-                                plist.append((path, la, seen, index))
+                            if path._node._item_set == state:
+                                plist.append((path, lookahead, seen, index))
+                            else:
+                                for path, la in path._node.backtrack_up(path, state, lookahead, first_set, seen):
+                                    #assert path1._node.item_set == path2._node.item_set
+                                    plist.append((path, la, seen, index))
                 for _, plist in states.items():
                     queue.append(plist)
         else:
@@ -80,7 +83,7 @@ def _log_counterexamples(conflict_list, out, first_set, name_map):
             for state, plist in states.items():
                 for path, lookahead, seen, index in path_list:
                     if path._node._item._index == 0:
-                        for path, la in path._node.backtrack_up(path, state, la, first_set, seen):
+                        for path, la in path._node.backtrack_up(path, state, lookahead, first_set, seen):
                             #assert path1._node.item_set == path2._node.item_set
                             plist.append((path, la, seen, index))
             for _, plist in states.items():
