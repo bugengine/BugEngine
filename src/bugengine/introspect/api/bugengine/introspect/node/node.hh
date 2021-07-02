@@ -57,7 +57,7 @@ protected:
     virtual void doVisit(Node::Visitor & visitor) const = 0;
 
 public:
-    struct Visitor
+    struct be_api(INTROSPECT) Visitor
     {
         virtual void accept(weak< const Array > arrayValue);
         virtual void accept(weak< const Bool > boolValue);
