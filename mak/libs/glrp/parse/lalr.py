@@ -454,7 +454,7 @@ def create_parser_table(productions, start_id, name_map, terminal_count, log, er
                 associativity = actions[-1][1]._precedence[0] if actions[-1][1]._precedence is not None else 'left'
                 for _, item in actions:
                     if item._precedence is None:
-                        log.info('  ** %s has no precedence precedence annotation', item.to_string(name_map))
+                        log.info('  ** %s has no precedence annotation', item.to_string(name_map))
                         num_missing_annotations += 1
                 assoc_conflict = False
                 for j, item in actions:
@@ -464,8 +464,6 @@ def create_parser_table(productions, start_id, name_map, terminal_count, log, er
                         elif item._precedence[0] != associativity:
                             log.error('  *** associativity conflicts!')
                             log.error('  *** %s', item.to_string(name_map))
-                            error_log.error('  *** associativity conflicts!')
-                            error_log.error('  *** %s', item.to_string(name_map))
                             assoc_conflict = True
                         elif associativity == 'left' and j >= 0:
                             try:
@@ -493,8 +491,6 @@ def create_parser_table(productions, start_id, name_map, terminal_count, log, er
                 if assoc_conflict:
                     log.error('  *** %s', actions[-1][1].to_string(name_map))
                     log.error('  *** using %s', actions[-1][1].to_string(name_map))
-                    error_log.error('  *** %s', actions[-1][1].to_string(name_map))
-                    error_log.error('  *** using %s', actions[-1][1].to_string(name_map))
             else:
                 accepted_actions = action_dest
 
