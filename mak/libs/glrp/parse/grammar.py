@@ -2,6 +2,7 @@ from ..log import Logger
 from be_typing import TYPE_CHECKING, overload
 from .lr0item import LR0Item
 from . import lalr
+import io
 import os
 import sys
 
@@ -90,9 +91,9 @@ class Grammar(object):
         debug_filename = os.path.join(output_dir, name + '.txt')
         index = dict(terminals)
         name_map = [''] * (len(terminals))
-        log = Logger(open(debug_filename, 'w'))
+        log = Logger(io.open(debug_filename, 'w', encoding='utf-8'))
         stderr = Logger(sys.stderr)
-        dot_file = Logger(open(os.path.splitext(debug_filename)[0] + '.dot', 'w'))
+        dot_file = Logger(io.open(os.path.splitext(debug_filename)[0] + '.dot', 'w', encoding='utf-8'))
         for name, i in terminals.items():
             name_map[i] = name
 
