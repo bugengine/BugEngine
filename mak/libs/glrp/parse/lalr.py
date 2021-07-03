@@ -454,10 +454,7 @@ def create_parser_table(productions, start_id, name_map, terminal_count, log, er
                 associativity = actions[-1][1]._precedence[0] if actions[-1][1]._precedence is not None else 'left'
                 for _, item in actions:
                     if item._precedence is None:
-                        log.warning('  ** %s [%s] needs a precedence annotation', item.to_string(name_map), name_map[a])
-                        error_log.warning(
-                            '  ** %s [%s] needs a precedence annotation', item.to_string(name_map), name_map[a]
-                        )
+                        log.info('  ** %s has no precedence precedence annotation', item.to_string(name_map))
                         num_missing_annotations += 1
                 assoc_conflict = False
                 for j, item in actions:
@@ -511,7 +508,7 @@ def create_parser_table(productions, start_id, name_map, terminal_count, log, er
                             conflicts.append((node, 'Shift using rule %s' % item.to_string(name_map), None))
                         else:
                             conflicts.append((node, 'Reduce using rule %s' % item.to_string(name_map), a))
-                _log_counterexamples(conflicts, error_log, first_set, name_map)
+                _log_counterexamples(conflicts, log, first_set, name_map)
 
         nkeys = set([])
         for item in item_group:
@@ -586,11 +583,11 @@ def create_parser_table(productions, start_id, name_map, terminal_count, log, er
 
     # Report shift/reduce and reduce/reduce conflicts
     if num_missing_annotations == 1:
-        log.warning('1 missing annotation')
-        error_log.warning('1 missing annotation')
+        log.warning('1 missing precedence annotation')
+        error_log.warning('1 missing precedence annotation')
     elif num_missing_annotations > 1:
-        log.warning('%d missing annotations', num_missing_annotations)
-        error_log.warning('%d missing annotations', num_missing_annotations)
+        log.warning('%d missing precedence annotations', num_missing_annotations)
+        error_log.warning('%d missing precedence annotations', num_missing_annotations)
 
     if num_rr == 1:
         log.warning('1 reduce/reduce conflict')
