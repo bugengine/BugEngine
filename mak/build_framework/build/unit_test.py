@@ -21,7 +21,7 @@ class unit_test(Task.Task):
 @TaskGen.after_method('install_step')
 def check_unit_test(task_gen):
     # type: (TaskGen.TaskGen) -> None
-    if task_gen.env.UNIT_TESTS and False:
+    if task_gen.env.RUN_UNIT_TESTS and False:
         task = task_gen.create_task('unit_test', [task_gen.postlink_task.outputs[0]])
         task.set_run_after(task_gen.postlink_task)
 

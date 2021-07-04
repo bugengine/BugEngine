@@ -1,4 +1,4 @@
-from ..ir_ast import IrExpressionCast, IrExpressionConstant, IrExpressionReference, IrExpressionArray, IrExpressionVector, IrExpressionAggregate, IrExpressionUndef, IrReference, IrExpressionZero
+from ..ir_ast import IrExpressionCast, IrExpressionConstant, IrExpressionReference, IrExpressionArray, IrExpressionVector, IrExpressionAggregate, IrExpressionUndef, IrReference, IrExpressionZero, IrExpressionPoison
 from be_typing import TYPE_CHECKING
 
 
@@ -8,6 +8,7 @@ def p_ir_expr(p):
         ir-expr : ir-expr-constant
                 | ir-expr-zeroinitializer
                 | ir-expr-undef
+                | ir-expr-poison
                 | ir-expr-reference
                 | ir-expr-cast
                 | ir-expr-aggregate
@@ -56,6 +57,14 @@ def p_ir_expr_undef(p):
         ir-expr-undef : UNDEF
     """
     p[0] = IrExpressionUndef()
+
+
+def p_ir_expr_poison(p):
+    # type: (YaccProduction) -> None
+    """
+        ir-expr-poison : POISON
+    """
+    p[0] = IrExpressionPoison()
 
 
 def p_ir_expr_reference(p):

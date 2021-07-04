@@ -1,24 +1,23 @@
-
 from ply.lex import TOKEN
 from be_typing import TYPE_CHECKING
 
 t_ignore = ' \t'
 
 keywords = (
-    # header
+                                       # header
     'source_filename',
     'target',
     'datalayout',
     'triple',
     'attributes',
 
-    # structs
+                                       # structs
     'type',
     'opaque',
     'addrspace',
     'x',
 
-    # COMDAT
+                                       # COMDAT
     'comdat',
     'any',
     'exactmatch',
@@ -26,7 +25,7 @@ keywords = (
     'noduplicates',
     'samesize',
 
-    # types
+                                       # types
     'i1',
     'i8',
     'i16',
@@ -38,19 +37,20 @@ keywords = (
     'void',
     'metadata',
 
-    # values
+                                       # values
     'null',
     'None',
     'undef',
     'true',
     'false',
     'zeroinitializer',
+    'poison',
 
-    # methods
+                                       # methods
     'declare',
     'define',
 
-    # linkage
+                                       # linkage
     'private',
     'linker_private',
     'linker_private_weak',
@@ -65,27 +65,27 @@ keywords = (
     'weak_odr',
     'external',
 
-    # DLL attributes
+                                       # DLL attributes
     'dllimport',
     'dllexport',
 
-    # visibility
+                                       # visibility
     'default',
     'hidden',
     'protected',
 
-    # variables
+                                       # variables
     'global',
     'constant',
 
-    # method tags
+                                       # method tags
     'section',
     'gc',
     'prefix',
     'prologue',
     'personality',
 
-    # calling convention
+                                       # calling convention
     'spir_func',
     'spir_kernel',
     'ccc',
@@ -101,11 +101,11 @@ keywords = (
     'cfguard_checkcc',
     'cc',
 
-    # preemption
+                                       # preemption
     'dso_local',
     'dso_preemptable',
 
-    # method attribute
+                                       # method attribute
     'unnamed_addr',
     'local_unnamed_addr',
     'alignstack',
@@ -164,13 +164,14 @@ keywords = (
     'uwtable',
     'nocf_check',
     'shadowcallstack',
+    'mustprogress',
 
-    # fp
+                                       # fp
     'ieee',
     'preserve-sign',
     'positive-zero',
 
-    # parameter attributes
+                                       # parameter attributes
     'zeroext',
     'signext',
     'inreg',
@@ -190,10 +191,10 @@ keywords = (
     'swifterror',
     'immarg',
 
-    # debug metadata
+                                       # debug metadata
     'distinct',
 
-    # opcodes
+                                       # opcodes
     'to',
     'ret',
     'br',
@@ -281,13 +282,18 @@ octal_escape = r"""([0-7]{1,3})"""
 hex_escape = r"""(x[0-9a-fA-F]+)"""
 escape_sequence = r"""(\\(""" + simple_escape + '|' + octal_escape + '|' + hex_escape + '))'
 string_char = r"""([^"\\\n]|%s)""" % escape_sequence
+
+
 @TOKEN('"' + string_char + '*"')
 def t_LITERAL_STRING(t):
     # type: (LexToken) -> LexToken
     t.value = t.value[1:-1]
     return t
 
+
 t_ID_COMDAT = '\\$[a-zA-Z\._][a-zA-Z\._0-9]*'
+
+
 def t_ID_LABEL(t):
     # type: (LexToken) -> LexToken
     r'[a-zA-Z\._][a-zA-Z\._0-9]*'
@@ -295,6 +301,8 @@ def t_ID_LABEL(t):
         if t.value in keywords:
             t.type = t.value.upper()
     return t
+
+
 t_LITERAL_DECIMAL = '[-+]?[0-9]+'
 t_ATTRIBUTE_GROUP = '\\#[0-9]+'
 t_METADATA_NAME = '![-a-zA-Z\$\._][-a-zA-Z\$\._0-9]+'
@@ -314,16 +322,17 @@ t_RANGLE = '>'
 t_STAR = '\\*'
 t_PIPE = '\\|'
 
-
 for kw in keywords:
     globals()['t_%s' % kw.upper().replace('-', '_')] = kw
 t_ID = '[%@]([-a-zA-Z\$\._0-9]+|("[^"]*"))'
+
 
 def t_COMMENT(t):
     # type: (LexToken) -> Optional[LexToken]
     r';[^\n]*\n+'
     t.lexer.ir_lexer._lineno += t.value.count("\n")
     return None
+
 
 def t_NEWLINE(t):
     # type: (LexToken) -> Optional[LexToken]
@@ -341,34 +350,10 @@ def t_error(t):
 
 
 tokens = (
-    'ID',
-    'ID_COMDAT',
-    'ID_LABEL',
-    'LITERAL_STRING',
-    'LITERAL_DECIMAL',
-    'ATTRIBUTE_GROUP',
-    'METADATA_NAME',
-    'METADATA_REF',
-
-    'METADATA_MARK',
-    'LBRACE',
-    'RBRACE',
-    'LPAREN',
-    'LPAREN_MARK',
-    'RPAREN',
-    'LBRACKET',
-    'RBRACKET',
-    'LANGLE',
-    'RANGLE',
-
-    'EQUAL',
-    'STAR',
-    'COMMA',
-    'COLON',
-    'PIPE'
-) + tuple(
-    k.upper().replace('-', '_') for k in keywords
-)
+    'ID', 'ID_COMDAT', 'ID_LABEL', 'LITERAL_STRING', 'LITERAL_DECIMAL', 'ATTRIBUTE_GROUP', 'METADATA_NAME',
+    'METADATA_REF', 'METADATA_MARK', 'LBRACE', 'RBRACE', 'LPAREN', 'LPAREN_MARK', 'RPAREN', 'LBRACKET', 'RBRACKET',
+    'LANGLE', 'RANGLE', 'EQUAL', 'STAR', 'COMMA', 'COLON', 'PIPE'
+) + tuple(k.upper().replace('-', '_') for k in keywords)
 
 if TYPE_CHECKING:
     from typing import Optional

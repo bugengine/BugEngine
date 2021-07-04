@@ -155,7 +155,7 @@ def set_building_name_inherits(self):
                 self.env.append_unique('DEFINES', 'building_%s' % y.safe_target_name)
 
 
-@feature('bugengine:launcher', 'bugengine:python_module')
+@feature('bugengine:launcher', 'bugengine:unit_test', 'bugengine:python_module')
 @before_method('apply_link')
 @before_method('process_use')
 def static_dependencies(self):
@@ -283,6 +283,7 @@ def be_build_dll(self):
     except AttributeError:
         self.export_defines = ['be_dll_%s' % self.safe_target_name]
 
+
 @feature('cxxobjects', 'cobjects')
 def be_build_objects(self):
     if not self.env.STATIC:
@@ -290,6 +291,7 @@ def be_build_objects(self):
             self.export_defines.append('be_dll_%s' % self.safe_target_name)
         except AttributeError:
             self.export_defines = ['be_dll_%s' % self.safe_target_name]
+
 
 @taskgen_method
 def process_use_link(self):

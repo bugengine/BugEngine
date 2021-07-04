@@ -142,6 +142,8 @@ def p_ir_attribute_method(p):
                             | UWTABLE
                             | NOCF_CHECK
                             | SHADOWCALLSTACK
+                            | POISON
+                            | MUSTPROGRESS
     """
     p[0] = IrAttribute(p[1])
 

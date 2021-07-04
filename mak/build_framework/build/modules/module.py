@@ -171,7 +171,7 @@ def module(
     if module_path is not None:
         task_gen.module_path = module_path
 
-    if Options.options.tests and env.UNIT_TESTS:
+    if Options.options.tests and env.BUILD_UNIT_TESTS:
         for source_node in source_nodes:
             if os.path.isdir(os.path.join(source_node.abspath(), 'tests')):
                 test_path = source_node.make_node('tests')
@@ -185,7 +185,7 @@ def module(
                         target=env.ENV_PREFIX % target_name,
                         target_name=target_name,
                         safe_target_name=safe_name(test_name[-1]),
-                        features=['cxx', 'cxxprogram', 'bugengine:unit_test'],
+                        features=['cxx', 'cxxprogram', 'bugengine:cxx', 'bugengine:unit_test'],
                         use=[task_gen.target],
                         uselib=[build_context.__class__.optim] +
                         (build_context.env.STATIC and ['static'] or ['dynamic']),

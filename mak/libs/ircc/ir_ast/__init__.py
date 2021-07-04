@@ -7,5 +7,5 @@ from .ir_metadata import IrMetadataDeclaration, IrMetadataLink, IrMetadataString
 from .ir_reference import IrReference
 from .ir_attribute import IrAttribute, IrAttributeGroupDeclaration, IrAttributeGroupLink, IrAttributeGroupObject
 from .ir_value import IrValueExpr, IrValueVoid, IrValueMetadata
-from .ir_expr import IrExpressionZero, IrExpressionConstant, IrExpressionReference, IrExpressionCast, IrExpressionAggregate, IrExpressionArray, IrExpressionVector, IrExpressionUndef
+from .ir_expr import IrExpressionZero, IrExpressionConstant, IrExpressionReference, IrExpressionCast, IrExpressionAggregate, IrExpressionArray, IrExpressionVector, IrExpressionUndef, IrExpressionPoison
 from .ir_code import IrInstruction

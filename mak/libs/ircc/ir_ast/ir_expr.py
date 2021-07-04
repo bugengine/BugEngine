@@ -140,6 +140,28 @@ class IrExpressionUndef(IrExpression):
         return True
 
 
+class IrExpressionPoison(IrExpression):
+    def __init__(self):
+        # type: () -> None
+        IrExpression.__init__(self)
+
+    def get_type(self, suggested_type):
+        # type: (IrType) -> IrType
+        return suggested_type
+
+    def __str__(self):
+        # type: () -> str
+        return 'poison'
+
+    def create_generator_value(self, type, generator, code_context):
+        # type: (IrType, IrccGenerator, IrCodeGenContext) -> IrccExpression
+        return type.create_generator_undef(generator, code_context._equivalence)
+
+    def is_undef(self):
+        # type: () -> bool
+        return True
+
+
 class IrExpressionArray(IrExpression):
     def __init__(self, values):
         # type: (List[IrValue]) -> None

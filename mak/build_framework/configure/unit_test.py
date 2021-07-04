@@ -19,6 +19,7 @@ def check_run_exe(task_gen):
 
 def configure(configuration_context):
     # type: (Configure.ConfigurationContext) -> None
+    configuration_context.env.BUILD_UNIT_TESTS = True
     try:
         configuration_context.check(
             msg='Checking if unit tests can be run on host',
@@ -28,7 +29,7 @@ def configure(configuration_context):
     except Errors.WafError:
         pass
     else:
-        configuration_context.env.UNIT_TESTS = True
+        configuration_context.env.RUN_UNIT_TESTS = True
 
 
 if TYPE_CHECKING:
