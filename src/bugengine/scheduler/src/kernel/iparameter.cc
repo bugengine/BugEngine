@@ -16,7 +16,7 @@ IParameter::ParameterRegistration::ParameterRegistration(raw< const Meta::Class 
 
 IParameter::ParameterRegistration::~ParameterRegistration()
 {
-    minitl::vector< raw< const Meta::Class > > classes = IParameter::parameterClasses();
+    minitl::vector< raw< const Meta::Class > >& classes = IParameter::parameterClasses();
     for(minitl::vector< raw< const Meta::Class > >::iterator it = classes.begin();
         it != classes.end(); ++it)
     {
