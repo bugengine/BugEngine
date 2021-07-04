@@ -32,7 +32,7 @@ struct ClassID< KernelScheduler::Segments< T > >
         return Value(ref< KernelScheduler::Segments< T > >::create(Arena::task()));
     }
     static const Meta::Method::Overload s_ctrOverload;
-    static const Meta::Method           s_ctr;
+    static BE_EXPORT const Meta::Method s_ctr;
     static Meta::ObjectInfo             s_productClass;
     static BE_EXPORT KernelScheduler::IParameter::ParameterRegistration s_registration;
 
