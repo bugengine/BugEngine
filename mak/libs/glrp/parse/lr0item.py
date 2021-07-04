@@ -5,15 +5,15 @@ class LR0Item:
     def __init__(self, rule, index, next, predecessor, successors, follow):
         # type: (Grammar.Rule, int, Optional[LR0Item], Optional[int], List[Grammar.Rule], Set[int]) -> None
         self._rule = rule
-        self._symbol = rule._prod_symbol
-        self._index = index
+        self._symbol = rule._prod_symbol # type: int
+        self._index = index              # type: int
         self._next = next
         self._before = predecessor
         self._after = successors
         self._symbols = set(rule._production)
         self._follow = follow
-        self._lookaheads = {}      # type: Dict[int, List[int]]
-        self._precedence = None    # type: Optional[Tuple[str, int]]
+        self._lookaheads = {}            # type: Dict[int, List[int]]
+        self._precedence = None          # type: Optional[Tuple[str, int]]
         self._split = False
 
         if index == len(rule):

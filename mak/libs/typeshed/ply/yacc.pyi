@@ -1,5 +1,4 @@
 from ircc.ir_position import IrPosition
-from cpprtti.cpp_position import CppPosition
 from typing import Any, List, Optional, Tuple, Union, TYPE_CHECKING
 from typing_extensions import Protocol
 from .lex import LexToken

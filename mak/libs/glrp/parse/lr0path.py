@@ -9,22 +9,23 @@ class LR0Path(object):
             self._lookahead = lookahead
 
         def to_string(self, name_map):
-            # type: (List[str]) -> Tuple[List[str], int]
+            # type: (List[str]) -> Tuple[List[unicode], int]
             la = name_map[self._lookahead]
             return [la], len(la)
 
     def __init__(self, node, sequence, use_marker=True):
         # type: (LR0DominanceNode, List[Union[LR0Path, LR0Path.PathItem]], bool) -> None
         self._node = node
+        item = node._item
         if sequence:
             self._sequence = sequence
         else:
             if use_marker:
                 self._sequence = list(
-                    [LR0Path.PathItem(1)] + [LR0Path.PathItem(i) for i in self._node._item[self._node._item._index:]]
+                    [LR0Path.PathItem(1)] + [LR0Path.PathItem(i) for i in item[item._index:]]
                 )
             else:
-                self._sequence = list([LR0Path.PathItem(i) for i in self._node._item[self._node._item._index:]])
+                self._sequence = list([LR0Path.PathItem(i) for i in item[item._index:]])
         self._hash = (node._item, )    # type: Tuple[Union[int, LR0Item], ...]
         for s in self._sequence:
             self._hash += s._hash
@@ -60,21 +61,21 @@ class LR0Path(object):
         return LR0Path(self._node, self._sequence[:index] + path._sequence)
 
     def to_string(self, name_map):
-        # type: (List[str]) -> Tuple[List[str], int]
+        # type: (List[str]) -> Tuple[List[unicode], int]
         expanded_symbol = name_map[self._node._item._symbol]
         if len(self._sequence) == 0:
-            return ['', '\u2570%s\u256f' % expanded_symbol], len(expanded_symbol) + 2
+            return [u'', u'\u2570%s\u256f' % expanded_symbol], len(expanded_symbol) + 2
         buffer, length = self._sequence[0].to_string(name_map)
         for item in self._sequence[1:]:
             temp = buffer
             extension, ext_length = item.to_string(name_map)
-            buffer = ['%s %s' % (i.ljust(length), j) for i, j in zip(temp, extension)]
+            buffer = [u'%s %s' % (i.ljust(length), j) for i, j in zip(temp, extension)]
             buffer += temp[len(extension):]
-            buffer += [(1 + length) * ' ' + j for j in extension[len(temp):]]
+            buffer += [(1 + length) * u' ' + j for j in extension[len(temp):]]
             length += 1 + ext_length
 
-        extra_padding = '\u2500' * (length - 2 - len(expanded_symbol))
-        buffer.append('\u2570%s%s\u256f' % (expanded_symbol, extra_padding))
+        extra_padding = u'\u2500' * (length - 2 - len(expanded_symbol))
+        buffer.append(u'\u2570%s%s\u256f' % (expanded_symbol, extra_padding))
         return buffer, max(length, len(buffer[-1]))
 
 

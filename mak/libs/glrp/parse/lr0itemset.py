@@ -8,12 +8,13 @@ class LR0ItemSet(object):
         # type: (List[Tuple[LR0Item, Optional[LR0DominanceNode], int]]) -> None
         self._core = set([])   # type: Set[LR0DominanceNode]
         self._items = {}       # type:Dict[LR0Item, LR0DominanceNode]
+        self._sorted_items = [] # type: List[LR0Item]
         self.add_core(core)
         self._lr0_close()
 
     def __iter__(self):
         # type: () -> Iterator[LR0Item]
-        return iter(self._items)
+        return iter(self._sorted_items)
 
     def __getitem__(self, item):
         # type: (LR0Item) -> LR0DominanceNode
@@ -30,6 +31,7 @@ class LR0ItemSet(object):
                 else:
                     target_node = LR0DominanceNode(self, item)
                 self._items[item] = target_node
+                self._sorted_items.append(item)
             else:
                 assert node is not None
                 assert node not in target_node._predecessors
@@ -45,7 +47,8 @@ class LR0ItemSet(object):
         while new_items:
             self._items.update(new_items)
             new_items = {}
-            for item, dn in self._items.items():
+            for item in self._sorted_items[::]:
+                dn = self._items[item]
                 for x in item._after:
                     item = x._item
                     try:
@@ -56,6 +59,7 @@ class LR0ItemSet(object):
                         except KeyError:
                             successor = LR0DominanceNode(self, item, parent=dn)
                             new_items[item] = successor
+                            self._sorted_items.append(item)
                     if successor not in dn._direct_children:
                         dn._direct_children.append(successor)
                     if dn not in successor._direct_parents:
@@ -72,7 +76,6 @@ class LR0ItemSet(object):
                     for node in successor._children:
                         node._parents.add(dn)
                         node._parents.update(dn._parents)
-
 
 if TYPE_CHECKING:
     from typing import Dict, Iterator, List, Optional, Set, Tuple

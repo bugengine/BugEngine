@@ -1,4 +1,4 @@
 import ply
 import ircc
-import pyrcc
+import pyxx
 import glrp

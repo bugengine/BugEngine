@@ -92,7 +92,7 @@ class Grammar(object):
         index = dict(terminals)
         name_map = [''] * (len(terminals))
         log = Logger(io.open(debug_filename, 'w', encoding='utf-8'))
-        stderr = Logger(sys.stderr)
+        stderr = Logger(io.open(sys.stderr.fileno(), 'w', encoding='utf-8', closefd=False))
         dot_file = Logger(io.open(os.path.splitext(debug_filename)[0] + '.dot', 'w', encoding='utf-8'))
         for name, i in terminals.items():
             name_map[i] = name

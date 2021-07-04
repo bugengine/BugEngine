@@ -36,11 +36,11 @@ _parsers = {
             'c++20': ObjCxx20Parser,
             'c++23': ObjCxx23Parser,
         },
-}
+} # type: Dict[str, Dict[str, Type[glrp.Parser]]]
 
 
 def parser(lang, extension, std):
-    # type: (str, str) -> Type[glrp.Parser]
+    # type: (str, str, str) -> Type[glrp.Parser]
     if lang == 'auto':
         if extension == '.c':
             lang = 'c'
@@ -57,5 +57,5 @@ def parser(lang, extension, std):
 
 from be_typing import TYPE_CHECKING
 if TYPE_CHECKING:
-    from typing import Type
+    from typing import Dict, Type
     import glrp

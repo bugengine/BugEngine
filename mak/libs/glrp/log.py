@@ -48,17 +48,17 @@ class Logger:
     }
 
     def __init__(self, out_file):
-        # type: (IO[str]) -> None
+        # type: (IO[unicode]) -> None
         self._out_file = out_file
         self._error_color = out_file.isatty()
 
     def _msg(self, error_type, message):
-        # type: (str, str) -> None
+        # type: (str, unicode) -> None
         if self._error_color:
             (color_error_type, color_filename, color_message, color_caret,
              color_off) = self.COLOR_PATTERN.get(error_type, self.DEFAULT_COLOR_PATTERN)
             self._out_file.write(
-                '{color_error_type}{error_type}{color_off}: {color_message}{message}{color_off}\n'.format(**locals())
+                u'{color_error_type}{error_type}{color_off}: {color_message}{message}{color_off}\n'.format(**locals())
             )
         else:
             color_error_type = ''
@@ -67,25 +67,25 @@ class Logger:
             color_caret = ''
             color_off = ''
 
-            self._out_file.write('{color_message}{message}{color_off}\n'.format(**locals()))
+            self._out_file.write(u'{color_message}{message}{color_off}\n'.format(**locals()))
 
     def note(self, message, *args):
-        # type: (str, *Union[str, int]) -> None
+        # type: (unicode, *Union[str, unicode, int]) -> None
         self._msg('note', message % args)
 
     def info(self, message, *args):
-        # type: (str, *Union[str, int]) -> None
+        # type: (unicode, *Union[str, unicode,int]) -> None
         self._msg('info', message % args)
 
     def warning(self, message, *args):
-        # type: (str, *Union[str, int]) -> None
+        # type: (unicode, *Union[str, unicode, int]) -> None
         self._msg('warning', message % args)
 
     def error(self, message, *args):
-        # type: (str, *Union[str, int]) -> None
+        # type: (unicode, *Union[str, unicode, int]) -> None
         self._msg('error', message % args)
 
 
 from be_typing import TYPE_CHECKING
 if TYPE_CHECKING:
-    from typing import IO, Union
+    from typing import IO, Union, AnyStr

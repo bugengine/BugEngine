@@ -10,8 +10,8 @@ def _log(title, conflict_paths, out, name_map):
     seen = set([])
     if conflict_paths:
         count = len(set(conflict_paths))
-        out.info('   %s' % (title))
-        out.info('   \u256d\u2574')
+        out.info(u'   %s' % (title))
+        out.info(u'   \u256d\u2574')
         for path in conflict_paths:
             if path in seen:
                 continue
@@ -19,11 +19,11 @@ def _log(title, conflict_paths, out, name_map):
             seen.add(path)
             strings = path.expand_left().to_string(name_map)[0]
             for s in strings:
-                out.info('   \u2502 %s' % s)
+                out.info(u'   \u2502 %s' % s)
             if count == 0:
-                out.info('   \u2570\u2574')
+                out.info(u'   \u2570\u2574')
             else:
-                out.info('   \u251c\u2574')
+                out.info(u'   \u251c\u2574')
 
 
 def _log_counterexamples(conflict_list, out, first_set, name_map):
@@ -97,7 +97,7 @@ def _log_counterexamples(conflict_list, out, first_set, name_map):
 
 def create_parser_table(productions, start_id, name_map, terminal_count, log, error_log, dot_file):
     # type: (Dict[int, Grammar.Production], int, List[str], int, Logger, Logger, Logger) -> None
-    cidhash = {}
+    cidhash = {}       # type: Dict[int, int]
     goto_cache = {}    # type: Dict[Tuple[int, int], Optional[LR0ItemSet]]
     goto_cache_2 = {}  # type: Dict[int, Any]
     first_set = {}
@@ -125,7 +125,7 @@ def create_parser_table(productions, start_id, name_map, terminal_count, log, er
                 if not s1:
                     s1 = {}
                     s[id(next)] = s1
-                gs.append((next, item_set._items[item], lookahead))
+                gs.append((next, item_set[item], lookahead))
                 s = s1
 
         result = s.get(0, None)
@@ -382,6 +382,7 @@ def create_parser_table(productions, start_id, name_map, terminal_count, log, er
 
     num_missing_annotations = 0
     num_rr = 0
+    num_sr = 0
 
     dot_file.info('digraph Grammar {')
     for item_group in states:
@@ -392,16 +393,17 @@ def create_parser_table(productions, start_id, name_map, terminal_count, log, er
         dot_file.info('    node[style=filled;color=white];')
         state_id = id(item_group)
         for item in item_group:
-            dot_file.info('    %d[label="%s"];', id(item_group._items[item]), item.to_string(name_map))
+            dot_file.info('    %d[label="%s"];', id(item_group[item]), item.to_string(name_map))
         for item in item_group:
-            dnode = item_group._items[item]
+            dnode = item_group[item]
             for child in dnode._direct_children:
                 dot_file.info('    %d -> %d;', id(child), id(dnode))
         dot_file.info("  }")
         st += 1
 
     for st, item_group in enumerate(states):
-        for _, node in item_group._items.items():
+        for item in item_group:
+            node = item_group[item]
             for predecessor in node._predecessors:
                 assert node._predecessor_lookahead is not None
                 dot_file.info(
@@ -497,11 +499,14 @@ def create_parser_table(productions, start_id, name_map, terminal_count, log, er
             if len(accepted_actions) > 1:
                 # handle conflicts
                 conflicts = []     # type: List[Tuple[LR0DominanceNode, str, Optional[int]]]
+                num_rr += 1
                 for j, items in accepted_actions.items():
                     for item in items:
                         node = item_group[item]
                         if j > 0:
                             conflicts.append((node, 'Shift using rule %s' % item.to_string(name_map), None))
+                            num_rr -= 1
+                            num_sr += 1
                         else:
                             conflicts.append((node, 'Reduce using rule %s' % item.to_string(name_map), a))
                 _log_counterexamples(conflicts, log, first_set, name_map)
@@ -585,8 +590,16 @@ def create_parser_table(productions, start_id, name_map, terminal_count, log, er
         log.warning('%d missing precedence annotations', num_missing_annotations)
         error_log.warning('%d missing precedence annotations', num_missing_annotations)
 
+    if num_sr == 1:
+        log.warning('1 shift/reduce conflict')
+        error_log.warning('1 shift/reduce conflict')
+    elif num_sr > 1:
+        log.warning('%d shift/reduce conflicts', num_sr)
+        error_log.warning('%d shift/reduce conflicts', num_sr)
+
     if num_rr == 1:
         log.warning('1 reduce/reduce conflict')
+        error_log.warning('1 reduce/reduce conflict')
     elif num_rr > 1:
         log.warning('%d reduce/reduce conflicts', num_rr)
         error_log.warning('%d reduce/reduce conflicts', num_rr)
