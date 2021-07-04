@@ -32,9 +32,10 @@ protected:
         const override;
     virtual ConversionCost distance(const Type& type) const override;
     virtual bool           doResolve(DbContext & context) override;
-    virtual ref< Node >    getProperty(DbContext & context, const inamespace& propertyName) const;
-    virtual void           doEval(const Type& expectedType, Value& result) const override;
-    virtual void           doVisit(Node::Visitor & visitor) const override;
+    virtual ref< Node >    getProperty(DbContext & context, const inamespace& propertyName)
+        const override;
+    virtual void doEval(const Type& expectedType, Value& result) const override;
+    virtual void doVisit(Node::Visitor & visitor) const override;
 
 public:
     Object(ref< Reference > className, const minitl::vector< ref< Parameter > >& parameters);
