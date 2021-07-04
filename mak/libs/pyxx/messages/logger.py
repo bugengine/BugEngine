@@ -1,4 +1,5 @@
 import sys
+import io
 import argparse
 import glrp
 from be_typing import TypeVar, cast
@@ -89,7 +90,7 @@ class Logger(glrp.Logger):
 
     def __init__(self, arguments):
         # type: (Namespace) -> None
-        glrp.Logger.__init__(self, sys.stderr)
+        glrp.Logger.__init__(self, io.open(sys.stderr.fileno(), 'w', encoding='utf-8', closefd=False))
         self._arguments = arguments
         self._warning_count = 0
         self._error_count = 0

@@ -10,8 +10,8 @@ class LR0Item:
         self._next = next
         self._before = predecessor
         self._after = successors
-        self._symbols = set(rule._production)
-        self._follow = follow
+        self._symbols = sorted(set(rule._production))
+        self._follow = sorted(follow)
         self._lookaheads = {}            # type: Dict[int, List[int]]
         self._precedence = None          # type: Optional[Tuple[str, int]]
         self._split = False
@@ -69,13 +69,12 @@ class LR0Item:
         return result
 
     def to_string(self, name_map):
-        # type: (List[str]) -> str
-        return '%s -> %s' % (
-            name_map[self._rule._prod_symbol], ' '.join(
-                [name_map[p]
-                 for p in self._rule._production[:self._index]] + ['%s%s' % (name_map[1], self._annotations())] +
-                [name_map[p] for p in self._rule._production[self._index:]]
-            )
+        # type: (List[str]) -> Text
+        return u'%s%s -> %s \u2666 %s' % (
+            name_map[self._rule._prod_symbol],
+            self._annotations(),
+            ' '.join([name_map[p] for p in self._rule._production[:self._index]]),
+            ' '.join([name_map[p] for p in self._rule._production[self._index:]]),
         )
 
     def is_reduction_item(self):
@@ -102,5 +101,5 @@ class LR0Item:
 
 
 if TYPE_CHECKING:
-    from be_typing import Dict, List, Optional, Sequence, Set, Tuple, Union
+    from be_typing import Dict, List, Optional, Sequence, Set, Text, Tuple, Union
     from .grammar import Grammar

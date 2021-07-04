@@ -48,12 +48,12 @@ class Logger:
     }
 
     def __init__(self, out_file):
-        # type: (IO[unicode]) -> None
+        # type: (IO[Text]) -> None
         self._out_file = out_file
         self._error_color = out_file.isatty()
 
     def _msg(self, error_type, message):
-        # type: (str, unicode) -> None
+        # type: (str, Text) -> None
         if self._error_color:
             (color_error_type, color_filename, color_message, color_caret,
              color_off) = self.COLOR_PATTERN.get(error_type, self.DEFAULT_COLOR_PATTERN)
@@ -70,22 +70,22 @@ class Logger:
             self._out_file.write(u'{color_message}{message}{color_off}\n'.format(**locals()))
 
     def note(self, message, *args):
-        # type: (unicode, *Union[str, unicode, int]) -> None
+        # type: (Text, *Union[Text, int]) -> None
         self._msg('note', message % args)
 
     def info(self, message, *args):
-        # type: (unicode, *Union[str, unicode,int]) -> None
+        # type: (Text, *Union[Text,int]) -> None
         self._msg('info', message % args)
 
     def warning(self, message, *args):
-        # type: (unicode, *Union[str, unicode, int]) -> None
+        # type: (Text, *Union[Text, int]) -> None
         self._msg('warning', message % args)
 
     def error(self, message, *args):
-        # type: (unicode, *Union[str, unicode, int]) -> None
+        # type: (Text, *Union[Text, int]) -> None
         self._msg('error', message % args)
 
 
 from be_typing import TYPE_CHECKING
 if TYPE_CHECKING:
-    from typing import IO, Union, AnyStr
+    from typing import IO, Union, Text

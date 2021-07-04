@@ -62,6 +62,7 @@ class Grammar(object):
             self._rule_list = rule_list
             self._prod_symbol = prod_symbol
             self._first = set([])  # type: Set[int]
+            self._first_list = []  # type: List[int]
             self._empty = False
             self._nonterminal_count = 0
             for rule in rule_list:
@@ -112,7 +113,9 @@ class Grammar(object):
         start_id = len(index) - 1
         productions = _create_productions(rules, index, log)
         for prod_symbol, prod in productions.items():
-            log.info('%d %s {%s}', prod_symbol, name_map[prod_symbol], ', '.join([name_map[t] for t in prod._first]))
+            log.info(
+                '%d %s {%s}', prod_symbol, name_map[prod_symbol], ', '.join([name_map[t] for t in prod._first_list])
+            )
             for rule in prod:
                 log.info('  %s', rule.to_string(name_map))
 
@@ -220,6 +223,7 @@ def _create_productions(rules, index, log):
                                 found_epsilon = True
         len_set_after = len(prod._first)
         if len_set_before != len_set_after or len_set_after == 0:
+            prod._first_list = sorted(prod._first)
             queue.append(prod_symbol)
 
     return productions

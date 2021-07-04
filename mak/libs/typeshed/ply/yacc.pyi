@@ -11,12 +11,10 @@ class Lexer(Protocol):
 
 class YaccSymbol:
     position: IrPosition
-    cpp_position: CppPosition
 
 
 class YaccProduction:
     lexer: 'ir_lexer.IrLexer'
-    cpp_lexer: 'cpp_lexer.CppLexer'
     parser: 'Parser'
     slice: List[Union[YaccSymbol, LexToken]]
     stack: List[Union[YaccSymbol, LexToken]]
@@ -48,7 +46,6 @@ class YaccProduction:
 
 class Parser:
     ir_parser: 'ir_parser.IrParser'
-    cpp_parser: 'cpp_parser.CppParser'
 
     def errok(self) -> None:
         ...
@@ -84,4 +81,3 @@ def yacc(
 
 if TYPE_CHECKING:
     from ircc import ir_lexer, ir_parser
-    from cpprtti import cpp_lexer, cpp_parser

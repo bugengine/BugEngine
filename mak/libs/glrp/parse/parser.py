@@ -38,11 +38,10 @@ class Parser:
             # type: (Symbol) -> None
             self._stack.append(symbol)
 
-        def reduce(self, rule):
-            # type: (Grammar.Rule) -> None
-            prod_len = len(rule._production)
-            prod = self._stack[-prod_len:]
-            self._stack[-prod_len:] = [Production(rule._id, rule._name, prod, rule._action)]
+        def reduce(self, prod_id, prod_name, prod_length, action):
+            # type: (int, str, int, Callable[[Production], None]) -> None
+            prod = self._stack[-prod_length:]
+            self._stack[-prod_length:] = [Production(prod_id, prod_name, prod, action)]
 
     class Action:
         def __init__(self):

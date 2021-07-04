@@ -9,8 +9,8 @@ class LR0Path(object):
             self._lookahead = lookahead
 
         def to_string(self, name_map):
-            # type: (List[str]) -> Tuple[List[unicode], int]
-            la = name_map[self._lookahead]
+            # type: (List[str]) -> Tuple[List[Text], int]
+            la = u'\u2666' if self._lookahead == 1 else name_map[self._lookahead]
             return [la], len(la)
 
     def __init__(self, node, sequence, use_marker=True):
@@ -21,9 +21,7 @@ class LR0Path(object):
             self._sequence = sequence
         else:
             if use_marker:
-                self._sequence = list(
-                    [LR0Path.PathItem(1)] + [LR0Path.PathItem(i) for i in item[item._index:]]
-                )
+                self._sequence = list([LR0Path.PathItem(1)] + [LR0Path.PathItem(i) for i in item[item._index:]])
             else:
                 self._sequence = list([LR0Path.PathItem(i) for i in item[item._index:]])
         self._hash = (node._item, )    # type: Tuple[Union[int, LR0Item], ...]
@@ -61,7 +59,7 @@ class LR0Path(object):
         return LR0Path(self._node, self._sequence[:index] + path._sequence)
 
     def to_string(self, name_map):
-        # type: (List[str]) -> Tuple[List[unicode], int]
+        # type: (List[str]) -> Tuple[List[Text], int]
         expanded_symbol = name_map[self._node._item._symbol]
         if len(self._sequence) == 0:
             return [u'', u'\u2570%s\u256f' % expanded_symbol], len(expanded_symbol) + 2
@@ -80,6 +78,6 @@ class LR0Path(object):
 
 
 if TYPE_CHECKING:
-    from be_typing import Any, List, Optional, Tuple, Union
+    from be_typing import Any, List, Optional, Text, Tuple, Union
     from .lr0dominancenode import LR0DominanceNode
     from .lr0item import LR0Item

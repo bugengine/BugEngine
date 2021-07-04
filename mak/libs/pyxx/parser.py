@@ -1,5 +1,5 @@
-from .c import C89Parser, C99Parser, C11Parser, C17Parser
-from .cxx import Cxx98Parser, Cxx03Parser, Cxx11Parser, Cxx14Parser, Cxx17Parser, Cxx20Parser, Cxx23Parser
+from .c import CParser, C89Parser, C99Parser, C11Parser, C17Parser
+from .cxx import CxxParser, Cxx98Parser, Cxx03Parser, Cxx11Parser, Cxx14Parser, Cxx17Parser, Cxx20Parser, Cxx23Parser
 from .objc import ObjC89Parser, ObjC99Parser, ObjC11Parser, ObjC17Parser
 from .objc import ObjCxx98Parser, ObjCxx03Parser, ObjCxx11Parser, ObjCxx14Parser, ObjCxx17Parser, ObjCxx20Parser, ObjCxx23Parser
 
@@ -36,11 +36,11 @@ _parsers = {
             'c++20': ObjCxx20Parser,
             'c++23': ObjCxx23Parser,
         },
-} # type: Dict[str, Dict[str, Type[glrp.Parser]]]
+}                                      # type: Dict[str, Dict[str, Union[Type[CParser], Type[CxxParser]]]]
 
 
 def parser(lang, extension, std):
-    # type: (str, str, str) -> Type[glrp.Parser]
+    # type: (str, str, str) -> Union[Type[CParser], Type[CxxParser]]
     if lang == 'auto':
         if extension == '.c':
             lang = 'c'
@@ -57,5 +57,5 @@ def parser(lang, extension, std):
 
 from be_typing import TYPE_CHECKING
 if TYPE_CHECKING:
-    from typing import Dict, Type
+    from typing import Dict, Type, Union
     import glrp

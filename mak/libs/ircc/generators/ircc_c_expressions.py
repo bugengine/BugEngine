@@ -92,6 +92,7 @@ class IrccCExpressionAggregateValue(IrccCExpression):
         self._values = values
 
     def __str__(self):
+        # type: () -> str
         return '{ %s }' % ', '.join([str(x) for x in self._values])
 
 
@@ -266,6 +267,7 @@ class IrccCExpressionSelect(IrccCExpression):
         self._value_false = value_false
 
     def __str__(self):
+        # type: () -> str
         return '%s ? %s : %s' % (
             self._condition.make_string_left('right', self._precedence),
             self._value_true.make_string_left('right', self._precedence),

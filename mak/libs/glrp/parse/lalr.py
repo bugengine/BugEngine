@@ -1,12 +1,13 @@
 from .lr0itemset import LR0ItemSet
 from .lr0dominancenode import LR0DominanceNode
 from .lr0path import LR0Path
+from collections import OrderedDict
 from be_typing import TYPE_CHECKING
 import sys
 
 
 def _log(title, conflict_paths, out, name_map):
-    # type: (str, List[LR0Path], Logger, List[str]) -> None
+    # type: (Text, List[LR0Path], Logger, List[str]) -> None
     seen = set([])
     if conflict_paths:
         count = len(set(conflict_paths))
@@ -27,8 +28,8 @@ def _log(title, conflict_paths, out, name_map):
 
 
 def _log_counterexamples(conflict_list, out, first_set, name_map):
-    # type: (List[Tuple[LR0DominanceNode, str, Optional[int]]], Logger, Dict[int, Set[int]], List[str]) -> List[LR0Item]
-    conflict_paths = [(message, []) for _, message, _ in conflict_list] # type: List[Tuple[str, List[LR0Path]]]
+    # type: (List[Tuple[LR0DominanceNode, Text, Optional[int]]], Logger, Dict[int, Set[int]], List[str]) -> List[LR0Item]
+    conflict_paths = [(message, []) for _, message, _ in conflict_list] # type: List[Tuple[Text, List[LR0Path]]]
     result = []                                                         # type: List[LR0Item]
 
     queue = []     # type: List[List[Tuple[LR0Path, Optional[int], Set[Tuple[LR0DominanceNode, Optional[int]]], int]]]
@@ -50,8 +51,8 @@ def _log_counterexamples(conflict_list, out, first_set, name_map):
                 for path, _, _, index in path_list:
                     conflict_paths[index][1].append(path)
             else:
-                states = {
-                }              # type: Dict[LR0ItemSet, List[Tuple[LR0Path, Optional[int], Set[Tuple[LR0DominanceNode, Optional[int]]], int]]]
+                states = OrderedDict(
+                )                      # type: Dict[LR0ItemSet, List[Tuple[LR0Path, Optional[int], Set[Tuple[LR0DominanceNode, Optional[int]]], int]]]
 
                 for path, lookahead, seen, index in path_list:
                     if lookahead is not None:
@@ -72,7 +73,7 @@ def _log_counterexamples(conflict_list, out, first_set, name_map):
                 for _, plist in states.items():
                     queue.append(plist)
         else:
-            states = {}
+            states = OrderedDict()
             for path, lookahead, seen, index in path_list:
                 if path._node._item._index > 0:
                     for path, la in path._node.backtrack_up(path, None, lookahead, first_set, seen):
@@ -159,7 +160,7 @@ def create_parser_table(productions, start_id, name_map, terminal_count, log, er
                 for s in item._symbols:
                     asyms.add(s)
 
-            for x in asyms:
+            for x in sorted(asyms):
                 g = goto(state, x)
                 if not g or id(g) in cidhash:
                     continue
@@ -439,7 +440,8 @@ def create_parser_table(productions, start_id, name_map, terminal_count, log, er
                     if j >= 0:
                         st_action[a] = st_action.get(a, []) + [(j, item)]
 
-        for a, actions in st_action.items():
+        for a in sorted(st_action):
+            actions = st_action[a]
             action_dest = {}   # type: Dict[int, List[LR0Item]]
             for i, item in actions:
                 try:
@@ -498,9 +500,10 @@ def create_parser_table(productions, start_id, name_map, terminal_count, log, er
 
             if len(accepted_actions) > 1:
                 # handle conflicts
-                conflicts = []     # type: List[Tuple[LR0DominanceNode, str, Optional[int]]]
+                conflicts = []     # type: List[Tuple[LR0DominanceNode, Text, Optional[int]]]
                 num_rr += 1
-                for j, items in accepted_actions.items():
+                for j in sorted(accepted_actions):
+                    items = accepted_actions[j]
                     for item in items:
                         node = item_group[item]
                         if j > 0:
@@ -611,7 +614,7 @@ def create_parser_table(productions, start_id, name_map, terminal_count, log, er
 
 
 if TYPE_CHECKING:
-    from be_typing import Any, Callable, Dict, List, Optional, Set, Tuple
+    from be_typing import Any, Callable, Dict, List, Optional, Set, Text, Tuple
     from .grammar import Grammar
     from .lr0item import LR0Item
     from .lr0path import LR0Path
