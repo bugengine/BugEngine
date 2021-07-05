@@ -20,8 +20,11 @@ IParameter::ParameterRegistration::~ParameterRegistration()
     for(minitl::vector< raw< const Meta::Class > >::iterator it = classes.begin();
         it != classes.end(); ++it)
     {
-        if(*it == m_class) classes.erase(it);
-        break;
+        if(*it == m_class)
+        {
+            classes.erase(it);
+            break;
+        }
     }
 }
 
