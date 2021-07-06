@@ -65,7 +65,9 @@ const Meta::Method::Overload ClassID< KernelScheduler::Segments< T > >::s_ctrOve
 
 template < typename T >
 const Meta::Method ClassID< KernelScheduler::Segments< T > >::s_ctr
-    = {Meta::Class::nameConstructor(), {1, &s_ctrOverload}, {&s_ctr}};
+    = {Meta::Class::nameConstructor(),
+       {1, &s_ctrOverload},
+       {&ClassID< KernelScheduler::Segments< T > >::s_ctr}};
 
 template < typename T >
 Meta::ObjectInfo ClassID< KernelScheduler::Segments< T > >::s_productClass

@@ -65,7 +65,9 @@ const Meta::Method::Overload ClassID< KernelScheduler::Image1D< T > >::s_ctrOver
 
 template < typename T >
 const Meta::Method ClassID< KernelScheduler::Image1D< T > >::s_ctr
-    = {Meta::Class::nameConstructor(), {1, &s_ctrOverload}, {&s_ctr}};
+    = {Meta::Class::nameConstructor(),
+       {1, &s_ctrOverload},
+       {&ClassID< KernelScheduler::Image1D< T > >::s_ctr}};
 
 template < typename T >
 Meta::ObjectInfo ClassID< KernelScheduler::Image1D< T > >::s_productClass
