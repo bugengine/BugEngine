@@ -1,6 +1,6 @@
 """
-constant-expression:
-    conditional-expression
+asm-declaration:
+    attribute-specifier-seq? asm ( string-literal ) ;
 """
 
 import glrp
@@ -8,9 +8,9 @@ from ...parser import cxx98
 from be_typing import TYPE_CHECKING
 
 
-@glrp.rule('constant-expression : conditional-expression')
+@glrp.rule('asm-declaration : attribute-specifier-seq? "asm" "(" "string-literal" ")" ";"')
 @cxx98
-def constant_expression(self, p):
+def asm_declaration(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 

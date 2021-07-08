@@ -38,7 +38,7 @@ def requires_parameter_list(self, p):
     pass
 
 
-@glrp.rule('requirement-body : ""{" requirement-seq "}"')
+@glrp.rule('requirement-body : "{" requirement-seq "}"')
 @cxx98
 def requirement_body(self, p):
     # type: (CxxParser, glrp.Production) -> None

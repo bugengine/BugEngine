@@ -170,8 +170,8 @@ _keywords_cxx23 = _keywords_transactional + _keywords_reflection
 
 
 class Cxx98Lexer(glrp.Lexer):
-    keywords = _keywords
-    tokens = _keywords
+    keywords = _keywords + _keywords_cxx11 + _keywords_cxx20 + _keywords_cxx23
+    tokens = _keywords + _keywords_cxx11 + _keywords_cxx20 + _keywords_cxx23
 
     # arithmetic operators
     @glrp.token(r'\+', '+')
@@ -195,6 +195,7 @@ class Cxx98Lexer(glrp.Lexer):
     @glrp.token(r'>=')
     @glrp.token(r'==')
     @glrp.token(r'!=')
+    @glrp.token(r'<=>')
     # assignment operators
     @glrp.token(r'=')
     @glrp.token(r'\*=', '*=')

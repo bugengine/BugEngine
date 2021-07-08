@@ -21,6 +21,13 @@ condition:
 import glrp
 from ...parser import cxx98
 from be_typing import TYPE_CHECKING
+from . import labeled
+from . import expression
+from . import block
+from . import selection
+from . import iteration
+from . import jump
+from . import declaration
 
 
 @glrp.rule('statement : labeled-statement')
@@ -52,4 +59,4 @@ def condition(self, p):
 
 
 if TYPE_CHECKING:
-    from ....parser import CxxParser
+    from ...parser import CxxParser

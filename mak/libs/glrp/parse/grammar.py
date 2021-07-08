@@ -111,7 +111,7 @@ class Grammar(object):
         name_map.append('<epsilon>')
 
         start_id = len(index) - 1
-        productions = _create_productions(rules, index, log)
+        productions = _create_productions(rules, index, stderr, name_map, len(terminals))
         for prod_symbol, prod in productions.items():
             log.info(
                 '%d %s {%s}', prod_symbol, name_map[prod_symbol], ', '.join([name_map[t] for t in prod._first_list])
@@ -172,26 +172,51 @@ class Grammar(object):
         #                )
 
 
-def _create_productions(rules, index, log):
-    # type: (List[Tuple[str, Parser.Action, List[str], List[Tuple[str, List[str], int]], str, int]], Dict[str, int], Logger) -> Dict[int, Grammar.Production]
+def _create_productions(rules, index, log, name_map, terminal_count):
+    # type: (List[Tuple[str, Parser.Action, List[str], List[Tuple[str, List[str], int]], str, int]], Dict[str, int], Logger, List[str], int) -> Dict[int, Grammar.Production]
     rule_index = 0
     productions = {}   # type: Dict[int, Grammar.Production]
+
+    symbol_usage = [0] * len(index)    # type: List[int]
+    unreachable = []                   # type: List[Grammar.Production]
+    errors = False
 
     for nonterminal, action, production, attribute_list, filename, lineno in rules:
         prod_symbol = index[nonterminal]
         try:
-            rule = Grammar.Rule(
-                rule_index, prod_symbol, nonterminal, tuple(index[s] for s in production), action, attribute_list,
-                filename, lineno
-            )
+            symbols = tuple(index[s] for s in production)
         except KeyError as error:  # unknown rule or terminal
-            log.error('unknown object used in rule: %s', str(error))
+            log.error('%s:%d: Symbol %s used, but not defined as a token or a rule' % (filename, lineno, str(error)))
+            errors = True
         else:
+            rule = Grammar.Rule(rule_index, prod_symbol, nonterminal, symbols, action, attribute_list, filename, lineno)
             rule_index += 1
+            for s in symbols:
+                symbol_usage[s] += 1
             try:
                 productions[prod_symbol].add_rule(rule)
             except KeyError:
                 productions[prod_symbol] = Grammar.Production(prod_symbol, [rule])
+
+    if not errors:
+        pass
+
+    if errors:
+        raise SyntaxError('Unable to build grammar')
+
+    for s, count in enumerate(symbol_usage[:terminal_count]):
+        if count == 0:
+            log.warning('Token %s defined, but not used', name_map[s])
+    for s, count in enumerate(symbol_usage[terminal_count:]):
+        if count == 0:
+            try:
+                prod = productions[terminal_count + s]
+            except KeyError:
+                pass
+            else:
+                log.warning(
+                    '%s:%d: Rule %r defined, but not used', prod[0]._filename, prod[0]._lineno, prod[0]._prod_name
+                )
 
     queue = list(productions.keys())
     while queue:

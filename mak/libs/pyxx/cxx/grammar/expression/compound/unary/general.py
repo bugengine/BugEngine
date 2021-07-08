@@ -29,7 +29,7 @@ from be_typing import TYPE_CHECKING
 @glrp.rule('unary-expression : await-expression')
 @glrp.rule('unary-expression : "sizeof" unary-expression')
 @glrp.rule('unary-expression : "sizeof" "(" type-id ")"')
-@glrp.rule('unary-expression : "sizeof" "..." "(" identifier "")"')
+@glrp.rule('unary-expression : "sizeof" "..." "(" identifier ")"')
 @glrp.rule('unary-expression : "alignof" "(" type-id ")"')
 @glrp.rule('unary-expression : noexcept-expression')
 @glrp.rule('unary-expression : new-expression')

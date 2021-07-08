@@ -1,6 +1,6 @@
 """
-constant-expression:
-    conditional-expression
+declaration-statement:
+    block-declaration
 """
 
 import glrp
@@ -8,9 +8,9 @@ from ...parser import cxx98
 from be_typing import TYPE_CHECKING
 
 
-@glrp.rule('constant-expression : conditional-expression')
+@glrp.rule('declaration-statement : block-declaration')
 @cxx98
-def constant_expression(self, p):
+def declaration_statement(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
