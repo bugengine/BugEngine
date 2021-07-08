@@ -12,10 +12,10 @@ primary-expression:
 import glrp
 from ....parser import cxx98
 from be_typing import TYPE_CHECKING
-from .id import *
-from .lambda_expr import *
-from .fold import *
-from .requires import *
+from . import id
+from . import lambda_expr
+from . import fold
+from . import requires
 
 
 @glrp.rule('primary-expression : "literal"')
