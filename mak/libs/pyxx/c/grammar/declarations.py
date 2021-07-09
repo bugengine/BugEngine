@@ -747,7 +747,7 @@ def balanced_token_sequence(self, p):
 @glrp.rule('balanced-token : "integer-constant"')
 @glrp.rule('balanced-token : "floating-constant"')
 @glrp.rule('balanced-token : "character-constant"')
-@glrp.rule('balanced-token : "enum-constant"')
+@glrp.rule('balanced-token : "enumeration-constant"')
 @glrp.rule('balanced-token : "string-literal"')
 def balanced_token(self, p):
     # type: (CParser, glrp.Production) -> None

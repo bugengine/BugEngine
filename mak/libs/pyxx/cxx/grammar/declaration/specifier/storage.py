@@ -12,7 +12,7 @@ from be_typing import TYPE_CHECKING
 
 
 @glrp.rule('storage-class-specifier : "static"')
-@glrp.rule('storage-class-specifier : "thread_­local"')
+@glrp.rule('storage-class-specifier : "thread_local"')
 @glrp.rule('storage-class-specifier : "extern"')
 @glrp.rule('storage-class-specifier : "mutable"')
 @cxx98

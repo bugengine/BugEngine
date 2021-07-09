@@ -46,6 +46,7 @@ def statement(self, p):
 
 @glrp.rule('init-statement : expression-statement')
 @glrp.rule('init-statement : simple-declaration')
+@cxx98
 def init_statement(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
@@ -53,6 +54,7 @@ def init_statement(self, p):
 
 @glrp.rule('condition : expression')
 @glrp.rule('condition : attribute-specifier-seq? decl-specifier-seq declarator brace-or-equal-initializer')
+@cxx98
 def condition(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass

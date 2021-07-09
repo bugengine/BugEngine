@@ -219,6 +219,9 @@ def balanced_token_seq(self, p):
 @glrp.rule('balanced-token : "co_await"')
 @glrp.rule('balanced-token : "co_return"')
 @glrp.rule('balanced-token : "co_yield"')
+@glrp.rule('balanced-token : "export"')
+@glrp.rule('balanced-token : "import"')
+@glrp.rule('balanced-token : "module"')
 @glrp.rule('balanced-token : "requires"')
 @glrp.rule('balanced-token : "atomic_cancel"')
 @glrp.rule('balanced-token : "atomic_commit"')
@@ -273,6 +276,11 @@ def balanced_token_seq(self, p):
 @glrp.rule('balanced-token : "floating-literal"')
 @glrp.rule('balanced-token : "integer-literal"')
 @glrp.rule('balanced-token : "string-literal"')
+@glrp.rule('balanced-token : "character-literal"')
+@glrp.rule('balanced-token : "user-defined-floating-literal"')
+@glrp.rule('balanced-token : "user-defined-integer-literal"')
+@glrp.rule('balanced-token : "user-defined-string-literal"')
+@glrp.rule('balanced-token : "user-defined-character-literal"')
 @cxx98
 def balanced_token(self, p):
     # type: (CxxParser, glrp.Production) -> None

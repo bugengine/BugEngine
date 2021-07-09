@@ -20,6 +20,7 @@ from ....parser import cxx98
 from be_typing import TYPE_CHECKING
 from . import storage
 from . import function
+from . import typedef
 from . import type
 
 

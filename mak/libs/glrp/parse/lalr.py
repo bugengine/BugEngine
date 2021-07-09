@@ -11,7 +11,7 @@ def _log(title, conflict_paths, out, name_map):
     seen = set([])
     if conflict_paths:
         count = len(set(conflict_paths))
-        out.info(u'   %s' % (title))
+        out.info(u'   %s', title)
         out.info(u'   \u256d\u2574')
         for path in conflict_paths:
             if path in seen:
@@ -20,7 +20,7 @@ def _log(title, conflict_paths, out, name_map):
             seen.add(path)
             strings = path.expand_left().to_string(name_map)[0]
             for s in strings:
-                out.info(u'   \u2502 %s' % s)
+                out.info(u'   \u2502 %s', s)
             if count == 0:
                 out.info(u'   \u2570\u2574')
             else:

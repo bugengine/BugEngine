@@ -4,56 +4,67 @@ from be_typing import TYPE_CHECKING
 
 decimal.getcontext().prec = 24
 
+_identifier = r'[a-zA-Z_][a-zA-Z_0-9]*'
+
 _nonzero_digit = '[1-9]'
 _digit = '[0-9]'
 _octal_digit = '[0-7]'
 _hexadecimal_digit = '[0-9a-fA-F]'
-_binary_digit = '[01]'
+_hexadecimal_prefix = '(?:0[xX])'
 
-_decimal_literal = '(?:%s%s*)' % (_nonzero_digit, _digit)
-_octal_literal = '(?:0%s*)' % _octal_digit
-_hexadecimal_literal = """(?:0(?:x|X)%s+)""" % _hexadecimal_digit
-_binary_literal = """(?:0(?:b|B)%s+)""" % _binary_digit
-
-_unsigned_suffix = '(?:u|U)'
-_long_suffix = '(?:l|L)'
+_decimal_constant = '(?:%(_nonzero_digit)s%(_digit)s*)' % locals()
+_octal_constant = '(?:0%(_octal_digit)s*)' % locals()
+_hexadecimal_constant = '(?:%(_hexadecimal_prefix)s%(_hexadecimal_digit)s+)' % locals()
+_binary_constant = '(?:0[bB][01]+)'
+_unsigned_suffix = '[uU]'
+_long_suffix = '[lL]'
 _long_long_suffix = '(?:(?:ll)|(?:LL))'
-
-_integer_suffix = '(?:(?:%s%s?)|(?:%s%s?)|(?:%s%s?)|(?:%s%s?))' % (
-    _unsigned_suffix, _long_long_suffix, _unsigned_suffix, _long_suffix, _long_suffix, _unsigned_suffix,
-    _long_long_suffix, _unsigned_suffix
+_integer_suffix = '(?:(?:%(_unsigned_suffix)s%(_long_suffix)s?)|(?:%(_unsigned_suffix)s%(_long_long_suffix)s)|(?:%(_long_suffix)s%(_unsigned_suffix)s?)|(?:%(_long_long_suffix)s%(_unsigned_suffix)s?))' % locals(
+)
+_integer_literal = '(?:%(_decimal_constant)s|%(_octal_constant)s|%(_hexadecimal_constant)s|%(_binary_constant)s)%(_integer_suffix)s?' % locals(
 )
 
-integer_literal = '(?:%s%s)|(?:%s%s)|(?:%s%s)|(?:%s%s)' % (
-    _decimal_literal, _integer_suffix, _octal_literal, _integer_suffix, _hexadecimal_literal, _integer_suffix,
-    _binary_literal, _integer_suffix
+_floating_suffix = '(?:f|l|F|L|(?:df)|(?:dd)|(?:dl)|(?:DF)|(?:DD)|(?:DL))'
+
+_fractional_constant = r'(?:(?:[0-9]*\.[0-9]+)|(?:[0-9]+\.))'
+_exponent_part = r'(?:[eE][+\-]?[0-9]+)'
+_decimal_floating_constant = '(?:(?:%(_fractional_constant)s%(_exponent_part)s?%(_floating_suffix)s?)|(?:[0-9]+%(_exponent_part)s%(_floating_suffix)s?))' % locals(
 )
 
-_digit_sequence = '(%s+)' % _digit
-_sign = '(\\+|-)'
-
-_fractional_constant = '(?:(?:%s?\\.%s)|(?:%s\\.))' % (_digit_sequence, _digit_sequence, _digit_sequence)
-_exponent_part = '(?:(?:e|E)%s?%s)' % (_sign, _digit_sequence)
-
-_floating_suffix = '(?:f|l|F|L)'
-
-floating_literal = '(?:%s%s?%s?)|(?:%s%s%s?)' % (
-    _fractional_constant, _exponent_part, _floating_suffix, _digit_sequence, _exponent_part, _floating_suffix
+_hexadecimal_fractional_constant = '(?:(?:%(_hexadecimal_digit)s*\\.%(_hexadecimal_digit)s+)|(?:%(_hexadecimal_digit)s+\\.))' % locals(
+)
+_binary_exponent_part = r'(?:[pP][+\-]?[0-9]+)'
+_hexadecimal_floating_constant = '(?:(?:%(_hexadecimal_prefix)s%(_hexadecimal_fractional_constant)s)|(?:%(_binary_exponent_part)s%(_floating_suffix)s?)|(?:%(_hexadecimal_prefix)s%(_hexadecimal_digit)s+)|(?:%(_binary_exponent_part)s%(_floating_suffix)s))' % locals(
 )
 
-_simple_escape = r"""([a-zA-Z\\?'"])"""
-_octal_escape = r"""([0-7]{1,3})"""
-_hex_escape = r"""(x[0-9a-fA-F]+)"""
+_floating_literal = '%(_decimal_floating_constant)s|%(_hexadecimal_floating_constant)s' % locals()
 
-_escape_sequence = r"""(\\(""" + _simple_escape + '|' + _octal_escape + '|' + _hex_escape + '))'
-_cconst_char = r"""([^'\\\n]|""" + _escape_sequence + ')'
-character_literal = "'" + _cconst_char + "'"
-wide_character_literal = 'L' + character_literal
+_encoding_prefix = '(?:(?:u8?)|U|L)'
+_simple_escape_sequence = r'(?:\\[\'"\?\\abfnrtv])'
+_octal_escape_sequence = '(?:\\\\%(_octal_digit)s%(_octal_digit)s?%(_octal_digit)s?)' % locals()
+_hexadecimal_escape_sequence = '(?:\\\\x%(_hexadecimal_digit)s+)' % locals()
+_hexadecimal_quad = '%(_hexadecimal_digit)s%(_hexadecimal_digit)s%(_hexadecimal_digit)s%(_hexadecimal_digit)s' % locals(
+)
+_universal_character_name = '(?:(?:\\\\u%(_hexadecimal_quad)s)|(?:\\\\U%(_hexadecimal_quad)s%(_hexadecimal_quad)s))' % locals(
+)
+_escape_sequence = '(?:%(_simple_escape_sequence)s|%(_octal_escape_sequence)s|%(_hexadecimal_escape_sequence)s|%(_universal_character_name)s)' % locals(
+)
+_c_char = '[^\\\'\\\\\\n]|%(_escape_sequence)s' % locals()
+_c_char_sequence = '%(_c_char)s+' % locals()
+_character_literal = '%(_encoding_prefix)s?\'%(_c_char_sequence)s\'' % locals()
 
-# String literals (K&R2: A.2.6)
-_string_char = r"""([^"\\\n]|""" + _escape_sequence + ')'
-string_literal = '"' + _string_char + '*"'
-wide_string_literal = 'L' + string_literal
+_s_char = '(?:[^"\\n]|%(_escape_sequence)s)' % locals()
+_string_literal = '(?:%(_encoding_prefix)s"%(_s_char)s*")' % locals()
+
+_user_defined_integer_literal = '(?:%(_decimal_constant)s%(_identifier)s)|(?:%(_hexadecimal_constant)s%(_identifier)s)|(?:%(_octal_constant)s%(_identifier)s)|(?:%(_binary_constant)s%(_identifier)s)' % locals(
+)
+
+_user_defined_floating_literal = '(?:%(_fractional_constant)s%(_exponent_part)s?%(_identifier)s)|(?:[0-9]+%(_exponent_part)s%(_identifier)s)|(?:%(_hexadecimal_prefix)s%(_hexadecimal_fractional_constant)s%(_binary_exponent_part)s%(_identifier)s)|(?:%(_hexadecimal_prefix)s%(_hexadecimal_digit)s+%(_binary_exponent_part)s%(_identifier)s)' % locals(
+)
+
+_user_defined_string_literal = '(?:%(_string_literal)s%(_identifier)s)' % locals()
+
+_user_defined_character_literal = '(?:%(_character_literal)s%(_identifier)s)' % locals()
 
 _keywords = (
                            #'and',
@@ -154,6 +165,9 @@ _keywords_cxx20 = (
     'co_await',
     'co_return',
     'co_yield',
+    'export',
+    'import',
+    'module',
     'requires',
 )                      # type: Tuple[str,...]
 
@@ -257,7 +271,7 @@ class Cxx98Lexer(glrp.Lexer):
         else:
             return None
 
-    @glrp.token(r'[a-zA-Z_][a-zA-Z_0-9]*', 'identifier')
+    @glrp.token(_identifier, 'identifier')
     def identifier(self, t):
         # type: (glrp.Token) -> Optional[glrp.Token]
         t.value = t.text()
@@ -265,7 +279,7 @@ class Cxx98Lexer(glrp.Lexer):
             self.set_token_type(t, t.value)
         return t
 
-    @glrp.token(floating_literal, 'floating-literal')
+    @glrp.token(_floating_literal, 'floating-literal')
     def floating_literal(self, t):
         # type: (glrp.Token) -> Optional[glrp.Token]
         if t.text()[-1] in 'fFdD':
@@ -274,15 +288,45 @@ class Cxx98Lexer(glrp.Lexer):
             t.value = decimal.Decimal(t.text())
         return t
 
-    @glrp.token(integer_literal, 'integer-literal')
+    @glrp.token(_integer_literal, 'integer-literal')
     def integer_literal(self, t):
         # type: (glrp.Token) -> Optional[glrp.Token]
         return t
 
-    @glrp.token(string_literal, 'string-literal')
+    @glrp.token(_string_literal, 'string-literal')
     def string_literal(self, t):
         # type: (glrp.Token) -> Optional[glrp.Token]
         t.value = t.text()[1:-1]
+        return t
+
+    @glrp.token(_character_literal, 'character-literal')
+    def character_literal(self, t):
+        # type: (glrp.Token) -> Optional[glrp.Token]
+        t.value = t.text()[1:-1]
+        return t
+
+    @glrp.token(_user_defined_integer_literal, 'user-defined-integer-literal')
+    def user_integer_literal(self, t):
+        # type: (glrp.Token) -> Optional[glrp.Token]
+        t.value = t.text()
+        return t
+
+    @glrp.token(_user_defined_floating_literal, 'user-defined-floating-literal')
+    def user_floating_literal(self, t):
+        # type: (glrp.Token) -> Optional[glrp.Token]
+        t.value = t.text()
+        return t
+
+    @glrp.token(_user_defined_character_literal, 'user-defined-character-literal')
+    def user_defined_character_literal(self, t):
+        # type: (glrp.Token) -> Optional[glrp.Token]
+        t.value = t.text()
+        return t
+
+    @glrp.token(_user_defined_string_literal, 'user-defined-string-literal')
+    def user_defined_string_literal(self, t):
+        # type: (glrp.Token) -> Optional[glrp.Token]
+        t.value = t.text()
         return t
 
 

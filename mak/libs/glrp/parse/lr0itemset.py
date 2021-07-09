@@ -6,9 +6,9 @@ from be_typing import TYPE_CHECKING
 class LR0ItemSet(object):
     def __init__(self, core):
         # type: (List[Tuple[LR0Item, Optional[LR0DominanceNode], int]]) -> None
-        self._core = set([])   # type: Set[LR0DominanceNode]
-        self._items = {}       # type:Dict[LR0Item, LR0DominanceNode]
-        self._sorted_items = [] # type: List[LR0Item]
+        self._core = set([])       # type: Set[LR0DominanceNode]
+        self._items = {}           # type:Dict[LR0Item, LR0DominanceNode]
+        self._sorted_items = []    # type: List[LR0Item]
         self.add_core(core)
         self._lr0_close()
 
@@ -65,17 +65,6 @@ class LR0ItemSet(object):
                     if dn not in successor._direct_parents:
                         successor._direct_parents.append(dn)
 
-                    dn._children.add(successor)
-                    dn._children.update(successor._children)
-                    for node in dn._parents:
-                        node._children.add(successor)
-                        node._children.update(successor._children)
-
-                    successor._parents.add(dn)
-                    successor._parents.update(dn._parents)
-                    for node in successor._children:
-                        node._parents.add(dn)
-                        node._parents.update(dn._parents)
 
 if TYPE_CHECKING:
     from typing import Dict, Iterator, List, Optional, Set, Tuple

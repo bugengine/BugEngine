@@ -2,3 +2,8 @@ from . import basic
 from . import expression
 from . import statement
 from . import declaration
+from . import module
+from . import klass
+from . import overload
+from . import template
+from . import exception

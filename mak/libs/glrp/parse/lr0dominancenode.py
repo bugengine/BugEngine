@@ -17,14 +17,10 @@ class LR0DominanceNode(object):
         self._successor = None                           # type: Optional[LR0DominanceNode]
 
         self._direct_parents = []
-        self._parents = set([])
         self._direct_children = []     # type: List[LR0DominanceNode]
-        self._children = set([])       # type: Set[LR0DominanceNode]
         if parent is not None:
             self._direct_parents.append(parent)
-            self._parents.add(parent)
             parent._direct_children.append(self)
-            parent._children.add(self)
 
     def expand_empty(self, first_set):
         # type: (Dict[int, Set[int]]) -> Optional[LR0Path]

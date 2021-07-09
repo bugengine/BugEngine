@@ -13,6 +13,7 @@ from ....parser import cxx98
 from be_typing import TYPE_CHECKING
 from . import declarator
 from . import name
+from . import function
 
 
 @glrp.rule('init-declarator-list : init-declarator')

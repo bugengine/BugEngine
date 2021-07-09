@@ -49,6 +49,10 @@ empty-declaration:
 
 attribute-declaration:
     attribute-specifier-seq ;
+
+identifier-list:
+    identifier
+    identifier-list , identifier
 """
 
 import glrp
@@ -59,6 +63,7 @@ from . import declarator
 from . import initializer
 from . import function
 from . import enumeration
+from . import using_enum
 from . import namespace
 from . import using
 from . import asm
@@ -134,8 +139,8 @@ def simple_declaration(self, p):
     pass
 
 
-@glrp.rule('static_assert-declaration : "static_­assert" "(" constant-expression ")" ";"')
-@glrp.rule('static_assert-declaration : "static_­assert" "(" constant-expression "," "string-literal" ")" ";"')
+@glrp.rule('static_assert-declaration : "static_assert" "(" constant-expression ")" ";"')
+@glrp.rule('static_assert-declaration : "static_assert" "(" constant-expression "," "string-literal" ")" ";"')
 @cxx98
 def static_assert_declaration(self, p):
     # type: (CxxParser, glrp.Production) -> None
@@ -152,6 +157,14 @@ def empty_declaration(self, p):
 @glrp.rule('attribute-declaration : attribute-specifier-seq ";"')
 @cxx98
 def attribute_declaration(self, p):
+    # type: (CxxParser, glrp.Production) -> None
+    pass
+
+
+@glrp.rule('identifier-list : "identifier"')
+@glrp.rule('identifier-list : identifier-list "," "identifier"')
+@cxx98
+def identifier_list(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
