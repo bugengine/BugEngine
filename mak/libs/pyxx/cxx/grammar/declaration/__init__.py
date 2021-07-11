@@ -41,8 +41,8 @@ simple-declaration:
     attribute-specifier-seq? decl-specifier-seq ref-qualifier? [ identifier-list ] initializer ;
 
 static_assert-declaration:
-    static_­assert ( constant-expression ) ;
-    static_­assert ( constant-expression , string-literal ) ;
+    static_assert ( constant-expression ) ;
+    static_assert ( constant-expression , string-literal ) ;
 
 empty-declaration:
     ;

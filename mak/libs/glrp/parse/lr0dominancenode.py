@@ -8,6 +8,7 @@ class LR0DominanceNode(object):
         # type: (LR0ItemSet, LR0Item, Optional[Tuple[int, LR0DominanceNode]], Optional[LR0DominanceNode]) -> None
         self._item_set = item_set
         self._item = item
+        self._parents = set()                            # type: Set[LR0DominanceNode]
         if predecessor is not None:
             self._predecessor_lookahead = predecessor[0] # type: Optional[int]
             self._predecessors = [predecessor[1]]

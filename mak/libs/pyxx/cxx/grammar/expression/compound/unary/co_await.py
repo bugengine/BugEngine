@@ -1,6 +1,6 @@
 """
 await-expression:
-    co_­await cast-expression
+    co_await cast-expression
 """
 
 import glrp

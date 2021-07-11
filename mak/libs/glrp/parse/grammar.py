@@ -88,14 +88,16 @@ class Grammar(object):
             return len(self._rule_list)
 
     def __init__(self, name, terminals, rules, start_symbol, parser, output_dir):
-        # type: (str, Dict[str, int], List[Tuple[str, Parser.Action, List[str], List[Tuple[str, List[str], int]], str, int]], str, Parser, str) -> None
+        # type: (str, Dict[str, Tuple[int, bool]], List[Tuple[str, Parser.Action, List[str], List[Tuple[str, List[str], int]], str, int]], str, Parser, str) -> None
         debug_filename = os.path.join(output_dir, name + '.txt')
-        index = dict(terminals)
+        index = {}
+        for terminal, (i, _) in terminals.items():
+            index[terminal] = i
         name_map = [''] * (len(terminals))
         log = Logger(io.open(debug_filename, 'w', encoding='utf-8'))
         stderr = Logger(io.open(sys.stderr.fileno(), 'w', encoding='utf-8', closefd=False))
         dot_file = Logger(io.open(os.path.splitext(debug_filename)[0] + '.dot', 'w', encoding='utf-8'))
-        for name, i in terminals.items():
+        for name, (i, _) in terminals.items():
             name_map[i] = name
 
         rules = rules + [
@@ -111,7 +113,7 @@ class Grammar(object):
         name_map.append('<epsilon>')
 
         start_id = len(index) - 1
-        productions = _create_productions(rules, index, stderr, name_map, len(terminals))
+        productions = _create_productions(rules, index, stderr, name_map, terminals, start_id)
         for prod_symbol, prod in productions.items():
             log.info(
                 '%d %s {%s}', prod_symbol, name_map[prod_symbol], ', '.join([name_map[t] for t in prod._first_list])
@@ -172,8 +174,8 @@ class Grammar(object):
         #                )
 
 
-def _create_productions(rules, index, log, name_map, terminal_count):
-    # type: (List[Tuple[str, Parser.Action, List[str], List[Tuple[str, List[str], int]], str, int]], Dict[str, int], Logger, List[str], int) -> Dict[int, Grammar.Production]
+def _create_productions(rules, index, log, name_map, terminals, start_id):
+    # type: (List[Tuple[str, Parser.Action, List[str], List[Tuple[str, List[str], int]], str, int]], Dict[str, int], Logger, List[str], Dict[str, Tuple[int, bool]], int) -> Dict[int, Grammar.Production]
     rule_index = 0
     productions = {}   # type: Dict[int, Grammar.Production]
 
@@ -204,11 +206,12 @@ def _create_productions(rules, index, log, name_map, terminal_count):
     if errors:
         raise SyntaxError('Unable to build grammar')
 
-    for s, count in enumerate(symbol_usage[:terminal_count]):
-        if count == 0:
-            log.warning('Token %s defined, but not used', name_map[s])
+    terminal_count = len(terminals)
+    for s, count in enumerate(symbol_usage[1:terminal_count]):
+        if count == 0 and terminals[name_map[s + 1]][1]:
+            log.warning('Token %s defined, but not used', name_map[s + 1])
     for s, count in enumerate(symbol_usage[terminal_count:]):
-        if count == 0:
+        if count == 0 and terminal_count + s != start_id:
             try:
                 prod = productions[terminal_count + s]
             except KeyError:

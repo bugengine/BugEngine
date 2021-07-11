@@ -244,32 +244,29 @@ class Cxx98Lexer(glrp.Lexer):
     @glrp.token(r'\]', ']')
     @glrp.token(r'\}', '}')
     @glrp.token(r'\)', ')')
+    @glrp.token(r'/\*[\!\*](.|\n)*?\*/', 'doxycomment-block', warn=False)
+    @glrp.token(r'//[/\!](?:[^\\\n]|(?:\\.)|(?:\\\n))*', 'doxycomment-line', warn=False)
     def tok(self, token):
         # type: (glrp.Token) -> glrp.Token
         return token
 
-    @glrp.token(r'\#([^\\\n]|(?:\\.)|(?:\\\n))*', 'preprocessor')
+    @glrp.token(r'\#([^\\\n]|(?:\\.)|(?:\\\n))*', 'preprocessor', warn=False)
     def preprocessor(self, t):
         # type: (glrp.Token) -> Optional[glrp.Token]
         #if t.value.find('include') != -1:
         #    t.lexer.includes.append(t.value)
         return None
 
-    @glrp.token(r'[ \t\n]+', 'whitespace')
+    @glrp.token(r'[ \t\n]+', 'whitespace', warn=False)
     def skip(self, t):
         # type: (glrp.Token) -> Optional[glrp.Token]
         return None
 
-    @glrp.token(r'/\*(.|\n)*?\*/', 'block-comment')
-    @glrp.token(r'\//(?:[^\\\n]|(?:\\.)|(?:\\\n))*', 'line-comment')
+    @glrp.token(r'/\*(.|\n)*?\*/', 'block-comment', warn=False)
+    @glrp.token(r'//(?:[^\\\n]|(?:\\.)|(?:\\\n))*', 'line-comment', warn=False)
     def comment(self, t):
         # type: (glrp.Token) -> Optional[glrp.Token]
-        comment = t.text()
-        if comment[1] == '/' and comment[2] in ('/', '!') or comment[1] == '*' and comment[2] in ('*', '!'):
-            self.set_token_type(t, 'doxycomment')
-            return t
-        else:
-            return None
+        return None
 
     @glrp.token(_identifier, 'identifier')
     def identifier(self, t):

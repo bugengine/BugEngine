@@ -6,10 +6,10 @@ simple-type-specifier:
     placeholder-type-specifier
     nested-name-specifier? template-name
     char
-    char8_­t
-    char16_­t
-    char32_­t
-    wchar_­t
+    char8_t
+    char16_t
+    char32_t
+    wchar_t
     bool
     short
     int

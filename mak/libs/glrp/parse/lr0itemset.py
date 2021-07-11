@@ -64,6 +64,17 @@ class LR0ItemSet(object):
                         dn._direct_children.append(successor)
                     if dn not in successor._direct_parents:
                         successor._direct_parents.append(dn)
+        for node in self._items.values():
+            node._parents = set(node._direct_parents)
+            queue = node._direct_parents[:]
+            seen = set([node])
+            while queue:
+                parent = queue.pop()
+                if parent in seen:
+                    continue
+                seen.add(parent)
+                node._parents.update(parent._direct_parents)
+                queue += parent._direct_parents
 
 
 if TYPE_CHECKING:

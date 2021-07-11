@@ -5,9 +5,9 @@ fold-expression:
     ( cast-expression fold-operator ... fold-operator cast-expression )
 
 fold-operator: one of
-+   -   *   /   %   ^   &   |   <<   >> 
-+=  -=  *=  /=  %=  ^=  &=  |=  <<=  >>=  =
-==  !=  <   >   <=  >=  &&  ||  ,    .*   ->*
++   -   *   /   %   ^   &   |   <<  >>
++=  -=  *=  /=  %=  ^=  &=  |=  <<= >>= =
+==  !=  <   >   <=  >=  &&  ||  ,   .*  ->*
 """
 
 import glrp

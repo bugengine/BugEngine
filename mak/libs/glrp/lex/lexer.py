@@ -11,14 +11,14 @@ class Lexer:
 
     class State:
         def __init__(self, regex_list):
-            # type: (List[Tuple[Pattern[str], List[Optional[Tuple[Callable[[F, Token], Optional[Token]], str, int]]]]]) -> None
+            # type: (List[Tuple[Pattern[str], List[Optional[Tuple[Callable[[F, Token], Optional[Token]], str, bool, int]]]]]) -> None
             self._regex = regex_list
 
     def __init__(self):
         # type: () -> None
         self._states = {}          # type: Dict[str, Lexer.State]
         self._state_stack = []     # type: List[Lexer.State]
-        self._terminals = {'<eof>': 0, '.': 1, '<start>': 2}
+        self._terminals = {'<eof>': (0, False), '<mark>': (1, False), '<start>': (2, False)}
         self._filename = ''
         self._lexdata = ''
         self._lexlen = 0
@@ -27,11 +27,11 @@ class Lexer:
             for regex, lexindexfunc in state._regex:
                 for token in lexindexfunc:
                     if token is not None:
-                        callback, name, index = token
-                        self._terminals[name] = index
+                        callback, name, warn, index = token
+                        self._terminals[name] = (index, warn)
         for token_name in self.tokens:
             if token_name not in self._terminals:
-                self._terminals[token_name] = len(self._terminals)
+                self._terminals[token_name] = (len(self._terminals), True)
 
     def input(self, filename):
         # type: (str) -> None
@@ -42,13 +42,21 @@ class Lexer:
 
     def get_token_id(self, token_type):
         # type: (str) -> int
-        return self._terminals[token_type]
+        return self._terminals[token_type][0]
 
     def set_token_type(self, token, type):
         # type: (Token, str) -> Token
         token._id = self.get_token_id(type)
         token._name = type
         return token
+
+    def push_state(self, state):
+        # type: (str) -> None
+        self._state_stack.append(self._states[state])
+
+    def pop_state(self):
+        # type: () -> None
+        self._state_stack.pop(-1)
 
     def token(self):
         # type: () -> Generator[Token, None, None]
@@ -109,36 +117,37 @@ class Lexer:
         yield tok
 
 
-def token(pattern, name=None):
-    # type: (str, Optional[str]) -> Callable[[Callable[[F, Token], Optional[Token]]], Callable[[F, Token], Optional[Token]]]
+def token(pattern, name=None, states=('INITIAL', ), warn=True):
+    # type: (str, Optional[str], Tuple[str,...], bool) -> Callable[[Callable[[F, Token], Optional[Token]]], Callable[[F, Token], Optional[Token]]]
     if name is None:
         name = pattern
 
     def attach(method):
         # type: (Callable[[F, Token], Optional[Token]]) -> Callable[[F, Token], Optional[Token]]
         if not hasattr(method, 'patterns'):
-            setattr(method, 'patterns', [(pattern, name)])
+            setattr(method, 'patterns', [(pattern, name, states, warn)])
         else:
-            getattr(method, 'patterns').append((pattern, name))
+            getattr(method, 'patterns').append((pattern, name, states, warn))
         return method
 
     return attach
 
 
-def _form_master_re(rule_list, start_index=2):
-    # type: (List[Tuple[str, str, Pattern[str], Callable[[F, Token], Optional[Token]]]], int) -> List[Tuple[Pattern[str], List[Optional[Tuple[Callable[[F, Token], Optional[Token]], str, int]]]]]
+def _form_master_re(rule_list, start_index):
+    # type: (List[Tuple[str, str, Pattern[str], bool, Callable[[F, Token], Optional[Token]]]], int) -> List[Tuple[Pattern[str], List[Optional[Tuple[Callable[[F, Token], Optional[Token]], str, bool, int]]]]]
     if not rule_list:
         return []
 
     regex = '|'.join('(%s)' % (rule[0]) for rule in rule_list)
     try:
         lexre = re.compile(regex)
-        result = [None
-                  ] * (1 + lexre.groups) # type: List[Optional[Tuple[Callable[[F, Token], Optional[Token]], str, int]]]
+        result = [None] * (
+            1 + lexre.groups
+        )                      # type: List[Optional[Tuple[Callable[[F, Token], Optional[Token]], str, bool, int]]]
         index = 0
         for i, rule in enumerate(rule_list):
             index += 1 + rule[2].groups
-            result[index] = (rule[3], rule[1], start_index + i)
+            result[index] = (rule[4], rule[1], rule[3], start_index + i)
         return [(lexre, result)]
     except Exception as e:
         m = int(len(rule_list) / 2)
@@ -149,13 +158,21 @@ def _form_master_re(rule_list, start_index=2):
 
 def _build_states(owner):
     # type: (Type[Lexer]) -> Dict[str, Lexer.State]
-    rule_list = []     # type: List[Tuple[str, str, Pattern[str], Callable[[F, Token], Optional[Token]]]]
-    index = 0
+    rules = {}     # type: Dict[str, List[Tuple[str, str, Pattern[str], bool, Callable[[F, Token], Optional[Token]]]]]
     for action in dir(owner):
-        for rule, name in getattr(getattr(owner, action), 'patterns', []):
-            rule_list.append((rule, name, re.compile(rule), getattr(owner, action)))
-            index += 1
-    return {'INITIAL': Lexer.State(_form_master_re(rule_list))}
+        for rule, name, states, warn in getattr(getattr(owner, action), 'patterns', []):
+            regex = re.compile(rule)
+            for state in states:
+                try:
+                    rules[state].append((rule, name, regex, warn, getattr(owner, action)))
+                except KeyError:
+                    rules[state] = [(rule, name, regex, warn, getattr(owner, action))]
+    result = {}
+    index = 3
+    for state, rule_list in rules.items():
+        result[state] = Lexer.State(_form_master_re(rule_list, index))
+        index += len(rule_list)
+    return result
 
 
 if TYPE_CHECKING:

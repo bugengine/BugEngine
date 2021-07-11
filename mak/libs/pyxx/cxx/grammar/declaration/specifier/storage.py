@@ -1,7 +1,7 @@
 """
 storage-class-specifier:
     static
-    thread_­local
+    thread_local
     extern
     mutable
 """

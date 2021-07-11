@@ -11,10 +11,10 @@ postfix-expression:
     postfix-expression -> template? id-expression
     postfix-expression ++
     postfix-expression --
-    dynamic_­cast < type-id > ( expression )
-    static_­cast < type-id > ( expression )
-    reinterpret_­cast < type-id > ( expression )
-    const_­cast < type-id > ( expression )
+    dynamic_cast < type-id > ( expression )
+    static_cast < type-id > ( expression )
+    reinterpret_cast < type-id > ( expression )
+    const_cast < type-id > ( expression )
     typeid ( expression )
     typeid ( type-id )
 

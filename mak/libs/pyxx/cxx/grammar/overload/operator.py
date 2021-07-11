@@ -3,7 +3,7 @@ operator-function-id:
     operator operator
 
 operator: one of
-    new      delete   new[]    delete[] co_await ( )        [ ]        ->       ->*
+    new      delete   new[]    delete[] co_await ()       []       ->       ->*
     ~        !        +        -        *        /        %        ^        &
     |        =        +=       -=       *=       /=       %=       ^=       &=
     |=       ==       !=       <        >        <=       >=       <=>      &&
