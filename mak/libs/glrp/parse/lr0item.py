@@ -4,19 +4,20 @@ from be_typing import TYPE_CHECKING, overload
 class LR0Item:
     def __init__(self, rule, index, next, predecessor, successors, follow):
         # type: (Grammar.Rule, int, Optional[LR0Item], Optional[int], List[Grammar.Rule], Set[int]) -> None
-        self._rule = rule
+        self.rule = rule
+        self.len = rule.len
         self._symbol = rule._prod_symbol # type: int
         self._index = index              # type: int
         self._next = next
         self._before = predecessor
         self._after = successors
-        self._symbols = sorted(set(rule._production))
+        self._symbols = sorted(set(rule.production))
         self._follow = sorted(follow)
         self._lookaheads = {}            # type: Dict[int, List[int]]
         self._precedence = None          # type: Optional[Tuple[str, int]]
         self._split = False
 
-        if index == len(rule):
+        if index == rule.len:
             index = -1
         annotations = rule._annotations.get(index, {})
         for annotation, values in annotations.items():
@@ -71,33 +72,15 @@ class LR0Item:
     def to_string(self, name_map):
         # type: (List[str]) -> Text
         return u'%s%s -> %s \u2666 %s' % (
-            name_map[self._rule._prod_symbol],
+            name_map[self.rule._prod_symbol],
             self._annotations(),
-            ' '.join([name_map[p] for p in self._rule._production[:self._index]]),
-            ' '.join([name_map[p] for p in self._rule._production[self._index:]]),
+            ' '.join([name_map[p] for p in self.rule.production[:self._index]]),
+            ' '.join([name_map[p] for p in self.rule.production[self._index:]]),
         )
 
     def is_reduction_item(self):
         # type: () -> bool
-        return self._index == len(self._rule)
-
-    @overload
-    def __getitem__(self, index):
-        # type: (int) -> int
-        return self._rule[index]
-
-    @overload
-    def __getitem__(self, index):
-        # type: (slice) -> Sequence[int]
-        return self._rule[index]
-
-    def __getitem__(self, index):
-        # type: (Union[int, slice]) -> Union[int, Sequence[int]]
-        return self._rule[index]
-
-    def __len__(self):
-        # type: () -> int
-        return len(self._rule)
+        return self._index == self.len
 
 
 if TYPE_CHECKING:

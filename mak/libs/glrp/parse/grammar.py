@@ -14,11 +14,12 @@ class Grammar(object):
             self._id = id
             self._prod_symbol = prod_symbol
             self._prod_name = prod_name
-            self._production = production
+            self.production = production
+            self.len = len(self.production)
             self._action = action
             self._filename = filename
             self._lineno = lineno
-            predecessor = self._production[-1] if len(self._production) else None
+            predecessor = self.production[-1] if len(self.production) else None
             self._annotations = {}     # type: Dict[int, Dict[str, List[str]]]
             for annotation, values, index in annnotation_list:
                 if index == len(production):
@@ -32,29 +33,11 @@ class Grammar(object):
 
         def to_string(self, name_map):
             # type: (List[str]) -> str
-            return '%s -> %s' % (name_map[self._prod_symbol], ' '.join([name_map[p] for p in self._production]))
+            return '%s -> %s' % (name_map[self._prod_symbol], ' '.join([name_map[p] for p in self.production]))
 
         def __iter__(self):
             # type: () -> Iterator[int]
-            return iter(self._production)
-
-        @overload
-        def __getitem__(self, index):
-            # type: (int) -> int
-            return self._production[index]
-
-        @overload
-        def __getitem__(self, index):
-            # type: (slice) -> Sequence[int]
-            return self._production[index]
-
-        def __getitem__(self, index):
-            # type: (Union[int, slice]) -> Union[int, Sequence[int]]
-            return self._production[index]
-
-        def __len__(self):
-            # type: () -> int
-            return len(self._production)
+            return iter(self.production)
 
     class Production:
         def __init__(self, prod_symbol, rule_list):
@@ -66,13 +49,13 @@ class Grammar(object):
             self._empty = False
             self._nonterminal_count = 0
             for rule in rule_list:
-                if len(rule._production) == 0:
+                if rule.len == 0:
                     self._empty = True
 
         def add_rule(self, rule):
             # type: (Grammar.Rule) -> None
             self._rule_list.append(rule)
-            if len(rule._production) == 0:
+            if rule.len == 0:
                 self._empty = True
 
         def __iter__(self):
@@ -236,7 +219,7 @@ def _create_productions(rules, index, log, name_map, terminals, start_id):
             while found_epsilon:
                 found_epsilon = False
                 try:
-                    t = rule[i]
+                    t = rule.production[i]
                 except IndexError:
                     break
                 else:
@@ -264,14 +247,14 @@ def _create_lr0_items(productions):
     for _, prods in productions.items():
         for rule in prods:
             follow = set([-1])
-            i = len(rule) - 1
+            i = rule.len - 1
             while i >= 0:
                 try:
-                    production = productions[rule._production[i]]
+                    production = productions[rule.production[i]]
                 except KeyError:
                     # terminal
                     next = []
-                    follow_buffer = set([rule._production[i]])
+                    follow_buffer = set([rule.production[i]])
                 else:
                     next = list(production)
                     follow_buffer = production._first
@@ -279,7 +262,7 @@ def _create_lr0_items(productions):
                         follow_buffer = set(follow_buffer)
                         follow_buffer.remove(-1)
                         follow_buffer = follow_buffer.union(follow)
-                predecessor = rule._production[i - 1] if i > 0 else None
+                predecessor = rule.production[i - 1] if i > 0 else None
                 rule._item = LR0Item(rule, i, rule._item, predecessor, next, follow)
                 follow = follow_buffer
                 i -= 1

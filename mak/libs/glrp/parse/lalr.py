@@ -216,14 +216,14 @@ def create_parser_table(productions, start_id, name_map, terminal_count, sm_log,
             item_set = goto(states[state], N)
             assert item_set is not None
             for item in item_set:
-                if item._index < len(item._rule):
-                    a = item._rule._production[item._index]
+                if item._index < item.len:
+                    a = item.rule.production[item._index]
                     if a < terminal_count:
                         if a not in terms:
                             terms.append(a)
 
             # This extra bit is to handle the start state
-            if state == start_id and N == productions[start_id][0][0]:
+            if state == start_id and N == productions[start_id][0].production[0]:
                 terms.append(0)
 
             return terms
@@ -238,8 +238,8 @@ def create_parser_table(productions, start_id, name_map, terminal_count, sm_log,
             assert item_set is not None
             j = cidhash[id(item_set)]
             for item in item_set:
-                if item._index < len(item._rule):
-                    a = item._rule[item._index]
+                if item._index < item.len:
+                    a = item.rule.production[item._index]
                     if a in empty:
                         rel.append((j, a))
 
@@ -267,7 +267,7 @@ def create_parser_table(productions, start_id, name_map, terminal_count, sm_log,
                 lookb = []
                 includes = []
                 for p in states[state]:
-                    if p._rule._prod_symbol != N:
+                    if p.rule._prod_symbol != N:
                         continue
 
                     # Okay, we have a name match.  We now follow the production all the way
@@ -275,8 +275,8 @@ def create_parser_table(productions, start_id, name_map, terminal_count, sm_log,
 
                     lr_index = p._index
                     j = state
-                    while lr_index < len(p._rule):
-                        t = p._rule[lr_index]
+                    while lr_index < p.len:
+                        t = p.rule.production[lr_index]
                         lr_index = lr_index + 1
 
                         # Check to see if this symbol and state are a non-terminal transition
@@ -286,10 +286,10 @@ def create_parser_table(productions, start_id, name_map, terminal_count, sm_log,
                             # production derives empty
 
                             li = lr_index
-                            while li < len(p._rule):
-                                if p._rule[li] < terminal_count:
+                            while li < p.len:
+                                if p.rule.production[li] < terminal_count:
                                     break # No forget it
-                                if p._rule[li] not in nullable:
+                                if p.rule.production[li] not in nullable:
                                     break
                                 li = li + 1
                             else:
@@ -301,9 +301,9 @@ def create_parser_table(productions, start_id, name_map, terminal_count, sm_log,
 
                     # When we get here, j is the final state, now we have to locate the production
                     for r in states[j]:
-                        if r._rule._prod_symbol != p._rule._prod_symbol:
+                        if r.rule._prod_symbol != p.rule._prod_symbol:
                             continue
-                        if len(r._rule) != len(p._rule):
+                        if r.len != p.len:
                             continue
                         # i = 0
                         # This look is comparing a production ". A B C" with "A B C ."
@@ -313,7 +313,7 @@ def create_parser_table(productions, start_id, name_map, terminal_count, sm_log,
                         #    i = i + 1
                         #else:
                         #    lookb.append((j, r))
-                        if p._index == 0 and r._rule._production[:r._index] == p._rule._production[:r._index]:
+                        if p._index == 0 and r.rule.production[:r._index] == p.rule.production[:r._index]:
                             lookb.append((j, r))
                 for ii in includes:
                     if ii not in includedict:
@@ -353,8 +353,8 @@ def create_parser_table(productions, start_id, name_map, terminal_count, sm_log,
         trans = []
         for stateno, state in enumerate(states):
             for item in state:
-                if item._index < len(item._rule):
-                    t = (stateno, item._rule[item._index])
+                if item._index < item.len:
+                    t = (stateno, item.rule.production[item._index])
                     if t[1] >= terminal_count:
                         if t not in trans:
                             trans.append(t)
@@ -417,23 +417,23 @@ def create_parser_table(productions, start_id, name_map, terminal_count, sm_log,
         sm_log.info('state %d:', st)
         sm_log.info('')
         for item in item_group:
-            sm_log.info('    (%d) %s', item._rule._prod_symbol, item.to_string(name_map))
+            sm_log.info('    (%d) %s', item.rule._prod_symbol, item.to_string(name_map))
         sm_log.info('')
 
         for item in item_group:
-            if len(item._rule) == item._index:
-                if item._rule._prod_symbol == start_id:
+            if item.len == item._index:
+                if item.rule._prod_symbol == start_id:
                     # Start symbol. Accept!
                     st_action[0] = st_action.get(0, []) + [(0, item)]
-                    item._rule._reduced += 1
+                    item.rule._reduced += 1
                 else:
                     # We are at the end of a production.  Reduce!
                     for a in item._lookaheads[st]:
-                        st_action[a] = st_action.get(a, []) + [(-item._rule._id, item)]
-                        item._rule._reduced += 1
+                        st_action[a] = st_action.get(a, []) + [(-item.rule._id, item)]
+                        item.rule._reduced += 1
             else:
                 i = item._index
-                a = item._rule[i]  # Get symbol right after the "."
+                a = item.rule.production[i] # Get symbol right after the "."
                 if a < terminal_count:
                     g = goto(item_group, a)
                     j = cidhash[id(g)]

@@ -21,9 +21,11 @@ class LR0Path(object):
             self._sequence = sequence
         else:
             if use_marker:
-                self._sequence = list([LR0Path.PathItem(1)] + [LR0Path.PathItem(i) for i in item[item._index:]])
+                self._sequence = list(
+                    [LR0Path.PathItem(1)] + [LR0Path.PathItem(i) for i in item.rule.production[item._index:]]
+                )
             else:
-                self._sequence = list([LR0Path.PathItem(i) for i in item[item._index:]])
+                self._sequence = list([LR0Path.PathItem(i) for i in item.rule.production[item._index:]])
         self._hash = (node._item, )    # type: Tuple[Union[int, LR0Item], ...]
         for s in self._sequence:
             self._hash += s._hash
@@ -39,8 +41,10 @@ class LR0Path(object):
     def derive_from(self, node, lookahead):
         # type: (LR0DominanceNode, Optional[int]) -> LR0Path
         if lookahead is None:
-            sequence = [self]  # type: (List[Union[LR0Path, LR0Path.PathItem]])
-            result = LR0Path(node, sequence + [LR0Path.PathItem(i) for i in node._item[node._item._index + 1:]])
+            sequence = [self]                                                                                      # type: (List[Union[LR0Path, LR0Path.PathItem]])
+            result = LR0Path(
+                node, sequence + [LR0Path.PathItem(i) for i in node._item.rule.production[node._item._index + 1:]]
+            )
         else:
             sequence = [LR0Path.PathItem(lookahead)]
             result = LR0Path(node, sequence + self._sequence)
@@ -49,8 +53,8 @@ class LR0Path(object):
     def expand_left(self):
         # type: () -> LR0Path
         sequence = [
-            LR0Path.PathItem(i) for i in self._node._item[:self._node._item._index]
-        ]                                                                           # type: (List[Union[LR0Path, LR0Path.PathItem]])
+            LR0Path.PathItem(i) for i in self._node._item.rule.production[:self._node._item._index]
+        ]                                                                                           # type: (List[Union[LR0Path, LR0Path.PathItem]])
 
         return LR0Path(self._node, sequence + self._sequence)
 
