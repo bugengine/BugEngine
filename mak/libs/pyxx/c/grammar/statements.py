@@ -115,8 +115,8 @@ def expression_statement(self, p):
 
 
 @c89
-@glrp.rule('selection-statement : "if" "(" expression ")" statement')
-@glrp.rule('selection-statement : "if" "(" expression ")" statement "else" statement')
+@glrp.rule('selection-statement[prec:left,0] : "if" "(" expression ")" statement')
+@glrp.rule('selection-statement : "if" "(" expression ")" statement [prec:left,0]"else" statement')
 @glrp.rule('selection-statement : "switch" "(" expression ")" statement')
 def selection_statement(self, p):
     # type: (CParser, glrp.Production) -> None

@@ -90,12 +90,14 @@ class Grammar(object):
     def __init__(self, name, terminals, rules, start_symbol, parser, output_dir):
         # type: (str, Dict[str, Tuple[int, bool]], List[Tuple[str, Parser.Action, List[str], List[Tuple[str, List[str], int]], str, int]], str, Parser, str) -> None
         debug_filename = os.path.join(output_dir, name + '.txt')
+        conflict_filename = os.path.join(output_dir, name + '-Conflicts.txt')
         index = {}
         for terminal, (i, _) in terminals.items():
             index[terminal] = i
         name_map = [''] * (len(terminals))
         log = Logger(io.open(debug_filename, 'w', encoding='utf-8'))
         stderr = Logger(io.open(sys.stderr.fileno(), 'w', encoding='utf-8', closefd=False))
+        conflict_log = Logger(io.open(conflict_filename, 'w', encoding='utf-8'))
         dot_file = Logger(io.open(os.path.splitext(debug_filename)[0] + '.dot', 'w', encoding='utf-8'))
         for name, (i, _) in terminals.items():
             name_map[i] = name
@@ -122,7 +124,7 @@ class Grammar(object):
                 log.info('  %s', rule.to_string(name_map))
 
         _create_lr0_items(productions)
-        lalr.create_parser_table(productions, start_id, name_map, len(terminals), log, stderr, dot_file)
+        lalr.create_parser_table(productions, start_id, name_map, len(terminals), log, conflict_log, stderr, dot_file)
 
         #with open('cxx.y', 'w') as yaccfile:
         #    for index, terminal in enumerate(name_map[2:1 + len(terminals)]):

@@ -12,10 +12,12 @@ from ...parser import cxx98
 from be_typing import TYPE_CHECKING
 
 
-@glrp.rule('selection-statement : "if" "constexpr"? "(" init-statement? condition ")" statement')
-@glrp.rule('selection-statement : "if" "constexpr"? "(" init-statement? condition ")" statement "else" statement')
-@glrp.rule('selection-statement : "if" "!"? "consteval" compound-statement')
-@glrp.rule('selection-statement : "if" "!"? "consteval" compound-statement "else" statement')
+@glrp.rule('selection-statement[prec:left,0] : "if" "constexpr"? "(" init-statement? condition ")" statement')
+@glrp.rule(
+    'selection-statement : "if" "constexpr"? "(" init-statement? condition ")" statement [prec:left,0]"else" statement'
+)
+@glrp.rule('selection-statement[prec:left,0] : "if" "!"? "consteval" compound-statement')
+@glrp.rule('selection-statement : "if" "!"? "consteval" compound-statement [prec:left,0]"else" statement')
 @glrp.rule('selection-statement : "switch" "(" init-statement? condition ")" statement')
 @cxx98
 def selection_statement(self, p):

@@ -96,8 +96,8 @@ def _log_counterexamples(conflict_list, out, first_set, name_map):
     return result
 
 
-def create_parser_table(productions, start_id, name_map, terminal_count, log, error_log, dot_file):
-    # type: (Dict[int, Grammar.Production], int, List[str], int, Logger, Logger, Logger) -> None
+def create_parser_table(productions, start_id, name_map, terminal_count, sm_log, conflict_log, error_log, dot_file):
+    # type: (Dict[int, Grammar.Production], int, List[str], int, Logger, Logger, Logger, Logger) -> None
     cidhash = {}       # type: Dict[int, int]
     goto_cache = {}    # type: Dict[Tuple[int, int], Optional[LR0ItemSet]]
     goto_cache_2 = {}  # type: Dict[int, Any]
@@ -414,11 +414,11 @@ def create_parser_table(productions, start_id, name_map, terminal_count, log, er
         # Loop over each production
         st_action = {}     # type: Dict[int, List[Tuple[int, LR0Item]]]
         st_goto = {}
-        log.info('state %d:', st)
-        log.info('')
+        sm_log.info('state %d:', st)
+        sm_log.info('')
         for item in item_group:
-            log.info('    (%d) %s', item._rule._prod_symbol, item.to_string(name_map))
-        log.info('')
+            sm_log.info('    (%d) %s', item._rule._prod_symbol, item.to_string(name_map))
+        sm_log.info('')
 
         for item in item_group:
             if len(item._rule) == item._index:
@@ -453,48 +453,50 @@ def create_parser_table(productions, start_id, name_map, terminal_count, log, er
 
             if len(action_dest) > 1:
                 # looks like a potential conflict, look at precedence
+                conflict_log.info('State %d:', st)
                 actions = sorted(actions, key=lambda x: x[1]._precedence[1] if x[1]._precedence is not None else -1)
-                precedence = actions[-1][1]._precedence[1] if actions[-1][1]._precedence is not None else -1
-                associativity = actions[-1][1]._precedence[0] if actions[-1][1]._precedence is not None else 'left'
-                for _, item in actions:
-                    if item._precedence is None:
-                        log.info('  ** %s has no precedence annotation', item.to_string(name_map))
-                        num_missing_annotations += 1
+                if actions[-1][1]._precedence is not None:
+                    precedence = actions[-1][1]._precedence[1]
+                    associativity = actions[-1][1]._precedence[0]
+                    for _, item in actions:
+                        if item._precedence is None:
+                            conflict_log.info('  ** %s has no precedence annotation', item.to_string(name_map))
+                            num_missing_annotations += 1
+                else:
+                    precedence = -1
+                    associativity = 'nonassoc'
                 assoc_conflict = False
                 for j, item in actions:
-                    if item._precedence is not None:
-                        if item._precedence[1] < precedence:
-                            log.info('  -- %s is not used', item.to_string(name_map))
-                        elif item._precedence[0] != associativity:
-                            log.error('  *** associativity conflicts!')
-                            log.error('  *** %s', item.to_string(name_map))
-                            assoc_conflict = True
-                        elif associativity == 'left' and j >= 0:
-                            try:
-                                accepted_actions[j].append(item)
-                            except KeyError:
-                                accepted_actions[j] = [item]
-                        elif associativity == 'right' and j < 0:
-                            try:
-                                accepted_actions[j].append(item)
-                            except KeyError:
-                                accepted_actions[j] = [item]
-                        elif associativity == 'nonassoc':
-                            try:
-                                accepted_actions[j].append(item)
-                            except KeyError:
-                                accepted_actions[j] = [item]
-                        else:
-                            log.info('  -- %s is not used', item.to_string(name_map))
-                    else:
+                    item_precedence = item._precedence if item._precedence is not None else ('nonassoc', -1)
+                    if item_precedence[1] < precedence:
+                        conflict_log.info('  [discarded] %s', item.to_string(name_map))
+                    elif item_precedence[0] != associativity:
+                        conflict_log.info('  [condlict]  %s', item.to_string(name_map))
+                        assoc_conflict = True
+                    elif associativity == 'left' and j >= 0:
                         try:
                             accepted_actions[j].append(item)
                         except KeyError:
                             accepted_actions[j] = [item]
+                        conflict_log.info('  [accepted]  %s', item.to_string(name_map))
+                    elif associativity == 'right' and j < 0:
+                        try:
+                            accepted_actions[j].append(item)
+                        except KeyError:
+                            accepted_actions[j] = [item]
+                        conflict_log.info('  [accepted]  %s', item.to_string(name_map))
+                    elif associativity == 'nonassoc':
+                        try:
+                            accepted_actions[j].append(item)
+                        except KeyError:
+                            accepted_actions[j] = [item]
+                        conflict_log.info('  [accepted]  %s', item.to_string(name_map))
+                    else:
+                        conflict_log.info('  [discarded] %s', item.to_string(name_map))
 
                 if assoc_conflict:
-                    log.error('  *** %s', actions[-1][1].to_string(name_map))
-                    log.error('  *** using %s', actions[-1][1].to_string(name_map))
+                    conflict_log.error('detected associativity conflict')
+                conflict_log.info('')
             else:
                 accepted_actions = action_dest
 
@@ -512,7 +514,8 @@ def create_parser_table(productions, start_id, name_map, terminal_count, log, er
                             num_sr += 1
                         else:
                             conflicts.append((node, 'Reduce using rule %s' % item.to_string(name_map), a))
-                _log_counterexamples(conflicts, log, first_set, name_map)
+                _log_counterexamples(conflicts, conflict_log, first_set, name_map)
+                conflict_log.info('')
 
         nkeys = set([])
         for item in item_group:
@@ -523,7 +526,7 @@ def create_parser_table(productions, start_id, name_map, terminal_count, log, er
                     if j >= 0:
                         if s not in nkeys:
                             nkeys.add(s)
-                            log.info('    %-30s shift and go to state %d', name_map[s], j)
+                            sm_log.info('    %-30s shift and go to state %d', name_map[s], j)
         """
         # Print the actions associated with each terminal
         _actprint = {}
@@ -587,30 +590,24 @@ def create_parser_table(productions, start_id, name_map, terminal_count, log, er
 
     # Report shift/reduce and reduce/reduce conflicts
     if num_missing_annotations == 1:
-        log.warning('1 missing precedence annotation')
         error_log.warning('1 missing precedence annotation')
     elif num_missing_annotations > 1:
-        log.warning('%d missing precedence annotations', num_missing_annotations)
         error_log.warning('%d missing precedence annotations', num_missing_annotations)
 
     if num_sr == 1:
-        log.warning('1 shift/reduce conflict')
         error_log.warning('1 shift/reduce conflict')
     elif num_sr > 1:
-        log.warning('%d shift/reduce conflicts', num_sr)
         error_log.warning('%d shift/reduce conflicts', num_sr)
 
     if num_rr == 1:
-        log.warning('1 reduce/reduce conflict')
         error_log.warning('1 reduce/reduce conflict')
     elif num_rr > 1:
-        log.warning('%d reduce/reduce conflicts', num_rr)
         error_log.warning('%d reduce/reduce conflicts', num_rr)
 
     for _, production in productions.items():
         for rule in production:
             if rule._reduced == 0:
-                log.warning('Rule (%s) is never reduced', rule.to_string(name_map))
+                error_log.warning('Rule (%s) is never reduced', rule.to_string(name_map))
 
 
 if TYPE_CHECKING:
