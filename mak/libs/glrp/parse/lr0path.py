@@ -6,15 +6,21 @@ class LR0Path(object):
         # type: (LR0DominanceNode, bool) -> None
         self._node = node
         self._use_marker = use_marker
-        self._hash = (node._item, )    # type: Tuple[LR0Item,...]
+        self._hash_cache = (self._node._item, ) # type: Optional[Tuple[LR0Item,...]]
+
+    def _hash(self):
+        # type: () -> Tuple[LR0Item,...]
+        return (self._node._item, )
 
     def __hash__(self):
         # type: () -> int
-        return hash(self._hash)
+        if self._hash_cache is None:
+            self._hash_cache = self._hash()
+        return hash(self._hash_cache)
 
     def __eq__(self, other):
         # type: (Any) -> bool
-        return isinstance(other, LR0Path) and self._hash == other._hash
+        return isinstance(other, LR0Path) and self._hash() == other._hash()
 
     def extend(self, node, lookahead):
         # type: (LR0DominanceNode, int) -> LR0Path
@@ -61,7 +67,13 @@ class _LR0BaseConstruction(LR0Path):
         # type: (LR0DominanceNode, LR0Path) -> None
         self._node = node
         self._follow = follow
-        self._hash = (node._item, ) + follow._hash # type: Tuple[LR0Item,...]
+        self._hash_cache = None
+
+    def _hash(self):
+        # type: () -> Tuple[LR0Item,...]
+        if self._hash_cache is None:
+            self._hash_cache = (self._node._item, ) + self._follow._hash()
+        return self._hash_cache
 
 
 class _LR0Extension(_LR0BaseConstruction):
@@ -87,8 +99,8 @@ class _LR0Expansion(_LR0BaseConstruction):
         # type: (LR0DominanceNode, LR0Path, LR0Path) -> None
         self._node = node
         self._follow = follow
-        self._hash = (node._item, ) + follow._hash # type: Tuple[LR0Item,...]
         self._next = expanded_path
+        self._hash_cache = None
 
     def to_string(self, name_map):
         # type: (List[str]) -> Tuple[List[Text], int]
