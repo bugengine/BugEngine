@@ -27,14 +27,14 @@ class LR0DominanceNode(object):
         # type: (Dict[int, Set[int]]) -> Optional[LR0Path]
         # expand the first item of the path to build empty productions
         if self._item._index == self._item.len:
-            return LR0Path(self, [], use_marker=False)
+            return LR0Path(self, use_marker=False)
         result = None  # type: Optional[LR0Path]
         for child in self._direct_children:
             try:
                 following_symbol = child._item.rule.production[0]
             except IndexError:
-                result = LR0Path(child, [], use_marker=False)
-                result = result.derive_from(self, None)
+                result = LR0Path(child, use_marker=False)
+                result = result.derive_from(self)
                 return result
             else:
                 assert child._successor is not None
@@ -43,8 +43,8 @@ class LR0DominanceNode(object):
                     if p is not None:
                         result = child.expand_empty(first_set)
                         assert result is not None
-                        result = result.expand(1, p)
-                        result = result.derive_from(self, None)
+                        result = result.expand_next(p)
+                        result = result.derive_from(self)
                         return result
         return None
 
@@ -67,17 +67,17 @@ class LR0DominanceNode(object):
 
             if following_symbol == lookahead:
                 result = None
-                paths[-1].append(LR0Path(node, [], use_marker=False))
+                paths[-1].append(LR0Path(node, use_marker=False))
                 while paths:
                     child_paths = paths.pop(-1)
                     if result is not None:
-                        child_paths[-1] = child_paths[-1].expand(1, result)
-                    merge_children = lambda x, y: x.derive_from(y._node, None)
+                        child_paths[-1] = child_paths[-1].expand_next(result)
+                    merge_children = lambda x, y: x.derive_from(y._node)
                     result = functools.reduce(merge_children, child_paths[::-1])
                 return result
             elif lookahead in first_set.get(following_symbol, []):
                 for child in sorted(node._direct_children, key=lambda n: n._item.len):
-                    queue.append((child, paths[:-1] + [paths[-1] + [LR0Path(node, [], use_marker=False)]]))
+                    queue.append((child, paths[:-1] + [paths[-1] + [LR0Path(node, use_marker=False)]]))
             elif -1 in first_set.get(following_symbol, []) and node._successor is not None:
                 empty_path = node.expand_empty(first_set)
                 if empty_path is not None:
@@ -99,16 +99,16 @@ class LR0DominanceNode(object):
                     successor_path = self._successor.expand_empty(first_set)
                     assert successor_path is not None
                     for p, la in self._successor.filter_node_by_lookahead(successor_path, lookahead, first_set):
-                        result.append((path.expand(1, p), la))
+                        result.append((path.expand_next(p), la))
                 if lookahead in first_set.get(following_symbol, set([following_symbol])):
                     successor_path = self._successor.expand_lookahead(lookahead, first_set)
                     assert successor_path is not None
-                    result.append((path.expand(1, successor_path), None))
+                    result.append((path.expand_next(successor_path), None))
         else:
             result.append((path, lookahead))
         return result
 
-    def backtrack_up(self, path, state, lookahead, first_set, seen):
+    def backtrack_up_1(self, path, state, lookahead, first_set, seen):
         # type: (LR0Path, Optional[LR0ItemSet], Optional[int], Dict[int, Set[int]], Set[Tuple[LR0DominanceNode, Optional[int]]]) -> List[Tuple[LR0Path, Optional[int]]]
         queue = [(path, lookahead)]
         result = []    # type: List[Tuple[LR0Path, Optional[int]]]
@@ -126,7 +126,7 @@ class LR0DominanceNode(object):
                         lookahead, parent._item_set, parent._item.rule.production[:parent._item._index]
                     ) in shortest_path_seen:
                         continue
-                for p, la in parent.filter_node_by_lookahead(path.derive_from(parent, None), lookahead, first_set):
+                for p, la in parent.filter_node_by_lookahead(path.derive_from(parent), lookahead, first_set):
                     if parent._item._index > 0 and la is None:
                         shortest_path_seen.add(
                             (lookahead, parent._item_set, parent._item.rule.production[:parent._item._index])
@@ -152,7 +152,152 @@ class LR0DominanceNode(object):
                                 predecessor._item.rule.production[:predecessor._item._index]
                             )
                         )
-                    result.append((path.derive_from(predecessor, node._predecessor_lookahead), lookahead))
+                    assert node._predecessor_lookahead is not None
+                    result.append((path.extend(predecessor, node._predecessor_lookahead), lookahead))
+        return result
+
+    def backtrack_up_2(self, path, state, lookahead, first_set, seen):
+        # type: (LR0Path, Optional[LR0ItemSet], Optional[int], Dict[int, Set[int]], Set[Tuple[LR0DominanceNode, Optional[int]]]) -> List[Tuple[LR0Path, Optional[int]]]
+        queue = [(path, lookahead)]
+        result = []    # type: List[Tuple[LR0Path, Optional[int]]]
+
+        shortest_path_seen = set()
+        while queue:
+            path, lookahead = queue.pop(0)
+            node = path._node
+            for parent in sorted(node._direct_parents, key=lambda n: n._item.len - n._item._index):
+                if (parent, lookahead) in seen:
+                    continue
+                seen.add((parent, lookahead))
+                if parent._item._index > 0:
+                    if (
+                        lookahead, parent._item_set, parent._item.rule.production[:parent._item._index]
+                    ) in shortest_path_seen:
+                        continue
+                for p, la in parent.filter_node_by_lookahead(path.derive_from(parent), lookahead, first_set):
+                    if parent._item._index > 0 and la is None:
+                        shortest_path_seen.add(
+                            (lookahead, parent._item_set, parent._item.rule.production[:parent._item._index])
+                        )
+                    if la is None and state is None:
+                        result.append((p, la))
+                    else:
+                        queue.append((p, la))
+            for predecessor in node._predecessors:
+                if (predecessor, lookahead) in seen:
+                    continue
+                seen.add((predecessor, lookahead))
+                if state is None or predecessor._item_set == state:
+                    if predecessor._item._index > 0:
+                        if (
+                            lookahead, predecessor._item_set,
+                            predecessor._item.rule.production[:predecessor._item._index]
+                        ) in shortest_path_seen:
+                            continue
+                        shortest_path_seen.add(
+                            (
+                                lookahead, predecessor._item_set,
+                                predecessor._item.rule.production[:predecessor._item._index]
+                            )
+                        )
+                    assert node._predecessor_lookahead is not None
+                    result.append((path.extend(predecessor, node._predecessor_lookahead), lookahead))
+        return result
+
+    def backtrack_up_3(self, path, state, lookahead, first_set, seen):
+        # type: (LR0Path, Optional[LR0ItemSet], Optional[int], Dict[int, Set[int]], Set[Tuple[LR0DominanceNode, Optional[int]]]) -> List[Tuple[LR0Path, Optional[int]]]
+        queue = [(path, lookahead)]
+        result = []    # type: List[Tuple[LR0Path, Optional[int]]]
+
+        shortest_path_seen = set()
+        while queue:
+            path, lookahead = queue.pop(0)
+            node = path._node
+            for parent in sorted(node._direct_parents, key=lambda n: n._item.len - n._item._index):
+                if (parent, lookahead) in seen:
+                    continue
+                seen.add((parent, lookahead))
+                if parent._item._index > 0:
+                    if (
+                        lookahead, parent._item_set, parent._item.rule.production[:parent._item._index]
+                    ) in shortest_path_seen:
+                        continue
+                for p, la in parent.filter_node_by_lookahead(path.derive_from(parent), lookahead, first_set):
+                    if parent._item._index > 0 and la is None:
+                        shortest_path_seen.add(
+                            (lookahead, parent._item_set, parent._item.rule.production[:parent._item._index])
+                        )
+                    if la is None and state is None:
+                        result.append((p, la))
+                    else:
+                        queue.append((p, la))
+            for predecessor in node._predecessors:
+                if (predecessor, lookahead) in seen:
+                    continue
+                seen.add((predecessor, lookahead))
+                if state is None or predecessor._item_set == state:
+                    if predecessor._item._index > 0:
+                        if (
+                            lookahead, predecessor._item_set,
+                            predecessor._item.rule.production[:predecessor._item._index]
+                        ) in shortest_path_seen:
+                            continue
+                        shortest_path_seen.add(
+                            (
+                                lookahead, predecessor._item_set,
+                                predecessor._item.rule.production[:predecessor._item._index]
+                            )
+                        )
+                    assert node._predecessor_lookahead is not None
+                    result.append((path.extend(predecessor, node._predecessor_lookahead), lookahead))
+        return result
+
+    def backtrack_up_4(self, path, state, lookahead, first_set, seen):
+        # type: (LR0Path, Optional[LR0ItemSet], Optional[int], Dict[int, Set[int]], Set[Tuple[LR0DominanceNode, Optional[int]]]) -> List[Tuple[LR0Path, Optional[int]]]
+        queue = [(path, lookahead)]
+        result = []    # type: List[Tuple[LR0Path, Optional[int]]]
+
+        shortest_path_seen = set()
+        while queue:
+            path, lookahead = queue.pop(0)
+            node = path._node
+            for parent in sorted(node._direct_parents, key=lambda n: n._item.len - n._item._index):
+                if (parent, lookahead) in seen:
+                    continue
+                seen.add((parent, lookahead))
+                if parent._item._index > 0:
+                    if (
+                        lookahead, parent._item_set, parent._item.rule.production[:parent._item._index]
+                    ) in shortest_path_seen:
+                        continue
+                for p, la in parent.filter_node_by_lookahead(path.derive_from(parent), lookahead, first_set):
+                    if parent._item._index > 0 and la is None:
+                        shortest_path_seen.add(
+                            (lookahead, parent._item_set, parent._item.rule.production[:parent._item._index])
+                        )
+                    if la is None and state is None:
+                        result.append((p, la))
+                    else:
+                        queue.append((p, la))
+            for predecessor in node._predecessors:
+                if (predecessor, lookahead) in seen:
+                    continue
+                seen.add((predecessor, lookahead))
+                if state is None or predecessor._item_set == state:
+                    if predecessor._item._index > 0:
+                        if (
+                            lookahead, predecessor._item_set,
+                            predecessor._item.rule.production[:predecessor._item._index]
+                        ) in shortest_path_seen:
+                            continue
+                        shortest_path_seen.add(
+                            (
+                                lookahead, predecessor._item_set,
+                                predecessor._item.rule.production[:predecessor._item._index]
+                            )
+                        )
+                    assert node._predecessor_lookahead is not None
+                    result.append((path.extend(predecessor, node._predecessor_lookahead), lookahead))
         return result
 
 

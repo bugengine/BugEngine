@@ -2,33 +2,11 @@ from be_typing import TYPE_CHECKING
 
 
 class LR0Path(object):
-    class PathItem(object):
-        def __init__(self, lookahead):
-            # type: (int) -> None
-            self._hash = (lookahead, ) # type: Tuple[Union[int, LR0Item], ...]
-            self._lookahead = lookahead
-
-        def to_string(self, name_map):
-            # type: (List[str]) -> Tuple[List[Text], int]
-            la = u'\u2666' if self._lookahead == 1 else name_map[self._lookahead]
-            return [la], len(la)
-
-    def __init__(self, node, sequence, use_marker=True):
-        # type: (LR0DominanceNode, List[Union[LR0Path, LR0Path.PathItem]], bool) -> None
+    def __init__(self, node, use_marker=True):
+        # type: (LR0DominanceNode, bool) -> None
         self._node = node
-        item = node._item
-        if sequence:
-            self._sequence = sequence
-        else:
-            if use_marker:
-                self._sequence = list(
-                    [LR0Path.PathItem(1)] + [LR0Path.PathItem(i) for i in item.rule.production[item._index:]]
-                )
-            else:
-                self._sequence = list([LR0Path.PathItem(i) for i in item.rule.production[item._index:]])
-        self._hash = (node._item, )    # type: Tuple[Union[int, LR0Item], ...]
-        for s in self._sequence:
-            self._hash += s._hash
+        self._use_marker = use_marker
+        self._hash = (node._item, )    # type: Tuple[LR0Item,...]
 
     def __hash__(self):
         # type: () -> int
@@ -38,32 +16,29 @@ class LR0Path(object):
         # type: (Any) -> bool
         return isinstance(other, LR0Path) and self._hash == other._hash
 
-    def derive_from(self, node, lookahead):
-        # type: (LR0DominanceNode, Optional[int]) -> LR0Path
-        if lookahead is None:
-            sequence = [self]                                                                                      # type: (List[Union[LR0Path, LR0Path.PathItem]])
-            result = LR0Path(
-                node, sequence + [LR0Path.PathItem(i) for i in node._item.rule.production[node._item._index + 1:]]
-            )
-        else:
-            sequence = [LR0Path.PathItem(lookahead)]
-            result = LR0Path(node, sequence + self._sequence)
-        return result
+    def extend(self, node, lookahead):
+        # type: (LR0DominanceNode, int) -> LR0Path
+        return _LR0Extension(node, self)
+
+    def derive_from(self, node):
+        # type: (LR0DominanceNode) -> LR0Path
+        return _LR0Derivation(node, self)
 
     def expand_left(self):
         # type: () -> LR0Path
-        sequence = [
-            LR0Path.PathItem(i) for i in self._node._item.rule.production[:self._node._item._index]
-        ]                                                                                           # type: (List[Union[LR0Path, LR0Path.PathItem]])
+        return _LR0LeftExpansion(self._node, self)
 
-        return LR0Path(self._node, sequence + self._sequence)
-
-    def expand(self, index, path):
-        # type: (int, LR0Path) -> LR0Path
-        return LR0Path(self._node, self._sequence[:index] + path._sequence)
+    def expand_next(self, path):
+        # type: (LR0Path) -> LR0Path
+        return _LR0Expansion(self._node, self, path)
 
     def to_string(self, name_map):
         # type: (List[str]) -> Tuple[List[Text], int]
+        return ([''], 0)
+
+    def _to_string(self, sequence, name_map):
+        # type: (List[int], List[str]) -> Tuple[List[Text], int]
+        return ([''], 0)
         expanded_symbol = name_map[self._node._item._symbol]
         if len(self._sequence) == 0:
             return [u'', u'\u2570%s\u256f' % expanded_symbol], len(expanded_symbol) + 2
@@ -79,6 +54,45 @@ class LR0Path(object):
         extra_padding = u'\u2500' * (length - 2 - len(expanded_symbol))
         buffer.append(u'\u2570%s%s\u256f' % (expanded_symbol, extra_padding))
         return buffer, max(length, len(buffer[-1]))
+
+
+class _LR0BaseConstruction(LR0Path):
+    def __init__(self, node, follow):
+        # type: (LR0DominanceNode, LR0Path) -> None
+        self._node = node
+        self._follow = follow
+        self._hash = (node._item, ) + follow._hash # type: Tuple[LR0Item,...]
+
+
+class _LR0Extension(_LR0BaseConstruction):
+    def to_string(self, name_map):
+        # type: (List[str]) -> Tuple[List[Text], int]
+        return [''], 0
+
+
+class _LR0Derivation(_LR0BaseConstruction):
+    def to_string(self, name_map):
+        # type: (List[str]) -> Tuple[List[Text], int]
+        return [''], 0
+
+
+class _LR0LeftExpansion(_LR0BaseConstruction):
+    def to_string(self, name_map):
+        # type: (List[str]) -> Tuple[List[Text], int]
+        return [''], 0
+
+
+class _LR0Expansion(_LR0BaseConstruction):
+    def __init__(self, node, follow, expanded_path):
+        # type: (LR0DominanceNode, LR0Path, LR0Path) -> None
+        self._node = node
+        self._follow = follow
+        self._hash = (node._item, ) + follow._hash # type: Tuple[LR0Item,...]
+        self._next = expanded_path
+
+    def to_string(self, name_map):
+        # type: (List[str]) -> Tuple[List[Text], int]
+        return [''], 0
 
 
 if TYPE_CHECKING:
