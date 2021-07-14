@@ -206,6 +206,25 @@ def _create_productions(rules, index, log, name_map, terminals, start_id):
                     '%s:%d: Rule %r defined, but not used', prod[0]._filename, prod[0]._lineno, prod[0]._prod_name
                 )
 
+    changed = True
+    while changed:
+        changed = False
+        for _, prods in productions.items():
+            if not prods._empty:
+                for rule in prods:
+                    for x in rule:
+                        try:
+                            p = productions[x]
+                        except KeyError:
+                            break
+                        else:
+                            if not p._empty:
+                                break
+                    else:
+                        prods._empty = True
+                        changed = True
+                        break
+
     queue = list(productions.keys())
     while queue:
         prod_symbol = queue.pop(0)

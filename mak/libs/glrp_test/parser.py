@@ -158,3 +158,80 @@ class Parser4(glrp.Parser):
         # type: ()->None
         self.lexer = self.__class__.Lexer()
         glrp.Parser.__init__(self, self.lexer, 's', '.')
+
+
+class Parser5(glrp.Parser):
+    class Lexer(glrp.Lexer):
+        @glrp.token(r'id', 'identifier')
+        @glrp.token('::')
+        @glrp.token(',')
+        @glrp.token(';')
+        @glrp.token('-')
+        @glrp.token(r'\$', '$')
+        @glrp.token('£')
+        @glrp.token('template')
+        def tok(self, token):
+            # type: (glrp.Token) -> glrp.Token
+            return token
+
+    @glrp.rule("prog : prog comma_opt id_expression")
+    @glrp.rule("prog : id_expression")
+    def prog(self, p):
+        pass
+
+    @glrp.rule("id_expression : qualified_id")
+    @glrp.rule("id_expression : unqualified_id")
+    def id_expression(self, p):
+        pass
+
+    @glrp.rule("unqualified_id : template_opt identifier")
+    def unqualified_id(self, p):
+        pass
+
+    @glrp.rule("template_opt : template")
+    @glrp.rule("template_opt : ")
+    def template_opt(self, p):
+        pass
+
+    @glrp.rule("qualified_id : nested_name_specifier unqualified_id")
+    @glrp.rule("qualified_id : sign '::' nested_name_specifier unqualified_id")
+    def qualified_id(self, p):
+        pass
+
+    @glrp.rule("sign : dollar_opt pound_opt")
+    def sign(self, p):
+        pass
+
+    @glrp.rule("dollar_opt :")
+    @glrp.rule("dollar_opt : '$'")
+    def dollar_opt(self, p):
+        pass
+
+    @glrp.rule("pound_opt :")
+    @glrp.rule("pound_opt : '£'")
+    def pound_opt(self, p):
+        pass
+
+    @glrp.rule("comma_opt : ','")
+    @glrp.rule("comma_opt : semi_opt dash_opt")
+    def comma_opt(self, p):
+        pass
+
+    @glrp.rule("semi_opt : ';'")
+    @glrp.rule("semi_opt :")
+    def semi_opt(self, p):
+        pass
+
+    @glrp.rule("dash_opt : '-'")
+    @glrp.rule("dash_opt :")
+    def dash_opt(self, p):
+        pass
+
+    @glrp.rule("nested_name_specifier : template_opt identifier '::'")
+    def nested_name_specifier(self, p):
+        pass
+
+    def __init__(self):
+        # type: ()->None
+        self.lexer = self.__class__.Lexer()
+        glrp.Parser.__init__(self, self.lexer, 'prog', '.')

@@ -40,18 +40,22 @@ class LR0Path(object):
 
     def to_string(self, name_map):
         # type: (List[str]) -> Tuple[List[Text], int]
-        return self._to_string([], name_map)
+        return self._to_string([], name_map, True, True)
 
-    def _to_string(self, sequence, name_map):
-        # type: (List[int], List[str]) -> Tuple[List[Text], int]
+    def _to_string(self, sequence, name_map, add_derivation, complete_right):
+        # type: (List[int], List[str], bool, bool) -> Tuple[List[Text], int]
         expanded_symbol = name_map[self._node._item._symbol]
         if self._use_marker:
             sequence.append(1)
-        sequence += self._node._item.rule.production[self._node._item._index:]
+        if complete_right:
+            sequence += self._node._item.rule.production[self._node._item._index:]
         sequence_str = u' '.join(name_map[i] if i != 1 else '\u2666' for i in sequence)
-        extra_padding = u'\u2500' * (len(sequence_str) - 2 - len(expanded_symbol))
-        derivation_str = u'\u2570%s%s\u256f' % (expanded_symbol, extra_padding)
-        return [sequence_str, derivation_str], max(len(sequence_str), len(derivation_str))
+        if add_derivation:
+            extra_padding = u'\u2500' * (len(sequence_str) - 2 - len(expanded_symbol))
+            derivation_str = u'\u2570%s%s\u256f' % (expanded_symbol, extra_padding)
+            return [sequence_str, derivation_str], max(len(sequence_str), len(derivation_str))
+        else:
+            return [sequence_str], len(sequence_str)
 
 
 class _LR0BaseConstruction(LR0Path):
@@ -69,20 +73,23 @@ class _LR0BaseConstruction(LR0Path):
 
 
 class _LR0Extension(_LR0BaseConstruction):
-    def _to_string(self, sequence, name_map):
-        # type: (List[int], List[str]) -> Tuple[List[Text], int]
+    def _to_string(self, sequence, name_map, add_derivation, complete_right):
+        # type: (List[int], List[str], bool, bool) -> Tuple[List[Text], int]
         sequence.append(self._node._item.rule.production[self._node._item._index])
-        return self._follow._to_string(sequence, name_map)
+        return self._follow._to_string(sequence, name_map, add_derivation, complete_right)
 
 
 class _LR0Derivation(_LR0BaseConstruction):
-    def _to_string(self, sequence, name_map):
-        # type: (List[int], List[str]) -> Tuple[List[Text], int]
+    def _to_string(self, sequence, name_map, add_derivation, complete_right):
+        # type: (List[int], List[str], bool, bool) -> Tuple[List[Text], int]
         expanded_symbol = name_map[self._node._item._symbol]
         sequence_str = u' '.join(name_map[i] for i in sequence)
-        post_sequence_str = u' '.join(
-            name_map[i] for i in self._node._item.rule.production[self._node._item._index + 1:]
-        )
+        if complete_right:
+            post_sequence_str = u' '.join(
+                name_map[i] for i in self._node._item.rule.production[self._node._item._index + 1:]
+            )
+        else:
+            post_sequence_str = u''
         result, length = self._follow.to_string(name_map)
         if sequence_str:
             padding = ' ' * (len(sequence_str) + 1)
@@ -91,16 +98,19 @@ class _LR0Derivation(_LR0BaseConstruction):
         if post_sequence_str:
             result[0] += ' ' * (length - len(result[0]) + 1) + post_sequence_str
             length += len(post_sequence_str) + 1
-        extra_padding = u'\u2500' * (length - 2 - len(expanded_symbol))
-        derivation_str = u'\u2570%s%s\u256f' % (expanded_symbol, extra_padding)
-        return result + [derivation_str], max(length, len(derivation_str))
+        if add_derivation:
+            extra_padding = u'\u2500' * (length - 2 - len(expanded_symbol))
+            derivation_str = u'\u2570%s%s\u256f' % (expanded_symbol, extra_padding)
+            return result + [derivation_str], max(length, len(derivation_str))
+        else:
+            return result, length
 
 
 class _LR0LeftExpansion(_LR0BaseConstruction):
-    def _to_string(self, sequence, name_map):
-        # type: (List[int], List[str]) -> Tuple[List[Text], int]
+    def _to_string(self, sequence, name_map, add_derivation, complete_right):
+        # type: (List[int], List[str], bool, bool) -> Tuple[List[Text], int]
         sequence += self._node._item.rule.production[:self._node._item._index]
-        return self._follow._to_string(sequence, name_map)
+        return self._follow._to_string(sequence, name_map, add_derivation, complete_right)
 
 
 class _LR0Expansion(_LR0BaseConstruction):
@@ -111,9 +121,31 @@ class _LR0Expansion(_LR0BaseConstruction):
         self._next = expanded_path
         self._hash_cache = None
 
-    def _to_string(self, sequence, name_map):
-        # type: (List[int], List[str]) -> Tuple[List[Text], int]
-        return self._follow._to_string(sequence, name_map)
+    def _to_string(self, sequence, name_map, add_derivation, complete_right):
+        # type: (List[int], List[str], bool, bool) -> Tuple[List[Text], int]
+        expanded_symbol = name_map[self._node._item._symbol]
+        sequence_str = u' '.join(name_map[i] for i in sequence)
+        result, length = self._follow._to_string([], name_map, False, False)
+        next, next_len = self._next._to_string([], name_map, False, complete_right)
+
+        if sequence_str:
+            padding = ' ' * (len(sequence_str) + 1)
+            result = [u'%s %s' % (sequence_str, result[0])] + [u'%s%s' % (padding, s) for s in result[1:]]
+            length += len(sequence_str) + 1
+        max_length = length
+
+        for i, (n1, n2) in enumerate(zip(result, next)):
+            result[i] = '%s%s%s' % (n1, ' ' * (length - len(n1) + 1), n2)
+            max_length = max(max_length, len(result[i]))
+        for final in next[i + 1:]:
+            result.append(' ' * (length + 1) + final)
+
+        if add_derivation:
+            extra_padding = u'\u2500' * (max_length - 2 - len(expanded_symbol))
+            derivation_str = u'\u2570%s%s\u256f' % (expanded_symbol, extra_padding)
+            return result + [derivation_str], max(max_length, len(derivation_str))
+        else:
+            return result, max_length
 
 
 if TYPE_CHECKING:
