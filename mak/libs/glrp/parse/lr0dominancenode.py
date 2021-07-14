@@ -95,11 +95,13 @@ class LR0DominanceNode(object):
                 result.append((path, lookahead))
             else:
                 assert self._successor is not None
-                if lookahead in first_set.get(following_symbol, set([following_symbol])):
+                if lookahead == following_symbol:
+                    result.append((path, None))
+                elif lookahead in first_set.get(following_symbol, []):
                     successor_path = self._successor.expand_lookahead(lookahead, first_set)
                     assert successor_path is not None
                     result.append((path.expand_next(successor_path), None))
-                elif -1 in first_set.get(following_symbol, set([following_symbol])):
+                elif -1 in first_set.get(following_symbol, []):
                     successor_path = self._successor.expand_empty(first_set)
                     assert successor_path is not None
                     for p, la in self._successor.filter_node_by_lookahead(successor_path, lookahead, first_set):
