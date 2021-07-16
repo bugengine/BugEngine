@@ -110,7 +110,7 @@ class Grammar(object):
         lalr.create_parser_table(productions, start_id, name_map, len(terminals), log, conflict_log, stderr, dot_file)
 
         #with open('cxx.y', 'w') as yaccfile:
-        #    for index, terminal in enumerate(name_map[2:1 + len(terminals)]):
+        #    for index, terminal in enumerate(name_map[2:len(terminals)]):
         #        yaccfile.write('%%token _%d "%s"\n' % (index - 1, terminal))
         #    yaccfile.write('\n%%start %s\n\n%%%%\n' % start_symbol)
         #    for prod_symbol, prod in productions.items():
@@ -118,32 +118,32 @@ class Grammar(object):
         #        if prod_symbol == start_id:
         #            continue
         #        for rule in prod:
-        #            if len(rule) == 0:
+        #            if rule.len == 0:
         #                yaccfile.write('\n%s: ;\n' % (name_map[prod_symbol]))
         #            else:
         #                yaccfile.write(
         #                    '\n%s:\n        %s\n    ;\n' % (
-        #                        name_map[prod_symbol],
-        #                        ' '.join(name_map[i] if i > len(terminals) else '"%s"' % name_map[i] for i in rule)
+        #                        name_map[prod_symbol], ' '.join(
+        #                            name_map[i] if i > len(terminals) else '"%s"' % name_map[i] for i in rule.production
+        #                        )
         #                    )
         #                )
         #    yaccfile.write('\n%%%%\n')
 
         #with open('cxx.py', 'w') as slyfile:
         #    slyfile.write('import sly\nclass CxxLexer(sly.Lexer):\n    tokens = []\n    literals = {\n')
-        #    for index, terminal in enumerate(name_map[2:1 + len(terminals)]):
+        #    for index, terminal in enumerate(name_map[2:len(terminals)]):
         #        slyfile.write('        "%s",\n' % (terminal))
         #    slyfile.write('    }\n')
         #    slyfile.write(
         #        '\nclass CxxParser(sly.Parser):\n    tokens = CxxLexer.tokens\n    debugfile = "cxxparser.out"\n'
         #    )
-
         #    for prod_symbol, prod in productions.items():
         #        print(name_map[prod_symbol])
         #        if prod_symbol == start_id:
         #            continue
         #        for rule in prod:
-        #            if len(rule) == 0:
+        #            if rule.len == 0:
         #                slyfile.write(
         #                    '\n    @_(\'\')\n    def %s(self, p):\n        pass\n' %
         #                    (name_map[prod_symbol].replace('-', '_'))
@@ -152,8 +152,9 @@ class Grammar(object):
         #                slyfile.write(
         #                    '\n    @_(\'%s\')\n    def %s(self, p):\n        pass\n' % (
         #                        ' '.join(
-        #                            name_map[i].replace('-', '_') if i > len(terminals) else
-        #                            (name_map[i] if len(name_map[i]) > 1 else '"%s"' % name_map[i]) for i in rule
+        #                            name_map[i].replace('-', '_') if i >= len(terminals) else
+        #                            (name_map[i] if len(name_map[i]) > 1 else '"%s"' % name_map[i])
+        #                            for i in rule.production
         #                        ), name_map[prod_symbol].replace('-', '_')
         #                    )
         #                )

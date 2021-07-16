@@ -120,12 +120,15 @@ def create_parser_table(productions, start_id, name_map, terminal_count, sm_log,
         for item in item_set:
             next = item._next
             if next and next._before == lookahead:
-                s1 = s.get(id(next))
-                if not s1:
-                    s1 = {}
-                    s[id(next)] = s1
                 gs.append((next, item_set[item], lookahead))
-                s = s1
+
+        gs = sorted(gs, key=lambda x: id(x[0]))
+        for item, _, _ in gs:
+            s1 = s.get(id(item))
+            if not s1:
+                s1 = {}
+                s[id(item)] = s1
+            s = s1
 
         result = s.get(0, None)
         if result is None:
@@ -155,8 +158,7 @@ def create_parser_table(productions, start_id, name_map, terminal_count, sm_log,
             # Collect all of the symbols that could possibly be in the goto(I,X) sets
             asyms = set([])
             for item in state:
-                for s in item._symbols:
-                    asyms.add(s)
+                asyms.update(item._symbols)
 
             for x in sorted(asyms):
                 g = goto(state, x)
@@ -457,8 +459,8 @@ def create_parser_table(productions, start_id, name_map, terminal_count, sm_log,
                 if actions[-1][1]._precedence is not None:
                     precedence = actions[-1][1]._precedence[1]
                     associativity = actions[-1][1]._precedence[0]
-                    for _, item in actions:
-                        if item._precedence is None:
+                    for j, item in actions:
+                        if item._precedence is None and j > 0:
                             conflict_log.info('  ** %s has no precedence annotation', item.to_string(name_map))
                             num_missing_annotations += 1
                 else:
@@ -470,7 +472,7 @@ def create_parser_table(productions, start_id, name_map, terminal_count, sm_log,
                     if item_precedence[1] < precedence:
                         conflict_log.info('  [discarded] %s', item.to_string(name_map))
                     elif item_precedence[0] != associativity:
-                        conflict_log.info('  [condlict]  %s', item.to_string(name_map))
+                        conflict_log.info('  [conflict]  %s', item.to_string(name_map))
                         assoc_conflict = True
                     elif associativity == 'left' and j >= 0:
                         try:

@@ -40,7 +40,7 @@ from ...parser import cxx98
 from be_typing import TYPE_CHECKING
 
 
-@glrp.rule('enum-name : identifier')
+@glrp.rule('enum-name : "identifier"')
 @cxx98
 def enum_name(self, p):
     # type: (CxxParser, glrp.Production) -> None

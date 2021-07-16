@@ -79,6 +79,7 @@ def member_declarator_list(self, p):
 @glrp.rule('member-declarator : declarator virt-specifier-seq? pure-specifier?')
 @glrp.rule('member-declarator : declarator requires-clause')
 @glrp.rule('member-declarator : declarator brace-or-equal-initializer?')
+#@glrp.rule('member-declarator : declarator brace-or-equal-initializer')
 @glrp.rule(
     'member-declarator : identifier? attribute-specifier-seq? ":" constant-expression brace-or-equal-initializer?'
 )

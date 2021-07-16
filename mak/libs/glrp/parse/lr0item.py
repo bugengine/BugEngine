@@ -11,7 +11,7 @@ class LR0Item:
         self._next = next
         self._before = predecessor
         self._after = successors
-        self._symbols = sorted(set(rule.production))
+        self._symbols = set(rule.production)
         self._follow = sorted(follow)
         self._lookaheads = {}            # type: Dict[int, List[int]]
         self._precedence = None          # type: Optional[Tuple[str, int]]

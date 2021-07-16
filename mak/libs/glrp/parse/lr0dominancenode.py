@@ -132,7 +132,7 @@ class LR0DominanceNode(object):
                     ) in shortest_path_seen:
                         continue
                 for p, la in parent.filter_node_by_lookahead(path.derive_from(parent), lookahead, first_set):
-                    if parent._item._index > 0 and la is None:
+                    if parent._item._index > 0:
                         shortest_path_seen.add(
                             (lookahead, parent._item_set, parent._item.rule.production[:parent._item._index])
                         )
