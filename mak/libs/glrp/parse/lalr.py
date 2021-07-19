@@ -382,6 +382,7 @@ def create_parser_table(productions, start_id, name_map, terminal_count, sm_log,
     st = 0
 
     num_missing_annotations = 0
+    invalid_precedence_count = 0
     num_rr = 0
     num_sr = 0
 
@@ -455,53 +456,65 @@ def create_parser_table(productions, start_id, name_map, terminal_count, sm_log,
                 # looks like a potential conflict, look at precedence
                 conflict_log.info('State %d:', st)
                 conflict_log.info('  disambiguation for lookahead %s', name_map[a])
-                actions = sorted(actions, key=lambda x: x[1]._precedence[1] if x[1]._precedence is not None else -1)
-                if actions[-1][1]._precedence is not None:
-                    precedence = actions[-1][1]._precedence[1]
-                    associativity = actions[-1][1]._precedence[0]
-                    for j, item in actions:
-                        if item._precedence is None and j > 0:
-                            conflict_log.info('  ** %s has no precedence annotation', item.to_string(name_map))
-                            num_missing_annotations += 1
-                else:
-                    precedence = -1
-                    associativity = 'nonassoc'
-                assoc_conflict = False
-                for j, item in actions:
-                    item_precedence = item._precedence if item._precedence is not None else ('nonassoc', -1)
-                    if item_precedence[1] < precedence:
-                        conflict_log.info('  [discarded] %s', item.to_string(name_map))
-                    elif item_precedence[0] != associativity:
-                        conflict_log.info('  [conflict]  %s', item.to_string(name_map))
-                        assoc_conflict = True
-                    elif associativity == 'left' and j >= 0:
-                        try:
-                            accepted_actions[j].append(item)
-                        except KeyError:
-                            accepted_actions[j] = [item]
-                        conflict_log.info('  [accepted]  %s', item.to_string(name_map))
-                    elif associativity == 'right' and j < 0:
-                        try:
-                            accepted_actions[j].append(item)
-                        except KeyError:
-                            accepted_actions[j] = [item]
-                        conflict_log.info('  [accepted]  %s', item.to_string(name_map))
-                    elif associativity == 'nonassoc':
-                        try:
-                            accepted_actions[j].append(item)
-                        except KeyError:
-                            accepted_actions[j] = [item]
-                        conflict_log.info('  [accepted]  %s', item.to_string(name_map))
-                    else:
-                        conflict_log.info('  [discarded] %s', item.to_string(name_map))
 
-                if assoc_conflict:
-                    conflict_log.error('detected associativity conflict')
-                conflict_log.info('')
-            else:
-                accepted_actions = action_dest
+                precedence, associativity = (-1, 'nonassoc')
+                shift_actions = False
+                reduce_actions = False
+                assoc_error = False
+                precedence_set = False
+                split = False
+                for j, items in action_dest.items():
+                    for item in items:
+                        if item._precedence is not None:
+                            precedence_set = True
+                            if item._precedence[1] > precedence:
+                                precedence = item._precedence[1]
+                                associativity = item._precedence[0]
+                                assoc_error = False
+                                shift_actions = j >= 0
+                                reduce_actions = j < 0
+                                split = item._split
+                            elif item._precedence[1] == precedence:
+                                if item._precedence[0] != associativity:
+                                    assoc_error = True
+                                shift_actions |= j >= 0
+                                reduce_actions |= j < 0
+                                split |= item._split
+                        elif precedence == -1:
+                            shift_actions |= j >= 0
+                            reduce_actions |= j < 0
 
-            if len(accepted_actions) > 1:
+                for j, items in action_dest.items():
+                    for item in items:
+                        if item._precedence is None and precedence_set:
+                            if j >= 0:
+                                conflict_log.info('  ** %s has no precedence annotation', item.to_string(name_map))
+                                num_missing_annotations += 1
+                            conflict_log.info('  [discarded] %s', item.to_string(name_map))
+                            continue
+                        elif item._precedence is not None:
+                            if item._precedence[1] < precedence:
+                                conflict_log.info('  [discarded] %s', item.to_string(name_map))
+                                continue
+                            if assoc_error:
+                                conflict_log.info('  ** %s has no precedence annotation', item.to_string(name_map))
+                                num_missing_annotations += 1
+                            if split and not item._split:
+                                conflict_log.info('  ** %s has no split annotation', item.to_string(name_map))
+                                num_missing_annotations += 1
+                            if j < 0 and shift_actions and associativity == 'left':
+                                conflict_log.info('  [discarded] %s', item.to_string(name_map))
+                                continue
+                            if j >= 0 and reduce_actions and associativity == 'right':
+                                conflict_log.info('  [discarded] %s', item.to_string(name_map))
+                                continue
+                        try:
+                            accepted_actions[j].append(item)
+                        except KeyError:
+                            accepted_actions[j] = [item]
+                        conflict_log.info('  [accepted]  %s', item.to_string(name_map))
+
+            if len(accepted_actions) > 1 and not split:
                 # handle conflicts
                 conflicts = []     # type: List[Tuple[LR0DominanceNode, Text, Optional[int]]]
                 num_rr += 1
@@ -515,8 +528,17 @@ def create_parser_table(productions, start_id, name_map, terminal_count, sm_log,
                             num_sr += 1
                         else:
                             conflicts.append((node, 'Reduce using rule %s' % item.to_string(name_map), a))
+
                 _log_counterexamples(conflicts, conflict_log, first_set, name_map)
                 conflict_log.info('')
+            elif len(accepted_actions) > 1 and split:
+                splits = []
+                for j in sorted(accepted_actions):
+                    items = accepted_actions[j]
+                    for item in items:
+                        splits.append(item_group[item])
+                #_find_splits()
+                #conflict_log.info('')
 
         nkeys = set([])
         for item in item_group:
@@ -589,11 +611,16 @@ def create_parser_table(productions, start_id, name_map, terminal_count, sm_log,
         """
     dot_file.info('}')
 
-    # Report shift/reduce and reduce/reduce conflicts
+    # Report errors
     if num_missing_annotations == 1:
         error_log.warning('1 missing precedence annotation')
     elif num_missing_annotations > 1:
         error_log.warning('%d missing precedence annotations', num_missing_annotations)
+
+    if invalid_precedence_count == 1:
+        error_log.warning('1 invalid precedence annotation')
+    elif invalid_precedence_count > 1:
+        error_log.warning('%d invalid precedence annotations', num_missing_annotations)
 
     if num_sr == 1:
         error_log.warning('1 shift/reduce conflict')

@@ -123,19 +123,14 @@ class LR0DominanceNode(object):
             node = path._node
 
             for parent in node._direct_parents:
+                if (lookahead, node._item.rule.production[:node._item._index + 1]) in shortest_path_seen:
+                    continue
                 if (parent, lookahead) in seen:
                     continue
                 seen.add((parent, lookahead))
-                if parent._item._index > 0:
-                    if (
-                        lookahead, parent._item_set, parent._item.rule.production[:parent._item._index]
-                    ) in shortest_path_seen:
-                        continue
                 for p, la in parent.filter_node_by_lookahead(path.derive_from(parent), lookahead, first_set):
-                    if parent._item._index > 0:
-                        shortest_path_seen.add(
-                            (lookahead, parent._item_set, parent._item.rule.production[:parent._item._index])
-                        )
+                    if la is None:
+                        shortest_path_seen.add((lookahead, node._item.rule.production[:node._item._index + 1]))
                     if la is None and state is None:
                         result.append((p, la))
                     else:
@@ -145,18 +140,6 @@ class LR0DominanceNode(object):
                     continue
                 seen.add((predecessor, lookahead))
                 if state is None or predecessor._item_set == state:
-                    if predecessor._item._index > 0:
-                        if (
-                            lookahead, predecessor._item_set,
-                            predecessor._item.rule.production[:predecessor._item._index]
-                        ) in shortest_path_seen:
-                            continue
-                        shortest_path_seen.add(
-                            (
-                                lookahead, predecessor._item_set,
-                                predecessor._item.rule.production[:predecessor._item._index]
-                            )
-                        )
                     assert node._predecessor_lookahead is not None
                     result.append((path.extend(predecessor, node._predecessor_lookahead), lookahead))
         return result
