@@ -103,7 +103,7 @@ class LR0DominanceNode(object):
                                        #if (self, lookahead) in seen:
                                        #    return result
         seen.add((self, lookahead))
-        shortest_path_seen = set()     # type: Set[Tuple[Optional[int], Tuple[int, ...]]]
+        shortest_path_seen = set()     # type: Set[Tuple[Optional[int], int, Tuple[int, ...]]]
         state_path_seen = set()
 
         while queue:
@@ -121,9 +121,13 @@ class LR0DominanceNode(object):
                     except KeyError:
                         pass
                     else:
-                        if (lookahead, parent._item.rule.production[:parent._item.len - offset]) in shortest_path_seen:
+                        if (
+                            lookahead, parent._item._symbol, parent._item.rule.production[:parent._item.len - offset]
+                        ) in shortest_path_seen:
                             continue
-                        shortest_path_seen.add((lookahead, parent._item.rule.production[:parent._item.len - offset]))
+                        shortest_path_seen.add(
+                            (lookahead, parent._item._symbol, parent._item.rule.production[:parent._item.len - offset])
+                        )
                         p = parent.filter_node_by_lookahead(path.derive_from(parent), lookahead)
                         if state is None:
                             result.append((p, None))
@@ -134,11 +138,22 @@ class LR0DominanceNode(object):
                     except KeyError:
                         pass
                     else:
-                        if (None, parent._item.rule.production[:parent._item.len - offset]) in shortest_path_seen:
+                        if (
+                            None, parent._item._symbol, parent._item.rule.production[:parent._item.len - offset]
+                        ) in shortest_path_seen:
                             continue
-                        shortest_path_seen.add((None, parent._item.rule.production[:parent._item.len - offset]))
+                        shortest_path_seen.add(
+                            (None, parent._item._symbol, parent._item.rule.production[:parent._item.len - offset])
+                        )
                         queue.append((path.derive_from(parent), lookahead))
                 else:
+                    if (
+                        None, parent._item._symbol, parent._item.rule.production[:parent._item._index + 1]
+                    ) in shortest_path_seen:
+                        continue
+                    shortest_path_seen.add(
+                        (None, parent._item._symbol, parent._item.rule.production[:parent._item._index + 1])
+                    )
                     queue.append((path.derive_from(parent), lookahead))
             for predecessor in node._predecessors:
                 if (predecessor, lookahead) in seen:

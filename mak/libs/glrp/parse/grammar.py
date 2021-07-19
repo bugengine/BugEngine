@@ -276,7 +276,7 @@ def _create_lr0_items(productions):
                     # terminal
                     next = []
                     first = set([rule.production[i]])
-                    follow = {rule.production[i]: 0}
+                    follow = {rule.production[i]: offset}
                 else:
                     next = list(production)
                     first = production._first

@@ -235,3 +235,48 @@ class Parser5(glrp.Parser):
         # type: ()->None
         self.lexer = self.__class__.Lexer()
         glrp.Parser.__init__(self, self.lexer, 'prog', '.')
+
+
+class Parser6(glrp.Parser):
+    class Lexer(glrp.Lexer):
+        @glrp.token(r'identifier', 'identifier')
+        @glrp.token(r';', ';')
+        @glrp.token(r'\[', '[')
+        @glrp.token(r'\]', ']')
+        def tok(self, token):
+            # type: (glrp.Token) -> glrp.Token
+            return token
+
+    @glrp.rule("prog :")
+    @glrp.rule("prog : prog stmt")
+    def p_prog(self, p):
+        # type: (glrp.Production) -> None
+        pass
+
+    @glrp.rule("stmt : expr ';'")
+    @glrp.rule("stmt : decl")
+    def p_stmt(self, p):
+        # type: (glrp.Production) -> None
+        pass
+
+    @glrp.rule("expr : 'identifier'")
+    @glrp.rule("expr : 'expr' '[' expr? ']'")
+    def p_expr(self, p):
+        # type: (glrp.Production) -> None
+        pass
+
+    @glrp.rule("decl : 'identifier' ';'")
+    @glrp.rule("decl : 'identifier' annotation ';'")
+    def p_decl(self, p):
+        # type: (glrp.Production) -> None
+        pass
+
+    @glrp.rule("annotation : '[' '[' 'identifier' ']' ']'")
+    def p_annotation(self, p):
+        # type: (glrp.Production) -> None
+        pass
+
+    def __init__(self):
+        # type: ()->None
+        self.lexer = self.__class__.Lexer()
+        glrp.Parser.__init__(self, self.lexer, 'prog', '.')
