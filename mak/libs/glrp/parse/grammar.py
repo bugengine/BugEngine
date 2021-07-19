@@ -28,7 +28,7 @@ class Grammar(object):
                     self._annotations[index][annotation] = values
                 except KeyError:
                     self._annotations[index] = {annotation: values}
-            self._item = LR0Item(self, len(production), None, predecessor, [], set([-1]))
+            self._item = LR0Item(self, len(production), None, predecessor, [], set([-1]), {-1: 0})
             self._reduced = 0
 
         def to_string(self, name_map):
@@ -266,26 +266,33 @@ def _create_lr0_items(productions):
     # type: (Dict[int, Grammar.Production]) -> None
     for _, prods in productions.items():
         for rule in prods:
-            follow = set([-1])
             i = rule.len - 1
+            offset = 1
+            follow_buffer = {-1: 0}
             while i >= 0:
                 try:
                     production = productions[rule.production[i]]
                 except KeyError:
                     # terminal
                     next = []
-                    follow_buffer = set([rule.production[i]])
+                    first = set([rule.production[i]])
+                    follow = {rule.production[i]: 0}
                 else:
                     next = list(production)
-                    follow_buffer = production._first
-                    if -1 in follow_buffer:
-                        follow_buffer = set(follow_buffer)
-                        follow_buffer.remove(-1)
-                        follow_buffer = follow_buffer.union(follow)
+                    first = production._first
+
+                    if -1 not in first:
+                        follow = {}
+                    else:
+                        follow = dict(follow_buffer)
+                    for terminal in production._first:
+                        if terminal != -1:
+                            follow[terminal] = offset
                 predecessor = rule.production[i - 1] if i > 0 else None
-                rule._item = LR0Item(rule, i, rule._item, predecessor, next, follow)
-                follow = follow_buffer
+                rule._item = LR0Item(rule, i, rule._item, predecessor, next, first, follow_buffer)
                 i -= 1
+                offset += 1
+                follow_buffer = follow
 
 
 if TYPE_CHECKING:

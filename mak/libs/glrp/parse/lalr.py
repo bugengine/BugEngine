@@ -27,8 +27,8 @@ def _log(title, conflict_paths, out, name_map):
                 out.info(u'   \u251c\u2574')
 
 
-def _log_counterexamples(conflict_list, out, first_set, name_map):
-    # type: (List[Tuple[LR0DominanceNode, Text, Optional[int]]], Logger, Dict[int, Set[int]], List[str]) -> List[LR0Item]
+def _log_counterexamples(conflict_list, out, name_map):
+    # type: (List[Tuple[LR0DominanceNode, Text, Optional[int]]], Logger, List[str]) -> List[LR0Item]
     conflict_paths = [(message, []) for _, message, _ in conflict_list] # type: List[Tuple[Text, List[LR0Path]]]
     result = []                                                         # type: List[LR0Item]
 
@@ -54,7 +54,7 @@ def _log_counterexamples(conflict_list, out, first_set, name_map):
 
                 for path, lookahead, seen, index in path_list:
                     if lookahead is not None:
-                        for path, la in path._node.backtrack_up(path, None, lookahead, first_set, seen):
+                        for path, la in path._node.backtrack_up(path, None, lookahead, seen):
                             try:
                                 states[path._node._item_set].append((path, la, seen, index))
                             except KeyError:
@@ -65,7 +65,7 @@ def _log_counterexamples(conflict_list, out, first_set, name_map):
                             if path._node._item_set == state:
                                 plist.append((path, lookahead, seen, index))
                             else:
-                                for path, la in path._node.backtrack_up(path, state, lookahead, first_set, seen):
+                                for path, la in path._node.backtrack_up(path, state, lookahead, seen):
                                     #assert path1._node.item_set == path2._node.item_set
                                     plist.append((path, la, seen, index))
                 for _, plist in states.items():
@@ -74,7 +74,7 @@ def _log_counterexamples(conflict_list, out, first_set, name_map):
             states = OrderedDict()
             for path, lookahead, seen, index in path_list:
                 if path._node._item._index > 0:
-                    for path, la in path._node.backtrack_up(path, None, lookahead, first_set, seen):
+                    for path, la in path._node.backtrack_up(path, None, lookahead, seen):
                         try:
                             states[path._node._item_set].append((path, la, seen, index))
                         except KeyError:
@@ -82,7 +82,7 @@ def _log_counterexamples(conflict_list, out, first_set, name_map):
             for state, plist in states.items():
                 for path, lookahead, seen, index in path_list:
                     if path._node._item._index == 0:
-                        for path, la in path._node.backtrack_up(path, state, lookahead, first_set, seen):
+                        for path, la in path._node.backtrack_up(path, state, lookahead, seen):
                             #assert path1._node.item_set == path2._node.item_set
                             plist.append((path, la, seen, index))
             for _, plist in states.items():
@@ -99,9 +99,6 @@ def create_parser_table(productions, start_id, name_map, terminal_count, sm_log,
     cidhash = {}       # type: Dict[int, int]
     goto_cache = {}    # type: Dict[Tuple[int, int], Optional[LR0ItemSet]]
     goto_cache_2 = {}  # type: Dict[int, Any]
-    first_set = {}
-    for prod_index, prod in productions.items():
-        first_set[prod_index] = prod._first
 
     def goto(item_set, lookahead):
         # type: (LR0ItemSet, int) -> Optional[LR0ItemSet]
@@ -529,7 +526,7 @@ def create_parser_table(productions, start_id, name_map, terminal_count, sm_log,
                         else:
                             conflicts.append((node, 'Reduce using rule %s' % item.to_string(name_map), a))
 
-                _log_counterexamples(conflicts, conflict_log, first_set, name_map)
+                _log_counterexamples(conflicts, conflict_log, name_map)
                 conflict_log.info('')
             elif len(accepted_actions) > 1 and split:
                 splits = []

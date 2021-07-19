@@ -2,8 +2,8 @@ from be_typing import TYPE_CHECKING, overload
 
 
 class LR0Item:
-    def __init__(self, rule, index, next, predecessor, successors, follow):
-        # type: (Grammar.Rule, int, Optional[LR0Item], Optional[int], List[Grammar.Rule], Set[int]) -> None
+    def __init__(self, rule, index, next, predecessor, successors, first, follow):
+        # type: (Grammar.Rule, int, Optional[LR0Item], Optional[int], List[Grammar.Rule], Set[int], Dict[int, int]) -> None
         self.rule = rule
         self.len = rule.len
         self._symbol = rule._prod_symbol # type: int
@@ -12,7 +12,8 @@ class LR0Item:
         self._before = predecessor
         self._after = successors
         self._symbols = set(rule.production)
-        self._follow = sorted(follow)
+        self._first = first
+        self._follow = follow
         self._lookaheads = {}            # type: Dict[int, List[int]]
         self._precedence = None          # type: Optional[Tuple[str, int]]
         self._split = False

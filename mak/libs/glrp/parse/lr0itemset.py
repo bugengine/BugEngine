@@ -65,7 +65,8 @@ class LR0ItemSet(object):
                     if dn not in successor._direct_parents:
                         successor._direct_parents.append(dn)
         for node in self._items.values():
-            node._direct_parents = sorted(node._direct_parents, key=lambda n: n._item.len - n._item._index)
+            node._direct_parents.sort(key=lambda n: n._item.len - n._item._index)
+            node._direct_children.sort(key=lambda n: n._item.len)
             node._parents = set(node._direct_parents)
             queue = node._direct_parents[:]
             seen = set([node])
