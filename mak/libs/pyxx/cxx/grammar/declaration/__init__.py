@@ -92,7 +92,6 @@ def declaration_seq(self, p):
 @glrp.rule('declaration : empty-declaration')
 @glrp.rule('declaration : attribute-declaration')
 @glrp.rule('declaration : module-import-declaration')
-@glrp.rule('declaration : simple-declaration')
 @cxx98
 def declaration(self, p):
     # type: (CxxParser, glrp.Production) -> None

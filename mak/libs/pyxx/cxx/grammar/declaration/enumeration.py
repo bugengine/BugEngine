@@ -40,7 +40,7 @@ from ...parser import cxx98
 from be_typing import TYPE_CHECKING
 
 
-@glrp.rule('enum-name[split] : "identifier"')
+@glrp.rule('enum-name[split] : [split]"identifier"')
 @cxx98
 def enum_name(self, p):
     # type: (CxxParser, glrp.Production) -> None
@@ -76,7 +76,7 @@ def opaque_enum_declaration(self, p):
     pass
 
 
-@glrp.rule('enum-key : "enum"')
+@glrp.rule('enum-key[split] : "enum"')
 @glrp.rule('enum-key : "enum" "class"')
 @glrp.rule('enum-key : "enum" "struct"')
 @cxx98

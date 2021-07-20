@@ -36,16 +36,16 @@ def simple_template_id(self, p):
     pass
 
 
-@glrp.rule('template-id : simple-template-id')
-@glrp.rule('template-id : operator-function-id "<" template-argument-list? ">"')
-@glrp.rule('template-id : literal-operator-id "<" template-argument-list? ">"')
+@glrp.rule('template-id[split] : [split]simple-template-id')
+@glrp.rule('template-id : operator-function-id [split]"<" template-argument-list? ">"')
+@glrp.rule('template-id : literal-operator-id [split]"<" template-argument-list? ">"')
 @cxx98
 def template_id(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
 
-@glrp.rule('template-name[split] : "identifier"')
+@glrp.rule('template-name[split] : [split]"identifier"')
 @cxx98
 def template_name(self, p):
     # type: (CxxParser, glrp.Production) -> None

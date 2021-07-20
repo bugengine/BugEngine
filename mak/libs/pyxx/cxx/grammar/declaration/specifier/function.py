@@ -21,8 +21,8 @@ def function_specifier(self, p):
     pass
 
 
-@glrp.rule('explicit-specifier : "explicit" "(" constant-expression ")"')
-@glrp.rule('explicit-specifier : "explicit"')
+@glrp.rule('explicit-specifier : "explicit"[split] "(" constant-expression ")"')
+@glrp.rule('explicit-specifier : "explicit"[split]')
 @cxx98
 def explicit_specifier(self, p):
     # type: (CxxParser, glrp.Production) -> None

@@ -31,8 +31,8 @@ from . import derived
 from . import conversion
 
 
-@glrp.rule('class-name[split] : "identifier"')
-@glrp.rule('class-name : simple-template-id')
+@glrp.rule('class-name[split] : [split]"identifier"')
+@glrp.rule('class-name[split] : [split]simple-template-id')
 @cxx98
 def class_name(self, p):
     # type: (CxxParser, glrp.Production) -> None

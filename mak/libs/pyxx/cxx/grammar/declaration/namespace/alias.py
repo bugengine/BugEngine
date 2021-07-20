@@ -14,7 +14,7 @@ from ....parser import cxx98
 from be_typing import TYPE_CHECKING
 
 
-@glrp.rule('namespace-alias : "identifier"')
+@glrp.rule('namespace-alias : [split]"identifier"')
 @cxx98
 def namespace_alias(self, p):
     # type: (CxxParser, glrp.Production) -> None

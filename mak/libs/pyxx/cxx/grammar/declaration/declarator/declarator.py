@@ -53,7 +53,7 @@ def declarator(self, p):
     pass
 
 
-@glrp.rule('ptr-declarator : noptr-declarator')
+@glrp.rule('ptr-declarator[split] : noptr-declarator')
 @glrp.rule('ptr-declarator : ptr-operator ptr-declarator')
 @cxx98
 def ptr_declarator(self, p):
@@ -72,7 +72,7 @@ def noptr_declarator(self, p):
 
 
 @glrp.rule(
-    'parameters-and-qualifiers : "(" parameter-declaration-clause ")" cv-qualifier-seq? ref-qualifier? noexcept-specifier? attribute-specifier-seq?'
+    'parameters-and-qualifiers : [split]"(" parameter-declaration-clause ")" cv-qualifier-seq? ref-qualifier? noexcept-specifier? attribute-specifier-seq?'
 )
 @cxx98
 def parameters_and_qualifiers(self, p):
@@ -87,9 +87,17 @@ def trailing_return_type(self, p):
     pass
 
 
-@glrp.rule('ptr-operator : "*" attribute-specifier-seq? cv-qualifier-seq?')
-@glrp.rule('ptr-operator : "&" attribute-specifier-seq?')
-@glrp.rule('ptr-operator : "&&" attribute-specifier-seq?')
+#@glrp.rule('ptr-operator : "*" attribute-specifier-seq? cv-qualifier-seq?')
+@glrp.rule('ptr-operator[prec:nonassoc,0][split] : "*"')
+@glrp.rule('ptr-operator[prec:nonassoc,0][split] : "*" cv-qualifier-seq')
+@glrp.rule('ptr-operator : "*" attribute-specifier-seq')
+@glrp.rule('ptr-operator : "*" attribute-specifier-seq cv-qualifier-seq')
+#@glrp.rule('ptr-operator : "&" attribute-specifier-seq?')
+@glrp.rule('ptr-operator[prec:nonassoc,0][split] : "&"')
+@glrp.rule('ptr-operator : "&" attribute-specifier-seq')
+#@glrp.rule('ptr-operator : "&&" attribute-specifier-seq?')
+@glrp.rule('ptr-operator[prec:nonassoc,0][split] : "&&"')
+@glrp.rule('ptr-operator : "&&" attribute-specifier-seq')
 @glrp.rule('ptr-operator : nested-name-specifier "*" attribute-specifier-seq? cv-qualifier-seq?')
 @cxx98
 def ptr_operator(self, p):
@@ -104,8 +112,8 @@ def cv_qualifier_seq(self, p):
     pass
 
 
-@glrp.rule('cv-qualifier : "const"')
-@glrp.rule('cv-qualifier : "volatile"')
+@glrp.rule('cv-qualifier : [prec:nonassoc,1]"const"')
+@glrp.rule('cv-qualifier : [prec:nonassoc,1]"volatile"')
 @cxx98
 def cv_qualifier(self, p):
     # type: (CxxParser, glrp.Production) -> None

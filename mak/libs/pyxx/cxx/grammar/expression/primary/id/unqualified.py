@@ -14,10 +14,10 @@ from .....parser import cxx98
 from be_typing import TYPE_CHECKING
 
 
-@glrp.rule('unqualified-id : "identifier"')
-@glrp.rule('unqualified-id : operator-function-id')
+@glrp.rule('unqualified-id[split] : "identifier"')
+@glrp.rule('unqualified-id[split] : operator-function-id')
 @glrp.rule('unqualified-id : conversion-function-id')
-@glrp.rule('unqualified-id : literal-operator-id')
+@glrp.rule('unqualified-id[split] : literal-operator-id')
 @glrp.rule('unqualified-id : "~" type-name')
 @glrp.rule('unqualified-id : "~" decltype-specifier')
 @glrp.rule('unqualified-id : template-id')

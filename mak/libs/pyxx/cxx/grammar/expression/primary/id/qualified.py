@@ -23,7 +23,7 @@ def qualified_id(self, p):
     pass
 
 
-@glrp.rule('nested-name-specifier : "::"')
+@glrp.rule('nested-name-specifier : [split]"::"')
 @glrp.rule('nested-name-specifier : type-name [prec:left,1]"::"')
 @glrp.rule('nested-name-specifier : namespace-name "::"')
 @glrp.rule('nested-name-specifier : decltype-specifier [prec:left,1]"::"')

@@ -58,7 +58,7 @@ def attribute_specifier_seq(self, p):
     pass
 
 
-@glrp.rule('attribute-specifier : "[" "[" attribute-using-prefix? attribute-list "]" "]"')
+@glrp.rule('attribute-specifier : [prec:nonassoc,0][split]"[" "[" attribute-using-prefix? attribute-list "]" "]"')
 @glrp.rule('attribute-specifier : alignment-specifier')
 @cxx98
 def attribute_specifier(self, p):
@@ -66,8 +66,8 @@ def attribute_specifier(self, p):
     pass
 
 
-@glrp.rule('alignment-specifier : "alignas" "(" type-id "..."? ")"')
-@glrp.rule('alignment-specifier : "alignas" "(" constant-expression "..."? ")"')
+@glrp.rule('alignment-specifier : [prec:nonassoc,1]"alignas" "(" type-id "..."? ")"')
+@glrp.rule('alignment-specifier : [prec:nonassoc,1]"alignas" "(" constant-expression "..."? ")"')
 @cxx98
 def alignment_specifier(self, p):
     # type: (CxxParser, glrp.Production) -> None

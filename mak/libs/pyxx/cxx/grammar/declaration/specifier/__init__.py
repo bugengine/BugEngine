@@ -39,7 +39,9 @@ def decl_specifier(self, p):
     pass
 
 
-@glrp.rule('decl-specifier-seq : decl-specifier attribute-specifier-seq?')
+#@glrp.rule('decl-specifier-seq : decl-specifier attribute-specifier-seq?')
+@glrp.rule('decl-specifier-seq[split] : decl-specifier')
+@glrp.rule('decl-specifier-seq : decl-specifier attribute-specifier-seq')
 @glrp.rule('decl-specifier-seq : decl-specifier decl-specifier-seq')
 @cxx98
 def decl_specifier_seq(self, p):

@@ -480,6 +480,7 @@ def create_parser_table(productions, start_id, name_map, terminal_count, sm_log,
                         elif precedence == -1:
                             shift_actions |= j >= 0
                             reduce_actions |= j < 0
+                            split |= item._split
 
                 for j, items in action_dest.items():
                     for item in items:
@@ -528,7 +529,7 @@ def create_parser_table(productions, start_id, name_map, terminal_count, sm_log,
 
                 _log_counterexamples(conflicts, conflict_log, name_map)
                 conflict_log.info('')
-            elif len(accepted_actions) > 1 and split:
+            elif len(accepted_actions) > 1:
                 splits = []
                 for j in sorted(accepted_actions):
                     items = accepted_actions[j]
