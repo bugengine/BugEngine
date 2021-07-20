@@ -34,7 +34,9 @@ from ....parser import cxx98
 from be_typing import TYPE_CHECKING
 
 
-@glrp.rule('type-id : type-specifier-seq abstract-declarator?')
+#@glrp.rule('type-id : type-specifier-seq abstract-declarator?')
+@glrp.rule('type-id[split] : type-specifier-seq')
+@glrp.rule('type-id : type-specifier-seq abstract-declarator')
 @cxx98
 def type_id(self, p):
     # type: (CxxParser, glrp.Production) -> None
@@ -88,7 +90,7 @@ def abstract_pack_declarato(self, p):
 @glrp.rule(
     'noptr-abstract-pack-declarator : noptr-abstract-pack-declarator "[" constant-expression? "]" attribute-specifier-seq?'
 )
-@glrp.rule('noptr-abstract-pack-declarator : "..."')
+@glrp.rule('noptr-abstract-pack-declarator : [split]"..."')
 @cxx98
 def noptr_abstract_pack_declarator(self, p):
     # type: (CxxParser, glrp.Production) -> None

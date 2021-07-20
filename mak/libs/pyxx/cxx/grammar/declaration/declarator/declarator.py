@@ -88,17 +88,20 @@ def trailing_return_type(self, p):
 
 
 #@glrp.rule('ptr-operator : "*" attribute-specifier-seq? cv-qualifier-seq?')
-@glrp.rule('ptr-operator[prec:nonassoc,0][split] : "*"')
-@glrp.rule('ptr-operator[prec:nonassoc,0][split] : "*" cv-qualifier-seq')
-@glrp.rule('ptr-operator : "*" attribute-specifier-seq')
-@glrp.rule('ptr-operator : "*" attribute-specifier-seq cv-qualifier-seq')
+@glrp.rule('ptr-operator[prec:nonassoc,0][split] : [split]"*"')
+@glrp.rule('ptr-operator[prec:nonassoc,0][split] : [split]"*" cv-qualifier-seq')
+@glrp.rule('ptr-operator : [split]"*" attribute-specifier-seq')
+@glrp.rule('ptr-operator : [split]"*" attribute-specifier-seq cv-qualifier-seq')
 #@glrp.rule('ptr-operator : "&" attribute-specifier-seq?')
-@glrp.rule('ptr-operator[prec:nonassoc,0][split] : "&"')
-@glrp.rule('ptr-operator : "&" attribute-specifier-seq')
+@glrp.rule('ptr-operator[prec:nonassoc,0][split] : [split]"&"')
+@glrp.rule('ptr-operator : [split]"&" attribute-specifier-seq')
 #@glrp.rule('ptr-operator : "&&" attribute-specifier-seq?')
-@glrp.rule('ptr-operator[prec:nonassoc,0][split] : "&&"')
-@glrp.rule('ptr-operator : "&&" attribute-specifier-seq')
-@glrp.rule('ptr-operator : nested-name-specifier "*" attribute-specifier-seq? cv-qualifier-seq?')
+@glrp.rule('ptr-operator[prec:nonassoc,0][split] : [split]"&&"')
+@glrp.rule('ptr-operator : [split]"&&" attribute-specifier-seq')
+@glrp.rule('ptr-operator[prec:nonassoc,0][split] : nested-name-specifier "*"')
+@glrp.rule('ptr-operator : nested-name-specifier "*" cv-qualifier-seq')
+@glrp.rule('ptr-operator : nested-name-specifier "*" attribute-specifier-seq')
+@glrp.rule('ptr-operator : nested-name-specifier "*" attribute-specifier-seq cv-qualifier-seq')
 @cxx98
 def ptr_operator(self, p):
     # type: (CxxParser, glrp.Production) -> None
@@ -128,7 +131,9 @@ def ref_qualifier(self, p):
     pass
 
 
-@glrp.rule('declarator-id : "..."? id-expression')
+#@glrp.rule('declarator-id : "..."? id-expression')
+@glrp.rule('declarator-id : id-expression')
+@glrp.rule('declarator-id : [split]"..." id-expression')
 @cxx98
 def declarator_id(self, p):
     # type: (CxxParser, glrp.Production) -> None

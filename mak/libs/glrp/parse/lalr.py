@@ -495,10 +495,10 @@ def create_parser_table(productions, start_id, name_map, terminal_count, sm_log,
                                 conflict_log.info('  [discarded] %s', item.to_string(name_map))
                                 continue
                             if assoc_error:
-                                conflict_log.info('  ** %s has no precedence annotation', item.to_string(name_map))
+                                conflict_log.info('  *** %s has no precedence annotation', item.to_string(name_map))
                                 num_missing_annotations += 1
                             if split and not item._split:
-                                conflict_log.info('  ** %s has no split annotation', item.to_string(name_map))
+                                conflict_log.info('  *** %s has no split annotation', item.to_string(name_map))
                                 num_missing_annotations += 1
                             if j < 0 and shift_actions and associativity == 'left':
                                 conflict_log.info('  [discarded] %s', item.to_string(name_map))
@@ -527,6 +527,7 @@ def create_parser_table(productions, start_id, name_map, terminal_count, sm_log,
                         else:
                             conflicts.append((node, 'Reduce using rule %s' % item.to_string(name_map), a))
 
+                conflict_log.info(' *** conflicts:')
                 _log_counterexamples(conflicts, conflict_log, name_map)
                 conflict_log.info('')
             elif len(accepted_actions) > 1:

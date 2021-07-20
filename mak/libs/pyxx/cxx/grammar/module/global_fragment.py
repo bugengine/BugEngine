@@ -8,7 +8,9 @@ from ...parser import cxx98
 from be_typing import TYPE_CHECKING
 
 
-@glrp.rule('global-module-fragment : "module" ";" declaration-seq?')
+#@glrp.rule('global-module-fragment : "module" ";" declaration-seq?')
+@glrp.rule('global-module-fragment[split] : "module" ";"')
+@glrp.rule('global-module-fragment : "module" ";" declaration-seq')
 @cxx98
 def global_module_fragment(self, p):
     # type: (CxxParser, glrp.Production) -> None

@@ -14,7 +14,7 @@ from be_typing import TYPE_CHECKING
 
 @glrp.rule('relational-expression : compare-expression')
 @glrp.rule('relational-expression : relational-expression "<" compare-expression')
-@glrp.rule('relational-expression : relational-expression ">" compare-expression')
+@glrp.rule('relational-expression : relational-expression [prec:right,0]">" compare-expression')
 @glrp.rule('relational-expression : relational-expression "<=" compare-expression')
 @glrp.rule('relational-expression : relational-expression ">=" compare-expression')
 @cxx98

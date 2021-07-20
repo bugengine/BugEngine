@@ -91,7 +91,7 @@ def declaration_seq(self, p):
 @glrp.rule('declaration : namespace-definition')
 @glrp.rule('declaration : empty-declaration')
 @glrp.rule('declaration : attribute-declaration')
-@glrp.rule('declaration : module-import-declaration')
+@glrp.rule('declaration[prec:right,0] : module-import-declaration')
 @cxx98
 def declaration(self, p):
     # type: (CxxParser, glrp.Production) -> None
@@ -146,7 +146,7 @@ def static_assert_declaration(self, p):
     pass
 
 
-@glrp.rule('empty-declaration : ";"')
+@glrp.rule('empty-declaration[prec:right,1] : ";"')
 @cxx98
 def empty_declaration(self, p):
     # type: (CxxParser, glrp.Production) -> None

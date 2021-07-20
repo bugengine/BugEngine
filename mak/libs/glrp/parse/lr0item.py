@@ -68,6 +68,8 @@ class LR0Item:
         result = ''
         if self._precedence is not None:
             result += '[prec:%s,%d]' % self._precedence
+        if self._split:
+            result += '[split]'
         return result
 
     def to_string(self, name_map):

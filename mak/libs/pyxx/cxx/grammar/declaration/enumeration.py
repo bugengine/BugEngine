@@ -76,9 +76,9 @@ def opaque_enum_declaration(self, p):
     pass
 
 
-@glrp.rule('enum-key[split] : "enum"')
-@glrp.rule('enum-key : "enum" "class"')
-@glrp.rule('enum-key : "enum" "struct"')
+@glrp.rule('enum-key[split] : [split]"enum"')
+@glrp.rule('enum-key : [split]"enum" "class"')
+@glrp.rule('enum-key : [split]"enum" "struct"')
 @cxx98
 def enum_key(self, p):
     # type: (CxxParser, glrp.Production) -> None

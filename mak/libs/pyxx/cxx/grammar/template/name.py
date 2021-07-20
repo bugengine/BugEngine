@@ -29,7 +29,7 @@ from ...parser import cxx98
 from be_typing import TYPE_CHECKING
 
 
-@glrp.rule('simple-template-id : template-name "<" template-argument-list? ">"')
+@glrp.rule('simple-template-id : template-name [split]"<" template-argument-list? ">"')
 @cxx98
 def simple_template_id(self, p):
     # type: (CxxParser, glrp.Production) -> None
@@ -62,15 +62,15 @@ def template_argument_list(self, p):
 
 @glrp.rule('template-argument : constant-expression')
 @glrp.rule('template-argument : type-id')
-@glrp.rule('template-argument : id-expression')
+@glrp.rule('template-argument[split] : id-expression')
 @cxx98
 def template_argument(self, p):
     # type: (CxxParser, glrp.Production) -> None
     pass
 
 
-@glrp.rule('typename-specifier : typename nested-name-specifier "identifier"')
-@glrp.rule('typename-specifier : typename nested-name-specifier "template"? simple-template-id')
+@glrp.rule('typename-specifier : [split]typename nested-name-specifier "identifier"')
+@glrp.rule('typename-specifier : [split]typename nested-name-specifier "template"? simple-template-id')
 @cxx98
 def typename_specifier(self, p):
     # type: (CxxParser, glrp.Production) -> None

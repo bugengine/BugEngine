@@ -10,7 +10,7 @@ from ....parser import cxx98
 from be_typing import TYPE_CHECKING
 
 
-@glrp.rule('equality-expression : relational-expression')
+@glrp.rule('equality-expression[prec:right,0] : relational-expression')
 @glrp.rule('equality-expression : equality-expression "==" relational-expression')
 @glrp.rule('equality-expression : equality-expression "!=" relational-expression')
 @cxx98

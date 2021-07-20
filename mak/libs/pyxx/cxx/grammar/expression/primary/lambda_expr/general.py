@@ -29,7 +29,9 @@ def lambda_expression(self, p):
     pass
 
 
-@glrp.rule('lambda-introducer : "[" lambda-capture? "]"')
+#@glrp.rule('lambda-introducer : "[" lambda-capture? "]"')
+@glrp.rule('lambda-introducer : [split] "[" lambda-capture "]"')
+@glrp.rule('lambda-introducer[split] : [split] "[" [split] "]"')
 @cxx98
 def lambda_introducer(self, p):
     # type: (CxxParser, glrp.Production) -> None

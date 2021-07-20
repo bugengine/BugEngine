@@ -11,7 +11,9 @@ from ...parser import cxx98
 from be_typing import TYPE_CHECKING
 
 
-@glrp.rule('compound-statement : "{" statement-seq? "}"')
+#@glrp.rule('compound-statement : "{" statement-seq? "}"')
+@glrp.rule('compound-statement[split] : "{" "}"')
+@glrp.rule('compound-statement : "{" statement-seq "}"')
 @cxx98
 def compound_statement(self, p):
     # type: (CxxParser, glrp.Production) -> None

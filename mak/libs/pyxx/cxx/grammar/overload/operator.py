@@ -22,10 +22,10 @@ def operator_function_id(self, p):
     pass
 
 
-@glrp.rule('overloadable-operator : "new"')
-@glrp.rule('overloadable-operator : "delete"')
-@glrp.rule('overloadable-operator : "new" "[" "]"')
-@glrp.rule('overloadable-operator : "delete" "[" "]"')
+@glrp.rule('overloadable-operator : "new"    [split]')
+@glrp.rule('overloadable-operator : "delete" [split]')
+@glrp.rule('overloadable-operator : "new"    [split]"[" "]"')
+@glrp.rule('overloadable-operator : "delete" [split]"[" "]"')
 @glrp.rule('overloadable-operator : "co_await"')
 @glrp.rule('overloadable-operator : "(" ")"')
 @glrp.rule('overloadable-operator : "[" "]"')

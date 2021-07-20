@@ -18,7 +18,7 @@ from . import fold
 from . import requires
 
 
-@glrp.rule('primary-expression : "integer-literal"')
+@glrp.rule('primary-expression[split] : "integer-literal"')
 @glrp.rule('primary-expression : "character-literal"')
 @glrp.rule('primary-expression : "floating-literal"')
 @glrp.rule('primary-expression : "string-literal"')
@@ -28,7 +28,7 @@ from . import requires
 @glrp.rule('primary-expression : "user-defined-string-literal"')
 @glrp.rule('primary-expression : "this"')
 @glrp.rule('primary-expression : "(" expression ")"')
-@glrp.rule('primary-expression : id-expression')
+@glrp.rule('primary-expression[split] : id-expression')
 @glrp.rule('primary-expression : lambda-expression')
 @glrp.rule('primary-expression : fold-expression')
 @glrp.rule('primary-expression : requires-expression')

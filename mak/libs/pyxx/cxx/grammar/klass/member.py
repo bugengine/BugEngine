@@ -78,11 +78,18 @@ def member_declarator_list(self, p):
 
 @glrp.rule('member-declarator : declarator virt-specifier-seq? pure-specifier?')
 @glrp.rule('member-declarator : declarator requires-clause')
-@glrp.rule('member-declarator : declarator brace-or-equal-initializer?')
-#@glrp.rule('member-declarator : declarator brace-or-equal-initializer')
+#@glrp.rule('member-declarator : declarator brace-or-equal-initializer?')
+@glrp.rule('member-declarator : declarator brace-or-equal-initializer')
+#@glrp.rule(
+#    'member-declarator : identifier? attribute-specifier-seq? ":" constant-expression brace-or-equal-initializer?'
+#)
 @glrp.rule(
-    'member-declarator : identifier? attribute-specifier-seq? ":" constant-expression brace-or-equal-initializer?'
+    'member-declarator : identifier attribute-specifier-seq? ":" constant-expression brace-or-equal-initializer?'
 )
+@glrp.rule(
+    'member-declarator[prec:right,1] : attribute-specifier-seq ":" constant-expression brace-or-equal-initializer?'
+)
+@glrp.rule('member-declarator[prec:right,0] : ":" constant-expression brace-or-equal-initializer?')
 @cxx98
 def member_declarator(self, p):
     # type: (CxxParser, glrp.Production) -> None
@@ -105,7 +112,7 @@ def virt_specifier(self, p):
     pass
 
 
-@glrp.rule('pure-specifier : "=" "integer-literal"')
+@glrp.rule('pure-specifier[split] : "=" "integer-literal"')
 @cxx98
 def pure_specifier(self, p):
     # type: (CxxParser, glrp.Production) -> None

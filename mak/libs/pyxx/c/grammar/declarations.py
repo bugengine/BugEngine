@@ -202,7 +202,9 @@ def declaration(self, p):
 
 
 @c89
-@glrp.rule('declaration-specifiers : declaration-specifier attribute-specifier-sequence?')
+#@glrp.rule('declaration-specifiers : declaration-specifier attribute-specifier-sequence?')
+@glrp.rule('declaration-specifiers[split] : declaration-specifier')
+@glrp.rule('declaration-specifiers : declaration-specifier attribute-specifier-sequence')
 @glrp.rule('declaration-specifiers : declaration-specifier declaration-specifiers')
 def declaration_specifiers(self, p):
     # type: (CParser, glrp.Production) -> None
@@ -370,7 +372,7 @@ def enumerator(self, p):
 
 
 @c89
-@glrp.rule('atomic-type-specifier : "_Atomic" "(" type-name ")"')
+@glrp.rule('atomic-type-specifier : "_Atomic" [prec:left,0]"(" type-name ")"')
 def atomic_type_specifier(self, p):
     # type: (CParser, glrp.Production) -> None
     pass
@@ -410,7 +412,9 @@ def declarator(self, p):
 
 
 @c89
-@glrp.rule('direct-declarator : identifier attribute-specifier-sequence?')
+#@glrp.rule('direct-declarator : identifier attribute-specifier-sequence?')
+@glrp.rule('direct-declarator : [split]identifier')
+@glrp.rule('direct-declarator : identifier attribute-specifier-sequence')
 @glrp.rule('direct-declarator : "(" declarator ")"')
 @glrp.rule('direct-declarator : array-declarator attribute-specifier-sequence?')
 @glrp.rule('direct-declarator : function-declarator attribute-specifier-sequence?')
@@ -524,7 +528,7 @@ def function_abstract_declarator(self, p):
 
 
 @c89
-@glrp.rule('typedef-name : "identifier"')
+@glrp.rule('typedef-name[split] : [split]"identifier"')
 def typedef_name(self, p):
     # type: (CParser, glrp.Production) -> None
     pass
@@ -586,7 +590,7 @@ def attribute_specifier_sequence(self, p):
 
 
 @c89
-@glrp.rule('attribute-specifier : "[" "[" attribute-list "]" "]"')
+@glrp.rule('attribute-specifier : [split]"[" "[" attribute-list "]" "]"')
 def attribute_specifier(self, p):
     # type: (CParser, glrp.Production) -> None
     pass

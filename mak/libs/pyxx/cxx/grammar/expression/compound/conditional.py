@@ -9,7 +9,7 @@ from ....parser import cxx98
 from be_typing import TYPE_CHECKING
 
 
-@glrp.rule('conditional-expression : logical-or-expression')
+@glrp.rule('conditional-expression[split] : logical-or-expression')
 @glrp.rule('conditional-expression : logical-or-expression "?" expression ":" assignment-expression')
 @cxx98
 def conditional_expression(self, p):

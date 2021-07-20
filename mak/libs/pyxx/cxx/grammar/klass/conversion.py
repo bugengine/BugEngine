@@ -28,7 +28,9 @@ def conversion_type_id(self, p):
     pass
 
 
-@glrp.rule('conversion-declarator : ptr-operator conversion-declarator?')
+#@glrp.rule('conversion-declarator : ptr-operator conversion-declarator?')
+@glrp.rule('conversion-declarator[split] : ptr-operator')
+@glrp.rule('conversion-declarator : ptr-operator conversion-declarator')
 @cxx98
 def conversion_declarator(self, p):
     # type: (CxxParser, glrp.Production) -> None

@@ -37,7 +37,9 @@ def parameter_declaration_list(self, p):
 
 @glrp.rule('parameter-declaration : attribute-specifier-seq? decl-specifier-seq declarator')
 @glrp.rule('parameter-declaration : attribute-specifier-seq? decl-specifier-seq declarator "=" initializer-clause')
-@glrp.rule('parameter-declaration : attribute-specifier-seq? decl-specifier-seq abstract-declarator?')
+#@glrp.rule('parameter-declaration : attribute-specifier-seq? decl-specifier-seq abstract-declarator?')
+@glrp.rule('parameter-declaration[split] : attribute-specifier-seq? decl-specifier-seq')
+@glrp.rule('parameter-declaration : attribute-specifier-seq? decl-specifier-seq abstract-declarator')
 @glrp.rule(
     'parameter-declaration : attribute-specifier-seq? decl-specifier-seq abstract-declarator? "=" initializer-clause'
 )

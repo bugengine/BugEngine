@@ -9,8 +9,8 @@ from ...parser import cxx98
 from be_typing import TYPE_CHECKING
 
 
-@glrp.rule('noexcept-specifier : "noexcept" "(" constant-expression ")"')
-@glrp.rule('noexcept-specifier : "noexcept"')
+@glrp.rule('noexcept-specifier : "noexcept" [split] "(" constant-expression ")"')
+@glrp.rule('noexcept-specifier : "noexcept" [split]')
 @cxx98
 def noexcept_specifier(self, p):
     # type: (CxxParser, glrp.Production) -> None

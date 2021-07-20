@@ -24,7 +24,7 @@ def assignment_expression(self, p):
     pass
 
 
-@glrp.rule('assignment-operator : "="')
+@glrp.rule('assignment-operator : [split]"="')
 @glrp.rule('assignment-operator : "*="')
 @glrp.rule('assignment-operator : "/="')
 @glrp.rule('assignment-operator : "%="')

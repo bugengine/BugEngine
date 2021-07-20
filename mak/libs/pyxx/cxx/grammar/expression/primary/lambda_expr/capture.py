@@ -65,7 +65,7 @@ def capture(self, p):
     pass
 
 
-@glrp.rule('simple-capture : "identifier" "..."?')
+@glrp.rule('simple-capture : "identifier" [split] "..."?')
 @glrp.rule('simple-capture : "&" "identifier" "..."?')
 @glrp.rule('simple-capture :"this"')
 @glrp.rule('simple-capture :"*" "this"')

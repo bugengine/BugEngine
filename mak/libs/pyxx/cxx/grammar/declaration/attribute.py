@@ -51,7 +51,9 @@ from ...parser import cxx98
 from be_typing import TYPE_CHECKING
 
 
-@glrp.rule('attribute-specifier-seq : attribute-specifier-seq? attribute-specifier')
+#@glrp.rule('attribute-specifier-seq : attribute-specifier-seq? attribute-specifier')
+@glrp.rule('attribute-specifier-seq[prec:right,0] : [prec:left,0]attribute-specifier')
+@glrp.rule('attribute-specifier-seq[prec:right,1] : attribute-specifier-seq [prec:left,0]attribute-specifier')
 @cxx98
 def attribute_specifier_seq(self, p):
     # type: (CxxParser, glrp.Production) -> None
@@ -81,7 +83,9 @@ def attribute_using_prefix(self, p):
     pass
 
 
-@glrp.rule('attribute-list : attribute?')
+#@glrp.rule('attribute-list : attribute?')
+@glrp.rule('attribute-list[split] :')
+@glrp.rule('attribute-list : attribute')
 @glrp.rule('attribute-list : attribute-list "," attribute?')
 @glrp.rule('attribute-list : attribute "..."')
 @glrp.rule('attribute-list : attribute-list "," attribute "..."')
@@ -98,7 +102,7 @@ def attribute(self, p):
     pass
 
 
-@glrp.rule('attribute-token : "identifier"')
+@glrp.rule('attribute-token[split] : "identifier"')
 @glrp.rule('attribute-token : attribute-scoped-token')
 @cxx98
 def attribute_token(self, p):

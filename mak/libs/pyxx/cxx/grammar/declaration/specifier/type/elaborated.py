@@ -24,7 +24,7 @@ def elaborated_type_specifier(self, p):
     pass
 
 
-@glrp.rule('elaborated-enum-specifier : enum nested-name-specifier? [split]"identifier"')
+@glrp.rule('elaborated-enum-specifier : [split]enum nested-name-specifier? [split]"identifier"')
 @cxx98
 def elaborated_enum_specifier(self, p):
     # type: (CxxParser, glrp.Production) -> None
