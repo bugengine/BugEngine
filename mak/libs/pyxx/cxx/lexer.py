@@ -250,7 +250,7 @@ class Cxx98Lexer(glrp.Lexer):
         # type: (glrp.Token) -> glrp.Token
         return token
 
-    @glrp.token(r'\#([^\\\n]|(?:\\.)|(?:\\\n))*', 'preprocessor', warn=False)
+    @glrp.token(r'\#(:?[^\\\n]|(?:\\.)|(?:\\\n))*', 'preprocessor', warn=False)
     def preprocessor(self, t):
         # type: (glrp.Token) -> Optional[glrp.Token]
         #if t.value.find('include') != -1:

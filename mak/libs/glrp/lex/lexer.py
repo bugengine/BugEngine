@@ -69,7 +69,6 @@ class Lexer:
         state = self._state_stack[-1]
         skipped_tokens = []    # type: List[Token   ]
 
-        separator_start = lexpos
         while lexpos < lexlen:
             # Look for a regular expression match
             for lexre, lexindexfunc in state._regex:
@@ -104,7 +103,6 @@ class Lexer:
                     break
 
                 skipped_tokens = []
-                separator_start = lexpos
                 yield new_token
                 break
             else:
@@ -146,8 +144,8 @@ def _form_master_re(rule_list, start_index):
         )                      # type: List[Optional[Tuple[Callable[[F, Token], Optional[Token]], str, bool, int]]]
         index = 0
         for i, rule in enumerate(rule_list):
+            result[index + 1] = (rule[4], rule[1], rule[3], start_index + i)
             index += 1 + rule[2].groups
-            result[index] = (rule[4], rule[1], rule[3], start_index + i)
         return [(lexre, result)]
     except Exception as e:
         m = int(len(rule_list) / 2)

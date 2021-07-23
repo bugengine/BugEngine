@@ -49,7 +49,7 @@ _universal_character_name = '(?:(?:\\\\u%(_hexadecimal_quad)s)|(?:\\\\U%(_hexade
 _escape_sequence = '(?:%(_simple_escape_sequence)s|%(_octal_escape_sequence)s|%(_hexadecimal_escape_sequence)s|%(_universal_character_name)s)' % locals(
 )
 _c_char = '[^\\\'\\\\\\n]|%(_escape_sequence)s' % locals()
-_c_char_sequence = '%(_c_char)s+' % locals()
+_c_char_sequence = '(?:%(_c_char)s)+' % locals()
 _character_constant = '%(_encoding_prefix)s?\'%(_c_char_sequence)s\'' % locals()
 
 _s_char = '(?:[^"\\n]|%(_escape_sequence)s)' % locals()
@@ -159,14 +159,14 @@ class C89Lexer(glrp.Lexer):
     @glrp.token(r"<<=", "<<=")
     @glrp.token(r">>=", ">>=")
     @glrp.token(r"&=", "&=")
-    @glrp.token(r"^=", "^=")
-    @glrp.token(r"|=", "|=")
+    @glrp.token(r"\^=", "^=")
+    @glrp.token(r"\|=", "|=")
     @glrp.token(r",", ",")
     def punctuation(self, token):
         # type: (glrp.Token) -> glrp.Token
         return token
 
-    @glrp.token(r'\#([^\\\n]|(?:\\.)|(?:\\\n))*', 'preprocessor', warn=False)
+    @glrp.token(r'\#(?:[^\\\n]|(?:\\.)|(?:\\\n))*', 'preprocessor', warn=False)
     def preprocessor(self, t):
         # type: (glrp.Token) -> Optional[glrp.Token]
         #if t.value.find('include') != -1:
