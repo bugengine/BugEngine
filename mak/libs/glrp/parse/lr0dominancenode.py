@@ -105,15 +105,16 @@ class LR0DominanceNode(object):
         seen.add((self, lookahead))
         shortest_path_seen = set()     # type: Set[Tuple[Optional[int], int, Tuple[int, ...]]]
         state_path_seen = set()
+        local_seen = set()
 
         while queue:
             path, lookahead = queue.pop(0)
             node = path._node
 
             for parent in node._direct_parents:
-                if (parent, lookahead) in seen:
+                if (parent, lookahead) in local_seen:
                     continue
-                seen.add((parent, lookahead))
+                local_seen.add((parent, lookahead))
                 item = parent._item
                 if lookahead is not None:
                     try:
@@ -158,8 +159,8 @@ class LR0DominanceNode(object):
             for predecessor in node._predecessors:
                 if (predecessor, lookahead) in seen:
                     continue
-                seen.add((predecessor, lookahead))
                 if state is None or predecessor._item_set == state:
+                    seen.add((predecessor, lookahead))
                     if lookahead is None:
                         if predecessor._item_set in state_path_seen:
                             continue
