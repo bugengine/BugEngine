@@ -126,9 +126,9 @@ class LR0DominanceNode(object):
                             lookahead, parent._item._symbol, parent._item.rule.production[:parent._item.len - offset]
                         ) in shortest_path_seen:
                             continue
-                        #shortest_path_seen.add(
-                        #    (lookahead, parent._item._symbol, parent._item.rule.production[:parent._item.len - offset])
-                        #)
+                        shortest_path_seen.add(
+                            (lookahead, parent._item._symbol, parent._item.rule.production[:parent._item.len - offset])
+                        )
                         p = parent.filter_node_by_lookahead(path.derive_from(parent), lookahead)
                         queue.append((p, None))
                     try:
@@ -140,30 +140,30 @@ class LR0DominanceNode(object):
                             None, parent._item._symbol, parent._item.rule.production[:parent._item.len - offset]
                         ) in shortest_path_seen:
                             continue
-                        #shortest_path_seen.add(
-                        #    (None, parent._item._symbol, parent._item.rule.production[:parent._item.len - offset])
-                        #)
+                        shortest_path_seen.add(
+                            (None, parent._item._symbol, parent._item.rule.production[:parent._item.len - offset])
+                        )
                         queue.append((path.derive_from(parent), lookahead))
                 else:
                     if (
                         None, parent._item._symbol, parent._item.rule.production[:parent._item._index + 1]
                     ) in shortest_path_seen:
                         continue
-                    #shortest_path_seen.add(
-                    #    (None, parent._item._symbol, parent._item.rule.production[:parent._item._index + 1])
-                    #)
+                    shortest_path_seen.add(
+                        (None, parent._item._symbol, parent._item.rule.production[:parent._item._index + 1])
+                    )
                     queue.append((path.derive_from(parent), lookahead))
             for predecessor in node._predecessors:
-                #if (predecessor, lookahead) in seen:
-                #    continue
-                if predecessor._item_set == state:
-                    #seen.add((predecessor, lookahead))
-                    if lookahead is None:
-                        if predecessor._item_set in state_path_seen:
-                            continue
-                        state_path_seen.add(predecessor._item_set)
-                    assert node._predecessor_lookahead is not None
-                    result.append((path.extend(predecessor, node._predecessor_lookahead), lookahead))
+                if (predecessor, lookahead) in seen:
+                    continue
+                if state is None or predecessor._item_set == state:
+                    seen.add((predecessor, lookahead))
+                if lookahead is None:
+                    if predecessor._item_set in state_path_seen:
+                        continue
+                    state_path_seen.add(predecessor._item_set)
+                assert node._predecessor_lookahead is not None
+                result.append((path.extend(predecessor, node._predecessor_lookahead), lookahead))
         return result
 
     def backtrack_up(self, path, lookahead, seen):
@@ -195,9 +195,9 @@ class LR0DominanceNode(object):
                             lookahead, parent._item._symbol, parent._item.rule.production[:parent._item.len - offset]
                         ) in shortest_path_seen:
                             continue
-                        #shortest_path_seen.add(
-                        #    (lookahead, parent._item._symbol, parent._item.rule.production[:parent._item.len - offset])
-                        #)
+                        shortest_path_seen.add(
+                            (lookahead, parent._item._symbol, parent._item.rule.production[:parent._item.len - offset])
+                        )
                         p = parent.filter_node_by_lookahead(path.derive_from(parent), lookahead)
                         result.append((p, None))
                     try:
@@ -209,18 +209,18 @@ class LR0DominanceNode(object):
                             None, parent._item._symbol, parent._item.rule.production[:parent._item.len - offset]
                         ) in shortest_path_seen:
                             continue
-                        #shortest_path_seen.add(
-                        #    (None, parent._item._symbol, parent._item.rule.production[:parent._item.len - offset])
-                        #)
+                        shortest_path_seen.add(
+                            (None, parent._item._symbol, parent._item.rule.production[:parent._item.len - offset])
+                        )
                         queue.append((path.derive_from(parent), lookahead))
                 else:
                     if (
                         None, parent._item._symbol, parent._item.rule.production[:parent._item._index + 1]
                     ) in shortest_path_seen:
                         continue
-                    #shortest_path_seen.add(
-                    #    (None, parent._item._symbol, parent._item.rule.production[:parent._item._index + 1])
-                    #)
+                    shortest_path_seen.add(
+                        (None, parent._item._symbol, parent._item.rule.production[:parent._item._index + 1])
+                    )
                     queue.append((path.derive_from(parent), lookahead))
             for predecessor in node._predecessors:
                 if (predecessor, lookahead) in seen:
@@ -229,7 +229,7 @@ class LR0DominanceNode(object):
                     if predecessor._item_set in state_path_seen:
                         continue
                     state_path_seen.add(predecessor._item_set)
-                #seen.add((predecessor, lookahead))
+                seen.add((predecessor, lookahead))
                 assert node._predecessor_lookahead is not None
                 result.append((path.extend(predecessor, node._predecessor_lookahead), lookahead))
         return result
