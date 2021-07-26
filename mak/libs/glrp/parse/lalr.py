@@ -54,7 +54,7 @@ def _log_counterexamples(conflict_list, out, name_map):
 
                 for path, lookahead, seen, index in path_list:
                     if lookahead is not None:
-                        for path, la in path._node.backtrack_up(path, None, lookahead, seen):
+                        for path, la in path._node.backtrack_up(path, lookahead, seen):
                             try:
                                 states[path._node._item_set].append((path, la, seen, index))
                             except KeyError:
@@ -65,7 +65,7 @@ def _log_counterexamples(conflict_list, out, name_map):
                             if path._node._item_set == state:
                                 plist.append((path, lookahead, seen, index))
                             else:
-                                for path, la in path._node.backtrack_up(path, state, lookahead, seen):
+                                for path, la in path._node.backtrack_to_state(path, state, lookahead, seen):
                                     #assert path1._node.item_set == path2._node.item_set
                                     plist.append((path, la, seen, index))
                 for _, plist in states.items():
@@ -74,7 +74,7 @@ def _log_counterexamples(conflict_list, out, name_map):
             states = OrderedDict()
             for path, lookahead, seen, index in path_list:
                 if path._node._item._index > 0:
-                    for path, la in path._node.backtrack_up(path, None, lookahead, seen):
+                    for path, la in path._node.backtrack_up(path, lookahead, seen):
                         try:
                             states[path._node._item_set].append((path, la, seen, index))
                         except KeyError:
@@ -82,7 +82,7 @@ def _log_counterexamples(conflict_list, out, name_map):
             for state, plist in states.items():
                 for path, lookahead, seen, index in path_list:
                     if path._node._item._index == 0:
-                        for path, la in path._node.backtrack_up(path, state, lookahead, seen):
+                        for path, la in path._node.backtrack_to_state(path, state, lookahead, seen):
                             #assert path1._node.item_set == path2._node.item_set
                             plist.append((path, la, seen, index))
             for _, plist in states.items():
