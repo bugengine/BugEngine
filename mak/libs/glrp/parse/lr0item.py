@@ -1,7 +1,7 @@
 from be_typing import TYPE_CHECKING, overload
 
 
-class LR0Item:
+class LR0Item(object):
     def __init__(self, rule, index, next, predecessor, successors, first, follow):
         # type: (Grammar.Rule, int, Optional[LR0Item], Optional[int], List[Grammar.Rule], Set[int], Dict[int, int]) -> None
         self.rule = rule

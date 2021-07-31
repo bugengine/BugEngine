@@ -5,15 +5,74 @@ from be_typing import TYPE_CHECKING, TypeVar
 from abc import abstractmethod
 import os
 import re
-import inspect
+import hashlib
+import zlib
+import base64
 try:
     import cPickle as pickle
 except ImportError:
     import pickle  # type: ignore
 
+LOAD_OPTIMIZED = 0
+GENERATE = 1
+LOAD_CACHE = 2
 
-class Parser:
-    class Stack:
+
+class Action(object):
+    def __init__(self):
+        # type: () -> None
+        pass
+
+    #@abstractmethod
+    def __call__(self, parser):
+        # type: (Parser) -> Callable[[Production], None]
+        raise NotImplementedError
+
+
+class _DirectAction(Action):
+    def __init__(self, action_name):
+        # type: (str) -> None
+        Action.__init__(self)
+        self._action_name = action_name
+
+    def __call__(self, parser):
+        # type: (Parser) -> Callable[[Production], None]
+        return getattr(parser, self._action_name)
+
+
+class _OptionalAction(Action):
+    def __init__(self, action, optional_index):
+        # type: (Action, int) -> None
+        Action.__init__(self)
+        self._action = action
+        self._index = optional_index
+
+    def __call__(self, parser):
+        # type: (Parser) -> Callable[[Production], None]
+        action = self._action(parser)
+
+        def call(production):
+            # type: (Production) -> Any
+            production._insert(self._index, Token(1, '<empty>', production._position, None, []))
+            action(production)
+
+        return call
+
+
+class _AcceptAction(Action):
+    def __init__(self):
+        # type: () -> None
+        Action.__init__(self)
+
+    def __call__(self, parser):
+        # type: (Parser) -> Callable[[Production], None]
+        return parser.accept
+
+
+class Parser(object):
+    AcceptAction = _AcceptAction
+
+    class Stack(object):
         def __init__(self, stack, parent=None):
             # type: (List[Symbol], Optional[Parser.Stack]) -> None
             self._parent = parent
@@ -43,64 +102,49 @@ class Parser:
             prod = self._stack[-prod_length:]
             self._stack[-prod_length:] = [Production(prod_id, prod_name, prod, action)]
 
-    class Action:
-        def __init__(self):
-            # type: () -> None
-            pass
-
-        @abstractmethod
-        def __call__(self, parser):
-            # type: (Parser) -> Callable[[Production], None]
-            raise NotImplementedError
-
-    class DirectAction(Action):
-        def __init__(self, action_name):
-            # type: (str) -> None
-            Parser.Action.__init__(self)
-            self._action_name = action_name
-
-        def __call__(self, parser):
-            # type: (Parser) -> Callable[[Production], None]
-            return getattr(parser, self._action_name)
-
-    class OptionalAction(Action):
-        def __init__(self, action, optional_index):
-            # type: (Parser.Action, int) -> None
-            Parser.Action.__init__(self)
-            self._action = action
-            self._index = optional_index
-
-        def __call__(self, parser):
-            # type: (Parser) -> Callable[[Production], None]
-            action = self._action(parser)
-
-            def call(production):
-                # type: (Production) -> Any
-                production._insert(self._index, Token(1, '<empty>', production._position, None, []))
-                action(production)
-
-            return call
-
-    class AcceptAction(Action):
-        def __init__(self):
-            # type: () -> None
-            Parser.Action.__init__(self)
-
-        def __call__(self, parser):
-            # type: (Parser) -> Callable[[Production], None]
-            return parser.accept
-
-    def __init__(self, lexer, start_symbol, output_directory):
-        # type: (Lexer, str, str) -> None
+    def __init__(self, lexer, start_symbol, temp_directory, output_directory, mode=LOAD_CACHE):
+        # type: (Lexer, str, str, str, int) -> None
         self._lexer = lexer
 
-        rules = []     # type: List[Tuple[str, Parser.Action, List[str], List[Tuple[str, List[str], int]], str, int]]
+        if mode == LOAD_OPTIMIZED:
+            self._grammar = self._load_table(output_directory)
+        else:
+            h = hashlib.md5()
+            for rule_action in dir(self):
+                action = getattr(self, rule_action)
+                for rule_string, _, _ in getattr(action, 'rules', []):
+                    h.update(rule_string.encode())
+            if mode == LOAD_CACHE:
+                try:
+                    self._grammar = self._load_table(output_directory)
+                except Exception:
+                    generate = True
+                else:
+                    generate = self._grammar._hash != h.hexdigest()
+            else:
+                generate = True
+            if generate:
+                self._grammar = self._generate_table(h.hexdigest(), start_symbol, temp_directory, output_directory)
+
+    def _load_table(self, output_directory):
+        # type: (str) -> Grammar
+        with open(os.path.join(output_directory, self.__class__.__name__ + '.tbl'), 'rb') as table_file:
+            return pickle.loads(zlib.decompress(base64.b64decode(table_file.read())))
+
+    def _generate_table(self, rule_hash, start_symbol, temp_directory, output_directory):
+        # type: (str, str, str, str) -> Grammar
+        rules = []     # type: List[Tuple[str, Action, List[str], List[Tuple[str, List[str], int]], str, int]]
         for rule_action in dir(self):
             action = getattr(self, rule_action)
             for rule_string, filename, lineno in getattr(action, 'rules', []):
                 rules += _parse_rule(rule_string, rule_action, filename, lineno)
 
-        grammar = Grammar(self.__class__.__name__, self._lexer._terminals, rules, start_symbol, self, output_directory)
+        grammar = Grammar(
+            self.__class__.__name__, rule_hash, self._lexer._terminals, rules, start_symbol, self, temp_directory
+        )
+        with open(os.path.join(output_directory, self.__class__.__name__ + '.tbl'), 'wb') as table_file:
+            table_file.write(base64.b64encode(zlib.compress(pickle.dumps(grammar, protocol=0), 9)))
+        return self._load_table(output_directory)
 
     def parse(self, filename):
         # type: (str) -> Any
@@ -129,8 +173,8 @@ _production = re.compile(
 
 
 def _parse_rule(rule_string, action, filename, lineno):
-    # type: (str, str, str, int) -> List[Tuple[str, Parser.Action, List[str], List[Tuple[str, List[str], int]], str, int]]
-    result = []    # type: List[Tuple[str, Parser.Action, List[str], List[Tuple[str, List[str], int]], str, int]]
+    # type: (str, str, str, int) -> List[Tuple[str, Action, List[str], List[Tuple[str, List[str], int]], str, int]]
+    result = []    # type: List[Tuple[str, Action, List[str], List[Tuple[str, List[str], int]], str, int]]
 
     if rule_string:
         m = _rule_id.match(rule_string)
@@ -156,8 +200,8 @@ def _parse_rule(rule_string, action, filename, lineno):
 
         while True:
             productions = [
-                (Parser.DirectAction(action), [], annotations[:])
-            ]                                                     # type: List[Tuple[Parser.Action, List[str], List[Tuple[str, List[str], int]]]]
+                (_DirectAction(action), [], annotations[:])
+            ]                                               # type: List[Tuple[Action, List[str], List[Tuple[str, List[str], int]]]]
 
             while m is not None:
                 parse_start = m.end()
@@ -169,10 +213,7 @@ def _parse_rule(rule_string, action, filename, lineno):
                     for p in productions:
                         p[1].append(m.group(m.lastindex - 1))
                     if m.group(m.lastindex) == '?':
-                        productions += [
-                            (Parser.OptionalAction(p[0],
-                                                   len(p[1]) - 1), p[1][:-1], p[2][:]) for p in productions
-                        ]
+                        productions += [(_OptionalAction(p[0], len(p[1]) - 1), p[1][:-1], p[2][:]) for p in productions]
                     continue
                 elif m.lastindex == 7: # |
                     for p in productions:
@@ -240,6 +281,6 @@ def rule(rule_string):
 
 
 if TYPE_CHECKING:
-    from typing import Any, Callable, List, Optional, Tuple
+    from typing import Any, Callable, List, Optional, Tuple, Type
     from ..lex import Lexer
     from ..symbol import Symbol

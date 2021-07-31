@@ -6,6 +6,13 @@ from be_typing import TYPE_CHECKING
 import sys
 
 
+class LALRTable(object):
+    def __init__(self, action_table, goto_table):
+        # type: (List[Dict[int, Tuple[int,...]]], List[Dict[int, int]]) -> None
+        self._action_table = action_table
+        self._goto_table = goto_table
+
+
 def _log(title, conflict_paths, out, name_map):
     # type: (Text, List[LR0Path], Logger, List[str]) -> None
     seen = set([])
@@ -95,7 +102,7 @@ def _log_counterexamples(conflict_list, out, name_map):
 
 
 def create_parser_table(productions, start_id, name_map, terminal_count, sm_log, conflict_log, error_log, dot_file):
-    # type: (Dict[int, Grammar.Production], int, List[str], int, Logger, Logger, Logger, Logger) -> None
+    # type: (Dict[int, Grammar.Production], int, List[str], int, Logger, Logger, Logger, Logger) -> LALRTable
     cidhash = {}       # type: Dict[int, int]
     goto_cache = {}    # type: Dict[Tuple[int, int], Optional[LR0ItemSet]]
     goto_cache_2 = {}  # type: Dict[int, Any]
@@ -368,9 +375,8 @@ def create_parser_table(productions, start_id, name_map, terminal_count, sm_log,
         # Add all of the lookaheads
         add_lookaheads(lookd, followsets)
 
-    goto_table = {}    # Goto array
-    action = {}        # Action array
-    actionp = {}       # Action production array (temporary)
+    goto_table = []    # Goto array
+    action = []        # Action array
 
     # Build the parser table, state by state
     states = create_item_sets()
@@ -390,7 +396,6 @@ def create_parser_table(productions, start_id, name_map, terminal_count, sm_log,
         dot_file.info('    style=filled;')
         dot_file.info('    color=lightgray;')
         dot_file.info('    node[style=filled;color=white];')
-        state_id = id(item_group)
         for item in item_group:
             dot_file.info('    %d[label="%s"];', id(item_group[item]), item.to_string(name_map))
         for item in item_group:
@@ -410,24 +415,27 @@ def create_parser_table(productions, start_id, name_map, terminal_count, sm_log,
                 )
 
         # Loop over each production
-        st_action = {}     # type: Dict[int, List[Tuple[int, LR0Item]]]
-        st_goto = {}
+        action_map = {}    # type: Dict[int, List[Tuple[int, LR0Item]]]
+        st_action = {}     # type: Dict[int, Tuple[int,...]]
+        st_goto = {}       # type: Dict[int, int]
+        sm_log.info('')
+        sm_log.info('')
         sm_log.info('state %d:', st)
         sm_log.info('')
         for item in item_group:
-            sm_log.info('    (%d) %s', item.rule._prod_symbol, item.to_string(name_map))
+            sm_log.info('    (%d) %s', item.rule._id, item.to_string(name_map))
         sm_log.info('')
 
         for item in item_group:
             if item.len == item._index:
                 if item.rule._prod_symbol == start_id:
                     # Start symbol. Accept!
-                    st_action[0] = st_action.get(0, []) + [(0, item)]
+                    action_map[0] = action_map.get(0, []) + [(0, item)]
                     item.rule._reduced += 1
                 else:
                     # We are at the end of a production.  Reduce!
                     for a in item._lookaheads[st]:
-                        st_action[a] = st_action.get(a, []) + [(-item.rule._id, item)]
+                        action_map[a] = action_map.get(a, []) + [(-item.rule._id, item)]
                         item.rule._reduced += 1
             else:
                 i = item._index
@@ -436,10 +444,10 @@ def create_parser_table(productions, start_id, name_map, terminal_count, sm_log,
                     g = goto(item_group, a)
                     j = cidhash[id(g)]
                     if j >= 0:
-                        st_action[a] = st_action.get(a, []) + [(j, item)]
+                        action_map[a] = action_map.get(a, []) + [(j, item)]
 
-        for a in sorted(st_action):
-            actions = st_action[a]
+        for a in sorted(action_map):
+            actions = action_map[a]
             action_dest = {}   # type: Dict[int, List[LR0Item]]
             for i, item in actions:
                 try:
@@ -511,33 +519,52 @@ def create_parser_table(productions, start_id, name_map, terminal_count, sm_log,
                         except KeyError:
                             accepted_actions[j] = [item]
                         conflict_log.info('  [accepted]  %s', item.to_string(name_map))
+            else:
+                accepted_actions = action_dest
 
+            st_action[a] = tuple(sorted(accepted_actions))
             if len(accepted_actions) > 1 and not split:
                 # handle conflicts
                 conflicts = []     # type: List[Tuple[LR0DominanceNode, Text, Optional[int]]]
                 num_rr += 1
-                for j in sorted(accepted_actions):
+                sm_log.info('    %-30s conflict split', name_map[a])
+                for j in st_action[a]:
                     items = accepted_actions[j]
+                    if j >= 0:
+                        sm_log.info('        shift and go to state %d', j)
                     for item in items:
                         node = item_group[item]
-                        if j > 0:
+                        if j >= 0:
                             conflicts.append((node, 'Shift using rule %s' % item.to_string(name_map), None))
                             num_rr -= 1
                             num_sr += 1
                         else:
+                            sm_log.info('        reduce using rule %s', item.to_string(name_map))
                             conflicts.append((node, 'Reduce using rule %s' % item.to_string(name_map), a))
 
                 conflict_log.info(' *** conflicts:')
                 _log_counterexamples(conflicts, conflict_log, name_map)
-                conflict_log.info('')
             elif len(accepted_actions) > 1:
                 splits = []
-                for j in sorted(accepted_actions):
+                sm_log.info('    %-30s split', name_map[a])
+                for j in st_action[a]:
                     items = accepted_actions[j]
+                    if j >= 0:
+                        sm_log.info('        shift and go to state %d', j)
                     for item in items:
                         splits.append(item_group[item])
+                        if j < 0:
+                            sm_log.info('        reduce using rule %s', item.to_string(name_map))
                 #_find_splits()
                 #conflict_log.info('')
+            else:
+                for j in st_action[a]:
+                    items = accepted_actions[j]
+                    if j >= 0:
+                        sm_log.info('    %-30s shift and go to state %d', name_map[a], j)
+                    for item in items:
+                        if j < 0:
+                            sm_log.info('    %-30s reduce using rule %s', name_map[a], item.to_string(name_map))
 
         nkeys = set([])
         for item in item_group:
@@ -547,67 +574,13 @@ def create_parser_table(productions, start_id, name_map, terminal_count, sm_log,
                     j = cidhash.get(id(g), -1)
                     if j >= 0:
                         if s not in nkeys:
+                            st_goto[s] = j
                             nkeys.add(s)
                             sm_log.info('    %-30s shift and go to state %d', name_map[s], j)
-        """
-        # Print the actions associated with each terminal
-        _actprint = {}
-        for a, p, m in actlist:
-            if a in st_action:
-                if p is st_actionp[a]:
-                    log.info('    %-15s %s', name_map[a], m)
-                    _actprint[(a, m)] = 1
-        log.info('')
-        # Print the actions that were not used. (debugging)
-        not_used = 0
-        for a, p, m in actlist:
-            if a in st_action:
-                if p is not st_actionp[a]:
-                    if not (a, m) in _actprint:
-                        log.note('  ! %-15s [ %s ]', name_map[a], m)
-                        not_used = 1
-                        _actprint[(a, m)] = 1
-        if not_used:
-            log.note('')
 
-        # Construct the goto table for this state
+        action.append(st_action)
+        goto_table.append(st_goto)
 
-        nkeys = set([])    # type: Set[int]
-        for item in item_group:
-            for s in item._symbols:
-                if s > terminal_count:
-                    nkeys.add(s)
-        for n in nkeys:
-            g = goto(item_group, n)
-            j = cidhash.get(id(g), -1)
-            if j >= 0:
-                st_goto[n] = j
-                log.info('    %-30s shift and go to state %d', name_map[n], j)
-
-        action[st] = st_action
-        goto_table[st] = st_goto
-        st += 1
-
-        for state, tok, rule, resolution in sr_conflicts:
-            log.warning('shift/reduce conflict for %s in state %d resolved as %s', name_map[tok], state, resolution)
-            log.warning('  reduce rule %s', rule.to_string(name_map))
-            error_log.warning(
-                'shift/reduce conflict for %s in state %d resolved as %s', name_map[tok], state, resolution
-            )
-            error_log.warning('  reduce rule %s', rule.to_string(name_map))
-
-        already_reported = set()
-        for state, rule, rejected in rr_conflicts:
-            if (state, id(rule), id(rejected)) in already_reported:
-                continue
-            log.warning('reduce/reduce conflict in state %d resolved using rule (%s)', state, rule.to_string(name_map))
-            log.warning('rejected rule (%s) in state %d', rejected.to_string(name_map), state)
-            error_log.warning(
-                'reduce/reduce conflict in state %d resolved using rule (%s)', state, rule.to_string(name_map)
-            )
-            error_log.warning('rejected rule (%s) in state %d', rejected.to_string(name_map), state)
-            already_reported.add((state, id(rule), id(rejected)))
-        """
     dot_file.info('}')
 
     # Report errors
@@ -635,6 +608,8 @@ def create_parser_table(productions, start_id, name_map, terminal_count, sm_log,
         for rule in production:
             if rule._reduced == 0:
                 error_log.warning('Rule (%s) is never reduced', rule.to_string(name_map))
+
+    return LALRTable(action, goto_table)
 
 
 if TYPE_CHECKING:

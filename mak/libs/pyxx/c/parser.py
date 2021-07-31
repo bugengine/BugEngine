@@ -1,23 +1,18 @@
 import glrp
 from . import lexer
+from .. import tables
+import os
 from be_typing import Callable, TYPE_CHECKING, cast
 
 
 class CParser(glrp.Parser):
     Lexer = glrp.Lexer
 
-    def __init__(self, tmp_dir):
-        # type: (str)->None
+    def __init__(self, tmp_dir, mode=glrp.LOAD_CACHE):
+        # type: (str, int)->None
         self.lexer = self.__class__.Lexer()
-        glrp.Parser.__init__(self, self.lexer, 'translation-unit', tmp_dir)
-        #    self.tokens = self.__class__.Lexer.tokens
-        #    self.parser = yacc.yacc(
-        #        module=self,
-        #        start='simple-declaration',
-        #        picklefile=os.path.join(tmp_dir, 'cxxrtti_grammar_%s.pickle' % self.__class__.__name__[-2:]),
-        #        debugfile=os.path.join(tmp_dir, 'cxxrtti_grammar_%s.debug' % self.__class__.__name__[-2:]),
-        #        debug=True
-        #    )
+        out_dir = os.path.dirname(tables.__file__)
+        glrp.Parser.__init__(self, self.lexer, 'translation-unit', tmp_dir, out_dir, mode)
 
 
 class C89Parser(CParser):
